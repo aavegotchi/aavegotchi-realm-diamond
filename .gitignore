@@ -1,0 +1,4 @@
+src/build/*
+src/contracts/tokens/artifacts/*
+src/contracts/GBM/artifacts/*
+src/contracts/Helpers/artifacts/*
