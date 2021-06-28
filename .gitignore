@@ -1,4 +1,10 @@
-src/build/*
-src/contracts/tokens/artifacts/*
-src/contracts/GBM/artifacts/*
-src/contracts/Helpers/artifacts/*
+build/*
+artifacts/*
+contracts/tokens/artifacts/*
+contracts/GBM/artifacts/*
+contracts/Helpers/artifacts/*
+.env
+node_modules/
+yarn-error.log
+.vscode
+cache/
