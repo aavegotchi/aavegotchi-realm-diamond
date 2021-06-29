@@ -16,7 +16,7 @@ async function main() {
   let erc20Address;
   let erc721;
   let erc721Address;
-  let massRegistrer;
+  //let massRegistrer;
 
   let testing = ["hardhat", "kovan"].includes(hardhat.network.name);
 
@@ -34,9 +34,10 @@ async function main() {
     erc721Address = erc721.address;
 
     //Mint 10 ERC721s
-    for (let index = 0; index < 10; index++) {
-      erc721["mint()"];
-    }
+
+    await erc721["mint()"]();
+    await erc721["mint()"]();
+    await erc721["mint()"]();
 
     console.log("erc721 address:", erc721Address);
   }
@@ -75,22 +76,32 @@ async function main() {
   await gbm.registerAnAuctionContract(erc721Address, gbmInitiatorAddress);
 
   //Deploy helper contracts
-  const MassRegistrerFactory = await ethers.getContractFactory("MassRegistrer");
-  massRegistrer = await MassRegistrerFactory.deploy();
+  //const MassRegistrerFactory = await ethers.getContractFactory("MassRegistrer");
+  // massRegistrer = await MassRegistrerFactory.deploy();
   // erc721Address = erc721.address;
-  console.log("registrer address:", massRegistrer.address);
+  // console.log("registrer address:", massRegistrer.address);
 
   //Register the Auction
 
+  if (erc721) {
+    const totalSupply = await erc721.getTotalSupply();
+    console.log("total supply:", totalSupply.toString());
+
+    const owner = await erc721.ownerOf("0");
+    console.log("owner:", owner);
+
+    await erc721.setApprovalForAll(gbmAddress, true);
+
+    await gbm.massRegistrerERC721Each(
+      gbmAddress,
+      gbmInitiatorAddress,
+      erc721Address,
+      "0",
+      "3"
+    );
+  }
+
   /*
-  await massRegistrer.massRegistrerERC721Default(
-    gbmAddress,
-    gbmInitiatorAddress,
-    erc721Address,
-    "0",
-    "9"
-  );
-  */
 
   await gbm.registerAnAuctionToken(
     erc721Address,
@@ -98,6 +109,7 @@ async function main() {
     "0x73ad2146",
     gbmInitiatorAddress
   );
+  */
 
   const tokenId = await gbm.getTokenId("0");
 
