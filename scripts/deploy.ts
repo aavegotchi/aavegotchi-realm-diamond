@@ -26,7 +26,6 @@ async function main() {
   let erc721;
   let erc721Address;
   let ghst;
-  //let massRegistrer;
 
   const bidderAddress = "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c";
   const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
@@ -35,9 +34,6 @@ async function main() {
 
   if (testing) {
     ghst = await ethers.getContractAt("ERC20Generic", ghstAddress);
-
-    const ghstBalance = await ghst.balanceOf(bidderAddress);
-    console.log("ghst balance:", ghstBalance.toString());
 
     //Deploy ERC721 Token for Auction
     const ERC721Factory = await ethers.getContractFactory("ERC721Generic");
@@ -82,11 +78,6 @@ async function main() {
   //Register the Auction
 
   if (erc721) {
-    const totalSupply = await erc721.getTotalSupply();
-    console.log("total supply:", totalSupply.toString());
-
-    const owner = await erc721.ownerOf("0");
-
     await erc721.setApprovalForAll(gbmAddress, true);
 
     await gbm.massRegistrerERC721Each(
@@ -150,6 +141,4 @@ main()
     process.exit(1);
   });
 
-//exports.deployProject = main;
-
-// diamond address: 0x7560d1282A3316DE155452Af3ec248d05b8A8044
+exports.deploy = main;

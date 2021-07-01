@@ -11,6 +11,8 @@ import "../tokens/IERC1155.sol";
 import "../tokens/IERC1155TokenReceiver.sol";
 import "../tokens/Ownable.sol";
 
+import "hardhat/console.sol";
+
 /// @title GBM auction contract
 /// @dev See GBM.auction on how to use this contract
 /// @author Guillaume Gonnaud
@@ -159,6 +161,13 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
 
     if ((previousHighestBid + duePay) != 0) {
       //Refunding the previous bid as well as sending the incentives
+
+      //Added to prevent revert
+      IERC20(ERC20Currency).approve(
+        address(this),
+        (previousHighestBid + duePay)
+      );
+
       IERC20(ERC20Currency).transferFrom(
         address(this),
         previousHighestBidder,
@@ -719,7 +728,7 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     );
 
     while (_indexStart < _indexEnd) {
-      GBM(_GBM).registerAnAuctionToken(
+      registerAnAuctionToken(
         _ERC1155Contract,
         _tokenID,
         bytes4(keccak256("ERC1155")),
