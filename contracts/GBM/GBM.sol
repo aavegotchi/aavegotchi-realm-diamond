@@ -11,8 +11,6 @@ import "../tokens/IERC1155.sol";
 import "../tokens/IERC1155TokenReceiver.sol";
 import "../tokens/Ownable.sol";
 
-import "hardhat/console.sol";
-
 /// @title GBM auction contract
 /// @dev See GBM.auction on how to use this contract
 /// @author Guillaume Gonnaud
@@ -91,6 +89,7 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     );
 
     //An auction start time of 0 also indicate the auction has not been created at all
+
     require(
       getAuctionStartTime(_auctionID) <= block.timestamp &&
         getAuctionStartTime(_auctionID) != 0,

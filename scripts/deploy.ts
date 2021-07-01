@@ -1,4 +1,15 @@
+//@ts-ignore
 import hardhat, { run, ethers } from "hardhat";
+
+async function impersonate(address: string, contract: any) {
+  await hardhat.network.provider.request({
+    method: "hardhat_impersonateAccount",
+    params: [address],
+  });
+  let signer = await ethers.getSigner(address);
+  contract = contract.connect(signer);
+  return contract;
+}
 
 async function main() {
   const accounts = await ethers.getSigners();
@@ -12,21 +23,21 @@ async function main() {
   let gbmInitiator;
   let gbmAddress;
   let gbmInitiatorAddress;
-  let erc20;
-  let erc20Address;
   let erc721;
   let erc721Address;
+  let ghst;
   //let massRegistrer;
+
+  const bidderAddress = "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c";
+  const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
 
   let testing = ["hardhat", "kovan"].includes(hardhat.network.name);
 
   if (testing) {
-    //Deploy ERC20 Token for Payment
-    const ERC20Factory = await ethers.getContractFactory("ERC20Generic");
-    erc20 = await ERC20Factory.deploy();
-    erc20Address = erc20.address;
-    erc20.mint(ethers.utils.parseEther("100"));
-    console.log("erc20 address:", erc20Address);
+    ghst = await ethers.getContractAt("ERC20Generic", ghstAddress);
+
+    const ghstBalance = await ghst.balanceOf(bidderAddress);
+    console.log("ghst balance:", ghstBalance.toString());
 
     //Deploy ERC721 Token for Auction
     const ERC721Factory = await ethers.getContractFactory("ERC721Generic");
@@ -38,18 +49,16 @@ async function main() {
     await erc721["mint()"]();
     await erc721["mint()"]();
     await erc721["mint()"]();
-
-    console.log("erc721 address:", erc721Address);
   }
   //Set defaults for Matic
   else {
-    erc20Address = "ghstAddress";
+    // erc20Address = ghstAddress
     erc721Address = "aavegotchiDiamond";
   }
 
   //Deploy GBM Core
   const GBMContractFactory = await ethers.getContractFactory("GBM");
-  gbm = await GBMContractFactory.deploy(erc20Address);
+  gbm = await GBMContractFactory.deploy(ghstAddress);
   const GBMContractInitiatorFactory = await ethers.getContractFactory(
     "GBMInitiator"
   );
@@ -61,25 +70,14 @@ async function main() {
   //Initialize settings of Initiator
   await gbmInitiator.setBidDecimals(100000);
   await gbmInitiator.setBidMultiplier(11120);
-  // await gbmInitiator.setEndTime("in 25mn");
+  await gbmInitiator.setEndTime(Math.floor(Date.now() / 1000) + 86400);
   await gbmInitiator.setHammerTimeDuration(300);
   await gbmInitiator.setIncMax(10000);
   await gbmInitiator.setIncMin(1000);
-  // await gbmInitiator.setStartTime("in 15mn");
+  await gbmInitiator.setStartTime(Math.floor(Date.now() / 1000));
   await gbmInitiator.setStepMin(10000);
 
   gbmInitiatorAddress = gbmInitiator.address;
-
-  console.log("gbm initiator deployed:", gbmInitiatorAddress);
-
-  //Register Parameters on GBM
-  await gbm.registerAnAuctionContract(erc721Address, gbmInitiatorAddress);
-
-  //Deploy helper contracts
-  //const MassRegistrerFactory = await ethers.getContractFactory("MassRegistrer");
-  // massRegistrer = await MassRegistrerFactory.deploy();
-  // erc721Address = erc721.address;
-  // console.log("registrer address:", massRegistrer.address);
 
   //Register the Auction
 
@@ -88,7 +86,6 @@ async function main() {
     console.log("total supply:", totalSupply.toString());
 
     const owner = await erc721.ownerOf("0");
-    console.log("owner:", owner);
 
     await erc721.setApprovalForAll(gbmAddress, true);
 
@@ -101,28 +98,46 @@ async function main() {
     );
   }
 
-  /*
+  const auctionId = (
+    await gbm["getAuctionID(address,uint256)"](erc721Address, "0")
+  ).toString();
 
-  await gbm.registerAnAuctionToken(
-    erc721Address,
-    "0",
-    "0x73ad2146",
-    gbmInitiatorAddress
-  );
-  */
+  //Open bidding
+  await gbm.setBiddingAllowed(erc721Address, true);
 
-  const tokenId = await gbm.getTokenId("0");
+  //@ts-ignore
+  ethers.provider.send("evm_increaseTime", [3600]);
 
-  console.log("token id:", tokenId);
+  //@ts-ignore
+  ethers.provider.send("evm_mine");
 
-  /*
-  if (hre.network.name === "hardhat") {
-  } else if (hre.network.name === "matic") {
-  } else if (hre.network.name === "kovan") {
-  } else {
-    throw Error("No network settings for " + hre.network.name);
-  }
-  */
+  const bidder = await impersonate(bidderAddress, gbm);
+  const bidderGhst = await impersonate(bidderAddress, ghst);
+
+  const bidAmount = ethers.utils.parseEther("1");
+
+  //Bidding
+
+  await bidderGhst.approve(gbmAddress, ethers.utils.parseEther("10000000"));
+  await bidder.bid(auctionId, bidAmount, "0");
+
+  //Get highest bid
+  const highestBidder = await gbm.getAuctionHighestBidder(auctionId);
+  const highestBid = await gbm.getAuctionHighestBid(auctionId);
+
+  console.log("highest bid:", highestBidder, highestBid.toString());
+
+  //@ts-ignore
+  ethers.provider.send("evm_increaseTime", [25 * 3600]);
+
+  //@ts-ignore
+  ethers.provider.send("evm_mine");
+
+  //Claim item
+  await gbm.claim(auctionId);
+
+  const nftBalance = await erc721?.balanceOf(bidderAddress);
+  console.log("nft balance:", nftBalance);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
