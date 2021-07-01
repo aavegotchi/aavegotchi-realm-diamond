@@ -320,14 +320,15 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     );
 
     if (!_rewrite) {
+      _1155Index = eRC1155_tokensIndex[_tokenContract][_tokenId]; //_1155Index was 0 if creating new auctions
       require(
         auctionMapping[_tokenContract][_tokenId][_1155Index] == 0,
         "The auction aleady exist for the specified token"
       );
-      require(
+      /*require(
         _1155Index == 0,
         "_1155Index must be equal to 0 when registering new tokens"
-      );
+      );*/
     } else {
       require(
         auctionMapping[_tokenContract][_tokenId][_1155Index] != 0,
@@ -381,7 +382,6 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
       );
 
       if (!_rewrite) {
-        _1155Index = eRC1155_tokensIndex[_tokenContract][_tokenId]; //_1155Index was 0 if creating new auctions
         eRC1155_tokensIndex[_tokenContract][_tokenId] =
           eRC1155_tokensIndex[_tokenContract][_tokenId] +
           1;
