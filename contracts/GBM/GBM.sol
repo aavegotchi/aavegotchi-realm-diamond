@@ -183,6 +183,12 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
       "claim: Auction has not yet ended"
     );
 
+    //Added to prevent revert
+    IERC20(ERC20Currency).approve(
+      address(this),
+      (auction_highestBid[_auctionID] - auction_debt[_auctionID])
+    );
+
     //Transfer the proceeds to this smart contract owner
     IERC20(ERC20Currency).transferFrom(
       address(this),
