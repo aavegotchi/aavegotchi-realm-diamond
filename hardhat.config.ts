@@ -44,6 +44,15 @@ module.exports = {
       gasPrice: 10000000000,
       //   timeout: 90000
     },
+    kovan: {
+      url: process.env.KOVAN_URL,
+      // url: 'https://rpc-mainnet.maticvigil.com/',
+      accounts: [process.env.SECRET],
+      // blockGasLimit: 20000000,
+      blockGasLimit: 12000000,
+      gasPrice: 100000000000,
+      //   timeout: 90000
+    },
   },
   gasReporter: {
     currency: "USD",

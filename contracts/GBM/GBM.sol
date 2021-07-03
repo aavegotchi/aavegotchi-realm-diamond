@@ -293,6 +293,38 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         emit Auction_StartTimeUpdated(auctionId, getAuctionStartTime(auctionId));
     }
 
+    struct AuctionInfo {
+        address highestBidder;
+        uint256 highestBid;
+        uint256 auctionDebt;
+        uint256 dueIncentives;
+        address contractAddress;
+        uint256 startTime;
+        uint256 endTime;
+        uint256 hammerTimeDuration;
+        uint256 bidDecimals;
+        uint256 stepMin;
+        uint256 incMin;
+        uint256 incMax;
+        uint256 bidMultiplier;
+    }
+
+    function getAuctionInfo(uint256 _auctionId) external view returns (AuctionInfo memory auctionInfo_) {
+        auctionInfo_.highestBidder = auction_highestBidder[_auctionId];
+        auctionInfo_.highestBid = auction_highestBid[_auctionId];
+        auctionInfo_.auctionDebt = auction_debt[_auctionId];
+        auctionInfo_.dueIncentives = auction_dueIncentives[_auctionId];
+        auctionInfo_.contractAddress = tokenMapping[_auctionId].contractAddress;
+        auctionInfo_.startTime = auction_startTime[_auctionId];
+        auctionInfo_.endTime = auction_endTime[_auctionId];
+        auctionInfo_.hammerTimeDuration = auction_hammerTimeDuration[_auctionId];
+        auctionInfo_.bidDecimals = auction_bidDecimals[_auctionId];
+        auctionInfo_.stepMin = auction_stepMin[_auctionId];
+        auctionInfo_.incMin = auction_incMin[_auctionId];
+        auctionInfo_.incMax = auction_incMax[_auctionId];
+        auctionInfo_.bidMultiplier = auction_bidMultiplier[_auctionId];
+    }
+
     function getAuctionHighestBidder(uint256 _auctionID) external view override returns (address) {
         return auction_highestBidder[_auctionID];
     }
