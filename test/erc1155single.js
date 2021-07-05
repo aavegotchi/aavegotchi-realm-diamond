@@ -25,6 +25,8 @@ describe("Test ERC1155 GBM", async function () {
   let gbmInitiatorAddress;
   let ghst;
   let auctionId;
+  let signer;
+  let deployerAddress;
 
   const bidderAddress = "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c";
   const secondBidderAddress = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
@@ -33,32 +35,26 @@ describe("Test ERC1155 GBM", async function () {
   before(async function () {
     const accounts = await ethers.getSigners();
     account = await accounts[0].getAddress();
-  });
-
-  it("Can deploy ERC1155 NFT Contract and mint three NFTs", async function () {
-    //Deploy erc1155 Token for Auction
-    const ERC1155Factory = await ethers.getContractFactory("ERC1155Generic");
-    erc1155 = await ERC1155Factory.deploy();
-    erc1155Address = erc1155.address;
-
-    //Mint 10 erc1155s
-
-    await erc1155["mint(uint256,uint256)"]("0", "3");
-
-    const balanceOf = await erc1155.balanceOf(account, "0");
-    expect(balanceOf).to.equal(3);
+    console.log("account:", account);
   });
 
   it("Can deploy GBM + GBM Initiator and start an Auction", async function () {
+    erc1155Address = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
+
+    erc1155 = await ethers.getContractAt("ERC1155Generic", erc1155Address);
+
     //Deploy GBM Core
+
     const GBMContractFactory = await ethers.getContractFactory("GBM");
     gbm = await GBMContractFactory.deploy(ghstAddress);
     const GBMContractInitiatorFactory = await ethers.getContractFactory(
       "GBMInitiator"
     );
     gbmInitiator = await GBMContractInitiatorFactory.deploy();
-
     gbmAddress = gbm.address;
+
+    const owner = await gbmInitiator.getOwner();
+    console.log("owner:", owner);
 
     //Initialize settings of Initiator
     await gbmInitiator.setBidDecimals(100000);
@@ -72,28 +68,67 @@ describe("Test ERC1155 GBM", async function () {
 
     gbmInitiatorAddress = gbmInitiator.address;
 
-    await erc1155?.setApprovalForAll(gbmAddress, true);
+    await erc1155.setApprovalForAll(gbmAddress, true);
+  });
 
-    await gbm.massRegistrerERC1155Each(
+  it("Transfer NFTs to deployer and start auction", async function () {
+    const connectedERC1155 = await impersonate(bidderAddress, erc1155);
+
+    //aave hero mask
+    const tokenId = "18";
+
+    let balanceOf = await erc1155.balanceOf(bidderAddress, tokenId);
+    expect(balanceOf).to.equal(1);
+
+    /*
+    await connectedERC1155.safeTransferFrom(
+      bidderAddress,
+      gbmAddress,
+      tokenId,
+      "1",
+      []
+    );
+
+    balanceOf = await erc1155.balanceOf(gbmAddress, tokenId);
+    expect(balanceOf).to.equal(1);
+    */
+
+    const connectedGBM = await impersonate(account, gbm);
+
+    await connectedGBM.massRegistrerERC1155Each(
       gbmAddress,
       gbmInitiatorAddress,
       erc1155Address,
+      "18",
       "0",
-      "0",
-      "3"
+      "1"
     );
 
+    /*
+    await connectedGBM.registerAnAuctionToken(
+      erc1155Address,
+      "18",
+      "0x973bb640",
+      gbmInitiatorAddress
+    );
+    */
+
     auctionId = (
-      await gbm["getAuctionID(address,uint256)"](erc1155Address, "0")
+      await gbm["getAuctionID(address,uint256)"](erc1155Address, "18")
     ).toString();
 
+    console.log("auction id:", auctionId);
+
+    await connectedGBM.setBiddingAllowed(erc1155Address, true);
+
     const auctionStartTime = await gbm.getAuctionStartTime(auctionId);
+
+    console.log("start time:", auctionStartTime);
     expect(Number(auctionStartTime)).to.greaterThan(0);
   });
 
   it("Can bid on an auction", async function () {
     //Open bidding
-    await gbm.setBiddingAllowed(erc1155Address, true);
 
     //@ts-ignore
     ethers.provider.send("evm_increaseTime", [3600]);
@@ -166,7 +201,7 @@ describe("Test ERC1155 GBM", async function () {
     //Claim item
     await gbm.claim(auctionId);
 
-    const nftBalance = await erc1155?.balanceOf(secondBidderAddress, "0");
+    const nftBalance = await erc1155.balanceOf(secondBidderAddress, "18");
     expect(nftBalance).to.equal(1);
   });
 });

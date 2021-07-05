@@ -69,14 +69,19 @@ async function main() {
   gbmAddress = gbm.address;
   console.log("gbm deployed:", gbmAddress);
 
+  const startTime = Math.floor(Date.now() / 1000).toFixed(0);
+  console.log("starttime:", startTime);
+  const endTime = (Math.floor(Date.now() / 1000) + 86400 * 3).toFixed(0);
+  console.log("endTime:", endTime);
+
   //Initialize settings of first Wearable Auction
   await gbmInitiator.setBidDecimals(100000);
   await gbmInitiator.setBidMultiplier(11120);
-  await gbmInitiator.setEndTime(Math.floor(Date.now() / 1000) + 86400 * 3);
+  await gbmInitiator.setEndTime(endTime);
   await gbmInitiator.setHammerTimeDuration(300);
   await gbmInitiator.setIncMax(10000);
   await gbmInitiator.setIncMin(1000);
-  await gbmInitiator.setStartTime(Math.floor(Date.now() / 1000));
+  await gbmInitiator.setStartTime(startTime);
   await gbmInitiator.setStepMin(10000);
 
   gbmInitiatorAddress = gbmInitiator.address;

@@ -166,7 +166,7 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     /// @param _contract The token contract the auctionned token belong to
     /// @param _initiator Set to 0 if you want to use the default value registered for the token contract
     function registerAnAuctionContract(address _contract, address _initiator) public {
-        require(msg.sender == Ownable(_contract).owner(), "Only the owner of a contract can register default values for the tokens");
+        require(msg.sender == owner, "Only the owner of a contract can register default values for the tokens");
 
         collection_startTime[_contract] = IGBMInitiator(_initiator).getStartTime(uint256(uint160(_contract)));
         collection_endTime[_contract] = IGBMInitiator(_initiator).getEndTime(uint256(uint160(_contract)));
@@ -182,7 +182,7 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     /// @param _contract The token contract the auctionned token belong to
     /// @param _value True if bidding/claiming should be allowed.
     function setBiddingAllowed(address _contract, bool _value) external {
-        require(msg.sender == Ownable(_contract).owner(), "Only the owner of a contract can allow/disallow bidding");
+        require(msg.sender == owner, "Only the owner of GBM contract can allow/disallow bidding");
         collection_biddingAllowed[_contract] = _value;
     }
 
@@ -294,6 +294,7 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     }
 
     struct AuctionInfo {
+        address owner;
         address highestBidder;
         uint256 highestBid;
         uint256 auctionDebt;
@@ -307,9 +308,11 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         uint256 incMin;
         uint256 incMax;
         uint256 bidMultiplier;
+        bool biddingAllowed;
     }
 
-    function getAuctionInfo(uint256 _auctionId) external view returns (AuctionInfo memory auctionInfo_) {
+    function getAuctionInfo(address _contractAddress, uint256 _auctionId) external view returns (AuctionInfo memory auctionInfo_) {
+        auctionInfo_.owner = owner;
         auctionInfo_.highestBidder = auction_highestBidder[_auctionId];
         auctionInfo_.highestBid = auction_highestBid[_auctionId];
         auctionInfo_.auctionDebt = auction_debt[_auctionId];
@@ -323,6 +326,7 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         auctionInfo_.incMin = auction_incMin[_auctionId];
         auctionInfo_.incMax = auction_incMax[_auctionId];
         auctionInfo_.bidMultiplier = auction_bidMultiplier[_auctionId];
+        auctionInfo_.biddingAllowed = collection_biddingAllowed[_contractAddress];
     }
 
     function getAuctionHighestBidder(uint256 _auctionID) external view override returns (address) {
