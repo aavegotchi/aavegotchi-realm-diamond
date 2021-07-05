@@ -184,6 +184,7 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     function setBiddingAllowed(address _contract, bool _value) external {
         require(msg.sender == owner, "Only the owner of GBM contract can allow/disallow bidding");
         collection_biddingAllowed[_contract] = _value;
+        emit Contract_BiddingAllowed(_contract, _value);
     }
 
     /// @notice Register an auction token and emit the relevant Auction_Initialized & Auction_StartTimeUpdated events
@@ -287,7 +288,7 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         }
 
         //Event emitted when an auction is being setup
-        emit Auction_Initialized(auctionId, _tokenId, _tokenContract, _tokenKind);
+        emit Auction_Initialized(auctionId, _tokenId, _1155Index, _tokenContract, _tokenKind);
 
         //Event emitted when the start time of an auction changes (due to admin interaction )
         emit Auction_StartTimeUpdated(auctionId, getAuctionStartTime(auctionId));

@@ -7,7 +7,13 @@ pragma solidity 0.8.5;
 /// @author Guillaume Gonnaud
 interface IGBM {
     //Event emitted when an auction is being setup
-    event Auction_Initialized(uint256 indexed _auctionID, uint256 indexed _tokenID, address indexed _contractAddress, bytes4 _tokenKind);
+    event Auction_Initialized(
+        uint256 indexed _auctionID,
+        uint256 indexed _tokenID,
+        uint256 indexed _tokenIndex,
+        address _contractAddress,
+        bytes4 _tokenKind
+    );
 
     //Event emitted when the start time of an auction changes (due to admin interaction )
     event Auction_StartTimeUpdated(uint256 indexed _auctionID, uint256 _startTime);
@@ -23,6 +29,8 @@ interface IGBM {
 
     //Event emitted when incentives are paid (due to a new bid rewarding the _earner bid)
     event Auction_IncentivePaid(uint256 indexed _auctionID, address indexed _earner, uint256 _incentiveAmount);
+
+    event Contract_BiddingAllowed(address indexed _contract, bool _biddingAllowed);
 
     function bid(
         uint256 _auctionID,
