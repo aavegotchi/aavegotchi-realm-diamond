@@ -225,10 +225,6 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         if (!_rewrite) {
             _1155Index = eRC1155_tokensIndex[_tokenContract][_tokenId]; //_1155Index was 0 if creating new auctions
             require(auctionMapping[_tokenContract][_tokenId][_1155Index] == 0, "The auction aleady exist for the specified token");
-            /*require(
-        _1155Index == 0,
-        "_1155Index must be equal to 0 when registering new tokens"
-      );*/
         } else {
             require(auctionMapping[_tokenContract][_tokenId][_1155Index] != 0, "The auction doesn't exist yet for the specified token");
         }
@@ -312,7 +308,7 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         bool biddingAllowed;
     }
 
-    function getAuctionInfo(address _contractAddress, uint256 _auctionId) external view returns (AuctionInfo memory auctionInfo_) {
+    function getAuctionInfo(uint256 _auctionId) external view returns (AuctionInfo memory auctionInfo_) {
         auctionInfo_.owner = owner;
         auctionInfo_.highestBidder = auction_highestBidder[_auctionId];
         auctionInfo_.highestBid = auction_highestBid[_auctionId];
@@ -327,7 +323,7 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         auctionInfo_.incMin = auction_incMin[_auctionId];
         auctionInfo_.incMax = auction_incMax[_auctionId];
         auctionInfo_.bidMultiplier = auction_bidMultiplier[_auctionId];
-        auctionInfo_.biddingAllowed = collection_biddingAllowed[_contractAddress];
+        auctionInfo_.biddingAllowed = collection_biddingAllowed[tokenMapping[_auctionId].contractAddress];
     }
 
     function getAuctionHighestBidder(uint256 _auctionID) external view override returns (address) {
