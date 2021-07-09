@@ -32,6 +32,8 @@ interface IGBM {
 
     event Contract_BiddingAllowed(address indexed _contract, bool _biddingAllowed);
 
+    event Auction_ItemClaimed(uint256 indexed _auctionID);
+
     function bid(
         uint256 _auctionID,
         uint256 _bidAmount,

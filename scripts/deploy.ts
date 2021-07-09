@@ -129,6 +129,9 @@ async function main() {
 
   const nftBalance = await erc721?.balanceOf(bidderAddress);
   console.log("nft balance:", nftBalance);
+
+  const auctionInfo = await gbm.getAuctionInfo(auctionId);
+  console.log("auction info:", auctionInfo);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

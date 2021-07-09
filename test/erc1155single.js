@@ -78,20 +78,21 @@ describe("Test ERC1155 GBM", async function () {
     const tokenId = "18";
 
     let balanceOf = await erc1155.balanceOf(bidderAddress, tokenId);
+    console.log("balance of:", balanceOf.toString());
     expect(balanceOf).to.equal(1);
 
-    /*
     await connectedERC1155.safeTransferFrom(
       bidderAddress,
-      gbmAddress,
+      account,
       tokenId,
       "1",
       []
     );
 
-    balanceOf = await erc1155.balanceOf(gbmAddress, tokenId);
+    balanceOf = await erc1155.balanceOf(account, tokenId);
     expect(balanceOf).to.equal(1);
-    */
+
+    console.log("balance is:", balanceOf.toString());
 
     const connectedGBM = await impersonate(account, gbm);
 
@@ -203,5 +204,12 @@ describe("Test ERC1155 GBM", async function () {
 
     const nftBalance = await erc1155.balanceOf(secondBidderAddress, "18");
     expect(nftBalance).to.equal(1);
+  });
+
+  it("Cannot claim twice", async function () {
+    //Claim item
+    await expect(gbm.claim(auctionId)).to.be.revertedWith(
+      "claim: Item has already been claimed"
+    );
   });
 });

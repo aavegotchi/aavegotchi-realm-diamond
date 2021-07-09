@@ -49,6 +49,7 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     mapping(uint256 => uint256) internal auction_incMin; // _auctionID => minimal earned incentives
     mapping(uint256 => uint256) internal auction_incMax; // _auctionID => maximal earned incentives
     mapping(uint256 => uint256) internal auction_bidMultiplier; // _auctionID => bid incentive growth multiplier
+    mapping(uint256 => bool) internal auction_itemClaimed;
 
     //var storing contract wide settings. Those are used if no auctionId specific parameters is initialized
     mapping(address => uint256) internal collection_startTime; // tokencontract => timestamp
@@ -145,6 +146,7 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
 
         require(collection_biddingAllowed[_ca], "claim: Claiming is currently not allowed");
         require(getAuctionEndTime(_auctionID) < block.timestamp, "claim: Auction has not yet ended");
+        require(auction_itemClaimed[_auctionID] == false, "claim: Item has already been claimed");
 
         //Added to prevent revert
         IERC20(ERC20Currency).approve(address(this), (auction_highestBid[_auctionID] - auction_debt[_auctionID]));
@@ -160,6 +162,9 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
             IERC1155(_ca).safeTransferFrom(address(this), auction_highestBidder[_auctionID], _tid, 1, "");
             eRC1155_tokensUnderAuction[_ca][_tid] = eRC1155_tokensUnderAuction[_ca][_tid] - 1;
         }
+
+        auction_itemClaimed[_auctionID] = true;
+        emit Auction_ItemClaimed(_auctionID);
     }
 
     /// @notice Register an auction contract default parameters for a GBM auction. To use to save gas
