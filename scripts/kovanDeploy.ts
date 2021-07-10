@@ -59,30 +59,43 @@ async function main() {
   }
 
   //Deploy GBM Core
+
+  const _pixelcraft = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
+  const _playerRewards = "0x27DF5C6dcd360f372e23d5e63645eC0072D0C098";
+  const _daoTreasury = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
+
+  let startTime = Math.floor(Date.now() / 1000);
+  let endTime = Math.floor(Date.now() / 1000) + 86400;
+  let hammerTimeDuration = 300;
+  let bidDecimals = 100000;
+  let stepMin = 10000;
+  let incMax = 10000;
+  let incMin = 1000;
+  let bidMultiplier = 11120;
+
   const GBMContractFactory = await ethers.getContractFactory("GBM");
-  gbm = await GBMContractFactory.deploy(ghstAddress);
+  gbm = await GBMContractFactory.deploy(
+    ghstAddress,
+    _pixelcraft,
+    _playerRewards,
+    _daoTreasury
+  );
   const GBMContractInitiatorFactory = await ethers.getContractFactory(
     "GBMInitiator"
   );
-  gbmInitiator = await GBMContractInitiatorFactory.deploy();
+  gbmInitiator = await GBMContractInitiatorFactory.deploy(
+    startTime,
+    endTime,
+    hammerTimeDuration,
+    bidDecimals,
+    stepMin,
+    incMin,
+    incMax,
+    bidMultiplier
+  );
 
   gbmAddress = gbm.address;
   console.log("gbm deployed:", gbmAddress);
-
-  const startTime = Math.floor(Date.now() / 1000).toFixed(0);
-  console.log("starttime:", startTime);
-  const endTime = (Math.floor(Date.now() / 1000) + 86400 * 3).toFixed(0);
-  console.log("endTime:", endTime);
-
-  //Initialize settings of first Wearable Auction
-  await gbmInitiator.setBidDecimals(100000);
-  await gbmInitiator.setBidMultiplier(11120);
-  await gbmInitiator.setEndTime(endTime);
-  await gbmInitiator.setHammerTimeDuration(300);
-  await gbmInitiator.setIncMax(10000);
-  await gbmInitiator.setIncMin(1000);
-  await gbmInitiator.setStartTime(startTime);
-  await gbmInitiator.setStepMin(10000);
 
   gbmInitiatorAddress = gbmInitiator.address;
 

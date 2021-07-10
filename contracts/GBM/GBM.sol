@@ -164,6 +164,9 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
 
         //Todo: Add in the various Aavegotchi addresses
         uint256 _proceeds = auction_highestBid[_auctionID] - auction_debt[_auctionID];
+        console.log("proceeds:", _proceeds);
+
+        console.log("auction debt:", auction_debt[_auctionID]);
 
         //Added to prevent revert
         IERC20(ERC20Currency).approve(address(this), _proceeds);
@@ -172,19 +175,22 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
 
         //5% to burn address
         uint256 burnShare = (_proceeds * 5) / 100;
+        console.log("burn share:", burnShare);
 
         //40% to Pixelcraft wallet
         uint256 companyShare = (_proceeds * 40) / 100;
+        console.log("company share:", companyShare);
 
-        //40% to rarity farming rewards
-        uint256 rarityFarmShare = (_proceeds * 2) / 5;
+        //40% to player rewards
+        uint256 playerRewardsShare = (_proceeds * 2) / 5;
+        console.log("rarity farm:", playerRewardsShare);
 
         //15% to DAO
-        uint256 daoShare = (_proceeds - burnShare - companyShare - rarityFarmShare);
+        uint256 daoShare = (_proceeds - burnShare - companyShare - playerRewardsShare);
 
         IERC20(ERC20Currency).transferFrom(address(this), address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), burnShare);
         IERC20(ERC20Currency).transferFrom(address(this), pixelcraft, companyShare);
-        IERC20(ERC20Currency).transferFrom(address(this), playerRewards, rarityFarmShare);
+        IERC20(ERC20Currency).transferFrom(address(this), playerRewards, playerRewardsShare);
         IERC20(ERC20Currency).transferFrom(address(this), daoTreasury, daoShare);
 
         if (tokenMapping[_auctionID].tokenKind == bytes4(keccak256("ERC721"))) {

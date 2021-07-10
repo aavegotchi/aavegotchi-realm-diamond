@@ -32,6 +32,17 @@ describe("Test ERC1155 GBM", async function () {
   const secondBidderAddress = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
   const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
 
+  const _pixelcraft = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
+  const _playerRewards = "0x27DF5C6dcd360f372e23d5e63645eC0072D0C098";
+  const _daoTreasury = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
+
+  let pcBalance;
+  let prBalance;
+  let daoBalance;
+
+  const bidAmount1 = ethers.utils.parseEther("1");
+  const bidAmount2 = ethers.utils.parseEther("2");
+
   before(async function () {
     const accounts = await ethers.getSigners();
     account = await accounts[0].getAddress();
@@ -45,8 +56,15 @@ describe("Test ERC1155 GBM", async function () {
 
     //Deploy GBM Core
 
+    //
+
     const GBMContractFactory = await ethers.getContractFactory("GBM");
-    gbm = await GBMContractFactory.deploy(ghstAddress);
+    gbm = await GBMContractFactory.deploy(
+      ghstAddress,
+      _pixelcraft,
+      _playerRewards,
+      _daoTreasury
+    );
     const GBMContractInitiatorFactory = await ethers.getContractFactory(
       "GBMInitiator"
     );
@@ -151,7 +169,7 @@ describe("Test ERC1155 GBM", async function () {
     const bidder = await impersonate(bidderAddress, gbm);
     const bidderGhst = await impersonate(bidderAddress, ghst);
 
-    const bidAmount = ethers.utils.parseEther("0.1");
+    //const bidAmount = ethers.utils.parseEther("0.1");
 
     //Bidding
 
@@ -159,34 +177,32 @@ describe("Test ERC1155 GBM", async function () {
 
     const previousBal = await ghst.balanceOf(bidderAddress);
 
-    await bidder.bid(auctionId, bidAmount, "0");
+    await bidder.bid(auctionId, bidAmount1, "0");
 
     const afterBal = await ghst.balanceOf(bidderAddress);
 
-    expect(afterBal).to.equal(previousBal.sub(bidAmount));
+    expect(afterBal).to.equal(previousBal.sub(bidAmount1));
 
     //Get highest bid
     const highestBidder = await gbm.getAuctionHighestBidder(auctionId);
     const highestBid = await gbm.getAuctionHighestBid(auctionId);
 
     expect(highestBidder).to.equal(bidderAddress);
-    expect(highestBid).to.equal(bidAmount);
+    expect(highestBid).to.equal(bidAmount1);
   });
 
   it("Can be outbid and address outbid receives incentive", async function () {
     const secondBidder = await impersonate(secondBidderAddress, gbm);
     const secondBidderGhst = await impersonate(secondBidderAddress, ghst);
 
-    const bidAmount = ethers.utils.parseEther("0.2");
-
     //Bidding
     await secondBidderGhst.approve(gbmAddress, ethers.utils.parseEther("2"));
-    let previousBid = ethers.utils.parseEther("0.1");
+    let previousBid = bidAmount1;
 
     const previousBal = await ghst.balanceOf(bidderAddress);
     const dueIncentives = await gbm.getAuctionDueIncentives(auctionId);
 
-    await secondBidder.bid(auctionId, bidAmount, previousBid);
+    await secondBidder.bid(auctionId, bidAmount2, previousBid);
 
     const afterBal = await ghst.balanceOf(bidderAddress);
 
@@ -198,7 +214,7 @@ describe("Test ERC1155 GBM", async function () {
     const highestBid = await gbm.getAuctionHighestBid(auctionId);
 
     expect(highestBidder).to.equal(secondBidderAddress);
-    expect(highestBid).to.equal(bidAmount);
+    expect(highestBid).to.equal(bidAmount2);
   });
 
   it("Can claim NFT prize", async function () {
@@ -207,6 +223,10 @@ describe("Test ERC1155 GBM", async function () {
 
     //@ts-ignore
     ethers.provider.send("evm_mine");
+
+    pcBalance = await ghst.balanceOf(_pixelcraft);
+    prBalance = await ghst.balanceOf(_playerRewards);
+    daoBalance = await ghst.balanceOf(_daoTreasury);
 
     //Claim item
     await gbm.claim(auctionId);
@@ -220,5 +240,19 @@ describe("Test ERC1155 GBM", async function () {
     await expect(gbm.claim(auctionId)).to.be.revertedWith(
       "claim: Item has already been claimed"
     );
+  });
+
+  it("Various wallet addresses should receive the correct amounts", async function () {
+    const newPcBalance = await ghst.balanceOf(_pixelcraft);
+    const newPrBalance = await ghst.balanceOf(_playerRewards);
+    const newDaoBalance = await ghst.balanceOf(_daoTreasury);
+
+    const expectedBurn = bidAmount2.mul(5).div(100);
+    const expectedPcIncrease = bidAmount2.mul(40).div(100);
+    const expectedPrIncrease = bidAmount2.mul(40).div(100);
+
+    expect(newPcBalance).to.equal(pcBalance.add(expectedPcIncrease));
+    expect(newPrBalance).to.equal(prBalance.add(expectedPrIncrease));
+    //  expect(newDaoBalance).to.equal(daoBalance.add(expectedBurn.mul(3)));
   });
 });
