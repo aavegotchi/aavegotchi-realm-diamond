@@ -50,21 +50,30 @@ describe("Test ERC1155 GBM", async function () {
     const GBMContractInitiatorFactory = await ethers.getContractFactory(
       "GBMInitiator"
     );
-    gbmInitiator = await GBMContractInitiatorFactory.deploy();
+
+    let startTime = Math.floor(Date.now() / 1000);
+    let endTime = Math.floor(Date.now() / 1000) + 86400;
+    let hammerTimeDuration = 300;
+    let bidDecimals = 100000;
+    let stepMin = 10000;
+    let incMax = 10000;
+    let incMin = 1000;
+    let bidMultiplier = 11120;
+
+    gbmInitiator = await GBMContractInitiatorFactory.deploy(
+      startTime,
+      endTime,
+      hammerTimeDuration,
+      bidDecimals,
+      stepMin,
+      incMin,
+      incMax,
+      bidMultiplier
+    );
     gbmAddress = gbm.address;
 
     const owner = await gbmInitiator.getOwner();
     console.log("owner:", owner);
-
-    //Initialize settings of Initiator
-    await gbmInitiator.setBidDecimals(100000);
-    await gbmInitiator.setBidMultiplier(11120);
-    await gbmInitiator.setEndTime(Math.floor(Date.now() / 1000) + 86400);
-    await gbmInitiator.setHammerTimeDuration(300);
-    await gbmInitiator.setIncMax(10000);
-    await gbmInitiator.setIncMin(1000);
-    await gbmInitiator.setStartTime(Math.floor(Date.now() / 1000));
-    await gbmInitiator.setStepMin(10000);
 
     gbmInitiatorAddress = gbmInitiator.address;
 
@@ -79,18 +88,18 @@ describe("Test ERC1155 GBM", async function () {
 
     let balanceOf = await erc1155.balanceOf(bidderAddress, tokenId);
     console.log("balance of:", balanceOf.toString());
-    expect(balanceOf).to.equal(1);
+    expect(balanceOf).to.equal(2);
 
     await connectedERC1155.safeTransferFrom(
       bidderAddress,
       account,
       tokenId,
-      "1",
+      "2",
       []
     );
 
     balanceOf = await erc1155.balanceOf(account, tokenId);
-    expect(balanceOf).to.equal(1);
+    expect(balanceOf).to.equal(2);
 
     console.log("balance is:", balanceOf.toString());
 
@@ -102,7 +111,7 @@ describe("Test ERC1155 GBM", async function () {
       erc1155Address,
       "18",
       "0",
-      "1"
+      "2"
     );
 
     /*
@@ -142,7 +151,7 @@ describe("Test ERC1155 GBM", async function () {
     const bidder = await impersonate(bidderAddress, gbm);
     const bidderGhst = await impersonate(bidderAddress, ghst);
 
-    const bidAmount = ethers.utils.parseEther("1");
+    const bidAmount = ethers.utils.parseEther("0.1");
 
     //Bidding
 
@@ -168,11 +177,11 @@ describe("Test ERC1155 GBM", async function () {
     const secondBidder = await impersonate(secondBidderAddress, gbm);
     const secondBidderGhst = await impersonate(secondBidderAddress, ghst);
 
-    const bidAmount = ethers.utils.parseEther("2");
+    const bidAmount = ethers.utils.parseEther("0.2");
 
     //Bidding
     await secondBidderGhst.approve(gbmAddress, ethers.utils.parseEther("2"));
-    let previousBid = ethers.utils.parseEther("1");
+    let previousBid = ethers.utils.parseEther("0.1");
 
     const previousBal = await ghst.balanceOf(bidderAddress);
     const dueIncentives = await gbm.getAuctionDueIncentives(auctionId);

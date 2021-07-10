@@ -148,10 +148,15 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         require(getAuctionEndTime(_auctionID) < block.timestamp, "claim: Auction has not yet ended");
         require(auction_itemClaimed[_auctionID] == false, "claim: Item has already been claimed");
 
+        //Prevents re-entrancy
+        auction_itemClaimed[_auctionID] = true;
+
         //Added to prevent revert
         IERC20(ERC20Currency).approve(address(this), (auction_highestBid[_auctionID] - auction_debt[_auctionID]));
 
         //Transfer the proceeds to this smart contract owner
+
+        //Todo: Add in the various Aavegotchi addresses
         IERC20(ERC20Currency).transferFrom(address(this), owner, (auction_highestBid[_auctionID] - auction_debt[_auctionID]));
 
         if (tokenMapping[_auctionID].tokenKind == bytes4(keccak256("ERC721"))) {
@@ -163,7 +168,6 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
             eRC1155_tokensUnderAuction[_ca][_tid] = eRC1155_tokensUnderAuction[_ca][_tid] - 1;
         }
 
-        auction_itemClaimed[_auctionID] = true;
         emit Auction_ItemClaimed(_auctionID);
     }
 

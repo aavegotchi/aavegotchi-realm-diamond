@@ -38,9 +38,47 @@ contract GBMInitiator is IGBMInitiator {
         _;
     }
 
-    constructor() {
+    constructor(
+        uint256 _startTime,
+        uint256 _endTime,
+        uint256 _hammerTimeDuration,
+        uint256 _bidDecimals,
+        uint256 _stepMin,
+        uint256 _incMin,
+        uint256 _incMax,
+        uint256 _bidMultiplier
+    ) {
         owner = msg.sender;
-        // emit InitiatorCreated(msg.sender);
+        auction_startTime = _startTime;
+        auction_endTime = _endTime;
+        auction_hammerTimeDuration = _hammerTimeDuration;
+        auction_bidDecimals = _bidDecimals;
+        auction_stepMin = _stepMin;
+        auction_incMin = _incMin;
+        auction_incMax = _incMax;
+        auction_bidMultiplier = _bidMultiplier;
+    }
+
+    struct InitiatorInfo {
+        uint256 startTime;
+        uint256 endTime;
+        uint256 hammerTimeDuration;
+        uint256 bidDecimals;
+        uint256 stepMin;
+        uint256 incMin;
+        uint256 incMax;
+        uint256 bidMultiplier;
+    }
+
+    function getInitiatorInfo() external view returns (InitiatorInfo memory info_) {
+        info_.startTime = auction_startTime;
+        info_.endTime = auction_endTime;
+        info_.hammerTimeDuration = auction_hammerTimeDuration;
+        info_.bidDecimals = auction_bidDecimals;
+        info_.stepMin = auction_stepMin;
+        info_.incMin = auction_incMin;
+        info_.incMax = auction_incMax;
+        info_.bidMultiplier = auction_bidMultiplier;
     }
 
     function getOwner() external view returns (address) {
