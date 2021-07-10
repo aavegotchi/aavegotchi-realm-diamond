@@ -26,6 +26,9 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
 
     //The address of the auctionner to whom all profits will be sent
     address public override owner;
+    address public pixelcraft;
+    address public playerRewards;
+    address public daoTreasury;
 
     //Contract address storing the ERC20 currency used in auctions
     address public override ERC20Currency;
@@ -64,8 +67,16 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     mapping(address => mapping(uint256 => uint256)) internal eRC1155_tokensIndex; //Contract => TokenID => Amount being auctionned
     mapping(address => mapping(uint256 => uint256)) internal eRC1155_tokensUnderAuction; //Contract => TokenID => Amount being auctionned
 
-    constructor(address _ERC20Currency) {
+    constructor(
+        address _ERC20Currency,
+        address _pixelcraft,
+        address _playerRewards,
+        address _daoTreasury
+    ) {
         owner = msg.sender;
+        pixelcraft = _pixelcraft;
+        playerRewards = _playerRewards;
+        daoTreasury = _daoTreasury;
         ERC20Currency = _ERC20Currency;
     }
 
@@ -151,13 +162,30 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         //Prevents re-entrancy
         auction_itemClaimed[_auctionID] = true;
 
-        //Added to prevent revert
-        IERC20(ERC20Currency).approve(address(this), (auction_highestBid[_auctionID] - auction_debt[_auctionID]));
-
-        //Transfer the proceeds to this smart contract owner
-
         //Todo: Add in the various Aavegotchi addresses
-        IERC20(ERC20Currency).transferFrom(address(this), owner, (auction_highestBid[_auctionID] - auction_debt[_auctionID]));
+        uint256 _proceeds = auction_highestBid[_auctionID] - auction_debt[_auctionID];
+
+        //Added to prevent revert
+        IERC20(ERC20Currency).approve(address(this), _proceeds);
+
+        //Transfer the proceeds to the various recipients
+
+        //5% to burn address
+        uint256 burnShare = (_proceeds * 5) / 100;
+
+        //40% to Pixelcraft wallet
+        uint256 companyShare = (_proceeds * 40) / 100;
+
+        //40% to rarity farming rewards
+        uint256 rarityFarmShare = (_proceeds * 2) / 5;
+
+        //15% to DAO
+        uint256 daoShare = (_proceeds - burnShare - companyShare - rarityFarmShare);
+
+        IERC20(ERC20Currency).transferFrom(address(this), address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), burnShare);
+        IERC20(ERC20Currency).transferFrom(address(this), pixelcraft, companyShare);
+        IERC20(ERC20Currency).transferFrom(address(this), playerRewards, rarityFarmShare);
+        IERC20(ERC20Currency).transferFrom(address(this), daoTreasury, daoShare);
 
         if (tokenMapping[_auctionID].tokenKind == bytes4(keccak256("ERC721"))) {
             //0x73ad2146
