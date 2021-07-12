@@ -7,20 +7,21 @@ import chalk from "chalk";
 import { createLogger, format, transports } from "winston";
 import auctionConfig from "../auction.config";
 import { NonceManager } from "@ethersproject/experimental";
-
+import { Contract, utils } from "ethers";
 const startAt = moment().format("YYYY-MM-DD_HH-mm-ss");
-const file = new transports.File({
-  filename: `logs/${hardhat.network.name}/${auctionConfig.id}/${startAt}.log.json`,
-});
+const filename = `logs/${hardhat.network.name}/${auctionConfig.id}/${startAt}.log.json`;
 const logger = createLogger({
   level: "info",
-  format: format.json(),
+  // @ts-ignore
+  format: format.combine(format.timestamp(), format.prettyPrint(format.json())),
   defaultMeta: { service: auctionConfig.id },
-  transports: [file],
+  transports: [
+    new transports.File({
+      filename: filename,
+    }),
+  ],
 });
-
 logger.on("finish", () => {
-  // All `info` log messages has now been logged
   process.exit(0);
 });
 
@@ -28,25 +29,23 @@ async function main() {
   const accounts = await ethers.getSigners();
   const account = await accounts[0].getAddress();
   const nonceManagedSigner = new NonceManager(accounts[0]);
-  console.log("Deploying Account: " + account);
-  console.log("---");
+  console.log("Deploying Account: " + account + "\n---");
 
   let totalGasUsed = ethers.BigNumber.from("0");
   let receipt;
-  let gbm;
-  let gbmInitiator;
+  let ghst: Contract;
+  let ghstAddress: string;
+  let gbm: Contract;
+  let gbmInitiator: Contract;
   let gbmAddress: string;
   let gbmInitiatorAddress: string;
-  let erc1155;
+  let erc1155: Contract;
   let erc1155Address: string;
-  let ghst;
-  let ghstAddress: string;
-
-  const bidderAddress = "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c";
 
   let testing = ["hardhat"].includes(hardhat.network.name);
   let kovan = hardhat.network.name === "kovan";
 
+  console.log(`${chalk.red.underline(hardhat.network.name)} network testing!`);
   if (testing) {
     ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
     ghst = await ethers.getContractAt("ERC20Generic", ghstAddress);
@@ -60,7 +59,6 @@ async function main() {
       await erc1155["mint()"]();
     }
   } else if (kovan) {
-    console.log(`kovan network testing!`);
     ghstAddress = "0xeDaA788Ee96a0749a2De48738f5dF0AA88E99ab5";
     ghst = await ethers.getContractAt("ERC20Generic", ghstAddress);
 
@@ -77,9 +75,8 @@ async function main() {
     }
     let res = await Promise.all(prom);
     await Promise.all(res.map((tx) => tx.wait()));
-  }
-  //Set defaults for Matic
-  else {
+  } else {
+    //Set defaults for Matic
     erc1155Address = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   }
 
@@ -116,7 +113,10 @@ async function main() {
     stepMin,
     incMin,
     incMax,
-    bidMultiplier
+    bidMultiplier,
+    utils.parseEther(
+      (auctionConfig.priceFloor > 0 ? auctionConfig.priceFloor : 0).toString()
+    )
   );
 
   gbmAddress = gbm.address;
@@ -124,85 +124,66 @@ async function main() {
   gbmInitiatorAddress = gbmInitiator.address;
   console.log("GBMInitiator deployed to:", gbmInitiatorAddress);
 
+  logger.info({
+    config: auctionConfig,
+  });
+
   console.log(
     `[${chalk.cyan(hardhat.network.name)} ${chalk.yellow(
       auctionConfig.id
-    )}] Create auctions. AMOUNT: ${chalk.yellow(
-      auctionConfig.auctionCount
-    )}. TYPE: ${chalk.yellow(
-      "ERC" + auctionConfig.ercType
-    )}. START_AT: ${chalk.yellow(auctionConfig.initialIndex)}`
+    )}] Creating auctions:
+    AMOUNT: ${chalk.yellow(auctionConfig.auctionCount)}
+    TYPE: ${chalk.yellow("ERC" + auctionConfig.ercType)}
+    START_AT: ${chalk.yellow(auctionConfig.initialIndex)}
+    END_AT: ${chalk.yellow(
+      auctionConfig.initialIndex + auctionConfig.auctionCount - 1
+    )}
+    PRICE_FLOOR: ${chalk.yellow(auctionConfig.priceFloor)}`
   );
+
+  //@ts-ignore
+  await erc1155?.setApprovalForAll(gbmAddress, true);
+
   if (auctionConfig.ercType == 721) {
     if (auctionConfig.tokenId != 0)
       throw new Error("ERC721 tokenId should be zero, check your config.");
-    console.log(
-      `Type ERC 721, starts at index ${auctionConfig.initialIndex}, amount of ${
-        auctionConfig.auctionCount
-      }, /25 R = ${auctionConfig.auctionCount % 25}`
-    );
+    // console.log(
+    //   `Type ERC 721, starts at index ${auctionConfig.initialIndex}, amount of ${
+    //     auctionConfig.auctionCount
+    //   }, /25 R = ${auctionConfig.auctionCount % 25}`
+    // );
   } else if (auctionConfig.ercType == 1155) {
-    console.log(`Type ERC 1155, starts at index ${auctionConfig.initialIndex}`);
+    // console.log(`Type ERC 1155, starts at index ${auctionConfig.initialIndex}`);
   }
 
   //Register the Auctions
+  let auctionSteps = 3; // amount of items in a massRegistrerXEach call
   let maxAuctions = auctionConfig.auctionCount;
-  let auctionSteps = 1; // amount of items in a batch call
-  let txNeeded = maxAuctions / auctionSteps;
-  let remainder = maxAuctions % auctionSteps; // ie 502/25 = remainder 2
-  if (remainder > 0) txNeeded -= 1;
-  // nonceManagedSigner.incrementTransactionCount(1);
-  let t = await erc1155?.setApprovalForAll(gbmAddress, true);
-  console.log(t);
-  let a = await t.wait();
-  console.log(`done t`, a);
-  // nonceManagedSigner.incrementTransactionCount(1);
+  let txNeeded = Math.floor(maxAuctions / auctionSteps);
+  let remainder = maxAuctions % auctionSteps; // ie 13/5 = 2 remainder is: 3
   let promises = [];
-  // nonceManagedSigner.incrementTransactionCount(1);
-  let nonceManagedContract = gbm.connect(nonceManagedSigner);
   for (let i = 0; i < txNeeded; i++) {
-    if (erc1155) {
-      let startIndex = i * auctionSteps;
-      let endIndex = startIndex + auctionSteps - 1; // since index = 0
-      let r = await gbm.massRegistrerERC721Each(
-        gbmAddress,
-        gbmInitiatorAddress,
-        erc1155Address,
-        `${startIndex}`,
-        `${endIndex}`
-      );
-      console.log(`run ${i}`, `${startIndex}`, `${endIndex}`, r);
-      await r.wait();
-      promises.push(r);
-    }
-  }
-  if (remainder > 0) {
-    let startIndex = maxAuctions - remainder;
-    let endIndex = startIndex + remainder;
-    console.log(`remaning ${remainder} ${startIndex} ${endIndex}`);
-    let r = gbm.massRegistrerERC721Each(
+    let startIndex = auctionConfig.initialIndex + i * auctionSteps;
+    let endIndex = startIndex + auctionSteps; // since index = 0
+    let r = await gbm.massRegistrerERC721Each(
       gbmAddress,
       gbmInitiatorAddress,
       erc1155Address,
       `${startIndex}`,
       `${endIndex}`
     );
+    // r = await r.wait();
     promises.push(r);
-  }
+    // console.log(r.wait());
 
-  // waits for all tx to submit, then returns promise of wait() calls
-  let confs = (await Promise.all(promises)).map((r, i) => {
-    let startIndex = i * auctionSteps;
-    let endIndex = startIndex + auctionSteps - 1;
-    // console.log(`tx`, r);
     logger.info({
       tx: {
-        createdAt: Date.now(),
         hash: r.hash,
         from: r.from,
         to: r.to,
-        chainId: r.chainId,
         nonce: r.nonce,
+        chainId: r.chainId,
+        networkId: hardhat.network.name,
       },
       params: {
         gbmAddress: gbmAddress,
@@ -211,28 +192,51 @@ async function main() {
         startIndex: startIndex,
         endIndex: endIndex,
       },
-      config: auctionConfig,
     });
-    return r.wait();
-  });
-  // waits for all confirmations
-  await Promise.all(confs);
-  // calls process.exit(0) once logger reports complete
+  }
+  if (remainder > 0) {
+    // last run, include remaining run
+    let startIndex = auctionConfig.initialIndex + maxAuctions - remainder;
+    let endIndex = startIndex + remainder - 1; // index started at 0
+    let r = await gbm.massRegistrerERC721Each(
+      gbmAddress,
+      gbmInitiatorAddress,
+      erc1155Address,
+      `${maxAuctions - remainder}`,
+      `${startIndex + remainder}`
+    );
+    // let as = await r.wait();
+    logger.info({
+      tx: {
+        hash: r.hash,
+        from: r.from,
+        to: r.to,
+        chainId: r.chainId,
+        nonce: r.nonce,
+        networkId: hardhat.network.name,
+      },
+      params: {
+        gbmAddress: gbmAddress,
+        gbmInitiatorAddress: gbmInitiatorAddress,
+        erc1155Address: erc1155Address,
+        startIndex: startIndex,
+        endIndex: endIndex,
+      },
+    });
+    // return r.wait();
+    promises.push(r.wait());
+  }
+
+  await Promise.all(promises);
+
+  console.log(
+    `[${chalk.green`✅`}] Completed! Log at ${chalk.yellow(filename)}`
+  );
 }
 
-// console.log(`[!] Creating new auctions with config:`, auctionConfig);
-// readline.question(
-//   `[?] Current Network: ${hardhat.network.name}, type "yes" to confirm\n`,
-//   (arg: string) => {
-//     if (arg.toLowerCase() === "yes")
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
   console.error(error);
   process.exit(1);
 });
-// else process.exit(0);
-// }
-// );
 
 exports.deploy = main;
