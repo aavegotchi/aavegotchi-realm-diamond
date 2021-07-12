@@ -41,7 +41,8 @@ describe("Test ERC1155 GBM", async function () {
   let daoBalance;
 
   const bidAmountTooLow = ethers.utils.parseEther("0.5");
-  const bidAmount1 = ethers.utils.parseEther("1");
+  const floorPrice = ethers.utils.parseEther("1");
+  const bidAmount1 = ethers.utils.parseEther("1.1");
   const bidAmount2 = ethers.utils.parseEther("2");
 
   before(async function () {
@@ -87,7 +88,8 @@ describe("Test ERC1155 GBM", async function () {
       stepMin,
       incMin,
       incMax,
-      bidMultiplier
+      bidMultiplier,
+      floorPrice
     );
     gbmAddress = gbm.address;
 
@@ -124,8 +126,7 @@ describe("Test ERC1155 GBM", async function () {
       erc1155Address,
       "18",
       "0",
-      "2",
-      bidAmount1
+      "2"
     );
 
     auctionId = (
@@ -136,9 +137,9 @@ describe("Test ERC1155 GBM", async function () {
 
     const auctionInfo = await gbm.getAuctionInfo(auctionId);
 
-    const floorPrice = auctionInfo.floorPrice.toString();
+    const floor = auctionInfo.floorPrice.toString();
 
-    expect(floorPrice).to.equal(bidAmount1);
+    expect(floor).to.equal(floorPrice);
     expect(Number(auctionInfo.startTime)).to.greaterThan(0);
   });
 

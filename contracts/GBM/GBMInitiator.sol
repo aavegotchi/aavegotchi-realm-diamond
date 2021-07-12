@@ -22,6 +22,8 @@ contract GBMInitiator is IGBMInitiator {
     uint256 internal auction_incMax; // _auctionID => maximal earned incentives
     uint256 internal auction_bidMultiplier; // _auctionID => bid incentive growth multiplier
 
+    uint256 internal auction_priceFloor;
+
     /* event InitiatorCreated(address _owner);
     event StartTimeSet(uint256 _auction_startTime);
     event EndTimeSet(uint256 _auction_endTime);
@@ -46,7 +48,8 @@ contract GBMInitiator is IGBMInitiator {
         uint256 _stepMin,
         uint256 _incMin,
         uint256 _incMax,
-        uint256 _bidMultiplier
+        uint256 _bidMultiplier,
+        uint256 _priceFloor
     ) {
         owner = msg.sender;
         auction_startTime = _startTime;
@@ -57,6 +60,7 @@ contract GBMInitiator is IGBMInitiator {
         auction_incMin = _incMin;
         auction_incMax = _incMax;
         auction_bidMultiplier = _bidMultiplier;
+        auction_priceFloor = _priceFloor;
     }
 
     struct InitiatorInfo {
@@ -68,6 +72,7 @@ contract GBMInitiator is IGBMInitiator {
         uint256 incMin;
         uint256 incMax;
         uint256 bidMultiplier;
+        uint256 priceFloor;
     }
 
     function getInitiatorInfo() external view returns (InitiatorInfo memory info_) {
@@ -79,6 +84,7 @@ contract GBMInitiator is IGBMInitiator {
         info_.incMin = auction_incMin;
         info_.incMax = auction_incMax;
         info_.bidMultiplier = auction_bidMultiplier;
+        info_.priceFloor = auction_priceFloor;
     }
 
     function getOwner() external view returns (address) {
@@ -133,43 +139,43 @@ contract GBMInitiator is IGBMInitiator {
         return (auction_bidMultiplier);
     }
 
+    function getPriceFloor(uint256) external view override returns (uint256) {
+        return (auction_priceFloor);
+    }
+
     function setStartTime(uint256 _auction_startTime) external onlyOwner {
         auction_startTime = _auction_startTime;
-        // emit StartTimeSet(_auction_startTime);
     }
 
     function setEndTime(uint256 _auction_endTime) external onlyOwner {
         auction_endTime = _auction_endTime;
-        // emit EndTimeSet(_auction_endTime);
     }
 
     function setHammerTimeDuration(uint256 _auction_hammerTimeDuration) external onlyOwner {
         auction_hammerTimeDuration = _auction_hammerTimeDuration;
-        //  emit HammerTimeSet(_auction_hammerTimeDuration);
     }
 
     function setBidDecimals(uint256 _auction_bidDecimals) external onlyOwner {
         auction_bidDecimals = _auction_bidDecimals;
-        // emit BidDecimalsSet(_auction_bidDecimals);
     }
 
     function setStepMin(uint256 _auction_stepMin) external onlyOwner {
         auction_stepMin = _auction_stepMin;
-        // emit StepMinSet(_auction_stepMin);
     }
 
     function setIncMin(uint256 _auction_incMin) external onlyOwner {
         auction_incMin = _auction_incMin;
-        //  emit IncMinSet(_auction_incMin);
     }
 
     function setIncMax(uint256 _auction_incMax) external onlyOwner {
         auction_incMax = _auction_incMax;
-        //  emit IncMaxSet(_auction_incMax);
     }
 
     function setBidMultiplier(uint256 _auction_bidMultiplier) external onlyOwner {
         auction_bidMultiplier = _auction_bidMultiplier;
-        // emit BidMultiplierSet(_auction_bidMultiplier);
+    }
+
+    function setPriceFloor(uint256 _auction_priceFloor) external onlyOwner {
+        auction_priceFloor = _auction_priceFloor;
     }
 }

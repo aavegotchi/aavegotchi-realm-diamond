@@ -237,10 +237,9 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         address _tokenContract,
         uint256 _tokenId,
         bytes4 _tokenKind,
-        address _initiator,
-        uint256 _floorPrice
+        address _initiator
     ) public {
-        modifyAnAuctionToken(_tokenContract, _tokenId, _tokenKind, _initiator, 0, _floorPrice, false);
+        modifyAnAuctionToken(_tokenContract, _tokenId, _tokenKind, _initiator, 0, false);
     }
 
     /// @notice Register an auction token and emit the relevant Auction_Initialized & Auction_StartTimeUpdated events
@@ -258,7 +257,6 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         bytes4 _tokenKind,
         address _initiator,
         uint256 _1155Index,
-        uint256 _floorPrice,
         bool _rewrite
     ) public {
         require(msg.sender == owner, "Only the owner of a contract can allow/disallow bidding");
@@ -322,9 +320,8 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
             auction_incMin[auctionId] = IGBMInitiator(_initiator).getIncMin(auctionId);
             auction_incMax[auctionId] = IGBMInitiator(_initiator).getIncMax(auctionId);
             auction_bidMultiplier[auctionId] = IGBMInitiator(_initiator).getBidMultiplier(auctionId);
+            auction_floorPrice[auctionId] = IGBMInitiator(_initiator).getPriceFloor(auctionId);
         }
-
-        auction_floorPrice[auctionId] = _floorPrice;
 
         //Event emitted when an auction is being setup
         emit Auction_Initialized(auctionId, _tokenId, _1155Index, _tokenContract, _tokenKind);
@@ -535,13 +532,12 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         address _initiator,
         address _ERC721Contract,
         uint256 _tokenIDStart,
-        uint256 _tokenIDEnd,
-        uint256 _floorPrice
+        uint256 _tokenIDEnd
     ) external {
         while (_tokenIDStart < _tokenIDEnd) {
             require(msg.sender == owner, "Must be contract owner");
             IERC721(_ERC721Contract).safeTransferFrom(msg.sender, _GBM, _tokenIDStart, "");
-            registerAnAuctionToken(_ERC721Contract, _tokenIDStart, bytes4(keccak256("ERC721")), _initiator, _floorPrice);
+            registerAnAuctionToken(_ERC721Contract, _tokenIDStart, bytes4(keccak256("ERC721")), _initiator);
 
             _tokenIDStart++;
         }
@@ -553,8 +549,7 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         address _ERC1155Contract,
         uint256 _tokenID,
         uint256 _indexStart,
-        uint256 _indexEnd,
-        uint256 _floorPrice
+        uint256 _indexEnd
     ) external {
         require(msg.sender == owner, "Must be contract owner");
         registerAnAuctionContract(_ERC1155Contract, _initiator);
@@ -562,7 +557,7 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         IERC1155(_ERC1155Contract).safeTransferFrom(msg.sender, _GBM, _tokenID, _indexEnd - _indexStart, "");
 
         while (_indexStart < _indexEnd) {
-            registerAnAuctionToken(_ERC1155Contract, _tokenID, bytes4(keccak256("ERC1155")), _initiator, _floorPrice);
+            registerAnAuctionToken(_ERC1155Contract, _tokenID, bytes4(keccak256("ERC1155")), _initiator);
             _indexStart++;
         }
     }

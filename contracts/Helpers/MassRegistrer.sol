@@ -16,13 +16,12 @@ contract MassRegistrer {
         address _initiator,
         address _ERC721Contract,
         uint256 _tokenIDStart,
-        uint256 _tokenIDEnd,
-        uint256 _floorPrice
+        uint256 _tokenIDEnd
     ) external {
         GBM(_GBM).registerAnAuctionContract(_ERC721Contract, _initiator);
         while (_tokenIDStart < _tokenIDEnd) {
             IERC721(_ERC721Contract).safeTransferFrom(msg.sender, _GBM, _tokenIDStart, "");
-            GBM(_GBM).registerAnAuctionToken(_ERC721Contract, _tokenIDStart, bytes4(keccak256("ERC721")), address(0), _floorPrice);
+            GBM(_GBM).registerAnAuctionToken(_ERC721Contract, _tokenIDStart, bytes4(keccak256("ERC721")), address(0));
             _tokenIDStart++;
         }
     }
@@ -33,12 +32,11 @@ contract MassRegistrer {
         address _initiator,
         address _ERC721Contract,
         uint256 _tokenIDStart,
-        uint256 _tokenIDEnd,
-        uint256 _floorPrice
+        uint256 _tokenIDEnd
     ) external {
         while (_tokenIDStart < _tokenIDEnd) {
             IERC721(_ERC721Contract).safeTransferFrom(msg.sender, _GBM, _tokenIDStart, "");
-            GBM(_GBM).registerAnAuctionToken(_ERC721Contract, _tokenIDStart, bytes4(keccak256("ERC721")), _initiator, _floorPrice);
+            GBM(_GBM).registerAnAuctionToken(_ERC721Contract, _tokenIDStart, bytes4(keccak256("ERC721")), _initiator);
             _tokenIDStart++;
         }
     }
@@ -49,15 +47,14 @@ contract MassRegistrer {
         address _ERC1155Contract,
         uint256 _tokenID,
         uint256 _indexStart,
-        uint256 _indexEnd,
-        uint256 _floorPrice
+        uint256 _indexEnd
     ) external {
         GBM(_GBM).registerAnAuctionContract(_ERC1155Contract, _initiator);
 
         IERC1155(_ERC1155Contract).safeTransferFrom(msg.sender, _GBM, _tokenID, _indexEnd - _indexStart, "");
 
         while (_indexStart < _indexEnd) {
-            GBM(_GBM).registerAnAuctionToken(_ERC1155Contract, _tokenID, bytes4(keccak256("ERC1155")), address(0), _floorPrice);
+            GBM(_GBM).registerAnAuctionToken(_ERC1155Contract, _tokenID, bytes4(keccak256("ERC1155")), address(0));
             _indexStart++;
         }
     }
@@ -68,15 +65,14 @@ contract MassRegistrer {
         address _ERC1155Contract,
         uint256 _tokenID,
         uint256 _indexStart,
-        uint256 _indexEnd,
-        uint256 _floorPrice
+        uint256 _indexEnd
     ) external {
         GBM(_GBM).registerAnAuctionContract(_ERC1155Contract, _initiator);
 
         IERC1155(_ERC1155Contract).safeTransferFrom(msg.sender, _GBM, _tokenID, _indexEnd - _indexStart, "");
 
         while (_indexStart < _indexEnd) {
-            GBM(_GBM).registerAnAuctionToken(_ERC1155Contract, _tokenID, bytes4(keccak256("ERC1155")), _initiator, _floorPrice);
+            GBM(_GBM).registerAnAuctionToken(_ERC1155Contract, _tokenID, bytes4(keccak256("ERC1155")), _initiator);
             _indexStart++;
         }
     }
