@@ -93,7 +93,7 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         require(collection_biddingAllowed[tokenMapping[_auctionID].contractAddress], "bid: bidding is currently not allowed");
 
         require(_bidAmount > 1, "bid: _bidAmount cannot be 0");
-        require(_bidAmount >= auction_floorPrice[_auctionID], "bid: must be higher than floor price");
+        require(_bidAmount > auction_floorPrice[_auctionID], "bid: must be higher than floor price");
         require(_highestBid == auction_highestBid[_auctionID], "bid: current highest bid do not match the submitted transaction _highestBid");
 
         //An auction start time of 0 also indicate the auction has not been created at all
@@ -101,7 +101,7 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         require(getAuctionStartTime(_auctionID) <= block.timestamp && getAuctionStartTime(_auctionID) != 0, "bid: Auction has not started yet");
         require(getAuctionEndTime(_auctionID) >= block.timestamp, "bid: Auction has already ended");
 
-        require(_bidAmount > _highestBid, "bid: _bidAmount must be higgher than _highestBid");
+        require(_bidAmount > _highestBid, "bid: _bidAmount must be higher than _highestBid");
         require(
             (_highestBid * (getAuctionBidDecimals(_auctionID)) + (getAuctionStepMin(_auctionID) / getAuctionBidDecimals(_auctionID))) >= _highestBid,
             "bid: _bidAmount must meet the minimum bid"

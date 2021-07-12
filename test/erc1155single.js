@@ -91,9 +91,6 @@ describe("Test ERC1155 GBM", async function () {
     );
     gbmAddress = gbm.address;
 
-    const owner = await gbmInitiator.getOwner();
-    console.log("owner:", owner);
-
     gbmInitiatorAddress = gbmInitiator.address;
 
     await erc1155.setApprovalForAll(gbmAddress, true);
@@ -106,7 +103,6 @@ describe("Test ERC1155 GBM", async function () {
     const tokenId = "18";
 
     let balanceOf = await erc1155.balanceOf(bidderAddress, tokenId);
-    console.log("balance of:", balanceOf.toString());
     expect(balanceOf).to.equal(2);
 
     await connectedERC1155.safeTransferFrom(
@@ -119,8 +115,6 @@ describe("Test ERC1155 GBM", async function () {
 
     balanceOf = await erc1155.balanceOf(account, tokenId);
     expect(balanceOf).to.equal(2);
-
-    console.log("balance is:", balanceOf.toString());
 
     const connectedGBM = await impersonate(account, gbm);
 
@@ -138,13 +132,9 @@ describe("Test ERC1155 GBM", async function () {
       await gbm["getAuctionID(address,uint256)"](erc1155Address, "18")
     ).toString();
 
-    console.log("auction id:", auctionId);
-
     await connectedGBM.setBiddingAllowed(erc1155Address, true);
 
     const auctionInfo = await gbm.getAuctionInfo(auctionId);
-
-    console.log("info:", auctionInfo);
 
     const floorPrice = auctionInfo.floorPrice.toString();
 
