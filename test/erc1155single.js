@@ -40,6 +40,7 @@ describe("Test ERC1155 GBM", async function () {
   let prBalance;
   let daoBalance;
 
+  const bidAmountTooLow = ethers.utils.parseEther("0.5");
   const bidAmount1 = ethers.utils.parseEther("1");
   const bidAmount2 = ethers.utils.parseEther("2");
 
@@ -129,17 +130,9 @@ describe("Test ERC1155 GBM", async function () {
       erc1155Address,
       "18",
       "0",
-      "2"
+      "2",
+      bidAmount1
     );
-
-    /*
-    await connectedGBM.registerAnAuctionToken(
-      erc1155Address,
-      "18",
-      "0x973bb640",
-      gbmInitiatorAddress
-    );
-    */
 
     auctionId = (
       await gbm["getAuctionID(address,uint256)"](erc1155Address, "18")
@@ -149,10 +142,14 @@ describe("Test ERC1155 GBM", async function () {
 
     await connectedGBM.setBiddingAllowed(erc1155Address, true);
 
-    const auctionStartTime = await gbm.getAuctionStartTime(auctionId);
+    const auctionInfo = await gbm.getAuctionInfo(auctionId);
 
-    console.log("start time:", auctionStartTime);
-    expect(Number(auctionStartTime)).to.greaterThan(0);
+    console.log("info:", auctionInfo);
+
+    const floorPrice = auctionInfo.floorPrice.toString();
+
+    expect(floorPrice).to.equal(bidAmount1);
+    expect(Number(auctionInfo.startTime)).to.greaterThan(0);
   });
 
   it("Can bid on an auction", async function () {
@@ -169,13 +166,17 @@ describe("Test ERC1155 GBM", async function () {
     const bidder = await impersonate(bidderAddress, gbm);
     const bidderGhst = await impersonate(bidderAddress, ghst);
 
-    //const bidAmount = ethers.utils.parseEther("0.1");
-
     //Bidding
 
     await bidderGhst.approve(gbmAddress, ethers.utils.parseEther("10000000"));
 
     const previousBal = await ghst.balanceOf(bidderAddress);
+
+    //Cannot bid lower than price floor
+
+    await expect(
+      bidder.bid(auctionId, bidAmountTooLow, "0")
+    ).to.be.revertedWith("bid: must be higher than floor price");
 
     await bidder.bid(auctionId, bidAmount1, "0");
 
@@ -243,13 +244,18 @@ describe("Test ERC1155 GBM", async function () {
   });
 
   it("Various wallet addresses should receive the correct amounts", async function () {
+    const auctionInfo = await gbm.getAuctionInfo(auctionId);
+
+    const auctionDebt = auctionInfo.auctionDebt;
+    const finalReceiveAmount = bidAmount2.sub(auctionDebt);
+
     const newPcBalance = await ghst.balanceOf(_pixelcraft);
     const newPrBalance = await ghst.balanceOf(_playerRewards);
     const newDaoBalance = await ghst.balanceOf(_daoTreasury);
 
-    const expectedBurn = bidAmount2.mul(5).div(100);
-    const expectedPcIncrease = bidAmount2.mul(40).div(100);
-    const expectedPrIncrease = bidAmount2.mul(40).div(100);
+    const expectedBurn = finalReceiveAmount.mul(5).div(100);
+    const expectedPcIncrease = finalReceiveAmount.mul(40).div(100);
+    const expectedPrIncrease = finalReceiveAmount.mul(40).div(100);
 
     expect(newPcBalance).to.equal(pcBalance.add(expectedPcIncrease));
     expect(newPrBalance).to.equal(prBalance.add(expectedPrIncrease));

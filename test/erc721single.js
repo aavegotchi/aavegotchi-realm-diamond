@@ -81,7 +81,8 @@ describe("Test ERC721 GBM", async function () {
       gbmInitiatorAddress,
       erc721Address,
       "0",
-      "3"
+      "3",
+      ethers.utils.parseEther("1")
     );
 
     auctionId = (
