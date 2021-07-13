@@ -30,6 +30,7 @@ async function main() {
   console.log("Deploying Account: " + account + "\n---");
 
   let totalGasUsed = ethers.BigNumber.from("0");
+  let totalGas = 0;
   let gbm: Contract;
   let gbmInitiator: Contract;
   let gbmAddress: string;
@@ -151,7 +152,7 @@ async function main() {
   // // @ts-ignore
   // console.log(tokenContract);
 
-  let auctionSteps = 25; // amount of items in a massRegistrerXEach call
+  let auctionSteps = 40; // amount of items in a massRegistrerXEach call
   let maxAuctions = auctionConfig.auctionCount;
   let txNeeded = Math.floor(maxAuctions / auctionSteps);
   let remainder = maxAuctions % auctionSteps; // ie 13/5 = 2 remainder is: 3
@@ -174,6 +175,7 @@ async function main() {
     );
     // r = await r.wait();
     promises.push(r.wait());
+    totalGas += parseFloat(utils.formatUnits(r.gasLimit, "gwei"));
     logger.info({
       tx: {
         hash: r.hash,
@@ -232,7 +234,9 @@ async function main() {
   await Promise.all(promises);
 
   console.log(
-    `[${chalk.green`✅`}] Completed! Log at ${chalk.yellow(filename)}`
+    `[${chalk.green`✅`}] Completed!
+      LOG: ${chalk.yellow(filename)}
+      GAS_USAGE ${chalk.yellow(totalGas)}`
   );
 }
 
