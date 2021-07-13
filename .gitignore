@@ -7,4 +7,5 @@ contracts/Helpers/artifacts/*
 node_modules/
 yarn-error.log
 .vscode
-cache/
+logs/hardhat
+logs/kovan
