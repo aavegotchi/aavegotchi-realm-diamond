@@ -5,8 +5,7 @@ import moment from "moment";
 // @ts-ignore
 import chalk from "chalk";
 import { createLogger, format, transports } from "winston";
-import auctionConfig from "../auction.config";
-import { NonceManager } from "@ethersproject/experimental";
+import auctionConfig from "../auction.erc1155.config";
 import { Contract, utils } from "ethers";
 const startAt = moment().format("YYYY-MM-DD_HH-mm-ss");
 const filename = `logs/${hardhat.network.name}/${auctionConfig.id}/${startAt}.log.json`;
@@ -28,70 +27,61 @@ logger.on("finish", () => {
 async function main() {
   const accounts = await ethers.getSigners();
   const account = await accounts[0].getAddress();
-  const nonceManagedSigner = new NonceManager(accounts[0]);
   console.log("Deploying Account: " + account + "\n---");
 
   let totalGasUsed = ethers.BigNumber.from("0");
-  let receipt;
-  let ghst: Contract;
-  let ghstAddress: string;
   let gbm: Contract;
   let gbmInitiator: Contract;
   let gbmAddress: string;
   let gbmInitiatorAddress: string;
-  let erc1155: Contract;
-  let erc1155Address: string = "";
 
-  let testing = ["hardhat"].includes(hardhat.network.name);
-  let kovan = hardhat.network.name === "kovan";
+  let ghst: Contract;
+  let ghstAddress: string;
+
+  let tokenContract: Contract;
+  let tokenAddress: string = "";
 
   console.log(`${chalk.red.underline(hardhat.network.name)} network testing!`);
-  if (testing) {
+  if (["hardhat"].includes(hardhat.network.name)) {
     ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
     ghst = await ethers.getContractAt("ERC20Generic", ghstAddress);
     //Deploy ERC721 Token for Auction
     const ERC1155Factory = await ethers.getContractFactory("ERC1155Generic");
-    erc1155 = await ERC1155Factory.deploy();
-    erc1155Address = erc1155.address;
-    // let r = await erc1155.mint(18, 2);
-    // console.log(`mint`, r);
-    let r = await erc1155["mint(uint256,uint256)"](
+    tokenContract = await ERC1155Factory.deploy();
+    tokenAddress = tokenContract.address;
+    await tokenContract["mint(uint256,uint256)"](
       auctionConfig.tokenId,
       auctionConfig.auctionCount
     );
-    // console.log(`mint`, erc1155, r);
-    // //Mint 2000 ERC721s
-    // for (let i = 0; i < auctionConfig.auctionCount; i++) {
-    //   await erc1155["mint()"]();
-    // }
-  } else if (kovan) {
+  } else if (hardhat.network.name === "kovan") {
     ghstAddress = "0xeDaA788Ee96a0749a2De48738f5dF0AA88E99ab5";
     ghst = await ethers.getContractAt("ERC20Generic", ghstAddress);
 
-    const ERC1155Factory = await ethers.getContractFactory("ERC1155Generic");
-    let erc721 = await ERC1155Factory.deploy();
-
-    // //Mint X ERC721s
-    // let prom = [];
-    // let nonceManagedContract = erc721.connect(nonceManagedSigner);
-    erc1155 = erc721;
-    erc1155Address = erc1155.address;
-    // @ts-ignore
-    let r = await erc1155["mint(uint256,uint256)"](
-      auctionConfig.tokenId,
-      auctionConfig.auctionCount
-    );
-    // console.log(`mint`, erc1155, r);
-    // for (let i = 0; i < auctionConfig.auctionCount; i++) {
-    //   prom.push(nonceManagedContract["mint()"]());
-    // }
-    // let res = await Promise.all(prom);
-    // await Promise.all(res.map((tx) => tx.wait()));
+    if (
+      auctionConfig.gbm &&
+      auctionConfig.gbmInitiator &&
+      auctionConfig.token
+    ) {
+      const erc = await ethers.getContractAt(
+        "ERC1155Generic",
+        auctionConfig.token
+      );
+      tokenContract = erc;
+      tokenAddress = erc.address;
+    } else {
+      const ERC1155Factory = await ethers.getContractFactory("ERC1155Generic");
+      let erc721 = await ERC1155Factory.deploy();
+      tokenContract = erc721;
+      tokenAddress = tokenContract.address;
+      await tokenContract["mint(uint256,uint256)"](
+        auctionConfig.tokenId,
+        auctionConfig.auctionCount
+      );
+    }
+  } else if (["polygon", "matic"].includes(hardhat.network.name)) {
+    //Set defaults for Matic
+    tokenAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   }
-  // else {
-  //   //Set defaults for Matic
-  //   erc1155Address = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
-  // }
 
   //Deploy GBM Core
   const _pixelcraft = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
@@ -142,7 +132,7 @@ async function main() {
   });
 
   //@ts-ignore
-  await erc1155?.setApprovalForAll(gbmAddress, true);
+  await tokenContract?.setApprovalForAll(gbmAddress, true);
 
   console.log(
     `[${chalk.cyan(hardhat.network.name)} ${chalk.yellow(
@@ -159,7 +149,7 @@ async function main() {
   );
 
   // // @ts-ignore
-  // console.log(erc1155);
+  // console.log(tokenContract);
 
   let auctionSteps = 25; // amount of items in a massRegistrerXEach call
   let maxAuctions = auctionConfig.auctionCount;
@@ -177,7 +167,7 @@ async function main() {
     let r = await gbm.massRegistrerERC1155Each(
       gbmAddress,
       gbmInitiatorAddress,
-      erc1155Address,
+      tokenAddress,
       auctionConfig.tokenId,
       `${startIndex}`,
       `${endIndex}`
@@ -196,7 +186,7 @@ async function main() {
       params: {
         gbmAddress: gbmAddress,
         gbmInitiatorAddress: gbmInitiatorAddress,
-        erc1155Address: erc1155Address,
+        tokenAddress: tokenAddress,
         tokenId: auctionConfig.tokenId,
         startIndex: startIndex,
         endIndex: endIndex,
@@ -211,7 +201,7 @@ async function main() {
     let r = await gbm.massRegistrerERC1155Each(
       gbmAddress,
       gbmInitiatorAddress,
-      erc1155Address,
+      tokenAddress,
       auctionConfig.tokenId,
       `${maxAuctions - remainder}`,
       `${startIndex + remainder}`
@@ -229,7 +219,7 @@ async function main() {
       params: {
         gbmAddress: gbmAddress,
         gbmInitiatorAddress: gbmInitiatorAddress,
-        erc1155Address: erc1155Address,
+        tokenAddress: tokenAddress,
         tokenId: auctionConfig.tokenId,
         startIndex: startIndex,
         endIndex: endIndex,
