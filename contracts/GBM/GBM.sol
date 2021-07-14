@@ -11,6 +11,8 @@ import "../tokens/IERC1155.sol";
 import "../tokens/IERC1155TokenReceiver.sol";
 import "../tokens/Ownable.sol";
 
+import "hardhat/console.sol";
+
 /// @title GBM auction contract
 /// @dev See GBM.auction on how to use this contract
 /// @author Guillaume Gonnaud
@@ -510,10 +512,14 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         //Init the baseline bid we need to perform against
         uint256 baseBid = (auction_highestBid[_auctionID] * (bidDecimals + getAuctionStepMin(_auctionID))) / bidDecimals;
 
+        console.log("base bid:", baseBid);
+
         //If no bids are present, set a basebid value of 1 to prevent divide by 0 errors
         if (baseBid == 0) {
             baseBid = 1;
         }
+
+        require(_newBidValue >= baseBid, "bid: must be minimum step");
 
         //Ratio of newBid compared to expected minBid
         uint256 decimaledRatio = ((bidDecimals * getAuctionBidMultiplier(_auctionID) * (_newBidValue - baseBid)) / baseBid) +
@@ -523,6 +529,9 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         if (decimaledRatio > (bidDecimals * bidIncMax)) {
             decimaledRatio = bidDecimals * bidIncMax;
         }
+        console.log("ratio:", decimaledRatio);
+
+        console.log("new bid value:", _newBidValue);
 
         return (_newBidValue * decimaledRatio) / (bidDecimals * bidDecimals);
     }

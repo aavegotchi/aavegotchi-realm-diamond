@@ -40,10 +40,12 @@ describe("Test ERC1155 GBM", async function () {
   let prBalance;
   let daoBalance;
 
-  const bidAmountTooLow = ethers.utils.parseEther("0.5");
-  const floorPrice = ethers.utils.parseEther("1");
-  const bidAmount1 = ethers.utils.parseEther("1.1");
-  const bidAmount2 = ethers.utils.parseEther("2");
+  // const bidAmountTooLow = ethers.utils.parseEther("0.5");
+  const floorPrice = ethers.utils.parseEther("0");
+  const bidAmount1 = ethers.utils.parseEther("1");
+  console.log("bid 1:", bidAmount1.toString());
+  const bidAmount2 = ethers.utils.parseEther("1.1");
+  console.log("bid 2:", bidAmount2.toString());
 
   before(async function () {
     const accounts = await ethers.getSigners();
@@ -165,9 +167,10 @@ describe("Test ERC1155 GBM", async function () {
 
     //Cannot bid lower than price floor
 
-    await expect(
+    /*  await expect(
       bidder.bid(auctionId, bidAmountTooLow, "0")
     ).to.be.revertedWith("bid: must be higher than floor price");
+    */
 
     await bidder.bid(auctionId, bidAmount1, "0");
 
