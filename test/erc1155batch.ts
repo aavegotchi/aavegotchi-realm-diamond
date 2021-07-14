@@ -31,6 +31,7 @@ interface LocalConf {
   gbm?: string;
   gbmInitiator?: string;
   token?: string;
+  ghst?: string;
   totalAuctions: number;
   release: boolean;
   auctions: any;
@@ -38,13 +39,8 @@ interface LocalConf {
 }
 
 const auctionConfig: LocalConf = {
-  id: activeConfig.id,
-  gbm: activeConfig.gbm,
-  gbmInitiator: activeConfig.gbmInitiator,
-  token: activeConfig.token,
+  ...activeConfig,
   totalAuctions: totalAuctions,
-  release: activeConfig.release,
-  auctions: activeConfig.auctions,
   initOrdering: Object.keys(activeConfig.auctions).map((x) => parseInt(x)),
 };
 
@@ -65,27 +61,20 @@ async function main() {
   const accounts = await ethers.getSigners();
   const nonceManaged = new NonceManager(accounts[0]);
   const account = await accounts[0].getAddress();
-  console.log(`${chalk.red.underline(hardhat.network.name)} network testing!`);
-  console.log(`Auction queue info: `, auctionConfig);
   console.log(
-    "Deploying Account: " + account + "\n---",
-    auctionConfig.release &&
-      auctionConfig.token &&
-      auctionConfig.gbm &&
-      auctionConfig.gbmInitiator,
-    auctionConfig.release,
-    auctionConfig.token,
-    auctionConfig.gbm,
-    auctionConfig.gbmInitiator
+    `${chalk.red.underline(
+      hardhat.network.name
+    )} network, sign/deploy account: ${account}!\n---"`
   );
 
   let gbm: Contract;
-  let gbmInitiator: Contract;
   let gbmAddress: string;
+
+  let gbmInitiator: Contract;
   let gbmInitiatorAddress: string;
 
-  let ghst: Contract;
-  let ghstAddress: string;
+  let ghstAddress = auctionConfig.ghst;
+  // let ghst: Contract = await ethers.getContractAt("ERC20Generic", ghstAddress);
 
   let tokenContract: Contract;
   let tokenAddress: string = "";
@@ -115,14 +104,6 @@ async function main() {
     console.log(
       `[${chalk.yellow("ℹ️")}] Fresh ${hardhat.network.name} deployment`
     );
-
-    if (["hardhat"].includes(hardhat.network.name)) {
-      ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
-      ghst = await ethers.getContractAt("ERC20Generic", ghstAddress);
-    } else if (hardhat.network.name === "kovan") {
-      ghstAddress = "0xeDaA788Ee96a0749a2De48738f5dF0AA88E99ab5";
-      ghst = await ethers.getContractAt("ERC20Generic", ghstAddress);
-    }
 
     //Deploys ERC1155 Token for Auction
     const ERC1155Factory = (
