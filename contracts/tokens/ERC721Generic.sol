@@ -2,9 +2,9 @@
 // © Copyright 2021. Patent pending. All rights reserved. Perpetual Altruism Ltd.
 pragma solidity 0.8.5;
 
-import "./IERC721.sol";
-import "./IERC721TokenReceiver.sol";
-import "./IERC165.sol";
+import "../interfaces/IERC721.sol";
+import "../interfaces/IERC721TokenReceiver.sol";
+import "../interfaces/IERC165.sol";
 
 /// @author Guillaume Gonnaud 2021
 /// @title ERC721 Generic placeholder smart contract for testing and ABI

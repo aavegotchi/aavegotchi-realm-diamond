@@ -2,7 +2,7 @@
 // © Copyright 2021. Patent pending. All rights reserved. Perpetual Altruism Ltd.
 pragma solidity 0.8.5;
 
-import "./IGBMInitiator.sol";
+import "../interfaces/IGBMInitiator.sol";
 
 /// @title GBM auction contract Initiator
 /// @dev Implementation of IGBM. Feel free to cook up your own implementation for more complex patterns.

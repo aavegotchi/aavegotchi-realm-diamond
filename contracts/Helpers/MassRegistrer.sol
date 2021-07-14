@@ -2,8 +2,8 @@
 // © Copyright 2021. Patent pending. All rights reserved. Perpetual Altruism Ltd.
 pragma solidity 0.8.5;
 
-import "../tokens/IERC721.sol";
-import "../tokens/IERC1155.sol";
+import "../interfaces/IERC721.sol";
+import "../interfaces/IERC1155.sol";
 import "../GBM/GBM.sol";
 
 /// @title MassRegistrer

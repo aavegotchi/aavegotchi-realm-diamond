@@ -2,13 +2,13 @@
 // © Copyright 2021. Patent pending. All rights reserved. Perpetual Altruism Ltd.
 pragma solidity 0.8.5;
 
-import "./IGBM.sol";
-import "./IGBMInitiator.sol";
-import "../tokens/IERC20.sol";
-import "../tokens/IERC721.sol";
-import "../tokens/IERC721TokenReceiver.sol";
-import "../tokens/IERC1155.sol";
-import "../tokens/IERC1155TokenReceiver.sol";
+import "../interfaces/IGBM.sol";
+import "../interfaces/IGBMInitiator.sol";
+import "../interfaces/IERC20.sol";
+import "../interfaces/IERC721.sol";
+import "../interfaces/IERC721TokenReceiver.sol";
+import "../interfaces/IERC1155.sol";
+import "../interfaces/IERC1155TokenReceiver.sol";
 import "../tokens/Ownable.sol";
 
 /// @title GBM auction contract
