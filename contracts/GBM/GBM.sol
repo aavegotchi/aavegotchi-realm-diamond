@@ -104,8 +104,9 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         require(getAuctionEndTime(_auctionID) >= block.timestamp, "bid: Auction has already ended");
 
         require(_bidAmount > _highestBid, "bid: _bidAmount must be higher than _highestBid");
+
         require(
-            (_highestBid * (getAuctionBidDecimals(_auctionID)) + (getAuctionStepMin(_auctionID) / getAuctionBidDecimals(_auctionID))) >= _highestBid,
+            (_highestBid * (getAuctionBidDecimals(_auctionID) + getAuctionStepMin(_auctionID))) <= (_bidAmount * getAuctionBidDecimals(_auctionID)),
             "bid: _bidAmount must meet the minimum bid"
         );
 
@@ -512,14 +513,10 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         //Init the baseline bid we need to perform against
         uint256 baseBid = (auction_highestBid[_auctionID] * (bidDecimals + getAuctionStepMin(_auctionID))) / bidDecimals;
 
-        console.log("base bid:", baseBid);
-
         //If no bids are present, set a basebid value of 1 to prevent divide by 0 errors
         if (baseBid == 0) {
             baseBid = 1;
         }
-
-        require(_newBidValue >= baseBid, "bid: must be minimum step");
 
         //Ratio of newBid compared to expected minBid
         uint256 decimaledRatio = ((bidDecimals * getAuctionBidMultiplier(_auctionID) * (_newBidValue - baseBid)) / baseBid) +
@@ -529,9 +526,6 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         if (decimaledRatio > (bidDecimals * bidIncMax)) {
             decimaledRatio = bidDecimals * bidIncMax;
         }
-        console.log("ratio:", decimaledRatio);
-
-        console.log("new bid value:", _newBidValue);
 
         return (_newBidValue * decimaledRatio) / (bidDecimals * bidDecimals);
     }
