@@ -32,9 +32,9 @@ module.exports = {
       timeout: 120000,
       gas: "auto",
     },
-    // localhost: {
-    //   timeout: 160000
-    // },
+    localhost: {
+      timeout: 800000,
+    },
     matic: {
       url: process.env.MATIC_URL,
       // url: 'https://rpc-mainnet.maticvigil.com/',

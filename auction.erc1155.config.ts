@@ -3,7 +3,7 @@ export interface ERC1155Config {
   auctions?: Object;
   gbm?: string;
   gbmInitiator?: string;
-  token?: string;
+  token: string;
   ghst?: string;
   gasGwei?: number;
   release?: boolean;
@@ -35,11 +35,17 @@ export default <Config>{
     gasGwei: 5,
     release: false,
     ghst: "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
+    token: "",
   },
   hardhat: {
     gbm: "",
     gbmInitiator: "",
-    token: "",
+    token: "0x86935F11C86623deC8a25696E1C19a8659CbF95d",
+  },
+  localhost: {
+    gbm: "",
+    gbmInitiator: "",
+    token: "0x86935F11C86623deC8a25696E1C19a8659CbF95d",
   },
   kovan: {
     id: "auction-kovan-megasrs-launch",

@@ -30,7 +30,7 @@ interface LocalConf {
   id: string;
   gbm?: string;
   gbmInitiator?: string;
-  token?: string;
+  token: string;
   ghst?: string;
   totalAuctions: number;
   release: boolean;
@@ -58,9 +58,18 @@ const logger = createLogger({
 });
 
 async function main() {
-  const accounts = await ethers.getSigners();
-  const nonceManaged = new NonceManager(accounts[0]);
-  const account = await accounts[0].getAddress();
+  const itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
+  //Impersonate itemManager
+  await hardhat.network.provider.request({
+    method: "hardhat_impersonateAccount",
+    params: [itemManager],
+  });
+  let signer = await ethers.getSigner(itemManager);
+
+  // const accounts = await ethers.getSigners();
+  const nonceManaged = new NonceManager(signer);
+  const account = await signer.getAddress();
+
   console.log(
     `${chalk.red.underline(
       hardhat.network.name
@@ -77,7 +86,7 @@ async function main() {
   // let ghst: Contract = await ethers.getContractAt("ERC20Generic", ghstAddress);
 
   let tokenContract: Contract;
-  let tokenAddress: string = "";
+  let tokenAddress: string = auctionConfig.token;
 
   if (
     auctionConfig.release &&
@@ -92,12 +101,14 @@ async function main() {
       ERC TOKEN: ${auctionConfig.token}
       `);
 
-    tokenAddress = auctionConfig.token;
+    //  tokenAddress = auctionConfig.token;
     tokenContract = (
       await ethers.getContractAt("ERC1155Generic", tokenAddress)
     ).connect(nonceManaged);
     gbmAddress = auctionConfig.gbm;
     gbmInitiatorAddress = auctionConfig.gbmInitiator;
+
+    gbm = (await ethers.getContractAt("GBM", gbmAddress)).connect(nonceManaged);
   } else {
     // deploying dummy tokens for testing
 
@@ -105,18 +116,12 @@ async function main() {
       `[${chalk.yellow("ℹ️")}] Fresh ${hardhat.network.name} deployment`
     );
 
-    //Deploys ERC1155 Token for Auction
-    const ERC1155Factory = (
-      await ethers.getContractFactory("ERC1155Generic")
+    console.log("auctionconfig:", auctionConfig);
+
+    console.log("token address:", tokenAddress);
+    tokenContract = (
+      await ethers.getContractAt("ERC1155Generic", tokenAddress)
     ).connect(nonceManaged);
-    tokenContract = (await ERC1155Factory.deploy()).connect(nonceManaged);
-    tokenAddress = tokenContract.address;
-    auctionConfig.initOrdering.map(async (itemId) => {
-      await tokenContract["mint(uint256,uint256)"](
-        itemId,
-        auctionConfig.auctions[itemId]
-      );
-    });
 
     //Deploy GBM Core
     const _pixelcraft = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
@@ -168,8 +173,15 @@ async function main() {
   }
 
   // approved gbmAddress to list the token
-  if (gbmAddress && tokenContract)
-    await tokenContract.setApprovalForAll(gbmAddress, true);
+  // if (gbmAddress && tokenContract)
+  await tokenContract.setApprovalForAll(gbmAddress, true);
+
+  const approval = await tokenContract.isApprovedForAll(
+    itemManager,
+    gbmAddress
+  );
+
+  console.log("Approval:", approval);
 
   logger.info({
     activeConfig: activeConfig,
@@ -200,6 +212,11 @@ async function main() {
       // let startIndex = auctionConfig.initialIndex + i * auctionSteps;
       let startIndex = 0 + i * auctionSteps;
       let endIndex = startIndex + auctionSteps; // since index = 0
+
+      const balanceOf = await tokenContract.balanceOf(itemManager, itemId);
+
+      console.log(`balance of: ${itemId}`, balanceOf.toString());
+
       let txReq = await gbm.massRegistrerERC1155Each(
         gbmAddress,
         gbmInitiatorAddress,
@@ -209,6 +226,8 @@ async function main() {
         `${endIndex}`,
         txOps
       );
+
+      console.log("gas used:", utils.formatUnits(txReq.gasLimit, "gwei"));
       // totalGas += parseFloat(utils.formatUnits(txReq.gasLimit, "gwei"));
 
       logger.info({
@@ -245,6 +264,8 @@ async function main() {
         `${startIndex + remaining}`,
         txOps
       );
+
+      console.log("gas used:", utils.formatUnits(txReq.gasLimit, "gwei"));
       // totalGas += parseFloat(utils.formatUnits(txReq.gasLimit, "gwei"));
 
       // let as = await r.wait();

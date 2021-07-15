@@ -81,6 +81,15 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         ERC20Currency = _ERC20Currency;
     }
 
+    function getOwner() external view returns (address) {
+        return owner;
+    }
+
+    function transferOwner(address _newOwner) external {
+        require(msg.sender == owner, "Must be contract owner");
+        owner = _newOwner;
+    }
+
     /// @notice Place a GBM bid for a GBM auction
     /// @param _auctionID The auction you want to bid on
     /// @param _bidAmount The amount of the ERC20 token the bid is made of. They should be withdrawable by this contract.
@@ -460,7 +469,7 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         if (auction_incMax[_auctionID] != 0) {
             return auction_incMax[_auctionID];
         } else {
-            return collection_incMin[tokenMapping[_auctionID].contractAddress];
+            return collection_incMax[tokenMapping[_auctionID].contractAddress];
         }
     }
 
