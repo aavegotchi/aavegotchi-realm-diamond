@@ -7,7 +7,7 @@ pragma solidity 0.8.5;
 /// @author Guillaume Gonnaud
 interface IGBM {
     //Event emitted when an auction is being setup
-    event Auction_Initialized(
+    event AuctionInitialized(
         uint256 indexed _auctionId,
         uint256 indexed _tokenID,
         uint256 indexed _tokenIndex,
@@ -16,23 +16,23 @@ interface IGBM {
     );
 
     //Event emitted when the start time of an auction changes (due to admin interaction )
-    event Auction_StartTimeUpdated(uint256 indexed _auctionId, uint256 _startTime);
+    event AuctionStartTimeUpdated(uint256 indexed _auctionId, uint256 _startTime);
 
     //Event emitted when the end time of an auction changes (be it due to admin interaction or bid at the end)
-    event Auction_EndTimeUpdated(uint256 indexed _auctionId, uint256 _endTime);
+    event AuctionEndTimeUpdated(uint256 indexed _auctionId, uint256 _endTime);
 
     //Event emitted when a Bid is placed
-    event Auction_BidPlaced(uint256 indexed _auctionId, address indexed _bidder, uint256 _bidAmount);
+    event AuctionBidPlaced(uint256 indexed _auctionId, address indexed _bidder, uint256 _bidAmount);
 
     //Event emitted when a bid is removed (due to a new bid displacing it)
-    event Auction_BidRemoved(uint256 indexed _auctionId, address indexed _bidder, uint256 _bidAmount);
+    event AuctionBidRemoved(uint256 indexed _auctionId, address indexed _bidder, uint256 _bidAmount);
 
     //Event emitted when incentives are paid (due to a new bid rewarding the _earner bid)
-    event Auction_IncentivePaid(uint256 indexed _auctionId, address indexed _earner, uint256 _incentiveAmount);
+    event AuctionIncentivePaid(uint256 indexed _auctionId, address indexed _earner, uint256 _incentiveAmount);
 
     event Contract_BiddingAllowed(address indexed _contract, bool _biddingAllowed);
 
-    event Auction_ItemClaimed(uint256 indexed _auctionId);
+    event AuctionItemClaimed(uint256 indexed _auctionId);
 
     function bid(
         uint256 _auctionId,

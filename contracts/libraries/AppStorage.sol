@@ -55,11 +55,11 @@ struct AppStorage {
     //var storing individual auction settings. if != null, they take priority over collection settings
     mapping(uint256 => Auction) auctions; //_auctionId => auctions
 
-    mapping(uint256 => bool) auction_itemClaimed;
+    mapping(uint256 => bool) auctionItemClaimed;
 
     //var storing contract wide settings. Those are used if no auctionId specific parameters is initialized
     mapping(address => Collection) collections; //tokencontract => collections
 
-    mapping(address => mapping(uint256 => uint256)) eRC1155_tokensIndex; //Contract => TokenID => Amount being auctionned
-    mapping(address => mapping(uint256 => uint256)) eRC1155_tokensUnderAuction; //Contract => TokenID => Amount being auctionned
+    mapping(address => mapping(uint256 => uint256)) erc1155TokensIndex; //Contract => TokenID => Amount being auctionned
+    mapping(address => mapping(uint256 => uint256)) erc1155TokensUnderAuction; //Contract => TokenID => Amount being auctionned
 }
