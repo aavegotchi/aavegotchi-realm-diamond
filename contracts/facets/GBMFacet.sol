@@ -45,11 +45,11 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         uint256 _bidAmount,
         uint256 _highestBid
     ) external override {
-        require(s.collection_biddingAllowed[s.tokenMapping[_auctionId].contractAddress], "bid: bidding is currently not allowed");
+        require(s.collections[s.tokenMapping[_auctionId].contractAddress].biddingAllowed, "bid: bidding is currently not allowed");
 
         require(_bidAmount > 1, "bid: _bidAmount cannot be 0");
-        require(_bidAmount > s.auction_floorPrice[_auctionId], "bid: must be higher than floor price");
-        require(_highestBid == s.auction_highestBid[_auctionId], "bid: current highest bid do not match the submitted transaction _highestBid");
+        require(_bidAmount > s.auctions[_auctionId].floorPrice, "bid: must be higher than floor price");
+        require(_highestBid == s.auctions[_auctionId].highestBid, "bid: current highest bid do not match the submitted transaction _highestBid");
 
         //An auction start time of 0 also indicate the auction has not been created at all
 
@@ -67,14 +67,14 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
 
         //Extend the duration time of the auction if we are close to the end
         if (getAuctionEndTime(_auctionId) < block.timestamp + getHammerTimeDuration(_auctionId)) {
-            s.auction_endTime[_auctionId] = block.timestamp + getHammerTimeDuration(_auctionId);
-            emit Auction_EndTimeUpdated(_auctionId, s.auction_endTime[_auctionId]);
+            s.auctions[_auctionId].endTime = block.timestamp + getHammerTimeDuration(_auctionId);
+            emit Auction_EndTimeUpdated(_auctionId, s.auctions[_auctionId].endTime);
         }
 
         // Saving incentives for later sending
-        uint256 duePay = s.auction_dueIncentives[_auctionId];
-        address previousHighestBidder = s.auction_highestBidder[_auctionId];
-        uint256 previousHighestBid = s.auction_highestBid[_auctionId];
+        uint256 duePay = s.auctions[_auctionId].dueIncentives;
+        address previousHighestBidder = s.auctions[_auctionId].highestBidder;
+        uint256 previousHighestBid = s.auctions[_auctionId].highestBid;
 
         // Emitting the event sequence
         if (previousHighestBidder != address(0)) {
@@ -82,18 +82,18 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         }
 
         if (duePay != 0) {
-            s.auction_debt[_auctionId] = s.auction_debt[_auctionId] + duePay;
+            s.auctions[_auctionId].debt = s.auctions[_auctionId].debt + duePay;
             emit Auction_IncentivePaid(_auctionId, previousHighestBidder, duePay);
         }
 
         emit Auction_BidPlaced(_auctionId, msg.sender, _bidAmount);
 
         // Calculating incentives for the new bidder
-        s.auction_dueIncentives[_auctionId] = calculateIncentives(_auctionId, _bidAmount);
+        s.auctions[_auctionId].dueIncentives = calculateIncentives(_auctionId, _bidAmount);
 
         //Setting the new bid/bidder as the highest bid/bidder
-        s.auction_highestBidder[_auctionId] = msg.sender;
-        s.auction_highestBid[_auctionId] = _bidAmount;
+        s.auctions[_auctionId].highestBidder = msg.sender;
+        s.auctions[_auctionId].highestBid = _bidAmount;
 
         if ((previousHighestBid + duePay) != 0) {
             //Refunding the previous bid as well as sending the incentives
@@ -112,7 +112,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         address _ca = s.tokenMapping[_auctionId].contractAddress;
         uint256 _tid = s.tokenMapping[_auctionId].tokenId;
 
-        require(s.collection_biddingAllowed[_ca], "claim: Claiming is currently not allowed");
+        require(s.collections[_ca].biddingAllowed, "claim: Claiming is currently not allowed");
         require(getAuctionEndTime(_auctionId) < block.timestamp, "claim: Auction has not yet ended");
         require(s.auction_itemClaimed[_auctionId] == false, "claim: Item has already been claimed");
 
@@ -120,7 +120,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         s.auction_itemClaimed[_auctionId] = true;
 
         //Todo: Add in the various Aavegotchi addresses
-        uint256 _proceeds = s.auction_highestBid[_auctionId] - s.auction_debt[_auctionId];
+        uint256 _proceeds = s.auctions[_auctionId].highestBid - s.auctions[_auctionId].debt;
 
         //Added to prevent revert
         IERC20(s.ERC20Currency).approve(address(this), _proceeds);
@@ -146,10 +146,10 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
 
         if (s.tokenMapping[_auctionId].tokenKind == bytes4(keccak256("ERC721"))) {
             //0x73ad2146
-            IERC721(_ca).safeTransferFrom(address(this), s.auction_highestBidder[_auctionId], _tid);
+            IERC721(_ca).safeTransferFrom(address(this), s.auctions[_auctionId].highestBidder, _tid);
         } else if (s.tokenMapping[_auctionId].tokenKind == bytes4(keccak256("ERC1155"))) {
             //0x973bb640
-            IERC1155(_ca).safeTransferFrom(address(this), s.auction_highestBidder[_auctionId], _tid, 1, "");
+            IERC1155(_ca).safeTransferFrom(address(this), s.auctions[_auctionId].highestBidder, _tid, 1, "");
             s.eRC1155_tokensUnderAuction[_ca][_tid] = s.eRC1155_tokensUnderAuction[_ca][_tid] - 1;
         }
 
@@ -162,14 +162,14 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     function registerAnAuctionContract(address _contract, address _initiator) public {
         LibDiamond.enforceIsContractOwner();
 
-        s.collection_startTime[_contract] = IGBMInitiator(_initiator).getStartTime(uint256(uint160(_contract)));
-        s.collection_endTime[_contract] = IGBMInitiator(_initiator).getEndTime(uint256(uint160(_contract)));
-        s.collection_hammerTimeDuration[_contract] = IGBMInitiator(_initiator).getHammerTimeDuration(uint256(uint160(_contract)));
-        s.collection_bidDecimals[_contract] = IGBMInitiator(_initiator).getBidDecimals(uint256(uint160(_contract)));
-        s.collection_stepMin[_contract] = IGBMInitiator(_initiator).getStepMin(uint256(uint160(_contract)));
-        s.collection_incMin[_contract] = IGBMInitiator(_initiator).getIncMin(uint256(uint160(_contract)));
-        s.collection_incMax[_contract] = IGBMInitiator(_initiator).getIncMax(uint256(uint160(_contract)));
-        s.collection_bidMultiplier[_contract] = IGBMInitiator(_initiator).getBidMultiplier(uint256(uint160(_contract)));
+        s.collections[_contract].startTime = IGBMInitiator(_initiator).getStartTime(uint256(uint160(_contract)));
+        s.collections[_contract].endTime = IGBMInitiator(_initiator).getEndTime(uint256(uint160(_contract)));
+        s.collections[_contract].hammerTimeDuration = IGBMInitiator(_initiator).getHammerTimeDuration(uint256(uint160(_contract)));
+        s.collections[_contract].bidDecimals = IGBMInitiator(_initiator).getBidDecimals(uint256(uint160(_contract)));
+        s.collections[_contract].stepMin = IGBMInitiator(_initiator).getStepMin(uint256(uint160(_contract)));
+        s.collections[_contract].incMin = IGBMInitiator(_initiator).getIncMin(uint256(uint160(_contract)));
+        s.collections[_contract].incMax = IGBMInitiator(_initiator).getIncMax(uint256(uint160(_contract)));
+        s.collections[_contract].bidMultiplier = IGBMInitiator(_initiator).getBidMultiplier(uint256(uint160(_contract)));
     }
 
     /// @notice Allow/disallow bidding and claiming for a whole token contract address.
@@ -177,7 +177,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     /// @param _value True if bidding/claiming should be allowed.
     function setBiddingAllowed(address _contract, bool _value) external {
         LibDiamond.enforceIsContractOwner();
-        s.collection_biddingAllowed[_contract] = _value;
+        s.collections[_contract].biddingAllowed = _value;
         emit Contract_BiddingAllowed(_contract, _value);
     }
 
@@ -235,7 +235,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         newAuction.tokenId = _tokenId;
         newAuction.tokenKind = _tokenKind;
 
-        uint256 auctionId;
+        uint256 _auctionId;
 
         if (_tokenKind == bytes4(keccak256("ERC721"))) {
             require(
@@ -243,8 +243,8 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
                 "registerAnAuctionToken: the specified ERC-721 token cannot be auctioned"
             );
 
-            auctionId = uint256(keccak256(abi.encodePacked(_tokenContract, _tokenId, _tokenKind)));
-            s.auctionMapping[_tokenContract][_tokenId][0] = auctionId;
+            _auctionId = uint256(keccak256(abi.encodePacked(_tokenContract, _tokenId, _tokenKind)));
+            s.auctionMapping[_tokenContract][_tokenId][0] = _auctionId;
         } else {
             require(
                 msg.sender == Ownable(_tokenContract).owner() ||
@@ -254,70 +254,58 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
 
             require(_1155Index <= s.eRC1155_tokensIndex[_tokenContract][_tokenId], "The specified _1155Index have not been reached yet for this token");
 
-            auctionId = uint256(keccak256(abi.encodePacked(_tokenContract, _tokenId, _tokenKind, _1155Index)));
+            _auctionId = uint256(keccak256(abi.encodePacked(_tokenContract, _tokenId, _tokenKind, _1155Index)));
 
             if (!_rewrite) {
                 s.eRC1155_tokensIndex[_tokenContract][_tokenId] = s.eRC1155_tokensIndex[_tokenContract][_tokenId] + 1;
                 s.eRC1155_tokensUnderAuction[_tokenContract][_tokenId] = s.eRC1155_tokensUnderAuction[_tokenContract][_tokenId] + 1;
             }
 
-            s.auctionMapping[_tokenContract][_tokenId][_1155Index] = auctionId;
+            s.auctionMapping[_tokenContract][_tokenId][_1155Index] = _auctionId;
         }
 
-        s.tokenMapping[auctionId] = newAuction; //_auctionId => token_primaryKey
+        s.tokenMapping[_auctionId] = newAuction; //_auctionId => token_primaryKey
 
         if (_initiator != address(0x0)) {
-            s.auction_startTime[auctionId] = IGBMInitiator(_initiator).getStartTime(auctionId);
-            s.auction_endTime[auctionId] = IGBMInitiator(_initiator).getEndTime(auctionId);
-            s.auction_hammerTimeDuration[auctionId] = IGBMInitiator(_initiator).getHammerTimeDuration(auctionId);
-            s.auction_bidDecimals[auctionId] = IGBMInitiator(_initiator).getBidDecimals(auctionId);
-            s.auction_stepMin[auctionId] = IGBMInitiator(_initiator).getStepMin(auctionId);
-            s.auction_incMin[auctionId] = IGBMInitiator(_initiator).getIncMin(auctionId);
-            s.auction_incMax[auctionId] = IGBMInitiator(_initiator).getIncMax(auctionId);
-            s.auction_bidMultiplier[auctionId] = IGBMInitiator(_initiator).getBidMultiplier(auctionId);
-            s.auction_floorPrice[auctionId] = IGBMInitiator(_initiator).getPriceFloor(auctionId);
+            s.auctions[_auctionId].startTime = IGBMInitiator(_initiator).getStartTime(_auctionId);
+            s.auctions[_auctionId].endTime = IGBMInitiator(_initiator).getEndTime(_auctionId);
+            s.auctions[_auctionId].hammerTimeDuration = IGBMInitiator(_initiator).getHammerTimeDuration(_auctionId);
+            s.auctions[_auctionId].bidDecimals = IGBMInitiator(_initiator).getBidDecimals(_auctionId);
+            s.auctions[_auctionId].stepMin = IGBMInitiator(_initiator).getStepMin(_auctionId);
+            s.auctions[_auctionId].incMin = IGBMInitiator(_initiator).getIncMin(_auctionId);
+            s.auctions[_auctionId].incMax = IGBMInitiator(_initiator).getIncMax(_auctionId);
+            s.auctions[_auctionId].bidMultiplier = IGBMInitiator(_initiator).getBidMultiplier(_auctionId);
+            s.auctions[_auctionId].floorPrice = IGBMInitiator(_initiator).getPriceFloor(_auctionId);
         }
 
         //Event emitted when an auction is being setup
-        emit Auction_Initialized(auctionId, _tokenId, _1155Index, _tokenContract, _tokenKind);
+        emit Auction_Initialized(_auctionId, _tokenId, _1155Index, _tokenContract, _tokenKind);
 
         //Event emitted when the start time of an auction changes (due to admin interaction )
-        emit Auction_StartTimeUpdated(auctionId, getAuctionStartTime(auctionId));
+        emit Auction_StartTimeUpdated(_auctionId, getAuctionStartTime(_auctionId));
     }
 
-    function getAuctionInfo(uint256 _auctionId) external view returns (AuctionInfo memory auctionInfo_) {
+    function getAuctionInfo(uint256 _auctionId) external view returns (Auction memory auctionInfo_) {
+        auctionInfo_ = s.auctions[_auctionId];
 //        auctionInfo_.owner = owner; TODO: Check to remove
-        auctionInfo_.highestBidder = s.auction_highestBidder[_auctionId];
-        auctionInfo_.highestBid = s.auction_highestBid[_auctionId];
-        auctionInfo_.auctionDebt = s.auction_debt[_auctionId];
-        auctionInfo_.dueIncentives = s.auction_dueIncentives[_auctionId];
         auctionInfo_.contractAddress = s.tokenMapping[_auctionId].contractAddress;
-        auctionInfo_.startTime = s.auction_startTime[_auctionId];
-        auctionInfo_.endTime = s.auction_endTime[_auctionId];
-        auctionInfo_.hammerTimeDuration = s.auction_hammerTimeDuration[_auctionId];
-        auctionInfo_.bidDecimals = s.auction_bidDecimals[_auctionId];
-        auctionInfo_.stepMin = s.auction_stepMin[_auctionId];
-        auctionInfo_.incMin = s.auction_incMin[_auctionId];
-        auctionInfo_.incMax = s.auction_incMax[_auctionId];
-        auctionInfo_.bidMultiplier = s.auction_bidMultiplier[_auctionId];
-        auctionInfo_.biddingAllowed = s.collection_biddingAllowed[s.tokenMapping[_auctionId].contractAddress];
-        auctionInfo_.floorPrice = s.auction_floorPrice[_auctionId];
+        auctionInfo_.biddingAllowed = s.collections[s.tokenMapping[_auctionId].contractAddress].biddingAllowed;
     }
 
     function getAuctionHighestBidder(uint256 _auctionId) external view override returns (address) {
-        return s.auction_highestBidder[_auctionId];
+        return s.auctions[_auctionId].highestBidder;
     }
 
     function getAuctionHighestBid(uint256 _auctionId) external view override returns (uint256) {
-        return s.auction_highestBid[_auctionId];
+        return s.auctions[_auctionId].highestBid;
     }
 
     function getAuctionDebt(uint256 _auctionId) external view override returns (uint256) {
-        return s.auction_debt[_auctionId];
+        return s.auctions[_auctionId].debt;
     }
 
     function getAuctionDueIncentives(uint256 _auctionId) external view override returns (uint256) {
-        return s.auction_dueIncentives[_auctionId];
+        return s.auctions[_auctionId].dueIncentives;
     }
 
     function getAuctionID(address _contract, uint256 _tokenID) external view override returns (uint256) {
@@ -345,66 +333,66 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     }
 
     function getAuctionStartTime(uint256 _auctionId) public view override returns (uint256) {
-        if (s.auction_startTime[_auctionId] != 0) {
-            return s.auction_startTime[_auctionId];
+        if (s.auctions[_auctionId].startTime != 0) {
+            return s.auctions[_auctionId].startTime;
         } else {
-            return s.collection_startTime[s.tokenMapping[_auctionId].contractAddress];
+            return s.collections[s.tokenMapping[_auctionId].contractAddress].startTime;
         }
     }
 
     function getAuctionEndTime(uint256 _auctionId) public view override returns (uint256) {
-        if (s.auction_endTime[_auctionId] != 0) {
-            return s.auction_endTime[_auctionId];
+        if (s.auctions[_auctionId].endTime != 0) {
+            return s.auctions[_auctionId].endTime;
         } else {
-            return s.collection_endTime[s.tokenMapping[_auctionId].contractAddress];
+            return s.collections[s.tokenMapping[_auctionId].contractAddress].endTime;
         }
     }
 
     function getHammerTimeDuration(uint256 _auctionId) public view override returns (uint256) {
-        if (s.auction_hammerTimeDuration[_auctionId] != 0) {
-            return s.auction_hammerTimeDuration[_auctionId];
+        if (s.auctions[_auctionId].hammerTimeDuration != 0) {
+            return s.auctions[_auctionId].hammerTimeDuration;
         } else {
-            return s.collection_hammerTimeDuration[s.tokenMapping[_auctionId].contractAddress];
+            return s.collections[s.tokenMapping[_auctionId].contractAddress].hammerTimeDuration;
         }
     }
 
     function getAuctionBidDecimals(uint256 _auctionId) public view override returns (uint256) {
-        if (s.auction_bidDecimals[_auctionId] != 0) {
-            return s.auction_bidDecimals[_auctionId];
+        if (s.auctions[_auctionId].bidDecimals != 0) {
+            return s.auctions[_auctionId].bidDecimals;
         } else {
-            return s.collection_bidDecimals[s.tokenMapping[_auctionId].contractAddress];
+            return s.collections[s.tokenMapping[_auctionId].contractAddress].bidDecimals;
         }
     }
 
     function getAuctionStepMin(uint256 _auctionId) public view override returns (uint256) {
-        if (s.auction_stepMin[_auctionId] != 0) {
-            return s.auction_stepMin[_auctionId];
+        if (s.auctions[_auctionId].stepMin != 0) {
+            return s.auctions[_auctionId].stepMin;
         } else {
-            return s.collection_stepMin[s.tokenMapping[_auctionId].contractAddress];
+            return s.collections[s.tokenMapping[_auctionId].contractAddress].stepMin;
         }
     }
 
     function getAuctionIncMin(uint256 _auctionId) public view override returns (uint256) {
-        if (s.auction_incMin[_auctionId] != 0) {
-            return s.auction_incMin[_auctionId];
+        if (s.auctions[_auctionId].incMin != 0) {
+            return s.auctions[_auctionId].incMin;
         } else {
-            return s.collection_incMin[s.tokenMapping[_auctionId].contractAddress];
+            return s.collections[s.tokenMapping[_auctionId].contractAddress].incMin;
         }
     }
 
     function getAuctionIncMax(uint256 _auctionId) public view override returns (uint256) {
-        if (s.auction_incMax[_auctionId] != 0) {
-            return s.auction_incMax[_auctionId];
+        if (s.auctions[_auctionId].incMax != 0) {
+            return s.auctions[_auctionId].incMax;
         } else {
-            return s.collection_incMin[s.tokenMapping[_auctionId].contractAddress];
+            return s.collections[s.tokenMapping[_auctionId].contractAddress].incMin; // TODO: Check
         }
     }
 
     function getAuctionBidMultiplier(uint256 _auctionId) public view override returns (uint256) {
-        if (s.auction_bidMultiplier[_auctionId] != 0) {
-            return s.auction_bidMultiplier[_auctionId];
+        if (s.auctions[_auctionId].bidMultiplier != 0) {
+            return s.auctions[_auctionId].bidMultiplier;
         } else {
-            return s.collection_bidMultiplier[s.tokenMapping[_auctionId].contractAddress];
+            return s.collections[s.tokenMapping[_auctionId].contractAddress].bidMultiplier;
         }
     }
 
@@ -444,7 +432,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         uint256 bidIncMax = getAuctionIncMax(_auctionId);
 
         //Init the baseline bid we need to perform against
-        uint256 baseBid = (s.auction_highestBid[_auctionId] * (bidDecimals + getAuctionStepMin(_auctionId))) / bidDecimals;
+        uint256 baseBid = (s.auctions[_auctionId].highestBid * (bidDecimals + getAuctionStepMin(_auctionId))) / bidDecimals;
 
         //If no bids are present, set a basebid value of 1 to prevent divide by 0 errors
         if (baseBid == 0) {
