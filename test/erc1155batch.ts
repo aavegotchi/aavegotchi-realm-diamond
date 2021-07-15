@@ -122,8 +122,10 @@ async function main() {
     const _pixelcraft = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
     const _playerRewards = "0x27DF5C6dcd360f372e23d5e63645eC0072D0C098";
     const _daoTreasury = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
-    let startTime = Math.floor(Date.now() / 1000);
-    let endTime = Math.floor(Date.now() / 1000) + 86400;
+    //  let startTime = Math.floor(Date.now() / 1000);
+    // let endTime = Math.floor(Date.now() / 1000) + 86400;
+    let startTime = 1626357600; //2PM UTC
+    let endTime = 1626357600 + 86400 * 3; //July 18, 2PM UTC
     let hammerTimeDuration = 300;
     let bidDecimals = 100000;
     let stepMin = 10000;

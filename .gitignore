@@ -9,3 +9,4 @@ yarn-error.log
 .vscode
 logs/hardhat
 logs/kovan
+cache
