@@ -384,7 +384,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         if (s.auctions[_auctionId].incMax != 0) {
             return s.auctions[_auctionId].incMax;
         } else {
-            return s.collections[s.tokenMapping[_auctionId].contractAddress].incMin; // TODO: Check
+            return s.collections[s.tokenMapping[_auctionId].contractAddress].incMax; // TODO: Check
         }
     }
 
