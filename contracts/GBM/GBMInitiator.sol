@@ -13,14 +13,14 @@ contract GBMInitiator is IGBMInitiator {
 
     address public owner;
 
-    uint256 internal startTime; // _auctionID => timestamp
-    uint256 internal endTime; // _auctionID => timestamp
-    uint256 internal hammerTimeDuration; // _auctionID => duration in seconds
-    uint256 internal bidDecimals; // _auctionID => bidDecimals
-    uint256 internal stepMin; // _auctionID => stepMin
-    uint256 internal incMin; // _auctionID => minimal earned incentives
-    uint256 internal incMax; // _auctionID => maximal earned incentives
-    uint256 internal bidMultiplier; // _auctionID => bid incentive growth multiplier
+    uint256 internal startTime; // _auctionId => timestamp
+    uint256 internal endTime; // _auctionId => timestamp
+    uint256 internal hammerTimeDuration; // _auctionId => duration in seconds
+    uint256 internal bidDecimals; // _auctionId => bidDecimals
+    uint256 internal stepMin; // _auctionId => stepMin
+    uint256 internal incMin; // _auctionId => minimal earned incentives
+    uint256 internal incMax; // _auctionId => maximal earned incentives
+    uint256 internal bidMultiplier; // _auctionId => bid incentive growth multiplier
 
     uint256 internal priceFloor;
 
@@ -92,49 +92,49 @@ contract GBMInitiator is IGBMInitiator {
     }
 
     function getStartTime(
-        uint256 /* _auctionID */
+        uint256 /* _auctionId */
     ) external view override returns (uint256) {
         return (startTime);
     }
 
     function getEndTime(
-        uint256 /* _auctionID */
+        uint256 /* _auctionId */
     ) external view override returns (uint256) {
         return (endTime);
     }
 
     function getHammerTimeDuration(
-        uint256 /* _auctionID */
+        uint256 /* _auctionId */
     ) external view override returns (uint256) {
         return (hammerTimeDuration);
     }
 
     function getBidDecimals(
-        uint256 /* _auctionID */
+        uint256 /* _auctionId */
     ) external view override returns (uint256) {
         return (bidDecimals);
     }
 
     function getStepMin(
-        uint256 /* _auctionID */
+        uint256 /* _auctionId */
     ) external view override returns (uint256) {
         return (stepMin);
     }
 
     function getIncMin(
-        uint256 /* _auctionID */
+        uint256 /* _auctionId */
     ) external view override returns (uint256) {
         return (incMin);
     }
 
     function getIncMax(
-        uint256 /* _auctionID */
+        uint256 /* _auctionId */
     ) external view override returns (uint256) {
         return (incMax);
     }
 
     function getBidMultiplier(
-        uint256 /* _auctionID */
+        uint256 /* _auctionId */
     ) external view override returns (uint256) {
         return (bidMultiplier);
     }

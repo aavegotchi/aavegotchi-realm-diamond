@@ -37,27 +37,27 @@ struct AppStorage {
     //Contract address storing the ERC20 currency used in auctions
     address ERC20Currency;
 
-    mapping(uint256 => TokenRepresentation) tokenMapping; //_auctionID => token_primaryKey
-    mapping(address => mapping(uint256 => mapping(uint256 => uint256))) auctionMapping; // contractAddress => tokenId => TokenIndex => _auctionID
+    mapping(uint256 => TokenRepresentation) tokenMapping; //_auctionId => token_primaryKey
+    mapping(address => mapping(uint256 => mapping(uint256 => uint256))) auctionMapping; // contractAddress => tokenId => TokenIndex => _auctionId
 
-    mapping(uint256 => AuctionInfo) auctions; //_auctionID => actions
+    mapping(uint256 => AuctionInfo) auctions; //_auctionId => actions
 
-    mapping(uint256 => uint256) auction_dueIncentives; // _auctionID => dueIncentives
-    mapping(uint256 => uint256) auction_debt; // _auctionID => unsettled debt
-    mapping(uint256 => address) auction_highestBidder; // _auctionID => bidder
-    mapping(uint256 => uint256) auction_highestBid; // _auctionID => bid
+    mapping(uint256 => uint256) auction_dueIncentives; // _auctionId => dueIncentives
+    mapping(uint256 => uint256) auction_debt; // _auctionId => unsettled debt
+    mapping(uint256 => address) auction_highestBidder; // _auctionId => bidder
+    mapping(uint256 => uint256) auction_highestBid; // _auctionId => bid
 
     mapping(address => bool) collection_biddingAllowed; // tokencontract => Allow to start/pause ongoing auctions
 
     //var storing individual auction settings. if != null, they take priority over collection settings
-    mapping(uint256 => uint256) auction_startTime; // _auctionID => timestamp
-    mapping(uint256 => uint256) auction_endTime; // _auctionID => timestamp
-    mapping(uint256 => uint256) auction_hammerTimeDuration; // _auctionID => duration in seconds
-    mapping(uint256 => uint256) auction_bidDecimals; // _auctionID => bidDecimals
-    mapping(uint256 => uint256) auction_stepMin; // _auctionID => stepMin
-    mapping(uint256 => uint256) auction_incMin; // _auctionID => minimal earned incentives
-    mapping(uint256 => uint256) auction_incMax; // _auctionID => maximal earned incentives
-    mapping(uint256 => uint256) auction_bidMultiplier; // _auctionID => bid incentive growth multiplier
+    mapping(uint256 => uint256) auction_startTime; // _auctionId => timestamp
+    mapping(uint256 => uint256) auction_endTime; // _auctionId => timestamp
+    mapping(uint256 => uint256) auction_hammerTimeDuration; // _auctionId => duration in seconds
+    mapping(uint256 => uint256) auction_bidDecimals; // _auctionId => bidDecimals
+    mapping(uint256 => uint256) auction_stepMin; // _auctionId => stepMin
+    mapping(uint256 => uint256) auction_incMin; // _auctionId => minimal earned incentives
+    mapping(uint256 => uint256) auction_incMax; // _auctionId => maximal earned incentives
+    mapping(uint256 => uint256) auction_bidMultiplier; // _auctionId => bid incentive growth multiplier
 
     mapping(uint256 => uint256) auction_floorPrice; //floor price of the auction
 
