@@ -42,7 +42,7 @@ interface IGBM {
 
     function claim(uint256 _auctionID) external;
 
-    function owner() external returns (address);
+//    function owner() external returns (address); // TODO: Check to remove
 
     function ERC20Currency() external returns (address);
 
