@@ -16,7 +16,7 @@ import "../libraries/LibDiamond.sol";
 /// @title GBM auction contract
 /// @dev See GBM.auction on how to use this contract
 /// @author Guillaume Gonnaud
-contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
+contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     AppStorage internal s;
 
     constructor(

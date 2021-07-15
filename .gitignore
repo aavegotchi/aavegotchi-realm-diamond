@@ -1,6 +1,6 @@
 build/*
 artifacts/*
-contracts/tokens/artifacts/*
+contracts/test/artifacts/*
 contracts/GBM/artifacts/*
 contracts/Helpers/artifacts/*
 .env
