@@ -13,12 +13,11 @@ contract MassRegistrer {
     //Prerequisite : msg.sender must own the tokenID from _tokenIDStart to _tokenIDEnd and this contract need to be an operator of msg.sender
     function massRegistrerERC721Default(
         address _GBM,
-        address _initiator,
         address _ERC721Contract,
         uint256 _tokenIDStart,
         uint256 _tokenIDEnd
     ) external {
-        GBMFacet(_GBM).registerAnAuctionContract(_ERC721Contract, _initiator);
+        GBMFacet(_GBM).registerAnAuctionContract(_ERC721Contract);
         while (_tokenIDStart < _tokenIDEnd) {
             IERC721(_ERC721Contract).safeTransferFrom(msg.sender, _GBM, _tokenIDStart, "");
             GBMFacet(_GBM).registerAnAuctionToken(_ERC721Contract, _tokenIDStart, bytes4(keccak256("ERC721")), address(0));
@@ -43,13 +42,12 @@ contract MassRegistrer {
 
     function massRegistrerERC1155Default(
         address _GBM,
-        address _initiator,
         address _ERC1155Contract,
         uint256 _tokenID,
         uint256 _indexStart,
         uint256 _indexEnd
     ) external {
-        GBMFacet(_GBM).registerAnAuctionContract(_ERC1155Contract, _initiator);
+        GBMFacet(_GBM).registerAnAuctionContract(_ERC1155Contract);
 
         IERC1155(_ERC1155Contract).safeTransferFrom(msg.sender, _GBM, _tokenID, _indexEnd - _indexStart, "");
 
@@ -67,7 +65,7 @@ contract MassRegistrer {
         uint256 _indexStart,
         uint256 _indexEnd
     ) external {
-        GBMFacet(_GBM).registerAnAuctionContract(_ERC1155Contract, _initiator);
+        GBMFacet(_GBM).registerAnAuctionContract(_ERC1155Contract);
 
         IERC1155(_ERC1155Contract).safeTransferFrom(msg.sender, _GBM, _tokenID, _indexEnd - _indexStart, "");
 

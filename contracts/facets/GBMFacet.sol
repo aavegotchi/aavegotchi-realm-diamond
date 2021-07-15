@@ -158,18 +158,17 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
 
     /// @notice Register an auction contract default parameters for a GBM auction. To use to save gas
     /// @param _contract The token contract the auctionned token belong to
-    /// @param _initiator Set to 0 if you want to use the default value registered for the token contract
-    function registerAnAuctionContract(address _contract, address _initiator) public {
+    function registerAnAuctionContract(address _contract) public {
         LibDiamond.enforceIsContractOwner();
 
-        s.collections[_contract].startTime = IGBMInitiator(_initiator).getStartTime(uint256(uint160(_contract)));
-        s.collections[_contract].endTime = IGBMInitiator(_initiator).getEndTime(uint256(uint160(_contract)));
-        s.collections[_contract].hammerTimeDuration = IGBMInitiator(_initiator).getHammerTimeDuration(uint256(uint160(_contract)));
-        s.collections[_contract].bidDecimals = IGBMInitiator(_initiator).getBidDecimals(uint256(uint160(_contract)));
-        s.collections[_contract].stepMin = IGBMInitiator(_initiator).getStepMin(uint256(uint160(_contract)));
-        s.collections[_contract].incMin = IGBMInitiator(_initiator).getIncMin(uint256(uint160(_contract)));
-        s.collections[_contract].incMax = IGBMInitiator(_initiator).getIncMax(uint256(uint160(_contract)));
-        s.collections[_contract].bidMultiplier = IGBMInitiator(_initiator).getBidMultiplier(uint256(uint160(_contract)));
+        s.collections[_contract].startTime = s.initiatorInfo.startTime;
+        s.collections[_contract].endTime = s.initiatorInfo.endTime;
+        s.collections[_contract].hammerTimeDuration = s.initiatorInfo.hammerTimeDuration;
+        s.collections[_contract].bidDecimals = s.initiatorInfo.bidDecimals;
+        s.collections[_contract].stepMin = s.initiatorInfo.stepMin;
+        s.collections[_contract].incMin = s.initiatorInfo.incMin;
+        s.collections[_contract].incMax = s.initiatorInfo.incMax;
+        s.collections[_contract].bidMultiplier = s.initiatorInfo.bidMultiplier;
     }
 
     /// @notice Allow/disallow bidding and claiming for a whole token contract address.
@@ -267,15 +266,15 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         s.tokenMapping[_auctionId] = newAuction; //_auctionId => token_primaryKey
 
         if (_initiator != address(0x0)) {
-            s.auctions[_auctionId].startTime = IGBMInitiator(_initiator).getStartTime(_auctionId);
-            s.auctions[_auctionId].endTime = IGBMInitiator(_initiator).getEndTime(_auctionId);
-            s.auctions[_auctionId].hammerTimeDuration = IGBMInitiator(_initiator).getHammerTimeDuration(_auctionId);
-            s.auctions[_auctionId].bidDecimals = IGBMInitiator(_initiator).getBidDecimals(_auctionId);
-            s.auctions[_auctionId].stepMin = IGBMInitiator(_initiator).getStepMin(_auctionId);
-            s.auctions[_auctionId].incMin = IGBMInitiator(_initiator).getIncMin(_auctionId);
-            s.auctions[_auctionId].incMax = IGBMInitiator(_initiator).getIncMax(_auctionId);
-            s.auctions[_auctionId].bidMultiplier = IGBMInitiator(_initiator).getBidMultiplier(_auctionId);
-            s.auctions[_auctionId].floorPrice = IGBMInitiator(_initiator).getPriceFloor(_auctionId);
+            s.auctions[_auctionId].startTime = s.initiatorInfo.startTime;
+            s.auctions[_auctionId].endTime = s.initiatorInfo.endTime;
+            s.auctions[_auctionId].hammerTimeDuration = s.initiatorInfo.hammerTimeDuration;
+            s.auctions[_auctionId].bidDecimals = s.initiatorInfo.bidDecimals;
+            s.auctions[_auctionId].stepMin = s.initiatorInfo.stepMin;
+            s.auctions[_auctionId].incMin = s.initiatorInfo.incMin;
+            s.auctions[_auctionId].incMax = s.initiatorInfo.incMax;
+            s.auctions[_auctionId].bidMultiplier = s.initiatorInfo.bidMultiplier;
+            s.auctions[_auctionId].floorPrice = s.initiatorInfo.floorPrice;
         }
 
         //Event emitted when an auction is being setup
@@ -476,7 +475,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         uint256 _indexEnd
     ) external {
         LibDiamond.enforceIsContractOwner();
-        registerAnAuctionContract(_ERC1155Contract, _initiator);
+        registerAnAuctionContract(_ERC1155Contract);
 
         IERC1155(_ERC1155Contract).safeTransferFrom(msg.sender, _GBM, _tokenID, _indexEnd - _indexStart, "");
 

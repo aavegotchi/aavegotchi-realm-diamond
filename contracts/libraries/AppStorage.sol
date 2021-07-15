@@ -8,6 +8,18 @@ struct TokenRepresentation {
     bytes4 tokenKind; // The ERC name of the token implementation bytes4(keccak256("ERC721")) or bytes4(keccak256("ERC1155"))
 }
 
+struct InitiatorInfo {
+    uint256 startTime;
+    uint256 endTime;
+    uint256 hammerTimeDuration;
+    uint256 bidDecimals;
+    uint256 stepMin;
+    uint256 incMin;
+    uint256 incMax;
+    uint256 bidMultiplier;
+    uint256 floorPrice;
+}
+
 struct Auction {
 //    address owner; // TODO: Check to remove
     address highestBidder;
@@ -45,6 +57,9 @@ struct AppStorage {
     address pixelcraft;
     address playerRewards;
     address daoTreasury;
+
+
+    InitiatorInfo initiatorInfo;
 
     //Contract address storing the ERC20 currency used in auctions
     address ERC20Currency;

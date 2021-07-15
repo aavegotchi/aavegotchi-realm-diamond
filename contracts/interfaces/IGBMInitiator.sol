@@ -26,5 +26,5 @@ interface IGBMInitiator {
 
     function getBidMultiplier(uint256 _auctionId) external view returns (uint256);
 
-    function getPriceFloor(uint256 _auctionId) external view returns (uint256);
+    function getFloorPrice(uint256 _auctionId) external view returns (uint256);
 }
