@@ -255,4 +255,24 @@ describe("Test ERC1155 GBM", async function () {
     expect(newPrBalance).to.equal(prBalance.add(expectedPrIncrease));
     //  expect(newDaoBalance).to.equal(daoBalance.add(expectedBurn.mul(3)));
   });
+
+  it("Only owner can transfer contract", async function () {
+    const notOwnerGBM = await impersonate(
+      "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5",
+      gbm
+    );
+
+    await expect(
+      notOwnerGBM.transferOwner("0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5")
+    ).to.be.revertedWith("Must be contract owner");
+
+    const accounts = await ethers.getSigners();
+    account = await accounts[0].getAddress();
+    const ownerGBM = await impersonate(account, gbm);
+
+    await ownerGBM.transferOwner("0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5");
+
+    const owner = await ownerGBM.getOwner();
+    expect(owner).to.equal("0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5");
+  });
 });
