@@ -383,7 +383,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         if (s.auctions[_auctionId].incMax != 0) {
             return s.auctions[_auctionId].incMax;
         } else {
-            return s.collections[s.tokenMapping[_auctionId].contractAddress].incMax; // TODO: Check
+            return s.collections[s.tokenMapping[_auctionId].contractAddress].incMax;
         }
     }
 
@@ -457,11 +457,10 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         uint256 _tokenIDStart,
         uint256 _tokenIDEnd
     ) external {
+        LibDiamond.enforceIsContractOwner();
         while (_tokenIDStart < _tokenIDEnd) {
-            LibDiamond.enforceIsContractOwner(); // TODO: Check flow
             IERC721(_ERC721Contract).safeTransferFrom(msg.sender, _GBM, _tokenIDStart, "");
             registerAnAuctionToken(_ERC721Contract, _tokenIDStart, bytes4(keccak256("ERC721")), _initiator);
-
             _tokenIDStart++;
         }
     }
@@ -476,9 +475,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     ) external {
         LibDiamond.enforceIsContractOwner();
         registerAnAuctionContract(_ERC1155Contract);
-
         IERC1155(_ERC1155Contract).safeTransferFrom(msg.sender, _GBM, _tokenID, _indexEnd - _indexStart, "");
-
         while (_indexStart < _indexEnd) {
             registerAnAuctionToken(_ERC1155Contract, _tokenID, bytes4(keccak256("ERC1155")), _initiator);
             _indexStart++;
