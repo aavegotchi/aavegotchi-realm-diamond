@@ -265,11 +265,6 @@ describe("Test ERC1155 GBM", async function () {
       )
     ).toString();
 
-    console.log("second auction id:", secondAuctionID);
-
-    const auctionInfo = await gbm.getAuctionInfo(secondAuctionID);
-    console.log("auction info:", auctionInfo);
-
     const accounts = await ethers.getSigners();
     account = await accounts[0].getAddress();
     const ownerGBM = await impersonate(account, gbm);
