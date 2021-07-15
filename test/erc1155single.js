@@ -256,6 +256,31 @@ describe("Test ERC1155 GBM", async function () {
     //  expect(newDaoBalance).to.equal(daoBalance.add(expectedBurn.mul(3)));
   });
 
+  it("Owner can claim unbid NFT", async function () {
+    const secondAuctionID = (
+      await gbm["getAuctionID(address,uint256,uint256)"](
+        erc1155Address,
+        "18",
+        "1"
+      )
+    ).toString();
+
+    console.log("second auction id:", secondAuctionID);
+
+    const auctionInfo = await gbm.getAuctionInfo(secondAuctionID);
+    console.log("auction info:", auctionInfo);
+
+    const accounts = await ethers.getSigners();
+    account = await accounts[0].getAddress();
+    const ownerGBM = await impersonate(account, gbm);
+    //Claim item
+
+    await ownerGBM.claim(secondAuctionID);
+
+    const nftBalance = await erc1155.balanceOf(account, "18");
+    expect(nftBalance).to.equal(1);
+  });
+
   it("Only owner can transfer contract", async function () {
     const notOwnerGBM = await impersonate(
       "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5",

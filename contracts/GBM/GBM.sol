@@ -11,8 +11,6 @@ import "../tokens/IERC1155.sol";
 import "../tokens/IERC1155TokenReceiver.sol";
 import "../tokens/Ownable.sol";
 
-import "hardhat/console.sol";
-
 /// @title GBM auction contract
 /// @dev See GBM.auction on how to use this contract
 /// @author Guillaume Gonnaud
@@ -200,6 +198,11 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         IERC20(ERC20Currency).transferFrom(address(this), pixelcraft, companyShare);
         IERC20(ERC20Currency).transferFrom(address(this), playerRewards, playerRewardsShare);
         IERC20(ERC20Currency).transferFrom(address(this), daoTreasury, daoShare);
+
+        //Allow contract owner to claim NFTs that haven't been bid on
+        if (auction_highestBid[_auctionID] == 0) {
+            auction_highestBidder[_auctionID] = owner;
+        }
 
         if (tokenMapping[_auctionID].tokenKind == bytes4(keccak256("ERC721"))) {
             //0x73ad2146
