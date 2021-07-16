@@ -1,4 +1,4 @@
-# GBM_Library_Aavegotchi
+# GBM_Diamond_Aavegotchi
 
 Working repo for the GBM auction contract
 
@@ -9,41 +9,40 @@ The GBM auction is the intellectual property of Perpetual Altruism Ltd. This cod
 GBM: 0xC025B341fF094958179d6acdddBD86042430DE1d
 Initiator: 0x3EF3b22917D663ECE1896F98251fa44d96052e07
 
-## Setup and deployments
-
-Use your favorite deploying tools. Easiest way for tinkering is using https://remix.ethereum.org + remixd  
-Those contract can be used "as is" for live projects, but be aware they are not upgradable and can only auction a specific NFT once.
-
 ### Setup the token contracts
 
 - Deploy the ERC-20 token contract that is gonna be used as currency and either ERC-721 or ERC-1155 token contracts to be used as NFTs to auction.
+- For Aavegotchi, GHST is used instead of deploying new ERC-20.
 
-For testing purposes, an implementation of each of those contract can be found in _src/contracts/token/ERCxxxGeneric.sol_
+For testing purposes, an implementation of each of those contract can be found in _src/contracts/test/ERCxxxGeneric.sol_
 
-### Setup the GBM contract
+### Setup the GBM Diamond and Facets
 
-- Deploy the _src/contracts/GBM/GBM.sol_ GBM contract with the following parameter :
+- GBM Diamond and facets could be deployed with following deploy script.
+  
+  _src/scripts/deploy.js_
+- Before deploy, you need to check and configure default aution parameters for GBM in deploy script.
+  ```
+  const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
+  const _pixelcraft = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
+  const _playerRewards = "0x27DF5C6dcd360f372e23d5e63645eC0072D0C098";
+  const _daoTreasury = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
 
-  `_ERC20Currency = The address of the ERC20 smart contract to be used as currency`
+  let startTime = Math.floor(Date.now() / 1000);
+  let endTime = Math.floor(Date.now() / 1000) + 86400;
+  let hammerTimeDuration = 300;
+  let bidDecimals = 100000;
+  let stepMin = 10000;
+  let incMax = 10000;
+  let incMin = 1000;
+  let bidMultiplier = 11120;
+  let floorPrice = 0;
+  ```
 
 ### Mint and transfer a token
 
 - Mint an ERC-721 or ERC-1155 token
 - Transfer it to the GBM smart contract address.
-
-### Setup auction parameters
-
-- Deploy the _src/contracts/GBM/GBMInitiator.sol_ GBMInitiator contract
-- Use the setters of GBMInitiator with the following suggested parameters
-
-  ` setBidDecimals(100000);`  
-   ` setBidMultiplier(11120);`  
-   ` setEndTime("in 25mn"); //Use https://www.unixtimestamp.com if needed`  
-   ` setHammerTimeDuration(300); // 5mn of additional time at the end of an auction if new incoming bid`  
-   ` setIncMax(10000);`  
-   ` setIncMin(1000);`  
-   ` setStartTime("in 15mn");`  
-   ` setStepMin(10000);`
 
 ### Register default auction parameters for a Token Smart Contract
 
