@@ -70,7 +70,7 @@ interface IGBM {
 
     function getAuctionEndTime(uint256 _auctionId) external view returns (uint256);
 
-    function getHammerTimeDuration(uint256 _auctionId) external view returns (uint256);
+    function getAuctionHammerTimeDuration(uint256 _auctionId) external view returns (uint256);
 
     function getAuctionBidDecimals(uint256 _auctionId) external view returns (uint256);
 

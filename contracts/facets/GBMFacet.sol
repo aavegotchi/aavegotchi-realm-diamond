@@ -53,8 +53,8 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         IERC20(s.erc20Currency).transferFrom(msg.sender, address(this), _bidAmount);
 
         //Extend the duration time of the auction if we are close to the end
-        if (getAuctionEndTime(_auctionId) < block.timestamp + getHammerTimeDuration(_auctionId)) {
-            s.auctions[_auctionId].endTime = block.timestamp + getHammerTimeDuration(_auctionId);
+        if (getAuctionEndTime(_auctionId) < block.timestamp + getAuctionHammerTimeDuration(_auctionId)) {
+            s.auctions[_auctionId].endTime = block.timestamp + getAuctionHammerTimeDuration(_auctionId);
             emit AuctionEndTimeUpdated(_auctionId, s.auctions[_auctionId].endTime);
         }
 
@@ -333,7 +333,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         }
     }
 
-    function getHammerTimeDuration(uint256 _auctionId) public view override returns (uint256) {
+    function getAuctionHammerTimeDuration(uint256 _auctionId) public view override returns (uint256) {
         if (s.auctions[_auctionId].hammerTimeDuration != 0) {
             return s.auctions[_auctionId].hammerTimeDuration;
         } else {
