@@ -12,7 +12,7 @@ import "../libraries/LibDiamond.sol";
 contract InitiatorFacet is IGBMInitiator {
     AppStorage internal s;
 
-    // To future developprs: All the getters are called AFTER the auction ID has been generated and hence you can lookup
+    // To future developers: All the getters are called AFTER the auction ID has been generated and hence you can lookup
     // token_ID/Token contract/token kind using the main GBM contract getters(auctionId) if you want to return determinstic values
 
     constructor(

@@ -21,7 +21,6 @@ struct InitiatorInfo {
 }
 
 struct Auction {
-//    address owner; // TODO: Check to remove
     address highestBidder;
     uint256 highestBid;
     uint256 debt;
@@ -52,8 +51,6 @@ struct Collection {
 }
 
 struct AppStorage {
-    //The address of the auctionner to whom all profits will be sent
-//    address owner; // TODO: Check to remove
     address pixelcraft;
     address playerRewards;
     address daoTreasury;
@@ -62,7 +59,7 @@ struct AppStorage {
     InitiatorInfo initiatorInfo;
 
     //Contract address storing the ERC20 currency used in auctions
-    address ERC20Currency;
+    address erc20Currency;
 
     mapping(uint256 => TokenRepresentation) tokenMapping; //_auctionId => token_primaryKey
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) auctionMapping; // contractAddress => tokenId => TokenIndex => _auctionId

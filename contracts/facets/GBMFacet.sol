@@ -20,20 +20,19 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     AppStorage internal s;
 
     constructor(
-        address _ERC20Currency,
+        address _erc20Currency,
         address _pixelcraft,
         address _playerRewards,
         address _daoTreasury
     ) {
-//        owner = msg.sender; // TODO: Check to remove
         s.pixelcraft = _pixelcraft;
         s.playerRewards = _playerRewards;
         s.daoTreasury = _daoTreasury;
-        s.ERC20Currency = _ERC20Currency;
+        s.erc20Currency = _erc20Currency;
     }
 
-    function ERC20Currency() external override returns (address) {
-        return s.ERC20Currency;
+    function erc20Currency() external override returns (address) {
+        return s.erc20Currency;
     }
 
     /// @notice Place a GBM bid for a GBM auction
@@ -63,7 +62,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         );
 
         //Transfer the money of the bidder to the GBM smart contract
-        IERC20(s.ERC20Currency).transferFrom(msg.sender, address(this), _bidAmount);
+        IERC20(s.erc20Currency).transferFrom(msg.sender, address(this), _bidAmount);
 
         //Extend the duration time of the auction if we are close to the end
         if (getAuctionEndTime(_auctionId) < block.timestamp + getHammerTimeDuration(_auctionId)) {
@@ -99,9 +98,9 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
             //Refunding the previous bid as well as sending the incentives
 
             //Added to prevent revert
-            IERC20(s.ERC20Currency).approve(address(this), (previousHighestBid + duePay));
+            IERC20(s.erc20Currency).approve(address(this), (previousHighestBid + duePay));
 
-            IERC20(s.ERC20Currency).transferFrom(address(this), previousHighestBidder, (previousHighestBid + duePay));
+            IERC20(s.erc20Currency).transferFrom(address(this), previousHighestBidder, (previousHighestBid + duePay));
         }
     }
 
@@ -123,7 +122,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         uint256 _proceeds = s.auctions[_auctionId].highestBid - s.auctions[_auctionId].debt;
 
         //Added to prevent revert
-        IERC20(s.ERC20Currency).approve(address(this), _proceeds);
+        IERC20(s.erc20Currency).approve(address(this), _proceeds);
 
         //Transfer the proceeds to the various recipients
 
@@ -139,10 +138,10 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         //15% to DAO
         uint256 daoShare = (_proceeds - burnShare - companyShare - playerRewardsShare);
 
-        IERC20(s.ERC20Currency).transferFrom(address(this), address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), burnShare);
-        IERC20(s.ERC20Currency).transferFrom(address(this), s.pixelcraft, companyShare);
-        IERC20(s.ERC20Currency).transferFrom(address(this), s.playerRewards, playerRewardsShare);
-        IERC20(s.ERC20Currency).transferFrom(address(this), s.daoTreasury, daoShare);
+        IERC20(s.erc20Currency).transferFrom(address(this), address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), burnShare);
+        IERC20(s.erc20Currency).transferFrom(address(this), s.pixelcraft, companyShare);
+        IERC20(s.erc20Currency).transferFrom(address(this), s.playerRewards, playerRewardsShare);
+        IERC20(s.erc20Currency).transferFrom(address(this), s.daoTreasury, daoShare);
 
         if (s.tokenMapping[_auctionId].tokenKind == bytes4(keccak256("ERC721"))) {
             //0x73ad2146
@@ -286,7 +285,6 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
 
     function getAuctionInfo(uint256 _auctionId) external view returns (Auction memory auctionInfo_) {
         auctionInfo_ = s.auctions[_auctionId];
-//        auctionInfo_.owner = owner; TODO: Check to remove
         auctionInfo_.contractAddress = s.tokenMapping[_auctionId].contractAddress;
         auctionInfo_.biddingAllowed = s.collections[s.tokenMapping[_auctionId].contractAddress].biddingAllowed;
     }
