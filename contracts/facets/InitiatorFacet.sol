@@ -9,22 +9,11 @@ import "../libraries/LibDiamond.sol";
 /// @title GBM auction contract Initiator
 /// @dev Implementation of IGBM. Feel free to cook up your own implementation for more complex patterns.
 /// @author Guillaume Gonnaud
-contract GBMInitiator is IGBMInitiator {
+contract InitiatorFacet is IGBMInitiator {
     AppStorage internal s;
 
-    // To future developpers: All the getters are called AFTER the auction ID has been generated and hence you can lookup
+    // To future developprs: All the getters are called AFTER the auction ID has been generated and hence you can lookup
     // token_ID/Token contract/token kind using the main GBM contract getters(auctionId) if you want to return determinstic values
-
-    uint256 internal startTime; // _auctionId => timestamp
-    uint256 internal endTime; // _auctionId => timestamp
-    uint256 internal hammerTimeDuration; // _auctionId => duration in seconds
-    uint256 internal bidDecimals; // _auctionId => bidDecimals
-    uint256 internal stepMin; // _auctionId => stepMin
-    uint256 internal incMin; // _auctionId => minimal earned incentives
-    uint256 internal incMax; // _auctionId => maximal earned incentives
-    uint256 internal bidMultiplier; // _auctionId => bid incentive growth multiplier
-
-    uint256 internal floorPrice;
 
     constructor(
         uint256 _startTime,

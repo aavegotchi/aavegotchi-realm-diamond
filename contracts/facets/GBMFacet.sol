@@ -185,15 +185,15 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     /// @param _tokenContract The token contract the auctionned token belong to
     /// @param _tokenId The token ID of the token being auctionned
     /// @param _tokenKind either bytes4(keccak256("ERC721")) or bytes4(keccak256("ERC1155"))
-    /// @param _initiator Set to 0 if you want to use the default value registered for the token contract (if wanting to reset to default,
-    /// use an initiator sending back 0 on it's getters)
+    /// @param _isReset Set to `false` if you want to use the default value registered for the token contract (if wanting to reset to default,
+    /// use `true`)
     function registerAnAuctionToken(
         address _tokenContract,
         uint256 _tokenId,
         bytes4 _tokenKind,
-        address _initiator
+        bool _isReset
     ) public {
-        modifyAnAuctionToken(_tokenContract, _tokenId, _tokenKind, _initiator, 0, false);
+        modifyAnAuctionToken(_tokenContract, _tokenId, _tokenKind, _isReset, 0, false);
     }
 
     /// @notice Register an auction token and emit the relevant AuctionInitialized & AuctionStartTimeUpdated events
@@ -201,15 +201,15 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     /// @param _tokenContract The token contract the auctionned token belong to
     /// @param _tokenId The token ID of the token being auctionned
     /// @param _tokenKind either bytes4(keccak256("ERC721")) or bytes4(keccak256("ERC1155"))
-    /// @param _initiator Set to 0 if you want to use the default value registered for the token contract (if wanting to reset to default,
-    /// use an initiator sending back 0 on it's getters)
+    /// @param _isReset Set to `false` if you want to use the default value registered for the token contract (if wanting to reset to default,
+    /// use `true`)
     /// @param _1155Index Set to 0 if dealing with an ERC-721 or registering new 1155 test. otherwise, set to relevant index you want to reinitialize
     /// @param _rewrite Set to true if you want to rewrite the data of an existing auction, false otherwise
     function modifyAnAuctionToken(
         address _tokenContract,
         uint256 _tokenId,
         bytes4 _tokenKind,
-        address _initiator,
+        bool _isReset,
         uint256 _1155Index,
         bool _rewrite
     ) public {
@@ -265,7 +265,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
 
         s.tokenMapping[_auctionId] = newAuction; //_auctionId => token_primaryKey
 
-        if (_initiator != address(0x0)) {
+        if (_isReset) {
             s.auctions[_auctionId].startTime = s.initiatorInfo.startTime;
             s.auctions[_auctionId].endTime = s.initiatorInfo.endTime;
             s.auctions[_auctionId].hammerTimeDuration = s.initiatorInfo.hammerTimeDuration;
@@ -450,9 +450,9 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         return (_newBidValue * decimaledRatio) / (bidDecimals * bidDecimals);
     }
 
-    function massRegistrerERC721Each(
+    function registerMassERC721Each(
         address _GBM,
-        address _initiator,
+        bool _isReset,
         address _ERC721Contract,
         uint256 _tokenIDStart,
         uint256 _tokenIDEnd
@@ -460,14 +460,14 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         LibDiamond.enforceIsContractOwner();
         while (_tokenIDStart < _tokenIDEnd) {
             IERC721(_ERC721Contract).safeTransferFrom(msg.sender, _GBM, _tokenIDStart, "");
-            registerAnAuctionToken(_ERC721Contract, _tokenIDStart, bytes4(keccak256("ERC721")), _initiator);
+            registerAnAuctionToken(_ERC721Contract, _tokenIDStart, bytes4(keccak256("ERC721")), _isReset);
             _tokenIDStart++;
         }
     }
 
-    function massRegistrerERC1155Each(
+    function registerMassERC1155Each(
         address _GBM,
-        address _initiator,
+        bool _isReset,
         address _ERC1155Contract,
         uint256 _tokenID,
         uint256 _indexStart,
@@ -477,7 +477,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         registerAnAuctionContract(_ERC1155Contract);
         IERC1155(_ERC1155Contract).safeTransferFrom(msg.sender, _GBM, _tokenID, _indexEnd - _indexStart, "");
         while (_indexStart < _indexEnd) {
-            registerAnAuctionToken(_ERC1155Contract, _tokenID, bytes4(keccak256("ERC1155")), _initiator);
+            registerAnAuctionToken(_ERC1155Contract, _tokenID, bytes4(keccak256("ERC1155")), _isReset);
             _indexStart++;
         }
     }
