@@ -15,7 +15,19 @@ contract InitiatorFacet is IGBMInitiator {
     // To future developers: All the getters are called AFTER the auction ID has been generated and hence you can lookup
     // token_ID/Token contract/token kind using the main GBM contract getters(auctionId) if you want to return determinstic values
 
-    constructor(
+    function initContracts(
+        address _erc20Currency,
+        address _pixelcraft,
+        address _playerRewards,
+        address _daoTreasury
+    ) external {
+        s.pixelcraft = _pixelcraft;
+        s.playerRewards = _playerRewards;
+        s.daoTreasury = _daoTreasury;
+        s.erc20Currency = _erc20Currency;
+    }
+
+    function initAuctionParams(
         uint256 _startTime,
         uint256 _endTime,
         uint256 _hammerTimeDuration,
@@ -25,7 +37,7 @@ contract InitiatorFacet is IGBMInitiator {
         uint256 _incMax,
         uint256 _bidMultiplier,
         uint256 _floorPrice
-    ) {
+    ) external {
         s.initiatorInfo.startTime = _startTime;
         s.initiatorInfo.endTime = _endTime;
         s.initiatorInfo.hammerTimeDuration = _hammerTimeDuration;

@@ -19,18 +19,6 @@ import "../libraries/LibDiamond.sol";
 contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     AppStorage internal s;
 
-    constructor(
-        address _erc20Currency,
-        address _pixelcraft,
-        address _playerRewards,
-        address _daoTreasury
-    ) {
-        s.pixelcraft = _pixelcraft;
-        s.playerRewards = _playerRewards;
-        s.daoTreasury = _daoTreasury;
-        s.erc20Currency = _erc20Currency;
-    }
-
     function erc20Currency() external override returns (address) {
         return s.erc20Currency;
     }
