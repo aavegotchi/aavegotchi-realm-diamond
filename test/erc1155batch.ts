@@ -28,10 +28,10 @@ let totalAuctions = Object.values<number>(activeConfig.auctions).reduce(
 
 interface LocalConf {
   id: string;
-  gbm?: string;
-  gbmInitiator?: string;
+  gbm: string;
+  gbmInitiator: string;
   token: string;
-  ghst?: string;
+  ghst: string;
   totalAuctions: number;
   release: boolean;
   auctions: any;
@@ -58,17 +58,19 @@ const logger = createLogger({
 });
 
 async function main() {
-  const itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
+  const itemManager = "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c";
   //Impersonate itemManager
-  await hardhat.network.provider.request({
-    method: "hardhat_impersonateAccount",
-    params: [itemManager],
-  });
+
+  const accounts = await ethers.getSigners();
+  let account = await accounts[0].getAddress();
+
+  console.log("account:", account);
+
   let signer = await ethers.getSigner(itemManager);
 
   // const accounts = await ethers.getSigners();
   const nonceManaged = new NonceManager(signer);
-  const account = await signer.getAddress();
+  account = await signer.getAddress();
 
   console.log(
     `${chalk.red.underline(
@@ -83,18 +85,17 @@ async function main() {
   let gbmInitiatorAddress: string;
 
   let ghstAddress = auctionConfig.ghst;
-  // let ghst: Contract = await ethers.getContractAt("ERC20Generic", ghstAddress);
-
   let tokenContract: Contract;
   let tokenAddress: string = auctionConfig.token;
 
   if (
     auctionConfig.release &&
-    auctionConfig.token &&
-    auctionConfig.gbm &&
-    auctionConfig.gbmInitiator
+    auctionConfig.token !== "" &&
+    auctionConfig.gbm !== "" &&
+    auctionConfig.gbmInitiator !== ""
   ) {
     // mainnet deployment
+
     console.log(`[${chalk.yellow(`ℹ️`)}] release config, using these addresses:
       GBM: ${auctionConfig.gbm}
       INITIATOR: ${auctionConfig.gbmInitiator}
@@ -119,6 +120,7 @@ async function main() {
     console.log("auctionconfig:", auctionConfig);
 
     console.log("token address:", tokenAddress);
+
     tokenContract = (
       await ethers.getContractAt("ERC1155Generic", tokenAddress)
     ).connect(nonceManaged);
@@ -131,7 +133,7 @@ async function main() {
     // let endTime = Math.floor(Date.now() / 1000) + 86400;
     let startTime = 1626357600; //2PM UTC
     let endTime = 1626357600 + 86400 * 3; //July 18, 2PM UTC
-    let hammerTimeDuration = 300;
+    let hammerTimeDuration = 1200;
     let bidDecimals = 100000;
     let stepMin = 10000;
     let incMax = 10000;
@@ -143,7 +145,8 @@ async function main() {
       ghstAddress,
       _pixelcraft,
       _playerRewards,
-      _daoTreasury
+      _daoTreasury,
+      txOps
     );
 
     const GBMContractInitiatorFactory = await ethers.getContractFactory(
@@ -172,8 +175,7 @@ async function main() {
     console.log("GBMInitiator deployed to:", gbmInitiatorAddress);
   }
 
-  // approved gbmAddress to list the token
-  // if (gbmAddress && tokenContract)
+  console.log("Approving token");
   await tokenContract.setApprovalForAll(gbmAddress, true);
 
   const approval = await tokenContract.isApprovedForAll(

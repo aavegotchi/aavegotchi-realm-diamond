@@ -94,7 +94,7 @@ contract GBM is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     /// @param _auctionID The auction you want to bid on
     /// @param _bidAmount The amount of the ERC20 token the bid is made of. They should be withdrawable by this contract.
     /// @param _highestBid The current higest bid. Throw if incorrect.
-    function bid(
+    function commitBid(
         uint256 _auctionID,
         uint256 _bidAmount,
         uint256 _highestBid

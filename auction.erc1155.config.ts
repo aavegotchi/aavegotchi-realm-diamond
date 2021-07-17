@@ -1,8 +1,8 @@
 export interface ERC1155Config {
   id?: string;
   auctions?: Object;
-  gbm?: string;
-  gbmInitiator?: string;
+  gbm: string;
+  gbmInitiator: string;
   token: string;
   ghst?: string;
   gasGwei?: number;
@@ -32,10 +32,12 @@ export default <Config>{
 
       205: 1000, // Gotchi Mug
     },
-    gasGwei: 5,
+    //  gasGwei: 30,
     release: false,
     ghst: "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
     token: "",
+    gbm: "",
+    gbmInitiator: "",
   },
   hardhat: {
     gbm: "",
@@ -56,6 +58,15 @@ export default <Config>{
     gasGwei: 2,
     release: true,
   },
+  matic: {
+    id: "auction-wearables-1",
+    gbm: "",
+    gbmInitiator: "",
+    token: "0x86935F11C86623deC8a25696E1C19a8659CbF95d",
+    ghst: "0x385eeac5cb85a38a9a07a70c73e0a3271cfb54a7",
+    gasGwei: 30,
+    release: true,
+  },
   // mainnet kovan
   // kovan: {
   // gbm: "0xC025B341fF094958179d6acdddBD86042430DE1d",
@@ -65,13 +76,4 @@ export default <Config>{
   // gasGwei: 30,
   // release: true // confirm you really want to deploy using non-dummy addresses
   // }
-  // polygon: {
-  //   id: "auction-wearables-1",
-  //   gbm: "",
-  //   gbmInitiator: "",
-  //   token: "0x86935F11C86623deC8a25696E1C19a8659CbF95d",
-  //   ghst: "0x385eeac5cb85a38a9a07a70c73e0a3271cfb54a7"
-  //   gasGwei: 30,
-  //   release: true
-  // },
 };

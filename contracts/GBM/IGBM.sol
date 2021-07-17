@@ -34,7 +34,7 @@ interface IGBM {
 
     event Auction_ItemClaimed(uint256 indexed _auctionID);
 
-    function bid(
+    function commitBid(
         uint256 _auctionID,
         uint256 _bidAmount,
         uint256 _highestBid
