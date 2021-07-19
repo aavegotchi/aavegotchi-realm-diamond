@@ -1,28 +1,27 @@
+const { deployDiamond } = require("../scripts/deploy");
 const { expect } = require("chai");
 
-//@ts-ignore
 //import hardhat, { run, ethers } from "hardhat";
 
 async function impersonate(address, contract) {
   await network.provider.request({
     method: "hardhat_impersonateAccount",
-    params: [address],
+    params: [address]
   });
   let signer = await ethers.getSigner(address);
   contract = contract.connect(signer);
   return contract;
 }
 
-describe("Test ERC721 GBM", async function () {
+describe("Test ERC721 GBM", async function() {
   this.timeout(300000);
 
   let erc721;
   let erc721Address;
   let account;
 
-  let gbm;
-  let gbmAddress;
-  let gbmInitiatorAddress;
+  let diamondAddress;
+  let gbmFacet;
   let ghst;
   let auctionId;
 
@@ -30,12 +29,12 @@ describe("Test ERC721 GBM", async function () {
   const secondBidderAddress = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
   const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
 
-  before(async function () {
+  before(async function() {
     const accounts = await ethers.getSigners();
     account = await accounts[0].getAddress();
   });
 
-  it("Can deploy ERC721 NFT Contract and mint three NFTs", async function () {
+  it("Can deploy ERC721 NFT Contract and mint three NFTs", async function() {
     //Deploy ERC721 Token for Auction
     const ERC721Factory = await ethers.getContractFactory("ERC721Generic");
     erc721 = await ERC721Factory.deploy();
@@ -51,68 +50,45 @@ describe("Test ERC721 GBM", async function () {
     expect(balanceOf).to.equal(3);
   });
 
-  it("Can deploy GBM + GBM Initiator and start an Auction", async function () {
-    //Deploy GBM Core
-    const GBMContractFactory = await ethers.getContractFactory("GBM");
-    gbm = await GBMContractFactory.deploy(ghstAddress);
-    const GBMContractInitiatorFactory = await ethers.getContractFactory(
-      "GBMInitiator"
-    );
-    gbmInitiator = await GBMContractInitiatorFactory.deploy();
+  it("Can deploy GBM + GBM Initiator and start an Auction", async function() {
+    diamondAddress = await deployDiamond();
+    gbmFacet = await ethers.getContractAt("GBMFacet", diamondAddress);
 
-    gbmAddress = gbm.address;
+    await erc721?.setApprovalForAll(diamondAddress, true);
 
-    //Initialize settings of Initiator
-    await gbmInitiator.setBidDecimals(100000);
-    await gbmInitiator.setBidMultiplier(11120);
-    await gbmInitiator.setEndTime(Math.floor(Date.now() / 1000) + 86400);
-    await gbmInitiator.setHammerTimeDuration(300);
-    await gbmInitiator.setIncMax(10000);
-    await gbmInitiator.setIncMin(1000);
-    await gbmInitiator.setStartTime(Math.floor(Date.now() / 1000));
-    await gbmInitiator.setStepMin(10000);
-
-    gbmInitiatorAddress = gbmInitiator.address;
-
-    await erc721?.setApprovalForAll(gbmAddress, true);
-
-    await gbm.massRegistrerERC721Each(
-      gbmAddress,
-      gbmInitiatorAddress,
+    await gbmFacet.registerMassERC721Each(
+      diamondAddress,
+      true,
       erc721Address,
       "0",
-      "3",
-      ethers.utils.parseEther("1")
+      "3"
     );
 
     auctionId = (
-      await gbm["getAuctionID(address,uint256)"](erc721Address, "0")
+      await gbmFacet["getAuctionID(address,uint256)"](erc721Address, "0")
     ).toString();
 
-    const auctionStartTime = await gbm.getAuctionStartTime(auctionId);
+    const auctionStartTime = await gbmFacet.getAuctionStartTime(auctionId);
     expect(Number(auctionStartTime)).to.greaterThan(0);
   });
 
-  it("Can bid on an auction", async function () {
+  it("Can bid on an auction", async function() {
     //Open bidding
-    await gbm.setBiddingAllowed(erc721Address, true);
+    await gbmFacet.setBiddingAllowed(erc721Address, true);
 
-    //@ts-ignore
     ethers.provider.send("evm_increaseTime", [3600]);
-
-    //@ts-ignore
     ethers.provider.send("evm_mine");
 
     ghst = await ethers.getContractAt("ERC20Generic", ghstAddress);
 
-    const bidder = await impersonate(bidderAddress, gbm);
+    const bidder = await impersonate(bidderAddress, gbmFacet);
     const bidderGhst = await impersonate(bidderAddress, ghst);
 
     const bidAmount = ethers.utils.parseEther("1");
 
     //Bidding
 
-    await bidderGhst.approve(gbmAddress, ethers.utils.parseEther("10000000"));
+    await bidderGhst.approve(diamondAddress, ethers.utils.parseEther("10000000"));
 
     const previousBal = await ghst.balanceOf(bidderAddress);
 
@@ -123,25 +99,25 @@ describe("Test ERC721 GBM", async function () {
     expect(afterBal).to.equal(previousBal.sub(bidAmount));
 
     //Get highest bid
-    const highestBidder = await gbm.getAuctionHighestBidder(auctionId);
-    const highestBid = await gbm.getAuctionHighestBid(auctionId);
+    const highestBidder = await gbmFacet.getAuctionHighestBidder(auctionId);
+    const highestBid = await gbmFacet.getAuctionHighestBid(auctionId);
 
     expect(highestBidder).to.equal(bidderAddress);
     expect(highestBid).to.equal(bidAmount);
   });
 
-  it("Can be outbid and address outbid receives incentive", async function () {
-    const secondBidder = await impersonate(secondBidderAddress, gbm);
+  it("Can be outbid and address outbid receives incentive", async function() {
+    const secondBidder = await impersonate(secondBidderAddress, gbmFacet);
     const secondBidderGhst = await impersonate(secondBidderAddress, ghst);
 
     const bidAmount = ethers.utils.parseEther("2");
 
     //Bidding
-    await secondBidderGhst.approve(gbmAddress, ethers.utils.parseEther("2"));
+    await secondBidderGhst.approve(diamondAddress, ethers.utils.parseEther("2"));
     let previousBid = ethers.utils.parseEther("1");
 
     const previousBal = await ghst.balanceOf(bidderAddress);
-    const dueIncentives = await gbm.getAuctionDueIncentives(auctionId);
+    const dueIncentives = await gbmFacet.getAuctionDueIncentives(auctionId);
 
     await secondBidder.bid(auctionId, bidAmount, previousBid);
 
@@ -151,22 +127,19 @@ describe("Test ERC721 GBM", async function () {
     expect(afterBal).to.equal(previousBal.add(previousBid).add(dueIncentives));
 
     //Check highest bid
-    const highestBidder = await gbm.getAuctionHighestBidder(auctionId);
-    const highestBid = await gbm.getAuctionHighestBid(auctionId);
+    const highestBidder = await gbmFacet.getAuctionHighestBidder(auctionId);
+    const highestBid = await gbmFacet.getAuctionHighestBid(auctionId);
 
     expect(highestBidder).to.equal(secondBidderAddress);
     expect(highestBid).to.equal(bidAmount);
   });
 
-  it("Can claim NFT prize", async function () {
-    //@ts-ignore
+  it("Can claim NFT prize", async function() {
     ethers.provider.send("evm_increaseTime", [25 * 3600]);
-
-    //@ts-ignore
     ethers.provider.send("evm_mine");
 
     //Claim item
-    await gbm.claim(auctionId);
+    await gbmFacet.claim(auctionId);
 
     const nftBalance = await erc721?.balanceOf(secondBidderAddress);
     expect(nftBalance).to.equal(1);
