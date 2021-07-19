@@ -42,32 +42,28 @@ For testing purposes, an implementation of each of those contract can be found i
 ### Mint and transfer a token
 
 - Mint an ERC-721 or ERC-1155 token
-- Transfer it to the GBM smart contract address.
+- Transfer it to the GBM diamond address.
 
 ### Register default auction parameters for a Token Smart Contract
 
 - On the GBM smart contract, call _registerAnAuctionContract()_ with :  
    ` _contract = the address of the smart ERC721 or ERC1155 tokens smart contract`  
-   ` _initiator = the address of the initiator you previously deployed`
 
 ### Register an auction for a token that the GBM contract hold
 
 - On the GBM smart contract, call _registerAnAuctionToken()_ with :  
    ` _contract = the address of the smart ERC721 or ERC1155 tokens smart contract `  
    ` _tokenId = the token ID of the token held by the GBM smart contract `  
-   ` _initiator = the initiator you previously deployed`  
    ` _tokenKind = 0x73ad2146 if the token is ERC721, 0x973bb640 if the token is ERC1155`  
-   ` _initiator = the address of the initiator you previously deployed, 0x0 if wanting to use default values for the contract`
 
 ### Modify an auction already registered for a token that the GBM contract hold
 
 - On the GBM smart contract, call _modifyAnAuctionToken()_ with :  
    ` _contract = the address of the smart ERC721 or ERC1155 tokens smart contract `  
    ` _tokenId = the token ID of the token held by the GBM smart contract `  
-   ` _initiator = the initiator you previously deployed`  
    ` _tokenKind = 0x73ad2146 if the token is ERC721, 0x973bb640 if the token is ERC1155`  
-   ` _initiator = the address of the initiator you previously deployed. Have the initater values set to 0 if wanting to rest the auction to default contract values`  
-   ` _1155Index = the numerotation of an ERC1155 token within a single token ID. use getAuctionID(address _contract, uint256 _tokenID, uint256 _tokenIndex) to match it`
+   ` _isReset = the address of the initiator you previously deployed. Have the initater values set to 0 if wanting to rest the auction to default contract values`  
+   ` _1155Index = Set to `false` if you want to use the default value registered for the token contract (if wanting to reset to default,use `true`)`
   ` _rewrite = true if modifiying an existing auction, false if registering a new one`
 
 ### Allowing bidding for tokens
