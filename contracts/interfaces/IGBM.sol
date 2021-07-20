@@ -42,7 +42,7 @@ interface IGBM {
 
     function claim(uint256 _auctionId) external;
 
-    function erc20Currency() external returns (address);
+    function erc20Currency() external view returns (address);
 
     function getAuctionID(address _contract, uint256 _tokenID) external view returns (uint256);
 

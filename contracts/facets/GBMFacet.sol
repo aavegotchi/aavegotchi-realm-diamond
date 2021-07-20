@@ -19,7 +19,7 @@ import "../libraries/LibDiamond.sol";
 contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     AppStorage internal s;
 
-    function erc20Currency() external override returns (address) {
+    function erc20Currency() external view override returns (address) {
         return s.erc20Currency;
     }
 
