@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.5;
+pragma solidity ^0.8.0;
 
 //Struct used to store the representation of an NFT being auctionned
 struct TokenRepresentation {

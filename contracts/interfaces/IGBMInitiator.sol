@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 // © Copyright 2021. Patent pending. All rights reserved. Perpetual Altruism Ltd.
-pragma solidity 0.8.5;
+pragma solidity ^0.8.0;
 
 /// @title IGBMInitiator: GBM Auction initiator interface.
 /// @dev Will be called when initializing GBM auctions on the main GBM contract.
