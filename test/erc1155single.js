@@ -22,7 +22,7 @@ describe("Test ERC1155 GBM", async function() {
 
   let diamondAddress;
   let gbmFacet;
-  let initiatorFacet;
+  let settingsFacet;
   let ghst;
   let auctionId;
 
@@ -55,8 +55,8 @@ describe("Test ERC1155 GBM", async function() {
     //Deploy GBM Core
     diamondAddress = await deployDiamond();
     gbmFacet = await ethers.getContractAt("GBMFacet", diamondAddress);
-    initiatorFacet = await ethers.getContractAt("InitiatorFacet", diamondAddress);
-    await initiatorFacet.setFloorPrice(floorPrice);
+    settingsFacet = await ethers.getContractAt("SettingsFacet", diamondAddress);
+    await settingsFacet.setFloorPrice(floorPrice);
 
     await erc1155.setApprovalForAll(diamondAddress, true);
   });

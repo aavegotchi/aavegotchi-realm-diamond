@@ -57,7 +57,7 @@ async function deployDiamond () {
   const FacetNames = [
     'DiamondLoupeFacet',
     'OwnershipFacet',
-    'InitiatorFacet',
+    'SettingsFacet',
     'GBMFacet'
   ]
   const cut = []
@@ -89,9 +89,9 @@ async function deployDiamond () {
   console.log('Completed diamond cut')
 
   // // For confirmation
-  // const initiatorFacet = await ethers.getContractAt('InitiatorFacet', diamond.address)
-  // const initInf = await initiatorFacet.getInitiatorInfo()
-  // console.log('Saved initInfo', initInf)
+  // const settingsFacet = await ethers.getContractAt('SettingsFacet', diamond.address)
+  // let savedInfo = await settingsFacet.getInitiatorInfo()
+  // console.log('Saved initInfo', savedInfo)
 
   return diamond.address
 }

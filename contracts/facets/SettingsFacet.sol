@@ -9,7 +9,7 @@ import "../libraries/LibDiamond.sol";
 /// @title GBM auction contract Initiator
 /// @dev Implementation of IGBM. Feel free to cook up your own implementation for more complex patterns.
 /// @author Guillaume Gonnaud
-contract InitiatorFacet is IGBMInitiator {
+contract SettingsFacet is IGBMInitiator {
     AppStorage internal s;
 
     // To future developers: All the getters are called AFTER the auction ID has been generated and hence you can lookup
