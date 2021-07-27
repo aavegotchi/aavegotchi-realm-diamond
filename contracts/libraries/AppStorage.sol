@@ -8,6 +8,13 @@ struct TokenRepresentation {
     bytes4 tokenKind; // The ERC name of the token implementation bytes4(keccak256("ERC721")) or bytes4(keccak256("ERC1155"))
 }
 
+struct ContractAddresses {
+    address pixelcraft;
+    address playerRewards;
+    address daoTreasury;
+    address erc20Currency;
+}
+
 struct InitiatorInfo {
     uint256 startTime;
     uint256 endTime;

@@ -13,10 +13,18 @@ import { IDiamondLoupe } from "../interfaces/IDiamondLoupe.sol";
 import { IDiamondCut } from "../interfaces/IDiamondCut.sol";
 import { IERC173 } from "../interfaces/IERC173.sol";
 import { IERC165 } from "../interfaces/IERC165.sol";
+import { AppStorage, ContractAddresses, InitiatorInfo } from "../libraries/AppStorage.sol";
 
-contract DiamondInit {    
+contract DiamondInit {
+    AppStorage internal s;
 
-    function init() external {
+    function init(ContractAddresses memory contracts, InitiatorInfo memory initInfo) external {
+        s.pixelcraft = contracts.pixelcraft;
+        s.playerRewards = contracts.playerRewards;
+        s.daoTreasury = contracts.daoTreasury;
+        s.erc20Currency = contracts.erc20Currency;
+        s.initiatorInfo = initInfo;
+
         // adding ERC165 data
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
         ds.supportedInterfaces[type(IERC165).interfaceId] = true;
@@ -24,6 +32,4 @@ contract DiamondInit {
         ds.supportedInterfaces[type(IDiamondLoupe).interfaceId] = true;
         ds.supportedInterfaces[type(IERC173).interfaceId] = true;
     }
-
-
 }

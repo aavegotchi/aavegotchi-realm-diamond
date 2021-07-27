@@ -3,6 +3,32 @@
 
 const { getSelectors, FacetCutAction } = require('./libraries/diamond.js')
 
+// Init GBM
+const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
+const pixelcraft = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
+const playerRewards = "0x27DF5C6dcd360f372e23d5e63645eC0072D0C098";
+const daoTreasury = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
+
+let startTime = Math.floor(Date.now() / 1000);
+let endTime = Math.floor(Date.now() / 1000) + 86400;
+let hammerTimeDuration = 300;
+let bidDecimals = 100000;
+let stepMin = 10000;
+let incMax = 10000;
+let incMin = 1000;
+let bidMultiplier = 11120;
+let floorPrice = 0;
+
+const contractAddresses = {
+  erc20Currency: ghstAddress,
+  pixelcraft, playerRewards, daoTreasury
+}
+
+const initInfo = {
+  startTime, endTime, hammerTimeDuration, bidDecimals,
+  stepMin, incMax, incMin, bidMultiplier, floorPrice
+}
+
 async function deployDiamond () {
   const accounts = await ethers.getSigners()
   const contractOwner = accounts[0]
@@ -48,13 +74,12 @@ async function deployDiamond () {
   }
 
   // upgrade diamond with facets
-  console.log('')
   console.log('Diamond Cut:', cut)
   const diamondCut = await ethers.getContractAt('IDiamondCut', diamond.address)
   let tx
   let receipt
   // call to init function
-  let functionCall = diamondInit.interface.encodeFunctionData('init')
+  let functionCall = diamondInit.interface.encodeFunctionData('init', [contractAddresses, initInfo])
   tx = await diamondCut.diamondCut(cut, diamondInit.address, functionCall)
   console.log('Diamond cut tx: ', tx.hash)
   receipt = await tx.wait()
@@ -63,41 +88,10 @@ async function deployDiamond () {
   }
   console.log('Completed diamond cut')
 
-  // Init GBM
-  const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
-  const _pixelcraft = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
-  const _playerRewards = "0x27DF5C6dcd360f372e23d5e63645eC0072D0C098";
-  const _daoTreasury = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
-
-  let startTime = Math.floor(Date.now() / 1000);
-  let endTime = Math.floor(Date.now() / 1000) + 86400;
-  let hammerTimeDuration = 300;
-  let bidDecimals = 100000;
-  let stepMin = 10000;
-  let incMax = 10000;
-  let incMin = 1000;
-  let bidMultiplier = 11120;
-  let floorPrice = 0;
-
-  const initiatorFacet = await ethers.getContractAt('InitiatorFacet', diamond.address)
-
-  console.log('Initialize contracts started...')
-  tx = await initiatorFacet.initContracts(ghstAddress, _pixelcraft, _playerRewards, _daoTreasury)
-  console.log('Initialize contracts tx:', tx.hash)
-  receipt = await tx.wait()
-  if (!receipt.status) {
-    throw Error(`Initialize contracts failed: ${tx.hash}`)
-  }
-  console.log('Initialize contracts completed')
-
-  console.log('Initialize default auction params started....')
-  tx = await initiatorFacet.initAuctionParams(startTime, endTime, hammerTimeDuration, bidDecimals, stepMin, incMax, incMin, bidMultiplier, floorPrice)
-  console.log('Initialize default auction params tx:', tx.hash)
-  receipt = await tx.wait()
-  if (!receipt.status) {
-    throw Error(`Initialize default auction params  failed: ${tx.hash}`)
-  }
-  console.log('Initialize default auction params completed')
+  // // For confirmation
+  // const initiatorFacet = await ethers.getContractAt('InitiatorFacet', diamond.address)
+  // const initInf = await initiatorFacet.getInitiatorInfo()
+  // console.log('Saved initInfo', initInf)
 
   return diamond.address
 }
