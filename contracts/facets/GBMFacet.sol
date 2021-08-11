@@ -12,6 +12,7 @@ import "../interfaces/IERC1155TokenReceiver.sol";
 import "../interfaces/Ownable.sol";
 import "../libraries/AppStorage.sol";
 import "../libraries/LibDiamond.sol";
+import "../libraries/LibSignature.sol";
 
 /// @title GBM auction contract
 /// @dev See GBM.auction on how to use this contract
@@ -27,11 +28,28 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     /// @param _auctionId The auction you want to bid on
     /// @param _bidAmount The amount of the ERC20 token the bid is made of. They should be withdrawable by this contract.
     /// @param _highestBid The current higest bid. Throw if incorrect.
+    /// @param _signature Signature
+    function placeBid(
+        uint256 _auctionId,
+        uint256 _bidAmount,
+        uint256 _highestBid,
+        bytes memory _signature
+    ) external {
+        bytes32 messageHash = keccak256(abi.encodePacked(_auctionId, _bidAmount, _highestBid));
+        require(LibSignature.isValid(messageHash, _signature, s.backendPubKey), "bid: Invalid signature");
+
+        bid(_auctionId, _bidAmount, _highestBid);
+    }
+
+    /// @notice Place a GBM bid for a GBM auction
+    /// @param _auctionId The auction you want to bid on
+    /// @param _bidAmount The amount of the ERC20 token the bid is made of. They should be withdrawable by this contract.
+    /// @param _highestBid The current higest bid. Throw if incorrect.
     function bid(
         uint256 _auctionId,
         uint256 _bidAmount,
         uint256 _highestBid
-    ) external override {
+    ) internal {
         require(s.collections[s.tokenMapping[_auctionId].contractAddress].biddingAllowed, "bid: bidding is currently not allowed");
 
         require(_bidAmount > 1, "bid: _bidAmount cannot be 0");

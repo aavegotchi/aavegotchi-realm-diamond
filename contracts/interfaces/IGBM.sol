@@ -34,11 +34,11 @@ interface IGBM {
 
     event AuctionItemClaimed(uint256 indexed _auctionId);
 
-    function bid(
-        uint256 _auctionId,
-        uint256 _bidAmount,
-        uint256 _highestBid
-    ) external;
+//    function bid(
+//        uint256 _auctionId,
+//        uint256 _bidAmount,
+//        uint256 _highestBid
+//    ) external;
 
     function claim(uint256 _auctionId) external;
 

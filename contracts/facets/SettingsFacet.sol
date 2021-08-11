@@ -76,6 +76,11 @@ contract SettingsFacet is IGBMInitiator {
         s.initiatorInfo.startTime = _startTime;
     }
 
+    function setBackendPubKey(bytes memory _backendPubKey) external {
+        LibDiamond.enforceIsContractOwner();
+        s.backendPubKey = _backendPubKey;
+    }
+
     function setEndTime(uint256 _endTime) external {
         LibDiamond.enforceIsContractOwner();
         s.initiatorInfo.endTime = _endTime;
