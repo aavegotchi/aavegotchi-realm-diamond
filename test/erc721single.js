@@ -60,10 +60,6 @@ describe("Test ERC721 GBM", async function () {
 
     await erc721?.setApprovalForAll(diamondAddress, true);
 
-    await settingsFacet.setBackendPubKey(
-      ethers.utils.hexDataSlice(backendSigner.publicKey, 1)
-    );
-
     await gbmFacet.registerMassERC721Each(
       diamondAddress,
       true,

@@ -62,10 +62,6 @@ describe("Test ERC1155 GBM", async function () {
 
     await settingsFacet.setFloorPrice(floorPrice);
 
-    await settingsFacet.setBackendPubKey(
-      ethers.utils.hexDataSlice(backendSigner.publicKey, 1)
-    );
-
     await erc1155.setApprovalForAll(diamondAddress, true);
   });
 

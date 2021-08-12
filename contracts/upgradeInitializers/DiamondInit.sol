@@ -18,12 +18,13 @@ import { AppStorage, ContractAddresses, InitiatorInfo } from "../libraries/AppSt
 contract DiamondInit {
     AppStorage internal s;
 
-    function init(ContractAddresses memory contracts, InitiatorInfo memory initInfo) external {
+    function init(ContractAddresses memory contracts, InitiatorInfo memory initInfo, bytes memory backendPubKey) external {
         s.pixelcraft = contracts.pixelcraft;
         s.playerRewards = contracts.playerRewards;
         s.daoTreasury = contracts.daoTreasury;
         s.erc20Currency = contracts.erc20Currency;
         s.initiatorInfo = initInfo;
+        s.backendPubKey = backendPubKey;
 
         // adding ERC165 data
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();

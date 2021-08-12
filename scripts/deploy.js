@@ -78,8 +78,9 @@ async function deployDiamond () {
   const diamondCut = await ethers.getContractAt('IDiamondCut', diamond.address)
   let tx
   let receipt
+  let backendSigner = new ethers.Wallet(process.env.GBM_PK); // PK should start with '0x'
   // call to init function
-  let functionCall = diamondInit.interface.encodeFunctionData('init', [contractAddresses, initInfo])
+  let functionCall = diamondInit.interface.encodeFunctionData('init', [contractAddresses, initInfo, ethers.utils.hexDataSlice(backendSigner.publicKey, 1)])
   tx = await diamondCut.diamondCut(cut, diamondInit.address, functionCall)
   console.log('Diamond cut tx: ', tx.hash)
   receipt = await tx.wait()
