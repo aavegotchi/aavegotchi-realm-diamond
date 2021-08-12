@@ -6,14 +6,14 @@ const { expect } = require("chai");
 async function impersonate(address, contract) {
   await network.provider.request({
     method: "hardhat_impersonateAccount",
-    params: [address]
+    params: [address],
   });
   let signer = await ethers.getSigner(address);
   contract = contract.connect(signer);
   return contract;
 }
 
-describe("Test ERC1155 GBM", async function() {
+describe("Test ERC1155 GBM", async function () {
   this.timeout(300000);
 
   let erc1155;
@@ -34,7 +34,7 @@ describe("Test ERC1155 GBM", async function() {
   const _playerRewards = "0x27DF5C6dcd360f372e23d5e63645eC0072D0C098";
   const _daoTreasury = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
 
-  const backendPrivKey = "0x20c560026acf87032bd033ff2136fdb0312973c6c9b72193c236c3b44d60e7dd";
+  const backendPrivKey = process.env.GBM_PK;
   let backendSigner = new ethers.Wallet(backendPrivKey);
 
   let pcBalance;
@@ -46,12 +46,12 @@ describe("Test ERC1155 GBM", async function() {
   const bidAmount1 = ethers.utils.parseEther("1.1");
   const bidAmount2 = ethers.utils.parseEther("2");
 
-  before(async function() {
+  before(async function () {
     const accounts = await ethers.getSigners();
     account = await accounts[0].getAddress();
   });
 
-  it("Can deploy GBM + GBM Initiator and start an Auction", async function() {
+  it("Can deploy GBM + GBM Initiator and start an Auction", async function () {
     erc1155Address = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
     erc1155 = await ethers.getContractAt("ERC1155Generic", erc1155Address);
 
@@ -62,12 +62,14 @@ describe("Test ERC1155 GBM", async function() {
 
     await settingsFacet.setFloorPrice(floorPrice);
 
-    await settingsFacet.setBackendPubKey(ethers.utils.hexDataSlice(backendSigner.publicKey, 1));
+    await settingsFacet.setBackendPubKey(
+      ethers.utils.hexDataSlice(backendSigner.publicKey, 1)
+    );
 
     await erc1155.setApprovalForAll(diamondAddress, true);
   });
 
-  it("Transfer NFTs to deployer and start auction", async function() {
+  it("Transfer NFTs to deployer and start auction", async function () {
     const connectedERC1155 = await impersonate(bidderAddress, erc1155);
 
     //aave hero mask
@@ -112,7 +114,7 @@ describe("Test ERC1155 GBM", async function() {
     expect(Number(auctionInfo.startTime)).to.greaterThan(0);
   });
 
-  it("Can bid on an auction", async function() {
+  it("Can bid on an auction", async function () {
     //Open bidding
     ethers.provider.send("evm_increaseTime", [3600]);
     ethers.provider.send("evm_mine");
@@ -124,36 +126,53 @@ describe("Test ERC1155 GBM", async function() {
 
     //Bidding
 
-    await bidderGhst.approve(diamondAddress, ethers.utils.parseEther("10000000"));
+    await bidderGhst.approve(
+      diamondAddress,
+      ethers.utils.parseEther("10000000")
+    );
 
     const previousBal = await ghst.balanceOf(bidderAddress);
 
     //Cannot bid lower than price floor
 
-    let messageHash = ethers.utils.solidityKeccak256(["uint256", "uint256", "uint256"], [auctionId, bidAmountTooLow, "0"]);
-    let signedMessage = await backendSigner.signMessage(ethers.utils.arrayify(messageHash));
+    let messageHash = ethers.utils.solidityKeccak256(
+      ["uint256", "uint256", "uint256"],
+      [auctionId, bidAmountTooLow, "0"]
+    );
+    let signedMessage = await backendSigner.signMessage(
+      ethers.utils.arrayify(messageHash)
+    );
     let signature = ethers.utils.arrayify(signedMessage);
 
     signedMessage = await backendSigner.signMessage(messageHash);
     let invalidSignature = ethers.utils.arrayify(signedMessage);
 
     // check both invalid signature and data
-    await expect(bidder.placeBid(auctionId, bidAmountTooLow, "0", invalidSignature)).to.be.revertedWith("bid: Invalid signature");
+    await expect(
+      bidder.placeBid(auctionId, bidAmountTooLow, "0", invalidSignature)
+    ).to.be.revertedWith("bid: Invalid signature");
 
     // place bid with valid signature, and invalid data
     await expect(
       bidder.placeBid(auctionId, bidAmountTooLow, "0", signature)
     ).to.be.revertedWith("bid: must be higher than floor price");
 
-    messageHash = ethers.utils.solidityKeccak256(["uint256", "uint256", "uint256"], [auctionId, bidAmount1, "0"]);
-    signedMessage = await backendSigner.signMessage(ethers.utils.arrayify(messageHash));
+    messageHash = ethers.utils.solidityKeccak256(
+      ["uint256", "uint256", "uint256"],
+      [auctionId, bidAmount1, "0"]
+    );
+    signedMessage = await backendSigner.signMessage(
+      ethers.utils.arrayify(messageHash)
+    );
     signature = ethers.utils.arrayify(signedMessage);
 
     signedMessage = await backendSigner.signMessage(messageHash);
     invalidSignature = ethers.utils.arrayify(signedMessage);
 
     // check invalid signature and valid data
-    await expect(bidder.placeBid(auctionId, bidAmount1, "0", invalidSignature)).to.be.revertedWith("bid: Invalid signature");
+    await expect(
+      bidder.placeBid(auctionId, bidAmount1, "0", invalidSignature)
+    ).to.be.revertedWith("bid: Invalid signature");
 
     // place bid with both valid signature and data
     await bidder.placeBid(auctionId, bidAmount1, "0", signature);
@@ -170,19 +189,27 @@ describe("Test ERC1155 GBM", async function() {
     expect(highestBid).to.equal(bidAmount1);
   });
 
-  it("Can be outbid and address outbid receives incentive", async function() {
+  it("Can be outbid and address outbid receives incentive", async function () {
     const secondBidder = await impersonate(secondBidderAddress, gbmFacet);
     const secondBidderGhst = await impersonate(secondBidderAddress, ghst);
 
     //Bidding
-    await secondBidderGhst.approve(diamondAddress, ethers.utils.parseEther("2"));
+    await secondBidderGhst.approve(
+      diamondAddress,
+      ethers.utils.parseEther("2")
+    );
     let previousBid = bidAmount1;
 
     const previousBal = await ghst.balanceOf(bidderAddress);
     const dueIncentives = await gbmFacet.getAuctionDueIncentives(auctionId);
 
-    let messageHash = ethers.utils.solidityKeccak256(["uint256", "uint256", "uint256"], [auctionId, bidAmount2, previousBid]);
-    let signedMessage = await backendSigner.signMessage(ethers.utils.arrayify(messageHash));
+    let messageHash = ethers.utils.solidityKeccak256(
+      ["uint256", "uint256", "uint256"],
+      [auctionId, bidAmount2, previousBid]
+    );
+    let signedMessage = await backendSigner.signMessage(
+      ethers.utils.arrayify(messageHash)
+    );
     let signature = ethers.utils.arrayify(signedMessage);
 
     await secondBidder.placeBid(auctionId, bidAmount2, previousBid, signature);
@@ -200,7 +227,7 @@ describe("Test ERC1155 GBM", async function() {
     expect(highestBid).to.equal(bidAmount2);
   });
 
-  it("Can claim NFT prize", async function() {
+  it("Can claim NFT prize", async function () {
     ethers.provider.send("evm_increaseTime", [25 * 3600]);
     ethers.provider.send("evm_mine");
 
@@ -215,14 +242,14 @@ describe("Test ERC1155 GBM", async function() {
     expect(nftBalance).to.equal(1);
   });
 
-  it("Cannot claim twice", async function() {
+  it("Cannot claim twice", async function () {
     // Claim item
     await expect(gbmFacet.claim(auctionId)).to.be.revertedWith(
       "claim: Item has already been claimed"
     );
   });
 
-  it("Various wallet addresses should receive the correct amounts", async function() {
+  it("Various wallet addresses should receive the correct amounts", async function () {
     const auctionInfo = await gbmFacet.getAuctionInfo(auctionId);
 
     const auctionDebt = auctionInfo.debt;
