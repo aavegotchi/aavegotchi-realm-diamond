@@ -21,13 +21,16 @@ describe("Test ERC721 GBM", async function() {
   let account;
 
   let diamondAddress;
-  let gbmFacet;
+  let gbmFacet, settingsFacet;
   let ghst;
   let auctionId;
 
   const bidderAddress = "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c";
   const secondBidderAddress = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
   const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
+
+  const backendPrivKey = "0x20c560026acf87032bd033ff2136fdb0312973c6c9b72193c236c3b44d60e7dd";
+  let backendSigner = new ethers.Wallet(backendPrivKey);
 
   before(async function() {
     const accounts = await ethers.getSigners();
@@ -53,8 +56,11 @@ describe("Test ERC721 GBM", async function() {
   it("Can deploy GBM + GBM Initiator and start an Auction", async function() {
     diamondAddress = await deployDiamond();
     gbmFacet = await ethers.getContractAt("GBMFacet", diamondAddress);
+    settingsFacet = await ethers.getContractAt("SettingsFacet", diamondAddress);
 
     await erc721?.setApprovalForAll(diamondAddress, true);
+
+    await settingsFacet.setBackendPubKey(ethers.utils.hexDataSlice(backendSigner.publicKey, 1));
 
     await gbmFacet.registerMassERC721Each(
       diamondAddress,
@@ -92,7 +98,18 @@ describe("Test ERC721 GBM", async function() {
 
     const previousBal = await ghst.balanceOf(bidderAddress);
 
-    await bidder.bid(auctionId, bidAmount, "0");
+    let messageHash = ethers.utils.solidityKeccak256(["uint256", "uint256", "uint256"], [auctionId, bidAmount, "0"]);
+    let signedMessage = await backendSigner.signMessage(ethers.utils.arrayify(messageHash));
+    let signature = ethers.utils.arrayify(signedMessage);
+
+    signedMessage = await backendSigner.signMessage(messageHash);
+    let invalidSignature = ethers.utils.arrayify(signedMessage);
+
+    // check invalid signature
+    await expect(bidder.placeBid(auctionId, bidAmount, "0", invalidSignature)).to.be.revertedWith("bid: Invalid signature");
+
+    // place bid with valid signature
+    await bidder.placeBid(auctionId, bidAmount, "0", signature);
 
     const afterBal = await ghst.balanceOf(bidderAddress);
 
@@ -119,7 +136,11 @@ describe("Test ERC721 GBM", async function() {
     const previousBal = await ghst.balanceOf(bidderAddress);
     const dueIncentives = await gbmFacet.getAuctionDueIncentives(auctionId);
 
-    await secondBidder.bid(auctionId, bidAmount, previousBid);
+    let messageHash = ethers.utils.solidityKeccak256(["uint256", "uint256", "uint256"], [auctionId, bidAmount, previousBid]);
+    let signedMessage = await backendSigner.signMessage(ethers.utils.arrayify(messageHash));
+    let signature = ethers.utils.arrayify(signedMessage);
+
+    await secondBidder.placeBid(auctionId, bidAmount, previousBid, signature);
 
     const afterBal = await ghst.balanceOf(bidderAddress);
 

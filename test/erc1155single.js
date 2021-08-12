@@ -34,6 +34,9 @@ describe("Test ERC1155 GBM", async function() {
   const _playerRewards = "0x27DF5C6dcd360f372e23d5e63645eC0072D0C098";
   const _daoTreasury = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
 
+  const backendPrivKey = "0x20c560026acf87032bd033ff2136fdb0312973c6c9b72193c236c3b44d60e7dd";
+  let backendSigner = new ethers.Wallet(backendPrivKey);
+
   let pcBalance;
   let prBalance;
   let daoBalance;
@@ -56,7 +59,10 @@ describe("Test ERC1155 GBM", async function() {
     diamondAddress = await deployDiamond();
     gbmFacet = await ethers.getContractAt("GBMFacet", diamondAddress);
     settingsFacet = await ethers.getContractAt("SettingsFacet", diamondAddress);
+
     await settingsFacet.setFloorPrice(floorPrice);
+
+    await settingsFacet.setBackendPubKey(ethers.utils.hexDataSlice(backendSigner.publicKey, 1));
 
     await erc1155.setApprovalForAll(diamondAddress, true);
   });
@@ -124,11 +130,33 @@ describe("Test ERC1155 GBM", async function() {
 
     //Cannot bid lower than price floor
 
+    let messageHash = ethers.utils.solidityKeccak256(["uint256", "uint256", "uint256"], [auctionId, bidAmountTooLow, "0"]);
+    let signedMessage = await backendSigner.signMessage(ethers.utils.arrayify(messageHash));
+    let signature = ethers.utils.arrayify(signedMessage);
+
+    signedMessage = await backendSigner.signMessage(messageHash);
+    let invalidSignature = ethers.utils.arrayify(signedMessage);
+
+    // check both invalid signature and data
+    await expect(bidder.placeBid(auctionId, bidAmountTooLow, "0", invalidSignature)).to.be.revertedWith("bid: Invalid signature");
+
+    // place bid with valid signature, and invalid data
     await expect(
-      bidder.bid(auctionId, bidAmountTooLow, "0")
+      bidder.placeBid(auctionId, bidAmountTooLow, "0", signature)
     ).to.be.revertedWith("bid: must be higher than floor price");
 
-    await bidder.bid(auctionId, bidAmount1, "0");
+    messageHash = ethers.utils.solidityKeccak256(["uint256", "uint256", "uint256"], [auctionId, bidAmount1, "0"]);
+    signedMessage = await backendSigner.signMessage(ethers.utils.arrayify(messageHash));
+    signature = ethers.utils.arrayify(signedMessage);
+
+    signedMessage = await backendSigner.signMessage(messageHash);
+    invalidSignature = ethers.utils.arrayify(signedMessage);
+
+    // check invalid signature and valid data
+    await expect(bidder.placeBid(auctionId, bidAmount1, "0", invalidSignature)).to.be.revertedWith("bid: Invalid signature");
+
+    // place bid with both valid signature and data
+    await bidder.placeBid(auctionId, bidAmount1, "0", signature);
 
     const afterBal = await ghst.balanceOf(bidderAddress);
 
@@ -153,7 +181,11 @@ describe("Test ERC1155 GBM", async function() {
     const previousBal = await ghst.balanceOf(bidderAddress);
     const dueIncentives = await gbmFacet.getAuctionDueIncentives(auctionId);
 
-    await secondBidder.bid(auctionId, bidAmount2, previousBid);
+    let messageHash = ethers.utils.solidityKeccak256(["uint256", "uint256", "uint256"], [auctionId, bidAmount2, previousBid]);
+    let signedMessage = await backendSigner.signMessage(ethers.utils.arrayify(messageHash));
+    let signature = ethers.utils.arrayify(signedMessage);
+
+    await secondBidder.placeBid(auctionId, bidAmount2, previousBid, signature);
 
     const afterBal = await ghst.balanceOf(bidderAddress);
 
