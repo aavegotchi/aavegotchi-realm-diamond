@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: CC0-1.0
-pragma solidity 0.8.5; 
+pragma solidity ^0.8.0;
 
 /// @title ERC-1155 Multi Token Standard
 /// @dev ee https://eips.ethereum.org/EIPS/eip-1155

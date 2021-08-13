@@ -1,4 +1,4 @@
-# GBM_Library_Aavegotchi
+# GBM_Diamond_Aavegotchi
 
 Working repo for the GBM auction contract
 
@@ -9,66 +9,61 @@ The GBM auction is the intellectual property of Perpetual Altruism Ltd. This cod
 GBM: 0xC025B341fF094958179d6acdddBD86042430DE1d
 Initiator: 0x3EF3b22917D663ECE1896F98251fa44d96052e07
 
-## Setup and deployments
-
-Use your favorite deploying tools. Easiest way for tinkering is using https://remix.ethereum.org + remixd  
-Those contract can be used "as is" for live projects, but be aware they are not upgradable and can only auction a specific NFT once.
-
 ### Setup the token contracts
 
 - Deploy the ERC-20 token contract that is gonna be used as currency and either ERC-721 or ERC-1155 token contracts to be used as NFTs to auction.
+- For Aavegotchi, GHST is used instead of deploying new ERC-20.
 
-For testing purposes, an implementation of each of those contract can be found in _src/contracts/token/ERCxxxGeneric.sol_
+For testing purposes, an implementation of each of those contract can be found in _src/contracts/test/ERCxxxGeneric.sol_
 
-### Setup the GBM contract
+### Setup the GBM Diamond and Facets
 
-- Deploy the _src/contracts/GBM/GBM.sol_ GBM contract with the following parameter :
+- GBM Diamond and facets could be deployed with following deploy script.
+  
+  _src/scripts/deploy.js_
+- Before deploy, you need to check and configure default aution parameters for GBM in deploy script.
+  ```
+  const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
+  const _pixelcraft = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
+  const _playerRewards = "0x27DF5C6dcd360f372e23d5e63645eC0072D0C098";
+  const _daoTreasury = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
 
-  `_ERC20Currency = The address of the ERC20 smart contract to be used as currency`
+  let startTime = Math.floor(Date.now() / 1000);
+  let endTime = Math.floor(Date.now() / 1000) + 86400;
+  let hammerTimeDuration = 300;
+  let bidDecimals = 100000;
+  let stepMin = 10000;
+  let incMax = 10000;
+  let incMin = 1000;
+  let bidMultiplier = 11120;
+  let floorPrice = 0;
+  ```
 
 ### Mint and transfer a token
 
 - Mint an ERC-721 or ERC-1155 token
-- Transfer it to the GBM smart contract address.
-
-### Setup auction parameters
-
-- Deploy the _src/contracts/GBM/GBMInitiator.sol_ GBMInitiator contract
-- Use the setters of GBMInitiator with the following suggested parameters
-
-  ` setBidDecimals(100000);`  
-   ` setBidMultiplier(11120);`  
-   ` setEndTime("in 25mn"); //Use https://www.unixtimestamp.com if needed`  
-   ` setHammerTimeDuration(300); // 5mn of additional time at the end of an auction if new incoming bid`  
-   ` setIncMax(10000);`  
-   ` setIncMin(1000);`  
-   ` setStartTime("in 15mn");`  
-   ` setStepMin(10000);`
+- Transfer it to the GBM diamond address.
 
 ### Register default auction parameters for a Token Smart Contract
 
 - On the GBM smart contract, call _registerAnAuctionContract()_ with :  
    ` _contract = the address of the smart ERC721 or ERC1155 tokens smart contract`  
-   ` _initiator = the address of the initiator you previously deployed`
 
 ### Register an auction for a token that the GBM contract hold
 
 - On the GBM smart contract, call _registerAnAuctionToken()_ with :  
    ` _contract = the address of the smart ERC721 or ERC1155 tokens smart contract `  
    ` _tokenId = the token ID of the token held by the GBM smart contract `  
-   ` _initiator = the initiator you previously deployed`  
    ` _tokenKind = 0x73ad2146 if the token is ERC721, 0x973bb640 if the token is ERC1155`  
-   ` _initiator = the address of the initiator you previously deployed, 0x0 if wanting to use default values for the contract`
 
 ### Modify an auction already registered for a token that the GBM contract hold
 
 - On the GBM smart contract, call _modifyAnAuctionToken()_ with :  
    ` _contract = the address of the smart ERC721 or ERC1155 tokens smart contract `  
    ` _tokenId = the token ID of the token held by the GBM smart contract `  
-   ` _initiator = the initiator you previously deployed`  
    ` _tokenKind = 0x73ad2146 if the token is ERC721, 0x973bb640 if the token is ERC1155`  
-   ` _initiator = the address of the initiator you previously deployed. Have the initater values set to 0 if wanting to rest the auction to default contract values`  
-   ` _1155Index = the numerotation of an ERC1155 token within a single token ID. use getAuctionID(address _contract, uint256 _tokenID, uint256 _tokenIndex) to match it`
+   ` _isReset = the address of the initiator you previously deployed. Have the initater values set to 0 if wanting to rest the auction to default contract values`  
+   ` _1155Index = Set to `false` if you want to use the default value registered for the token contract (if wanting to reset to default,use `true`)`
   ` _rewrite = true if modifiying an existing auction, false if registering a new one`
 
 ### Allowing bidding for tokens

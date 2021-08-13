@@ -1,6 +1,6 @@
 build/*
 artifacts/*
-contracts/tokens/artifacts/*
+contracts/test/artifacts/*
 contracts/GBM/artifacts/*
 contracts/Helpers/artifacts/*
 .env
@@ -10,4 +10,5 @@ yarn-error.log
 logs/hardhat
 logs/kovan
 cache
+cache/
 logs

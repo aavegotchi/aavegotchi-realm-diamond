@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 // © Copyright 2021. Patent pending. All rights reserved. Perpetual Altruism Ltd.
-pragma solidity 0.8.5;
+pragma solidity ^0.8.0;
 
-import "./IERC1155.sol";
-import "./IERC1155TokenReceiver.sol";
-import "./IERC165.sol";
+import "../interfaces/IERC1155.sol";
+import "../interfaces/IERC1155TokenReceiver.sol";
+import "../interfaces/IERC165.sol";
 
 /// @author Guillaume Gonnaud 2021
 /// @title ERC1155 Generic placeholder smart contract for testing and ABI

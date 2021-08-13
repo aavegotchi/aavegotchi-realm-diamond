@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 // © Copyright 2021. Patent pending. All rights reserved. Perpetual Altruism Ltd.
-pragma solidity 0.8.5; 
+pragma solidity ^0.8.0;
 
-import "./IERC20.sol";
+import "../interfaces/IERC20.sol";
 
 /// @author Guillaume Gonnaud 2020
 /// @title ERC20 Generic placeholder smart contract for testing and ABI
