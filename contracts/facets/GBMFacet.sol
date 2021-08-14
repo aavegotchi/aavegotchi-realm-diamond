@@ -29,7 +29,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     /// @param _bidAmount The amount of the ERC20 token the bid is made of. They should be withdrawable by this contract.
     /// @param _highestBid The current higest bid. Throw if incorrect.
     /// @param _signature Signature
-    function placeBid(
+    function commitBid(
         uint256 _auctionId,
         uint256 _bidAmount,
         uint256 _highestBid,
@@ -62,8 +62,12 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         require(getAuctionEndTime(_auctionId) >= block.timestamp, "bid: Auction has already ended");
 
         require(_bidAmount > _highestBid, "bid: _bidAmount must be higher than _highestBid");
+
         require(
-            (_highestBid * (getAuctionBidDecimals(_auctionId)) + (getAuctionStepMin(_auctionId) / getAuctionBidDecimals(_auctionId))) >= _highestBid,
+            // (_highestBid * (getAuctionBidDecimals(_auctionId)) + (getAuctionStepMin(_auctionId) / getAuctionBidDecimals(_auctionId))) >= _highestBid,
+            // "bid: _bidAmount must meet the minimum bid"
+
+            (_highestBid * (getAuctionBidDecimals(_auctionId) + getAuctionStepMin(_auctionId))) <= (_bidAmount * getAuctionBidDecimals(_auctionId)),
             "bid: _bidAmount must meet the minimum bid"
         );
 
@@ -148,6 +152,11 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         IERC20(s.erc20Currency).transferFrom(address(this), s.pixelcraft, companyShare);
         IERC20(s.erc20Currency).transferFrom(address(this), s.playerRewards, playerRewardsShare);
         IERC20(s.erc20Currency).transferFrom(address(this), s.daoTreasury, daoShare);
+
+        //todo: test
+        if (s.auctions[_auctionId].highestBid == 0) {
+            s.auctions[_auctionId].highestBidder = LibDiamond.contractOwner();
+        }
 
         if (s.tokenMapping[_auctionId].tokenKind == bytes4(keccak256("ERC721"))) {
             //0x73ad2146
@@ -256,7 +265,10 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
                 "registerAnAuctionToken:  the specified ERC-1155 token cannot be auctionned"
             );
 
-            require(_1155Index <= s.erc1155TokensIndex[_tokenContract][_tokenId], "The specified _1155Index have not been reached yet for this token");
+            require(
+                _1155Index <= s.erc1155TokensIndex[_tokenContract][_tokenId],
+                "The specified _1155Index have not been reached yet for this token"
+            );
 
             _auctionId = uint256(keccak256(abi.encodePacked(_tokenContract, _tokenId, _tokenKind, _1155Index)));
 
