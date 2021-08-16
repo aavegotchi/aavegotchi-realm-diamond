@@ -71,15 +71,20 @@ contract SettingsFacet is IGBMInitiator, Modifiers {
 
     /* Setter Functions */
 
-    function setStartTime(uint256 _startTime) external onlyOwner {
-        s.initiatorInfo.startTime = _startTime;
+    function setInitiatorInfo(InitiatorInfo memory _info) external onlyOwner {
+        s.initiatorInfo = _info;
     }
 
     function setBackendPubKey(bytes memory _backendPubKey) external onlyOwner {
         s.backendPubKey = _backendPubKey;
     }
 
-    function setEndTime(uint256 _endTime) external {
+    /* function setStartTime(uint256 _startTime) external onlyOwner {
+        s.initiatorInfo.startTime = _startTime;
+    }
+    */
+
+    /* function setEndTime(uint256 _endTime) external {
         s.initiatorInfo.endTime = _endTime;
     }
 
@@ -106,6 +111,7 @@ contract SettingsFacet is IGBMInitiator, Modifiers {
     function setBidMultiplier(uint256 _bidMultiplier) external onlyOwner {
         s.initiatorInfo.bidMultiplier = _bidMultiplier;
     }
+    */
 
     function setFloorPrice(uint256 _floorPrice) external onlyOwner {
         s.initiatorInfo.floorPrice = _floorPrice;
