@@ -113,10 +113,10 @@ async function main() {
     stepMin,
     incMin,
     incMax,
-    bidMultiplier,
-    utils.parseEther(
+    bidMultiplier
+    /* utils.parseEther(
       (auctionConfig.priceFloor > 0 ? auctionConfig.priceFloor : 0).toString()
-    )
+    )*/
   );
 
   gbmAddress = gbm.address;
@@ -138,7 +138,7 @@ async function main() {
     END_AT: ${chalk.yellow(
       auctionConfig.initialIndex + auctionConfig.auctionCount - 1
     )}
-    PRICE_FLOOR: ${chalk.yellow(auctionConfig.priceFloor)}`
+    PRICE_FLOOR: 0`
   );
 
   //@ts-ignore

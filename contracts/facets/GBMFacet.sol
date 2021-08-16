@@ -52,7 +52,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver, Modifier
 
         require(_bidAmount > 1, "bid: _bidAmount cannot be 0");
         require(_bidAmount > s.auctions[_auctionId].floorPrice, "bid: must be higher than floor price");
-        require(_highestBid == s.auctions[_auctionId].highestBid, "bid: current highest bid do not match the submitted transaction _highestBid");
+        require(_highestBid == s.auctions[_auctionId].highestBid, "bid: current highest bid does not match the submitted transaction _highestBid");
 
         //An auction start time of 0 also indicate the auction has not been created at all
 
@@ -170,7 +170,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver, Modifier
 
     /// @notice Register an auction contract default parameters for a GBM auction. To use to save gas
     /// @param _contract The token contract the auctionned token belong to
-    function registerAnAuctionContract(address _contract) internal onlyOwner {
+    function registerAnAuctionContract(address _contract) public onlyOwner {
         s.collections[_contract].startTime = s.initiatorInfo.startTime;
         s.collections[_contract].endTime = s.initiatorInfo.endTime;
         s.collections[_contract].hammerTimeDuration = s.initiatorInfo.hammerTimeDuration;

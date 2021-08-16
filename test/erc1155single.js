@@ -22,6 +22,7 @@ describe("Test ERC1155 GBM", async function () {
 
   let diamondAddress;
   let gbmFacet;
+  let ownershipFacet;
   let settingsFacet;
   let ghst;
   let auctionId;
@@ -41,7 +42,7 @@ describe("Test ERC1155 GBM", async function () {
   let prBalance;
   let daoBalance;
 
-  // const bidAmountTooLow = ethers.utils.parseEther("0.5");
+  const bidAmountTooLow = ethers.utils.parseEther("0.5");
   const floorPrice = ethers.utils.parseEther("0");
   const bidAmount1 = ethers.utils.parseEther("1");
   console.log("bid 1:", bidAmount1.toString());
@@ -147,14 +148,14 @@ describe("Test ERC1155 GBM", async function () {
 
     // check both invalid signature and data
     await expect(
-      bidder.placeBid(auctionId, bidAmountTooLow, "0", invalidSignature)
+      bidder.commitBid(auctionId, bidAmountTooLow, "0", invalidSignature)
     ).to.be.revertedWith("bid: Invalid signature");
 
     // place bid with valid signature, and invalid data
-    await expect(
-      bidder.placeBid(auctionId, bidAmountTooLow, "0", signature)
+    /*  await expect(
+      bidder.commitBid(auctionId, bidAmountTooLow, "0", signature)
     ).to.be.revertedWith("bid: must be higher than floor price");
-    
+    */
 
     messageHash = ethers.utils.solidityKeccak256(
       ["uint256", "uint256", "uint256"],
@@ -170,11 +171,11 @@ describe("Test ERC1155 GBM", async function () {
 
     // check invalid signature and valid data
     await expect(
-      bidder.placeBid(auctionId, bidAmount1, "0", invalidSignature)
+      bidder.commitBid(auctionId, bidAmount1, "0", invalidSignature)
     ).to.be.revertedWith("bid: Invalid signature");
 
     // place bid with both valid signature and data
-    await bidder.placeBid(auctionId, bidAmount1, "0", signature);
+    await bidder.commitBid(auctionId, bidAmount1, "0", signature);
 
     const afterBal = await ghst.balanceOf(bidderAddress);
 
@@ -206,12 +207,13 @@ describe("Test ERC1155 GBM", async function () {
       ["uint256", "uint256", "uint256"],
       [auctionId, bidAmount2, previousBid]
     );
+
     let signedMessage = await backendSigner.signMessage(
       ethers.utils.arrayify(messageHash)
     );
     let signature = ethers.utils.arrayify(signedMessage);
 
-    await secondBidder.placeBid(auctionId, bidAmount2, previousBid, signature);
+    await secondBidder.commitBid(auctionId, bidAmount2, previousBid, signature);
 
     const afterBal = await ghst.balanceOf(bidderAddress);
 
@@ -269,7 +271,7 @@ describe("Test ERC1155 GBM", async function () {
 
   it("Owner can claim unbid NFT", async function () {
     const secondAuctionID = (
-      await gbm["getAuctionID(address,uint256,uint256)"](
+      await gbmFacet["getAuctionID(address,uint256,uint256)"](
         erc1155Address,
         "18",
         "1"
@@ -278,7 +280,7 @@ describe("Test ERC1155 GBM", async function () {
 
     const accounts = await ethers.getSigners();
     account = await accounts[0].getAddress();
-    const ownerGBM = await impersonate(account, gbm);
+    const ownerGBM = await impersonate(account, gbmFacet);
     //Claim item
 
     await ownerGBM.claim(secondAuctionID);
@@ -288,22 +290,31 @@ describe("Test ERC1155 GBM", async function () {
   });
 
   it("Only owner can transfer contract", async function () {
+    ownershipFacet = await ethers.getContractAt(
+      "OwnershipFacet",
+      diamondAddress
+    );
+
     const notOwnerGBM = await impersonate(
       "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5",
-      gbm
+      ownershipFacet
     );
 
     await expect(
-      notOwnerGBM.transferOwner("0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5")
+      notOwnerGBM.transferOwnership(
+        "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5"
+      )
     ).to.be.revertedWith("Must be contract owner");
 
     const accounts = await ethers.getSigners();
     account = await accounts[0].getAddress();
-    const ownerGBM = await impersonate(account, gbm);
+    const ownerGBM = await impersonate(account, ownershipFacet);
 
-    await ownerGBM.transferOwner("0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5");
+    await ownerGBM.transferOwnership(
+      "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5"
+    );
 
-    const owner = await ownerGBM.getOwner();
+    const owner = await ownerGBM.owner();
     expect(owner).to.equal("0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5");
   });
 });

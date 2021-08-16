@@ -113,11 +113,11 @@ describe("Test ERC721 GBM", async function () {
 
     // check invalid signature
     await expect(
-      bidder.placeBid(auctionId, bidAmount, "0", invalidSignature)
+      bidder.commitBid(auctionId, bidAmount, "0", invalidSignature)
     ).to.be.revertedWith("bid: Invalid signature");
 
     // place bid with valid signature
-    await bidder.placeBid(auctionId, bidAmount, "0", signature);
+    await bidder.commitBid(auctionId, bidAmount, "0", signature);
 
     const afterBal = await ghst.balanceOf(bidderAddress);
 
@@ -156,7 +156,7 @@ describe("Test ERC721 GBM", async function () {
     );
     let signature = ethers.utils.arrayify(signedMessage);
 
-    await secondBidder.placeBid(auctionId, bidAmount, previousBid, signature);
+    await secondBidder.commitBid(auctionId, bidAmount, previousBid, signature);
 
     const afterBal = await ghst.balanceOf(bidderAddress);
 

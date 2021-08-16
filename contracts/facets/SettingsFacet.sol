@@ -9,9 +9,7 @@ import "../libraries/LibDiamond.sol";
 /// @title GBM auction contract Initiator
 /// @dev Implementation of IGBM. Feel free to cook up your own implementation for more complex patterns.
 /// @author Guillaume Gonnaud
-contract SettingsFacet is IGBMInitiator {
-    AppStorage internal s;
-
+contract SettingsFacet is IGBMInitiator, Modifiers {
     // To future developers: All the getters are called AFTER the auction ID has been generated and hence you can lookup
     // token_ID/Token contract/token kind using the main GBM contract getters(auctionId) if you want to return determinstic values
 
@@ -71,53 +69,45 @@ contract SettingsFacet is IGBMInitiator {
         return s.initiatorInfo.floorPrice;
     }
 
-    function setStartTime(uint256 _startTime) external {
-        LibDiamond.enforceIsContractOwner();
+    /* Setter Functions */
+
+    function setStartTime(uint256 _startTime) external onlyOwner {
         s.initiatorInfo.startTime = _startTime;
     }
 
-    function setBackendPubKey(bytes memory _backendPubKey) external {
-        LibDiamond.enforceIsContractOwner();
+    function setBackendPubKey(bytes memory _backendPubKey) external onlyOwner {
         s.backendPubKey = _backendPubKey;
     }
 
     function setEndTime(uint256 _endTime) external {
-        LibDiamond.enforceIsContractOwner();
         s.initiatorInfo.endTime = _endTime;
     }
 
-    function setHammerTimeDuration(uint256 _hammerTimeDuration) external {
-        LibDiamond.enforceIsContractOwner();
+    function setHammerTimeDuration(uint256 _hammerTimeDuration) external onlyOwner {
         s.initiatorInfo.hammerTimeDuration = _hammerTimeDuration;
     }
 
-    function setBidDecimals(uint256 _bidDecimals) external {
-        LibDiamond.enforceIsContractOwner();
+    function setBidDecimals(uint256 _bidDecimals) external onlyOwner {
         s.initiatorInfo.bidDecimals = _bidDecimals;
     }
 
-    function setStepMin(uint256 _stepMin) external {
-        LibDiamond.enforceIsContractOwner();
+    function setStepMin(uint256 _stepMin) external onlyOwner {
         s.initiatorInfo.stepMin = _stepMin;
     }
 
-    function setIncMin(uint256 _incMin) external {
-        LibDiamond.enforceIsContractOwner();
+    function setIncMin(uint256 _incMin) external onlyOwner {
         s.initiatorInfo.incMin = _incMin;
     }
 
-    function setIncMax(uint256 _incMax) external {
-        LibDiamond.enforceIsContractOwner();
+    function setIncMax(uint256 _incMax) external onlyOwner {
         s.initiatorInfo.incMax = _incMax;
     }
 
-    function setBidMultiplier(uint256 _bidMultiplier) external {
-        LibDiamond.enforceIsContractOwner();
+    function setBidMultiplier(uint256 _bidMultiplier) external onlyOwner {
         s.initiatorInfo.bidMultiplier = _bidMultiplier;
     }
 
-    function setFloorPrice(uint256 _floorPrice) external {
-        LibDiamond.enforceIsContractOwner();
+    function setFloorPrice(uint256 _floorPrice) external onlyOwner {
         s.initiatorInfo.floorPrice = _floorPrice;
     }
 }
