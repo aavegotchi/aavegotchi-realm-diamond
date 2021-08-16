@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
+import {LibDiamond} from "./LibDiamond.sol";
 
 //Struct used to store the representation of an NFT being auctionned
 struct TokenRepresentation {
@@ -61,26 +62,26 @@ struct AppStorage {
     address pixelcraft;
     address playerRewards;
     address daoTreasury;
-
-
     InitiatorInfo initiatorInfo;
-
     //Contract address storing the ERC20 currency used in auctions
     address erc20Currency;
-
     mapping(uint256 => TokenRepresentation) tokenMapping; //_auctionId => token_primaryKey
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) auctionMapping; // contractAddress => tokenId => TokenIndex => _auctionId
-
     //var storing individual auction settings. if != null, they take priority over collection settings
     mapping(uint256 => Auction) auctions; //_auctionId => auctions
-
     mapping(uint256 => bool) auctionItemClaimed;
-
     //var storing contract wide settings. Those are used if no auctionId specific parameters is initialized
     mapping(address => Collection) collections; //tokencontract => collections
-
     mapping(address => mapping(uint256 => uint256)) erc1155TokensIndex; //Contract => TokenID => Amount being auctionned
     mapping(address => mapping(uint256 => uint256)) erc1155TokensUnderAuction; //Contract => TokenID => Amount being auctionned
-
     bytes backendPubKey;
+}
+
+contract Modifiers {
+    AppStorage internal s;
+
+    modifier onlyOwner() {
+        LibDiamond.enforceIsContractOwner();
+        _;
+    }
 }

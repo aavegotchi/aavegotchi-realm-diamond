@@ -17,9 +17,7 @@ import "../libraries/LibSignature.sol";
 /// @title GBM auction contract
 /// @dev See GBM.auction on how to use this contract
 /// @author Guillaume Gonnaud
-contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
-    AppStorage internal s;
-
+contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver, Modifiers {
     function erc20Currency() external view override returns (address) {
         return s.erc20Currency;
     }
@@ -172,9 +170,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
 
     /// @notice Register an auction contract default parameters for a GBM auction. To use to save gas
     /// @param _contract The token contract the auctionned token belong to
-    function registerAnAuctionContract(address _contract) public {
-        LibDiamond.enforceIsContractOwner();
-
+    function registerAnAuctionContract(address _contract) internal onlyOwner {
         s.collections[_contract].startTime = s.initiatorInfo.startTime;
         s.collections[_contract].endTime = s.initiatorInfo.endTime;
         s.collections[_contract].hammerTimeDuration = s.initiatorInfo.hammerTimeDuration;
@@ -188,8 +184,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
     /// @notice Allow/disallow bidding and claiming for a whole token contract address.
     /// @param _contract The token contract the auctionned token belong to
     /// @param _value True if bidding/claiming should be allowed.
-    function setBiddingAllowed(address _contract, bool _value) external {
-        LibDiamond.enforceIsContractOwner();
+    function setBiddingAllowed(address _contract, bool _value) external onlyOwner {
         s.collections[_contract].biddingAllowed = _value;
         emit Contract_BiddingAllowed(_contract, _value);
     }
@@ -206,7 +201,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         uint256 _tokenId,
         bytes4 _tokenKind,
         bool _isReset
-    ) public {
+    ) public onlyOwner {
         modifyAnAuctionToken(_tokenContract, _tokenId, _tokenKind, _isReset, 0, false);
     }
 
@@ -226,9 +221,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         bool _isReset,
         uint256 _1155Index,
         bool _rewrite
-    ) public {
-        LibDiamond.enforceIsContractOwner();
-
+    ) internal {
         if (!_rewrite) {
             _1155Index = s.erc1155TokensIndex[_tokenContract][_tokenId]; //_1155Index was 0 if creating new auctions
             require(s.auctionMapping[_tokenContract][_tokenId][_1155Index] == 0, "The auction aleady exist for the specified token");
@@ -472,11 +465,11 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         address _ERC721Contract,
         uint256 _tokenIDStart,
         uint256 _tokenIDEnd
-    ) external {
-        LibDiamond.enforceIsContractOwner();
+    ) external onlyOwner {
         while (_tokenIDStart < _tokenIDEnd) {
             IERC721(_ERC721Contract).safeTransferFrom(msg.sender, _GBM, _tokenIDStart, "");
             registerAnAuctionToken(_ERC721Contract, _tokenIDStart, bytes4(keccak256("ERC721")), _isReset);
+
             _tokenIDStart++;
         }
     }
@@ -488,8 +481,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver {
         uint256 _tokenID,
         uint256 _indexStart,
         uint256 _indexEnd
-    ) external {
-        LibDiamond.enforceIsContractOwner();
+    ) external onlyOwner {
         registerAnAuctionContract(_ERC1155Contract);
         IERC1155(_ERC1155Contract).safeTransferFrom(msg.sender, _GBM, _tokenID, _indexEnd - _indexStart, "");
         while (_indexStart < _indexEnd) {
