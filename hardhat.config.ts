@@ -1,13 +1,15 @@
 /* global task ethers */
-require('@nomiclabs/hardhat-waffle')
-require('@nomiclabs/hardhat-ethers')
-require('hardhat-contract-sizer')
-require('dotenv').config()
+import "@nomiclabs/hardhat-waffle";
+import "@nomiclabs/hardhat-ethers";
+import "hardhat-contract-sizer";
+import { task } from "hardhat/config";
+import * as dotenv from "dotenv";
+dotenv.config({ path: __dirname + "/.env" });
 
 // This is a sample Buidler task. To learn how to create your own go to
 // https://buidler.dev/guides/create-task.html
 task("accounts", "Prints the list of accounts", async (args, hre) => {
-  const accounts = await ethers.getSigners();
+  const accounts = await hre.ethers.getSigners();
 
   for (const account of accounts) {
     console.log(await account.getAddress());
@@ -40,7 +42,7 @@ module.exports = {
       accounts: [process.env.SECRET],
       // blockGasLimit: 20000000,
       blockGasLimit: 20000000,
-      gasPrice: 10000000000
+      gasPrice: 10000000000,
       //   timeout: 90000
     },
     kovan: {
@@ -49,19 +51,19 @@ module.exports = {
       accounts: [process.env.SECRET],
       // blockGasLimit: 20000000,
       blockGasLimit: 12000000,
-      gasPrice: 100000000000
+      gasPrice: 100000000000,
       //   timeout: 90000
-    }
+    },
   },
   gasReporter: {
     currency: "USD",
     gasPrice: 100,
-    enabled: false
+    enabled: false,
   },
   contractSizer: {
     alphaSort: false,
     runOnCompile: false,
-    disambiguatePaths: true
+    disambiguatePaths: true,
   },
   // This is a sample solc configuration that specifies which version of solc to use
   solidity: {
@@ -71,19 +73,19 @@ module.exports = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200
-          }
-        }
+            runs: 200,
+          },
+        },
       },
       {
         version: "0.7.4",
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200
-          }
-        }
-      }
-    ]
-  }
+            runs: 200,
+          },
+        },
+      },
+    ],
+  },
 };
