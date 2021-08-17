@@ -2,7 +2,7 @@
 /* eslint prefer-const: "off" */
 
 //@ts-ignore
-import hardhat, { run, ethers } from "hardhat";
+// import hardhat, { run, ethers } from "hardhat";
 
 const { getSelectors, FacetCutAction } = require("./libraries/diamond.js");
 
