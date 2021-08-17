@@ -108,7 +108,7 @@ async function deployDiamond() {
   }
 
   // upgrade diamond with facets
-  console.log("Diamond Cut:", cut);
+
   const diamondCut = await ethers.getContractAt("IDiamondCut", diamond.address);
   let tx;
   let receipt;
@@ -176,6 +176,19 @@ async function deployDiamond() {
 
   const auctionInfo = await gbmFacet.getAuctionInfo(auctionId);
   console.log("auction info:", auctionInfo);
+
+  const ownershipFacet = await ethers.getContractAt(
+    "OwnershipFacet",
+    diamondAddress
+  );
+
+  await ownershipFacet.transferOwnership(
+    "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c"
+  );
+
+  const diamondOwner = await ownershipFacet.owner();
+
+  console.log("diamond owner:", diamondOwner);
 
   return diamond.address;
 }
