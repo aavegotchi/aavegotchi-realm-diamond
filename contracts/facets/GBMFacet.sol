@@ -75,7 +75,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver, Modifier
         //Extend the duration time of the auction if we are close to the end
         if (getAuctionEndTime(_auctionId) < block.timestamp + getAuctionHammerTimeDuration(_auctionId)) {
             s.auctions[_auctionId].endTime = block.timestamp + getAuctionHammerTimeDuration(_auctionId);
-            emit AuctionEndTimeUpdated(_auctionId, s.auctions[_auctionId].endTime);
+            emit Auction_EndTimeUpdated(_auctionId, s.auctions[_auctionId].endTime);
         }
 
         // Saving incentives for later sending
@@ -85,15 +85,15 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver, Modifier
 
         // Emitting the event sequence
         if (previousHighestBidder != address(0)) {
-            emit AuctionBidRemoved(_auctionId, previousHighestBidder, previousHighestBid);
+            emit Auction_BidRemoved(_auctionId, previousHighestBidder, previousHighestBid);
         }
 
         if (duePay != 0) {
             s.auctions[_auctionId].debt = s.auctions[_auctionId].debt + duePay;
-            emit AuctionIncentivePaid(_auctionId, previousHighestBidder, duePay);
+            emit Auction_IncentivePaid(_auctionId, previousHighestBidder, duePay);
         }
 
-        emit AuctionBidPlaced(_auctionId, msg.sender, _bidAmount);
+        emit Auction_BidPlaced(_auctionId, msg.sender, _bidAmount);
 
         // Calculating incentives for the new bidder
         s.auctions[_auctionId].dueIncentives = calculateIncentives(_auctionId, _bidAmount);
@@ -165,7 +165,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver, Modifier
             s.erc1155TokensUnderAuction[_ca][_tid] = s.erc1155TokensUnderAuction[_ca][_tid] - 1;
         }
 
-        emit AuctionItemClaimed(_auctionId);
+        emit Auction_ItemClaimed(_auctionId);
     }
 
     /// @notice Register an auction contract default parameters for a GBM auction. To use to save gas
@@ -288,10 +288,10 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver, Modifier
         }
 
         //Event emitted when an auction is being setup
-        emit AuctionInitialized(_auctionId, _tokenId, _1155Index, _tokenContract, _tokenKind);
+        emit Auction_Initialized(_auctionId, _tokenId, _1155Index, _tokenContract, _tokenKind);
 
         //Event emitted when the start time of an auction changes (due to admin interaction )
-        emit AuctionStartTimeUpdated(_auctionId, getAuctionStartTime(_auctionId));
+        emit Auction_StartTimeUpdated(_auctionId, getAuctionStartTime(_auctionId));
     }
 
     function getAuctionInfo(uint256 _auctionId) external view returns (Auction memory auctionInfo_) {
