@@ -99,6 +99,8 @@ describe("Test ERC721 GBM", async function () {
 
     const previousBal = await ghst.balanceOf(bidderAddress);
 
+    console.log("auction id:", auctionId);
+
     let messageHash = ethers.utils.solidityKeccak256(
       ["uint256", "uint256", "uint256"],
       [auctionId, bidAmount, "0"]
@@ -106,7 +108,10 @@ describe("Test ERC721 GBM", async function () {
     let signedMessage = await backendSigner.signMessage(
       ethers.utils.arrayify(messageHash)
     );
+    console.log("signed message:", signedMessage);
     let signature = ethers.utils.arrayify(signedMessage);
+
+    console.log("signature:", signature);
 
     signedMessage = await backendSigner.signMessage(messageHash);
     let invalidSignature = ethers.utils.arrayify(signedMessage);

@@ -152,6 +152,12 @@ async function deployDiamond() {
     erc721address = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   }
 
+  const ownershipFacet = await ethers.getContractAt(
+    "OwnershipFacet",
+    diamondAddress
+  );
+
+  /*
   const gbmFacet = await ethers.getContractAt(
     "GBMFacet",
     diamondAddress,
@@ -177,14 +183,13 @@ async function deployDiamond() {
   const auctionInfo = await gbmFacet.getAuctionInfo(auctionId);
   console.log("auction info:", auctionInfo);
 
-  const ownershipFacet = await ethers.getContractAt(
-    "OwnershipFacet",
-    diamondAddress
-  );
+  
+  */
 
-  await ownershipFacet.transferOwnership(
+  /* await ownershipFacet.transferOwnership(
     "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c"
   );
+  */
 
   const diamondOwner = await ownershipFacet.owner();
 
