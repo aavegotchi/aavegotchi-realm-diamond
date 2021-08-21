@@ -13,7 +13,7 @@ const playerRewards = "0x27DF5C6dcd360f372e23d5e63645eC0072D0C098";
 const daoTreasury = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
 
 let startTime = Math.floor(Date.now() / 1000);
-let endTime = Math.floor(Date.now() / 1000) + 86400;
+let endTime = Math.floor(Date.now() / 1000) + 86400 * 3;
 let hammerTimeDuration = 300;
 let bidDecimals = 100000;
 let stepMin = 10000;
@@ -89,7 +89,7 @@ async function deployDiamond() {
   }
 
   // upgrade diamond with facets
-  console.log("Diamond Cut:", cut);
+  // console.log("Diamond Cut:", cut);
   const diamondCut = await ethers.getContractAt("IDiamondCut", diamond.address);
   let tx;
   let receipt;
