@@ -10,6 +10,8 @@ import { createLogger, format, transports } from "winston";
 import { Contract, utils } from "ethers";
 import { NonceManager } from "@ethersproject/experimental";
 
+const { deployDiamond } = require("../scripts/deploy");
+
 const defaultConfig = conf.default;
 const activeConfig = {
   ...defaultConfig,
@@ -126,53 +128,13 @@ async function main() {
     ).connect(nonceManaged);
 
     //Deploy GBM Core
-    const _pixelcraft = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
-    const _playerRewards = "0x27DF5C6dcd360f372e23d5e63645eC0072D0C098";
-    const _daoTreasury = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
-    //  let startTime = Math.floor(Date.now() / 1000);
-    // let endTime = Math.floor(Date.now() / 1000) + 86400;
-    let startTime = 1626357600; //2PM UTC
-    let endTime = 1626357600 + 86400 * 3; //July 18, 2PM UTC
-    let hammerTimeDuration = 1200;
-    let bidDecimals = 100000;
-    let stepMin = 10000;
-    let incMax = 10000;
-    let incMin = 1000;
-    let bidMultiplier = 11120;
-    const GBMContractFactory = await ethers.getContractFactory("GBM");
-    gbm = await GBMContractFactory.connect(nonceManaged).deploy(
-      // @ts-ignore
-      ghstAddress,
-      _pixelcraft,
-      _playerRewards,
-      _daoTreasury,
-      txOps
-    );
+    const diamondAddress = await deployDiamond();
 
-    const GBMContractInitiatorFactory = await ethers.getContractFactory(
-      "GBMInitiator"
-    );
-    gbmInitiator = await GBMContractInitiatorFactory.connect(
-      nonceManaged
-    ).deploy(
-      startTime,
-      endTime,
-      hammerTimeDuration,
-      bidDecimals,
-      stepMin,
-      incMin,
-      incMax,
-      bidMultiplier,
-      "0"
-      // utils.parseEther(
-      //   (auctionConfig.priceFloor > 0 ? auctionConfig.priceFloor : 0).toString()
-      // )
-    );
+    gbm = await ethers.getContractAt("GBMFacet", diamondAddress);
+    gbmInitiator = await ethers.getContractAt("SettingsFacet", diamondAddress);
 
-    gbmAddress = gbm.address;
+    gbmAddress = diamondAddress; //gbm.address;
     console.log("GBM deployed to:", gbmAddress);
-    gbmInitiatorAddress = gbmInitiator.address;
-    console.log("GBMInitiator deployed to:", gbmInitiatorAddress);
   }
 
   console.log("Approving token");
@@ -219,7 +181,7 @@ async function main() {
 
       console.log(`balance of: ${itemId}`, balanceOf.toString());
 
-      let txReq = await gbm.massRegistrerERC1155Each(
+      let txReq = await gbm.registerMassERC1155Each(
         gbmAddress,
         gbmInitiatorAddress,
         tokenAddress,
@@ -257,7 +219,7 @@ async function main() {
       // let startIndex = auctionConfig.initialIndex + maxItemAuctions - remaining;
       let startIndex = 0 + maxItemAuctions - remaining;
       let endIndex = startIndex + remaining - 1; // index started at 0
-      let txReq = await gbm.massRegistrerERC1155Each(
+      let txReq = await gbm.registerMassERC1155Each(
         gbmAddress,
         gbmInitiatorAddress,
         tokenAddress,
