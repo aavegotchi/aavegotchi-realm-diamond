@@ -40,6 +40,8 @@ interface IGBM {
     //        uint256 _highestBid
     //    ) external;
 
+    function batchClaim(uint256[] memory _auctionIds) external;
+
     function claim(uint256 _auctionId) external;
 
     function erc20Currency() external view returns (address);

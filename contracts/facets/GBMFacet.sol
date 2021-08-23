@@ -112,10 +112,16 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver, Modifier
         }
     }
 
+    function batchClaim(uint256[] memory _auctionIds) external override {
+        for (uint256 index = 0; index < _auctionIds.length; index++) {
+            claim(_auctionIds[index]);
+        }
+    }
+
     /// @notice Attribute a token to the winner of the auction and distribute the proceeds to the owner of this contract.
     /// throw if bidding is disabled or if the auction is not finished.
     /// @param _auctionId The auctionId of the auction to complete
-    function claim(uint256 _auctionId) external override {
+    function claim(uint256 _auctionId) public override {
         address _ca = s.tokenMapping[_auctionId].contractAddress;
         uint256 _tid = s.tokenMapping[_auctionId].tokenId;
 

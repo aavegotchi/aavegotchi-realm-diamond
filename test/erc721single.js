@@ -152,14 +152,29 @@ describe("Test ERC721 GBM", async function () {
     const previousBal = await ghst.balanceOf(bidderAddress);
     const dueIncentives = await gbmFacet.getAuctionDueIncentives(auctionId);
 
+    //Cannot bid lower than minimum
+    const lowerThanMin = ethers.utils.parseEther("1.01");
     let messageHash = ethers.utils.solidityKeccak256(
       ["uint256", "uint256", "uint256"],
-      [auctionId, bidAmount, previousBid]
+      [auctionId, lowerThanMin, previousBid]
     );
     let signedMessage = await backendSigner.signMessage(
       ethers.utils.arrayify(messageHash)
     );
     let signature = ethers.utils.arrayify(signedMessage);
+    await expect(
+      secondBidder.commitBid(auctionId, lowerThanMin, previousBid, signature)
+    ).to.be.revertedWith("bid: _bidAmount must meet the minimum bid");
+
+    //Normal bid
+    messageHash = ethers.utils.solidityKeccak256(
+      ["uint256", "uint256", "uint256"],
+      [auctionId, bidAmount, previousBid]
+    );
+    signedMessage = await backendSigner.signMessage(
+      ethers.utils.arrayify(messageHash)
+    );
+    signature = ethers.utils.arrayify(signedMessage);
 
     await secondBidder.commitBid(auctionId, bidAmount, previousBid, signature);
 
@@ -177,11 +192,11 @@ describe("Test ERC721 GBM", async function () {
   });
 
   it("Can claim NFT prize", async function () {
-    ethers.provider.send("evm_increaseTime", [25 * 3600]);
+    ethers.provider.send("evm_increaseTime", [73 * 3600]);
     ethers.provider.send("evm_mine");
 
     //Claim item
-    await gbmFacet.claim(auctionId);
+    await gbmFacet.batchClaim([auctionId]);
 
     const nftBalance = await erc721?.balanceOf(secondBidderAddress);
     expect(nftBalance).to.equal(1);
