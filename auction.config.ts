@@ -98,7 +98,7 @@ export default <AuctionERC721Config>{
       stepMin: 5000,
       incMin: 500,
       incMax: 5000,
-      bidMultiplier: 0,
+      bidMultiplier: 5080,
     },
     medium: {
       startTime: Date.now(),
