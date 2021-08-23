@@ -33,7 +33,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver, Modifier
         uint256 _highestBid,
         bytes memory _signature
     ) external {
-        bytes32 messageHash = keccak256(abi.encodePacked(_auctionId, _bidAmount, _highestBid));
+        bytes32 messageHash = keccak256(abi.encodePacked(msg.sender, _auctionId, _bidAmount, _highestBid));
         require(LibSignature.isValid(messageHash, _signature, s.backendPubKey), "bid: Invalid signature");
 
         bid(_auctionId, _bidAmount, _highestBid);

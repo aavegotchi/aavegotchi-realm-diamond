@@ -106,8 +106,8 @@ describe("Test ERC721 GBM", async function () {
     console.log("auction id:", auctionId);
 
     let messageHash = ethers.utils.solidityKeccak256(
-      ["uint256", "uint256", "uint256"],
-      [auctionId, bidAmount, "0"]
+      ["address", "uint256", "uint256", "uint256"],
+      [bidderAddress, auctionId, bidAmount, "0"]
     );
     let signedMessage = await backendSigner.signMessage(
       ethers.utils.arrayify(messageHash)
@@ -159,8 +159,8 @@ describe("Test ERC721 GBM", async function () {
     //Cannot bid lower than minimum
     const lowerThanMin = ethers.utils.parseEther("1.01");
     let messageHash = ethers.utils.solidityKeccak256(
-      ["uint256", "uint256", "uint256"],
-      [auctionId, lowerThanMin, previousBid]
+      ["address", "uint256", "uint256", "uint256"],
+      [secondBidderAddress, auctionId, lowerThanMin, previousBid]
     );
     let signedMessage = await backendSigner.signMessage(
       ethers.utils.arrayify(messageHash)
@@ -172,8 +172,8 @@ describe("Test ERC721 GBM", async function () {
 
     //Normal bid
     messageHash = ethers.utils.solidityKeccak256(
-      ["uint256", "uint256", "uint256"],
-      [auctionId, bidAmount, previousBid]
+      ["address", "uint256", "uint256", "uint256"],
+      [secondBidderAddress, auctionId, bidAmount, previousBid]
     );
     signedMessage = await backendSigner.signMessage(
       ethers.utils.arrayify(messageHash)

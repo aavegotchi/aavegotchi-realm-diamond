@@ -127,8 +127,8 @@ describe("Test ERC1155 GBM", async function () {
     const previousBal = await ghst.balanceOf(bidderAddress);
 
     let messageHash = ethers.utils.solidityKeccak256(
-      ["uint256", "uint256", "uint256"],
-      [auctionId, bidAmountTooLow, "0"]
+      ["address", "uint256", "uint256", "uint256"],
+      [bidderAddress, auctionId, bidAmountTooLow, "0"]
     );
     let signedMessage = await backendSigner.signMessage(
       ethers.utils.arrayify(messageHash)
@@ -144,8 +144,8 @@ describe("Test ERC1155 GBM", async function () {
     ).to.be.revertedWith("bid: Invalid signature");
 
     messageHash = ethers.utils.solidityKeccak256(
-      ["uint256", "uint256", "uint256"],
-      [auctionId, bidAmount1, "0"]
+      ["address", "uint256", "uint256", "uint256"],
+      [bidderAddress, auctionId, bidAmount1, "0"]
     );
     signedMessage = await backendSigner.signMessage(
       ethers.utils.arrayify(messageHash)
@@ -190,8 +190,8 @@ describe("Test ERC1155 GBM", async function () {
     const dueIncentives = await gbmFacet.getAuctionDueIncentives(auctionId);
 
     let messageHash = ethers.utils.solidityKeccak256(
-      ["uint256", "uint256", "uint256"],
-      [auctionId, bidAmount2, previousBid]
+      ["address", "uint256", "uint256", "uint256"],
+      [secondBidderAddress, auctionId, bidAmount2, previousBid]
     );
 
     let signedMessage = await backendSigner.signMessage(
@@ -215,7 +215,7 @@ describe("Test ERC1155 GBM", async function () {
   });
 
   it("Can claim NFT prize", async function () {
-    ethers.provider.send("evm_increaseTime", [25 * 3600]);
+    ethers.provider.send("evm_increaseTime", [5 * 25 * 3600]);
     ethers.provider.send("evm_mine");
 
     pcBalance = await ghst.balanceOf(_pixelcraft);
