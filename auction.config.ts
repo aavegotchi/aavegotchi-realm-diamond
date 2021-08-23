@@ -9,7 +9,6 @@ interface AuctionPreset {
   incMin: number;
   incMax: number;
   bidMultiplier: number;
-  floorPrice: number;
 }
 
 interface TokenCounts {
@@ -90,7 +89,6 @@ export default <AuctionERC721Config>{
       incMin: 0,
       incMax: 0,
       bidMultiplier: 0,
-      floorPrice: 0,
     },
     low: {
       startTime: 0,
@@ -101,7 +99,6 @@ export default <AuctionERC721Config>{
       incMin: 0,
       incMax: 0,
       bidMultiplier: 0,
-      floorPrice: 0,
     },
     medium: {
       startTime: Date.now(),
@@ -112,7 +109,6 @@ export default <AuctionERC721Config>{
       incMin: 1000,
       incMax: 10000,
       bidMultiplier: 11120,
-      floorPrice: 1000,
     },
     high: {
       startTime: 0,
@@ -123,7 +119,6 @@ export default <AuctionERC721Config>{
       incMin: 0,
       incMax: 0,
       bidMultiplier: 0,
-      floorPrice: 0,
     },
     degen: {
       startTime: 0,
@@ -134,7 +129,6 @@ export default <AuctionERC721Config>{
       incMin: 0,
       incMax: 0,
       bidMultiplier: 0,
-      floorPrice: 0,
     },
   },
   auctionTokenCounts: {

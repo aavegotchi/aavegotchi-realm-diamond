@@ -65,10 +65,6 @@ contract SettingsFacet is IGBMInitiator, Modifiers {
         return s.initiatorInfo.bidMultiplier;
     }
 
-    function getFloorPrice(uint256) external view override returns (uint256) {
-        return s.initiatorInfo.floorPrice;
-    }
-
     /* Setter Functions */
 
     function setInitiatorInfo(InitiatorInfo memory _info) external onlyOwner {
@@ -77,43 +73,5 @@ contract SettingsFacet is IGBMInitiator, Modifiers {
 
     function setBackendPubKey(bytes memory _backendPubKey) external onlyOwner {
         s.backendPubKey = _backendPubKey;
-    }
-
-    /* function setStartTime(uint256 _startTime) external onlyOwner {
-        s.initiatorInfo.startTime = _startTime;
-    }
-    */
-
-    /* function setEndTime(uint256 _endTime) external {
-        s.initiatorInfo.endTime = _endTime;
-    }
-
-    function setHammerTimeDuration(uint256 _hammerTimeDuration) external onlyOwner {
-        s.initiatorInfo.hammerTimeDuration = _hammerTimeDuration;
-    }
-
-    function setBidDecimals(uint256 _bidDecimals) external onlyOwner {
-        s.initiatorInfo.bidDecimals = _bidDecimals;
-    }
-
-    function setStepMin(uint256 _stepMin) external onlyOwner {
-        s.initiatorInfo.stepMin = _stepMin;
-    }
-
-    function setIncMin(uint256 _incMin) external onlyOwner {
-        s.initiatorInfo.incMin = _incMin;
-    }
-
-    function setIncMax(uint256 _incMax) external onlyOwner {
-        s.initiatorInfo.incMax = _incMax;
-    }
-
-    function setBidMultiplier(uint256 _bidMultiplier) external onlyOwner {
-        s.initiatorInfo.bidMultiplier = _bidMultiplier;
-    }
-    */
-
-    function setFloorPrice(uint256 _floorPrice) external onlyOwner {
-        s.initiatorInfo.floorPrice = _floorPrice;
     }
 }

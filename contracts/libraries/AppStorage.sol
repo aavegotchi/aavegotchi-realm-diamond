@@ -25,13 +25,13 @@ struct InitiatorInfo {
     uint256 incMin;
     uint256 incMax;
     uint256 bidMultiplier;
-    uint256 floorPrice;
 }
 
 struct Auction {
+    address owner;
     address highestBidder;
     uint256 highestBid;
-    uint256 debt;
+    uint256 auctionDebt;
     uint256 dueIncentives;
     address contractAddress;
     uint256 startTime;
@@ -43,7 +43,6 @@ struct Auction {
     uint256 incMax;
     uint256 bidMultiplier;
     bool biddingAllowed;
-    uint256 floorPrice;
 }
 
 struct Collection {

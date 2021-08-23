@@ -43,7 +43,6 @@ describe("Test ERC1155 GBM", async function () {
   let daoBalance;
 
   const bidAmountTooLow = ethers.utils.parseEther("0.5");
-  const floorPrice = ethers.utils.parseEther("0");
   const bidAmount1 = ethers.utils.parseEther("1");
   console.log("bid 1:", bidAmount1.toString());
   const bidAmount2 = ethers.utils.parseEther("1.1");
@@ -62,8 +61,6 @@ describe("Test ERC1155 GBM", async function () {
     diamondAddress = await deployDiamond();
     gbmFacet = await ethers.getContractAt("GBMFacet", diamondAddress);
     settingsFacet = await ethers.getContractAt("SettingsFacet", diamondAddress);
-
-    await settingsFacet.setFloorPrice(floorPrice);
 
     await erc1155.setApprovalForAll(diamondAddress, true);
   });
@@ -107,9 +104,6 @@ describe("Test ERC1155 GBM", async function () {
 
     const auctionInfo = await gbmFacet.getAuctionInfo(auctionId);
 
-    const floor = auctionInfo.floorPrice.toString();
-
-    expect(floor).to.equal(floorPrice);
     expect(Number(auctionInfo.startTime)).to.greaterThan(0);
   });
 
@@ -132,8 +126,6 @@ describe("Test ERC1155 GBM", async function () {
 
     const previousBal = await ghst.balanceOf(bidderAddress);
 
-    //Cannot bid lower than price floor
-
     let messageHash = ethers.utils.solidityKeccak256(
       ["uint256", "uint256", "uint256"],
       [auctionId, bidAmountTooLow, "0"]
@@ -150,12 +142,6 @@ describe("Test ERC1155 GBM", async function () {
     await expect(
       bidder.commitBid(auctionId, bidAmountTooLow, "0", invalidSignature)
     ).to.be.revertedWith("bid: Invalid signature");
-
-    // place bid with valid signature, and invalid data
-    /*  await expect(
-      bidder.commitBid(auctionId, bidAmountTooLow, "0", signature)
-    ).to.be.revertedWith("bid: must be higher than floor price");
-    */
 
     messageHash = ethers.utils.solidityKeccak256(
       ["uint256", "uint256", "uint256"],
@@ -253,7 +239,7 @@ describe("Test ERC1155 GBM", async function () {
   it("Various wallet addresses should receive the correct amounts", async function () {
     const auctionInfo = await gbmFacet.getAuctionInfo(auctionId);
 
-    const auctionDebt = auctionInfo.debt;
+    const auctionDebt = auctionInfo.auctionDebt;
     const finalReceiveAmount = bidAmount2.sub(auctionDebt);
 
     const newPcBalance = await ghst.balanceOf(_pixelcraft);

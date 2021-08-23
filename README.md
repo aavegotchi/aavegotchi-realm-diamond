@@ -38,7 +38,6 @@ For testing purposes, an implementation of each of those contract can be found i
   let incMax = 10000;
   let incMin = 1000;
   let bidMultiplier = 11120;
-  let floorPrice = 0;
   ```
 
 ### Mint and transfer a token

@@ -51,7 +51,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver, Modifier
         require(s.collections[s.tokenMapping[_auctionId].contractAddress].biddingAllowed, "bid: bidding is currently not allowed");
 
         require(_bidAmount > 1, "bid: _bidAmount cannot be 0");
-        require(_bidAmount > s.auctions[_auctionId].floorPrice, "bid: must be higher than floor price");
+
         require(_highestBid == s.auctions[_auctionId].highestBid, "bid: current highest bid does not match the submitted transaction _highestBid");
 
         //An auction start time of 0 also indicate the auction has not been created at all
@@ -89,7 +89,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver, Modifier
         }
 
         if (duePay != 0) {
-            s.auctions[_auctionId].debt = s.auctions[_auctionId].debt + duePay;
+            s.auctions[_auctionId].auctionDebt = s.auctions[_auctionId].auctionDebt + duePay;
             emit Auction_IncentivePaid(_auctionId, previousHighestBidder, duePay);
         }
 
@@ -133,7 +133,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver, Modifier
         s.auctionItemClaimed[_auctionId] = true;
 
         //Todo: Add in the various Aavegotchi addresses
-        uint256 _proceeds = s.auctions[_auctionId].highestBid - s.auctions[_auctionId].debt;
+        uint256 _proceeds = s.auctions[_auctionId].highestBid - s.auctions[_auctionId].auctionDebt;
 
         //Added to prevent revert
         IERC20(s.erc20Currency).approve(address(this), _proceeds);
@@ -279,9 +279,10 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver, Modifier
             s.auctionMapping[_tokenContract][_tokenId][_1155Index] = _auctionId;
         }
 
-        s.tokenMapping[_auctionId] = newAuction; //_auctionId => token_primaryKey
+        s.tokenMapping[_auctionId] = newAuction;
 
         if (_useInitiator) {
+            s.auctions[_auctionId].owner = LibDiamond.contractOwner();
             s.auctions[_auctionId].startTime = s.initiatorInfo.startTime;
             s.auctions[_auctionId].endTime = s.initiatorInfo.endTime;
             s.auctions[_auctionId].hammerTimeDuration = s.initiatorInfo.hammerTimeDuration;
@@ -290,7 +291,6 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver, Modifier
             s.auctions[_auctionId].incMin = s.initiatorInfo.incMin;
             s.auctions[_auctionId].incMax = s.initiatorInfo.incMax;
             s.auctions[_auctionId].bidMultiplier = s.initiatorInfo.bidMultiplier;
-            s.auctions[_auctionId].floorPrice = s.initiatorInfo.floorPrice;
         }
 
         //Event emitted when an auction is being setup
@@ -315,7 +315,7 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver, Modifier
     }
 
     function getAuctionDebt(uint256 _auctionId) external view override returns (uint256) {
-        return s.auctions[_auctionId].debt;
+        return s.auctions[_auctionId].auctionDebt;
     }
 
     function getAuctionDueIncentives(uint256 _auctionId) external view override returns (uint256) {

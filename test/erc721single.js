@@ -74,6 +74,10 @@ describe("Test ERC721 GBM", async function () {
 
     const auctionStartTime = await gbmFacet.getAuctionStartTime(auctionId);
     expect(Number(auctionStartTime)).to.greaterThan(0);
+
+    const auctionInfo = await gbmFacet.getAuctionInfo(auctionId);
+
+    console.log("info:", auctionInfo);
   });
 
   it("Can bid on an auction", async function () {

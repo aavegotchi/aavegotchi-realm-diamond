@@ -140,8 +140,7 @@ async function deployAuctions(
     START_AT: ${chalk.yellow(auctionConfig.initialIndex)}
     END_AT: ${chalk.yellow(
       auctionConfig.initialIndex + auctionConfig.auctionTokenCounts[preset] - 1
-    )}
-    PRICE_FLOOR: 0`
+    )}`
   );
 
   if (auctionConfig.ercType == 721) {

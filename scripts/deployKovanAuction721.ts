@@ -30,7 +30,6 @@ let stepMin = 10000;
 let incMax = 10000;
 let incMin = 1000;
 let bidMultiplier = 11120;
-let floorPrice = 0;
 
 const contractAddresses = {
   erc20Currency: ghstAddress,
@@ -48,7 +47,6 @@ const initInfo = {
   incMax,
   incMin,
   bidMultiplier,
-  floorPrice,
 };
 
 async function deployAuction() {
