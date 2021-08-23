@@ -81,8 +81,8 @@ export default <AuctionERC721Config>{
   id: "auction-haunt2-test", // huamn id
   auctionPresets: {
     none: {
-      startTime: 0,
-      endTime: 0,
+      startTime: Date.now(),
+      endTime: Date.now() + 86400 * 3,
       hammerTimeDuration: 1200,
       bidDecimals: 100000,
       stepMin: 5000,
@@ -111,8 +111,8 @@ export default <AuctionERC721Config>{
       bidMultiplier: 11120,
     },
     high: {
-      startTime: 0,
-      endTime: 0,
+      startTime: Date.now(),
+      endTime: Date.now() + 86400 * 3,
       hammerTimeDuration: 1200,
       bidDecimals: 100000,
       stepMin: 15000,
@@ -121,8 +121,8 @@ export default <AuctionERC721Config>{
       bidMultiplier: 18700,
     },
     degen: {
-      startTime: 0,
-      endTime: 0,
+      startTime: Date.now(),
+      endTime: Date.now() + 86400 * 3,
       hammerTimeDuration: 1200,
       bidDecimals: 100000,
       stepMin: 30000,
