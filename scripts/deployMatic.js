@@ -8,11 +8,12 @@ const { getSelectors, FacetCutAction } = require("./libraries/diamond.js");
 
 // Init GBM
 
-const ghstAddress = "0xeDaA788Ee96a0749a2De48738f5dF0AA88E99ab5";
+const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
 const pixelcraft = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
 const playerRewards = "0x27DF5C6dcd360f372e23d5e63645eC0072D0C098";
 const daoTreasury = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
 
+//Medium Preset
 let startTime = Math.floor(Date.now() / 1000);
 let endTime = Math.floor(Date.now() / 1000) + 86400;
 let hammerTimeDuration = 300;
@@ -92,9 +93,9 @@ async function deployDiamond() {
   const diamondCut = await ethers.getContractAt("IDiamondCut", diamond.address);
   let tx;
   let receipt;
-  //Use kovan PK
-  let backendSigner = new ethers.Wallet(process.env.GBM_PK); // PK should start with '0x'
-  // call to init function
+  //Use Matic PK
+  let backendSigner = new ethers.Wallet(process.env.GBM_PK_PROD); // PK should start with '0x'
+
   let functionCall = diamondInit.interface.encodeFunctionData("init", [
     contractAddresses,
     initInfo,
