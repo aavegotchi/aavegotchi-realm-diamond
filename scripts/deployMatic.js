@@ -66,6 +66,8 @@ async function deployDiamond() {
   await diamondInit.deployed();
   console.log("DiamondInit deployed:", diamondInit.address);
 
+  const testing = ["hardhat", "localhost"].includes(hre.network.name);
+
   // deploy facets
   console.log("");
   console.log("Deploying facets");
@@ -101,6 +103,9 @@ async function deployDiamond() {
     initInfo,
     ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
   ]);
+
+  console.log("key:", ethers.utils.hexDataSlice(backendSigner.publicKey, 1));
+
   tx = await diamondCut.diamondCut(cut, diamondInit.address, functionCall);
   console.log("Diamond cut tx: ", tx.hash);
   receipt = await tx.wait();
@@ -108,6 +113,25 @@ async function deployDiamond() {
     throw Error(`Diamond upgrade failed: ${tx.hash}`);
   }
   console.log("Completed diamond cut");
+
+  //transfer ownership to itemManager
+  const ownershipFacet = await ethers.getContractAt(
+    "OwnershipFacet",
+    diamond.address
+  );
+
+  if (testing) {
+    await ownershipFacet.transferOwnership(
+      "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+    );
+  } else {
+    await ownershipFacet.transferOwnership(
+      "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119"
+    );
+  }
+
+  const currentOwner = await ownershipFacet.owner();
+  console.log("current owner:", currentOwner);
 
   return diamond.address;
 }
