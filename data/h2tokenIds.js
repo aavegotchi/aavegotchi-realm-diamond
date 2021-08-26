@@ -1107,7 +1107,9 @@ const degen = [
   19999,
 ];
 
-const test = [0, 2, 4, 6];
+const test = [
+  10000, 10001, 10003, 10004, 10005, 10006, 10007, 10008, 10009, 10010, 10011,
+];
 
 exports.h2tokenIds = {
   none: none,

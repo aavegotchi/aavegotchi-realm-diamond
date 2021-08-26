@@ -32,36 +32,57 @@ logger.on("finish", () => {
 async function deployAuctions(
   preset: "none" | "low" | "medium" | "high" | "degen" | "test"
 ) {
-  const accounts = await ethers.getSigners();
-  const account = await accounts[0].getAddress();
-  const nonceManagedSigner = new NonceManager(accounts[0]);
-  console.log("Deploying Account: " + account + "\n---");
-
+  const itemManager = "0x8D46fd7160940d89dA026D59B2e819208E714E82";
   let totalGasUsed: BigNumber = ethers.BigNumber.from("0");
   let ghst: Contract;
   let ghstAddress: string;
   let gbm: Contract;
   let gbmInitiator: Contract;
   let gbmAddress: string;
-  let erc721: Contract;
+  // let erc721: Contract;
   let erc721address: string;
 
   let testing = ["hardhat"].includes(hardhat.network.name);
   let kovan = hardhat.network.name === "kovan";
+  let nonceManagedSigner;
+
+  if (testing) {
+    await hardhat.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [itemManager],
+    });
+    const signer = await ethers.provider.getSigner(itemManager);
+
+    nonceManagedSigner = new NonceManager(signer);
+    console.log("Deploying Account: " + itemManager + "\n---");
+  } else {
+    const accounts = await ethers.getSigners();
+    const account = await accounts[0].getAddress();
+    nonceManagedSigner = new NonceManager(accounts[0]);
+    console.log("Deploying Account: " + account + "\n---");
+  }
 
   console.log(
-    `${chalk.red.underline(
+    `${chalk.cyan.underline(
       hardhat.network.name
     )} network testing with ${chalk.red.underline(preset)} preset!`
   );
 
-  const diamondAddress = await deployDiamond();
+  const diamondAddress = "0xa44c8e0eCAEFe668947154eE2b803Bd4e6310EFe"; //await deployDiamond();
 
-  gbm = await ethers.getContractAt("GBMFacet", diamondAddress);
-  gbmInitiator = await ethers.getContractAt("SettingsFacet", diamondAddress);
+  gbm = await ethers.getContractAt(
+    "GBMFacet",
+    diamondAddress,
+    nonceManagedSigner
+  );
+  gbmInitiator = await ethers.getContractAt(
+    "SettingsFacet",
+    diamondAddress,
+    nonceManagedSigner
+  );
 
   gbmAddress = diamondAddress; //gbm.address;
-  console.log("GBM deployed to:", gbmAddress);
+  // console.log("GBM deployed to:", gbmAddress);
 
   logger.info({
     config: auctionConfig,
@@ -69,11 +90,13 @@ async function deployAuctions(
 
   //Begin Auctions
 
+  console.log(`Setting Preset for ${chalk.red(preset)}`);
   const presetInfo = auctionConfig.auctionPresets[preset];
   await gbmInitiator.setInitiatorInfo(presetInfo);
 
   const initiatorInfo = await gbmInitiator.getInitiatorInfo();
-  // console.log("info:", initiatorInfo);
+  console.log("start time:", initiatorInfo.startTime.toString());
+  console.log("end time:", initiatorInfo.endTime.toString());
 
   //Change this to correct preset
   if (
@@ -86,55 +109,24 @@ async function deployAuctions(
 
   console.log(`Presets are set for ${preset.toUpperCase()}, LFG!`);
 
-  if (testing) {
-    ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
-    ghst = await ethers.getContractAt("ERC20Generic", ghstAddress);
-    //Deploy ERC721 Token for Auction
-    const ERC721Factory = await ethers.getContractFactory("ERC721Generic");
-    erc721 = await ERC721Factory.deploy();
-    erc721address = erc721.address;
+  //  else {
+  //Set defaults for Matic
+  erc721address = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
+  // }
 
-    console.log("deploying");
+  const erc721 = await ethers.getContractAt(
+    "ERC721Generic",
+    erc721address,
+    nonceManagedSigner
+  );
 
-    //Mint 2000 ERC721s
-
-    console.log(
-      `Minting ${
-        auctionConfig.auctionTokenCounts[preset]
-      } ${preset.toUpperCase()} Portals`
-    );
-
-    for (let i = 0; i < auctionConfig.auctionTokenCounts[preset]; i++) {
-      await erc721["mint()"]();
-    }
-  } else if (kovan) {
-    ghstAddress = "0xeDaA788Ee96a0749a2De48738f5dF0AA88E99ab5";
-    ghst = await ethers.getContractAt("ERC20Generic", ghstAddress);
-
-    const ERC721Factory = await ethers.getContractFactory("ERC721Generic");
-    let erc721 = await ERC721Factory.deploy();
-
-    //Mint X ERC721s
-    let prom = [];
-    let nonceManagedContract = erc721.connect(nonceManagedSigner);
-    erc721 = erc721;
-    erc721address = erc721.address;
-    for (let i = 0; i < auctionConfig.auctionTokenCounts[preset]; i++) {
-      prom.push(nonceManagedContract["mint()"]());
-    }
-    let res = await Promise.all(prom);
-    await Promise.all(res.map((tx) => tx.wait()));
-  } else {
-    //Set defaults for Matic
-    erc721address = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
-  }
-
-  //@ts-ignore
-  const approval = await erc721?.isApprovedForAll(account, gbmAddress);
+  const approval = await erc721.isApprovedForAll(itemManager, gbmAddress);
   console.log("approval:", approval);
 
+  const balanceOf = await erc721?.balanceOf(itemManager);
+  console.log("Item Manager Balance:", balanceOf.toString());
+
   if (!approval) {
-    //@ts-ignore
     await erc721?.setApprovalForAll(gbmAddress, true);
   }
 
@@ -151,54 +143,66 @@ async function deployAuctions(
   );
 
   //Register the Auctions
-  let auctionSteps = 5; // amount of items in a massRegistrerXEach call
+  let auctionSteps = 4; // amount of items in a massRegistrerXEach call
   //let maxAuctions = auctionConfig.auctionTokenCounts[preset];
 
   let promises = [];
   let tokenIds = h2tokenIds[preset];
 
-  console.log("token ids:", tokenIds);
+  console.log(
+    `${chalk.red(preset)} preset has ${tokenIds.length} tokens to mint.`
+  );
 
   let sent = 0;
   let remaining = tokenIds.length - sent;
+  const gasPrice = 50000000000;
 
-  for (let i = 0; i < remaining; i++) {
-    let startIndex = auctionConfig.initialIndex + i * auctionSteps;
-    let endIndex = startIndex + auctionSteps; // since index = 0
-    let r = await gbm.registerMassERC721Each(
-      gbmAddress,
-      true,
-      erc721address,
-      tokenIds.splice(sent, sent + auctionSteps)
-    );
+  while (remaining > 0) {
+    if (remaining < auctionSteps) auctionSteps = remaining;
 
-    console.log(
-      `Creating auctions ${startIndex} to ${endIndex}, using ${r.gasLimit.toString()} gas`
-    );
+    console.log("remaining:", remaining);
 
-    totalGasUsed = totalGasUsed.add(r.gasLimit);
+    let finalTokenIds: number[] = tokenIds.slice(sent, sent + auctionSteps);
+    if (finalTokenIds.length > 0) {
+      console.log(`Creating Auctions for ${finalTokenIds.toString()}`);
+      let r = await gbm.registerMassERC721Each(
+        gbmAddress,
+        true,
+        erc721address,
+        finalTokenIds,
+        { gasPrice: gasPrice }
+      );
+      console.log("tx hash:", r.hash);
 
-    // r = await r.wait();
-    promises.push(r);
-    // console.log(r.wait());
+      console.log(
+        `Created auctions for ${finalTokenIds.toString()}, using ${r.gasLimit.toString()} gas`
+      );
 
-    logger.info({
-      tx: {
-        hash: r.hash,
-        from: r.from,
-        to: r.to,
-        nonce: r.nonce,
-        chainId: r.chainId,
-        networkId: hardhat.network.name,
-      },
-      params: {
-        gbmAddress: gbmAddress,
-        useDefault: true,
-        erc721address: erc721address,
-        startIndex: startIndex,
-        endIndex: endIndex,
-      },
-    });
+      totalGasUsed = totalGasUsed.add(r.gasLimit);
+
+      promises.push(r);
+
+      remaining -= auctionSteps;
+
+      logger.info({
+        tx: {
+          hash: r.hash,
+          from: r.from,
+          to: r.to,
+          nonce: r.nonce,
+          chainId: r.chainId,
+          networkId: hardhat.network.name,
+        },
+        params: {
+          gbmAddress: gbmAddress,
+          useDefault: true,
+          erc721address: erc721address,
+          tokenIds: tokenIds.splice(sent, sent + auctionSteps),
+        },
+      });
+    } else {
+      throw "That's it!";
+    }
   }
 
   await Promise.all(promises);

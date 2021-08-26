@@ -221,10 +221,10 @@ async function main() {
     }
     console.log("Completed diamond cut");
 
-    const gbmInitiator: Contract = await ethers.getContractAt(
+    /* const gbmInitiator: Contract = await ethers.getContractAt(
       "SettingsFacet",
       diamondAddress
-    );
+    );*/
     console.log(
       `[${chalk.yellow("ℹ️")}] Fresh ${hardhat.network.name} deployment`
     );
@@ -242,9 +242,11 @@ async function main() {
   ).connect(nonceManaged);
   await tokenContract.setApprovalForAll(diamondAddress, true);
 
-  const gbm: Contract = (
-    await ethers.getContractAt("GBMFacet", diamondAddress)
-  ).connect(nonceManaged);
+  const gbm: Contract = await ethers.getContractAt(
+    "GBMFacet",
+    diamondAddress,
+    nonceManaged
+  );
   const approvalGbm = await tokenContract.isApprovedForAll(
     itemManager,
     diamondAddress
@@ -254,30 +256,40 @@ async function main() {
     throw new Error(`Wont have permission to transfer items to gbm`);
 
   let allBalancesMatch = true;
+  //@ts-ignore
+  let itemBalances = {};
+
   for (let index in auctionConfig.initOrdering) {
     const expectId = auctionConfig.initOrdering[index];
     const expectBalance = auctionConfig.auctions[expectId];
     const bal = await tokenContract.balanceOf(itemManager, expectId);
+
+    //@ts-ignore
+    itemBalances[expectId] = bal.toString();
     const balanceMatchesQty =
       parseInt(bal.toString()) == parseInt(expectBalance.toString());
     console.log(
-      `Checking request auction of item (${expectId}) x (${expectBalance}) matches owned total: ${bal}`,
+      `Fetching balance item (${expectId}) x (${expectBalance}) matches owned total: ${bal}`,
       balanceMatchesQty
     );
     if (!balanceMatchesQty) allBalancesMatch = balanceMatchesQty;
   }
-  if (!allBalancesMatch)
+  /*if (!allBalancesMatch)
     throw new Error(`Signer is missing full quantity of auction listings`);
 
   console.log(
     `all checks passed, transactions will be queued. Wait for completion.`
   );
+  */
+
+  console.log("balances:", itemBalances);
+
   logger.info({
     activeConfig: activeConfig,
     auctionConfig: auctionConfig,
   });
 
-  let auctionSteps = 60; // amount of items in a massRegistrerXEach call, must avoid exceeding block size
+  let auctionSteps = 2; // amount of items in a massRegistrerXEach call, must avoid exceeding block size
   let promises: Promise<any>[] = [];
   for (let i in auctionConfig.initOrdering) {
     const itemId = auctionConfig.initOrdering[i];
@@ -285,7 +297,9 @@ async function main() {
     // taking each itemId from the auctionConfig.auctions field
     // registers X new auctions of itemId from the owner with gbm
 
-    let maxItemAuctions = auctionConfig.auctions[itemId];
+    //@ts-ignore
+    let maxItemAuctions = itemBalances[itemId];
+    console.log("max item:", maxItemAuctions);
     // tx needed for total amount
     let maxItemTx = Math.floor(maxItemAuctions / auctionSteps);
     // overflow tx amount when qty doesnt divide as whole num
@@ -308,9 +322,12 @@ async function main() {
       let endIndex = startIndex + auctionSteps; // since index = 0
 
       const balanceOf = await tokenContract.balanceOf(itemManager, itemId);
-      console.log(`balance of: ${itemId}`, balanceOf.toString(), gbm);
+      console.log(`balance of: ${itemId}`, balanceOf.toString());
 
-      let txReq = gbm.registerMassERC1155Each(
+      console.log("start index:", startIndex);
+      console.log("end index:", endIndex);
+
+      let txReq = await gbm.registerMassERC1155Each(
         diamondAddress,
         true,
         tokenAddress,
@@ -319,7 +336,7 @@ async function main() {
         `${endIndex}`,
         txOps
       );
-      await txReq;
+      //   await txReq;
       console.log(
         "gas used:",
         utils.formatUnits(txReq.gasLimit, "gwei"),
@@ -344,7 +361,7 @@ async function main() {
           endIndex: endIndex,
         },
       });
-      promises.push(await txReq.wait());
+      promises.push(txReq);
     }
     if (remaining > 0) {
       // last run, include remaining run

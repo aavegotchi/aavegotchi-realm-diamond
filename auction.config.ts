@@ -79,12 +79,15 @@ interface AuctionERC1155Config {
 //   gbm: "",
 // };
 
+const startTime = 1629943200;
+const endTime = 1630202400;
+
 export default <AuctionERC721Config>{
   id: "auction-haunt2-test", // huamn id
   auctionPresets: {
     none: {
-      startTime: Date.now(),
-      endTime: Date.now() + 86400 * 3,
+      startTime: startTime,
+      endTime: endTime,
       hammerTimeDuration: 1200,
       bidDecimals: 100000,
       stepMin: 5000,
@@ -103,8 +106,8 @@ export default <AuctionERC721Config>{
       bidMultiplier: 5080,
     },
     medium: {
-      startTime: Date.now(),
-      endTime: Date.now() + 86400 * 3,
+      startTime: startTime,
+      endTime: endTime,
       hammerTimeDuration: 1200,
       bidDecimals: 100000,
       stepMin: 10000,
@@ -113,8 +116,8 @@ export default <AuctionERC721Config>{
       bidMultiplier: 11120,
     },
     high: {
-      startTime: Date.now(),
-      endTime: Date.now() + 86400 * 3,
+      startTime: startTime,
+      endTime: endTime,
       hammerTimeDuration: 1200,
       bidDecimals: 100000,
       stepMin: 15000,
@@ -123,8 +126,8 @@ export default <AuctionERC721Config>{
       bidMultiplier: 18700,
     },
     degen: {
-      startTime: Date.now(),
-      endTime: Date.now() + 86400 * 3,
+      startTime: startTime,
+      endTime: endTime,
       hammerTimeDuration: 1200,
       bidDecimals: 100000,
       stepMin: 30000,
@@ -133,8 +136,8 @@ export default <AuctionERC721Config>{
       bidMultiplier: 48740,
     },
     test: {
-      startTime: Date.now(),
-      endTime: Date.now() + 86400 * 3,
+      startTime: startTime,
+      endTime: endTime,
       hammerTimeDuration: 1200,
       bidDecimals: 100000,
       stepMin: 30000,
