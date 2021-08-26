@@ -8,9 +8,8 @@ import { createLogger, format, transports } from "winston";
 import auctionConfig from "../auction.config";
 import { NonceManager } from "@ethersproject/experimental";
 import { Contract, BigNumber, utils } from "ethers";
+import { request } from "graphql-request";
 const { h2tokenIds } = require("../data/h2tokenIds");
-
-const { deployDiamond } = require("../scripts/deploy");
 
 const startAt = moment().format("YYYY-MM-DD_HH-mm-ss");
 const filename = `logs/${hardhat.network.name}/${auctionConfig.id}/${startAt}.log.json`;
@@ -34,8 +33,7 @@ async function deployAuctions(
 ) {
   const itemManager = "0x8D46fd7160940d89dA026D59B2e819208E714E82";
   let totalGasUsed: BigNumber = ethers.BigNumber.from("0");
-  let ghst: Contract;
-  let ghstAddress: string;
+
   let gbm: Contract;
   let gbmInitiator: Contract;
   let gbmAddress: string;
@@ -43,7 +41,6 @@ async function deployAuctions(
   let erc721address: string;
 
   let testing = ["hardhat"].includes(hardhat.network.name);
-  let kovan = hardhat.network.name === "kovan";
   let nonceManagedSigner;
 
   if (testing) {
@@ -68,7 +65,7 @@ async function deployAuctions(
     )} network testing with ${chalk.red.underline(preset)} preset!`
   );
 
-  const diamondAddress = "0xa44c8e0eCAEFe668947154eE2b803Bd4e6310EFe"; //await deployDiamond();
+  const diamondAddress = "0xa44c8e0eCAEFe668947154eE2b803Bd4e6310EFe";
 
   gbm = await ethers.getContractAt(
     "GBMFacet",
@@ -151,12 +148,23 @@ async function deployAuctions(
   );
 
   //Register the Auctions
-  let auctionSteps = 4; // amount of items in a massRegistrerXEach call
+  let auctionSteps = 1; // amount of items in a massRegistrerXEach call
   //let maxAuctions = auctionConfig.auctionTokenCounts[preset];
 
   let promises = [];
   let tokenIds = h2tokenIds[preset];
-  let deployedTokenIds = [];
+
+  const query = `
+  {auctions(where:{type:"erc721", incentivePreset:"${preset}"}) {
+    id
+  }}
+  `;
+  const url =
+    "https://aavegotchi2.stakesquid-frens.gq/subgraphs/id/QmRJbPF5W1ujDUUZymmeYu4Xo7xfSP6gmi8NHDbX99pDDL";
+
+  const response = await request(url, query);
+
+  console.log("response:", response);
 
   console.log(
     `${chalk.red(preset)} preset has ${tokenIds.length} tokens to mint.`
@@ -187,12 +195,11 @@ async function deployAuctions(
         `Created auctions for ${finalTokenIds.toString()}, using ${r.gasLimit.toString()} gas`
       );
 
-      deployedTokenIds.push(finalTokenIds);
-
       totalGasUsed = totalGasUsed.add(r.gasLimit);
 
       promises.push(r);
 
+      sent += auctionSteps;
       remaining -= auctionSteps;
 
       logger.info({
@@ -209,7 +216,6 @@ async function deployAuctions(
           useDefault: true,
           erc721address: erc721address,
           tokenIds: tokenIds.slice(sent, sent + auctionSteps),
-          deployedTokenIds: deployedTokenIds,
         },
       });
     } else {
@@ -226,7 +232,7 @@ async function deployAuctions(
   console.log("Used Gas:", totalGasUsed.toString());
 }
 
-deployAuctions("degen")
+deployAuctions("none")
   .then(() => process.exit(1))
   .catch((error) => {
     console.error(error);

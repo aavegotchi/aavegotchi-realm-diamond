@@ -49,8 +49,8 @@ interface AuctionERC721Config {
   gbm: string;
 }
 
-const startTime = 1629943200;
-const endTime = 1630202400;
+const startTime = 1629943200; //Aug 26, 2PM UTC
+const endTime = 1630202400; //Aug 29, 2PM UTC
 
 export default <AuctionERC721Config>{
   id: "auction-haunt2-test", // huamn id
@@ -61,7 +61,7 @@ export default <AuctionERC721Config>{
       hammerTimeDuration: 1200,
       bidDecimals: 100000,
       stepMin: 5000,
-      incMin: 0,
+      incMin: 500,
       incMax: 0,
       bidMultiplier: 0,
     },
