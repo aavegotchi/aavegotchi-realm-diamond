@@ -40,7 +40,7 @@ module.exports = {
     matic: {
       url: process.env.MATIC_URL,
       // url: 'https://rpc-mainnet.maticvigil.com/',
-      accounts: [process.env.SECRET],
+      accounts: [process.env.ITEM_MANAGER],
       // blockGasLimit: 20000000,
       blockGasLimit: 20000000,
       gasPrice: 10000000000,

@@ -19,18 +19,47 @@ interface Config {
 
 export default <Config>{
   default: {
-    id: "auction-wearable-test",
+    id: "auction-wearable-h2-localtest",
     auctions: {
       // svgId: quanity of items to take from owner and regiser for auction
-      204: 500, // Game Controller
-      203: 250, // Gamer Jacket
-      202: 50, // VR Headset
-
-      200: 500, // Steampunk Trousers
-      199: 250, // Steampunk Goggles
-      201: 100, // Mechanical Claw
-
-      205: 1000, // Gotchi Mug
+      // 206: 210, // biker helmet, -40 sold on venly
+      // 207: 495, // biker jacket, -5 sold on venly
+      // 208: 399, // aaviators, -101 sold on venly
+      // 209: 77, // horsehoe mustache, -23 sold on venly
+      211: 1000, // guy fawkes mask
+      212: 50, // 1337 laptop
+      213: 100, // haxxor shirt
+      214: 5, // matrix eyes
+      215: 100, // cyborg eyes
+      216: 50, // rainbow vomit,
+      217: 50, // energy gun,
+      218: 500, // mohawk,
+      219: 250, // mutton chops,
+      220: 100, // punk shirt
+      221: 1000, // pirate hat
+      222: 500, // pirate coat
+      223: 500, // hook hank
+      224: 250, // pirate patch
+      225: 1000, // basketball
+      226: 250, // red headband
+      227: 250, // 23 jersey
+      228: 1000, // 10 gallon hat
+      229: 500, // lasso
+      230: 1000, // wrangler jeans
+      231: 500, // comfy poncho
+      232: 1000, // poncho hoodie
+      233: 500, // uncommon cacti
+      234: 50, // shaman poncho
+      235: 100, // shaman hoodie
+      236: 250, // blue cacti
+      237: 50, // mythical cacti
+      238: 5, // godlike cacti
+      239: 500, // wagie cap,
+      240: 500, //headphones,
+      241: 250, // wgmi shirt
+      242: 100, // yellow manbun
+      243: 250, // tinted shades,
+      244: 250, // v-neck shirt
     },
     //  gasGwei: 30,
     release: false,
@@ -43,14 +72,16 @@ export default <Config>{
     gbm: "",
     gbmInitiator: "",
     token: "0x86935F11C86623deC8a25696E1C19a8659CbF95d",
+    gasGwei: 2,
   },
   localhost: {
     gbm: "",
     gbmInitiator: "",
     token: "0x86935F11C86623deC8a25696E1C19a8659CbF95d",
+    gasGwei: 2,
   },
   kovan: {
-    id: "auction-kovan-megasrs-launch",
+    id: "auction-wearables-h2-testnet",
     gbm: "",
     gbmInitiator: "",
     token: "",
@@ -59,7 +90,7 @@ export default <Config>{
     release: true,
   },
   matic: {
-    id: "auction-wearables-1",
+    id: "auction-wearables-h2",
     gbm: "",
     gbmInitiator: "",
     token: "0x86935F11C86623deC8a25696E1C19a8659CbF95d",
