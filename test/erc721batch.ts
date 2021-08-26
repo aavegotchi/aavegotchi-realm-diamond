@@ -95,8 +95,16 @@ async function deployAuctions(
   await gbmInitiator.setInitiatorInfo(presetInfo);
 
   const initiatorInfo = await gbmInitiator.getInitiatorInfo();
-  console.log("start time:", initiatorInfo.startTime.toString());
-  console.log("end time:", initiatorInfo.endTime.toString());
+  console.log(
+    "start time:",
+    new Date(Number(initiatorInfo.startTime.toString()) * 1000)
+  );
+  console.log(
+    "end time:",
+    new Date(Number(initiatorInfo.endTime.toString()) * 1000)
+  );
+
+  console.log("Bid Multiplier:", initiatorInfo.bidMultiplier.toString());
 
   //Change this to correct preset
   if (
@@ -148,6 +156,7 @@ async function deployAuctions(
 
   let promises = [];
   let tokenIds = h2tokenIds[preset];
+  let deployedTokenIds = [];
 
   console.log(
     `${chalk.red(preset)} preset has ${tokenIds.length} tokens to mint.`
@@ -178,6 +187,8 @@ async function deployAuctions(
         `Created auctions for ${finalTokenIds.toString()}, using ${r.gasLimit.toString()} gas`
       );
 
+      deployedTokenIds.push(finalTokenIds);
+
       totalGasUsed = totalGasUsed.add(r.gasLimit);
 
       promises.push(r);
@@ -197,7 +208,8 @@ async function deployAuctions(
           gbmAddress: gbmAddress,
           useDefault: true,
           erc721address: erc721address,
-          tokenIds: tokenIds.splice(sent, sent + auctionSteps),
+          tokenIds: tokenIds.slice(sent, sent + auctionSteps),
+          deployedTokenIds: deployedTokenIds,
         },
       });
     } else {
@@ -214,7 +226,7 @@ async function deployAuctions(
   console.log("Used Gas:", totalGasUsed.toString());
 }
 
-deployAuctions("test")
+deployAuctions("degen")
   .then(() => process.exit(1))
   .catch((error) => {
     console.error(error);
