@@ -8,6 +8,7 @@ import { createLogger, format, transports } from "winston";
 import auctionConfig from "../auction.config";
 import { NonceManager } from "@ethersproject/experimental";
 import { Contract, BigNumber, utils } from "ethers";
+const { h2tokenIds } = require("../data/h2tokenIds");
 
 const { deployDiamond } = require("../scripts/deploy");
 
@@ -29,7 +30,7 @@ logger.on("finish", () => {
 });
 
 async function deployAuctions(
-  preset: "none" | "low" | "medium" | "high" | "degen"
+  preset: "none" | "low" | "medium" | "high" | "degen" | "test"
 ) {
   const accounts = await ethers.getSigners();
   const account = await accounts[0].getAddress();
@@ -129,7 +130,13 @@ async function deployAuctions(
   }
 
   //@ts-ignore
-  await erc721?.setApprovalForAll(gbmAddress, true);
+  const approval = await erc721?.isApprovedForAll(account, gbmAddress);
+  console.log("approval:", approval);
+
+  if (!approval) {
+    //@ts-ignore
+    await erc721?.setApprovalForAll(gbmAddress, true);
+  }
 
   console.log(
     `[${chalk.cyan(hardhat.network.name)} ${chalk.yellow(
@@ -143,34 +150,26 @@ async function deployAuctions(
     )}`
   );
 
-  if (auctionConfig.ercType == 721) {
-    if (auctionConfig.tokenId != 0)
-      throw new Error("ERC721 tokenId should be zero, check your config.");
-    // console.log(
-    //   `Type ERC 721, starts at index ${auctionConfig.initialIndex}, amount of ${
-    //     auctionConfig.auctionCount
-    //   }, /25 R = ${auctionConfig.auctionCount % 25}`
-    // );
-  } else if (auctionConfig.ercType == 1155) {
-    // console.log(`Type ERC 1155, starts at index ${auctionConfig.initialIndex}`);
-  }
-
   //Register the Auctions
-  let auctionSteps = 40; // amount of items in a massRegistrerXEach call
-  let maxAuctions = auctionConfig.auctionTokenCounts[preset];
-  let txNeeded = Math.floor(maxAuctions / auctionSteps);
-  let remainder = maxAuctions % auctionSteps; // ie 13/5 = 2 remainder is: 3
-  let promises = [];
+  let auctionSteps = 5; // amount of items in a massRegistrerXEach call
+  //let maxAuctions = auctionConfig.auctionTokenCounts[preset];
 
-  for (let i = 0; i < txNeeded; i++) {
+  let promises = [];
+  let tokenIds = h2tokenIds[preset];
+
+  console.log("token ids:", tokenIds);
+
+  let sent = 0;
+  let remaining = tokenIds.length - sent;
+
+  for (let i = 0; i < remaining; i++) {
     let startIndex = auctionConfig.initialIndex + i * auctionSteps;
     let endIndex = startIndex + auctionSteps; // since index = 0
     let r = await gbm.registerMassERC721Each(
       gbmAddress,
       true,
       erc721address,
-      `${startIndex}`,
-      `${endIndex}`
+      tokenIds.splice(sent, sent + auctionSteps)
     );
 
     console.log(
@@ -201,38 +200,6 @@ async function deployAuctions(
       },
     });
   }
-  if (remainder > 0) {
-    // last run, include remaining run
-    let startIndex = auctionConfig.initialIndex + maxAuctions - remainder;
-    let endIndex = startIndex + remainder - 1; // index started at 0
-    let r = await gbm.registerMassERC721Each(
-      gbmAddress,
-      true,
-      erc721address,
-      `${maxAuctions - remainder}`,
-      `${startIndex + remainder}`
-    );
-    // let as = await r.wait();
-    logger.info({
-      tx: {
-        hash: r.hash,
-        from: r.from,
-        to: r.to,
-        chainId: r.chainId,
-        nonce: r.nonce,
-        networkId: hardhat.network.name,
-      },
-      params: {
-        gbmAddress: gbmAddress,
-        useDefault: true,
-        erc721address: erc721address,
-        startIndex: startIndex,
-        endIndex: endIndex,
-      },
-    });
-    // return r.wait();
-    promises.push(r.wait());
-  }
 
   await Promise.all(promises);
 
@@ -243,7 +210,7 @@ async function deployAuctions(
   console.log("Used Gas:", totalGasUsed.toString());
 }
 
-deployAuctions("medium")
+deployAuctions("test")
   .then(() => process.exit(1))
   .catch((error) => {
     console.error(error);

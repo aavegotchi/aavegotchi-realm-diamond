@@ -23,6 +23,8 @@ let incMax = 10000;
 let incMin = 1000;
 let bidMultiplier = 11120;
 
+const gasPrice = 20000000000;
+
 const contractAddresses = {
   erc20Currency: ghstAddress,
   pixelcraft,
@@ -47,7 +49,7 @@ async function deployDiamond() {
 
   // deploy DiamondCutFacet
   const DiamondCutFacet = await ethers.getContractFactory("DiamondCutFacet");
-  const diamondCutFacet = await DiamondCutFacet.deploy();
+  const diamondCutFacet = await DiamondCutFacet.deploy({ gasPrice: gasPrice });
   await diamondCutFacet.deployed();
   console.log("DiamondCutFacet deployed:", diamondCutFacet.address);
 
@@ -55,14 +57,15 @@ async function deployDiamond() {
   const Diamond = await ethers.getContractFactory("Diamond");
   const diamond = await Diamond.deploy(
     contractOwner.address,
-    diamondCutFacet.address
+    diamondCutFacet.address,
+    { gasPrice: gasPrice }
   );
   await diamond.deployed();
   console.log("Diamond deployed:", diamond.address);
 
   // deploy DiamondInit
   const DiamondInit = await ethers.getContractFactory("DiamondInit");
-  const diamondInit = await DiamondInit.deploy();
+  const diamondInit = await DiamondInit.deploy({ gasPrice: gasPrice });
   await diamondInit.deployed();
   console.log("DiamondInit deployed:", diamondInit.address);
 
@@ -80,7 +83,7 @@ async function deployDiamond() {
   const cut = [];
   for (const FacetName of FacetNames) {
     const Facet = await ethers.getContractFactory(FacetName);
-    const facet = await Facet.deploy();
+    const facet = await Facet.deploy({ gasPrice: gasPrice });
     await facet.deployed();
     console.log(`${FacetName} deployed: ${diamondInit.address}`);
     cut.push({
@@ -106,7 +109,9 @@ async function deployDiamond() {
 
   console.log("key:", ethers.utils.hexDataSlice(backendSigner.publicKey, 1));
 
-  tx = await diamondCut.diamondCut(cut, diamondInit.address, functionCall);
+  tx = await diamondCut.diamondCut(cut, diamondInit.address, functionCall, {
+    gasPrice: gasPrice,
+  });
   console.log("Diamond cut tx: ", tx.hash);
   receipt = await tx.wait();
   if (!receipt.status) {
@@ -126,7 +131,8 @@ async function deployDiamond() {
     );
   } else {
     await ownershipFacet.transferOwnership(
-      "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119"
+      "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119",
+      { gasPrice: gasPrice }
     );
   }
 

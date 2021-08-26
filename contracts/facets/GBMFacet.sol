@@ -469,15 +469,16 @@ contract GBMFacet is IGBM, IERC1155TokenReceiver, IERC721TokenReceiver, Modifier
         address _GBM,
         bool _useInitiator,
         address _ERC721Contract,
-        uint256 _tokenIDStart,
-        uint256 _tokenIDEnd
+        uint256[] memory _tokenIds
     ) external onlyOwner {
-        while (_tokenIDStart < _tokenIDEnd) {
-            IERC721(_ERC721Contract).safeTransferFrom(msg.sender, _GBM, _tokenIDStart, "");
-            registerAnAuctionToken(_ERC721Contract, _tokenIDStart, bytes4(keccak256("ERC721")), _useInitiator);
-
-            _tokenIDStart++;
+        require(_tokenIds.length > 0, "No auctions to create");
+        for (uint256 index = 0; index < _tokenIds.length; index++) {
+            uint256 tokenId = _tokenIds[index];
+            IERC721(_ERC721Contract).safeTransferFrom(msg.sender, _GBM, tokenId, "");
+            registerAnAuctionToken(_ERC721Contract, tokenId, bytes4(keccak256("ERC721")), _useInitiator);
         }
+
+        // _tokenIDStart++;
     }
 
     function registerMassERC1155Each(

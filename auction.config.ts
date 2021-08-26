@@ -1,4 +1,4 @@
-const { none, low, medium, high, degen } = require("./data/h2tokenIds");
+const { h2tokenIds } = require("./data/h2tokenIds");
 
 interface AuctionPreset {
   startTime: number;
@@ -17,6 +17,7 @@ interface TokenCounts {
   medium: number;
   high: number;
   degen: number;
+  test: number;
 }
 
 interface AuctionPresets {
@@ -25,6 +26,7 @@ interface AuctionPresets {
   medium: AuctionPreset;
   high: AuctionPreset;
   degen: AuctionPreset;
+  test: AuctionPreset;
 }
 
 interface AuctionERC721Config {
@@ -130,13 +132,24 @@ export default <AuctionERC721Config>{
       incMax: 30000,
       bidMultiplier: 48740,
     },
+    test: {
+      startTime: Date.now(),
+      endTime: Date.now() + 86400 * 3,
+      hammerTimeDuration: 1200,
+      bidDecimals: 100000,
+      stepMin: 30000,
+      incMin: 3000,
+      incMax: 30000,
+      bidMultiplier: 48740,
+    },
   },
   auctionTokenCounts: {
-    none: none.length,
-    low: low.length,
-    medium: medium.length,
-    high: high.length,
-    degen: degen.length,
+    none: h2tokenIds.none.length,
+    low: h2tokenIds.low.length,
+    medium: h2tokenIds.medium.length,
+    high: h2tokenIds.high.length,
+    degen: h2tokenIds.degen.length,
+    test: h2tokenIds.test.length,
   },
 
   initialIndex: 0, // none previous, so start at 0

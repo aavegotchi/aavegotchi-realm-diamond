@@ -1107,8 +1107,13 @@ const degen = [
   19999,
 ];
 
-exports.none = none;
-exports.low = low;
-exports.medium = medium;
-exports.high = high;
-exports.degen = degen;
+const test = [0, 2, 4, 6];
+
+exports.h2tokenIds = {
+  none: none,
+  low: low,
+  medium: medium,
+  high: high,
+  degen: degen,
+  test: test,
+};
