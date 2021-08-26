@@ -85,7 +85,7 @@ async function deployDiamond() {
     const Facet = await ethers.getContractFactory(FacetName);
     const facet = await Facet.deploy({ gasPrice: gasPrice });
     await facet.deployed();
-    console.log(`${FacetName} deployed: ${diamondInit.address}`);
+    console.log(`${FacetName} deployed: ${facet.address}`);
     cut.push({
       facetAddress: facet.address,
       action: FacetCutAction.Add,
@@ -125,16 +125,18 @@ async function deployDiamond() {
     diamond.address
   );
 
-  if (testing) {
+  /*  if (testing) {
     await ownershipFacet.transferOwnership(
       "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
     );
   } else {
-    await ownershipFacet.transferOwnership(
-      "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119",
-      { gasPrice: gasPrice }
-    );
-  }
+    */
+  //Transfer to itemManager
+  await ownershipFacet.transferOwnership(
+    "0x8D46fd7160940d89dA026D59B2e819208E714E82",
+    { gasPrice: gasPrice }
+  );
+  //}
 
   const currentOwner = await ownershipFacet.owner();
   console.log("current owner:", currentOwner);
