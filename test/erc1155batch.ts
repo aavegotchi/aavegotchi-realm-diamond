@@ -91,9 +91,9 @@ const logger = createLogger({
 
 async function main() {
   // impersonate item manager
-  const itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
+  const itemManager = "0x8D46fd7160940d89dA026D59B2e819208E714E82"; //"0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119"; //0x8D46fd7160940d89dA026D59B2e819208E714E82
   let account = itemManager;
-  let diamondAddress: string = "";
+  let diamondAddress: string = "0xa44c8e0eCAEFe668947154eE2b803Bd4e6310EFe";
   console.log(`${diamondAddress} should be the gbm diamond`);
   let tokenAddress: string = auctionConfig.token;
   console.log(`${tokenAddress} should be the address for erc1155s`);
@@ -110,7 +110,11 @@ async function main() {
   };
   console.log(`Contract addresses:`, contractAddresses);
 
-  if (["matic", "hardhat"].includes(hardhat.network.name.toLowerCase())) {
+  if (
+    ["matic", "hardhat", "localhost"].includes(
+      hardhat.network.name.toLowerCase()
+    )
+  ) {
     console.log(`Active on mainnet!`);
     // @TODO: set this to mainnet gbm diamond that was deployed by deployDiamond()
     diamondAddress = "0xa44c8e0eCAEFe668947154eE2b803Bd4e6310EFe"; // diamond returned from deployDiamond
@@ -118,6 +122,16 @@ async function main() {
     const signer = accounts[0];
     nonceManaged = new NonceManager(signer);
     account = await signer.getAddress();
+    if (["hardhat", "localhost"].includes(hardhat.network.name.toLowerCase())) {
+      console.log(`hardhat matic test`);
+      await hardhat.network.provider.request({
+        method: "hardhat_impersonateAccount",
+        params: [itemManager],
+      });
+      const signer = await ethers.provider.getSigner(itemManager);
+      account = await signer.getAddress();
+      nonceManaged = new NonceManager(signer);
+    }
     console.log(`Signing on mainnet as: `, account);
   } else {
     // localnet fork, deploy gbm owned by itemManager
@@ -222,13 +236,11 @@ async function main() {
   // connect to erc1155 interface with managed signer
   console.log("Approving token");
   console.log("token address:", tokenAddress);
-  console.log("diamond address:", diamondAddress);
+  console.log("diamond address / gbm deployed to:", diamondAddress);
   const tokenContract: Contract = (
     await ethers.getContractAt("ERC1155Generic", tokenAddress)
   ).connect(nonceManaged);
-  await tokenContract
-    .connect(nonceManaged)
-    .setApprovalForAll(diamondAddress, true);
+  await tokenContract.setApprovalForAll(diamondAddress, true);
 
   const gbm: Contract = (
     await ethers.getContractAt("GBMFacet", diamondAddress)
@@ -267,7 +279,9 @@ async function main() {
 
   let auctionSteps = 60; // amount of items in a massRegistrerXEach call, must avoid exceeding block size
   let promises: Promise<any>[] = [];
-  auctionConfig.initOrdering.map(async (itemId) => {
+  for (let i in auctionConfig.initOrdering) {
+    const itemId = auctionConfig.initOrdering[i];
+    // auctionConfig.initOrdering.map(async (itemId) => {
     // taking each itemId from the auctionConfig.auctions field
     // registers X new auctions of itemId from the owner with gbm
 
@@ -293,10 +307,10 @@ async function main() {
       let startIndex = 0 + i * auctionSteps;
       let endIndex = startIndex + auctionSteps; // since index = 0
 
-      // const balanceOf = await tokenContract.balanceOf(itemManager, itemId);
-      // console.log(`balance of: ${itemId}`, balanceOf.toString());
+      const balanceOf = await tokenContract.balanceOf(itemManager, itemId);
+      console.log(`balance of: ${itemId}`, balanceOf.toString(), gbm);
 
-      let txReq = await gbm.registerMassERC1155Each(
+      let txReq = gbm.registerMassERC1155Each(
         diamondAddress,
         true,
         tokenAddress,
@@ -305,12 +319,12 @@ async function main() {
         `${endIndex}`,
         txOps
       );
-
-      // console.log(
-      //   "gas used:",
-      //   utils.formatUnits(txReq.gasLimit, "gwei"),
-      //   txReq.hash
-      // );
+      await txReq;
+      console.log(
+        "gas used:",
+        utils.formatUnits(txReq.gasLimit, "gwei"),
+        txReq.hash
+      );
       // totalGas += parseFloat(utils.formatUnits(txReq.gasLimit, "gwei"));
 
       logger.info({
@@ -373,7 +387,8 @@ async function main() {
         maxItemTx + (remaining > 0 ? 1 : 0)
       )} txs!`
     );
-  });
+    // });
+  }
 
   console.log(
     `[${chalk.yellow(`ℹ️`)}] Queue in-progress, will exit when done logging!
