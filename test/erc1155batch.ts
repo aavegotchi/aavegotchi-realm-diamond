@@ -113,7 +113,7 @@ async function main() {
   if (["matic", "hardhat"].includes(hardhat.network.name.toLowerCase())) {
     console.log(`Active on mainnet!`);
     // @TODO: set this to mainnet gbm diamond that was deployed by deployDiamond()
-    diamondAddress = "0xa44c8e0eCAEFe668947154eE2b803Bd4e6310EFei"; // diamond returned from deployDiamond
+    diamondAddress = "0xa44c8e0eCAEFe668947154eE2b803Bd4e6310EFe"; // diamond returned from deployDiamond
     const accounts = await ethers.getSigners();
     const signer = accounts[0];
     nonceManaged = new NonceManager(signer);
