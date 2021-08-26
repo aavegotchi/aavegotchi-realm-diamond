@@ -28,17 +28,17 @@ logger.on("finish", () => {
   process.exit(0);
 });
 
-async function deployAuctions(
+const gasPrice = 50000000000;
+
+async function prepareAuction(
   preset: "none" | "low" | "medium" | "high" | "degen" | "test"
 ) {
   const itemManager = "0x8D46fd7160940d89dA026D59B2e819208E714E82";
-  let totalGasUsed: BigNumber = ethers.BigNumber.from("0");
 
   let gbm: Contract;
   let gbmInitiator: Contract;
   let gbmAddress: string;
   // let erc721: Contract;
-  let erc721address: string;
 
   let testing = ["hardhat"].includes(hardhat.network.name);
   let nonceManagedSigner;
@@ -89,7 +89,11 @@ async function deployAuctions(
 
   console.log(`Setting Preset for ${chalk.red(preset)}`);
   const presetInfo = auctionConfig.auctionPresets[preset];
-  await gbmInitiator.setInitiatorInfo(presetInfo);
+  const tx = await gbmInitiator.setInitiatorInfo(presetInfo, {
+    gasPrice: gasPrice,
+  });
+
+  await tx.wait();
 
   const initiatorInfo = await gbmInitiator.getInitiatorInfo();
   console.log(
@@ -110,7 +114,27 @@ async function deployAuctions(
   ) {
     console.log("Presets were not uploaded correctly! Exiting");
     process.exit(1);
+  } else {
+    await deployAuction(
+      preset,
+      nonceManagedSigner,
+      gbmAddress,
+      itemManager,
+      gbm
+    );
   }
+}
+
+async function deployAuction(
+  preset: "none" | "low" | "medium" | "high" | "degen" | "test",
+  nonceManagedSigner: NonceManager,
+  gbmAddress: string,
+  itemManager: string,
+  gbm: Contract
+) {
+  let totalGasUsed: BigNumber = ethers.BigNumber.from("0");
+
+  let erc721address: string;
 
   console.log(`Presets are set for ${preset.toUpperCase()}, LFG!`);
 
@@ -157,6 +181,7 @@ async function deployAuctions(
   const query = `
   {auctions(where:{type:"erc721", incentivePreset:"${preset}"}) {
     id
+    tokenId
   }}
   `;
   const url =
@@ -166,20 +191,37 @@ async function deployAuctions(
 
   console.log("response:", response);
 
+  let deployed: string[] = [];
+  response.auctions.forEach((auctionObj: any) => {
+    deployed.push(auctionObj.tokenId);
+  });
+
+  console.log("Already deployed:", deployed);
+
   console.log(
     `${chalk.red(preset)} preset has ${tokenIds.length} tokens to mint.`
   );
 
   let sent = 0;
-  let remaining = tokenIds.length - sent;
-  const gasPrice = 50000000000;
+
+  //filter out the deployed tokenIds from the preset
+  let filteredTokenIds = tokenIds.filter((tokenId: number) => {
+    return !deployed.includes(tokenId.toString());
+  });
+
+  let remaining = filteredTokenIds.length - sent;
+
+  console.log("filtered token ids:", filteredTokenIds);
 
   while (remaining > 0) {
     if (remaining < auctionSteps) auctionSteps = remaining;
 
     console.log("remaining:", remaining);
 
-    let finalTokenIds: number[] = tokenIds.slice(sent, sent + auctionSteps);
+    let finalTokenIds: number[] = filteredTokenIds.slice(
+      sent,
+      sent + auctionSteps
+    );
     if (finalTokenIds.length > 0) {
       console.log(`Creating Auctions for ${finalTokenIds.toString()}`);
       let r = await gbm.registerMassERC721Each(
@@ -232,11 +274,11 @@ async function deployAuctions(
   console.log("Used Gas:", totalGasUsed.toString());
 }
 
-deployAuctions("none")
+prepareAuction("low")
   .then(() => process.exit(1))
   .catch((error) => {
     console.error(error);
     process.exit(1);
   });
 
-exports.deploy = deployAuctions;
+exports.deploy = prepareAuction;
