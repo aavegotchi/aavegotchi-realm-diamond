@@ -172,31 +172,59 @@ async function deployAuction(
   );
 
   //Register the Auctions
-  let auctionSteps = 1; // amount of items in a massRegistrerXEach call
-  //let maxAuctions = auctionConfig.auctionTokenCounts[preset];
+  let auctionSteps = 50;
 
   let promises = [];
   let tokenIds = h2tokenIds[preset];
 
   const query = `
-  {auctions(where:{type:"erc721", incentivePreset:"${preset}"}) {
+  {first1000: auctions(first:1000, where:{type:"erc721", incentivePreset:"${preset}"}) {
     id
     tokenId
-  }}
+  }
+  first2000: auctions(skip:1000, first:1000, where:{type:"erc721", incentivePreset:"${preset}"}) {
+    id
+    tokenId
+  }
+  first3000: auctions(skip: 2000, first:1000, where:{type:"erc721", incentivePreset:"${preset}"}) {
+    id
+    tokenId
+  }
+  first4000: auctions(skip: 3000, first:1000, where:{type:"erc721", incentivePreset:"${preset}"}) {
+    id
+    tokenId
+  }
+  first5000: auctions(skip: 4000, first:1000, where:{type:"erc721", incentivePreset:"${preset}"}) {
+    id
+    tokenId
+  }
+}
   `;
   const url =
     "https://aavegotchi2.stakesquid-frens.gq/subgraphs/id/QmRJbPF5W1ujDUUZymmeYu4Xo7xfSP6gmi8NHDbX99pDDL";
 
   const response = await request(url, query);
 
-  console.log("response:", response);
+  // console.log("response:", response);
 
   let deployed: string[] = [];
-  response.auctions.forEach((auctionObj: any) => {
+  response.first1000.forEach((auctionObj: any) => {
     deployed.push(auctionObj.tokenId);
   });
 
-  console.log("Already deployed:", deployed);
+  response.first2000.forEach((auctionObj: any) => {
+    deployed.push(auctionObj.tokenId);
+  });
+
+  response.first3000.forEach((auctionObj: any) => {
+    deployed.push(auctionObj.tokenId);
+  });
+
+  response.first4000.forEach((auctionObj: any) => {
+    deployed.push(auctionObj.tokenId);
+  });
+
+  console.log("Already deployed:", deployed.length);
 
   console.log(
     `${chalk.red(preset)} preset has ${tokenIds.length} tokens to mint.`
@@ -274,7 +302,7 @@ async function deployAuction(
   console.log("Used Gas:", totalGasUsed.toString());
 }
 
-prepareAuction("low")
+prepareAuction("high")
   .then(() => process.exit(1))
   .catch((error) => {
     console.error(error);
