@@ -10,7 +10,7 @@ import { createLogger, format, transports } from "winston";
 import { Contract, utils } from "ethers";
 import { NonceManager } from "@ethersproject/experimental";
 // @ts-ignore
-import { deployDiamond } from "../scripts/deploy";
+// import { deployDiamond } from "../scripts/deploy";
 // @ts-ignore
 import { getSelectors, FacetCutAction } from "../scripts/libraries/diamond.js";
 
@@ -110,10 +110,10 @@ async function main() {
   };
   console.log(`Contract addresses:`, contractAddresses);
 
-  if (["matic"].includes(hardhat.network.name.toLowerCase())) {
+  if (["matic", "hardhat"].includes(hardhat.network.name.toLowerCase())) {
     console.log(`Active on mainnet!`);
     // @TODO: set this to mainnet gbm diamond that was deployed by deployDiamond()
-    diamondAddress = ""; // diamond returned from deployDiamond
+    diamondAddress = "0xa44c8e0eCAEFe668947154eE2b803Bd4e6310EFei"; // diamond returned from deployDiamond
     const accounts = await ethers.getSigners();
     const signer = accounts[0];
     nonceManaged = new NonceManager(signer);
@@ -221,6 +221,8 @@ async function main() {
   // approve diamondAddress, one of these probably works
   // connect to erc1155 interface with managed signer
   console.log("Approving token");
+  console.log("token address:", tokenAddress);
+  console.log("diamond address:", diamondAddress);
   const tokenContract: Contract = (
     await ethers.getContractAt("ERC1155Generic", tokenAddress)
   ).connect(nonceManaged);
@@ -345,16 +347,6 @@ async function main() {
         txOps
       );
 
-      // console.log(
-      //   "gas used:",
-      //   utils.formatUnits(txReq.gasLimit, "gwei"),
-      //   txReq.hash,
-      //   itemId,
-      //   maxItemAuctions
-      // );
-      // totalGas += parseFloat(utils.formatUnits(txReq.gasLimit, "gwei"));
-
-      // let as = await r.wait();
       logger.info({
         tx: {
           hash: txReq.hash,
