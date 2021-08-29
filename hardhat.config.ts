@@ -6,6 +6,7 @@ import { task } from "hardhat/config";
 import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname + "/.env" });
 require("./tasks/generateDiamondABI.js");
+require("./tasks/verifyFacet.js");
 
 // This is a sample Buidler task. To learn how to create your own go to
 // https://buidler.dev/guides/create-task.html
