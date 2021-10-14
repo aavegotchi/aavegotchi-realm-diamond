@@ -164,17 +164,15 @@ contract RealmVoucherFacet is Modifiers {
         return LibStrings.strWithUint("https://aavegotchi.com/metadata/realm/", _tokenId); //Here is your URL!
     }
 
-    /*
     function mintParcels(uint256[] calldata _tokenIds, ParcelMetadata[] memory _metadata) external onlyOwner {
         for (uint256 index = 0; index < _tokenIds.length; index++) {
             uint256 tokenId = _tokenIds[index];
-            ParcelMetadata memory realmId = _metadata[index];
+            ParcelMetadata memory metadata = _metadata[index];
             require(_tokenIds.length == _metadata.length, "Inputs must be same length");
-            s.tokenIdToParcel[tokenId] = realmId;
-            _safeMint(msg.sender, _tokenIds[index]);
+            s.tokenIdToParcel[tokenId] = metadata;
+            LibERC721._safeMint(msg.sender, _tokenIds[index]);
         }
     }
-    */
 
     function safeBatchTransfer(
         uint256[] calldata _tokenIds,

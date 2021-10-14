@@ -3,6 +3,7 @@ pragma solidity 0.8.9;
 
 import "../interfaces/IERC721TokenReceiver.sol";
 import {LibAppStorage, AppStorage} from "./AppStorage.sol";
+import "./LibMeta.sol";
 
 library LibERC721 {
     /// @dev This emits when ownership of any NFT changes by any mechanism.
@@ -23,6 +24,8 @@ library LibERC721 {
     event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
 
     bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
+
+    event MintParcel(address indexed _owner, uint256 indexed _tokenId);
 
     function checkOnERC721Received(
         address _operator,
@@ -89,5 +92,23 @@ library LibERC721 {
         assembly {
             mstore(tokenIds_, count)
         }
+    }
+
+    function _safeMint(address _to, uint256 _amount) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+
+        uint32 tokenId = s.tokenIdCounter;
+
+        for (uint256 i; i < _amount; i++) {
+            s.parcels[tokenId].owner = _to;
+            s.tokenIdIndexes[tokenId] = s.tokenIds.length;
+            s.tokenIds.push(tokenId);
+            s.ownerTokenIdIndexes[_to][tokenId] = s.ownerTokenIds[_to].length;
+            s.ownerTokenIds[_to].push(tokenId);
+            emit LibERC721.Transfer(address(0), _to, tokenId);
+            tokenId++;
+            emit MintParcel(_to, tokenId);
+        }
+        s.tokenIdCounter = tokenId;
     }
 }

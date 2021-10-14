@@ -13,8 +13,11 @@ struct ParcelMetadata {
 
 struct AppStorage {
     uint32[] tokenIds;
+    uint32 tokenIdCounter;
+    mapping(uint256 => uint256) tokenIdIndexes;
     mapping(address => uint256) parcelBalance;
     mapping(uint256 => ParcelMetadata) parcels;
+    mapping(address => mapping(uint256 => uint256)) ownerTokenIdIndexes;
     mapping(address => uint32[]) ownerTokenIds;
     mapping(uint256 => ParcelMetadata) tokenIdToParcel;
     mapping(address => mapping(address => bool)) operators;
