@@ -2,42 +2,9 @@
 /* eslint prefer-const: "off" */
 
 //@ts-ignore
-// import hardhat, { run, ethers } from "hardhat";
+import { ethers } from "hardhat";
 
 const { getSelectors, FacetCutAction } = require("./libraries/diamond.js");
-
-// Init GBM
-const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
-const pixelcraft = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
-const playerRewards = "0x27DF5C6dcd360f372e23d5e63645eC0072D0C098";
-const daoTreasury = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
-
-let startTime = Math.floor(Date.now() / 1000);
-let endTime = Math.floor(Date.now() / 1000) + 86400 * 3;
-let hammerTimeDuration = 300;
-let bidDecimals = 100000;
-let stepMin = 10000;
-let incMax = 10000;
-let incMin = 1000;
-let bidMultiplier = 11120;
-
-const contractAddresses = {
-  erc20Currency: ghstAddress,
-  pixelcraft,
-  playerRewards,
-  daoTreasury,
-};
-
-const initInfo = {
-  startTime,
-  endTime,
-  hammerTimeDuration,
-  bidDecimals,
-  stepMin,
-  incMax,
-  incMin,
-  bidMultiplier,
-};
 
 async function deployDiamond() {
   const accounts = await ethers.getSigners();
@@ -70,8 +37,7 @@ async function deployDiamond() {
   const FacetNames = [
     "DiamondLoupeFacet",
     "OwnershipFacet",
-    "SettingsFacet",
-    "GBMFacet",
+    "RealmVoucherFacet",
   ];
   const cut = [];
   for (const FacetName of FacetNames) {
@@ -91,13 +57,9 @@ async function deployDiamond() {
   const diamondCut = await ethers.getContractAt("IDiamondCut", diamond.address);
   let tx;
   let receipt;
-  let backendSigner = new ethers.Wallet(process.env.GBM_PK); // PK should start with '0x'
+
   // call to init function
-  let functionCall = diamondInit.interface.encodeFunctionData("init", [
-    contractAddresses,
-    initInfo,
-    ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
-  ]);
+  let functionCall = diamondInit.interface.encodeFunctionData("init", []);
   tx = await diamondCut.diamondCut(cut, diamondInit.address, functionCall);
   console.log("Diamond cut tx: ", tx.hash);
   receipt = await tx.wait();
