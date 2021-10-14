@@ -2,6 +2,7 @@
 pragma solidity 0.8.9;
 
 import "../interfaces/IERC721TokenReceiver.sol";
+import {LibAppStorage, AppStorage} from "./AppStorage.sol";
 
 library LibERC721 {
     /// @dev This emits when ownership of any NFT changes by any mechanism.
@@ -39,6 +40,54 @@ library LibERC721 {
                 ERC721_RECEIVED == IERC721TokenReceiver(_to).onERC721Received(_operator, _from, _tokenId, _data),
                 "AavegotchiFacet: Transfer rejected/failed by _to"
             );
+        }
+    }
+
+    // This function is used by transfer functions
+    function _transferFrom(
+        address _sender,
+        address _from,
+        address _to,
+        uint256 _tokenId
+    ) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        require(_to != address(0), "ER721: Can't transfer to 0 address");
+        address owner = s.parcels[_tokenId].owner;
+        require(owner != address(0), "ERC721: Invalid tokenId or can't be transferred");
+        require(
+            _sender == owner || s.operators[owner][_sender] || s.approved[_tokenId] == _sender,
+            "AavegotchiFacet: Not owner or approved to transfer"
+        );
+        require(_from == owner, "ERC721: _from is not owner, transfer failed");
+        s.parcels[_tokenId].owner = _to;
+        s.parcelBalance[_from]--;
+        s.parcelBalance[_to]++;
+        if (s.approved[_tokenId] != address(0)) {
+            delete s.approved[_tokenId];
+            emit LibERC721.Approval(owner, address(0), _tokenId);
+        }
+        emit LibERC721.Transfer(_from, _to, _tokenId);
+    }
+
+    function _tokenIdsOfOwner(address _owner) internal view returns (uint256[] memory tokenIds_) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        uint256 len = s.tokenIds.length;
+        tokenIds_ = new uint256[](len);
+        uint256 count;
+        for (uint256 i; i < len; ) {
+            uint256 tokenId = s.tokenIds[i];
+            if (s.parcels[tokenId].owner == _owner) {
+                tokenIds_[count] = tokenId;
+                unchecked {
+                    count++;
+                }
+            }
+            unchecked {
+                i++;
+            }
+        }
+        assembly {
+            mstore(tokenIds_, count)
         }
     }
 }

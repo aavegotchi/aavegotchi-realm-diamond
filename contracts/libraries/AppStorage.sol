@@ -21,6 +21,18 @@ struct AppStorage {
     mapping(uint256 => address) approved;
 }
 
+library LibAppStorage {
+    function diamondStorage() internal pure returns (AppStorage storage ds) {
+        assembly {
+            ds.slot := 0
+        }
+    }
+
+    function abs(int256 x) internal pure returns (uint256) {
+        return uint256(x >= 0 ? x : -x);
+    }
+}
+
 contract Modifiers {
     AppStorage internal s;
 

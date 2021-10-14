@@ -11,24 +11,7 @@ contract RealmVoucherFacet is Modifiers {
     bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
 
     function tokenIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {
-        uint256 len = s.tokenIds.length;
-        tokenIds_ = new uint256[](len);
-        uint256 count;
-        for (uint256 i; i < len; ) {
-            uint256 tokenId = s.tokenIds[i];
-            if (s.parcels[tokenId].owner == _owner) {
-                tokenIds_[count] = tokenId;
-                unchecked {
-                    count++;
-                }
-            }
-            unchecked {
-                i++;
-            }
-        }
-        assembly {
-            mstore(tokenIds_, count)
-        }
+        return LibERC721._tokenIdsOfOwner(_owner);
     }
 
     function totalSupply() external view returns (uint256 totalSupply_) {
@@ -99,7 +82,7 @@ contract RealmVoucherFacet is Modifiers {
         bytes calldata _data
     ) public {
         address sender = LibMeta.msgSender();
-        internalTransferFrom(sender, _from, _to, _tokenId);
+        LibERC721._transferFrom(sender, _from, _to, _tokenId);
         LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, _data);
     }
 
@@ -115,7 +98,7 @@ contract RealmVoucherFacet is Modifiers {
         uint256 _tokenId
     ) external {
         address sender = LibMeta.msgSender();
-        internalTransferFrom(sender, _from, _to, _tokenId);
+        LibERC721._transferFrom(sender, _from, _to, _tokenId);
         LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, "");
     }
 
@@ -135,32 +118,7 @@ contract RealmVoucherFacet is Modifiers {
         uint256 _tokenId
     ) external {
         address sender = LibMeta.msgSender();
-        internalTransferFrom(sender, _from, _to, _tokenId);
-    }
-
-    // This function is used by transfer functions
-    function internalTransferFrom(
-        address _sender,
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) internal {
-        require(_to != address(0), "ER721: Can't transfer to 0 address");
-        address owner = s.parcels[_tokenId].owner;
-        require(owner != address(0), "ERC721: Invalid tokenId or can't be transferred");
-        require(
-            _sender == owner || s.operators[owner][_sender] || s.approved[_tokenId] == _sender,
-            "AavegotchiFacet: Not owner or approved to transfer"
-        );
-        require(_from == owner, "ERC721: _from is not owner, transfer failed");
-        s.parcels[_tokenId].owner = _to;
-        s.parcelBalance[_from]--;
-        s.parcelBalance[_to]++;
-        if (s.approved[_tokenId] != address(0)) {
-            delete s.approved[_tokenId];
-            emit LibERC721.Approval(owner, address(0), _tokenId);
-        }
-        emit LibERC721.Transfer(_from, _to, _tokenId);
+        LibERC721._transferFrom(sender, _from, _to, _tokenId);
     }
 
     /// @notice Change or reaffirm the approved address for an NFT
@@ -190,12 +148,12 @@ contract RealmVoucherFacet is Modifiers {
     }
 
     function name() external pure returns (string memory) {
-        return "Aavegotchi";
+        return "Gotchiverse";
     }
 
     /// @notice An abbreviated name for NFTs in this contract
     function symbol() external pure returns (string memory) {
-        return "GOTCHI";
+        return "REALM";
     }
 
     /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
@@ -203,7 +161,7 @@ contract RealmVoucherFacet is Modifiers {
     ///  3986. The URI may point to a JSON file that conforms to the "ERC721
     ///  Metadata JSON Schema".
     function tokenURI(uint256 _tokenId) external pure returns (string memory) {
-        return LibStrings.strWithUint("https://aavegotchi.com/metadata/aavegotchis/", _tokenId); //Here is your URL!
+        return LibStrings.strWithUint("https://aavegotchi.com/metadata/realm/", _tokenId); //Here is your URL!
     }
 
     /*
