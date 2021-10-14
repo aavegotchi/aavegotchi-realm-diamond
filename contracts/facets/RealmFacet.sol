@@ -164,12 +164,38 @@ contract RealmVoucherFacet is Modifiers {
     return LibStrings.strWithUint("https://aavegotchi.com/metadata/realm/", _tokenId); //Here is your URL!
   }
 
-  function mintParcels(uint256[] calldata _tokenIds, Parcel[] memory _metadata) external onlyOwner {
+  struct MintParcelInput {
+    uint32 coordinateX;
+    uint32 coordinateY;
+    uint256 parcelId;
+    uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
+    uint256 fomoBoost;
+    uint256 fudBoost;
+    uint256 kekBoost;
+    uint256 alphaBoost;
+  }
+
+  function mintParcels(
+    address _to,
+    uint256[] calldata _tokenIds,
+    MintParcelInput[] memory _metadata
+  ) external onlyOwner {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
       uint256 tokenId = _tokenIds[index];
-      Parcel memory metadata = _metadata[index];
+      MintParcelInput memory metadata = _metadata[index];
       require(_tokenIds.length == _metadata.length, "Inputs must be same length");
-      s.tokenIdToParcel[tokenId] = metadata;
+
+      Parcel storage parcel = s.tokenIdToParcel[tokenId];
+      parcel.owner = _to;
+      parcel.coordinateX = metadata.coordinateX;
+      parcel.coordinateY = metadata.coordinateY;
+      parcel.parcelId = metadata.parcelId;
+      parcel.size = metadata.size;
+      parcel.fomoBoost = metadata.fomoBoost;
+      parcel.fudBoost = metadata.fudBoost;
+      parcel.kekBoost = metadata.kekBoost;
+      parcel.alphaBoost = metadata.alphaBoost;
+
       LibERC721._safeMint(msg.sender, _tokenIds[index]);
     }
   }
