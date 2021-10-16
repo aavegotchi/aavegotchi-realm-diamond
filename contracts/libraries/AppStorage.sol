@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 import {LibDiamond} from "./LibDiamond.sol";
+import {LibMeta} from "./LibMeta.sol";
 
 uint256 constant HUMBLE_WIDTH = 8;
 uint256 constant HUMBLE_HEIGHT = 8;
@@ -17,17 +18,14 @@ struct Parcel {
   uint32 coordinateY; //y position on the map
   uint256 parcelId;
   uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
-  uint256 fomoBoost;
-  uint256 fudBoost;
-  uint256 kekBoost;
-  uint256 alphaBoost;
-  //all set to 0 initially
-  uint256 fomo; //amount of fomo
-  uint256 fud; //amt of fud remaining
-  uint256 kek; //amt of kek remaining
-  uint256 alpha; //amt of alpha remaining
   uint256[64][64] buildGrid; //x, then y array of positions
   uint256[64][64] tileGrid; //x, then y array of positions
+  mapping(uint16 => uint256) alchemicaBoost;
+  mapping(uint16 => uint256) alchemicaRemaining;
+  mapping(uint16 => uint256) alchemicaCapacity;
+  mapping(uint16 => uint256) alchemicaHarvestRate;
+  mapping(uint16 => uint40) timeSinceLastClaim;
+  mapping(uint16 => uint256) unclaimedAlchemica;
   /*  
     0 0 0 0 0 0 0 0 
     0 0 0 0 0 0 0 0
@@ -58,7 +56,6 @@ struct AppStorage {
   mapping(uint256 => Parcel) tokenIdToParcel;
   mapping(address => mapping(address => bool)) operators;
   mapping(uint256 => address) approved;
-  // mapping(uint256 => Installation) installationTypes;
 }
 
 library LibAppStorage {
@@ -71,6 +68,11 @@ library LibAppStorage {
 
 contract Modifiers {
   AppStorage internal s;
+
+  modifier onlyParcelOwner(uint256 _tokenId) {
+    require(LibMeta.msgSender() == s.parcels[_tokenId].owner, "AppStorage: Only Parcel owner can call");
+    _;
+  }
 
   modifier onlyOwner() {
     LibDiamond.enforceIsContractOwner();
