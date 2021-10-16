@@ -49,6 +49,7 @@ struct Installation {
 struct AppStorage {
   uint32[] tokenIds;
   uint32 tokenIdCounter;
+  address installationContract;
   mapping(uint256 => uint256) tokenIdIndexes;
   mapping(address => uint256) parcelBalance;
   mapping(uint256 => Parcel) parcels;
@@ -57,7 +58,7 @@ struct AppStorage {
   mapping(uint256 => Parcel) tokenIdToParcel;
   mapping(address => mapping(address => bool)) operators;
   mapping(uint256 => address) approved;
-  mapping(uint256 => Installation) installationTypes;
+  // mapping(uint256 => Installation) installationTypes;
 }
 
 library LibAppStorage {

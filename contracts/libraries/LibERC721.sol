@@ -62,10 +62,14 @@ library LibERC721 {
     s.parcels[_tokenId].owner = _to;
     s.parcelBalance[_from]--;
     s.parcelBalance[_to]++;
+
     if (s.approved[_tokenId] != address(0)) {
       delete s.approved[_tokenId];
       emit LibERC721.Approval(owner, address(0), _tokenId);
     }
+
+    //todo: Add in hooks for AavegotchiDiamond marketplace
+
     emit LibERC721.Transfer(_from, _to, _tokenId);
   }
 
