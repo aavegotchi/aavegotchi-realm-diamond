@@ -1,6 +1,3 @@
-/* global ethers hre */
-/* eslint prefer-const: "off" */
-
 //@ts-ignore
 import { ethers } from "hardhat";
 
@@ -34,11 +31,7 @@ async function deployDiamond() {
   // deploy facets
   console.log("");
   console.log("Deploying facets");
-  const FacetNames = [
-    "DiamondLoupeFacet",
-    "OwnershipFacet",
-    "RealmVoucherFacet",
-  ];
+  const FacetNames = ["DiamondLoupeFacet", "OwnershipFacet", "RealmFacet"];
   const cut = [];
   for (const FacetName of FacetNames) {
     const Facet = await ethers.getContractFactory(FacetName);

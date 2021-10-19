@@ -2,21 +2,10 @@
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
 import "hardhat-contract-sizer";
-import { task } from "hardhat/config";
 import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname + "/.env" });
 require("./tasks/generateDiamondABI.js");
 require("./tasks/verifyFacet.js");
-
-// This is a sample Buidler task. To learn how to create your own go to
-// https://buidler.dev/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (args, hre) => {
-  const accounts = await hre.ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log(await account.getAddress());
-  }
-});
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:
@@ -41,7 +30,7 @@ module.exports = {
     matic: {
       url: process.env.MATIC_URL,
       // url: 'https://rpc-mainnet.maticvigil.com/',
-      accounts: [process.env.ITEM_MANAGER],
+      accounts: [process.env.SECRET],
       // blockGasLimit: 20000000,
       blockGasLimit: 20000000,
       gasPrice: 10000000000,

@@ -8,7 +8,7 @@ import "../libraries/LibMeta.sol";
 import "../libraries/LibERC721.sol";
 import {InstallationDiamond} from "../interfaces/InstallationDiamond.sol";
 
-contract RealmVoucherFacet is Modifiers {
+contract RealmFacet is Modifiers {
   // bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
 
   struct MintParcelInput {

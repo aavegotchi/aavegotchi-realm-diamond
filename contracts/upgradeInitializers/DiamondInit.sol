@@ -18,11 +18,9 @@ import {AppStorage} from "../libraries/AppStorage.sol";
 contract DiamondInit {
   AppStorage internal s;
 
-  function init(address _installationContract) external {
+  function init() external {
     // adding ERC165 data
     LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
-
-    s.installationContract = _installationContract;
 
     ds.supportedInterfaces[type(IERC165).interfaceId] = true;
     ds.supportedInterfaces[type(IDiamondCut).interfaceId] = true;
