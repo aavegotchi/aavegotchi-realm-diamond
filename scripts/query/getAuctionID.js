@@ -4,7 +4,7 @@
 //@ts-ignore
 // import hardhat, { run, ethers } from "hardhat";
 
-const { getSelectors, FacetCutAction } = require("./libraries/diamond.js");
+const { getSelectors, FacetCutAction } = require("../libraries/diamond.js");
 
 // Init GBM
 const diamondAddress = "0xa44c8e0eCAEFe668947154eE2b803Bd4e6310EFe";
