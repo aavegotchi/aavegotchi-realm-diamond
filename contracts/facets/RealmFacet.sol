@@ -24,11 +24,11 @@ contract RealmFacet is Modifiers {
 
   function mintParcels(
     address _to,
-    uint256[] calldata _tokenIds,
+    uint32[] calldata _tokenIds,
     MintParcelInput[] memory _metadata
   ) external onlyOwner {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
-      uint256 tokenId = _tokenIds[index];
+      uint32 tokenId = _tokenIds[index];
       MintParcelInput memory metadata = _metadata[index];
       require(_tokenIds.length == _metadata.length, "Inputs must be same length");
 
@@ -44,7 +44,7 @@ contract RealmFacet is Modifiers {
       parcel.alchemicaBoost[2] = metadata.alphaBoost;
       parcel.alchemicaBoost[3] = metadata.kekBoost;
 
-      LibERC721._safeMint(msg.sender, _tokenIds);
+      LibERC721._safeMint(_to, tokenId);
     }
   }
 
