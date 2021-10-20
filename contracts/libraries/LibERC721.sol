@@ -95,12 +95,11 @@ library LibERC721 {
     }
   }
 
-  function _safeMint(address _to, uint256 _amount) internal {
+  function _safeMint(address _to, uint256[] calldata _tokenIds) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
-    uint32 tokenId = s.tokenIdCounter;
-
-    for (uint256 i; i < _amount; i++) {
+    for (uint256 i; i < _tokenIds.length; i++) {
+      uint32 tokenId = uint32(_tokenIds[i]);
       s.parcels[tokenId].owner = _to;
       s.tokenIdIndexes[tokenId] = s.tokenIds.length;
       s.tokenIds.push(tokenId);
@@ -110,6 +109,5 @@ library LibERC721 {
       emit LibERC721.Transfer(address(0), _to, tokenId);
       tokenId++;
     }
-    s.tokenIdCounter = tokenId;
   }
 }

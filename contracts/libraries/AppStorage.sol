@@ -46,7 +46,6 @@ struct Installation {
 
 struct AppStorage {
   uint32[] tokenIds;
-  uint32 tokenIdCounter;
   address installationContract;
   mapping(uint256 => uint256) tokenIdIndexes;
   mapping(address => uint256) parcelBalance;

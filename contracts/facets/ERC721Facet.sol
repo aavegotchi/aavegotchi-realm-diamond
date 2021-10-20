@@ -8,7 +8,7 @@ import "../libraries/LibMeta.sol";
 import "../libraries/LibERC721.sol";
 import {InstallationDiamond} from "../interfaces/InstallationDiamond.sol";
 
-contract RealmVoucherFacet is Modifiers {
+contract ERC721Facet is Modifiers {
   // bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
 
   function tokenIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {
@@ -176,6 +176,7 @@ contract RealmVoucherFacet is Modifiers {
     uint256 alphaBoost;
   }
 
+  /*
   function mintParcels(
     address _to,
     uint256[] calldata _tokenIds,
@@ -198,7 +199,7 @@ contract RealmVoucherFacet is Modifiers {
       parcel.alchemicaBoost[2] = metadata.alphaBoost;
       parcel.alchemicaBoost[3] = metadata.kekBoost;
 
-      LibERC721._safeMint(msg.sender, _tokenIds[index]);
+      LibERC721._safeMint(msg.sender, _tokenIds);
     }
   }
 
@@ -211,4 +212,5 @@ contract RealmVoucherFacet is Modifiers {
       safeTransferFrom(msg.sender, _to, _tokenIds[index], _data);
     }
   }
+  */
 }
