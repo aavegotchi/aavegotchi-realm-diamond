@@ -118,7 +118,7 @@ describe("Realm tests", async function () {
         testAddress2,
         33
       )
-    ).to.be.revertedWith("AavegotchiFacet: Not owner or approved to transfer");
+    ).to.be.revertedWith("LibERC721: Not owner or approved to transfer");
   });
 
   it("Can batch transfer", async function () {
@@ -135,5 +135,11 @@ describe("Realm tests", async function () {
     const balancePostReceiver = await erc721Facet.balanceOf(testAddress2);
     expect(balancePostSender).to.equal(balancePreSender.sub(2));
     expect(balancePostReceiver).to.equal(balancePreReceiver.add(2));
+  });
+  it("Cannot batch transfer tokens not owned", async function () {
+    erc721Facet = await impersonate(testAddress, erc721Facet, ethers, network);
+    await expect(
+      erc721Facet.safeBatchTransfer(testAddress, testAddress2, [5, 200], [])
+    ).to.be.revertedWith("LibERC721: Not owner or approved to transfer");
   });
 });

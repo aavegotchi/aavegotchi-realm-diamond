@@ -41,7 +41,7 @@ library LibERC721 {
     if (size > 0) {
       require(
         ERC721_RECEIVED == IERC721TokenReceiver(_to).onERC721Received(_operator, _from, _tokenId, _data),
-        "AavegotchiFacet: Transfer rejected/failed by _to"
+        "LibERC721: Transfer rejected/failed by _to"
       );
     }
   }
@@ -57,7 +57,7 @@ library LibERC721 {
     require(_to != address(0), "ER721: Can't transfer to 0 address");
     address owner = s.parcels[_tokenId].owner;
     require(owner != address(0), "ERC721: Invalid tokenId or can't be transferred");
-    require(_sender == owner || s.operators[owner][_sender] || s.approved[_tokenId] == _sender, "AavegotchiFacet: Not owner or approved to transfer");
+    require(_sender == owner || s.operators[owner][_sender] || s.approved[_tokenId] == _sender, "LibERC721: Not owner or approved to transfer");
     require(_from == owner, "ERC721: _from is not owner, transfer failed");
     s.parcels[_tokenId].owner = _to;
     s.parcelBalance[_from]--;
