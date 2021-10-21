@@ -29,6 +29,20 @@ describe("Realm tests", async function () {
       diamondAddress
     )) as ERC721Facet;
   });
+
+  it("Token symbol should be REALM", async function () {
+    const symbol = await erc721Facet.symbol();
+    expect(symbol).to.equal("REALM");
+  });
+  it("Token name should be Gotchiverse REALM Parcel", async function () {
+    const name = await erc721Facet.name();
+    expect(name).to.equal("Gotchiverse REALM Parcel");
+  });
+  it("Token metadata url should be https://aavegotchi.com/metadata/realm/0", async function () {
+    const uri = await erc721Facet.tokenURI("0");
+    expect(uri).to.equal("https://aavegotchi.com/metadata/realm/0");
+  });
+
   it("Check that tokens are being minted", async function () {
     const parcelsTest1: MintParcelInput[] = [];
     const parcelsTest2: MintParcelInput[] = [];
@@ -82,7 +96,7 @@ describe("Realm tests", async function () {
     const totalSupply = await erc721Facet.totalSupply();
     expect(totalSupply).to.equal(parcelsTest1.length + parcelsTest2.length);
   });
-  it("Check transfers", async function () {
+  it("Can transfer tokens", async function () {
     erc721Facet = await impersonate(testAddress, erc721Facet, ethers, network);
     const balancePreSender = await erc721Facet.balanceOf(testAddress);
     const balancePreReceiver = await erc721Facet.balanceOf(testAddress2);
@@ -95,5 +109,31 @@ describe("Realm tests", async function () {
     const balancePostReceiver = await erc721Facet.balanceOf(testAddress2);
     expect(balancePostSender).to.equal(balancePreSender.sub(1));
     expect(balancePostReceiver).to.equal(balancePreReceiver.add(1));
+  });
+  it("Only owner can transfer", async function () {
+    erc721Facet = await impersonate(testAddress, erc721Facet, ethers, network);
+    await expect(
+      erc721Facet["safeTransferFrom(address,address,uint256)"](
+        testAddress,
+        testAddress2,
+        33
+      )
+    ).to.be.revertedWith("AavegotchiFacet: Not owner or approved to transfer");
+  });
+
+  it("Can batch transfer", async function () {
+    const balancePreSender = await erc721Facet.balanceOf(testAddress);
+    const balancePreReceiver = await erc721Facet.balanceOf(testAddress2);
+    erc721Facet = await impersonate(testAddress, erc721Facet, ethers, network);
+    await erc721Facet.safeBatchTransfer(
+      testAddress,
+      testAddress2,
+      [5, 200],
+      []
+    );
+    const balancePostSender = await erc721Facet.balanceOf(testAddress);
+    const balancePostReceiver = await erc721Facet.balanceOf(testAddress2);
+    expect(balancePostSender).to.equal(balancePreSender.sub(2));
+    expect(balancePostReceiver).to.equal(balancePreReceiver.add(2));
   });
 });

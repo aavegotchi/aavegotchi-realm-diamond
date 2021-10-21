@@ -202,15 +202,16 @@ contract ERC721Facet is Modifiers {
       LibERC721._safeMint(msg.sender, _tokenIds);
     }
   }
+  */
 
   function safeBatchTransfer(
-    uint256[] calldata _tokenIds,
+    address _from,
     address _to,
+    uint256[] calldata _tokenIds,
     bytes calldata _data
   ) external {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
-      safeTransferFrom(msg.sender, _to, _tokenIds[index], _data);
+      safeTransferFrom(_from, _to, _tokenIds[index], _data);
     }
   }
-  */
 }
