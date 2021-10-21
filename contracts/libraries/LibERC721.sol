@@ -95,19 +95,18 @@ library LibERC721 {
     }
   }
 
-  function _safeMint(address _to, uint256[] calldata _tokenIds) internal {
+  function _safeMint(address _to, uint32 _tokenId) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
-    for (uint256 i; i < _tokenIds.length; i++) {
-      uint32 tokenId = uint32(_tokenIds[i]);
-      s.parcels[tokenId].owner = _to;
-      s.tokenIdIndexes[tokenId] = s.tokenIds.length;
-      s.tokenIds.push(tokenId);
-      s.ownerTokenIdIndexes[_to][tokenId] = s.ownerTokenIds[_to].length;
-      s.ownerTokenIds[_to].push(tokenId);
-      emit MintParcel(_to, tokenId);
-      emit LibERC721.Transfer(address(0), _to, tokenId);
-      tokenId++;
-    }
+    require(s.parcels[_tokenId].owner == address(0), "ERC721: tokenId already minted");
+    s.parcels[_tokenId].owner = _to;
+    s.tokenIdIndexes[_tokenId] = s.tokenIds.length;
+    s.tokenIds.push(_tokenId);
+    s.ownerTokenIdIndexes[_to][_tokenId] = s.ownerTokenIds[_to].length;
+    s.ownerTokenIds[_to].push(_tokenId);
+    s.parcelBalance[_to]++;
+    emit MintParcel(_to, _tokenId);
+    emit LibERC721.Transfer(address(0), _to, _tokenId);
+    _tokenId++;
   }
 }

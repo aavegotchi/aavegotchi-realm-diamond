@@ -57,7 +57,7 @@ async function deployDiamond() {
   let receipt;
 
   // call to init function
-  let functionCall = diamondInit.interface.encodeFunctionData("init", []);
+  let functionCall = diamondInit.interface.encodeFunctionData("init");
   tx = await diamondCut.diamondCut(cut, diamondInit.address, functionCall);
   console.log("Diamond cut tx: ", tx.hash);
   receipt = await tx.wait();
@@ -65,27 +65,6 @@ async function deployDiamond() {
     throw Error(`Diamond upgrade failed: ${tx.hash}`);
   }
   console.log("Completed diamond cut");
-
-  const ERC721Facet = await ethers.getContractAt(
-    "ERC721Facet",
-    diamond.address,
-    accounts[0]
-  );
-
-  const RealmFacet = await ethers.getContractAt(
-    "RealmFacet",
-    diamond.address,
-    accounts[0]
-  );
-
-  await RealmFacet.mintParcels(
-    contractOwner.address,
-    [0, 1, 2, 3],
-    [[], [], []]
-  );
-
-  const balance = await ERC721Facet.balanceOf(contractOwner.address);
-  console.log("balance:", balance.toString());
 
   return diamond.address;
 }
