@@ -7,6 +7,7 @@ import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname + "/.env" });
 require("./tasks/generateDiamondABI.js");
 require("./tasks/verifyFacet.js");
+require("./tasks/mintParcels.ts");
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:

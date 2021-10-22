@@ -58,9 +58,7 @@ export function getSelector(func: string, ethers: any) {
   return abiInterface.getSighash(ethers.utils.Fragment.from(func));
 }
 
-export const maticDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
-
-export const maticStakingAddress = "0xA02d547512Bb90002807499F05495Fe9C4C3943f";
+export const maticDiamondAddress = "";
 
 export async function diamondOwner(address: string, ethers: any) {
   return await (await ethers.getContractAt("OwnershipFacet", address)).owner();

@@ -1,4 +1,10 @@
-import { MintParcelInput, ParcelArray, ParcelMetadata } from "../types";
+import {
+  AxiosMetadataResponse,
+  MintParcelInput,
+  ParcelArray,
+  ParcelMetadata,
+} from "../types";
+import axios from "axios";
 
 export function sizeNameToId(
   orientation: string //H=humble, R=reasonable, U=horizontal, S=spacious
@@ -40,4 +46,20 @@ export function parcelMetadataToContractInput(
     kekBoost: boostKek,
     alphaBoost: boostAlpha,
   };
+}
+
+export async function parcelMetadataFromTokenIds(
+  tokenIds: string[]
+): Promise<MintParcelInput[]> {
+  const parcels: MintParcelInput[] = [];
+  const res = await axios(
+    `https://api.gotchiverse.io/realm/parcel/info?tokenId=${tokenIds.join(",")}`
+  );
+  const parcelMetadata: AxiosMetadataResponse = res.data;
+
+  for (let i = 0; i < tokenIds.length; i++) {
+    const contractInput = parcelMetadataToContractInput(parcelMetadata.data[i]);
+    parcels.push(contractInput);
+  }
+  return parcels;
 }

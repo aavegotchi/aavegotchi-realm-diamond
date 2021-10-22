@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 
 const { getSelectors, FacetCutAction } = require("./libraries/diamond.js");
 
-async function deployDiamond() {
+export async function deployDiamond() {
   const accounts = await ethers.getSigners();
   const contractOwner = accounts[0];
 
@@ -79,5 +79,3 @@ if (require.main === module) {
       process.exit(1);
     });
 }
-
-exports.deployDiamond = deployDiamond;

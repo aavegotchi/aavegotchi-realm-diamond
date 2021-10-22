@@ -4,14 +4,16 @@ import { expect } from "chai";
 import { network } from "hardhat";
 import { ethers } from "hardhat";
 import { AxiosMetadataResponse, MintParcelInput } from "../types";
-import axios from "axios";
-import { parcelMetadataToContractInput } from "../helpers/metadataHelpers";
+
+import {
+  parcelMetadataFromTokenIds,
+  parcelMetadataToContractInput,
+} from "../helpers/metadataHelpers";
 import { auction1 } from "../data/auction1";
 
 const { deployDiamond } = require("../scripts/deploy.ts");
 
 const testAddress = "0xBC67F26c2b87e16e304218459D2BB60Dac5C80bC";
-const testAddress2 = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
 let diamondAddress;
 let realmFacet: RealmFacet;
 let erc721Facet: ERC721Facet;
@@ -34,25 +36,12 @@ describe("Realm tests", async function () {
   });
 
   it("Check that tokens are being minted", async function () {
-    const parcels: MintParcelInput[] = [];
-
     const tokenIds = auction1.slice(0, 100);
     console.log("First 100 iDS:", tokenIds);
 
-    const res = await axios(
-      `https://api.gotchiverse.io/realm/parcel/info?tokenId=${tokenIds.join(
-        ","
-      )}`
+    const parcels: MintParcelInput[] = await parcelMetadataFromTokenIds(
+      tokenIds
     );
-    const parcelMetadata: AxiosMetadataResponse = res.data;
-
-    for (let i = 0; i < tokenIds.length; i++) {
-      const contractInput = parcelMetadataToContractInput(
-        parcelMetadata.data[i]
-      );
-      parcels.push(contractInput);
-    }
-
     console.log("parcels:", parcels);
 
     const tx = await realmFacet.mintParcels(testAddress, tokenIds, parcels);
