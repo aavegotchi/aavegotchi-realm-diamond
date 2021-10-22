@@ -13,10 +13,10 @@ uint256 constant PAARTNER_WIDTH = 64;
 uint256 constant PAARTNER_HEIGHT = 64;
 
 struct Parcel {
+  string parcelId;
   address owner;
   uint32 coordinateX; //x position on the map
   uint32 coordinateY; //y position on the map
-  uint256 parcelId;
   uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
   uint256[64][64] buildGrid; //x, then y array of positions
   uint256[64][64] tileGrid; //x, then y array of positions
@@ -36,12 +36,6 @@ struct Parcel {
     0 0 0 0 0 0 0 0
     0 0 0 0 0 0 0 0
     */
-}
-
-struct Installation {
-  uint256 itemId; //needs to start at 1, not 0
-  uint256 width;
-  uint256 height;
 }
 
 struct AppStorage {

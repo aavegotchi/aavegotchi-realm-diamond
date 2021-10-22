@@ -13,16 +13,19 @@ require("./tasks/verifyFacet.js");
 // defaultNetwork, networks, solc, and paths.
 // Go to https://buidler.dev/config/ to learn more
 module.exports = {
+  mocha: {
+    timeout: 2000000,
+  },
   networks: {
     hardhat: {
       forking: {
         url: process.env.MATIC_URL,
-        timeout: 120000,
+        timeout: 2000000,
         // blockNumber: 12552123
         // blockNumber: 13024371
       },
       blockGasLimit: 20000000,
-      timeout: 120000,
+      timeout: 2000000,
       gas: "auto",
     },
     localhost: {

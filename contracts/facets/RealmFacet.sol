@@ -14,7 +14,7 @@ contract RealmFacet is Modifiers {
   struct MintParcelInput {
     uint32 coordinateX;
     uint32 coordinateY;
-    uint256 parcelId;
+    string parcelId;
     uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
     uint256 fomoBoost;
     uint256 fudBoost;
@@ -48,9 +48,20 @@ contract RealmFacet is Modifiers {
     }
   }
 
-  /*
-  function getParcelInfo(uint256 _tokenId) external view returns (Parcel memory) {
-    return s.tokenIdToParcel[_tokenId];
+  struct ParcelOutput {
+    string parcelId;
+    address owner;
+    uint32 coordinateX; //x position on the map
+    uint32 coordinateY; //y position on the map
+    uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
   }
-  */
+
+  function getParcelInfo(uint256 _tokenId) external view returns (ParcelOutput memory parcelOutput_) {
+    Parcel storage parcel = s.tokenIdToParcel[_tokenId];
+    parcelOutput_.parcelId = parcel.parcelId;
+    parcelOutput_.owner = parcel.owner;
+    parcelOutput_.coordinateX = parcel.coordinateX;
+    parcelOutput_.coordinateY = parcel.coordinateY;
+    parcelOutput_.size = parcel.size;
+  }
 }
