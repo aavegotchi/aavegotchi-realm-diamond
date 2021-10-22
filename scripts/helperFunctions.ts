@@ -58,6 +58,7 @@ export function getSelector(func: string, ethers: any) {
   return abiInterface.getSighash(ethers.utils.Fragment.from(func));
 }
 
+export const kovanDiamondAddress = "0xFAefD30Af8E86d3d8D22fa5caEFD48fAA2Fa8E21";
 export const maticDiamondAddress = "";
 
 export async function diamondOwner(address: string, ethers: any) {
