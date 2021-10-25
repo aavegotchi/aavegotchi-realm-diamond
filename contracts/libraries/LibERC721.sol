@@ -73,6 +73,7 @@ library LibERC721 {
     //Move the last element of the ownerIds array to replace the tokenId to be transferred
     s.ownerTokenIdIndexes[_from][lastTokenId] = transferIndex;
     s.ownerTokenIds[_from][transferIndex] = lastTokenId;
+    delete s.ownerTokenIdIndexes[_from][_tokenId];
 
     //pop from array
     s.ownerTokenIds[_from].pop();
@@ -96,7 +97,6 @@ library LibERC721 {
 
     require(s.parcels[_tokenId].owner == address(0), "LibERC721: tokenId already minted");
     s.parcels[_tokenId].owner = _to;
-    s.tokenIdIndexes[_tokenId] = s.tokenIds.length;
     s.tokenIds.push(_tokenId);
     s.ownerTokenIdIndexes[_to][_tokenId] = s.ownerTokenIds[_to].length;
     s.ownerTokenIds[_to].push(_tokenId);

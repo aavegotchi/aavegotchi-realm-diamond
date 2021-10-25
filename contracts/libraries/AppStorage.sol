@@ -31,8 +31,6 @@ struct Parcel {
 struct AppStorage {
   uint32[] tokenIds;
   address installationContract;
-  mapping(uint256 => uint256) tokenIdIndexes;
-  // mapping(address => uint256) parcelBalance;
   mapping(uint256 => Parcel) parcels;
   mapping(address => mapping(uint256 => uint256)) ownerTokenIdIndexes;
   mapping(address => uint256[]) ownerTokenIds;
