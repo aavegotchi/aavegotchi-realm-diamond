@@ -127,15 +127,16 @@ describe("Realm tests", async function () {
     erc721Facet = await impersonate(testAddress1, erc721Facet, ethers, network);
     const balancePreSender = await erc721Facet.balanceOf(testAddress1);
     const balancePreReceiver = await erc721Facet.balanceOf(testAddress2);
-    await erc721Facet["safeTransferFrom(address,address,uint256)"](
+    await erc721Facet.safeBatchTransfer(
       testAddress1,
       testAddress2,
-      33
+      [33, 5, 200],
+      []
     );
     const balancePostSender = await erc721Facet.balanceOf(testAddress1);
     const balancePostReceiver = await erc721Facet.balanceOf(testAddress2);
-    expect(balancePostSender).to.equal(balancePreSender.sub(1));
-    expect(balancePostReceiver).to.equal(balancePreReceiver.add(1));
+    expect(balancePostSender).to.equal(balancePreSender.sub(3));
+    expect(balancePostReceiver).to.equal(balancePreReceiver.add(3));
 
     console.log("After sending");
     tokenIdsOfSender = await erc721Facet.tokenIdsOfOwner(testAddress1);
@@ -163,6 +164,7 @@ describe("Realm tests", async function () {
     ).to.be.revertedWith("LibERC721: Not owner or approved to transfer");
   });
 
+  /*
   it("Can batch transfer", async function () {
     const balancePreSender = await erc721Facet.balanceOf(testAddress1);
     const balancePreReceiver = await erc721Facet.balanceOf(testAddress2);
@@ -178,6 +180,7 @@ describe("Realm tests", async function () {
     expect(balancePostSender).to.equal(balancePreSender.sub(2));
     expect(balancePostReceiver).to.equal(balancePreReceiver.add(2));
   });
+  */
   it("Cannot batch transfer tokens not owned", async function () {
     erc721Facet = await impersonate(testAddress1, erc721Facet, ethers, network);
     await expect(

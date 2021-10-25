@@ -64,21 +64,21 @@ library LibERC721 {
     //Update indexes and arrays
 
     //Get the index of the tokenID to transfer
-    uint256 index = s.ownerTokenIdIndexes[_from][_tokenId];
+    uint256 transferIndex = s.ownerTokenIdIndexes[_from][_tokenId];
 
-    //Get the length of owner array
     uint256 lastIndex = s.ownerTokenIds[_from].length - 1;
     uint256 lastTokenId = s.ownerTokenIds[_from][lastIndex];
+    uint256 newIndex = s.ownerTokenIds[_to].length;
 
     //Move the last element of the ownerIds array to replace the tokenId to be transferred
-    s.ownerTokenIdIndexes[_from][lastTokenId] = index;
-    s.ownerTokenIds[_from][index] = lastTokenId;
+    s.ownerTokenIdIndexes[_from][lastTokenId] = transferIndex;
+    s.ownerTokenIds[_from][transferIndex] = lastTokenId;
 
     //pop from array
     s.ownerTokenIds[_from].pop();
 
     //update index of new token
-    s.ownerTokenIdIndexes[_to][_tokenId] = s.ownerTokenIds[_to].length;
+    s.ownerTokenIdIndexes[_to][_tokenId] = newIndex;
     s.ownerTokenIds[_to].push(_tokenId);
 
     if (s.approved[_tokenId] != address(0)) {
