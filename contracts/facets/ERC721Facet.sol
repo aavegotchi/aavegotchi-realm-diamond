@@ -12,7 +12,7 @@ contract ERC721Facet is Modifiers {
   // bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
 
   function tokenIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {
-    return LibERC721._tokenIdsOfOwner(_owner);
+    return LibERC721.tokenIdsOfOwner(_owner);
   }
 
   function totalSupply() external view returns (uint256 totalSupply_) {
@@ -35,7 +35,7 @@ contract ERC721Facet is Modifiers {
   /// @param _owner An address for whom to query the balance
   /// @return balance_ The number of NFTs owned by `_owner`, possibly zero
   function balanceOf(address _owner) external view returns (uint256 balance_) {
-    balance_ = s.parcelBalance[_owner];
+    balance_ = s.ownerTokenIds[_owner].length;
   }
 
   /// @notice Find the owner of an NFT
@@ -83,7 +83,7 @@ contract ERC721Facet is Modifiers {
     bytes calldata _data
   ) public {
     address sender = LibMeta.msgSender();
-    LibERC721._transferFrom(sender, _from, _to, _tokenId);
+    LibERC721.transferFrom(sender, _from, _to, _tokenId);
     LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, _data);
   }
 
@@ -99,7 +99,7 @@ contract ERC721Facet is Modifiers {
     uint256 _tokenId
   ) external {
     address sender = LibMeta.msgSender();
-    LibERC721._transferFrom(sender, _from, _to, _tokenId);
+    LibERC721.transferFrom(sender, _from, _to, _tokenId);
     LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, "");
   }
 
@@ -119,7 +119,7 @@ contract ERC721Facet is Modifiers {
     uint256 _tokenId
   ) external {
     address sender = LibMeta.msgSender();
-    LibERC721._transferFrom(sender, _from, _to, _tokenId);
+    LibERC721.transferFrom(sender, _from, _to, _tokenId);
   }
 
   /// @notice Change or reaffirm the approved address for an NFT

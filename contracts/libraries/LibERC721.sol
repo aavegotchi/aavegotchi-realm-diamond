@@ -47,7 +47,7 @@ library LibERC721 {
   }
 
   // This function is used by transfer functions
-  function _transferFrom(
+  function transferFrom(
     address _sender,
     address _from,
     address _to,
@@ -60,8 +60,25 @@ library LibERC721 {
     require(_sender == owner || s.operators[owner][_sender] || s.approved[_tokenId] == _sender, "LibERC721: Not owner or approved to transfer");
     require(_from == owner, "ERC721: _from is not owner, transfer failed");
     s.parcels[_tokenId].owner = _to;
-    s.parcelBalance[_from]--;
-    s.parcelBalance[_to]++;
+
+    //Update indexes and arrays
+
+    //Get the index of the tokenID to transfer
+    uint256 index = s.ownerTokenIdIndexes[_from][_tokenId];
+
+    //Get the length of owner array
+    uint256 length = s.ownerTokenIds[_from].length;
+
+    //Move the last element of the ownerIds array to replace the tokenId to be transferred
+    s.ownerTokenIdIndexes[_from][length - 1] = index;
+    s.ownerTokenIds[_from][index] = s.ownerTokenIds[_from][length - 1];
+
+    //pop from array
+    s.ownerTokenIds[_from].pop();
+
+    //update index of new token
+    s.ownerTokenIdIndexes[_to][_tokenId] = s.ownerTokenIds[_to].length;
+    s.ownerTokenIds[_to].push(_tokenId);
 
     if (s.approved[_tokenId] != address(0)) {
       delete s.approved[_tokenId];
@@ -73,7 +90,10 @@ library LibERC721 {
     emit LibERC721.Transfer(_from, _to, _tokenId);
   }
 
-  function _tokenIdsOfOwner(address _owner) internal view returns (uint256[] memory tokenIds_) {
+  function tokenIdsOfOwner(address _owner) internal view returns (uint256[] memory) {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+    return s.ownerTokenIds[_owner];
+    /*
     AppStorage storage s = LibAppStorage.diamondStorage();
     uint256 len = s.tokenIds.length;
     tokenIds_ = new uint256[](len);
@@ -93,9 +113,10 @@ library LibERC721 {
     assembly {
       mstore(tokenIds_, count)
     }
+    */
   }
 
-  function _safeMint(address _to, uint32 _tokenId) internal {
+  function safeMint(address _to, uint32 _tokenId) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
     require(s.parcels[_tokenId].owner == address(0), "ERC721: tokenId already minted");
@@ -104,9 +125,8 @@ library LibERC721 {
     s.tokenIds.push(_tokenId);
     s.ownerTokenIdIndexes[_to][_tokenId] = s.ownerTokenIds[_to].length;
     s.ownerTokenIds[_to].push(_tokenId);
-    s.parcelBalance[_to]++;
+    // s.parcelBalance[_to]++;
     emit MintParcel(_to, _tokenId);
     emit LibERC721.Transfer(address(0), _to, _tokenId);
-    _tokenId++;
   }
 }

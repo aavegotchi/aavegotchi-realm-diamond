@@ -13,39 +13,29 @@ uint256 constant PAARTNER_WIDTH = 64;
 uint256 constant PAARTNER_HEIGHT = 64;
 
 struct Parcel {
-  string parcelId;
-  address owner;
   uint32 coordinateX; //x position on the map
   uint32 coordinateY; //y position on the map
+  string parcelId;
+  address owner;
   uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
   uint256[64][64] buildGrid; //x, then y array of positions
   uint256[64][64] tileGrid; //x, then y array of positions
-  mapping(uint16 => uint256) alchemicaBoost;
-  mapping(uint16 => uint256) alchemicaRemaining;
-  mapping(uint16 => uint256) alchemicaCapacity;
-  mapping(uint16 => uint256) alchemicaHarvestRate;
-  mapping(uint16 => uint40) timeSinceLastClaim;
-  mapping(uint16 => uint256) unclaimedAlchemica;
-  /*  
-    0 0 0 0 0 0 0 0 
-    0 0 0 0 0 0 0 0
-    0 0 0 0 0 0 0 0 
-    0 0 0 0 0 0 0 0 
-    0 0 0 0 0 0 0 0
-    0 0 0 0 0 0 0 0
-    0 0 0 0 0 0 0 0
-    0 0 0 0 0 0 0 0
-    */
+  mapping(uint256 => uint256) alchemicaBoost;
+  mapping(uint256 => uint256) alchemicaRemaining;
+  mapping(uint256 => uint256) alchemicaCapacity;
+  mapping(uint256 => uint256) alchemicaHarvestRate;
+  mapping(uint256 => uint256) timeSinceLastClaim;
+  mapping(uint256 => uint256) unclaimedAlchemica;
 }
 
 struct AppStorage {
   uint32[] tokenIds;
   address installationContract;
   mapping(uint256 => uint256) tokenIdIndexes;
-  mapping(address => uint256) parcelBalance;
+  // mapping(address => uint256) parcelBalance;
   mapping(uint256 => Parcel) parcels;
   mapping(address => mapping(uint256 => uint256)) ownerTokenIdIndexes;
-  mapping(address => uint32[]) ownerTokenIds;
+  mapping(address => uint256[]) ownerTokenIds;
   mapping(uint256 => Parcel) tokenIdToParcel;
   mapping(address => mapping(address => bool)) operators;
   mapping(uint256 => address) approved;

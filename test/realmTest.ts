@@ -59,7 +59,7 @@ describe("Realm tests", async function () {
       parcelsTest1.push({
         coordinateX: i,
         coordinateY: i,
-        parcelId: i,
+        parcelId: i.toString(),
         size,
         fomoBoost: boostFomo,
         fudBoost: boostFud,
@@ -76,7 +76,7 @@ describe("Realm tests", async function () {
       parcelsTest2.push({
         coordinateX: i,
         coordinateY: i,
-        parcelId: i,
+        parcelId: i.toString(),
         size,
         fomoBoost: boostFomo,
         fudBoost: boostFud,
@@ -109,6 +109,21 @@ describe("Realm tests", async function () {
     }
   });
   it("Can transfer tokens", async function () {
+    console.log("Before sending");
+    let tokenIdsOfSender = await erc721Facet.tokenIdsOfOwner(testAddress1);
+    // console.log("sender:", tokenIdsOfSender);
+
+    tokenIdsOfSender.forEach((id) => {
+      console.log("sender id:", id.toString());
+    });
+
+    let tokenIdsOfReceiver = await erc721Facet.tokenIdsOfOwner(testAddress2);
+    // console.log("sender:", tokenIdsOfReceiver);
+
+    tokenIdsOfReceiver.forEach((id) => {
+      console.log("receiver id:", id.toString());
+    });
+
     erc721Facet = await impersonate(testAddress1, erc721Facet, ethers, network);
     const balancePreSender = await erc721Facet.balanceOf(testAddress1);
     const balancePreReceiver = await erc721Facet.balanceOf(testAddress2);
@@ -121,6 +136,21 @@ describe("Realm tests", async function () {
     const balancePostReceiver = await erc721Facet.balanceOf(testAddress2);
     expect(balancePostSender).to.equal(balancePreSender.sub(1));
     expect(balancePostReceiver).to.equal(balancePreReceiver.add(1));
+
+    console.log("After sending");
+    tokenIdsOfSender = await erc721Facet.tokenIdsOfOwner(testAddress1);
+    // console.log("sender:", tokenIdsOfSender);
+
+    tokenIdsOfSender.forEach((id) => {
+      console.log("sender id:", id.toString());
+    });
+
+    tokenIdsOfReceiver = await erc721Facet.tokenIdsOfOwner(testAddress2);
+    // console.log("sender:", tokenIdsOfReceiver);
+
+    tokenIdsOfReceiver.forEach((id) => {
+      console.log("receiver id:", id.toString());
+    });
   });
   it("Only owner can transfer", async function () {
     erc721Facet = await impersonate(testAddress1, erc721Facet, ethers, network);

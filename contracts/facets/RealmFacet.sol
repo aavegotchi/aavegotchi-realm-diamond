@@ -44,7 +44,7 @@ contract RealmFacet is Modifiers {
       parcel.alchemicaBoost[2] = metadata.alphaBoost;
       parcel.alchemicaBoost[3] = metadata.kekBoost;
 
-      LibERC721._safeMint(_to, tokenId);
+      LibERC721.safeMint(_to, tokenId);
     }
   }
 
