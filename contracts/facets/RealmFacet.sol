@@ -9,7 +9,7 @@ import "../libraries/LibERC721.sol";
 import {InstallationDiamond} from "../interfaces/InstallationDiamond.sol";
 
 contract RealmFacet is Modifiers {
-  // bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
+  uint256 constant MAX_SUPPLY = 420069;
 
   struct MintParcelInput {
     uint32 coordinateX;
@@ -28,6 +28,7 @@ contract RealmFacet is Modifiers {
     MintParcelInput[] memory _metadata
   ) external onlyOwner {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
+      require(s.tokenIds.length < MAX_SUPPLY, "RealmFacet: Cannot mint more than 420,069 parcels");
       uint32 tokenId = _tokenIds[index];
       MintParcelInput memory metadata = _metadata[index];
       require(_tokenIds.length == _metadata.length, "Inputs must be same length");

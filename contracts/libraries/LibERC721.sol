@@ -67,11 +67,12 @@ library LibERC721 {
     uint256 index = s.ownerTokenIdIndexes[_from][_tokenId];
 
     //Get the length of owner array
-    uint256 length = s.ownerTokenIds[_from].length;
+    uint256 lastIndex = s.ownerTokenIds[_from].length - 1;
+    uint256 lastTokenId = s.ownerTokenIds[_from][lastIndex];
 
     //Move the last element of the ownerIds array to replace the tokenId to be transferred
-    s.ownerTokenIdIndexes[_from][length - 1] = index;
-    s.ownerTokenIds[_from][index] = s.ownerTokenIds[_from][length - 1];
+    s.ownerTokenIdIndexes[_from][lastTokenId] = index;
+    s.ownerTokenIds[_from][index] = lastTokenId;
 
     //pop from array
     s.ownerTokenIds[_from].pop();
@@ -90,42 +91,16 @@ library LibERC721 {
     emit LibERC721.Transfer(_from, _to, _tokenId);
   }
 
-  function tokenIdsOfOwner(address _owner) internal view returns (uint256[] memory) {
-    AppStorage storage s = LibAppStorage.diamondStorage();
-    return s.ownerTokenIds[_owner];
-    /*
-    AppStorage storage s = LibAppStorage.diamondStorage();
-    uint256 len = s.tokenIds.length;
-    tokenIds_ = new uint256[](len);
-    uint256 count;
-    for (uint256 i; i < len; ) {
-      uint256 tokenId = s.tokenIds[i];
-      if (s.parcels[tokenId].owner == _owner) {
-        tokenIds_[count] = tokenId;
-        unchecked {
-          count++;
-        }
-      }
-      unchecked {
-        i++;
-      }
-    }
-    assembly {
-      mstore(tokenIds_, count)
-    }
-    */
-  }
-
   function safeMint(address _to, uint32 _tokenId) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
-    require(s.parcels[_tokenId].owner == address(0), "ERC721: tokenId already minted");
+    require(s.parcels[_tokenId].owner == address(0), "LibERC721: tokenId already minted");
     s.parcels[_tokenId].owner = _to;
     s.tokenIdIndexes[_tokenId] = s.tokenIds.length;
     s.tokenIds.push(_tokenId);
     s.ownerTokenIdIndexes[_to][_tokenId] = s.ownerTokenIds[_to].length;
     s.ownerTokenIds[_to].push(_tokenId);
-    // s.parcelBalance[_to]++;
+
     emit MintParcel(_to, _tokenId);
     emit LibERC721.Transfer(address(0), _to, _tokenId);
   }

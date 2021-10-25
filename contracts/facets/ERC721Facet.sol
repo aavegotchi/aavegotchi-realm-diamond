@@ -12,7 +12,7 @@ contract ERC721Facet is Modifiers {
   // bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
 
   function tokenIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {
-    return LibERC721.tokenIdsOfOwner(_owner);
+    return s.ownerTokenIds[_owner];
   }
 
   function totalSupply() external view returns (uint256 totalSupply_) {
@@ -175,34 +175,6 @@ contract ERC721Facet is Modifiers {
     uint256 kekBoost;
     uint256 alphaBoost;
   }
-
-  /*
-  function mintParcels(
-    address _to,
-    uint256[] calldata _tokenIds,
-    MintParcelInput[] memory _metadata
-  ) external onlyOwner {
-    for (uint256 index = 0; index < _tokenIds.length; index++) {
-      uint256 tokenId = _tokenIds[index];
-      MintParcelInput memory metadata = _metadata[index];
-      require(_tokenIds.length == _metadata.length, "Inputs must be same length");
-
-      Parcel storage parcel = s.tokenIdToParcel[tokenId];
-      parcel.owner = _to;
-      parcel.coordinateX = metadata.coordinateX;
-      parcel.coordinateY = metadata.coordinateY;
-      parcel.parcelId = metadata.parcelId;
-      parcel.size = metadata.size;
-
-      parcel.alchemicaBoost[0] = metadata.fudBoost;
-      parcel.alchemicaBoost[1] = metadata.fomoBoost;
-      parcel.alchemicaBoost[2] = metadata.alphaBoost;
-      parcel.alchemicaBoost[3] = metadata.kekBoost;
-
-      LibERC721._safeMint(msg.sender, _tokenIds);
-    }
-  }
-  */
 
   function safeBatchTransfer(
     address _from,
