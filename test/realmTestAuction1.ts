@@ -49,6 +49,12 @@ describe("Realm tests", async function () {
     console.log(tx.hash);
 
     const parcel = await realmFacet.getParcelInfo(tokenIds[0]);
-    console.log("parcel:", parcel);
+
+    const expectedData = parcels[0];
+
+    expect(parcel.coordinateX).to.equal(expectedData.coordinateX);
+    expect(parcel.coordinateY).to.equal(expectedData.coordinateY);
+    expect(parcel.size).to.equal(expectedData.size);
+    expect(parcel.parcelId).to.equal(expectedData.parcelId);
   });
 });
