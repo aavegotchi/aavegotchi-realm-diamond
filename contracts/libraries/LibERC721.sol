@@ -92,7 +92,7 @@ library LibERC721 {
     emit LibERC721.Transfer(_from, _to, _tokenId);
   }
 
-  function safeMint(address _to, uint32 _tokenId) internal {
+  function safeMint(address _to, uint256 _tokenId) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
     require(s.parcels[_tokenId].owner == address(0), "LibERC721: tokenId already minted");

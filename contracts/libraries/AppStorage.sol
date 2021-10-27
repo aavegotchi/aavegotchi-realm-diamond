@@ -13,8 +13,8 @@ uint256 constant PAARTNER_WIDTH = 64;
 uint256 constant PAARTNER_HEIGHT = 64;
 
 struct Parcel {
-  uint32 coordinateX; //x position on the map
-  uint32 coordinateY; //y position on the map
+  uint256 coordinateX; //x position on the map
+  uint256 coordinateY; //y position on the map
   string parcelId;
   address owner;
   uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
@@ -29,12 +29,11 @@ struct Parcel {
 }
 
 struct AppStorage {
-  uint32[] tokenIds;
+  uint256[] tokenIds;
   address installationContract;
   mapping(uint256 => Parcel) parcels;
   mapping(address => mapping(uint256 => uint256)) ownerTokenIdIndexes;
   mapping(address => uint256[]) ownerTokenIds;
-  mapping(uint256 => Parcel) tokenIdToParcel;
   mapping(address => mapping(address => bool)) operators;
   mapping(uint256 => address) approved;
 }

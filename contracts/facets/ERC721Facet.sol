@@ -166,8 +166,8 @@ contract ERC721Facet is Modifiers {
   }
 
   struct MintParcelInput {
-    uint32 coordinateX;
-    uint32 coordinateY;
+    uint256 coordinateX;
+    uint256 coordinateY;
     uint256 parcelId;
     uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
     uint256 fomoBoost;
