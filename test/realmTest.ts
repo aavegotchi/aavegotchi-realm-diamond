@@ -114,7 +114,6 @@ describe("Realm tests", async function () {
     }
   });
   it("Can transfer tokens", async function () {
-    console.log("Before sending");
     let tokenIdsOfReceiver = await erc721Facet.tokenIdsOfOwner(testAddress2);
 
     erc721Facet = await impersonate(testAddress1, erc721Facet, ethers, network);
