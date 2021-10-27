@@ -48,7 +48,7 @@ describe("Realm tests", async function () {
     await tx.wait();
     console.log(tx.hash);
 
-    const parcel = await realmFacet.getParcelInfo("0");
+    const parcel = await realmFacet.getParcelInfo(tokenIds[0]);
     console.log("parcel:", parcel);
   });
 });

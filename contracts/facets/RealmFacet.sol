@@ -16,10 +16,7 @@ contract RealmFacet is Modifiers {
     uint256 coordinateY;
     string parcelId;
     uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
-    uint256 fomoBoost;
-    uint256 fudBoost;
-    uint256 kekBoost;
-    uint256 alphaBoost;
+    uint256[4] boost; //fud, fomo, alpha, kek
   }
 
   function maxSupply() external pure returns (uint256) {
@@ -43,10 +40,12 @@ contract RealmFacet is Modifiers {
       parcel.parcelId = metadata.parcelId;
       parcel.size = metadata.size;
 
-      parcel.alchemicaBoost[0] = metadata.fudBoost;
-      parcel.alchemicaBoost[1] = metadata.fomoBoost;
-      parcel.alchemicaBoost[2] = metadata.alphaBoost;
-      parcel.alchemicaBoost[3] = metadata.kekBoost;
+      parcel.alchemicaBoost = metadata.boost;
+
+      // parcel.alchemicaBoost[0] = metadata.fudBoost;
+      // parcel.alchemicaBoost[1] = metadata.fomoBoost;
+      // parcel.alchemicaBoost[2] = metadata.alphaBoost;
+      // parcel.alchemicaBoost[3] = metadata.kekBoost;
 
       LibERC721.safeMint(_to, tokenId);
     }

@@ -9,23 +9,13 @@ export interface MintParcelInput {
   coordinateY: BigNumberish;
   parcelId: string;
   size: BigNumberish;
-  fomoBoost: BigNumberish;
-  fudBoost: BigNumberish;
-  kekBoost: BigNumberish;
-  alphaBoost: BigNumberish;
-}
-
-export interface AlchemicaBoost {
-  fud: number;
-  fomo: number;
-  alpha: number;
-  kek: number;
+  boost: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
 }
 
 export interface ParcelMetadata {
   auction: boolean;
   parcelId: string; //C-5010-2906-V
-  alchemicaBoost: AlchemicaBoost;
+  boost: [number, number, number, number];
   tokenId: number;
   parcelHash: string;
   x: number;

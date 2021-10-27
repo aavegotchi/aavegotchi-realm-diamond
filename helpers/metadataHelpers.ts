@@ -31,20 +31,13 @@ export function parcelMetadataToContractInput(
   console.log("metadata:", parcelMetadata);
 
   const size = sizeNameToId(orientation);
-  const boostFud = parcelMetadata.alchemicaBoost.fud;
 
-  const boostFomo = parcelMetadata.alchemicaBoost.fomo;
-  const boostAlpha = parcelMetadata.alchemicaBoost.alpha;
-  const boostKek = parcelMetadata.alchemicaBoost.kek;
   return {
     coordinateX: x,
     coordinateY: y,
     parcelId: parcelMetadata.parcelId,
     size,
-    fomoBoost: boostFomo,
-    fudBoost: boostFud,
-    kekBoost: boostKek,
-    alphaBoost: boostAlpha,
+    boost: parcelMetadata.boost,
   };
 }
 

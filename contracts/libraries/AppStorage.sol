@@ -20,7 +20,8 @@ struct Parcel {
   uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
   uint256[64][64] buildGrid; //x, then y array of positions
   uint256[64][64] tileGrid; //x, then y array of positions
-  mapping(uint256 => uint256) alchemicaBoost;
+  uint256[4] alchemicaBoost;
+  // mapping(uint256 => uint256) alchemicaBoost;
   mapping(uint256 => uint256) alchemicaRemaining;
   mapping(uint256 => uint256) alchemicaCapacity;
   mapping(uint256 => uint256) alchemicaHarvestRate;
