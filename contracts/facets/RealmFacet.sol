@@ -22,6 +22,10 @@ contract RealmFacet is Modifiers {
     uint256 alphaBoost;
   }
 
+  function maxSupply() external pure returns (uint256) {
+    return MAX_SUPPLY;
+  }
+
   function mintParcels(
     address _to,
     uint256[] calldata _tokenIds,

@@ -5,6 +5,7 @@ import { network } from "hardhat";
 import { ethers } from "hardhat";
 import { MintParcelInput } from "../types";
 import { deployDiamond } from "../scripts/deploy";
+import { BigNumber } from "@ethersproject/bignumber";
 
 const testAddress1 = "0xBC67F26c2b87e16e304218459D2BB60Dac5C80bC";
 const testAddress2 = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
@@ -46,6 +47,11 @@ describe("Realm tests", async function () {
   it("Token metadata url should be https://aavegotchi.com/metadata/realm/0", async function () {
     const uri = await erc721Facet.tokenURI("0");
     expect(uri).to.equal("https://aavegotchi.com/metadata/realm/0");
+  });
+
+  it("Max supply should be 420,069", async function () {
+    const maxSupply = await realmFacet.maxSupply();
+    expect(maxSupply).to.equal(420069);
   });
 
   it("Check that tokens are being minted", async function () {
@@ -109,19 +115,7 @@ describe("Realm tests", async function () {
   });
   it("Can transfer tokens", async function () {
     console.log("Before sending");
-    let tokenIdsOfSender = await erc721Facet.tokenIdsOfOwner(testAddress1);
-    // console.log("sender:", tokenIdsOfSender);
-
-    tokenIdsOfSender.forEach((id) => {
-      console.log("sender id:", id.toString());
-    });
-
     let tokenIdsOfReceiver = await erc721Facet.tokenIdsOfOwner(testAddress2);
-    // console.log("sender:", tokenIdsOfReceiver);
-
-    tokenIdsOfReceiver.forEach((id) => {
-      console.log("receiver id:", id.toString());
-    });
 
     erc721Facet = await impersonate(testAddress1, erc721Facet, ethers, network);
     const balancePreSender = await erc721Facet.balanceOf(testAddress1);
@@ -137,20 +131,8 @@ describe("Realm tests", async function () {
     expect(balancePostSender).to.equal(balancePreSender.sub(3));
     expect(balancePostReceiver).to.equal(balancePreReceiver.add(3));
 
-    console.log("After sending");
-    tokenIdsOfSender = await erc721Facet.tokenIdsOfOwner(testAddress1);
-    // console.log("sender:", tokenIdsOfSender);
-
-    tokenIdsOfSender.forEach((id) => {
-      console.log("sender id:", id.toString());
-    });
-
     tokenIdsOfReceiver = await erc721Facet.tokenIdsOfOwner(testAddress2);
-    // console.log("sender:", tokenIdsOfReceiver);
-
-    tokenIdsOfReceiver.forEach((id) => {
-      console.log("receiver id:", id.toString());
-    });
+    expect(tokenIdsOfReceiver[6].toString()).to.equal("33");
   });
   it("Only owner can transfer", async function () {
     erc721Facet = await impersonate(testAddress1, erc721Facet, ethers, network);

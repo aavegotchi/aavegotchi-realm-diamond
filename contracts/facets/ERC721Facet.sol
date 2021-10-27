@@ -15,8 +15,8 @@ contract ERC721Facet is Modifiers {
     return s.ownerTokenIds[_owner];
   }
 
-  function totalSupply() external view returns (uint256 totalSupply_) {
-    totalSupply_ = s.tokenIds.length;
+  function totalSupply() external view returns (uint256) {
+    return s.tokenIds.length;
   }
 
   /// @notice Enumerate valid NFTs
