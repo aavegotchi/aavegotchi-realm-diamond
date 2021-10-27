@@ -7,6 +7,7 @@ import {
   Diamond__factory,
   OwnershipFacet,
 } from "../typechain";
+import { gasPrice } from "./helperFunctions";
 
 const { getSelectors, FacetCutAction } = require("./libraries/diamond.js");
 
@@ -18,7 +19,9 @@ export async function deployDiamond() {
 
   // deploy DiamondCutFacet
   const DiamondCutFacet = await ethers.getContractFactory("DiamondCutFacet");
-  const diamondCutFacet = await DiamondCutFacet.deploy();
+  const diamondCutFacet = await DiamondCutFacet.deploy({
+    gasPrice: gasPrice,
+  });
   await diamondCutFacet.deployed();
   console.log("DiamondCutFacet deployed:", diamondCutFacet.address);
 
@@ -28,7 +31,8 @@ export async function deployDiamond() {
   )) as Diamond__factory;
   const diamond = await Diamond.deploy(
     deployerAddress,
-    diamondCutFacet.address
+    diamondCutFacet.address,
+    { gasPrice: gasPrice }
   );
   await diamond.deployed();
   console.log("Diamond deployed:", diamond.address);
@@ -37,7 +41,7 @@ export async function deployDiamond() {
   const DiamondInit = (await ethers.getContractFactory(
     "DiamondInit"
   )) as DiamondInit__factory;
-  const diamondInit = await DiamondInit.deploy();
+  const diamondInit = await DiamondInit.deploy({ gasPrice: gasPrice });
   await diamondInit.deployed();
   console.log("DiamondInit deployed:", diamondInit.address);
 
@@ -53,7 +57,9 @@ export async function deployDiamond() {
   const cut = [];
   for (const FacetName of FacetNames) {
     const Facet = await ethers.getContractFactory(FacetName);
-    const facet = await Facet.deploy();
+    const facet = await Facet.deploy({
+      gasPrice: gasPrice,
+    });
     await facet.deployed();
     console.log(`${FacetName} deployed: ${diamondInit.address}`);
     cut.push({
@@ -73,7 +79,8 @@ export async function deployDiamond() {
   const tx = await diamondCut.diamondCut(
     cut,
     diamondInit.address,
-    functionCall
+    functionCall,
+    { gasPrice: gasPrice }
   );
   console.log("Diamond cut tx: ", tx.hash);
   const receipt = await tx.wait();
