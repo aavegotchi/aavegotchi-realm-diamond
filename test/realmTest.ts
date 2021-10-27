@@ -66,10 +66,9 @@ describe("Realm tests", async function () {
         coordinateY: i,
         parcelId: i.toString(),
         size,
-        fomoBoost: boostFomo,
-        fudBoost: boostFud,
-        kekBoost: boostKek,
-        alphaBoost: boostAlpha,
+        boost: [boostFud, boostFomo, boostAlpha, boostKek],
+        district: 1,
+        parcelAddress: "hey-whats-up",
       });
     }
     for (let i = 0; i < 6; i++) {
@@ -83,10 +82,9 @@ describe("Realm tests", async function () {
         coordinateY: i,
         parcelId: i.toString(),
         size,
-        fomoBoost: boostFomo,
-        fudBoost: boostFud,
-        kekBoost: boostKek,
-        alphaBoost: boostAlpha,
+        boost: [boostFud, boostFomo, boostAlpha, boostKek],
+        district: 1,
+        parcelAddress: "hey-whats-up",
       });
     }
     await realmFacet.mintParcels(testAddress1, tokenIdsTest1, parcelsTest1);

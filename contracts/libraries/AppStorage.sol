@@ -12,32 +12,40 @@ uint256 constant SPACIOUS_HEIGHT = 64;
 uint256 constant PAARTNER_WIDTH = 64;
 uint256 constant PAARTNER_HEIGHT = 64;
 
+uint256 constant FUD = 0;
+uint256 constant FOMO = 1;
+uint256 constant ALPHA = 2;
+uint256 constant KEK = 3;
+
 struct Parcel {
+  address owner;
+  string parcelAddress; //looks-like-this
+  string parcelId; //C-4208-3168-R
   uint256 coordinateX; //x position on the map
   uint256 coordinateY; //y position on the map
-  string parcelId;
-  string parcelAddress;
-  address owner;
   uint256 district;
   uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
   uint256[64][64] buildGrid; //x, then y array of positions
   uint256[64][64] tileGrid; //x, then y array of positions
-  uint256[4] alchemicaBoost;
+  uint256[4] alchemicaBoost; //fud, fomo, alpha, kek
+
+  /* will probably be converted into arrays
   mapping(uint256 => uint256) alchemicaRemaining;
   mapping(uint256 => uint256) alchemicaCapacity;
   mapping(uint256 => uint256) alchemicaHarvestRate;
   mapping(uint256 => uint256) timeSinceLastClaim;
   mapping(uint256 => uint256) unclaimedAlchemica;
+  */
 }
 
 struct AppStorage {
   uint256[] tokenIds;
-  address installationContract;
   mapping(uint256 => Parcel) parcels;
   mapping(address => mapping(uint256 => uint256)) ownerTokenIdIndexes;
   mapping(address => uint256[]) ownerTokenIds;
   mapping(address => mapping(address => bool)) operators;
   mapping(uint256 => address) approved;
+  //  address installationContract;
 }
 
 library LibAppStorage {

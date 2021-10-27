@@ -43,8 +43,6 @@ describe("Realm auction tests", async function () {
 
     const parcel = await realmFacet.getParcelInfo(tokenIds[0]);
 
-    console.log("parcel:", parcel);
-
     const expectedData = parcels[0];
 
     expect(parcel.coordinateX).to.equal(expectedData.coordinateX);

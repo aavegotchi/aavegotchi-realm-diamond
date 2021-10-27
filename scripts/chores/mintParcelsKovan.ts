@@ -5,12 +5,8 @@ import { auction1 } from "../../data/auction1";
 import { kovanDiamondAddress } from "../helperFunctions";
 
 export async function mintParcels() {
-  const accounts = await ethers.getSigners();
-
   const itemManager = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
-
   const tokenIds = auction1.slice(0, 50).join(",");
-  console.log("token ids:", tokenIds);
 
   const taskArgs: MintParcelsTaskArgs = {
     toAddress: itemManager,
