@@ -37,12 +37,10 @@ describe("Realm tests", async function () {
 
   it("Check that tokens are being minted", async function () {
     const tokenIds = auction1.slice(0, 100);
-    console.log("First 100 iDS:", tokenIds);
 
     const parcels: MintParcelInput[] = await parcelMetadataFromTokenIds(
       tokenIds
     );
-    console.log("parcels:", parcels);
 
     const tx = await realmFacet.mintParcels(testAddress, tokenIds, parcels);
     await tx.wait();
