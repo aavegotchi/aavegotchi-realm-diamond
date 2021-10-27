@@ -3,13 +3,19 @@ import { run, ethers } from "hardhat";
 import { MintParcelsTaskArgs } from "../../tasks/mintParcels";
 import { auction1 } from "../../data/auction1";
 import { maticDiamondAddress } from "../helperFunctions";
+import { Signer } from "@ethersproject/abstract-signer";
 
 export async function mintParcels() {
-  const accounts = await ethers.getSigners();
+  const accounts: Signer[] = await ethers.getSigners();
+
+  console.log("to:", await accounts[0].getAddress());
+  const to = await accounts[0].getAddress();
+
+  const tokenIds = auction1.slice(0, 100).join(",");
 
   const taskArgs: MintParcelsTaskArgs = {
-    toAddress: accounts[0].address,
-    tokenIds: auction1.slice(0, 100).join(","),
+    toAddress: to,
+    tokenIds: tokenIds,
     diamondAddress: maticDiamondAddress,
   };
 

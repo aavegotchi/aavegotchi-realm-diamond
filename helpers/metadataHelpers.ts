@@ -20,8 +20,6 @@ export function sizeNameToId(
 export function parcelMetadataToContractInput(
   parcelMetadata: ParcelMetadata
 ): MintParcelInput {
-  console.log("metadata:", parcelMetadata);
-
   const parcelArray = parcelMetadata.parcelId.split("-");
   //  const region = parcelArray[0];
   const x = parcelArray[1];

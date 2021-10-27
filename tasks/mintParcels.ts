@@ -3,6 +3,7 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { parcelMetadataFromTokenIds } from "../helpers/metadataHelpers";
+import { OwnershipFacet, RealmFacet } from "../typechain";
 import { MintParcelInput } from "../types";
 
 export interface MintParcelsTaskArgs {
@@ -24,10 +25,18 @@ task("mintParcels", "Mints parcels")
       );
       console.log("parcels:", parcels);
 
-      const realmFacet = await hre.ethers.getContractAt(
+      const ownershipFacet = (await hre.ethers.getContractAt(
+        "OwnershipFacet",
+        taskArgs.diamondAddress
+      )) as OwnershipFacet;
+
+      const owner = await ownershipFacet.owner();
+      console.log("owner:", owner);
+
+      const realmFacet = (await hre.ethers.getContractAt(
         "RealmFacet",
         taskArgs.diamondAddress
-      );
+      )) as RealmFacet;
 
       const tx = await realmFacet.mintParcels(
         taskArgs.toAddress,
