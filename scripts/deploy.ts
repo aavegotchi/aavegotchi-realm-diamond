@@ -1,11 +1,20 @@
 //@ts-ignore
+import { Signer } from "@ethersproject/abstract-signer";
 import { ethers } from "hardhat";
+import {
+  DiamondCutFacet,
+  DiamondInit__factory,
+  Diamond__factory,
+  OwnershipFacet,
+} from "../typechain";
 
 const { getSelectors, FacetCutAction } = require("./libraries/diamond.js");
 
 export async function deployDiamond() {
-  const accounts = await ethers.getSigners();
-  const contractOwner = accounts[0];
+  const accounts: Signer[] = await ethers.getSigners();
+  const deployer = accounts[0];
+  const deployerAddress = await deployer.getAddress();
+  console.log("Deployer:", deployerAddress);
 
   // deploy DiamondCutFacet
   const DiamondCutFacet = await ethers.getContractFactory("DiamondCutFacet");
@@ -14,16 +23,20 @@ export async function deployDiamond() {
   console.log("DiamondCutFacet deployed:", diamondCutFacet.address);
 
   // deploy Diamond
-  const Diamond = await ethers.getContractFactory("Diamond");
+  const Diamond = (await ethers.getContractFactory(
+    "Diamond"
+  )) as Diamond__factory;
   const diamond = await Diamond.deploy(
-    contractOwner.address,
+    deployerAddress,
     diamondCutFacet.address
   );
   await diamond.deployed();
   console.log("Diamond deployed:", diamond.address);
 
   // deploy DiamondInit
-  const DiamondInit = await ethers.getContractFactory("DiamondInit");
+  const DiamondInit = (await ethers.getContractFactory(
+    "DiamondInit"
+  )) as DiamondInit__factory;
   const diamondInit = await DiamondInit.deploy();
   await diamondInit.deployed();
   console.log("DiamondInit deployed:", diamondInit.address);
@@ -50,21 +63,37 @@ export async function deployDiamond() {
     });
   }
 
-  // upgrade diamond with facets
-  // console.log("Diamond Cut:", cut);
-  const diamondCut = await ethers.getContractAt("IDiamondCut", diamond.address);
-  let tx;
-  let receipt;
+  const diamondCut = (await ethers.getContractAt(
+    "IDiamondCut",
+    diamond.address
+  )) as DiamondCutFacet;
 
   // call to init function
-  let functionCall = diamondInit.interface.encodeFunctionData("init");
-  tx = await diamondCut.diamondCut(cut, diamondInit.address, functionCall);
+  const functionCall = diamondInit.interface.encodeFunctionData("init");
+  const tx = await diamondCut.diamondCut(
+    cut,
+    diamondInit.address,
+    functionCall
+  );
   console.log("Diamond cut tx: ", tx.hash);
-  receipt = await tx.wait();
+  const receipt = await tx.wait();
   if (!receipt.status) {
     throw Error(`Diamond upgrade failed: ${tx.hash}`);
   }
   console.log("Completed diamond cut");
+
+  const ownershipFacet = (await ethers.getContractAt(
+    "OwnershipFacet",
+    diamond.address
+  )) as OwnershipFacet;
+  const diamondOwner = await ownershipFacet.owner();
+  console.log("Diamond owner is:", diamondOwner);
+
+  if (diamondOwner !== deployerAddress) {
+    throw new Error(
+      `Diamond owner ${diamondOwner} is not deployer address ${deployerAddress}!`
+    );
+  }
 
   return diamond.address;
 }
