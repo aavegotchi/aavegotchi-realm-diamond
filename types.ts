@@ -8,8 +8,10 @@ export interface MintParcelInput {
   coordinateX: BigNumberish;
   coordinateY: BigNumberish;
   parcelId: string;
+  parcelAddress: string;
   size: BigNumberish;
   boost: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+  district: BigNumberish;
 }
 
 export interface ParcelMetadata {
@@ -18,6 +20,7 @@ export interface ParcelMetadata {
   boost: [number, number, number, number];
   tokenId: number;
   parcelHash: string;
+  district: number;
   x: number;
   y: number;
   type: "humble" | "reasonable" | "spacious";

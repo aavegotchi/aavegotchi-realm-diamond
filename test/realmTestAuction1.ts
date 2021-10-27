@@ -1,14 +1,10 @@
-import { impersonate } from "../scripts/helperFunctions";
 import { RealmFacet, ERC721Facet } from "../typechain";
 import { expect } from "chai";
-import { network } from "hardhat";
-import { ethers } from "hardhat";
-import { AxiosMetadataResponse, MintParcelInput } from "../types";
 
-import {
-  parcelMetadataFromTokenIds,
-  parcelMetadataToContractInput,
-} from "../helpers/metadataHelpers";
+import { ethers } from "hardhat";
+import { MintParcelInput } from "../types";
+
+import { parcelMetadataFromTokenIds } from "../helpers/metadataHelpers";
 import { auction1 } from "../data/auction1";
 
 const { deployDiamond } = require("../scripts/deploy.ts");
@@ -19,7 +15,7 @@ let realmFacet: RealmFacet;
 let erc721Facet: ERC721Facet;
 let accounts;
 
-describe("Realm tests", async function () {
+describe("Realm auction tests", async function () {
   before(async function () {
     this.timeout(20000000);
     diamondAddress = await deployDiamond();
@@ -36,7 +32,7 @@ describe("Realm tests", async function () {
   });
 
   it("Check that tokens are being minted", async function () {
-    const tokenIds = auction1.slice(0, 100);
+    const tokenIds = auction1.slice(0, 50);
 
     const parcels: MintParcelInput[] = await parcelMetadataFromTokenIds(
       tokenIds
@@ -44,9 +40,10 @@ describe("Realm tests", async function () {
 
     const tx = await realmFacet.mintParcels(testAddress, tokenIds, parcels);
     await tx.wait();
-    console.log(tx.hash);
 
     const parcel = await realmFacet.getParcelInfo(tokenIds[0]);
+
+    console.log("parcel:", parcel);
 
     const expectedData = parcels[0];
 
@@ -54,5 +51,7 @@ describe("Realm tests", async function () {
     expect(parcel.coordinateY).to.equal(expectedData.coordinateY);
     expect(parcel.size).to.equal(expectedData.size);
     expect(parcel.parcelId).to.equal(expectedData.parcelId);
+    expect(parcel.district).to.equal(expectedData.district);
+    expect(parcel.parcelAddress).to.equal(expectedData.parcelAddress);
   });
 });

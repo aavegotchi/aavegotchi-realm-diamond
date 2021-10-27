@@ -28,8 +28,6 @@ export function parcelMetadataToContractInput(
   const y = parcelArray[2];
   const orientation = parcelArray[3];
 
-  console.log("metadata:", parcelMetadata);
-
   const size = sizeNameToId(orientation);
 
   return {
@@ -38,6 +36,8 @@ export function parcelMetadataToContractInput(
     parcelId: parcelMetadata.parcelId,
     size,
     boost: parcelMetadata.boost,
+    parcelAddress: parcelMetadata.parcelHash,
+    district: parcelMetadata.district,
   };
 }
 

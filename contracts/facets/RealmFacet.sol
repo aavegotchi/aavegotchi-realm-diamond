@@ -14,7 +14,9 @@ contract RealmFacet is Modifiers {
   struct MintParcelInput {
     uint256 coordinateX;
     uint256 coordinateY;
+    uint256 district;
     string parcelId;
+    string parcelAddress;
     uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
     uint256[4] boost; //fud, fomo, alpha, kek
   }
@@ -39,13 +41,10 @@ contract RealmFacet is Modifiers {
       parcel.coordinateY = metadata.coordinateY;
       parcel.parcelId = metadata.parcelId;
       parcel.size = metadata.size;
+      parcel.district = metadata.district;
+      parcel.parcelAddress = metadata.parcelAddress;
 
       parcel.alchemicaBoost = metadata.boost;
-
-      // parcel.alchemicaBoost[0] = metadata.fudBoost;
-      // parcel.alchemicaBoost[1] = metadata.fomoBoost;
-      // parcel.alchemicaBoost[2] = metadata.alphaBoost;
-      // parcel.alchemicaBoost[3] = metadata.kekBoost;
 
       LibERC721.safeMint(_to, tokenId);
     }
@@ -53,18 +52,22 @@ contract RealmFacet is Modifiers {
 
   struct ParcelOutput {
     string parcelId;
+    string parcelAddress;
     address owner;
     uint256 coordinateX; //x position on the map
     uint256 coordinateY; //y position on the map
     uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
+    uint256 district;
   }
 
-  function getParcelInfo(uint256 _tokenId) external view returns (ParcelOutput memory parcelOutput_) {
+  function getParcelInfo(uint256 _tokenId) external view returns (ParcelOutput memory output_) {
     Parcel storage parcel = s.parcels[_tokenId];
-    parcelOutput_.parcelId = parcel.parcelId;
-    parcelOutput_.owner = parcel.owner;
-    parcelOutput_.coordinateX = parcel.coordinateX;
-    parcelOutput_.coordinateY = parcel.coordinateY;
-    parcelOutput_.size = parcel.size;
+    output_.parcelId = parcel.parcelId;
+    output_.owner = parcel.owner;
+    output_.coordinateX = parcel.coordinateX;
+    output_.coordinateY = parcel.coordinateY;
+    output_.size = parcel.size;
+    output_.parcelAddress = parcel.parcelAddress;
+    output_.district = parcel.district;
   }
 }
