@@ -1,6 +1,6 @@
 import { Signer } from "@ethersproject/abstract-signer";
 import { Contract } from "@ethersproject/contracts";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { HardhatRuntimeEnvironment, Network } from "hardhat/types";
 import { DiamondLoupeFacet, OwnershipFacet } from "../typechain";
 
 export const gasPrice = 100000000000;
@@ -9,7 +9,7 @@ export async function impersonate(
   address: string,
   contract: any,
   ethers: any,
-  network: any
+  network: Network
 ) {
   await network.provider.request({
     method: "hardhat_impersonateAccount",
@@ -59,7 +59,7 @@ export function getSelector(func: string, ethers: any) {
 }
 
 export const kovanDiamondAddress = "0xa37D0c085121B6b7190A34514Ca28fC15Bb4dc22";
-export const maticDiamondAddress = "";
+export const maticDiamondAddress = "0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11";
 
 export async function diamondOwner(address: string, ethers: any) {
   return await (await ethers.getContractAt("OwnershipFacet", address)).owner();

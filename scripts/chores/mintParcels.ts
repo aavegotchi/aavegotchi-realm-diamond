@@ -3,23 +3,30 @@ import { run, ethers } from "hardhat";
 import { MintParcelsTaskArgs } from "../../tasks/mintParcels";
 import { auction1 } from "../../data/auction1";
 import { maticDiamondAddress } from "../helperFunctions";
-import { Signer } from "@ethersproject/abstract-signer";
 
 export async function mintParcels() {
-  const accounts: Signer[] = await ethers.getSigners();
+  const maxProcess = 50;
 
-  console.log("to:", await accounts[0].getAddress());
-  const to = await accounts[0].getAddress();
+  const batches = Math.floor(auction1.length / maxProcess);
+  console.log("batches:", batches);
 
-  const tokenIds = auction1.slice(0, 100).join(",");
+  let currentBatch = 0;
 
-  const taskArgs: MintParcelsTaskArgs = {
-    toAddress: to,
-    tokenIds: tokenIds,
-    diamondAddress: maticDiamondAddress,
-  };
+  for (let index = 0; index < batches; index++) {
+    const tokenIds = auction1
+      .slice(maxProcess * currentBatch, maxProcess * currentBatch + maxProcess)
+      .join(",");
 
-  await run("mintParcels", taskArgs);
+    const taskArgs: MintParcelsTaskArgs = {
+      toAddress: "0x94cb5C277FCC64C274Bd30847f0821077B231022",
+      tokenIds: tokenIds,
+      diamondAddress: maticDiamondAddress,
+    };
+
+    await run("mintParcels", taskArgs);
+
+    currentBatch++;
+  }
 }
 
 // We recommend this pattern to be able to use async/await everywhere

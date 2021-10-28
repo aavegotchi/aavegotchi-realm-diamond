@@ -3,7 +3,8 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { parcelMetadataFromTokenIds } from "../helpers/metadataHelpers";
-import { OwnershipFacet, RealmFacet } from "../typechain";
+import { gasPrice, impersonate } from "../scripts/helperFunctions";
+import { ERC721Facet, OwnershipFacet, RealmFacet } from "../typechain";
 import { MintParcelInput } from "../types";
 
 export interface MintParcelsTaskArgs {
@@ -20,28 +21,51 @@ task("mintParcels", "Mints parcels")
     async (taskArgs: MintParcelsTaskArgs, hre: HardhatRuntimeEnvironment) => {
       const tokenIds = taskArgs.tokenIds.split(",");
 
+      console.log(
+        `Minting tokenIds: ${taskArgs.tokenIds} to address ${taskArgs.toAddress}`
+      );
+
+      const testing = ["hardhat", "localhost"].includes(hre.network.name);
+
       const parcels: MintParcelInput[] = await parcelMetadataFromTokenIds(
         tokenIds
       );
-      console.log("parcels:", parcels);
 
       const ownershipFacet = (await hre.ethers.getContractAt(
         "OwnershipFacet",
         taskArgs.diamondAddress
       )) as OwnershipFacet;
 
-      const owner = await ownershipFacet.owner();
-      console.log("owner:", owner);
-
-      const realmFacet = (await hre.ethers.getContractAt(
+      let realmFacet = (await hre.ethers.getContractAt(
         "RealmFacet",
         taskArgs.diamondAddress
       )) as RealmFacet;
 
+      const erc721facet = (await hre.ethers.getContractAt(
+        "ERC721Facet",
+        taskArgs.diamondAddress
+      )) as ERC721Facet;
+
+      const balance = await erc721facet.balanceOf(taskArgs.toAddress);
+      console.log("Balance of recipient is:", balance.toString());
+
+      const owner = await ownershipFacet.owner();
+      console.log("owner:", owner);
+
+      if (testing) {
+        realmFacet = await impersonate(
+          owner,
+          realmFacet,
+          hre.ethers,
+          hre.network
+        );
+      }
+
       const tx = await realmFacet.mintParcels(
         taskArgs.toAddress,
         tokenIds,
-        parcels
+        parcels,
+        { gasPrice: gasPrice }
       );
       await tx.wait();
       console.log(tx.hash);
