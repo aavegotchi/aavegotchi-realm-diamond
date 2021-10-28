@@ -58,6 +58,7 @@ contract RealmFacet is Modifiers {
     uint256 coordinateY; //y position on the map
     uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
     uint256 district;
+    uint256[4] boost;
   }
 
   function getParcelInfo(uint256 _tokenId) external view returns (ParcelOutput memory output_) {
@@ -69,5 +70,6 @@ contract RealmFacet is Modifiers {
     output_.size = parcel.size;
     output_.parcelAddress = parcel.parcelAddress;
     output_.district = parcel.district;
+    output_.boost = parcel.alchemicaBoost;
   }
 }

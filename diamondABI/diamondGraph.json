@@ -1,25 +1,5 @@
 [
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "_init",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "_calldata",
-        "type": "bytes"
-      }
-    ],
-    "name": "DiamondCut",
-    "type": "event"
-  },
-
-  {
     "inputs": [
       {
         "internalType": "bytes4",
@@ -220,9 +200,7 @@
   {
     "inputs": [],
     "name": "totalSupply",
-    "outputs": [
-      { "internalType": "uint256", "name": "totalSupply_", "type": "uint256" }
-    ],
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
   },
@@ -283,17 +261,38 @@
       {
         "components": [
           { "internalType": "string", "name": "parcelId", "type": "string" },
+          {
+            "internalType": "string",
+            "name": "parcelAddress",
+            "type": "string"
+          },
           { "internalType": "address", "name": "owner", "type": "address" },
-          { "internalType": "uint32", "name": "coordinateX", "type": "uint32" },
-          { "internalType": "uint32", "name": "coordinateY", "type": "uint32" },
-          { "internalType": "uint256", "name": "size", "type": "uint256" }
+          {
+            "internalType": "uint256",
+            "name": "coordinateX",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "coordinateY",
+            "type": "uint256"
+          },
+          { "internalType": "uint256", "name": "size", "type": "uint256" },
+          { "internalType": "uint256", "name": "district", "type": "uint256" }
         ],
         "internalType": "struct RealmFacet.ParcelOutput",
-        "name": "parcelOutput_",
-        "type": " "
+        "name": "output_",
+        "type": "tuple"
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "maxSupply",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "pure",
     "type": "function"
   },
 
