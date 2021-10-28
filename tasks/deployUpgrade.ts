@@ -144,7 +144,9 @@ task(
           facet.facetName
         )) as ContractFactory;
 
-        const deployedFacet: Contract = await factory.deploy();
+        const deployedFacet: Contract = await factory.deploy({
+          gasPrice: gasPrice,
+        });
         await deployedFacet.deployed();
         console.log(
           `Deployed Facet Address for ${facet.facetName}:`,
@@ -221,7 +223,7 @@ task(
         console.log("Completed diamond cut: ", tx.hash);
       } else {
         //Choose to use a multisig or a simple deploy address
-
+        console.log("Diamond cut");
         const tx: ContractTransaction = await diamondCut.diamondCut(
           cut,
           AddressZero,
