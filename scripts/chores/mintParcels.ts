@@ -7,7 +7,7 @@ import { maticDiamondAddress } from "../helperFunctions";
 export async function mintParcels() {
   const maxProcess = 50;
 
-  const batches = Math.floor(auction1.length / maxProcess);
+  const batches = Math.ceil(auction1.length / maxProcess);
   console.log("batches:", batches);
 
   let currentBatch = 0;
