@@ -21,6 +21,8 @@ contract RealmFacet is Modifiers {
     uint256[4] boost; //fud, fomo, alpha, kek
   }
 
+  event ResyncParcel(uint256 _tokenId);
+
   function maxSupply() external pure returns (uint256) {
     return MAX_SUPPLY;
   }
@@ -59,6 +61,15 @@ contract RealmFacet is Modifiers {
     uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
     uint256 district;
     uint256[4] boost;
+  }
+
+  /**
+  @dev Used to resync a parcel on the subgraph if metadata is added later 
+  */
+  function resyncParcel(uint256[] calldata _tokenIds) external onlyOwner {
+    for (uint256 index = 0; index < _tokenIds.length; index++) {
+      emit ResyncParcel(_tokenIds[index]);
+    }
   }
 
   function getParcelInfo(uint256 _tokenId) external view returns (ParcelOutput memory output_) {

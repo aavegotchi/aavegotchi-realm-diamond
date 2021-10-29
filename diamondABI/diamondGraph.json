@@ -278,7 +278,12 @@
             "type": "uint256"
           },
           { "internalType": "uint256", "name": "size", "type": "uint256" },
-          { "internalType": "uint256", "name": "district", "type": "uint256" }
+          { "internalType": "uint256", "name": "district", "type": "uint256" },
+          {
+            "internalType": "uint256[4]",
+            "name": "boost",
+            "type": "uint256[4]"
+          }
         ],
         "internalType": "struct RealmFacet.ParcelOutput",
         "name": "output_",
