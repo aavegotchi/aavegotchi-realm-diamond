@@ -45,6 +45,7 @@ struct AppStorage {
   mapping(address => uint256[]) ownerTokenIds;
   mapping(address => mapping(address => bool)) operators;
   mapping(uint256 => address) approved;
+  address aavegotchiDiamond;
   //  address installationContract;
 }
 

@@ -72,6 +72,14 @@ contract RealmFacet is Modifiers {
     }
   }
 
+  /**
+  @dev Used to set diamond address for Baazaar
+  */
+  function setAavegotchiDiamond(address _diamondAddress) external onlyOwner {
+    require(_diamondAddress != address(0), "RealmFacet: Cannot set diamond to zero address");
+    s.aavegotchiDiamond = _diamondAddress;
+  }
+
   function getParcelInfo(uint256 _tokenId) external view returns (ParcelOutput memory output_) {
     Parcel storage parcel = s.parcels[_tokenId];
     output_.parcelId = parcel.parcelId;

@@ -7,6 +7,7 @@ import "../libraries/LibStrings.sol";
 import "../libraries/LibMeta.sol";
 import "../libraries/LibERC721.sol";
 import {InstallationDiamond} from "../interfaces/InstallationDiamond.sol";
+import {ERC721Marketplace} from "../interfaces/ERC721Marketplace.sol";
 
 contract ERC721Facet is Modifiers {
   // bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
@@ -85,6 +86,12 @@ contract ERC721Facet is Modifiers {
     address sender = LibMeta.msgSender();
     LibERC721.transferFrom(sender, _from, _to, _tokenId);
     LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, _data);
+
+    //Update baazaar listing
+
+    if (s.aavegotchiDiamond != address(0)) {
+      ERC721Marketplace(s.aavegotchiDiamond).updateERC721Listing(address(this), _tokenId, _from);
+    }
   }
 
   /// @notice Transfers the ownership of an NFT from one address to another address
@@ -101,6 +108,11 @@ contract ERC721Facet is Modifiers {
     address sender = LibMeta.msgSender();
     LibERC721.transferFrom(sender, _from, _to, _tokenId);
     LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, "");
+
+    //Update baazaar listing
+    if (s.aavegotchiDiamond != address(0)) {
+      ERC721Marketplace(s.aavegotchiDiamond).updateERC721Listing(address(this), _tokenId, _from);
+    }
   }
 
   /// @notice Transfer ownership of an NFT -- THE CALLER IS RESPONSIBLE
