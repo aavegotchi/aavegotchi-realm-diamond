@@ -7,7 +7,7 @@ function getCompilerVersion(code) {
     // TODO: not sure if we should use this
     const version = code.match(/pragma solidity (.*);/)[1];
   } catch (e) {}
-  return "v0.8.0+commit.66f32c5";
+  return "v0.8.9+commit.e5eed63a";
 }
 
 function verifyRequest(guid, apikey) {
@@ -88,13 +88,13 @@ task(
     );
 
     sourceCode = sourceCode.replace(
-      "pragma solidity ^0.8.0;",
+      "pragma solidity 0.8.9;",
       "solidityindicator"
     );
-    sourceCode = sourceCode.replace(/pragma solidity ^0\.8\.0\;/g, "");
+    sourceCode = sourceCode.replace(/pragma solidity 0\.8\.9\;/g, "");
     sourceCode = sourceCode.replace(
       "solidityindicator",
-      "pragma solidity ^0.8.0;"
+      "pragma solidity 0.8.9;"
     );
 
     console.log("sourcecode:", sourceCode);

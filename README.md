@@ -2,7 +2,7 @@
 
 ## Deployed Vars
 
-### Matic (Not Final)
+### Matic (Final)
 
 - DiamondCutFacet deployed: 0x59145F61a9d8E5aa04023D33ECcca50Ce468c07C
 - Diamond deployed: 0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11
@@ -10,7 +10,7 @@
 - DiamondLoupeFacet deployed: 0x45944862B6274ea45FBC6063996112D41e4C2E49
 - OwnershipFacet deployed: 0x45944862B6274ea45FBC6063996112D41e4C2E49
 - ERC721Facet deployed: 0x45944862B6274ea45FBC6063996112D41e4C2E49
-- RealmFacet deployed: 0x45944862B6274ea45FBC6063996112D41e4C2E49
+- RealmFacet deployed: 0xA24d4E0E1531aD63E15a55b420487dDe6DA70705
 
 ### Kovan
 

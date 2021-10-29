@@ -13,8 +13,8 @@ DiamondLoupeFacet: 0xa23fbAC1B441787d6469F9C1E17B51B3F3C5DE28
 */
 
 async function verify() {
-  const address = "0x5F10fCEF9EF0a128d82AffC688D8A479bf40a818"; // deployed address
-  const facet = "OwnershipFacet"; // name of facet
+  const address = "0xA24d4E0E1531aD63E15a55b420487dDe6DA70705"; // deployed address
+  const facet = "RealmFacet"; // name of facet
   await run("verifyFacet", {
     apikey: process.env.POLYGON_API_KEY,
     contract: address,
