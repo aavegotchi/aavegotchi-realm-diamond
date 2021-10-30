@@ -132,6 +132,10 @@ contract ERC721Facet is Modifiers {
   ) external {
     address sender = LibMeta.msgSender();
     LibERC721.transferFrom(sender, _from, _to, _tokenId);
+
+    if (s.aavegotchiDiamond != address(0)) {
+      ERC721Marketplace(s.aavegotchiDiamond).updateERC721Listing(address(this), _tokenId, _from);
+    }
   }
 
   /// @notice Change or reaffirm the approved address for an NFT
