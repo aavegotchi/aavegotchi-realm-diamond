@@ -1,9 +1,11 @@
-import { run } from "hardhat";
+import { run, ethers } from "hardhat";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../tasks/deployUpgrade";
+import { RealmFacet__factory } from "../../typechain";
+import { RealmFacetInterface } from "../../typechain/RealmFacet";
 import { maticDiamondAddress } from "../helperFunctions";
 
 export async function upgrade() {
@@ -24,6 +26,15 @@ export async function upgrade() {
     },
   ];
 
+  let iface: RealmFacetInterface = new ethers.utils.Interface(
+    RealmFacet__factory.abi
+  ) as RealmFacetInterface;
+
+  const maticAavegotchiDiamond = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
+  const calldata = iface.encodeFunctionData("setAavegotchiDiamond", [
+    maticAavegotchiDiamond,
+  ]);
+
   const joined = convertFacetAndSelectorsToString(facets);
 
   const args: DeployUpgradeTaskArgs = {
@@ -32,6 +43,8 @@ export async function upgrade() {
     facetsAndAddSelectors: joined,
     useLedger: false,
     useMultisig: false,
+    initAddress: maticDiamondAddress,
+    initCalldata: calldata,
   };
 
   await run("deployUpgrade", args);
