@@ -13,13 +13,6 @@ export async function upgrade() {
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "RealmFacet",
-      addSelectors: [
-        "function setAavegotchiDiamond(address _diamondAddress) external",
-      ],
-      removeSelectors: [],
-    },
-    {
       facetName: "ERC721Facet",
       addSelectors: [],
       removeSelectors: [],
