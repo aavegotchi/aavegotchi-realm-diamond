@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@chainlink/contracts@^0.2.2":
+  "integrity" "sha512-wxXPbt7O3aZaUSG34ufFASC5amRSL6eeYCqsa+2gpqbB8Hk7B7FydEDCI5dqvAC444TlFskPHcVbizCZkRHPpw=="
+  "resolved" "https://registry.npmjs.org/@chainlink/contracts/-/contracts-0.2.2.tgz"
+  "version" "0.2.2"
+
 "@codechecks/client@^0.1.0":
   "integrity" "sha512-dSIzHnGNcXxDZtnVQEXWQHXH2v9KrpnK4mDGDxdwSu3l00rOIVwJcttj0wzx0bC0Q6gs65VsQdZH4gkanLdXOA=="
   "resolved" "https://registry.npmjs.org/@codechecks/client/-/client-0.1.11.tgz"
