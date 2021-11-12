@@ -191,11 +191,12 @@ task(
         }
 
         //Always replace the existing selectors to prevent duplications
-        cut.push({
-          facetAddress: deployedFacet.address,
-          action: FacetCutAction.Replace,
-          functionSelectors: existingSelectors,
-        });
+        if (existingSelectors.length > 0)
+          cut.push({
+            facetAddress: deployedFacet.address,
+            action: FacetCutAction.Replace,
+            functionSelectors: existingSelectors,
+          });
 
         if (removeSelectors.length > 0) {
           console.log("Removing selectors:", removeSelectors);

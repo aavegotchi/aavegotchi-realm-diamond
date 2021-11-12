@@ -36,14 +36,17 @@ export async function upgrade() {
   ) as SurveyingFacetInterface;
 
   const hardcodedAlchemicasTotals = [
-    [14154, 7076, 3538, 1414],
-    [56618, 28308, 14154, 5660],
-    [452946, 226472, 113236, 45294],
-    [452946, 226472, 113236, 45294],
-    [905894, 452946, 226472, 90588],
+    [
+      [14154, 7076, 3538, 1414],
+      [56618, 28308, 14154, 5660],
+      [452946, 226472, 113236, 45294],
+      [452946, 226472, 113236, 45294],
+      [905894, 452946, 226472, 90588],
+    ],
   ];
 
   const calldata = iface.encodeFunctionData(
+    //@ts-ignore
     "setAlchemicas",
     hardcodedAlchemicasTotals
   );
