@@ -22,10 +22,12 @@ export async function upgrade() {
         "function rawFulfillRandomWords(uint256 requestId, uint256[] memory randomWords) external",
         "function setSurveyingRound(uint8 _surveyingRound) external",
         `function setConfig(${requestConfig} _requestConfig) external`,
-        "function setAlchemicas(uint256[4][5] _alchemicas) external",
-        "function getAlchemicas() external view returns (uint256[4][5] memory)",
+        "function initVars(uint256[4][5] _alchemicas, address _installationContract, address _vrfCoordinator, address _linkAddress) external",
+        "function getTotalAlchemicas() external view returns (uint256[4][5] memory)",
         "function subscribe() external",
         "function topUpSubscription(uint256 amount) external",
+        "function testingStartSurveying(uint256 _tokenId, uint8 _surveyingRound) external",
+        "function getRealmAlchemica(uint256 _tokenId) external view returns (uint256[4] memory)",
       ],
       removeSelectors: [],
     },
@@ -36,19 +38,22 @@ export async function upgrade() {
   ) as SurveyingFacetInterface;
 
   const hardcodedAlchemicasTotals = [
-    [
-      [14154, 7076, 3538, 1414],
-      [56618, 28308, 14154, 5660],
-      [452946, 226472, 113236, 45294],
-      [452946, 226472, 113236, 45294],
-      [905894, 452946, 226472, 90588],
-    ],
+    [14154, 7076, 3538, 1414],
+    [56618, 28308, 14154, 5660],
+    [452946, 226472, 113236, 45294],
+    [452946, 226472, 113236, 45294],
+    [905894, 452946, 226472, 90588],
   ];
 
   const calldata = iface.encodeFunctionData(
     //@ts-ignore
-    "setAlchemicas",
-    hardcodedAlchemicasTotals
+    "initVars",
+    [
+      hardcodedAlchemicasTotals,
+      "0x0000000000000000000000000000000000000000",
+      "0x0000000000000000000000000000000000000000",
+      "0x0000000000000000000000000000000000000000",
+    ]
   );
 
   const joined = convertFacetAndSelectorsToString(facets);

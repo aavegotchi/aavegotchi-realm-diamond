@@ -17,27 +17,6 @@ uint256 constant FOMO = 1;
 uint256 constant ALPHA = 2;
 uint256 constant KEK = 3;
 
-// TODO confirm hardcoded values
-uint256 constant HUMBLE_FUD_ACT1 = 14154;
-uint256 constant HUMBLE_FOMO_ACT1 = 7076;
-uint256 constant HUMBLE_ALPHA_ACT1 = 3538;
-uint256 constant HUMBLE_KEK_ACT1 = 1414;
-
-uint256 constant REASONABLE_FUD_ACT1 = 56618;
-uint256 constant REASONABLE_FOMO_ACT1 = 28308;
-uint256 constant REASONABLE_ALPHA_ACT1 = 14154;
-uint256 constant REASONABLE_KEK_ACT1 = 5660;
-
-uint256 constant SPACIOUS_FUD_ACT1 = 452946;
-uint256 constant SPACIOUS_FOMO_ACT1 = 226472;
-uint256 constant SPACIOUS_ALPHA_ACT1 = 113236;
-uint256 constant SPACIOUS_KEK_ACT1 = 45294;
-
-uint256 constant PAARTNER_FUD_ACT1 = 905894;
-uint256 constant PAARTNER_FOMO_ACT1 = 452946;
-uint256 constant PAARTNER_ALPHA_ACT1 = 226472;
-uint256 constant PAARTNER_KEK_ACT1 = 90588;
-
 struct Parcel {
   address owner;
   string parcelAddress; //looks-like-this

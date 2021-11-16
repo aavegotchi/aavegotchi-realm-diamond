@@ -14,7 +14,7 @@ import {
 import { upgrade } from "../scripts/upgrades/upgrade-realmSurveying";
 
 describe("Testing Realms Surveying", async function () {
-  const testAddress = "0xBC67F26c2b87e16e304218459D2BB60Dac5C80bC";
+  const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
   const gbmAddress = "0xa44c8e0eCAEFe668947154eE2b803Bd4e6310EFe";
   let accounts;
   let ownerAddress;
@@ -47,7 +47,17 @@ describe("Testing Realms Surveying", async function () {
     )) as SurveyingFacet;
   });
   it("test", async function () {
-    const a = await surveyingFacet.getAlchemicas();
-    console.log(a);
+    surveyingFacet = await impersonate(
+      testAddress,
+      surveyingFacet,
+      ethers,
+      network
+    );
+    await surveyingFacet.testingStartSurveying(2893, 0);
+    const a = await surveyingFacet.getRealmAlchemica(2893);
+    console.log(ethers.utils.formatUnits(a[0], 0));
+    console.log(ethers.utils.formatUnits(a[1], 0));
+    console.log(ethers.utils.formatUnits(a[2], 0));
+    console.log(ethers.utils.formatUnits(a[3], 0));
   });
 });

@@ -7,6 +7,8 @@ import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/dev/VRFConsumerBaseV2.sol";
 
 contract SurveyingFacet is Modifiers {
+  event SurveyParcel(uint256 _tokenId, uint256[] _alchemicas);
+
   function startSurveying(uint256 _tokenId, uint8 _surveyingRound) external {
     require(s.parcels[_tokenId].owner == msg.sender, "RealmFacet: Not owner");
     require(!s.parcels[_tokenId].roundsClaimed[_surveyingRound], "RealmFacet: Round already claimed");
@@ -36,16 +38,22 @@ contract SurveyingFacet is Modifiers {
     }
   }
 
-  function updateRemainingAlchemicaFirstRound(uint256 tokenId, uint256[] memory randomWords) internal {
+  function updateRemainingAlchemicaFirstRound(uint256 _tokenId, uint256[] memory randomWords) internal {
+    uint256[] memory alchemicas = new uint256[](4);
     for (uint8 i; i < 4; i++) {
-      s.parcels[tokenId].alchemicaRemaining[i] = (randomWords[i] % s.totalAlchemicas[s.parcels[tokenId].size][i]) / 5;
+      s.parcels[_tokenId].alchemicaRemaining[i] = (randomWords[i] % s.totalAlchemicas[s.parcels[_tokenId].size][i]) / 5;
+      alchemicas[i] = (randomWords[i] % s.totalAlchemicas[s.parcels[_tokenId].size][i]) / 5;
     }
+    emit SurveyParcel(_tokenId, alchemicas);
   }
 
-  function updateRemainingAlchemica(uint256 tokenId, uint256[] memory randomWords) internal {
+  function updateRemainingAlchemica(uint256 _tokenId, uint256[] memory randomWords) internal {
+    uint256[] memory alchemicas = new uint256[](4);
     for (uint8 i; i < 4; i++) {
-      s.parcels[tokenId].alchemicaRemaining[i] = (randomWords[i] % s.totalAlchemicas[s.parcels[tokenId].size][i]) / 5;
+      s.parcels[_tokenId].alchemicaRemaining[i] = (randomWords[i] % s.totalAlchemicas[s.parcels[_tokenId].size][i]) / 5;
+      alchemicas[i] = (randomWords[i] % s.totalAlchemicas[s.parcels[_tokenId].size][i]) / 5;
     }
+    emit SurveyParcel(_tokenId, alchemicas);
   }
 
   function setSurveyingRound(uint8 _surveyingRound) external onlyOwner {
@@ -62,16 +70,28 @@ contract SurveyingFacet is Modifiers {
     );
   }
 
-  function setAlchemicas(uint256[4][5] calldata _alchemicas) external onlyOwner {
+  function initVars(
+    uint256[4][5] calldata _alchemicas,
+    address _installationContract,
+    address _vrfCoordinator,
+    address _linkAddress
+  ) external onlyOwner {
     for (uint8 i; i < _alchemicas.length; i++) {
       for (uint256 j; j < _alchemicas[i].length; j++) {
         s.totalAlchemicas[i][j] = _alchemicas[i][j];
       }
     }
+    s.installationContract = _installationContract;
+    s.vrfCoordinator = _vrfCoordinator;
+    s.linkAddress = _linkAddress;
   }
 
-  function getAlchemicas() external view returns (uint256[4][5] memory) {
+  function getTotalAlchemicas() external view returns (uint256[4][5] memory) {
     return s.totalAlchemicas;
+  }
+
+  function getRealmAlchemica(uint256 _tokenId) external view returns (uint256[4] memory) {
+    return s.parcels[_tokenId].alchemicaRemaining;
   }
 
   function subscribe() external onlyOwner {
@@ -84,5 +104,17 @@ contract SurveyingFacet is Modifiers {
   // Assumes this contract owns link
   function topUpSubscription(uint256 amount) external onlyOwner {
     LinkTokenInterface(s.linkAddress).transferAndCall(s.vrfCoordinator, amount, abi.encode(s.requestConfig.subId));
+  }
+
+  // testing funcs
+  function testingStartSurveying(uint256 _tokenId, uint8 _surveyingRound) external {
+    require(s.parcels[_tokenId].owner == msg.sender, "RealmFacet: Not owner");
+    require(!s.parcels[_tokenId].roundsClaimed[_surveyingRound], "RealmFacet: Round already claimed");
+    uint256[] memory alchemicas = new uint256[](4);
+    for (uint256 i; i < 4; i++) {
+      alchemicas[i] = uint256(keccak256(abi.encodePacked(block.number, msg.sender, i)));
+    }
+    updateRemainingAlchemicaFirstRound(_tokenId, alchemicas);
+    emit SurveyParcel(_tokenId, alchemicas);
   }
 }
