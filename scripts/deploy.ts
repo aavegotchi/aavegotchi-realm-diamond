@@ -6,6 +6,7 @@ import {
   DiamondInit__factory,
   Diamond__factory,
   OwnershipFacet,
+  SurveyingFacet,
 } from "../typechain";
 import { gasPrice } from "./helperFunctions";
 
@@ -53,6 +54,7 @@ export async function deployDiamond() {
     "OwnershipFacet",
     "ERC721Facet",
     "RealmFacet",
+    "SurveyingFacet",
   ];
   const cut = [];
   for (const FacetName of FacetNames) {
@@ -101,6 +103,30 @@ export async function deployDiamond() {
       `Diamond owner ${diamondOwner} is not deployer address ${deployerAddress}!`
     );
   }
+
+  const hardcodedAlchemicasTotals = [
+    [14154, 7076, 3538, 1414],
+    [56618, 28308, 14154, 5660],
+    [452946, 226472, 113236, 45294],
+    [452946, 226472, 113236, 45294],
+    [905894, 452946, 226472, 90588],
+  ];
+
+  const surveyingFacet = (await ethers.getContractAt(
+    "SurveyingFacet",
+    diamond.address
+  )) as SurveyingFacet;
+
+  const initVars = await surveyingFacet.initVars(
+    //@ts-ignore
+    hardcodedAlchemicasTotals,
+    "0x0000000000000000000000000000000000000000",
+    "0x0000000000000000000000000000000000000000",
+    "0x0000000000000000000000000000000000000000"
+  );
+
+  const initVarsReceipt = await initVars.wait();
+  console.log("initVarsReceipt", initVarsReceipt);
 
   return diamond.address;
 }

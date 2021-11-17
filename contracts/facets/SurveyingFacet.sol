@@ -2,6 +2,8 @@
 pragma solidity 0.8.9;
 
 import "../libraries/AppStorage.sol";
+import "./RealmFacet.sol";
+import "../libraries/LibERC721.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/dev/VRFConsumerBaseV2.sol";
@@ -47,6 +49,7 @@ contract SurveyingFacet is Modifiers {
     emit SurveyParcel(_tokenId, alchemicas);
   }
 
+  // TODO update formula to match 80% of remaning supply divided in 9 rounds
   function updateRemainingAlchemica(uint256 _tokenId, uint256[] memory randomWords) internal {
     uint256[] memory alchemicas = new uint256[](4);
     for (uint8 i; i < 4; i++) {
@@ -116,5 +119,30 @@ contract SurveyingFacet is Modifiers {
     }
     updateRemainingAlchemicaFirstRound(_tokenId, alchemicas);
     emit SurveyParcel(_tokenId, alchemicas);
+  }
+
+  function testingMintParcel(
+    address _to,
+    uint256[] calldata _tokenIds,
+    RealmFacet.MintParcelInput[] memory _metadata
+  ) external {
+    for (uint256 index = 0; index < _tokenIds.length; index++) {
+      require(s.tokenIds.length < 420069, "RealmFacet: Cannot mint more than 420,069 parcels");
+      uint256 tokenId = _tokenIds[index];
+      RealmFacet.MintParcelInput memory metadata = _metadata[index];
+      require(_tokenIds.length == _metadata.length, "Inputs must be same length");
+
+      Parcel storage parcel = s.parcels[tokenId];
+      parcel.coordinateX = metadata.coordinateX;
+      parcel.coordinateY = metadata.coordinateY;
+      parcel.parcelId = metadata.parcelId;
+      parcel.size = metadata.size;
+      parcel.district = metadata.district;
+      parcel.parcelAddress = metadata.parcelAddress;
+
+      parcel.alchemicaBoost = metadata.boost;
+
+      LibERC721.safeMint(_to, tokenId);
+    }
   }
 }

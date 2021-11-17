@@ -24,6 +24,7 @@
     "typescript": "^4.3.5"
   },
   "devDependencies": {
+    "@nomiclabs/hardhat-etherscan": "^2.1.7",
     "@types/chai": "^4.2.21",
     "@types/jest": "^27.0.2",
     "@types/mocha": "^9.0.0",

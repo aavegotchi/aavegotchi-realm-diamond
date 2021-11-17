@@ -14,6 +14,9 @@ export async function upgrade() {
   const requestConfig =
     "(uint64 subId, uint32 callbackGasLimit, uint16 requestConfirmations, uint32 numWords, bytes32 keyHash)";
 
+  const mintParcelsInput =
+    "(uint256 coordinateX, uint256 coordinateY, uint256 district, string parcelId, string parcelAddress, uint256 size, uint256[4] boost)";
+
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "SurveyingFacet",
@@ -28,6 +31,7 @@ export async function upgrade() {
         "function topUpSubscription(uint256 amount) external",
         "function testingStartSurveying(uint256 _tokenId, uint8 _surveyingRound) external",
         "function getRealmAlchemica(uint256 _tokenId) external view returns (uint256[4] memory)",
+        `function testingMintParcel(address _to, uint256[] calldata _tokenIds, ${mintParcelsInput}[] memory _metadata) external`,
       ],
       removeSelectors: [],
     },

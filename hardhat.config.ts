@@ -2,6 +2,7 @@
 import "@typechain/hardhat";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
+import "@nomiclabs/hardhat-etherscan";
 import "hardhat-contract-sizer";
 import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname + "/.env" });
@@ -50,6 +51,11 @@ module.exports = {
       gasPrice: 100000000000,
       //   timeout: 90000
     },
+  },
+  etherscan: {
+    // Your API key for Etherscan
+    // Obtain one at https://etherscan.io/
+    apiKey: process.env.ETHERSCAN,
   },
   gasReporter: {
     currency: "USD",
