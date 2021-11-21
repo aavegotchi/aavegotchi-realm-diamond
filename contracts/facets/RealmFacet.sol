@@ -6,6 +6,7 @@ import "../libraries/LibDiamond.sol";
 import "../libraries/LibStrings.sol";
 import "../libraries/LibMeta.sol";
 import "../libraries/LibERC721.sol";
+import "../libraries/LibRealm.sol";
 import {InstallationDiamond} from "../interfaces/InstallationDiamond.sol";
 
 contract RealmFacet is Modifiers {
@@ -50,6 +51,27 @@ contract RealmFacet is Modifiers {
 
       LibERC721.safeMint(_to, tokenId);
     }
+  }
+
+  function equipInstallation(
+    uint256 _realmId,
+    uint256 _installationId,
+    uint256 _x,
+    uint256 _y
+  ) external onlyParcelOwner(_realmId) {
+    LibRealm.placeInstallation(_realmId, _installationId, _x, _y);
+    InstallationDiamond(s.installationContract).equipInstallation(msg.sender, _realmId, _installationId);
+  }
+
+  function unequipInstallation(
+    uint256 _realmId,
+    uint256 _installationId,
+    uint256 _x,
+    uint256 _y
+  ) external onlyParcelOwner(_realmId) {
+    LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
+    // refund 50% alchemica from great portal
+    InstallationDiamond(s.installationContract).unequipInstallation(_realmId, _installationId);
   }
 
   struct ParcelOutput {
