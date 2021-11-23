@@ -38,7 +38,7 @@ library LibRealm {
     if (installation.installationType == 0) {
       parcel.alchemicaHarvestRate[alchemicaType] += installation.harvestRate;
     } else if (installation.installationType == 1) {
-      parcel.alchemicaCapacity[alchemicaType] += installation.capacity;
+      parcel.reservoirCapacity[alchemicaType] += installation.capacity;
     }
 
     //Check if these slots are available onchain

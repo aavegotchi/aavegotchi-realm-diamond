@@ -21,15 +21,15 @@ export async function upgrade() {
     {
       facetName: "SurveyingFacet",
       addSelectors: [
-        "function startSurveying(uint256 _tokenId, uint8 _surveyingRound) external",
+        "function startSurveying(uint256 _tokenId, uint256 _surveyingRound) external",
         "function rawFulfillRandomWords(uint256 requestId, uint256[] memory randomWords) external",
-        "function setSurveyingRound(uint8 _surveyingRound) external",
+        "function progressSurveyingRound() external",
         `function setConfig(${requestConfig} _requestConfig) external`,
         "function initVars(uint256[4][5] _alchemicas, address _installationContract, address _vrfCoordinator, address _linkAddress) external",
         "function getTotalAlchemicas() external view returns (uint256[4][5] memory)",
         "function subscribe() external",
         "function topUpSubscription(uint256 amount) external",
-        "function testingStartSurveying(uint256 _tokenId, uint8 _surveyingRound) external",
+        "function testingStartSurveying(uint256 _tokenId, uint256 _surveyingRound) external",
         "function getRealmAlchemica(uint256 _tokenId) external view returns (uint256[4] memory)",
         `function testingMintParcel(address _to, uint256[] calldata _tokenIds, ${mintParcelsInput}[] memory _metadata) external`,
       ],
@@ -54,7 +54,7 @@ export async function upgrade() {
     "initVars",
     [
       hardcodedAlchemicasTotals,
-      "0x0000000000000000000000000000000000000000",
+      "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
       "0x0000000000000000000000000000000000000000",
       "0x0000000000000000000000000000000000000000",
     ]

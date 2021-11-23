@@ -11,13 +11,15 @@ import "@chainlink/contracts/src/v0.8/dev/VRFConsumerBaseV2.sol";
 contract SurveyingFacet is Modifiers {
   event SurveyParcel(uint256 _tokenId, uint256[] _alchemicas);
 
-  function startSurveying(uint256 _tokenId, uint8 _surveyingRound) external {
+  function startSurveying(uint256 _tokenId, uint256 _surveyingRound) external {
     require(s.parcels[_tokenId].owner == msg.sender, "RealmFacet: Not owner");
-    require(!s.parcels[_tokenId].roundsClaimed[_surveyingRound], "RealmFacet: Round already claimed");
+    require(_surveyingRound <= s.surveyingRound, "RealmFacet: Round not released");
+    require(_surveyingRound == s.parcels[_tokenId].roundsClaimed, "RealmFacet: Wrong round");
+    s.parcels[_tokenId].roundsClaimed++;
     drawRandomNumbers(_tokenId, _surveyingRound);
   }
 
-  function drawRandomNumbers(uint256 _tokenId, uint8 _surveyingRound) internal {
+  function drawRandomNumbers(uint256 _tokenId, uint256 _surveyingRound) internal {
     // Will revert if subscription is not set and funded.
     uint256 requestId = VRFCoordinatorV2Interface(s.vrfCoordinator).requestRandomWords(
       s.requestConfig.keyHash,
@@ -59,8 +61,8 @@ contract SurveyingFacet is Modifiers {
     emit SurveyParcel(_tokenId, alchemicas);
   }
 
-  function setSurveyingRound(uint8 _surveyingRound) external onlyOwner {
-    s.surveyingRound = _surveyingRound;
+  function progressSurveyingRound() external onlyOwner {
+    s.surveyingRound++;
   }
 
   function setConfig(RequestConfig calldata _requestConfig) external onlyOwner {
@@ -105,14 +107,16 @@ contract SurveyingFacet is Modifiers {
   }
 
   // Assumes this contract owns link
-  function topUpSubscription(uint256 amount) external onlyOwner {
+  function topUpSubscription(uint256 amount) external {
     LinkTokenInterface(s.linkAddress).transferAndCall(s.vrfCoordinator, amount, abi.encode(s.requestConfig.subId));
   }
 
   // testing funcs
-  function testingStartSurveying(uint256 _tokenId, uint8 _surveyingRound) external {
+  function testingStartSurveying(uint256 _tokenId, uint256 _surveyingRound) external {
     require(s.parcels[_tokenId].owner == msg.sender, "RealmFacet: Not owner");
-    require(!s.parcels[_tokenId].roundsClaimed[_surveyingRound], "RealmFacet: Round already claimed");
+    require(_surveyingRound <= s.surveyingRound, "RealmFacet: Round not released");
+    require(_surveyingRound == s.parcels[_tokenId].roundsClaimed, "RealmFacet: Wrong round");
+    s.parcels[_tokenId].roundsClaimed++;
     uint256[] memory alchemicas = new uint256[](4);
     for (uint256 i; i < 4; i++) {
       alchemicas[i] = uint256(keccak256(abi.encodePacked(block.number, msg.sender, i)));

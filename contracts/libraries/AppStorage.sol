@@ -29,8 +29,8 @@ struct Parcel {
   uint256[64][64] tileGrid; //x, then y array of positions - for tiles under the installations (floor)
   uint256[4] alchemicaBoost; //fud, fomo, alpha, kek
   uint256[4] alchemicaRemaining; //fud, fomo, alpha, kek
-  bool[10] roundsClaimed;
-  uint256[4] alchemicaCapacity;
+  uint256 roundsClaimed;
+  uint256[4] reservoirCapacity;
   uint256[4] alchemicaHarvestRate;
   uint256[4] timeSinceLastClaim;
   uint256[4] unclaimedAlchemica;
@@ -53,14 +53,14 @@ struct AppStorage {
   mapping(uint256 => address) approved;
   address aavegotchiDiamond;
   address installationContract;
-  uint8 surveyingRound;
+  uint256 surveyingRound;
   uint256[4][5] totalAlchemicas;
   // VRF
   address vrfCoordinator;
   address linkAddress;
   RequestConfig requestConfig;
   mapping(uint256 => uint256) vrfRequestIdToTokenId;
-  mapping(uint256 => uint8) vrfRequestIdToSurveyingRound;
+  mapping(uint256 => uint256) vrfRequestIdToSurveyingRound;
 }
 
 library LibAppStorage {
