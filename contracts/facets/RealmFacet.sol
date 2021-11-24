@@ -24,6 +24,8 @@ contract RealmFacet is Modifiers {
   }
 
   event ResyncParcel(uint256 _tokenId);
+  event EquipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y);
+  event UnequipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y);
 
   function maxSupply() external pure returns (uint256) {
     return MAX_SUPPLY;
@@ -62,6 +64,7 @@ contract RealmFacet is Modifiers {
   ) external onlyParcelOwner(_realmId) {
     LibRealm.placeInstallation(_realmId, _installationId, _x, _y);
     InstallationDiamond(s.installationsDiamond).equipInstallation(msg.sender, _realmId, _installationId);
+    emit EquipInstallation(_realmId, _installationId, _x, _y);
   }
 
   function unequipInstallation(
@@ -81,6 +84,7 @@ contract RealmFacet is Modifiers {
     //   greatPortal.transferFrom(s.greatPortalDiamond, msg.sender, alchemicaRefund);
     // }
     InstallationDiamond(s.installationsDiamond).unequipInstallation(_realmId, _installationId);
+    emit UnequipInstallation(_realmId, _installationId, _x, _y);
   }
 
   struct ParcelOutput {
