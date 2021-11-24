@@ -77,7 +77,8 @@ contract SurveyingFacet is Modifiers {
 
   function initVars(
     uint256[4][5] calldata _alchemicas,
-    address _installationContract,
+    address _installationsDiamond,
+    address _greatPortalDiamond,
     address _vrfCoordinator,
     address _linkAddress
   ) external onlyOwner {
@@ -86,7 +87,8 @@ contract SurveyingFacet is Modifiers {
         s.totalAlchemicas[i][j] = _alchemicas[i][j];
       }
     }
-    s.installationContract = _installationContract;
+    s.installationsDiamond = _installationsDiamond;
+    s.greatPortalDiamond = _greatPortalDiamond;
     s.vrfCoordinator = _vrfCoordinator;
     s.linkAddress = _linkAddress;
   }

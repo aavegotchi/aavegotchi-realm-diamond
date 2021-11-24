@@ -25,7 +25,7 @@ export async function upgrade() {
         "function rawFulfillRandomWords(uint256 requestId, uint256[] memory randomWords) external",
         "function progressSurveyingRound() external",
         `function setConfig(${requestConfig} _requestConfig) external`,
-        "function initVars(uint256[4][5] _alchemicas, address _installationContract, address _vrfCoordinator, address _linkAddress) external",
+        "function initVars(uint256[4][5] _alchemicas, address _installationsDiamond, address _greatPortalDiamond, address _vrfCoordinator, address _linkAddress) external",
         "function getTotalAlchemicas() external view returns (uint256[4][5] memory)",
         "function subscribe() external",
         "function topUpSubscription(uint256 amount) external",

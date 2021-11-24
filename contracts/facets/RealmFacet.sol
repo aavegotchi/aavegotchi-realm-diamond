@@ -8,6 +8,7 @@ import "../libraries/LibMeta.sol";
 import "../libraries/LibERC721.sol";
 import "../libraries/LibRealm.sol";
 import {InstallationDiamond} from "../interfaces/InstallationDiamond.sol";
+import {IERC20} from "../interfaces/IERC20.sol";
 
 contract RealmFacet is Modifiers {
   uint256 constant MAX_SUPPLY = 420069;
@@ -60,7 +61,7 @@ contract RealmFacet is Modifiers {
     uint256 _y
   ) external onlyParcelOwner(_realmId) {
     LibRealm.placeInstallation(_realmId, _installationId, _x, _y);
-    InstallationDiamond(s.installationContract).equipInstallation(msg.sender, _realmId, _installationId);
+    InstallationDiamond(s.installationsDiamond).equipInstallation(msg.sender, _realmId, _installationId);
   }
 
   function unequipInstallation(
@@ -71,7 +72,15 @@ contract RealmFacet is Modifiers {
   ) external onlyParcelOwner(_realmId) {
     LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
     // refund 50% alchemica from great portal
-    InstallationDiamond(s.installationContract).unequipInstallation(_realmId, _installationId);
+    // comment it out for testing
+    // InstallationDiamond installationsDiamond = InstallationDiamond(s.installationsDiamond);
+    // InstallationDiamond.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
+    // IERC20 greatPortal = IERC20(s.greatPortalDiamond);
+    // for (uint8 i; i < installation.alchemicaCost.length; i++) {
+    //   uint256 alchemicaRefund = installation.alchemicaCost[i] / 2;
+    //   greatPortal.transferFrom(s.greatPortalDiamond, msg.sender, alchemicaRefund);
+    // }
+    InstallationDiamond(s.installationsDiamond).unequipInstallation(_realmId, _installationId);
   }
 
   struct ParcelOutput {

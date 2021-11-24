@@ -148,4 +148,37 @@ describe("Testing Equip Installation", async function () {
       realmFacet.equipInstallation(2893, 1, 18, 18)
     ).to.be.revertedWith("LibItems: Doesn't have that many to transfer");
   });
+  it("Unequip installaton", async function() {
+    await installationDiamond.craftInstallations([1]);
+    for (let i = 0; i < 11000; i++) {
+      ethers.provider.send("evm_mine", []);
+    }
+    await installationDiamond.claimInstallations([3]);
+   await expect(
+      realmFacet.equipInstallation(2893, 1, 1, 1)
+    ).to.be.revertedWith("LibRealm: Invalid spot");
+    await expect(
+      realmFacet.equipInstallation(2893, 1, 2, 1)
+    ).to.be.revertedWith("LibRealm: Invalid spot");
+    await expect(
+      realmFacet.equipInstallation(2893, 1, 2, 2)
+    ).to.be.revertedWith("LibRealm: Invalid spot");
+    await expect(
+      realmFacet.equipInstallation(2893, 1, 3, 3)
+    ).to.be.revertedWith("LibRealm: Invalid spot");
+    await realmFacet.unequipInstallation(2893, 1, 2, 2)
+    await realmFacet.equipInstallation(2893, 1, 2, 2)
+    await expect(
+      realmFacet.equipInstallation(2893, 1, 1, 1)
+    ).to.be.revertedWith("LibRealm: Invalid spot");
+    await expect(
+      realmFacet.equipInstallation(2893, 1, 2, 1)
+    ).to.be.revertedWith("LibRealm: Invalid spot");
+    await expect(
+      realmFacet.equipInstallation(2893, 1, 2, 2)
+    ).to.be.revertedWith("LibRealm: Invalid spot");
+    await expect(
+      realmFacet.equipInstallation(2893, 1, 3, 3)
+    ).to.be.revertedWith("LibRealm: Invalid spot");
+  })
 });

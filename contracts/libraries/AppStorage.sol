@@ -52,7 +52,8 @@ struct AppStorage {
   mapping(address => mapping(address => bool)) operators;
   mapping(uint256 => address) approved;
   address aavegotchiDiamond;
-  address installationContract;
+  address installationsDiamond;
+  address greatPortalDiamond;
   uint256 surveyingRound;
   uint256[4][5] totalAlchemicas;
   // VRF

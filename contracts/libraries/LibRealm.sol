@@ -4,6 +4,8 @@ pragma solidity 0.8.9;
 import {InstallationDiamond} from "../interfaces/InstallationDiamond.sol";
 import {LibAppStorage, AppStorage, Parcel} from "./AppStorage.sol";
 
+import "hardhat/console.sol";
+
 library LibRealm {
   //Place installation
   function placeInstallation(
@@ -29,8 +31,8 @@ library LibRealm {
       64 //partner
     ];
 
-    InstallationDiamond installationContract = InstallationDiamond(s.installationContract);
-    InstallationDiamond.InstallationType memory installation = installationContract.getInstallationType(_installationId);
+    InstallationDiamond installationsDiamond = InstallationDiamond(s.installationsDiamond);
+    InstallationDiamond.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
 
     uint16 alchemicaType = installation.alchemicaType;
     Parcel storage parcel = s.parcels[_realmId];
@@ -59,8 +61,14 @@ library LibRealm {
     uint256 _y
   ) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
+    InstallationDiamond installationsDiamond = InstallationDiamond(s.installationsDiamond);
+    InstallationDiamond.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
     Parcel storage parcel = s.parcels[_realmId];
     require(parcel.buildGrid[_x][_y] == _installationId, "LibRealm: wrong installationId");
-    //todo update grid
+    for (uint256 indexW = _x; indexW < _x + installation.width; indexW++) {
+      for (uint256 indexH = _y; indexH < _y + installation.height; indexH++) {
+        parcel.buildGrid[indexW][indexH] = 0;
+      }
+    }
   }
 }
