@@ -4,9 +4,9 @@ pragma solidity 0.8.9;
 import {InstallationDiamond} from "../interfaces/InstallationDiamond.sol";
 import {LibAppStorage, AppStorage, Parcel} from "./AppStorage.sol";
 
-import "hardhat/console.sol";
-
 library LibRealm {
+  event SurveyParcel(uint256 _tokenId, uint256[] _alchemicas);
+
   //Place installation
   function placeInstallation(
     uint256 _realmId,
@@ -70,5 +70,26 @@ library LibRealm {
         parcel.buildGrid[indexW][indexH] = 0;
       }
     }
+  }
+
+  function updateRemainingAlchemicaFirstRound(uint256 _tokenId, uint256[] memory randomWords) internal {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+    uint256[] memory alchemicas = new uint256[](4);
+    for (uint8 i; i < 4; i++) {
+      s.parcels[_tokenId].alchemicaRemaining[i] = (randomWords[i] % s.totalAlchemicas[s.parcels[_tokenId].size][i]) / 5;
+      alchemicas[i] = (randomWords[i] % s.totalAlchemicas[s.parcels[_tokenId].size][i]) / 5;
+    }
+    emit SurveyParcel(_tokenId, alchemicas);
+  }
+
+  // TODO update formula to match 80% of remaning supply divided in 9 rounds
+  function updateRemainingAlchemica(uint256 _tokenId, uint256[] memory randomWords) internal {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+    uint256[] memory alchemicas = new uint256[](4);
+    for (uint8 i; i < 4; i++) {
+      s.parcels[_tokenId].alchemicaRemaining[i] = (randomWords[i] % s.totalAlchemicas[s.parcels[_tokenId].size][i]) / 5;
+      alchemicas[i] = (randomWords[i] % s.totalAlchemicas[s.parcels[_tokenId].size][i]) / 5;
+    }
+    emit SurveyParcel(_tokenId, alchemicas);
   }
 }

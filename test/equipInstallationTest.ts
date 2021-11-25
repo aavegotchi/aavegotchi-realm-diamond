@@ -9,8 +9,6 @@ describe("Testing Equip Installation", async function () {
   const installationsAddress = "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5";
   const installationsOwner = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
 
-  let accounts;
-  let ownerAddress;
   let realmFacet: RealmFacet;
   let installationDiamond: InstallationDiamond;
   let ghst: IERC20;
@@ -18,8 +16,6 @@ describe("Testing Equip Installation", async function () {
   before(async function () {
     this.timeout(20000000);
     await upgrade();
-    accounts = await ethers.getSigners();
-    ownerAddress = accounts[0].address;
 
     realmFacet = (await ethers.getContractAt(
       "RealmFacet",

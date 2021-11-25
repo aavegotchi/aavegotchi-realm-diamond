@@ -4,8 +4,8 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../tasks/deployUpgrade";
-import { SurveyingFacet__factory } from "../../typechain";
-import { SurveyingFacetInterface } from "../../typechain/SurveyingFacet";
+import { AlchemicaFacet__factory } from "../../typechain";
+import { AlchemicaFacetInterface } from "../../typechain/AlchemicaFacet";
 import { maticDiamondAddress } from "../helperFunctions";
 
 export async function upgrade() {
@@ -19,19 +19,25 @@ export async function upgrade() {
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "SurveyingFacet",
+      facetName: "AlchemicaFacet",
       addSelectors: [
         "function startSurveying(uint256 _tokenId, uint256 _surveyingRound) external",
-        "function rawFulfillRandomWords(uint256 requestId, uint256[] memory randomWords) external",
         "function progressSurveyingRound() external",
-        `function setConfig(${requestConfig} _requestConfig) external`,
-        "function initVars(uint256[4][5] _alchemicas, address _installationsDiamond, address _greatPortalDiamond, address _vrfCoordinator, address _linkAddress) external",
+        "function setVars(uint256[4][5] _alchemicas, address _installationsDiamond, address _greatPortalDiamond, address _vrfCoordinator, address _linkAddress) external",
         "function getTotalAlchemicas() external view returns (uint256[4][5] memory)",
-        "function subscribe() external",
-        "function topUpSubscription(uint256 amount) external",
         "function testingStartSurveying(uint256 _tokenId, uint256 _surveyingRound) external",
         "function getRealmAlchemica(uint256 _tokenId) external view returns (uint256[4] memory)",
         `function testingMintParcel(address _to, uint256[] calldata _tokenIds, ${mintParcelsInput}[] memory _metadata) external`,
+      ],
+      removeSelectors: [],
+    },
+    {
+      facetName: "VRFFacet",
+      addSelectors: [
+        "function rawFulfillRandomWords(uint256 requestId, uint256[] memory randomWords) external",
+        `function setConfig(${requestConfig} _requestConfig) external`,
+        "function subscribe() external",
+        "function topUpSubscription(uint256 amount) external",
       ],
       removeSelectors: [],
     },
@@ -45,9 +51,9 @@ export async function upgrade() {
     },
   ];
 
-  let iface: SurveyingFacetInterface = new ethers.utils.Interface(
-    SurveyingFacet__factory.abi
-  ) as SurveyingFacetInterface;
+  let iface: AlchemicaFacetInterface = new ethers.utils.Interface(
+    AlchemicaFacet__factory.abi
+  ) as AlchemicaFacetInterface;
 
   const hardcodedAlchemicasTotals = [
     [14154, 7076, 3538, 1414],
@@ -59,7 +65,7 @@ export async function upgrade() {
 
   const calldata = iface.encodeFunctionData(
     //@ts-ignore
-    "initVars",
+    "setVars",
     [
       hardcodedAlchemicasTotals,
       "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
