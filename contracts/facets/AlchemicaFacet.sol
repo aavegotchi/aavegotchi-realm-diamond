@@ -95,4 +95,93 @@ contract AlchemicaFacet is Modifiers {
       LibERC721.safeMint(_to, tokenId);
     }
   }
+
+  //Parcel starts out with 0 harvest rate
+  //Player equips harvester, harvest rate begins increasing
+  //Available alchemica will always be 0 if reservoir has not been added
+  //Once player has equipped a reservoir, the harvested amount will increase until it has reached the capacity.
+  //When a player claims the alchemica, the timeSinceLastUpdate is reset to 0, which means the harvested amount is also set back to zero. This prevents the reservoir from immediately refilling after a claim.
+
+  function alchemicaSinceLastUpdate(uint256 _tokenId, uint256 _alchemicaType) internal view returns (uint256) {
+    return s.parcels[_tokenId].alchemicaHarvestRate[_alchemicaType] * s.parcels[_tokenId].timeSinceLastUpdate[_alchemicaType];
+  }
+
+  function settleUnclaimedAlchemica(uint256 _tokenId, uint256 _alchemicaType) internal {
+    s.parcels[_tokenId].unclaimedAlchemica[_alchemicaType] += alchemicaSinceLastUpdate(_tokenId, _alchemicaType);
+    s.parcels[_tokenId].timeSinceLastUpdate[_alchemicaType] = 0;
+  }
+
+  function getAvailableAlchemica(uint256 _tokenId) public view returns (uint256[4] memory _availableAlchemica) {
+    //Calculate the # of blocks elapsed since the last
+
+    for (uint256 index = 0; index < 4; index++) {
+      //First get the onchain amount
+      uint256 available = s.parcels[_tokenId].unclaimedAlchemica[index];
+
+      //Then get the floating amount
+      available += alchemicaSinceLastUpdate(_tokenId, index);
+
+      uint256 capacity = s.parcels[_tokenId].reservoirCapacity[index];
+
+      //@todo: ensure that available alchemica is not higher than available reservoir capacity
+      if (available > capacity) _availableAlchemica[index] = capacity;
+      else _availableAlchemica[index] = available;
+    }
+  }
+
+  function claimAvailableAlchemica(uint256 _tokenId, uint256 _alchemicaType) external {
+    uint256 available = getAvailableAlchemica(_tokenId)[_alchemicaType];
+
+    uint256 remaining = s.parcels[_tokenId].alchemicaRemaining[_alchemicaType];
+
+    require(remaining >= available, "AlchemicaFacet: Not enough alchemica available");
+
+    s.parcels[_tokenId].alchemicaRemaining[_alchemicaType] -= available;
+
+    s.parcels[_tokenId].timeSinceLastUpdate[_alchemicaType] = 0;
+  }
+
+  function increaseTraits(uint256 _realmId, uint256 _installationId) internal {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+
+    //todo: First save the current harvested amount
+
+    InstallationDiamond.InstallationType memory installationType = InstallationDiamond(s.installationsDiamond).getInstallationType(_installationId);
+
+    uint256 alchemicaType = installationType.alchemicaType;
+
+    //handle harvester
+    if (installationType.harvestRate > 0) {
+      settleUnclaimedAlchemica(_realmId, alchemicaType);
+
+      s.parcels[_realmId].alchemicaHarvestRate[installationType.alchemicaType] += installationType.harvestRate;
+    }
+
+    //handle reservoir
+    if (installationType.capacity > 0) {
+      s.parcels[_realmId].reservoirCapacity[installationType.alchemicaType] += installationType.capacity;
+    }
+  }
+
+  function reduceTraits(uint256 _realmId, uint256 _installationId) internal {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+
+    InstallationDiamond.InstallationType memory installationType = InstallationDiamond(s.installationsDiamond).getInstallationType(_installationId);
+
+    uint256 alchemicaType = installationType.alchemicaType;
+
+    if (installationType.harvestRate > 0) {
+      settleUnclaimedAlchemica(_realmId, alchemicaType);
+      s.parcels[_realmId].alchemicaHarvestRate[installationType.alchemicaType] -= installationType.harvestRate;
+    }
+
+    if (installationType.capacity > 0) {
+      //@todo: handle the case where a user has more harvested than reservoir capacity after the update
+
+      //todo: solution 1: revert until user has claimed
+      //todo: solution 2: claim for user and then unequip
+
+      s.parcels[_realmId].reservoirCapacity[installationType.alchemicaType] -= installationType.capacity;
+    }
+  }
 }

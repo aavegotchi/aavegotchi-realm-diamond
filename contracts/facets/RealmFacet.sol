@@ -64,6 +64,9 @@ contract RealmFacet is Modifiers {
   ) external onlyParcelOwner(_realmId) {
     LibRealm.placeInstallation(_realmId, _installationId, _x, _y);
     InstallationDiamond(s.installationsDiamond).equipInstallation(msg.sender, _realmId, _installationId);
+
+    LibRealm.increaseTraits(_realmId, _installationId);
+
     emit EquipInstallation(_realmId, _installationId, _x, _y);
   }
 
@@ -84,6 +87,9 @@ contract RealmFacet is Modifiers {
     //   greatPortal.transferFrom(s.greatPortalDiamond, msg.sender, alchemicaRefund);
     // }
     InstallationDiamond(s.installationsDiamond).unequipInstallation(_realmId, _installationId);
+
+    LibRealm.reduceTraits(_realmId, _installationId);
+
     emit UnequipInstallation(_realmId, _installationId, _x, _y);
   }
 
