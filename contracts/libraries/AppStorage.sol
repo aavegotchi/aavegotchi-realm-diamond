@@ -56,6 +56,7 @@ struct AppStorage {
   address greatPortalDiamond;
   uint256 surveyingRound;
   uint256[4][5] totalAlchemicas;
+  address[4] alchemicaAddresses;
   // VRF
   address vrfCoordinator;
   address linkAddress;

@@ -7,6 +7,7 @@ import "../libraries/LibStrings.sol";
 import "../libraries/LibMeta.sol";
 import "../libraries/LibERC721.sol";
 import "../libraries/LibRealm.sol";
+import "../libraries/LibAlchemica.sol";
 import {InstallationDiamond} from "../interfaces/InstallationDiamond.sol";
 import {IERC20} from "../interfaces/IERC20.sol";
 
@@ -65,7 +66,7 @@ contract RealmFacet is Modifiers {
     LibRealm.placeInstallation(_realmId, _installationId, _x, _y);
     InstallationDiamond(s.installationsDiamond).equipInstallation(msg.sender, _realmId, _installationId);
 
-    LibRealm.increaseTraits(_realmId, _installationId);
+    LibAlchemica.increaseTraits(_realmId, _installationId);
 
     emit EquipInstallation(_realmId, _installationId, _x, _y);
   }
@@ -88,7 +89,7 @@ contract RealmFacet is Modifiers {
     // }
     InstallationDiamond(s.installationsDiamond).unequipInstallation(_realmId, _installationId);
 
-    LibRealm.reduceTraits(_realmId, _installationId);
+    LibAlchemica.reduceTraits(_realmId, _installationId);
 
     emit UnequipInstallation(_realmId, _installationId, _x, _y);
   }

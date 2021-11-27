@@ -5,8 +5,15 @@ import "../libraries/AppStorage.sol";
 import "./RealmFacet.sol";
 import "../libraries/LibRealm.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
+import "../libraries/LibAlchemica.sol";
+import "../interfaces/IERC20.sol";
+import "../interfaces/AavegotchiDiamond.sol";
 
 contract AlchemicaFacet is Modifiers {
+  function setAlchemicaAddresses(address[4] calldata _addresses) external onlyOwner {
+    s.alchemicaAddresses = _addresses;
+  }
+
   function startSurveying(uint256 _tokenId, uint256 _surveyingRound) external {
     require(s.parcels[_tokenId].owner == msg.sender, "RealmFacet: Not owner");
     require(_surveyingRound <= s.surveyingRound, "RealmFacet: Round not released");
@@ -45,7 +52,8 @@ contract AlchemicaFacet is Modifiers {
     address _installationsDiamond,
     address _greatPortalDiamond,
     address _vrfCoordinator,
-    address _linkAddress
+    address _linkAddress,
+    address[4] calldata _alchemicaAddresses
   ) external onlyOwner {
     for (uint8 i; i < _alchemicas.length; i++) {
       for (uint256 j; j < _alchemicas[i].length; j++) {
@@ -56,6 +64,7 @@ contract AlchemicaFacet is Modifiers {
     s.greatPortalDiamond = _greatPortalDiamond;
     s.vrfCoordinator = _vrfCoordinator;
     s.linkAddress = _linkAddress;
+    s.alchemicaAddresses = _alchemicaAddresses;
   }
 
   // testing funcs
@@ -96,29 +105,6 @@ contract AlchemicaFacet is Modifiers {
     }
   }
 
-  //Parcel starts out with 0 harvest rate
-  //Player equips harvester, harvest rate begins increasing
-  //Available alchemica will always be 0 if reservoir has not been added
-  //Once player has equipped a reservoir, the harvested amount will increase until it has reached the capacity.
-  //When a player claims the alchemica, the timeSinceLastUpdate is reset to 0, which means the harvested amount is also set back to zero. This prevents the reservoir from immediately refilling after a claim.
-
-  function alchemicaSinceLastUpdate(uint256 _tokenId, uint256 _alchemicaType) internal view returns (uint256) {
-    return s.parcels[_tokenId].alchemicaHarvestRate[_alchemicaType] * s.parcels[_tokenId].timeSinceLastUpdate[_alchemicaType];
-  }
-
-  function settleUnclaimedAlchemica(uint256 _tokenId, uint256 _alchemicaType) internal {
-    //todo: check capacity
-    uint256 capacity = s.parcels[_tokenId].reservoirCapacity[_alchemicaType];
-
-    if (alchemicaSinceLastUpdate > capacity) {
-      s.parcels[_tokenId].unclaimedAlchemica[_alchemicaType] = capacity;
-    } else {
-      s.parcels[_tokenId].unclaimedAlchemica[_alchemicaType] += alchemicaSinceLastUpdate(_tokenId, _alchemicaType);
-    }
-
-    s.parcels[_tokenId].timeSinceLastUpdate[_alchemicaType] = 0;
-  }
-
   function getAvailableAlchemica(uint256 _tokenId) public view returns (uint256[4] memory _availableAlchemica) {
     //Calculate the # of blocks elapsed since the last
 
@@ -127,17 +113,27 @@ contract AlchemicaFacet is Modifiers {
       uint256 available = s.parcels[_tokenId].unclaimedAlchemica[index];
 
       //Then get the floating amount
-      available += alchemicaSinceLastUpdate(_tokenId, index);
+      available += LibAlchemica.alchemicaSinceLastUpdate(_tokenId, index);
 
       uint256 capacity = s.parcels[_tokenId].reservoirCapacity[index];
 
-      //@todo: ensure that available alchemica is not higher than available reservoir capacity
+      //ensure that available alchemica is not higher than available reservoir capacity
       if (available > capacity) _availableAlchemica[index] = capacity;
       else _availableAlchemica[index] = available;
     }
   }
 
-  function claimAvailableAlchemica(uint256 _tokenId, uint256 _alchemicaType) external {
+  function claimAvailableAlchemica(
+    uint256 _tokenId,
+    uint256 _alchemicaType,
+    uint256 _gotchiId
+  ) external onlyParcelOwner(_tokenId) {
+    //@todo: enforce the gotchiId via a positional hash
+    //@todo: allow claimOperator
+
+    AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
+    require(diamond.ownerOf(_gotchiId) == msg.sender, "AlchemicaFacet: No permission to claim");
+
     uint256 available = getAvailableAlchemica(_tokenId)[_alchemicaType];
 
     uint256 remaining = s.parcels[_tokenId].alchemicaRemaining[_alchemicaType];
@@ -147,52 +143,15 @@ contract AlchemicaFacet is Modifiers {
     s.parcels[_tokenId].alchemicaRemaining[_alchemicaType] -= available;
 
     s.parcels[_tokenId].timeSinceLastUpdate[_alchemicaType] = 0;
-  }
 
-  function increaseTraits(uint256 _realmId, uint256 _installationId) internal {
-    AppStorage storage s = LibAppStorage.diamondStorage();
+    //@todo: mint new tokens
+    //@todo: transfer tokens based on reservoir level:
+    //@todo: get the spillover rate + spillover radius for the reservoir on this parcel
+    //@question: if player has multiple reservoirs equipped, how should we handle the spillover?
 
-    //todo: First save the current harvested amount
+    IERC20 alchemica = IERC20(s.alchemicaAddresses[_alchemicaType]);
 
-    InstallationDiamond.InstallationType memory installationType = InstallationDiamond(s.installationsDiamond).getInstallationType(_installationId);
-
-    uint256 alchemicaType = installationType.alchemicaType;
-
-    //unclaimed alchemica must be settled before mutating harvestRate and capacity
-    settleUnclaimedAlchemica(_realmId, alchemicaType);
-
-    //handle harvester
-    if (installationType.harvestRate > 0) {
-      s.parcels[_realmId].alchemicaHarvestRate[installationType.alchemicaType] += installationType.harvestRate;
-    }
-
-    //reservoir
-    if (installationType.capacity > 0) {
-      s.parcels[_realmId].reservoirCapacity[installationType.alchemicaType] += installationType.capacity;
-    }
-  }
-
-  function reduceTraits(uint256 _realmId, uint256 _installationId) internal {
-    AppStorage storage s = LibAppStorage.diamondStorage();
-
-    InstallationDiamond.InstallationType memory installationType = InstallationDiamond(s.installationsDiamond).getInstallationType(_installationId);
-
-    uint256 alchemicaType = installationType.alchemicaType;
-
-    //unclaimed alchemica must be settled before mutating harvestRate and capacity
-    settleUnclaimedAlchemica(_realmId, alchemicaType);
-
-    if (installationType.harvestRate > 0) {
-      s.parcels[_realmId].alchemicaHarvestRate[installationType.alchemicaType] -= installationType.harvestRate;
-    }
-
-    if (installationType.capacity > 0) {
-      //@todo: handle the case where a user has more harvested than reservoir capacity after the update
-
-      //todo: solution 1: revert until user has claimed
-      //todo: solution 2: claim for user and then unequip
-
-      s.parcels[_realmId].reservoirCapacity[installationType.alchemicaType] -= installationType.capacity;
-    }
+    //@todo: add in percentages
+    alchemica.transferFrom(address(this), msg.sender, available);
   }
 }
