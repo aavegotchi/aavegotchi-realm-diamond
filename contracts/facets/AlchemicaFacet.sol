@@ -107,7 +107,15 @@ contract AlchemicaFacet is Modifiers {
   }
 
   function settleUnclaimedAlchemica(uint256 _tokenId, uint256 _alchemicaType) internal {
-    s.parcels[_tokenId].unclaimedAlchemica[_alchemicaType] += alchemicaSinceLastUpdate(_tokenId, _alchemicaType);
+    //todo: check capacity
+    uint256 capacity = s.parcels[_tokenId].reservoirCapacity[_alchemicaType];
+
+    if (alchemicaSinceLastUpdate > capacity) {
+      s.parcels[_tokenId].unclaimedAlchemica[_alchemicaType] = capacity;
+    } else {
+      s.parcels[_tokenId].unclaimedAlchemica[_alchemicaType] += alchemicaSinceLastUpdate(_tokenId, _alchemicaType);
+    }
+
     s.parcels[_tokenId].timeSinceLastUpdate[_alchemicaType] = 0;
   }
 
@@ -150,14 +158,15 @@ contract AlchemicaFacet is Modifiers {
 
     uint256 alchemicaType = installationType.alchemicaType;
 
+    //unclaimed alchemica must be settled before mutating harvestRate and capacity
+    settleUnclaimedAlchemica(_realmId, alchemicaType);
+
     //handle harvester
     if (installationType.harvestRate > 0) {
-      settleUnclaimedAlchemica(_realmId, alchemicaType);
-
       s.parcels[_realmId].alchemicaHarvestRate[installationType.alchemicaType] += installationType.harvestRate;
     }
 
-    //handle reservoir
+    //reservoir
     if (installationType.capacity > 0) {
       s.parcels[_realmId].reservoirCapacity[installationType.alchemicaType] += installationType.capacity;
     }
@@ -170,8 +179,10 @@ contract AlchemicaFacet is Modifiers {
 
     uint256 alchemicaType = installationType.alchemicaType;
 
+    //unclaimed alchemica must be settled before mutating harvestRate and capacity
+    settleUnclaimedAlchemica(_realmId, alchemicaType);
+
     if (installationType.harvestRate > 0) {
-      settleUnclaimedAlchemica(_realmId, alchemicaType);
       s.parcels[_realmId].alchemicaHarvestRate[installationType.alchemicaType] -= installationType.harvestRate;
     }
 
