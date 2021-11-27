@@ -10,6 +10,8 @@ import "../interfaces/IERC20.sol";
 import "../interfaces/AavegotchiDiamond.sol";
 
 contract AlchemicaFacet is Modifiers {
+  event AlchemicaClaimed(uint256 indexed _tokenId, uint256 indexed _gotchiId, uint256 indexed _alchemicaType, uint256 _amount);
+
   function setAlchemicaAddresses(address[4] calldata _addresses) external onlyOwner {
     s.alchemicaAddresses = _addresses;
   }
@@ -151,7 +153,12 @@ contract AlchemicaFacet is Modifiers {
 
     IERC20 alchemica = IERC20(s.alchemicaAddresses[_alchemicaType]);
 
-    //@todo: add in percentages
+    //@todo: add in spillover percentages
+
+    //@todo: add in escrow() function in AavegotchiDiamond to prevent calling expensive aavegotchiInfo function
+
     alchemica.transferFrom(address(this), msg.sender, available);
+
+    emit AlchemicaClaimed(_tokenId, _gotchiId, _alchemicaType, available);
   }
 }
