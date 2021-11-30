@@ -3,6 +3,7 @@ import "@typechain/hardhat";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
 import "hardhat-contract-sizer";
+import "@nomiclabs/hardhat-etherscan";
 import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname + "/.env" });
 require("./tasks/generateDiamondABI.js");
@@ -16,6 +17,9 @@ require("./tasks/mintParcels.ts");
 module.exports = {
   mocha: {
     timeout: 2000000,
+  },
+  etherscan: {
+    apiKey: process.env.POLYGON_API_KEY,
   },
   networks: {
     hardhat: {
