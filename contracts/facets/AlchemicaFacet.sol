@@ -10,7 +10,14 @@ import "../interfaces/IERC20.sol";
 import "../interfaces/AavegotchiDiamond.sol";
 
 contract AlchemicaFacet is Modifiers {
-  event AlchemicaClaimed(uint256 indexed _tokenId, uint256 indexed _gotchiId, uint256 indexed _alchemicaType, uint256 _amount);
+  event AlchemicaClaimed(
+    uint256 indexed _parcelId,
+    uint256 indexed _gotchiId,
+    uint256 indexed _alchemicaType,
+    uint256 _amount,
+    uint256 _spilloverRate,
+    uint256 _spilloverRadius
+  );
 
   function setAlchemicaAddresses(address[4] calldata _addresses) external onlyOwner {
     s.alchemicaAddresses = _addresses;
@@ -159,6 +166,9 @@ contract AlchemicaFacet is Modifiers {
 
     alchemica.transferFrom(address(this), msg.sender, available);
 
-    emit AlchemicaClaimed(_tokenId, _gotchiId, _alchemicaType, available);
+    uint256 dummySpilloverRate = 80000; //80%
+    uint256 dummySpilloverRadius = 1000; //1000 gotchis
+
+    emit AlchemicaClaimed(_tokenId, _gotchiId, _alchemicaType, available, dummySpilloverRate, dummySpilloverRadius);
   }
 }
