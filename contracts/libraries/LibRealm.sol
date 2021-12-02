@@ -34,14 +34,7 @@ library LibRealm {
     InstallationDiamond installationsDiamond = InstallationDiamond(s.installationsDiamond);
     InstallationDiamond.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
 
-    uint16 alchemicaType = installation.alchemicaType;
     Parcel storage parcel = s.parcels[_realmId];
-
-    if (installation.installationType == 0) {
-      parcel.alchemicaHarvestRate[alchemicaType] += installation.harvestRate;
-    } else if (installation.installationType == 1) {
-      parcel.reservoirCapacity[alchemicaType] += installation.capacity;
-    }
 
     //Check if these slots are available onchain
     require(_x <= widths[parcel.size] - installation.width - 1, "LibRealm: x exceeding width");

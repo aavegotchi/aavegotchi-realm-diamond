@@ -80,13 +80,13 @@ contract RealmFacet is Modifiers {
     LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
     // refund 50% alchemica from great portal
     // comment it out for testing
-    // InstallationDiamond installationsDiamond = InstallationDiamond(s.installationsDiamond);
-    // InstallationDiamond.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
-    // IERC20 greatPortal = IERC20(s.greatPortalDiamond);
-    // for (uint8 i; i < installation.alchemicaCost.length; i++) {
-    //   uint256 alchemicaRefund = installation.alchemicaCost[i] / 2;
-    //   greatPortal.transferFrom(s.greatPortalDiamond, msg.sender, alchemicaRefund);
-    // }
+    InstallationDiamond installationsDiamond = InstallationDiamond(s.installationsDiamond);
+    InstallationDiamond.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
+    IERC20 greatPortal = IERC20(s.greatPortalDiamond);
+    for (uint8 i; i < installation.alchemicaCost.length; i++) {
+      uint256 alchemicaRefund = installation.alchemicaCost[i] / 2;
+      greatPortal.transferFrom(s.greatPortalDiamond, msg.sender, alchemicaRefund);
+    }
     InstallationDiamond(s.installationsDiamond).unequipInstallation(_realmId, _installationId);
 
     LibAlchemica.reduceTraits(_realmId, _installationId);

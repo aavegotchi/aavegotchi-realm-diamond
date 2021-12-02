@@ -23,13 +23,12 @@ library LibAlchemica {
       s.parcels[_tokenId].unclaimedAlchemica[_alchemicaType] += alchemicaSinceLastUpdate(_tokenId, _alchemicaType);
     }
 
-    s.parcels[_tokenId].timeSinceLastUpdate[_alchemicaType] = 0;
+    s.parcels[_tokenId].lastUpdateTimestamp[_alchemicaType] = block.timestamp;
   }
 
   function alchemicaSinceLastUpdate(uint256 _tokenId, uint256 _alchemicaType) internal view returns (uint256) {
     AppStorage storage s = LibAppStorage.diamondStorage();
-
-    return s.parcels[_tokenId].alchemicaHarvestRate[_alchemicaType] * s.parcels[_tokenId].timeSinceLastUpdate[_alchemicaType];
+    return s.parcels[_tokenId].alchemicaHarvestRate[_alchemicaType] * (block.timestamp - s.parcels[_tokenId].lastUpdateTimestamp[_alchemicaType]);
   }
 
   function increaseTraits(uint256 _realmId, uint256 _installationId) internal {

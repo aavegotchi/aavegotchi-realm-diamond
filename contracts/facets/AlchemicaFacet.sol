@@ -8,6 +8,7 @@ import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "../libraries/LibAlchemica.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/AavegotchiDiamond.sol";
+import "../test/AlchemicaToken.sol";
 
 contract AlchemicaFacet is Modifiers {
   event AlchemicaClaimed(uint256 indexed _tokenId, uint256 indexed _gotchiId, uint256 indexed _alchemicaType, uint256 _amount);
@@ -107,6 +108,12 @@ contract AlchemicaFacet is Modifiers {
     }
   }
 
+  function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external {
+    AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[_alchemicaType]);
+    alchemica.mint(_amount);
+    alchemica.transferFrom(address(this), msg.sender, _amount);
+  }
+
   function getAvailableAlchemica(uint256 _tokenId) public view returns (uint256[4] memory _availableAlchemica) {
     //Calculate the # of blocks elapsed since the last
 
@@ -144,7 +151,7 @@ contract AlchemicaFacet is Modifiers {
 
     s.parcels[_tokenId].alchemicaRemaining[_alchemicaType] -= available;
 
-    s.parcels[_tokenId].timeSinceLastUpdate[_alchemicaType] = 0;
+    s.parcels[_tokenId].lastUpdateTimestamp[_alchemicaType] = block.timestamp;
 
     //@todo: mint new tokens
     //@todo: transfer tokens based on reservoir level:

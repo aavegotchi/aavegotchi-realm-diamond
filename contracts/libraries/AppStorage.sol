@@ -32,7 +32,7 @@ struct Parcel {
   uint256 roundsClaimed;
   uint256[4] reservoirCapacity;
   uint256[4] alchemicaHarvestRate;
-  uint256[4] timeSinceLastUpdate;
+  uint256[4] lastUpdateTimestamp;
   uint256[4] unclaimedAlchemica;
 }
 

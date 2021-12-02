@@ -35,8 +35,8 @@ export interface DeployUpgradeTaskArgs {
   facetsAndAddSelectors: string;
   useMultisig: boolean;
   useLedger: boolean;
-  initAddress: string;
-  initCalldata: string;
+  initAddress?: string;
+  initCalldata?: string;
   // verifyFacets: boolean;
   // updateDiamondABI: boolean;
 }
@@ -94,8 +94,8 @@ task(
     "facetsAndAddSelectors",
     "Stringified array of facet names to upgrade, along with an array of add Selectors"
   )
-  .addParam("initAddress", "The facet address to call init function on")
-  .addParam("initCalldata", "The calldata for init function")
+  .addOptionalParam("initAddress", "The facet address to call init function on")
+  .addOptionalParam("initCalldata", "The calldata for init function")
   .addFlag(
     "useMultisig",
     "Set to true if multisig should be used for deploying"
@@ -221,8 +221,8 @@ task(
         console.log("Diamond cut");
         const tx: ContractTransaction = await diamondCut.diamondCut(
           cut,
-          initAddress,
-          initCalldata,
+          initAddress ? initAddress : hre.ethers.constants.AddressZero,
+          initCalldata ? initCalldata : "0x",
           { gasLimit: 8000000 }
         );
         console.log("Diamond cut tx:", tx.hash);
@@ -238,16 +238,16 @@ task(
           const tx: PopulatedTransaction =
             await diamondCut.populateTransaction.diamondCut(
               cut,
-              initAddress,
-              initCalldata,
+              initAddress ? initAddress : hre.ethers.constants.AddressZero,
+              initCalldata ? initCalldata : "0x",
               { gasLimit: 800000 }
             );
           // await sendToMultisig(diamondUpgrader, signer, tx, hre.ethers);
         } else {
           const tx: ContractTransaction = await diamondCut.diamondCut(
             cut,
-            initAddress,
-            initCalldata,
+            initAddress ? initAddress : hre.ethers.constants.AddressZero,
+            initCalldata ? initCalldata : "0x",
             { gasPrice: gasPrice }
           );
 
