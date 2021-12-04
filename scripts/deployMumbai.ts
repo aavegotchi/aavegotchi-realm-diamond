@@ -110,32 +110,29 @@ export async function deployDiamond() {
   }
 
   // deploy alchemicas ERC20
-  const Fud = await ethers.getContractFactory("AlchemicaToken");
-  let fud = (await Fud.deploy(
+  const alchemica = await ethers.getContractFactory("AlchemicaToken");
+  let fud = (await alchemica.deploy(
     "FUD",
     "FUD",
     ethers.utils.parseUnits("1000000000000"),
     diamond.address
   )) as AlchemicaToken;
   console.log("FUD deployed to ", fud.address);
-  const Fomo = await ethers.getContractFactory("AlchemicaToken");
-  let fomo = (await Fomo.deploy(
+  let fomo = (await alchemica.deploy(
     "FOMO",
     "FOMO",
     ethers.utils.parseUnits("250000000000"),
     diamond.address
   )) as AlchemicaToken;
   console.log("FOMO deployed to ", fomo.address);
-  const Alpha = await ethers.getContractFactory("AlchemicaToken");
-  let alpha = (await Alpha.deploy(
+  let alpha = (await alchemica.deploy(
     "ALPHA",
     "ALPHA",
     ethers.utils.parseUnits("125000000000"),
     diamond.address
   )) as AlchemicaToken;
   console.log("ALPHA deployed to ", alpha.address);
-  const Kek = await ethers.getContractFactory("AlchemicaToken");
-  let kek = (await Kek.deploy(
+  let kek = (await alchemica.deploy(
     "KEK",
     "KEK",
     ethers.utils.parseUnits("100000000000"),
@@ -169,13 +166,18 @@ export async function deployDiamond() {
     diamond.address
   )) as AlchemicaFacet;
 
+  //Mumbai-specific
+  const vrfCoordinator = "0xb96A95d11cE0B8E3AEdf332c9Df17fC31D379651";
+  const linkAddress = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB";
+  const installationDiamond = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB";
+
   const initVars = await alchemicaFacet.setVars(
     //@ts-ignore
     hardcodedAlchemicasTotals,
-    "0x1B84ADcD1DC7F2890D6e4889232cc349b3517F92",
+    installationDiamond,
     diamond.address,
-    "0xb96A95d11cE0B8E3AEdf332c9Df17fC31D379651",
-    "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
+    vrfCoordinator,
+    linkAddress,
     [fud.address, fomo.address, alpha.address, kek.address]
   );
 
