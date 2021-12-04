@@ -62,11 +62,7 @@ module.exports = {
       //   timeout: 90000
     },
   },
-  etherscan: {
-    // Your API key for Etherscan
-    // Obtain one at https://etherscan.io/
-    apiKey: process.env.ETHERSCAN,
-  },
+
   gasReporter: {
     currency: "USD",
     gasPrice: 100,

@@ -6,7 +6,6 @@ import "./RealmFacet.sol";
 import "../libraries/LibRealm.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "../libraries/LibAlchemica.sol";
-import "../interfaces/IERC20.sol";
 import "../interfaces/AavegotchiDiamond.sol";
 import "../test/AlchemicaToken.sol";
 
@@ -16,6 +15,14 @@ contract AlchemicaFacet is Modifiers {
     uint256 indexed _gotchiId,
     uint256 indexed _alchemicaType,
     uint256 _amount,
+    uint256 _spilloverRate,
+    uint256 _spilloverRadius
+  );
+
+  event ChannelAlchemica(
+    uint256 indexed _parcelId,
+    uint256 indexed _gotchiId,
+    uint256[4] _alchemica,
     uint256 _spilloverRate,
     uint256 _spilloverRadius
   );
@@ -117,7 +124,7 @@ contract AlchemicaFacet is Modifiers {
 
   function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external {
     AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[_alchemicaType]);
-    alchemica.mint(_amount);
+    alchemica.mint(msg.sender, _amount);
     alchemica.transferFrom(address(this), msg.sender, _amount);
   }
 
@@ -165,17 +172,36 @@ contract AlchemicaFacet is Modifiers {
     //@todo: get the spillover rate + spillover radius for the reservoir on this parcel
     //@question: if player has multiple reservoirs equipped, how should we handle the spillover?
 
-    IERC20 alchemica = IERC20(s.alchemicaAddresses[_alchemicaType]);
+    AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[_alchemicaType]);
 
     //@todo: add in spillover percentages
 
     //@todo: add in escrow() function in AavegotchiDiamond to prevent calling expensive aavegotchiInfo function
 
-    alchemica.transferFrom(address(this), msg.sender, available);
+    uint256 bp = 100000;
 
     uint256 dummySpilloverRate = 80000; //80%
     uint256 dummySpilloverRadius = 1000; //1000 gotchis
 
+    uint256 ownerAmount = (available * (bp - dummySpilloverRate)) / bp;
+    uint256 spillAmount = (available * dummySpilloverRate) / bp;
+
+    alchemica.mint(s.greatPortalDiamond, spillAmount);
+    alchemica.mint(msg.sender, ownerAmount);
+
     emit AlchemicaClaimed(_tokenId, _gotchiId, _alchemicaType, available, dummySpilloverRate, dummySpilloverRadius);
+  }
+
+  function channelAlchemica(uint256 _realmId, uint256 _gotchiId) external {
+    //@todo: Channel alchemica
+
+    //spillover rate and radius depends on altar level
+
+    uint256 dummySpilloverRate = 80000; //80%
+    uint256 dummySpilloverRadius = 1000;
+
+    //@todo: check Great Portal balance to see if tokens should be transferred or minted
+
+    emit ChannelAlchemica(_realmId, _gotchiId, [uint256(0), uint256(0), uint256(0), uint256(0)], dummySpilloverRate, dummySpilloverRadius);
   }
 }

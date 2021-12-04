@@ -18,7 +18,7 @@ contract AlchemicaToken is ERC20Capped, Ownable {
 
   /// @notice Mint _value tokens for msg.sender
   /// @param _value Amount of tokens to mint
-  function mint(uint256 _value) public onlyOwner {
-    _mint(msg.sender, _value);
+  function mint(address _to, uint256 _value) public onlyOwner {
+    _mint(_to, _value);
   }
 }
