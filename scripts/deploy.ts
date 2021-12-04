@@ -1,13 +1,18 @@
 //@ts-ignore
 import { Signer } from "@ethersproject/abstract-signer";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import {
   DiamondCutFacet,
   DiamondInit__factory,
   Diamond__factory,
   OwnershipFacet,
+  AlchemicaFacet,
+  ERC721Facet,
+  RealmFacet,
+  VRFFacet,
+  AlchemicaToken,
 } from "../typechain";
-import { gasPrice } from "./helperFunctions";
+import { gasPrice, impersonate } from "./helperFunctions";
 
 const { getSelectors, FacetCutAction } = require("./libraries/diamond.js");
 
@@ -53,6 +58,8 @@ export async function deployDiamond() {
     "OwnershipFacet",
     "ERC721Facet",
     "RealmFacet",
+    "AlchemicaFacet",
+    "VRFFacet",
   ];
   const cut = [];
   for (const FacetName of FacetNames) {
@@ -61,7 +68,7 @@ export async function deployDiamond() {
       gasPrice: gasPrice,
     });
     await facet.deployed();
-    console.log(`${FacetName} deployed: ${diamondInit.address}`);
+    console.log(`${FacetName} deployed: ${facet.address}`);
     cut.push({
       facetAddress: facet.address,
       action: FacetCutAction.Add,
@@ -101,6 +108,79 @@ export async function deployDiamond() {
       `Diamond owner ${diamondOwner} is not deployer address ${deployerAddress}!`
     );
   }
+
+  // deploy alchemicas ERC20
+  const Fud = await ethers.getContractFactory("AlchemicaToken");
+  let fud = (await Fud.deploy(
+    "FUD",
+    "FUD",
+    ethers.utils.parseUnits("1000000000000"),
+    diamond.address
+  )) as AlchemicaToken;
+  console.log("FUD deployed to ", fud.address);
+  const Fomo = await ethers.getContractFactory("AlchemicaToken");
+  let fomo = (await Fomo.deploy(
+    "FOMO",
+    "FOMO",
+    ethers.utils.parseUnits("250000000000"),
+    diamond.address
+  )) as AlchemicaToken;
+  console.log("FOMO deployed to ", fomo.address);
+  const Alpha = await ethers.getContractFactory("AlchemicaToken");
+  let alpha = (await Alpha.deploy(
+    "ALPHA",
+    "ALPHA",
+    ethers.utils.parseUnits("125000000000"),
+    diamond.address
+  )) as AlchemicaToken;
+  console.log("ALPHA deployed to ", alpha.address);
+  const Kek = await ethers.getContractFactory("AlchemicaToken");
+  let kek = (await Kek.deploy(
+    "KEK",
+    "KEK",
+    ethers.utils.parseUnits("100000000000"),
+    diamond.address
+  )) as AlchemicaToken;
+  console.log("KEK deployed to ", kek.address);
+
+  // await fud.mint(ethers.utils.parseUnits("10000000"));
+  // await fomo.mint(ethers.utils.parseUnits("10000000"));
+  // await alpha.mint(ethers.utils.parseUnits("10000000"));
+  // await kek.mint(ethers.utils.parseUnits("10000000"));
+
+  const hardcodedAlchemicasTotals: any = [
+    [14154, 7076, 3538, 1414],
+    [56618, 28308, 14154, 5660],
+    [452946, 226472, 113236, 45294],
+    [452946, 226472, 113236, 45294],
+    [905894, 452946, 226472, 90588],
+  ];
+
+  for (let i = 0; i < hardcodedAlchemicasTotals.length; i++) {
+    for (let j = 0; j < hardcodedAlchemicasTotals[i].length; j++) {
+      hardcodedAlchemicasTotals[i][j] = ethers.utils.parseUnits(
+        hardcodedAlchemicasTotals[i][j].toString()
+      );
+    }
+  }
+
+  const alchemicaFacet = (await ethers.getContractAt(
+    "AlchemicaFacet",
+    diamond.address
+  )) as AlchemicaFacet;
+
+  const initVars = await alchemicaFacet.setVars(
+    //@ts-ignore
+    hardcodedAlchemicasTotals,
+    "0x1B84ADcD1DC7F2890D6e4889232cc349b3517F92",
+    diamond.address,
+    "0xb96A95d11cE0B8E3AEdf332c9Df17fC31D379651",
+    "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
+    [fud.address, fomo.address, alpha.address, kek.address]
+  );
+
+  const initVarsReceipt = await initVars.wait();
+  console.log("initVarsReceipt", initVarsReceipt);
 
   return diamond.address;
 }

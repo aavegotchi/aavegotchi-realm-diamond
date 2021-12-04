@@ -2,6 +2,7 @@
 import "@typechain/hardhat";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
+import "@nomiclabs/hardhat-etherscan";
 import "hardhat-contract-sizer";
 import "@nomiclabs/hardhat-etherscan";
 import * as dotenv from "dotenv";
@@ -45,6 +46,12 @@ module.exports = {
       gasPrice: 10000000000,
       //   timeout: 90000
     },
+    mumbai: {
+      url: process.env.MUMBAI_URL,
+      accounts: [process.env.SECRET],
+      blockGasLimit: 20000000,
+      gasPrice: 1000000000,
+    },
     kovan: {
       url: process.env.KOVAN_URL,
       // url: 'https://rpc-mainnet.maticvigil.com/',
@@ -54,6 +61,11 @@ module.exports = {
       gasPrice: 100000000000,
       //   timeout: 90000
     },
+  },
+  etherscan: {
+    // Your API key for Etherscan
+    // Obtain one at https://etherscan.io/
+    apiKey: process.env.ETHERSCAN,
   },
   gasReporter: {
     currency: "USD",

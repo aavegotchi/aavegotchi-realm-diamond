@@ -6,7 +6,10 @@ import "../libraries/LibDiamond.sol";
 import "../libraries/LibStrings.sol";
 import "../libraries/LibMeta.sol";
 import "../libraries/LibERC721.sol";
+import "../libraries/LibRealm.sol";
+import "../libraries/LibAlchemica.sol";
 import {InstallationDiamond} from "../interfaces/InstallationDiamond.sol";
+import {IERC20} from "../interfaces/IERC20.sol";
 
 contract RealmFacet is Modifiers {
   uint256 constant MAX_SUPPLY = 420069;
@@ -22,6 +25,8 @@ contract RealmFacet is Modifiers {
   }
 
   event ResyncParcel(uint256 _tokenId);
+  event EquipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y);
+  event UnequipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y);
 
   function maxSupply() external pure returns (uint256) {
     return MAX_SUPPLY;
@@ -50,6 +55,43 @@ contract RealmFacet is Modifiers {
 
       LibERC721.safeMint(_to, tokenId);
     }
+  }
+
+  function equipInstallation(
+    uint256 _realmId,
+    uint256 _installationId,
+    uint256 _x,
+    uint256 _y
+  ) external onlyParcelOwner(_realmId) {
+    LibRealm.placeInstallation(_realmId, _installationId, _x, _y);
+    InstallationDiamond(s.installationsDiamond).equipInstallation(msg.sender, _realmId, _installationId);
+
+    LibAlchemica.increaseTraits(_realmId, _installationId);
+
+    emit EquipInstallation(_realmId, _installationId, _x, _y);
+  }
+
+  function unequipInstallation(
+    uint256 _realmId,
+    uint256 _installationId,
+    uint256 _x,
+    uint256 _y
+  ) external onlyParcelOwner(_realmId) {
+    LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
+    // refund 50% alchemica from great portal
+    // comment it out for testing
+    InstallationDiamond installationsDiamond = InstallationDiamond(s.installationsDiamond);
+    InstallationDiamond.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
+    IERC20 greatPortal = IERC20(s.greatPortalDiamond);
+    for (uint8 i; i < installation.alchemicaCost.length; i++) {
+      uint256 alchemicaRefund = installation.alchemicaCost[i] / 2;
+      greatPortal.transferFrom(s.greatPortalDiamond, msg.sender, alchemicaRefund);
+    }
+    InstallationDiamond(s.installationsDiamond).unequipInstallation(_realmId, _installationId);
+
+    LibAlchemica.reduceTraits(_realmId, _installationId);
+
+    emit UnequipInstallation(_realmId, _installationId, _x, _y);
   }
 
   struct ParcelOutput {

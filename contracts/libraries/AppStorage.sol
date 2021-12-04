@@ -25,17 +25,23 @@ struct Parcel {
   uint256 coordinateY; //y position on the map
   uint256 district;
   uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
-  uint256[64][64] buildGrid; //x, then y array of positions
-  uint256[64][64] tileGrid; //x, then y array of positions
+  uint256[64][64] buildGrid; //x, then y array of positions - for installations
+  uint256[64][64] tileGrid; //x, then y array of positions - for tiles under the installations (floor)
   uint256[4] alchemicaBoost; //fud, fomo, alpha, kek
+  uint256[4] alchemicaRemaining; //fud, fomo, alpha, kek
+  uint256 roundsClaimed;
+  uint256[4] reservoirCapacity;
+  uint256[4] alchemicaHarvestRate;
+  uint256[4] lastUpdateTimestamp;
+  uint256[4] unclaimedAlchemica;
+}
 
-  /* will probably be converted into arrays
-  mapping(uint256 => uint256) alchemicaRemaining;
-  mapping(uint256 => uint256) alchemicaCapacity;
-  mapping(uint256 => uint256) alchemicaHarvestRate;
-  mapping(uint256 => uint256) timeSinceLastClaim;
-  mapping(uint256 => uint256) unclaimedAlchemica;
-  */
+struct RequestConfig {
+  uint64 subId;
+  uint32 callbackGasLimit;
+  uint16 requestConfirmations;
+  uint32 numWords;
+  bytes32 keyHash;
 }
 
 struct AppStorage {
@@ -46,7 +52,17 @@ struct AppStorage {
   mapping(address => mapping(address => bool)) operators;
   mapping(uint256 => address) approved;
   address aavegotchiDiamond;
-  //  address installationContract;
+  address installationsDiamond;
+  address greatPortalDiamond;
+  uint256 surveyingRound;
+  uint256[4][5] totalAlchemicas;
+  address[4] alchemicaAddresses;
+  // VRF
+  address vrfCoordinator;
+  address linkAddress;
+  RequestConfig requestConfig;
+  mapping(uint256 => uint256) vrfRequestIdToTokenId;
+  mapping(uint256 => uint256) vrfRequestIdToSurveyingRound;
 }
 
 library LibAppStorage {
