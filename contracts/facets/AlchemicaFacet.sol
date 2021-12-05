@@ -167,25 +167,24 @@ contract AlchemicaFacet is Modifiers {
 
     s.parcels[_tokenId].lastUpdateTimestamp[_alchemicaType] = block.timestamp;
 
-    //@todo: mint new tokens
-    //@todo: transfer tokens based on reservoir level:
-    //@todo: get the spillover rate + spillover radius for the reservoir on this parcel
-    //@question: if player has multiple reservoirs equipped, how should we handle the spillover?
-
     AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[_alchemicaType]);
 
-    //@todo: add in spillover percentages
-
-    //@todo: add in escrow() function in AavegotchiDiamond to prevent calling expensive aavegotchiInfo function
+    //@todo: If gotchi is being lent, transfer funds to Gotchi escrow. Otherwise, transfer directly to owner account.
+    //@todo: use gotchiEscrow() function from aavegotchi diamond
+    address gotchiEscrowAddress = address(0);
 
     uint256 bp = 100000;
 
+    //@todo: transfer tokens based on reservoir level:
+    //@todo: get the spillover rate + spillover radius for the reservoir on this parcel
+    //@todo: add in spillover percentages
     uint256 dummySpilloverRate = 80000; //80%
     uint256 dummySpilloverRadius = 1000; //1000 gotchis
 
     uint256 ownerAmount = (available * (bp - dummySpilloverRate)) / bp;
     uint256 spillAmount = (available * dummySpilloverRate) / bp;
 
+    //Mint new tokens
     alchemica.mint(s.greatPortalDiamond, spillAmount);
     alchemica.mint(msg.sender, ownerAmount);
 
