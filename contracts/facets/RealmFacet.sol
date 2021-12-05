@@ -63,18 +63,12 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y
   ) external onlyParcelOwner(_realmId) {
-    enforceTechTree(_realmId);
-
     LibRealm.placeInstallation(_realmId, _installationId, _x, _y);
     InstallationDiamond(s.installationsDiamond).equipInstallation(msg.sender, _realmId, _installationId);
 
     LibAlchemica.increaseTraits(_realmId, _installationId);
 
     emit EquipInstallation(_realmId, _installationId, _x, _y);
-  }
-
-  function enforceTechTree(uint256 _realmId) internal view {
-    //@todo: enforce tech tree
   }
 
   function unequipInstallation(
