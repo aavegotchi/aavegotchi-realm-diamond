@@ -22,6 +22,22 @@ interface InstallationDiamond {
     // glam token to reduce craftTime
   }
 
+  struct UpgradeQueue {
+    uint256 parcelId;
+    uint256 coordinateX;
+    uint256 coordinateY;
+    uint256 prevInstallationId;
+    uint256 nextInstallationId;
+    uint256 readyBlock;
+    bool claimed;
+    address owner;
+  }
+
+  struct InstallationIdIO {
+    uint256 installationId;
+    uint256 balance;
+  }
+
   function setAlchemicaAddresses(address[] memory _addresses) external;
 
   function craftInstallations(uint256[] calldata _installationTypes) external;
@@ -34,7 +50,11 @@ interface InstallationDiamond {
     uint256 _installationId
   ) external;
 
-  function unequipInstallation(uint256 _realmTokenId, uint256 _installationId) external;
+  function unequipInstallation(
+    address _owner,
+    uint256 _realmId,
+    uint256 _installationId
+  ) external;
 
   function addInstallationTypes(InstallationType[] calldata _installationTypes) external;
 
@@ -45,4 +65,10 @@ interface InstallationDiamond {
   function getAlchemicaAddresses() external view returns (address[] memory);
 
   function balanceOf(address _owner, uint256 _id) external view returns (uint256 bal_);
+
+  function upgradeInstallation(UpgradeQueue calldata _upgradeQueue) external;
+
+  function finalizeUpgrade() external;
+
+  function installationsBalances(address _account) external view returns (InstallationIdIO[] memory bals_);
 }

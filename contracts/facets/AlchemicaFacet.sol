@@ -125,7 +125,6 @@ contract AlchemicaFacet is Modifiers {
   function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external {
     AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[_alchemicaType]);
     alchemica.mint(msg.sender, _amount);
-    alchemica.transferFrom(address(this), msg.sender, _amount);
   }
 
   function getAvailableAlchemica(uint256 _tokenId) public view returns (uint256[4] memory _availableAlchemica) {

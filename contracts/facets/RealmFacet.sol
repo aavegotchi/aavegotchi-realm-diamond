@@ -93,9 +93,9 @@ contract RealmFacet is Modifiers {
       AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
 
       uint256 alchemicaRefund = installation.alchemicaCost[i] / 2;
-      alchemica.transferFrom(s.greatPortalDiamond, msg.sender, alchemicaRefund);
+      alchemica.transfer(msg.sender, alchemicaRefund);
     }
-    InstallationDiamond(s.installationsDiamond).unequipInstallation(_realmId, _installationId);
+    InstallationDiamond(s.installationsDiamond).unequipInstallation(msg.sender, _realmId, _installationId);
 
     LibAlchemica.reduceTraits(_realmId, _installationId);
 
@@ -140,5 +140,29 @@ contract RealmFacet is Modifiers {
     output_.parcelAddress = parcel.parcelAddress;
     output_.district = parcel.district;
     output_.boost = parcel.alchemicaBoost;
+  }
+
+  function checkCoordinates(
+    uint256 _tokenId,
+    uint256 _coordinateX,
+    uint256 _coordinateY,
+    uint256 _installationId
+  ) public view {
+    Parcel storage parcel = s.parcels[_tokenId];
+    require(parcel.buildGrid[_coordinateX][_coordinateY] == _installationId, "RealmFacet: wrong coordinates");
+  }
+
+  function upgradeInstallation(
+    uint256 _realmId,
+    uint256 _prevInstallationId,
+    uint256 _nextInstallationId
+  ) external onlyInstallationDiamond {
+    LibAlchemica.reduceTraits(_realmId, _prevInstallationId);
+    LibAlchemica.increaseTraits(_realmId, _nextInstallationId);
+  }
+
+  // used for testing atm
+  function getParcelCapacity(uint256 _tokenId) external view returns (uint256[4] memory) {
+    return s.parcels[_tokenId].reservoirCapacity;
   }
 }

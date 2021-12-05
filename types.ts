@@ -36,3 +36,14 @@ export interface ParcelArray {
   2: number;
   3: "H" | "V";
 }
+
+export interface UpgradeQueue {
+  parcelId: BigNumberish;
+  coordinateX: BigNumberish;
+  coordinateY: BigNumberish;
+  prevInstallationId: BigNumberish;
+  nextInstallationId: BigNumberish;
+  readyBlock: BigNumberish;
+  claimed: boolean;
+  owner: string;
+}
