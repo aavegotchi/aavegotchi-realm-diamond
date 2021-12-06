@@ -83,4 +83,10 @@ interface InstallationDiamond {
   function finalizeUpgrade() external;
 
   function installationsBalances(address _account) external view returns (InstallationIdIO[] memory bals_);
+
+  function getAltarIds() external pure returns (uint256[] memory);
+
+  function spilloverRateOfId(uint256 _id) external view returns (uint256);
+
+  function spilloverRadiusOfId(uint256 _id) external view returns (uint256);
 }

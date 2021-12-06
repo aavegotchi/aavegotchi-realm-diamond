@@ -34,8 +34,7 @@ library LibAlchemica {
   function increaseTraits(uint256 _realmId, uint256 _installationId) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
-    //todo: First save the current harvested amount
-
+    //First save the current harvested amount
     InstallationDiamond.InstallationType memory installationType = InstallationDiamond(s.installationsDiamond).getInstallationType(_installationId);
 
     uint256 alchemicaType = installationType.alchemicaType;

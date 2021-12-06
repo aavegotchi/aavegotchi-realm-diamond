@@ -150,10 +150,7 @@ contract AlchemicaFacet is Modifiers {
     uint256 radius;
   }
 
-  function calculateSpilloverForAlchemica(uint256 _tokenId, uint256 _alchemicaType) internal view returns (SpilloverIO memory spillover) {
-    //@todo: transfer tokens based on reservoir level:
-    //@todo: get the spillover rate + spillover radius for the reservoir on this parcel
-
+  function calculateSpilloverForReservoir(uint256 _tokenId, uint256 _alchemicaType) internal view returns (SpilloverIO memory spillover) {
     uint256[] memory reservoirIds = InstallationDiamond(s.installationsDiamond).getReservoirIds(_alchemicaType);
 
     //getting balances and spillover rates
@@ -171,6 +168,7 @@ contract AlchemicaFacet is Modifiers {
     uint256 totalRate;
     uint256 totalRadius;
 
+    //@todo: get the spillover rate + spillover radius for all reservoirs on this parcel
     for (uint256 i = 0; i < reservoirBalances.length; i++) {
       uint256 installationId = reservoirIds[i];
       uint256 balance = reservoirBalances[i];
@@ -187,6 +185,29 @@ contract AlchemicaFacet is Modifiers {
     // uint256 dummySpilloverRadius = 1000; //1000 gotchis
 
     return SpilloverIO(totalRate / totalReservoirs, totalRadius / totalReservoirs);
+  }
+
+  function calculateSpilloverForAltar(uint256 _tokenId) internal view returns (SpilloverIO memory spillover) {
+    uint256[] memory altarIds = InstallationDiamond(s.installationsDiamond).getAltarIds();
+
+    uint256[] memory altarBalances = InstallationDiamond(s.installationsDiamond).installationBalancesOfTokenByIds(address(this), _tokenId, altarIds);
+
+    uint256 altarId = 0;
+
+    for (uint256 i = 0; i < altarBalances.length; i++) {
+      if (altarBalances[i] > 0) {
+        altarId = altarIds[i];
+        break;
+      }
+    }
+
+    //getting balances and spillover rates
+    uint256 rate = InstallationDiamond(s.installationsDiamond).spilloverRateOfId(altarId); // uint256 dummySpilloverRate = 80000; //80%
+
+    uint256 radius = InstallationDiamond(s.installationsDiamond).spilloverRadiusOfId(altarId);
+    // uint256 dummySpilloverRadius = 1000; //1000 gotchis
+
+    return SpilloverIO(rate, radius);
   }
 
   function claimAvailableAlchemica(
@@ -219,7 +240,7 @@ contract AlchemicaFacet is Modifiers {
     uint256 bp = 100000;
 
     //@todo: write tests to check spillover is accurate
-    SpilloverIO memory spillover = calculateSpilloverForAlchemica(_tokenId, _alchemicaType);
+    SpilloverIO memory spillover = calculateSpilloverForReservoir(_tokenId, _alchemicaType);
 
     uint256 ownerAmount = (available * (bp - spillover.rate)) / bp;
     uint256 spillAmount = (available * spillover.rate) / bp;
@@ -234,13 +255,14 @@ contract AlchemicaFacet is Modifiers {
   function channelAlchemica(uint256 _realmId, uint256 _gotchiId) external {
     //@todo: Channel alchemica
 
-    //spillover rate and radius depends on altar level
+    //@todo: write tests to check spillover is accurate
+    SpilloverIO memory spillover = calculateSpilloverForAltar(_realmId);
 
-    uint256 dummySpilloverRate = 80000; //80%
-    uint256 dummySpilloverRadius = 1000;
+    // uint256 dummySpilloverRate = 80000; //80%
+    // uint256 dummySpilloverRadius = 1000;
 
     //@todo: check Great Portal balance to see if tokens should be transferred or minted
 
-    emit ChannelAlchemica(_realmId, _gotchiId, [uint256(0), uint256(0), uint256(0), uint256(0)], dummySpilloverRate, dummySpilloverRadius);
+    emit ChannelAlchemica(_realmId, _gotchiId, [uint256(0), uint256(0), uint256(0), uint256(0)], spillover.rate, spillover.radius);
   }
 }
