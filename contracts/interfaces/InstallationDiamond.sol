@@ -45,4 +45,16 @@ interface InstallationDiamond {
   function getAlchemicaAddresses() external view returns (address[] memory);
 
   function balanceOf(address _owner, uint256 _id) external view returns (uint256 bal_);
+
+  function installationBalancesOfTokenByIds(
+    address _tokenContract,
+    uint256 _tokenId,
+    uint256[] calldata _ids
+  ) external view returns (uint256[] memory);
+
+  function spilloverRatesOfIds(uint256[] calldata _ids) external view returns (uint256[] memory);
+
+  function spilloverRadiusOfIds(uint256[] calldata _ids) external view returns (uint256[] memory);
+
+  function getReservoirIds(uint256 _alchemicaType) external pure returns (uint256[] memory);
 }
