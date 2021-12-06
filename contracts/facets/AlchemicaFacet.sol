@@ -153,40 +153,14 @@ contract AlchemicaFacet is Modifiers {
   }
 
   function calculateSpilloverForReservoir(uint256 _tokenId, uint256 _alchemicaType) internal view returns (SpilloverIO memory spillover) {
-    uint256[] memory reservoirIds = InstallationDiamond(s.installationsDiamond).getReservoirIds(_alchemicaType);
-
-    //getting balances and spillover rates
-    uint256[] memory spilloverRates = InstallationDiamond(s.installationsDiamond).spilloverRatesOfIds(reservoirIds);
-
-    uint256[] memory spilloverRadii = InstallationDiamond(s.installationsDiamond).spilloverRadiusOfIds(reservoirIds);
-
-    uint256[] memory reservoirBalances = InstallationDiamond(s.installationsDiamond).installationBalancesOfTokenByIds(
-      address(this),
-      _tokenId,
-      reservoirIds
-    );
-
-    uint256 totalReservoirs = 0;
-    uint256 totalRate;
-    uint256 totalRadius;
-
-    //@todo: get the spillover rate + spillover radius for all reservoirs on this parcel
-    for (uint256 i = 0; i < reservoirBalances.length; i++) {
-      uint256 installationId = reservoirIds[i];
-      uint256 balance = reservoirBalances[i];
-
-      if (balance > 0) {
-        totalReservoirs += balance;
-        totalRate += (spilloverRates[installationId] * balance);
-        totalRadius += (spilloverRadii[installationId] * balance);
-      }
-    }
-
     //@todo: add in spillover percentages
     // uint256 dummySpilloverRate = 80000; //80%
     // uint256 dummySpilloverRadius = 1000; //1000 gotchis
 
-    return SpilloverIO(totalRate / totalReservoirs, totalRadius / totalReservoirs);
+    uint256 spilloverRate = s.parcels[_tokenId].spilloverRate[_alchemicaType] / s.parcels[_tokenId].reservoirCount[_alchemicaType];
+    uint256 spilloverRadius = s.parcels[_tokenId].spilloverRadius[_alchemicaType] / s.parcels[_tokenId].reservoirCount[_alchemicaType];
+
+    return SpilloverIO(spilloverRate, spilloverRadius);
   }
 
   function calculateSpilloverForAltar(uint256 _tokenId) internal view returns (SpilloverIO memory spillover) {

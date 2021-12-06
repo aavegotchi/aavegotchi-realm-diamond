@@ -31,6 +31,11 @@ library LibAlchemica {
     return s.parcels[_tokenId].alchemicaHarvestRate[_alchemicaType] * (block.timestamp - s.parcels[_tokenId].lastUpdateTimestamp[_alchemicaType]);
   }
 
+  // function bumpHarvestRate(uint256 _tokenId) external {
+  //   //settleUnclaimedAlchemica
+  //   //iterate through all harvesters and update harvestrate to new rate
+  // }
+
   function increaseTraits(uint256 _realmId, uint256 _installationId) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
@@ -50,6 +55,11 @@ library LibAlchemica {
     //reservoir
     if (installationType.capacity > 0) {
       s.parcels[_realmId].reservoirCapacity[installationType.alchemicaType] += installationType.capacity;
+
+      //increment storage vars
+      s.parcels[_realmId].reservoirCount[installationType.alchemicaType]++;
+      s.parcels[_realmId].spilloverRate[installationType.alchemicaType] += installationType.spillRate;
+      s.parcels[_realmId].spilloverRadius[installationType.alchemicaType] += installationType.spillRadius;
     }
   }
 
@@ -70,10 +80,14 @@ library LibAlchemica {
     if (installationType.capacity > 0) {
       //@todo: handle the case where a user has more harvested than reservoir capacity after the update
 
+      //decrement storage vars
+      s.parcels[_realmId].reservoirCapacity[installationType.alchemicaType] -= installationType.capacity;
+      s.parcels[_realmId].reservoirCount[installationType.alchemicaType]--;
+      s.parcels[_realmId].spilloverRate[installationType.alchemicaType] -= installationType.spillRate;
+      s.parcels[_realmId].spilloverRadius[installationType.alchemicaType] -= installationType.spillRadius;
+
       //todo: solution 1: revert until user has claimed
       //todo: solution 2: claim for user and then unequip
-
-      s.parcels[_realmId].reservoirCapacity[installationType.alchemicaType] -= installationType.capacity;
     }
   }
 }

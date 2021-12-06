@@ -17,7 +17,7 @@ interface InstallationDiamond {
     uint256 harvestRate;
     uint256 capacity;
     uint256 spillRadius;
-    uint256 spillPercentage;
+    uint256 spillRate;
     uint256 craftTime; // in blocks
     // glam token to reduce craftTime
   }
@@ -75,8 +75,6 @@ interface InstallationDiamond {
   function spilloverRatesOfIds(uint256[] calldata _ids) external view returns (uint256[] memory);
 
   function spilloverRadiusOfIds(uint256[] calldata _ids) external view returns (uint256[] memory);
-
-  function getReservoirIds(uint256 _alchemicaType) external pure returns (uint256[] memory);
 
   function upgradeInstallation(UpgradeQueue calldata _upgradeQueue) external;
 

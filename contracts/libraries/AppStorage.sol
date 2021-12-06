@@ -31,6 +31,9 @@ struct Parcel {
   uint256[4] alchemicaRemaining; //fud, fomo, alpha, kek
   uint256 roundsClaimed;
   uint256[4] reservoirCapacity;
+  uint256[4] spilloverRate;
+  uint256[4] spilloverRadius;
+  uint256[4] reservoirCount;
   uint256[4] alchemicaHarvestRate;
   uint256[4] lastUpdateTimestamp;
   uint256[4] unclaimedAlchemica;
