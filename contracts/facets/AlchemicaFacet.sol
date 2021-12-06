@@ -9,6 +9,8 @@ import "../libraries/LibAlchemica.sol";
 import "../interfaces/AavegotchiDiamond.sol";
 import "../test/AlchemicaToken.sol";
 
+uint256 constant bp = 100000;
+
 contract AlchemicaFacet is Modifiers {
   event AlchemicaClaimed(
     uint256 indexed _parcelId,
@@ -210,6 +212,30 @@ contract AlchemicaFacet is Modifiers {
     return SpilloverIO(rate, radius);
   }
 
+  struct TransferAmounts {
+    uint256 owner;
+    uint256 spill;
+  }
+
+  function calculateTransferAmounts(uint256 _amount, uint256 _spilloverRate) internal pure returns (TransferAmounts memory) {
+    uint256 owner = (_amount * (bp - _spilloverRate)) / bp;
+    uint256 spill = (_amount * _spilloverRate) / bp;
+    return TransferAmounts(owner, spill);
+  }
+
+  function alchemicaRecipient(uint256 _gotchiId) internal view returns (address) {
+    //Check if Aavegotchi is being lent.
+
+    //if aavegotchi is being lent, return gotchi escrow address.
+    //else return msg.sender
+
+    //@todo: If gotchi is being lent, transfer funds to Gotchi escrow. Otherwise, transfer directly to owner account.
+    //@todo: use gotchiEscrow() function from aavegotchi diamond
+    address gotchiEscrowAddress = address(0);
+
+    return msg.sender;
+  }
+
   function claimAvailableAlchemica(
     uint256 _tokenId,
     uint256 _alchemicaType,
@@ -233,36 +259,40 @@ contract AlchemicaFacet is Modifiers {
 
     AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[_alchemicaType]);
 
-    //@todo: If gotchi is being lent, transfer funds to Gotchi escrow. Otherwise, transfer directly to owner account.
-    //@todo: use gotchiEscrow() function from aavegotchi diamond
-    address gotchiEscrowAddress = address(0);
-
-    uint256 bp = 100000;
-
     //@todo: write tests to check spillover is accurate
     SpilloverIO memory spillover = calculateSpilloverForReservoir(_tokenId, _alchemicaType);
 
-    uint256 ownerAmount = (available * (bp - spillover.rate)) / bp;
-    uint256 spillAmount = (available * spillover.rate) / bp;
+    TransferAmounts memory amounts = calculateTransferAmounts(available, spillover.rate);
 
     //Mint new tokens
-    alchemica.mint(s.greatPortalDiamond, spillAmount);
-    alchemica.mint(msg.sender, ownerAmount);
+    alchemica.mint(alchemicaRecipient(_gotchiId), amounts.owner);
+    alchemica.mint(s.greatPortalDiamond, amounts.spill);
 
     emit AlchemicaClaimed(_tokenId, _gotchiId, _alchemicaType, available, spillover.rate, spillover.radius);
   }
 
   function channelAlchemica(uint256 _realmId, uint256 _gotchiId) external {
-    //@todo: Channel alchemica
-
     //@todo: write tests to check spillover is accurate
     SpilloverIO memory spillover = calculateSpilloverForAltar(_realmId);
 
-    // uint256 dummySpilloverRate = 80000; //80%
-    // uint256 dummySpilloverRadius = 1000;
+    //@todo: use random number generation to determine final amounts
+    uint256[4] memory channelAmounts = [uint256(100e18), uint256(50e18), uint256(25e18), uint256(10e18)];
+    //fud, fomo, alpha, kek
 
-    //@todo: check Great Portal balance to see if tokens should be transferred or minted
+    bool shouldMintNew = true; //@todo: change to check great portal balance is greater than the hardcoded upper limits
 
-    emit ChannelAlchemica(_realmId, _gotchiId, [uint256(0), uint256(0), uint256(0), uint256(0)], spillover.rate, spillover.radius);
+    //@todo: handle gotchi lending case
+    if (shouldMintNew) {
+      for (uint256 i = 0; i < channelAmounts.length; i++) {
+        TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], spillover.rate);
+
+        AlchemicaToken(s.alchemicaAddresses[i]).mint(alchemicaRecipient(_gotchiId), amounts.owner);
+        AlchemicaToken(s.alchemicaAddresses[i]).mint(s.greatPortalDiamond, amounts.spill);
+      }
+    } else {
+      //@todo: transfer from great portal
+    }
+
+    emit ChannelAlchemica(_realmId, _gotchiId, channelAmounts, spillover.rate, spillover.radius);
   }
 }
