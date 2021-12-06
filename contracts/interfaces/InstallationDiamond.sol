@@ -17,7 +17,7 @@ interface InstallationDiamond {
     uint256 harvestRate;
     uint256 capacity;
     uint256 spillRadius;
-    uint256 spillPercentage;
+    uint256 spillRate;
     uint256 craftTime; // in blocks
     // glam token to reduce craftTime
   }
