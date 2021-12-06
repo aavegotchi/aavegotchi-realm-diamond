@@ -112,18 +112,11 @@ describe("Testing Equip Installation", async function () {
       maticDiamondAddress,
       "0x1000000000000000",
     ]);
-    fud = await impersonate(maticDiamondAddress, fud, ethers, network);
-    fomo = await impersonate(maticDiamondAddress, fomo, ethers, network);
-    alpha = await impersonate(maticDiamondAddress, alpha, ethers, network);
-    kek = await impersonate(maticDiamondAddress, kek, ethers, network);
-    await fud.mint(alchemicaTestAmount);
-    await fomo.mint(alchemicaTestAmount);
-    await alpha.mint(alchemicaTestAmount);
-    await kek.mint(alchemicaTestAmount);
-    await fud.transfer(testAddress, alchemicaForTester);
-    await fomo.transfer(testAddress, alchemicaForTester);
-    await alpha.transfer(testAddress, alchemicaForTester);
-    await kek.transfer(testAddress, alchemicaForTester);
+
+    await fud.transferOwnership(maticDiamondAddress);
+    await fomo.transferOwnership(maticDiamondAddress);
+    await alpha.transferOwnership(maticDiamondAddress);
+    await kek.transferOwnership(maticDiamondAddress);
   });
   it("Setup installation diamond", async function () {
     installationDiamond = await impersonate(

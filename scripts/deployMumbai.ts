@@ -140,10 +140,10 @@ export async function deployDiamond() {
   )) as AlchemicaToken;
   console.log("KEK deployed to ", kek.address);
 
-  // await fud.mint(ethers.utils.parseUnits("10000000"));
-  // await fomo.mint(ethers.utils.parseUnits("10000000"));
-  // await alpha.mint(ethers.utils.parseUnits("10000000"));
-  // await kek.mint(ethers.utils.parseUnits("10000000"));
+  await fud.transferOwnership(diamond.address);
+  await fomo.transferOwnership(diamond.address);
+  await alpha.transferOwnership(diamond.address);
+  await kek.transferOwnership(diamond.address);
 
   const hardcodedAlchemicasTotals: any = [
     [14154, 7076, 3538, 1414],
@@ -169,7 +169,7 @@ export async function deployDiamond() {
   //Mumbai-specific
   const vrfCoordinator = "0xb96A95d11cE0B8E3AEdf332c9Df17fC31D379651";
   const linkAddress = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB";
-  const installationDiamond = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB";
+  const installationDiamond = "0x6Ead866C75B485d4d1c123dc51eb6f749a02C797";
 
   const initVars = await alchemicaFacet.setVars(
     //@ts-ignore

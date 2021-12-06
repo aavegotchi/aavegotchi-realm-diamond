@@ -31,6 +31,8 @@ export async function upgrade() {
         `function testingMintParcel(address _to, uint256[] calldata _tokenIds, ${mintParcelsInput}[] memory _metadata) external`,
         "function getAvailableAlchemica(uint256 _tokenId) public view returns (uint256[4] memory _availableAlchemica)",
         "function claimAvailableAlchemica(uint256 _tokenId, uint256 _alchemicaType, uint256 _gotchiId) external",
+        "function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external",
+        "function channelAlchemica(uint256 _realmId, uint256 _gotchiId) external",
       ],
       removeSelectors: [],
     },
@@ -49,6 +51,9 @@ export async function upgrade() {
       addSelectors: [
         "function equipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y) external",
         "function unequipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y) external",
+        "function checkCoordinates(uint256 _tokenId, uint256 _coordinateX, uint256 _coordinateY, uint256 _installationId) public view",
+        "function upgradeInstallation(uint256 _realmId, uint256 _prevInstallationId, uint256 _nextInstallationId) external",
+        "function getParcelCapacity(uint256 _tokenId) external view returns(uint256[4] memory)",
       ],
       removeSelectors: [],
     },
