@@ -85,4 +85,9 @@ contract Modifiers {
     LibDiamond.enforceIsContractOwner();
     _;
   }
+
+  modifier onlyInstallationDiamond() {
+    require(LibMeta.msgSender() == s.installationsDiamond, "AppStorage: Only Installation diamond can call");
+    _;
+  }
 }

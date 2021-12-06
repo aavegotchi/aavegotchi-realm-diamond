@@ -27,7 +27,7 @@ module.exports = {
       forking: {
         url: process.env.MATIC_URL,
         timeout: 2000000,
-        // blockNumber: 12552123
+        // blockNumber: 22161650,
         // blockNumber: 13024371
       },
       blockGasLimit: 20000000,
@@ -39,7 +39,6 @@ module.exports = {
     },
     matic: {
       url: process.env.MATIC_URL,
-      // url: 'https://rpc-mainnet.maticvigil.com/',
       accounts: [process.env.SECRET],
       // blockGasLimit: 20000000,
       blockGasLimit: 20000000,
