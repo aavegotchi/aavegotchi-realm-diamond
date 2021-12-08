@@ -152,7 +152,7 @@ describe("Testing Equip Installation", async function () {
       harvestRate: 0,
       capacity: 0,
       spillRadius: 0,
-      spillPercentage: 0,
+      spillRate: 0,
       craftTime: 0,
     });
     installations.push({
@@ -165,33 +165,33 @@ describe("Testing Equip Installation", async function () {
       harvestRate: ethers.utils.parseUnits("2"),
       capacity: 0,
       spillRadius: 0,
-      spillPercentage: 0,
+      spillRate: 0,
       craftTime: 10000,
     });
     installations.push({
       installationType: 1,
       level: 1,
-      width: 4,
-      height: 4,
+      width: 2,
+      height: 2,
       alchemicaType: 0,
       alchemicaCost: [ethers.utils.parseUnits("200"), 0, 0, 0],
       harvestRate: 0,
       capacity: ethers.utils.parseUnits("5000"),
       spillRadius: ethers.utils.parseUnits("100"),
-      spillPercentage: ethers.utils.parseUnits("10"),
+      spillRate: ethers.utils.parseUnits("10"),
       craftTime: 20000,
     });
     installations.push({
       installationType: 1,
       level: 2,
-      width: 4,
-      height: 4,
+      width: 2,
+      height: 2,
       alchemicaType: 0,
       alchemicaCost: [ethers.utils.parseUnits("400"), 0, 0, 0],
       harvestRate: 0,
       capacity: ethers.utils.parseUnits("10000"),
       spillRadius: ethers.utils.parseUnits("50"),
-      spillPercentage: ethers.utils.parseUnits("5"),
+      spillRate: ethers.utils.parseUnits("5"),
       craftTime: 15000,
     });
     await installationDiamond.addInstallationTypes(installations);
@@ -253,13 +253,13 @@ describe("Testing Equip Installation", async function () {
   });
   it("Equip reservoir", async function () {
     realmFacet = await impersonate(testAddress, realmFacet, ethers, network);
-    await realmFacet.equipInstallation(testParcelId, 2, 9, 9);
+    await realmFacet.equipInstallation(testParcelId, 2, 0, 0);
   });
   it("Upgrade reservoir", async function () {
     const upgradeQueue: UpgradeQueue = {
       parcelId: testParcelId,
-      coordinateX: 9,
-      coordinateY: 9,
+      coordinateX: 0,
+      coordinateY: 0,
       prevInstallationId: 2,
       nextInstallationId: 3,
       readyBlock: 0,

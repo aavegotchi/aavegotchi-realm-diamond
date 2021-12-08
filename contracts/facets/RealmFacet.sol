@@ -159,4 +159,44 @@ contract RealmFacet is Modifiers {
   function getParcelCapacity(uint256 _tokenId) external view returns (uint256[4] memory) {
     return s.parcels[_tokenId].reservoirCapacity;
   }
+
+  function getHumbleGrid(uint256 _parcelId) external view returns (uint256[8][8] memory output_) {
+    require(s.parcels[_parcelId].size == 0, "RealmFacet: Not humble");
+    for (uint256 i; i < 8; i++) {
+      for (uint256 j; j < 8; j++) {
+        output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+      }
+    }
+  }
+
+  function getReasonableGrid(uint256 _parcelId) external view returns (uint256[16][16] memory output_) {
+    require(s.parcels[_parcelId].size == 1, "RealmFacet: Not reasonable");
+    for (uint256 i; i < 16; i++) {
+      for (uint256 j; j < 16; j++) {
+        output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+      }
+    }
+  }
+
+  function getSpaciousVerticalGrid(uint256 _parcelId) external view returns (uint256[32][64] memory output_) {
+    require(s.parcels[_parcelId].size == 2, "RealmFacet: Not spacious vertical");
+    for (uint256 i; i < 64; i++) {
+      for (uint256 j; j < 32; j++) {
+        output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+      }
+    }
+  }
+
+  function getSpaciousHorizontalGrid(uint256 _parcelId) external view returns (uint256[64][32] memory output_) {
+    require(s.parcels[_parcelId].size == 3, "RealmFacet: Not spacious horizontal");
+    for (uint256 i; i < 32; i++) {
+      for (uint256 j; j < 64; j++) {
+        output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+      }
+    }
+  }
+
+  function getPaartnerGrid(uint256 _parcelId) external view returns (uint256[64][64] memory) {
+    return s.parcels[_parcelId].buildGrid;
+  }
 }
