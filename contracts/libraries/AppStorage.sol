@@ -66,6 +66,8 @@ struct AppStorage {
   RequestConfig requestConfig;
   mapping(uint256 => uint256) vrfRequestIdToTokenId;
   mapping(uint256 => uint256) vrfRequestIdToSurveyingRound;
+
+  bytes backendPubKey;
 }
 
 library LibAppStorage {

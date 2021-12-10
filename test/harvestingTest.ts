@@ -99,6 +99,7 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
+    const backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
 
     await alchemicaFacet.setVars(
       hardcodedAlchemicasTotals,
@@ -106,7 +107,8 @@ describe("Testing Equip Installation", async function () {
       maticDiamondAddress,
       "0x0000000000000000000000000000000000000000",
       "0x0000000000000000000000000000000000000000",
-      [fud.address, fomo.address, alpha.address, kek.address]
+      [fud.address, fomo.address, alpha.address, kek.address],
+      ethers.utils.hexDataSlice(backendSigner.publicKey, 1)
     );
     await network.provider.send("hardhat_setBalance", [
       maticDiamondAddress,
@@ -243,7 +245,19 @@ describe("Testing Equip Installation", async function () {
     expect(Number(ethers.utils.formatUnits(availableAlchemica[0]))).to.equal(
       200
     );
-    await alchemicaFacet.claimAvailableAlchemica(2893, 0, 22306);
+
+    let backendSigner = new ethers.Wallet(process.env.GBM_PK); // PK should start with '0x'
+    let messageHash = ethers.utils.solidityKeccak256(["uint256", "uint256"], [0, 22306]);
+    let signedMessage = await backendSigner.signMessage(ethers.utils.arrayify(messageHash));
+    let signature = ethers.utils.arrayify(signedMessage);
+
+    signedMessage = await backendSigner.signMessage(messageHash);
+    let invalidSignature = ethers.utils.arrayify(signedMessage);
+
+    // check invalid signature
+    await expect(alchemicaFacet.claimAvailableAlchemica(2893, 0, 22306, invalidSignature)).to.be.revertedWith("AlchemicaFacet: Invalid signature");
+
+    await alchemicaFacet.claimAvailableAlchemica(2893, 0, 22306, signature);
     availableAlchemica = await alchemicaFacet.getAvailableAlchemica(2893);
     expect(Number(ethers.utils.formatUnits(availableAlchemica[0]))).to.equal(0);
   });

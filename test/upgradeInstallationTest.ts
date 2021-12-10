@@ -110,13 +110,15 @@ describe("Testing Equip Installation", async function () {
       network
     );
 
+    const backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
     await alchemicaFacet.setVars(
       hardcodedAlchemicasTotals,
       installationsAddress,
       maticDiamondAddress,
       "0x0000000000000000000000000000000000000000",
       "0x0000000000000000000000000000000000000000",
-      [fud.address, fomo.address, alpha.address, kek.address]
+      [fud.address, fomo.address, alpha.address, kek.address],
+      ethers.utils.hexDataSlice(backendSigner.publicKey, 1)
     );
     await network.provider.send("hardhat_setBalance", [
       maticDiamondAddress,

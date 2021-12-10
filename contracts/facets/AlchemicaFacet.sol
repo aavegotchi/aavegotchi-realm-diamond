@@ -6,6 +6,7 @@ import "./RealmFacet.sol";
 import "../libraries/LibRealm.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "../libraries/LibAlchemica.sol";
+import "../libraries/LibSignature.sol";
 import "../interfaces/AavegotchiDiamond.sol";
 import "../test/AlchemicaToken.sol";
 
@@ -72,7 +73,8 @@ contract AlchemicaFacet is Modifiers {
     address _greatPortalDiamond,
     address _vrfCoordinator,
     address _linkAddress,
-    address[4] calldata _alchemicaAddresses
+    address[4] calldata _alchemicaAddresses,
+    bytes memory _backendPubKey
   ) external onlyOwner {
     for (uint8 i; i < _alchemicas.length; i++) {
       for (uint256 j; j < _alchemicas[i].length; j++) {
@@ -84,6 +86,7 @@ contract AlchemicaFacet is Modifiers {
     s.vrfCoordinator = _vrfCoordinator;
     s.linkAddress = _linkAddress;
     s.alchemicaAddresses = _alchemicaAddresses;
+    s.backendPubKey = _backendPubKey;
   }
 
   // testing funcs
@@ -213,9 +216,13 @@ contract AlchemicaFacet is Modifiers {
   function claimAvailableAlchemica(
     uint256 _tokenId,
     uint256 _alchemicaType,
-    uint256 _gotchiId
+    uint256 _gotchiId,
+    bytes memory _signature
   ) external onlyParcelOwner(_tokenId) {
     //@todo: enforce the gotchiId via a positional hash
+    bytes32 messageHash = keccak256(abi.encodePacked(_alchemicaType, _gotchiId));
+    require(LibSignature.isValid(messageHash, _signature, s.backendPubKey), "AlchemicaFacet: Invalid signature");
+
     //@todo: allow claimOperator
 
     AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
