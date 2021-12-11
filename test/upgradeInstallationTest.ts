@@ -10,6 +10,7 @@ import {
 } from "../typechain";
 import { upgrade } from "../scripts/upgrades/upgrade-upgradeInstallation";
 import { UpgradeQueue } from "../types";
+import { BigNumberish } from "@ethersproject/bignumber";
 
 describe("Testing Equip Installation", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
@@ -32,6 +33,18 @@ describe("Testing Equip Installation", async function () {
       );
     }
   }
+
+  const greatPortalCapacity: [
+    BigNumberish,
+    BigNumberish,
+    BigNumberish,
+    BigNumberish
+  ] = [
+    ethers.utils.parseUnits("1250000000"),
+    ethers.utils.parseUnits("625000000"),
+    ethers.utils.parseUnits("312500000"),
+    ethers.utils.parseUnits("125000000"),
+  ];
 
   let alchemicaFacet: AlchemicaFacet;
   let realmFacet: RealmFacet;
@@ -113,6 +126,7 @@ describe("Testing Equip Installation", async function () {
     const backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
     await alchemicaFacet.setVars(
       hardcodedAlchemicasTotals,
+      greatPortalCapacity,
       installationsAddress,
       maticDiamondAddress,
       "0x0000000000000000000000000000000000000000",

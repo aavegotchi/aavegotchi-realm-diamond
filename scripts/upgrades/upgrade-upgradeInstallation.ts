@@ -29,7 +29,7 @@ export async function upgrade() {
         "function getTotalAlchemicas() external view returns (uint256[4][5] memory)",
         "function getRealmAlchemica(uint256 _tokenId) external view returns (uint256[4] memory)",
         "function progressSurveyingRound() external",
-        "function setVars(uint256[4][5] calldata _alchemicas, address _installationsDiamond, address _greatPortalDiamond, address _vrfCoordinator, address _linkAddress, address[4] calldata _alchemicaAddresses, bytes memory _backendPubKey) external",
+        "function setVars(uint256[4][5] calldata _alchemicas, uint256[4] _greatPortalCapacity, address _installationsDiamond, address _greatPortalDiamond, address _vrfCoordinator, address _linkAddress, address[4] calldata _alchemicaAddresses, bytes memory _backendPubKey) external",
         "function testingStartSurveying(uint256 _tokenId, uint256 _surveyingRound) external",
         `function testingMintParcel(address _to, uint256[] calldata _tokenIds, ${mintParcelsInput}[] memory _metadata) external`,
         "function getAvailableAlchemica(uint256 _tokenId) public view returns (uint256[4] memory _availableAlchemica)",

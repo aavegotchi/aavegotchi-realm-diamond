@@ -7,6 +7,7 @@ import {
 import { AlchemicaFacet__factory } from "../../typechain";
 import { AlchemicaFacetInterface } from "../../typechain/AlchemicaFacet";
 import { maticDiamondAddress } from "../helperFunctions";
+import { BigNumberish } from "@ethersproject/bignumber";
 
 export async function upgrade() {
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
@@ -23,7 +24,7 @@ export async function upgrade() {
       addSelectors: [
         "function startSurveying(uint256 _tokenId, uint256 _surveyingRound) external",
         "function progressSurveyingRound() external",
-        "function setVars(uint256[4][5] _alchemicas, address _installationsDiamond, address _greatPortalDiamond, address _vrfCoordinator, address _linkAddress) external",
+        "function setVars(uint256[4][5] _alchemicas, uint256[4] _greatPortalCapacity, address _installationsDiamond, address _greatPortalDiamond, address _vrfCoordinator, address _linkAddress) external",
         "function getTotalAlchemicas() external view returns (uint256[4][5] memory)",
         "function testingStartSurveying(uint256 _tokenId, uint256 _surveyingRound) external",
         "function getRealmAlchemica(uint256 _tokenId) external view returns (uint256[4] memory)",
@@ -63,11 +64,24 @@ export async function upgrade() {
     [905894, 452946, 226472, 90588],
   ];
 
+  const greatPortalCapacity: [
+    BigNumberish,
+    BigNumberish,
+    BigNumberish,
+    BigNumberish
+  ] = [
+    ethers.utils.parseUnits("1250000000"),
+    ethers.utils.parseUnits("625000000"),
+    ethers.utils.parseUnits("312500000"),
+    ethers.utils.parseUnits("125000000"),
+  ];
+
   const calldata = iface.encodeFunctionData(
     //@ts-ignore
     "setVars",
     [
       hardcodedAlchemicasTotals,
+      greatPortalCapacity,
       "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
       "0x0000000000000000000000000000000000000000",
       "0x0000000000000000000000000000000000000000",

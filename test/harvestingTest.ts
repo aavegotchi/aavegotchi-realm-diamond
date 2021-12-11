@@ -9,6 +9,7 @@ import {
   InstallationDiamond,
 } from "../typechain";
 import { upgrade } from "../scripts/upgrades/upgrade-harvesting";
+import { BigNumberish } from "@ethersproject/bignumber";
 
 describe("Testing Equip Installation", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
@@ -31,6 +32,18 @@ describe("Testing Equip Installation", async function () {
       );
     }
   }
+
+  const greatPortalCapacity: [
+    BigNumberish,
+    BigNumberish,
+    BigNumberish,
+    BigNumberish
+  ] = [
+    ethers.utils.parseUnits("1250000000"),
+    ethers.utils.parseUnits("625000000"),
+    ethers.utils.parseUnits("312500000"),
+    ethers.utils.parseUnits("125000000"),
+  ];
 
   let alchemicaFacet: AlchemicaFacet;
   let realmFacet: RealmFacet;
@@ -103,6 +116,7 @@ describe("Testing Equip Installation", async function () {
 
     await alchemicaFacet.setVars(
       hardcodedAlchemicasTotals,
+      greatPortalCapacity,
       installationsAddress,
       maticDiamondAddress,
       "0x0000000000000000000000000000000000000000",
@@ -247,15 +261,22 @@ describe("Testing Equip Installation", async function () {
     );
 
     let backendSigner = new ethers.Wallet(process.env.GBM_PK); // PK should start with '0x'
-    let messageHash = ethers.utils.solidityKeccak256(["uint256", "uint256"], [0, 22306]);
-    let signedMessage = await backendSigner.signMessage(ethers.utils.arrayify(messageHash));
+    let messageHash = ethers.utils.solidityKeccak256(
+      ["uint256", "uint256"],
+      [0, 22306]
+    );
+    let signedMessage = await backendSigner.signMessage(
+      ethers.utils.arrayify(messageHash)
+    );
     let signature = ethers.utils.arrayify(signedMessage);
 
     signedMessage = await backendSigner.signMessage(messageHash);
     let invalidSignature = ethers.utils.arrayify(signedMessage);
 
     // check invalid signature
-    await expect(alchemicaFacet.claimAvailableAlchemica(2893, 0, 22306, invalidSignature)).to.be.revertedWith("AlchemicaFacet: Invalid signature");
+    await expect(
+      alchemicaFacet.claimAvailableAlchemica(2893, 0, 22306, invalidSignature)
+    ).to.be.revertedWith("AlchemicaFacet: Invalid signature");
 
     await alchemicaFacet.claimAvailableAlchemica(2893, 0, 22306, signature);
     availableAlchemica = await alchemicaFacet.getAvailableAlchemica(2893);

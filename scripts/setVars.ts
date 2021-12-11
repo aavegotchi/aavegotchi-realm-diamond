@@ -1,5 +1,6 @@
 import { ethers } from "hardhat";
 import { RealmFacet, AlchemicaFacet } from "../typechain";
+import { BigNumberish } from "@ethersproject/bignumber";
 
 export async function setAddresses() {
   const diamondAddress = "0xCDe6B59B6AcBbdBf5D6Ef4c291481feCA70cf1aa";
@@ -24,6 +25,18 @@ export async function setAddresses() {
     [905894, 452946, 226472, 90588],
   ];
 
+  const greatPortalCapacity: [
+    BigNumberish,
+    BigNumberish,
+    BigNumberish,
+    BigNumberish
+  ] = [
+    ethers.utils.parseUnits("1250000000"),
+    ethers.utils.parseUnits("625000000"),
+    ethers.utils.parseUnits("312500000"),
+    ethers.utils.parseUnits("125000000"),
+  ];
+
   for (let i = 0; i < hardcodedAlchemicasTotals.length; i++) {
     for (let j = 0; j < hardcodedAlchemicasTotals[i].length; j++) {
       hardcodedAlchemicasTotals[i][j] = ethers.utils.parseUnits(
@@ -41,6 +54,7 @@ export async function setAddresses() {
   await alchemicaFacet.setVars(
     //@ts-ignore
     hardcodedAlchemicasTotals,
+    greatPortalCapacity,
     installationDiamond,
     "0xCDe6B59B6AcBbdBf5D6Ef4c291481feCA70cf1aa",
     vrfCoordinator,

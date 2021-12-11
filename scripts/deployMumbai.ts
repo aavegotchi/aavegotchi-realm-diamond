@@ -1,5 +1,6 @@
 //@ts-ignore
 import { Signer } from "@ethersproject/abstract-signer";
+import { BigNumberish } from "@ethersproject/bignumber";
 import { ethers, network } from "hardhat";
 import {
   DiamondCutFacet,
@@ -153,6 +154,18 @@ export async function deployDiamond() {
     [905894, 452946, 226472, 90588],
   ];
 
+  const greatPortalCapacity: [
+    BigNumberish,
+    BigNumberish,
+    BigNumberish,
+    BigNumberish
+  ] = [
+    ethers.utils.parseUnits("1250000000"),
+    ethers.utils.parseUnits("625000000"),
+    ethers.utils.parseUnits("312500000"),
+    ethers.utils.parseUnits("125000000"),
+  ];
+
   for (let i = 0; i < hardcodedAlchemicasTotals.length; i++) {
     for (let j = 0; j < hardcodedAlchemicasTotals[i].length; j++) {
       hardcodedAlchemicasTotals[i][j] = ethers.utils.parseUnits(
@@ -175,6 +188,7 @@ export async function deployDiamond() {
   const initVars = await alchemicaFacet.setVars(
     //@ts-ignore
     hardcodedAlchemicasTotals,
+    greatPortalCapacity,
     installationDiamond,
     diamond.address,
     vrfCoordinator,

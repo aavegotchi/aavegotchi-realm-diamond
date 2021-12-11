@@ -69,6 +69,7 @@ contract AlchemicaFacet is Modifiers {
 
   function setVars(
     uint256[4][5] calldata _alchemicas,
+    uint256[4] calldata _greatPortalCapacity,
     address _installationsDiamond,
     address _greatPortalDiamond,
     address _vrfCoordinator,
@@ -81,6 +82,7 @@ contract AlchemicaFacet is Modifiers {
         s.totalAlchemicas[i][j] = _alchemicas[i][j];
       }
     }
+    s.greatPortalCapacity = _greatPortalCapacity;
     s.installationsDiamond = _installationsDiamond;
     s.greatPortalDiamond = _greatPortalDiamond;
     s.vrfCoordinator = _vrfCoordinator;
@@ -156,10 +158,6 @@ contract AlchemicaFacet is Modifiers {
   }
 
   function calculateSpilloverForReservoir(uint256 _tokenId, uint256 _alchemicaType) internal view returns (SpilloverIO memory spillover) {
-    //@todo: add in spillover percentages
-    // uint256 dummySpilloverRate = 80000; //80%
-    // uint256 dummySpilloverRadius = 1000; //1000 gotchis
-
     uint256 spilloverRate = s.parcels[_tokenId].spilloverRate[_alchemicaType] / s.parcels[_tokenId].reservoirCount[_alchemicaType];
     uint256 spilloverRadius = s.parcels[_tokenId].spilloverRadius[_alchemicaType] / s.parcels[_tokenId].reservoirCount[_alchemicaType];
 
@@ -256,22 +254,20 @@ contract AlchemicaFacet is Modifiers {
     //@todo: write tests to check spillover is accurate
     SpilloverIO memory spillover = calculateSpilloverForAltar(_realmId);
 
-    //@todo: use random number generation to determine final amounts
     uint256[4] memory channelAmounts = [uint256(100e18), uint256(50e18), uint256(25e18), uint256(10e18)];
-    //fud, fomo, alpha, kek
 
-    bool shouldMintNew = true; //@todo: change to check great portal balance is greater than the hardcoded upper limits
-
-    //@todo: handle gotchi lending case
-    if (shouldMintNew) {
-      for (uint256 i = 0; i < channelAmounts.length; i++) {
+    for (uint256 i; i < channelAmounts.length; i++) {
+      AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
+      if (alchemica.balanceOf(s.greatPortalDiamond) < s.greatPortalCapacity[i]) {
         TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], spillover.rate);
 
-        AlchemicaToken(s.alchemicaAddresses[i]).mint(alchemicaRecipient(_gotchiId), amounts.owner);
-        AlchemicaToken(s.alchemicaAddresses[i]).mint(s.greatPortalDiamond, amounts.spill);
+        alchemica.mint(alchemicaRecipient(_gotchiId), amounts.owner);
+        alchemica.mint(s.greatPortalDiamond, amounts.spill);
+      } else {
+        TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], spillover.rate);
+
+        alchemica.transfer(alchemicaRecipient(_gotchiId), amounts.owner);
       }
-    } else {
-      //@todo: transfer from great portal
     }
 
     emit ChannelAlchemica(_realmId, _gotchiId, channelAmounts, spillover.rate, spillover.radius);

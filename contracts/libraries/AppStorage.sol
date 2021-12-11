@@ -60,13 +60,13 @@ struct AppStorage {
   uint256 surveyingRound;
   uint256[4][5] totalAlchemicas;
   address[4] alchemicaAddresses;
+  uint256[4] greatPortalCapacity;
   // VRF
   address vrfCoordinator;
   address linkAddress;
   RequestConfig requestConfig;
   mapping(uint256 => uint256) vrfRequestIdToTokenId;
   mapping(uint256 => uint256) vrfRequestIdToSurveyingRound;
-
   bytes backendPubKey;
 }
 
