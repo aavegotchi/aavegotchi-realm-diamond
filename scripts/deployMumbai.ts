@@ -170,6 +170,7 @@ export async function deployDiamond() {
   const vrfCoordinator = "0xb96A95d11cE0B8E3AEdf332c9Df17fC31D379651";
   const linkAddress = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB";
   const installationDiamond = "0x6Ead866C75B485d4d1c123dc51eb6f749a02C797";
+  const backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
 
   const initVars = await alchemicaFacet.setVars(
     //@ts-ignore
@@ -178,7 +179,8 @@ export async function deployDiamond() {
     diamond.address,
     vrfCoordinator,
     linkAddress,
-    [fud.address, fomo.address, alpha.address, kek.address]
+    [fud.address, fomo.address, alpha.address, kek.address],
+    ethers.utils.hexDataSlice(backendSigner.publicKey, 1)
   );
 
   const initVarsReceipt = await initVars.wait();
