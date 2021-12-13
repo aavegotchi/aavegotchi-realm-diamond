@@ -10,7 +10,7 @@ import "../libraries/LibSignature.sol";
 import "../interfaces/AavegotchiDiamond.sol";
 import "../test/AlchemicaToken.sol";
 
-uint256 constant bp = 100000;
+uint256 constant bp = 100000000000000000000; // 100 ether in wei
 
 contract AlchemicaFacet is Modifiers {
   event AlchemicaClaimed(
