@@ -5,7 +5,7 @@ import { parcels } from "../../data/raffle2";
 import { maticDiamondAddress } from "../helperFunctions";
 
 export async function mintParcels() {
-  const maxProcess = 5;
+  const maxProcess = 30;
 
   const batches = Math.ceil(parcels.length / maxProcess);
   console.log("batches:", batches);
@@ -19,7 +19,7 @@ export async function mintParcels() {
 
     const taskArgs: MintParcelsTaskArgs = {
       //Send directly to voucher conversion contract
-      toAddress: "0x038d7eD80A500D2D181f67fd0DF60c57628Dcc7C",
+      toAddress: "0xD8eB01f43B2Cfb1b29e2119FFe90DFbF11f873a3",
       tokenIds: tokenIds,
       diamondAddress: maticDiamondAddress,
     };
