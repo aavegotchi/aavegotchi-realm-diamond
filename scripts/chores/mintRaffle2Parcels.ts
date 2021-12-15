@@ -19,7 +19,7 @@ export async function mintParcels() {
 
     const taskArgs: MintParcelsTaskArgs = {
       //Send directly to voucher conversion contract
-      toAddress: "0xD8eB01f43B2Cfb1b29e2119FFe90DFbF11f873a3",
+      toAddress: "0xd5724BCA82423D5792C676cd453c1Bf66151dC04",
       tokenIds: tokenIds,
       diamondAddress: maticDiamondAddress,
     };
