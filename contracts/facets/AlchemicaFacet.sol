@@ -199,6 +199,7 @@ contract AlchemicaFacet is Modifiers {
   }
 
   function alchemicaRecipient(uint256 _gotchiId) internal view returns (address) {
+    //@note: isAavegotchiLent() function does not yet exist in Aavegotchi Diamond
     AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
     if (diamond.isAavegotchiLent(_gotchiId)) {
       return diamond.gotchiEscrow(_gotchiId);
