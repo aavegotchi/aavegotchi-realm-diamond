@@ -10,7 +10,7 @@ import "../libraries/LibSignature.sol";
 import "../interfaces/AavegotchiDiamond.sol";
 import "../test/AlchemicaToken.sol";
 
-uint256 constant bp = 100000000000000000000; // 100 ether in wei
+uint256 constant bp = 100000000000000000000; // 100 ether in wei //@todo: maybe change this to 10e18?
 
 contract AlchemicaFacet is Modifiers {
   event AlchemicaClaimed(
@@ -252,6 +252,13 @@ contract AlchemicaFacet is Modifiers {
 
   function channelAlchemica(uint256 _realmId, uint256 _gotchiId) external {
     //@todo: write tests to check spillover is accurate
+
+    //@todo: enforce duration (once per parcel per 24 hrs)
+
+    //@todo: enforce that gotchi owner is also parcel owner
+
+    //@todo: enforce LibSignature hash
+
     SpilloverIO memory spillover = calculateSpilloverForAltar(_realmId);
 
     uint256[4] memory channelAmounts = [uint256(100e18), uint256(50e18), uint256(25e18), uint256(10e18)];
