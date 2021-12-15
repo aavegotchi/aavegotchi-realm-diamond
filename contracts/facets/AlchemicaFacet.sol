@@ -199,16 +199,12 @@ contract AlchemicaFacet is Modifiers {
   }
 
   function alchemicaRecipient(uint256 _gotchiId) internal view returns (address) {
-    //Check if Aavegotchi is being lent.
-
-    //if aavegotchi is being lent, return gotchi escrow address.
-    //else return msg.sender
-
-    //@todo: If gotchi is being lent, transfer funds to Gotchi escrow. Otherwise, transfer directly to owner account.
-    //@todo: use gotchiEscrow() function from aavegotchi diamond
-    address gotchiEscrowAddress = address(0);
-
-    return msg.sender;
+    AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
+    if (diamond.isAavegotchiLent(_gotchiId)) {
+      return diamond.gotchiEscrow(_gotchiId);
+    } else {
+      return diamond.ownerOf(_gotchiId);
+    }
   }
 
   function claimAvailableAlchemica(
