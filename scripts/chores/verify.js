@@ -1,24 +1,11 @@
 const { run } = require("hardhat");
 
-/*
-Diamond address: 0xa44c8e0eCAEFe668947154eE2b803Bd4e6310EFe
-DiamondCutFacet: 0x27f09D8Bfb88C80498788D5DfAa25eae5b984A78
-DiamondInit: 0xd98c8146785A05473030ff1053c0E89Dcc8473Fc
-
-OwnershipFacet: 0x5F10fCEF9EF0a128d82AffC688D8A479bf40a818
-
-GBMFacet:  0x70461FC4FE6d28a8D5B492B3007193DdA4C4A2A5
-SettingsFacet: 0x64a4d92Fdb7561810063F5756e65b0E3CDb85A64
-DiamondLoupeFacet: 0xa23fbAC1B441787d6469F9C1E17B51B3F3C5DE28
-*/
-
 async function verify() {
-  const address = "0x45944862B6274ea45FBC6063996112D41e4C2E49"; // deployed address
-  const facet = "DiamondLoupeFacet"; // name of facet
-  await run("verifyFacet", {
-    apikey: process.env.POLYGON_API_KEY,
-    contract: address,
-    facet: facet,
+  const address = "0xC1572d67f0f3d3F33F9b7f0a077F3A486Ab58964"; // deployed address
+
+  await run("verify:verify", {
+    // apikey: process.env.POLYGON_API_KEY,
+    address: address,
   });
 }
 
