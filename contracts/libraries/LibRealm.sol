@@ -65,23 +65,39 @@ library LibRealm {
     }
   }
 
+  function calculateAmount(
+    uint256 _tokenId,
+    uint256[] memory randomWords,
+    uint256 i
+  ) internal view returns (uint256) {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+    return (randomWords[i] % s.totalAlchemicas[s.parcels[_tokenId].size][i]) / 4; //25% of initial supply
+  }
+
   function updateRemainingAlchemicaFirstRound(uint256 _tokenId, uint256[] memory randomWords) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
     uint256[] memory alchemicas = new uint256[](4);
     for (uint8 i; i < 4; i++) {
-      s.parcels[_tokenId].alchemicaRemaining[i] = (randomWords[i] % s.totalAlchemicas[s.parcels[_tokenId].size][i]) / 5;
-      alchemicas[i] = (randomWords[i] % s.totalAlchemicas[s.parcels[_tokenId].size][i]) / 5;
+      uint256 amount = calculateAmount(_tokenId, randomWords, i);
+      uint256 boost = s.parcels[_tokenId].alchemicaBoost[i]; //@todo: calculate final boost amount
+
+      s.parcels[_tokenId].alchemicaRemaining[i] = amount + boost;
+      alchemicas[i] = amount + boost;
     }
     emit SurveyParcel(_tokenId, alchemicas);
   }
 
-  // TODO update formula to match 80% of remaning supply divided in 9 rounds
+  // TODO test formula
   function updateRemainingAlchemica(uint256 _tokenId, uint256[] memory randomWords) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
     uint256[] memory alchemicas = new uint256[](4);
     for (uint8 i; i < 4; i++) {
-      s.parcels[_tokenId].alchemicaRemaining[i] = (randomWords[i] % s.totalAlchemicas[s.parcels[_tokenId].size][i]) / 5;
-      alchemicas[i] = (randomWords[i] % s.totalAlchemicas[s.parcels[_tokenId].size][i]) / 5;
+      uint256 amount = calculateAmount(_tokenId, randomWords, i) * 3; //75%;
+      uint256 roundAmount = amount / 9; //75% / 9 = 8.3%
+      uint256 boost = s.parcels[_tokenId].alchemicaBoost[i]; //@todo: calculate final boost amount
+
+      s.parcels[_tokenId].alchemicaRemaining[i] += roundAmount + boost;
+      alchemicas[i] = roundAmount + boost;
     }
     emit SurveyParcel(_tokenId, alchemicas);
   }
