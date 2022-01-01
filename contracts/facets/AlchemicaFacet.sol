@@ -75,7 +75,8 @@ contract AlchemicaFacet is Modifiers {
     address _vrfCoordinator,
     address _linkAddress,
     address[4] calldata _alchemicaAddresses,
-    bytes memory _backendPubKey
+    bytes memory _backendPubKey,
+    address _gameManager
   ) external onlyOwner {
     for (uint8 i; i < _alchemicas.length; i++) {
       for (uint256 j; j < _alchemicas[i].length; j++) {
@@ -89,6 +90,7 @@ contract AlchemicaFacet is Modifiers {
     s.linkAddress = _linkAddress;
     s.alchemicaAddresses = _alchemicaAddresses;
     s.backendPubKey = _backendPubKey;
+    s.gameManager = _gameManager;
   }
 
   // testing funcs
@@ -247,7 +249,12 @@ contract AlchemicaFacet is Modifiers {
     emit AlchemicaClaimed(_tokenId, _gotchiId, _alchemicaType, available, spillover.rate, spillover.radius);
   }
 
-  function channelAlchemica(uint256 _realmId, uint256 _gotchiId) external {
+  function channelAlchemica(
+    uint256 _realmId,
+    uint256 _gotchiId,
+    uint256 _lastChanneled,
+    bytes memory _signature
+  ) external {
     //@todo: write tests to check spillover is accurate
 
     //@todo: enforce duration (once per parcel per 24 hrs)
@@ -255,6 +262,13 @@ contract AlchemicaFacet is Modifiers {
     //@todo: enforce that gotchi owner is also parcel owner
 
     //@todo: enforce LibSignature hash
+
+    require(_lastChanneled == s.parcels[_realmId].gotchiChannelings[_gotchiId], "AlchemicaFacet: Incorrect last duration");
+
+    require(block.timestamp - _lastChanneled < 1 days, "AlchemicaFacet: Can't channel yet");
+
+    bytes32 messageHash = keccak256(abi.encodePacked(_realmId, _gotchiId, _lastChanneled));
+    require(LibSignature.isValid(messageHash, _signature, s.backendPubKey), "AlchemicaFacet: Invalid signature");
 
     SpilloverIO memory spillover = calculateSpilloverForAltar(_realmId);
 
@@ -274,6 +288,30 @@ contract AlchemicaFacet is Modifiers {
       }
     }
 
+    //update latest channeling
+    s.parcels[_realmId].gotchiChannelings[_gotchiId] = block.timestamp;
+
     emit ChannelAlchemica(_realmId, _gotchiId, channelAmounts, spillover.rate, spillover.radius);
+  }
+
+  function exitAlchemica(
+    uint256[] calldata _alchemica,
+    uint256 _gotchiId,
+    uint256 _lastExitTime,
+    bytes memory _signature
+  ) external {
+    require(msg.sender == s.gameManager, "AlchemicaFacet: Only Game Manager");
+    require(_alchemica.length == 4, "AlchemicaFacet: Incorrect length");
+
+    require(_lastExitTime == s.lastExitTime[_gotchiId], "AlchemicsFacet: Wrong last exit");
+
+    //lastExitTime ensures hash is unique every time
+    bytes32 messageHash = keccak256(abi.encodePacked(_alchemica[0], _alchemica[1], _alchemica[2], _alchemica[3], _lastExitTime, _gotchiId));
+    require(LibSignature.isValid(messageHash, _signature, s.backendPubKey), "AlchemicaFacet: Invalid signature");
+
+    for (uint256 i = 0; i < _alchemica.length; i++) {
+      AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
+      alchemica.transferFrom(s.greatPortalDiamond, alchemicaRecipient(_gotchiId), _alchemica[i]);
+    }
   }
 }
