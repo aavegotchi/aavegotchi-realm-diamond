@@ -217,7 +217,7 @@ contract AlchemicaFacet is Modifiers {
     bytes memory _signature
   ) external onlyParcelOwner(_tokenId) {
     //@todo: enforce the gotchiId via a positional hash
-    bytes32 messageHash = keccak256(abi.encodePacked(_alchemicaType, _gotchiId));
+    bytes32 messageHash = keccak256(abi.encodePacked(_alchemicaType, _tokenId, _gotchiId, s.parcels[_tokenId].alchemicaRemaining[_alchemicaType]));
     require(LibSignature.isValid(messageHash, _signature, s.backendPubKey), "AlchemicaFacet: Invalid signature");
 
     //@todo: allow claimOperator
