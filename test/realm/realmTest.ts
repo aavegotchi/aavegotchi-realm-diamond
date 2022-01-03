@@ -1,10 +1,10 @@
-import { impersonate } from "../scripts/helperFunctions";
-import { RealmFacet, ERC721Facet } from "../typechain";
+import { impersonate } from "../../scripts/helperFunctions";
+import { RealmFacet, ERC721Facet } from "../../typechain";
 import { expect } from "chai";
 import { network } from "hardhat";
 import { ethers } from "hardhat";
-import { MintParcelInput } from "../types";
-import { deployDiamond } from "../scripts/deploy";
+import { MintParcelInput } from "../../types";
+import { deployDiamond } from "../../scripts/deployMatic";
 import { BigNumber } from "@ethersproject/bignumber";
 
 const testAddress1 = "0xBC67F26c2b87e16e304218459D2BB60Dac5C80bC";

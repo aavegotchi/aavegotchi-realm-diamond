@@ -3,8 +3,8 @@ import {
   maticAavegotchiDiamondAddress,
   maticGhstAddress,
   maticRealmDiamondAddress,
-} from "../scripts/helperFunctions";
-import { InstallationFacet, ERC1155Facet, IERC20 } from "../typechain";
+} from "../../scripts/helperFunctions";
+import { InstallationFacet, ERC1155Facet, IERC20 } from "../../typechain";
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
 import { deployDiamond } from "../scripts/deploy";

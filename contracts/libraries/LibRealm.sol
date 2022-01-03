@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-import {InstallationDiamond} from "../interfaces/InstallationDiamond.sol";
+import {InstallationDiamondInterface} from "../interfaces/InstallationDiamond.sol";
 import {LibAppStorage, AppStorage, Parcel} from "./AppStorage.sol";
 
 library LibRealm {
@@ -31,8 +31,8 @@ library LibRealm {
       64 //partner
     ];
 
-    InstallationDiamond installationsDiamond = InstallationDiamond(s.installationsDiamond);
-    InstallationDiamond.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
+    InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
+    InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
 
     Parcel storage parcel = s.parcels[_realmId];
 
@@ -54,8 +54,8 @@ library LibRealm {
     uint256 _y
   ) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
-    InstallationDiamond installationsDiamond = InstallationDiamond(s.installationsDiamond);
-    InstallationDiamond.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
+    InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
+    InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
     Parcel storage parcel = s.parcels[_realmId];
     require(parcel.buildGrid[_x][_y] == _installationId, "LibRealm: wrong installationId");
     for (uint256 indexW = _x; indexW < _x + installation.width; indexW++) {

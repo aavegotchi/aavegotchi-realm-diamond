@@ -167,9 +167,13 @@ contract AlchemicaFacet is Modifiers {
   }
 
   function calculateSpilloverForAltar(uint256 _tokenId) internal view returns (SpilloverIO memory spillover) {
-    uint256[] memory altarIds = InstallationDiamond(s.installationsDiamond).getAltarIds();
+    uint256[] memory altarIds = InstallationDiamondInterface(s.installationsDiamond).getAltarIds();
 
-    uint256[] memory altarBalances = InstallationDiamond(s.installationsDiamond).installationBalancesOfTokenByIds(address(this), _tokenId, altarIds);
+    uint256[] memory altarBalances = InstallationDiamondInterface(s.installationsDiamond).installationBalancesOfTokenByIds(
+      address(this),
+      _tokenId,
+      altarIds
+    );
 
     uint256 altarId = 0;
 
@@ -181,9 +185,9 @@ contract AlchemicaFacet is Modifiers {
     }
 
     //getting balances and spillover rates
-    uint256 rate = InstallationDiamond(s.installationsDiamond).spilloverRateOfId(altarId); // uint256 dummySpilloverRate = 80000; //80%
+    uint256 rate = InstallationDiamondInterface(s.installationsDiamond).spilloverRateOfId(altarId); // uint256 dummySpilloverRate = 80000; //80%
 
-    uint256 radius = InstallationDiamond(s.installationsDiamond).spilloverRadiusOfId(altarId);
+    uint256 radius = InstallationDiamondInterface(s.installationsDiamond).spilloverRadiusOfId(altarId);
     // uint256 dummySpilloverRadius = 1000; //1000 gotchis
 
     return SpilloverIO(rate, radius);

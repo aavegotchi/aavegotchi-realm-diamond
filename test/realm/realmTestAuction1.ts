@@ -1,8 +1,8 @@
-import { RealmFacet, ERC721Facet } from "../typechain";
+import { RealmFacet, ERC721Facet } from "../../typechain";
 import { expect } from "chai";
 
 import { ethers } from "hardhat";
-import { MintParcelInput } from "../types";
+import { MintParcelInput } from "../../types";
 
 import { parcelMetadataFromTokenIds } from "../helpers/metadataHelpers";
 import { auction1 } from "../data/auction1";

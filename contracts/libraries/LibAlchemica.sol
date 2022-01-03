@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-import {InstallationDiamond} from "../interfaces/InstallationDiamond.sol";
+import {InstallationDiamondInterface} from "../interfaces/InstallationDiamond.sol";
 import {LibAppStorage, AppStorage, Parcel} from "./AppStorage.sol";
 
 library LibAlchemica {
@@ -40,7 +40,9 @@ library LibAlchemica {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
     //First save the current harvested amount
-    InstallationDiamond.InstallationType memory installationType = InstallationDiamond(s.installationsDiamond).getInstallationType(_installationId);
+    InstallationDiamondInterface.InstallationType memory installationType = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(
+      _installationId
+    );
 
     uint256 alchemicaType = installationType.alchemicaType;
 
@@ -66,7 +68,9 @@ library LibAlchemica {
   function reduceTraits(uint256 _realmId, uint256 _installationId) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
-    InstallationDiamond.InstallationType memory installationType = InstallationDiamond(s.installationsDiamond).getInstallationType(_installationId);
+    InstallationDiamondInterface.InstallationType memory installationType = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(
+      _installationId
+    );
 
     uint256 alchemicaType = installationType.alchemicaType;
 

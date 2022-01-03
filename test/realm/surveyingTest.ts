@@ -1,9 +1,12 @@
-import { impersonate, maticDiamondAddress } from "../scripts/helperFunctions";
+import {
+  impersonate,
+  maticDiamondAddress,
+} from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
-import { AlchemicaFacet, OwnershipFacet } from "../typechain";
+import { AlchemicaFacet, OwnershipFacet } from "../../typechain";
 import { upgrade } from "../scripts/upgrades/upgrade-realmSurveying";
-import { MintParcelInput } from "../types";
+import { MintParcelInput } from "../../types";
 
 describe("Testing Realms Surveying", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";

@@ -1,12 +1,13 @@
+import { BigNumberish } from "ethers";
 import { run, ethers } from "hardhat";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
-} from "../../tasks/deployUpgrade";
-import { AlchemicaFacet__factory } from "../../typechain";
-import { AlchemicaFacetInterface } from "../../typechain/AlchemicaFacet";
-import { maticDiamondAddress } from "../helperFunctions";
+} from "../../../tasks/deployUpgrade";
+import { AlchemicaFacet__factory } from "../../../typechain";
+import { AlchemicaFacetInterface } from "../../../typechain/AlchemicaFacet";
+import { maticDiamondAddress } from "../../helperFunctions";
 
 export async function upgrade() {
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
@@ -29,13 +30,14 @@ export async function upgrade() {
         "function getTotalAlchemicas() external view returns (uint256[4][5] memory)",
         "function getRealmAlchemica(uint256 _tokenId) external view returns (uint256[4] memory)",
         "function progressSurveyingRound() external",
-        "function setVars(uint256[4][5] calldata _alchemicas, uint256[4] _greatPortalCapacity, address _installationsDiamond, address _greatPortalDiamond, address _vrfCoordinator, address _linkAddress, address[4] calldata _alchemicaAddresses, bytes memory _backendPubKey) external",
+        "function setVars(uint256[4][5] calldata _alchemicas, uint256[4] _greatPortalCapacity, address _installationsDiamond, address _greatPortalDiamond, address _vrfCoordinator, address _linkAddress, address[4] calldata _alchemicaAddresses, bytes memory _backendPubKey, address _gameManager) external",
         "function testingStartSurveying(uint256 _tokenId, uint256 _surveyingRound) external",
         `function testingMintParcel(address _to, uint256[] calldata _tokenIds, ${mintParcelsInput}[] memory _metadata) external`,
+        "function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external",
         "function getAvailableAlchemica(uint256 _tokenId) public view returns (uint256[4] memory _availableAlchemica)",
         "function claimAvailableAlchemica(uint256 _tokenId, uint256 _alchemicaType, uint256 _gotchiId, bytes memory _signature) external",
-        "function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external",
-        "function channelAlchemica(uint256 _realmId, uint256 _gotchiId) external",
+        "function channelAlchemica(uint256 _realmId, uint256 _gotchiId, uint256 _lastChanneled, bytes memory _signature) external",
+        "function exitAlchemica(uint256[] calldata _alchemica, uint256 _gotchiId,uint256 _lastExitTime, bytes memory _signature) external",
       ],
       removeSelectors: [],
     },
@@ -62,7 +64,6 @@ export async function upgrade() {
         "function getSpaciousVerticalGrid(uint256 _parcelId) external view returns (uint256[32][64] memory output_)",
         "function getSpaciousHorizontalGrid(uint256 _parcelId) external view returns (uint256[64][32] memory output_)",
         "function getPaartnerGrid(uint256 _parcelId) external view returns (uint256[64][64] memory)",
-        // `function getParcelInfo(uint256 _tokenId) external view returns (${parcelOutput} output_)`,
       ],
       removeSelectors: [],
     },
@@ -70,10 +71,57 @@ export async function upgrade() {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
+  let iface: AlchemicaFacetInterface = new ethers.utils.Interface(
+    AlchemicaFacet__factory.abi
+  ) as AlchemicaFacetInterface;
+
+  const hardcodedAlchemicasTotals = [
+    [14154, 7076, 3538, 1414],
+    [56618, 28308, 14154, 5660],
+    [452946, 226472, 113236, 45294],
+    [452946, 226472, 113236, 45294],
+    [905894, 452946, 226472, 90588],
+  ];
+
+  const greatPortalCapacity: [
+    BigNumberish,
+    BigNumberish,
+    BigNumberish,
+    BigNumberish
+  ] = [
+    ethers.utils.parseUnits("1250000000"),
+    ethers.utils.parseUnits("625000000"),
+    ethers.utils.parseUnits("312500000"),
+    ethers.utils.parseUnits("125000000"),
+  ];
+
+  const calldata = iface.encodeFunctionData(
+    //@ts-ignore
+    "setVars",
+    [
+      hardcodedAlchemicasTotals,
+      greatPortalCapacity,
+      "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
+      "0x0000000000000000000000000000000000000000",
+      "0x0000000000000000000000000000000000000000",
+      "0x0000000000000000000000000000000000000000",
+      [
+        "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
+        "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
+        "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
+        "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
+      ],
+      "0x",
+      "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
+    ]
+  );
+
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: maticDiamondAddress,
     facetsAndAddSelectors: joined,
+    initAddress: maticDiamondAddress,
+    initCalldata: calldata,
     useLedger: false,
     useMultisig: false,
   };

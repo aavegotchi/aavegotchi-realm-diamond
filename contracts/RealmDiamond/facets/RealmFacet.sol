@@ -8,7 +8,7 @@ import "../../libraries/LibMeta.sol";
 import "../../libraries/LibERC721.sol";
 import "../../libraries/LibRealm.sol";
 import "../../libraries/LibAlchemica.sol";
-import {InstallationDiamond} from "../../interfaces/InstallationDiamond.sol";
+import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamond.sol";
 import "../../test/AlchemicaToken.sol";
 
 contract RealmFacet is Modifiers {
@@ -64,7 +64,7 @@ contract RealmFacet is Modifiers {
     uint256 _y
   ) external onlyParcelOwner(_realmId) {
     LibRealm.placeInstallation(_realmId, _installationId, _x, _y);
-    InstallationDiamond(s.installationsDiamond).equipInstallation(msg.sender, _realmId, _installationId);
+    InstallationDiamondInterface(s.installationsDiamond).equipInstallation(msg.sender, _realmId, _installationId);
 
     LibAlchemica.increaseTraits(_realmId, _installationId);
 
@@ -80,8 +80,8 @@ contract RealmFacet is Modifiers {
     LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
     // refund 50% alchemica from great portal
     // comment it out for testing
-    InstallationDiamond installationsDiamond = InstallationDiamond(s.installationsDiamond);
-    InstallationDiamond.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
+    InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
+    InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
 
     for (uint8 i; i < installation.alchemicaCost.length; i++) {
       AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
@@ -89,7 +89,7 @@ contract RealmFacet is Modifiers {
       uint256 alchemicaRefund = installation.alchemicaCost[i] / 2;
       alchemica.transfer(msg.sender, alchemicaRefund);
     }
-    InstallationDiamond(s.installationsDiamond).unequipInstallation(msg.sender, _realmId, _installationId);
+    InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(msg.sender, _realmId, _installationId);
 
     LibAlchemica.reduceTraits(_realmId, _installationId);
 

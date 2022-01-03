@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { RealmFacet, AlchemicaFacet } from "../typechain";
+import { RealmFacet, AlchemicaFacet } from "../../typechain";
 import { BigNumberish } from "@ethersproject/bignumber";
 
 export async function setAddresses() {

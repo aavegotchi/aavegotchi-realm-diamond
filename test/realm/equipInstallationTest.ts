@@ -1,8 +1,17 @@
-import { impersonate, maticDiamondAddress } from "../scripts/helperFunctions";
+import {
+  impersonate,
+  maticDiamondAddress,
+} from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
-import { RealmFacet, InstallationDiamond, IERC20 } from "../typechain";
-import { upgrade } from "../scripts/upgrades/upgrade-equipInstallation";
+import {
+  RealmFacet,
+  IERC20,
+  InstallationFacet,
+  ERC1155Facet,
+} from "../../typechain";
+import { upgrade } from "../../scripts/realm/upgrades/upgrade-equipInstallation";
+import { InstallationType } from "../../types";
 
 describe("Testing Equip Installation", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
@@ -10,8 +19,9 @@ describe("Testing Equip Installation", async function () {
   const installationsOwner = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
 
   let realmFacet: RealmFacet;
-  let installationDiamond: InstallationDiamond;
+  let installationFacet: InstallationFacet;
   let ghst: IERC20;
+  let erc1155facet: ERC1155Facet;
 
   before(async function () {
     this.timeout(20000000);
@@ -21,19 +31,24 @@ describe("Testing Equip Installation", async function () {
       "RealmFacet",
       maticDiamondAddress
     )) as RealmFacet;
-    installationDiamond = (await ethers.getContractAt(
-      "InstallationDiamond",
+    installationFacet = (await ethers.getContractAt(
+      "InstallationFacet",
       installationsAddress
-    )) as InstallationDiamond;
+    )) as InstallationFacet;
     ghst = (await ethers.getContractAt(
       "IERC20",
       "0x385eeac5cb85a38a9a07a70c73e0a3271cfb54a7"
     )) as IERC20;
+
+    erc1155facet = (await ethers.getContractAt(
+      "ERC1155Facet",
+      installationsAddress
+    )) as ERC1155Facet;
   });
   it("Setup installation diamond", async function () {
-    installationDiamond = await impersonate(
+    installationFacet = await impersonate(
       installationsOwner,
-      installationDiamond,
+      installationFacet,
       ethers,
       network
     );
@@ -43,12 +58,12 @@ describe("Testing Equip Installation", async function () {
       "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
       "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
     ];
-    await installationDiamond.setAlchemicaAddresses(setAlchemicaAddresses);
+    await installationFacet.setAlchemicaAddresses(setAlchemicaAddresses);
     const getAlchemicaAddresses =
-      await installationDiamond.getAlchemicaAddresses();
+      await installationFacet.getAlchemicaAddresses();
     expect(setAlchemicaAddresses).to.eql(getAlchemicaAddresses);
-    let installationsTypes = await installationDiamond.getInstallationTypes([]);
-    const installations = [];
+    let installationsTypes = await installationFacet.getInstallationTypes([]);
+    const installations: InstallationType[] = [];
     installations.push({
       installationType: 0,
       level: 0,
@@ -59,8 +74,11 @@ describe("Testing Equip Installation", async function () {
       harvestRate: 0,
       capacity: 0,
       spillRadius: 0,
-      spillPercentage: 0,
+      spillRate: 0,
       craftTime: 0,
+      deprecated: false,
+      nextLevelId: 0,
+      prerequisites: [],
     });
     installations.push({
       installationType: 0,
@@ -72,8 +90,11 @@ describe("Testing Equip Installation", async function () {
       harvestRate: 2,
       capacity: 0,
       spillRadius: 0,
-      spillPercentage: 0,
+      spillRate: 0,
       craftTime: 10000,
+      deprecated: false,
+      nextLevelId: 0,
+      prerequisites: [],
     });
     installations.push({
       installationType: 1,
@@ -85,18 +106,21 @@ describe("Testing Equip Installation", async function () {
       harvestRate: 0,
       capacity: 50000,
       spillRadius: 100,
-      spillPercentage: 100,
+      spillRate: 100,
       craftTime: 20000,
+      deprecated: false,
+      nextLevelId: 0,
+      prerequisites: [],
     });
-    await installationDiamond.addInstallationTypes(installations);
-    installationsTypes = await installationDiamond.getInstallationTypes([]);
+    await installationFacet.addInstallationTypes(installations);
+    installationsTypes = await installationFacet.getInstallationTypes([]);
     expect(installationsTypes.length).to.equal(installations.length);
   });
   it("Craft installations", async function () {
     ghst = await impersonate(testAddress, ghst, ethers, network);
-    installationDiamond = await impersonate(
+    installationFacet = await impersonate(
       testAddress,
-      installationDiamond,
+      installationFacet,
       ethers,
       network
     );
@@ -104,16 +128,16 @@ describe("Testing Equip Installation", async function () {
       installationsAddress,
       ethers.utils.parseUnits("1000000000")
     );
-    await installationDiamond.craftInstallations([1, 1, 1]);
-    await expect(
-      installationDiamond.claimInstallations([0])
-    ).to.be.revertedWith("InstallationFacet: installation not ready");
+    await installationFacet.craftInstallations([1, 1, 1]);
+    await expect(installationFacet.claimInstallations([0])).to.be.revertedWith(
+      "InstallationFacet: installation not ready"
+    );
     for (let i = 0; i < 11000; i++) {
       ethers.provider.send("evm_mine", []);
     }
-    const balancePre = await installationDiamond.balanceOf(testAddress, 1);
-    await installationDiamond.claimInstallations([0, 1, 2]);
-    const balancePost = await installationDiamond.balanceOf(testAddress, 1);
+    const balancePre = await erc1155facet.balanceOf(testAddress, 1);
+    await installationFacet.claimInstallations([0, 1, 2]);
+    const balancePost = await erc1155facet.balanceOf(testAddress, 1);
     expect(balancePost).to.above(balancePre);
   });
 
@@ -145,11 +169,11 @@ describe("Testing Equip Installation", async function () {
     ).to.be.revertedWith("LibItems: Doesn't have that many to transfer");
   });
   it("Unequip installaton", async function () {
-    await installationDiamond.craftInstallations([1]);
+    await installationFacet.craftInstallations([1]);
     for (let i = 0; i < 11000; i++) {
       ethers.provider.send("evm_mine", []);
     }
-    await installationDiamond.claimInstallations([3]);
+    await installationFacet.claimInstallations([3]);
     await expect(
       realmFacet.equipInstallation(2893, 1, 1, 1)
     ).to.be.revertedWith("LibRealm: Invalid spot");

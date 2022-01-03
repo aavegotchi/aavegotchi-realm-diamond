@@ -47,3 +47,20 @@ export interface UpgradeQueue {
   claimed: boolean;
   owner: string;
 }
+
+export interface InstallationType {
+  deprecated: boolean;
+  installationType: BigNumberish;
+  level: BigNumberish;
+  width: BigNumberish;
+  height: BigNumberish;
+  alchemicaType: BigNumberish;
+  alchemicaCost: BigNumberish[];
+  harvestRate: BigNumberish;
+  capacity: BigNumberish;
+  spillRadius: BigNumberish;
+  spillRate: BigNumberish;
+  craftTime: BigNumberish;
+  nextLevelId: BigNumberish;
+  prerequisites: BigNumberish[];
+}

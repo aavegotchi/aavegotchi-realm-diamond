@@ -6,7 +6,6 @@ import "../../libraries/LibDiamond.sol";
 import "../../libraries/LibStrings.sol";
 import "../../libraries/LibMeta.sol";
 import "../../libraries/LibERC721.sol";
-import {InstallationDiamond} from "../../interfaces/InstallationDiamond.sol";
 import {ERC721Marketplace} from "../../interfaces/ERC721Marketplace.sol";
 
 contract ERC721Facet is Modifiers {

@@ -1,4 +1,7 @@
-import { impersonate, maticDiamondAddress } from "../scripts/helperFunctions";
+import {
+  impersonate,
+  maticDiamondAddress,
+} from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
 import {
@@ -6,15 +9,20 @@ import {
   RealmFacet,
   OwnershipFacet,
   AlchemicaToken,
-  InstallationDiamond,
-} from "../typechain";
-import { upgrade } from "../scripts/upgrades/upgrade-harvesting";
+  InstallationFacet,
+  ERC1155Facet,
+} from "../../typechain";
+import { upgrade } from "../../scripts/realm/upgrades/upgrade-harvesting";
 import { BigNumberish } from "@ethersproject/bignumber";
+import { Wallet } from "ethers";
+import { deployDiamond } from "../../scripts/installation/deploy";
 
+import { InstallationType } from "../../types";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 describe("Testing Equip Installation", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
-  const installationsAddress = "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5";
-  const installationsOwner = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
+  // const installationsAddress = "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5";
+  // const installationsOwner = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
   const alchemicaTestAmount = ethers.utils.parseUnits("100000");
   const alchemicaForTester = ethers.utils.parseUnits("50000");
 
@@ -47,16 +55,23 @@ describe("Testing Equip Installation", async function () {
 
   let alchemicaFacet: AlchemicaFacet;
   let realmFacet: RealmFacet;
-  let installationDiamond: InstallationDiamond;
+  let installationDiamond: InstallationFacet;
   let ownerAddress: string;
+  let installationsAddress: string;
   let fud: AlchemicaToken;
   let fomo: AlchemicaToken;
   let alpha: AlchemicaToken;
   let kek: AlchemicaToken;
+  let erc1155Facet: ERC1155Facet;
+  let currentAccount: SignerWithAddress;
 
   before(async function () {
+    const accounts = await ethers.getSigners();
+    currentAccount = accounts[0];
+
     this.timeout(20000000);
     await upgrade();
+    installationsAddress = await deployDiamond();
 
     alchemicaFacet = (await ethers.getContractAt(
       "AlchemicaFacet",
@@ -67,9 +82,15 @@ describe("Testing Equip Installation", async function () {
       maticDiamondAddress
     )) as RealmFacet;
     installationDiamond = (await ethers.getContractAt(
-      "InstallationDiamond",
+      "InstallationFacet",
       installationsAddress
-    )) as InstallationDiamond;
+    )) as InstallationFacet;
+
+    erc1155Facet = (await ethers.getContractAt(
+      "ERC1155Facet",
+      installationsAddress
+    )) as ERC1155Facet;
+
     const ownershipFacet = (await ethers.getContractAt(
       "OwnershipFacet",
       maticDiamondAddress
@@ -112,7 +133,8 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
-    const backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+    //@ts-ignore
+    const backendSigner: Wallet = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
 
     await alchemicaFacet.setVars(
       hardcodedAlchemicasTotals,
@@ -122,7 +144,8 @@ describe("Testing Equip Installation", async function () {
       "0x0000000000000000000000000000000000000000",
       "0x0000000000000000000000000000000000000000",
       [fud.address, fomo.address, alpha.address, kek.address],
-      ethers.utils.hexDataSlice(backendSigner.publicKey, 1)
+      ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
+      ownerAddress
     );
     await network.provider.send("hardhat_setBalance", [
       maticDiamondAddress,
@@ -136,7 +159,7 @@ describe("Testing Equip Installation", async function () {
   });
   it("Setup installation diamond", async function () {
     installationDiamond = await impersonate(
-      installationsOwner,
+      currentAccount.address,
       installationDiamond,
       ethers,
       network
@@ -152,7 +175,7 @@ describe("Testing Equip Installation", async function () {
       await installationDiamond.getAlchemicaAddresses();
     expect(setAlchemicaAddresses).to.eql(getAlchemicaAddresses);
     let installationsTypes = await installationDiamond.getInstallationTypes([]);
-    const installations = [];
+    const installations: InstallationType[] = [];
     installations.push({
       installationType: 0,
       level: 0,
@@ -163,8 +186,11 @@ describe("Testing Equip Installation", async function () {
       harvestRate: 0,
       capacity: 0,
       spillRadius: 0,
-      spillPercentage: 0,
+      spillRate: 0,
       craftTime: 0,
+      deprecated: false,
+      nextLevelId: 0,
+      prerequisites: [],
     });
     installations.push({
       installationType: 0,
@@ -172,12 +198,15 @@ describe("Testing Equip Installation", async function () {
       width: 2,
       height: 2,
       alchemicaType: 0,
-      alchemicaCost: [ethers.utils.parseUnits("100"), 0, 0, 0],
+      alchemicaCost: [0, 0, 0, 0],
       harvestRate: ethers.utils.parseUnits("2"),
       capacity: 0,
       spillRadius: 0,
-      spillPercentage: 0,
+      spillRate: 0,
       craftTime: 10000,
+      deprecated: false,
+      nextLevelId: 0,
+      prerequisites: [],
     });
     installations.push({
       installationType: 1,
@@ -185,12 +214,15 @@ describe("Testing Equip Installation", async function () {
       width: 4,
       height: 4,
       alchemicaType: 0,
-      alchemicaCost: [ethers.utils.parseUnits("200"), 0, 0, 0],
+      alchemicaCost: [0, 0, 0, 0],
       harvestRate: 0,
       capacity: ethers.utils.parseUnits("5000"),
       spillRadius: ethers.utils.parseUnits("100"),
-      spillPercentage: ethers.utils.parseUnits("10"),
+      spillRate: ethers.utils.parseUnits("10"),
       craftTime: 20000,
+      deprecated: false,
+      nextLevelId: 0,
+      prerequisites: [],
     });
     await installationDiamond.addInstallationTypes(installations);
     installationsTypes = await installationDiamond.getInstallationTypes([]);
@@ -230,9 +262,9 @@ describe("Testing Equip Installation", async function () {
     for (let i = 0; i < 21000; i++) {
       ethers.provider.send("evm_mine", []);
     }
-    const balancePre = await installationDiamond.balanceOf(testAddress, 1);
+    const balancePre = await erc1155Facet.balanceOf(testAddress, 1);
     await installationDiamond.claimInstallations([0, 1, 2, 3]);
-    const balancePost = await installationDiamond.balanceOf(testAddress, 1);
+    const balancePost = await erc1155Facet.balanceOf(testAddress, 1);
     expect(balancePost).to.above(balancePre);
   });
   it("Survey Parcel", async function () {
@@ -260,7 +292,8 @@ describe("Testing Equip Installation", async function () {
       200
     );
 
-    let backendSigner = new ethers.Wallet(process.env.GBM_PK); // PK should start with '0x'
+    //@ts-ignore
+    const backendSigner: Wallet = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
     let messageHash = ethers.utils.solidityKeccak256(
       ["uint256", "uint256"],
       [0, 22306]

@@ -6,7 +6,7 @@ pragma solidity ^0.8.0;
 * EIP-2535 Diamonds: https://eips.ethereum.org/EIPS/eip-2535
 /******************************************************************************/
 
-interface InstallationDiamond {
+interface InstallationDiamondInterface {
   struct InstallationType {
     uint16 installationType; //0 = harvester, 1 = reservoir, 2 = altar, 3 = gotchi lodge
     uint16 level;

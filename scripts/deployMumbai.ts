@@ -12,7 +12,7 @@ import {
   RealmFacet,
   VRFFacet,
   AlchemicaToken,
-} from "../typechain";
+} from "../../typechain";
 import { gasPrice, impersonate } from "./helperFunctions";
 
 const { getSelectors, FacetCutAction } = require("./libraries/diamond.js");

@@ -1,4 +1,7 @@
-import { impersonate, maticDiamondAddress } from "../scripts/helperFunctions";
+import {
+  impersonate,
+  maticDiamondAddress,
+} from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
 import {
@@ -7,9 +10,9 @@ import {
   OwnershipFacet,
   AlchemicaToken,
   InstallationDiamond,
-} from "../typechain";
+} from "../../typechain";
 import { upgrade } from "../scripts/upgrades/upgrade-upgradeInstallation";
-import { UpgradeQueue } from "../types";
+import { UpgradeQueue } from "../../types";
 import { BigNumberish } from "@ethersproject/bignumber";
 
 describe("Testing Equip Installation", async function () {
