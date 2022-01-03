@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.9;
 
-import "../libraries/AppStorage.sol";
-import "../libraries/LibERC721.sol";
-import "../libraries/LibRealm.sol";
+import "../../libraries/AppStorage.sol";
+import "../../libraries/LibERC721.sol";
+import "../../libraries/LibRealm.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/dev/VRFConsumerBaseV2.sol";

@@ -2,11 +2,11 @@ import {
   impersonate,
   maticDiamondAddress,
   maticAavegotchiDiamondAddress,
-} from "../scripts/helperFunctions";
+} from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
-import { RealmFacet, ERC721Facet, ERC721Marketplace } from "../typechain";
-import { upgrade } from "../scripts/upgrades/upgrade-baazaarSupport";
+import { RealmFacet, ERC721Facet, ERC721Marketplace } from "../../typechain";
+import { upgrade } from "../../scripts/upgrades/upgrade-baazaarSupport";
 
 describe("Testing Realms in baazaar", async function () {
   const testAddress = "0xBC67F26c2b87e16e304218459D2BB60Dac5C80bC";

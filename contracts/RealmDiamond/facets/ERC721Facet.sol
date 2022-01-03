@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.9;
 
-import "../libraries/AppStorage.sol";
-import "../libraries/LibDiamond.sol";
-import "../libraries/LibStrings.sol";
-import "../libraries/LibMeta.sol";
-import "../libraries/LibERC721.sol";
-import {InstallationDiamond} from "../interfaces/InstallationDiamond.sol";
-import {ERC721Marketplace} from "../interfaces/ERC721Marketplace.sol";
+import "../../libraries/AppStorage.sol";
+import "../../libraries/LibDiamond.sol";
+import "../../libraries/LibStrings.sol";
+import "../../libraries/LibMeta.sol";
+import "../../libraries/LibERC721.sol";
+import {InstallationDiamond} from "../../interfaces/InstallationDiamond.sol";
+import {ERC721Marketplace} from "../../interfaces/ERC721Marketplace.sol";
 
 contract ERC721Facet is Modifiers {
   // bytes4 private constant ERC721_RECEIVED = 0x150b7a02;

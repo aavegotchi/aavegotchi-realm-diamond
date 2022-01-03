@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.9;
 
-import "../libraries/AppStorage.sol";
+import "../../libraries/AppStorage.sol";
 import "./RealmFacet.sol";
-import "../libraries/LibRealm.sol";
+import "../../libraries/LibRealm.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "../libraries/LibAlchemica.sol";
-import "../libraries/LibSignature.sol";
-import "../interfaces/AavegotchiDiamond.sol";
-import "../test/AlchemicaToken.sol";
+import "../../libraries/LibAlchemica.sol";
+import "../../libraries/LibSignature.sol";
+import "../../interfaces/AavegotchiDiamond.sol";
+import "../../test/AlchemicaToken.sol";
 
 uint256 constant bp = 100000000000000000000; // 100 ether in wei //@todo: maybe change this to 10e18?
 

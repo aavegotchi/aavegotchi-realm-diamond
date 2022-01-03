@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.9;
 
-import "../libraries/AppStorage.sol";
-import "../libraries/LibDiamond.sol";
-import "../libraries/LibStrings.sol";
-import "../libraries/LibMeta.sol";
-import "../libraries/LibERC721.sol";
-import "../libraries/LibRealm.sol";
-import "../libraries/LibAlchemica.sol";
-import {InstallationDiamond} from "../interfaces/InstallationDiamond.sol";
-import "../test/AlchemicaToken.sol";
+import "../../libraries/AppStorage.sol";
+import "../../libraries/LibDiamond.sol";
+import "../../libraries/LibStrings.sol";
+import "../../libraries/LibMeta.sol";
+import "../../libraries/LibERC721.sol";
+import "../../libraries/LibRealm.sol";
+import "../../libraries/LibAlchemica.sol";
+import {InstallationDiamond} from "../../interfaces/InstallationDiamond.sol";
+import "../../test/AlchemicaToken.sol";
 
 contract RealmFacet is Modifiers {
   uint256 constant MAX_SUPPLY = 420069;
