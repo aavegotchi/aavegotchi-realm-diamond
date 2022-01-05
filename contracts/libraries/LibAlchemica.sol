@@ -6,12 +6,6 @@ import {LibAppStorage, AppStorage, Parcel} from "./AppStorage.sol";
 import "hardhat/console.sol";
 
 library LibAlchemica {
-  //Parcel starts out with 0 harvest rate
-  //Player equips harvester, harvest rate begins increasing
-  //Available alchemica will always be 0 if reservoir has not been added
-  //Once player has equipped a reservoir, the harvested amount will increase until it has reached the capacity.
-  //When a player claims the alchemica, the timeSinceLastUpdate is reset to 0, which means the harvested amount is also set back to zero. This prevents the reservoir from immediately refilling after a claim.
-
   function settleUnclaimedAlchemica(uint256 _tokenId, uint256 _alchemicaType) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 

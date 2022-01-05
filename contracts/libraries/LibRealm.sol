@@ -93,7 +93,7 @@ library LibRealm {
     emit SurveyParcel(_tokenId, alchemicas);
   }
 
-  // TODO test formula
+  // TODO refactor between two functions
   function updateRemainingAlchemica(
     uint256 _tokenId,
     uint256[] memory randomWords,

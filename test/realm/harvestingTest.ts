@@ -19,6 +19,7 @@ import { deployDiamond } from "../../scripts/installation/deploy";
 
 import { InstallationType } from "../../types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { boostMultipliers, greatPortalCapacity } from "../../scripts/setVars";
 describe("Testing Equip Installation", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
   // const installationsAddress = "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5";
@@ -40,18 +41,6 @@ describe("Testing Equip Installation", async function () {
       );
     }
   }
-
-  const greatPortalCapacity: [
-    BigNumberish,
-    BigNumberish,
-    BigNumberish,
-    BigNumberish
-  ] = [
-    ethers.utils.parseUnits("1250000000"),
-    ethers.utils.parseUnits("625000000"),
-    ethers.utils.parseUnits("312500000"),
-    ethers.utils.parseUnits("125000000"),
-  ];
 
   let alchemicaFacet: AlchemicaFacet;
   let realmFacet: RealmFacet;
@@ -138,6 +127,7 @@ describe("Testing Equip Installation", async function () {
 
     await alchemicaFacet.setVars(
       hardcodedAlchemicasTotals,
+      boostMultipliers,
       greatPortalCapacity,
       installationsAddress,
       maticDiamondAddress,
@@ -274,7 +264,7 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
-    await alchemicaFacet.testingStartSurveying(2893, 0);
+    await alchemicaFacet.testingStartSurveying(2893);
   });
   it("Equip reservoir", async function () {
     realmFacet = await impersonate(testAddress, realmFacet, ethers, network);

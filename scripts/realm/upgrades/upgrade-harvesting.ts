@@ -1,4 +1,3 @@
-import { BigNumberish } from "ethers";
 import { run, ethers } from "hardhat";
 import {
   convertFacetAndSelectorsToString,
@@ -8,6 +7,11 @@ import {
 import { AlchemicaFacet__factory } from "../../../typechain";
 import { AlchemicaFacetInterface } from "../../../typechain/AlchemicaFacet";
 import { maticDiamondAddress } from "../../helperFunctions";
+import {
+  alchemicaTotals,
+  boostMultipliers,
+  greatPortalCapacity,
+} from "../../setVars";
 
 export async function upgrade() {
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
@@ -17,9 +21,6 @@ export async function upgrade() {
 
   const mintParcelsInput =
     "(uint256 coordinateX, uint256 coordinateY, uint256 district, string parcelId, string parcelAddress, uint256 size, uint256[4] boost)";
-
-  const parcelOutput =
-    "(string parcelId, string parcelAddress, address owner, uint256 coordinateX, uint256 coordinateY, uint256 size, uint256 district, uint256[4] boost)";
 
   const facets: FacetsAndAddSelectors[] = [
     {
@@ -79,46 +80,11 @@ export async function upgrade() {
     AlchemicaFacet__factory.abi
   ) as AlchemicaFacetInterface;
 
-  const hardcodedAlchemicasTotals: number[][] = [
-    [14154, 7076, 3538, 1414],
-    [56618, 28308, 14154, 5660],
-    [452946, 226472, 113236, 45294],
-    [452946, 226472, 113236, 45294],
-    [905894, 452946, 226472, 90588],
-  ];
-
-  const alchemicaTotalsBN: BigNumberish[][] = [];
-
-  hardcodedAlchemicasTotals.forEach((element) => {
-    alchemicaTotalsBN.push(
-      element.map((val) => ethers.utils.parseEther(val.toString()))
-    );
-  });
-
-  const greatPortalCapacity: [
-    BigNumberish,
-    BigNumberish,
-    BigNumberish,
-    BigNumberish
-  ] = [
-    ethers.utils.parseEther("1250000000"),
-    ethers.utils.parseEther("625000000"),
-    ethers.utils.parseEther("312500000"),
-    ethers.utils.parseEther("125000000"),
-  ];
-
-  const boostMultipliers: BigNumberish[] = [
-    ethers.utils.parseEther("1000"),
-    ethers.utils.parseEther("500"),
-    ethers.utils.parseEther("250"),
-    ethers.utils.parseEther("100"),
-  ];
-
   const calldata = iface.encodeFunctionData(
     //@ts-ignore
     "setVars",
     [
-      alchemicaTotalsBN,
+      alchemicaTotals(),
       boostMultipliers,
       greatPortalCapacity,
       "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
