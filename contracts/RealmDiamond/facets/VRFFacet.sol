@@ -15,7 +15,7 @@ contract VRFFacet is Modifiers {
     if (s.vrfRequestIdToSurveyingRound[requestId] == 0) {
       LibRealm.updateRemainingAlchemicaFirstRound(tokenId, randomWords);
     } else {
-      LibRealm.updateRemainingAlchemica(tokenId, randomWords);
+      LibRealm.updateRemainingAlchemica(tokenId, randomWords, s.vrfRequestIdToSurveyingRound[requestId]);
     }
   }
 

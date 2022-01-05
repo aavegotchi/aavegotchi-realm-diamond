@@ -220,8 +220,6 @@ contract InstallationFacet is Modifiers {
         //each wearable needs a unique queue id
         s.craftQueue.push(QueueItem(s.nextCraftId, readyBlock, _installationTypes[i], false, msg.sender));
 
-        // console.log("craft queue length:", s.craftQueue.length);
-
         emit AddedToQueue(s.nextCraftId, _installationTypes[i], readyBlock, msg.sender);
         s.nextCraftId++;
       }
@@ -323,8 +321,7 @@ contract InstallationFacet is Modifiers {
     // check coordinates
     RealmDiamond realm = RealmDiamond(s.realmDiamond);
 
-    //todo: remove only for testing
-    // realm.checkCoordinates(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId);
+    realm.checkCoordinates(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId);
     // check tech tree
 
     //current installation
@@ -384,9 +381,8 @@ contract InstallationFacet is Modifiers {
         // equip new installation
         LibInstallation._equipInstallation(queueUpgrade.owner, queueUpgrade.parcelId, nextLevelId);
 
-        //@todo: comment out only during local testing
-        // RealmDiamond realm = RealmDiamond(s.realmDiamond);
-        // realm.upgradeInstallation(queueUpgrade.parcelId, queueUpgrade.installationId, nextLevelId);
+        RealmDiamond realm = RealmDiamond(s.realmDiamond);
+        realm.upgradeInstallation(queueUpgrade.parcelId, queueUpgrade.installationId, nextLevelId);
         // pop upgrade from array
         s.upgradeQueue[index] = s.upgradeQueue[s.upgradeQueue.length - 1];
         s.upgradeQueue.pop();
@@ -451,6 +447,21 @@ contract InstallationFacet is Modifiers {
           _installationTypes[i].prerequisites
         )
       );
+
+      // bool deprecated;
+      //   uint16 installationType; //0 = harvester, 1 = reservoir, 2 = altar, 3 = gotchi lodge, 4 = wall, 5 = NFT display
+      //   uint16 level;
+      //   uint256 width;
+      //   uint256 height;
+      //   uint16 alchemicaType; //0 = none 1 = fud, 2 = fomo, 3 = alpha, 4 = kek
+      //   uint256[] alchemicaCost; // [fud, fomo, alpha, kek]
+      //   uint256 harvestRate;
+      //   uint256 capacity;
+      //   uint256 spillRadius;
+      //   uint256 spillRate;
+      //   uint256 craftTime; // in blocks
+      //   uint256 nextLevelId; //the ID of the next level of this installation. Used for upgrades.
+      //   uint256[] prerequisites; //IDs of installations that must be present before this installation can be added
     }
   }
 

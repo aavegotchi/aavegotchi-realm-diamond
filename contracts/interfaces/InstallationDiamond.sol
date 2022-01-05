@@ -8,7 +8,8 @@ pragma solidity ^0.8.0;
 
 interface InstallationDiamondInterface {
   struct InstallationType {
-    uint16 installationType; //0 = harvester, 1 = reservoir, 2 = altar, 3 = gotchi lodge
+    bool deprecated;
+    uint16 installationType; //0 = harvester, 1 = reservoir, 2 = altar, 3 = gotchi lodge, 4 = wall, 5 = NFT display
     uint16 level;
     uint256 width;
     uint256 height;
@@ -19,15 +20,15 @@ interface InstallationDiamondInterface {
     uint256 spillRadius;
     uint256 spillRate;
     uint256 craftTime; // in blocks
-    // glam token to reduce craftTime
+    uint256 nextLevelId; //the ID of the next level of this installation. Used for upgrades.
+    uint256[] prerequisites; //IDs of installations that must be present before this installation can be added
   }
 
   struct UpgradeQueue {
     uint256 parcelId;
     uint256 coordinateX;
     uint256 coordinateY;
-    uint256 prevInstallationId;
-    uint256 nextInstallationId;
+    uint256 installationId;
     uint256 readyBlock;
     bool claimed;
     address owner;

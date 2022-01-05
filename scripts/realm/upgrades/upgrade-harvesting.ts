@@ -26,18 +26,22 @@ export async function upgrade() {
       facetName: "AlchemicaFacet",
       addSelectors: [
         "function setAlchemicaAddresses(address[4] calldata _addresses) external",
-        "function startSurveying(uint256 _tokenId, uint256 _surveyingRound) external",
+        "function startSurveying(uint256 _tokenId) external",
         "function getTotalAlchemicas() external view returns (uint256[4][5] memory)",
         "function getRealmAlchemica(uint256 _tokenId) external view returns (uint256[4] memory)",
         "function progressSurveyingRound() external",
-        "function setVars(uint256[4][5] calldata _alchemicas, uint256[4] _greatPortalCapacity, address _installationsDiamond, address _greatPortalDiamond, address _vrfCoordinator, address _linkAddress, address[4] calldata _alchemicaAddresses, bytes memory _backendPubKey, address _gameManager) external",
-        "function testingStartSurveying(uint256 _tokenId, uint256 _surveyingRound) external",
+        "function setVars(uint256[4][5] calldata _alchemicas, uint256[4] calldata _boostMultipliers, uint256[4] _greatPortalCapacity, address _installationsDiamond, address _greatPortalDiamond, address _vrfCoordinator, address _linkAddress, address[4] calldata _alchemicaAddresses, bytes memory _backendPubKey, address _gameManager) external",
+        "function testingStartSurveying(uint256 _tokenId) external",
         `function testingMintParcel(address _to, uint256[] calldata _tokenIds, ${mintParcelsInput}[] memory _metadata) external`,
         "function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external",
         "function getAvailableAlchemica(uint256 _tokenId) public view returns (uint256[4] memory _availableAlchemica)",
         "function claimAvailableAlchemica(uint256 _tokenId, uint256 _alchemicaType, uint256 _gotchiId, bytes memory _signature) external",
         "function channelAlchemica(uint256 _realmId, uint256 _gotchiId, uint256 _lastChanneled, bytes memory _signature) external",
         "function exitAlchemica(uint256[] calldata _alchemica, uint256 _gotchiId,uint256 _lastExitTime, bytes memory _signature) external",
+        "function getRoundAlchemica(uint256 _realmId, uint256 _roundId) external view returns (uint256[] memory)",
+        "function getRoundBaseAlchemica(uint256 _realmId, uint256 _roundId) external view returns (uint256[] memory)",
+        "function getReservoirSpilloverRate(uint256 _tokenId, uint256 _alchemicaType) external view returns (uint256)",
+        "function getAltarSpilloverRate(uint256 _tokenId) external view returns (uint256)",
       ],
       removeSelectors: [],
     },
@@ -75,7 +79,7 @@ export async function upgrade() {
     AlchemicaFacet__factory.abi
   ) as AlchemicaFacetInterface;
 
-  const hardcodedAlchemicasTotals = [
+  const hardcodedAlchemicasTotals: number[][] = [
     [14154, 7076, 3538, 1414],
     [56618, 28308, 14154, 5660],
     [452946, 226472, 113236, 45294],
@@ -83,23 +87,39 @@ export async function upgrade() {
     [905894, 452946, 226472, 90588],
   ];
 
+  const alchemicaTotalsBN: BigNumberish[][] = [];
+
+  hardcodedAlchemicasTotals.forEach((element) => {
+    alchemicaTotalsBN.push(
+      element.map((val) => ethers.utils.parseEther(val.toString()))
+    );
+  });
+
   const greatPortalCapacity: [
     BigNumberish,
     BigNumberish,
     BigNumberish,
     BigNumberish
   ] = [
-    ethers.utils.parseUnits("1250000000"),
-    ethers.utils.parseUnits("625000000"),
-    ethers.utils.parseUnits("312500000"),
-    ethers.utils.parseUnits("125000000"),
+    ethers.utils.parseEther("1250000000"),
+    ethers.utils.parseEther("625000000"),
+    ethers.utils.parseEther("312500000"),
+    ethers.utils.parseEther("125000000"),
+  ];
+
+  const boostMultipliers: BigNumberish[] = [
+    ethers.utils.parseEther("1000"),
+    ethers.utils.parseEther("500"),
+    ethers.utils.parseEther("250"),
+    ethers.utils.parseEther("100"),
   ];
 
   const calldata = iface.encodeFunctionData(
     //@ts-ignore
     "setVars",
     [
-      hardcodedAlchemicasTotals,
+      alchemicaTotalsBN,
+      boostMultipliers,
       greatPortalCapacity,
       "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
       "0x0000000000000000000000000000000000000000",

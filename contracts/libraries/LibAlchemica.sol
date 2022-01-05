@@ -3,6 +3,7 @@ pragma solidity 0.8.9;
 
 import {InstallationDiamondInterface} from "../interfaces/InstallationDiamond.sol";
 import {LibAppStorage, AppStorage, Parcel} from "./AppStorage.sol";
+import "hardhat/console.sol";
 
 library LibAlchemica {
   //Parcel starts out with 0 harvest rate
@@ -14,13 +15,13 @@ library LibAlchemica {
   function settleUnclaimedAlchemica(uint256 _tokenId, uint256 _alchemicaType) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
-    //todo: check capacity
     uint256 capacity = s.parcels[_tokenId].reservoirCapacity[_alchemicaType];
+    uint256 alchemicaSinceUpdate = alchemicaSinceLastUpdate(_tokenId, _alchemicaType);
 
-    if (alchemicaSinceLastUpdate(_tokenId, _alchemicaType) > capacity) {
+    if (alchemicaSinceUpdate > capacity) {
       s.parcels[_tokenId].unclaimedAlchemica[_alchemicaType] = capacity;
     } else {
-      s.parcels[_tokenId].unclaimedAlchemica[_alchemicaType] += alchemicaSinceLastUpdate(_tokenId, _alchemicaType);
+      s.parcels[_tokenId].unclaimedAlchemica[_alchemicaType] += alchemicaSinceUpdate;
     }
 
     s.parcels[_tokenId].lastUpdateTimestamp[_alchemicaType] = block.timestamp;
@@ -28,13 +29,9 @@ library LibAlchemica {
 
   function alchemicaSinceLastUpdate(uint256 _tokenId, uint256 _alchemicaType) internal view returns (uint256) {
     AppStorage storage s = LibAppStorage.diamondStorage();
+
     return s.parcels[_tokenId].alchemicaHarvestRate[_alchemicaType] * (block.timestamp - s.parcels[_tokenId].lastUpdateTimestamp[_alchemicaType]);
   }
-
-  // function bumpHarvestRate(uint256 _tokenId) external {
-  //   //settleUnclaimedAlchemica
-  //   //iterate through all harvesters and update harvestrate to new rate
-  // }
 
   function increaseTraits(uint256 _realmId, uint256 _installationId) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
@@ -74,24 +71,25 @@ library LibAlchemica {
 
     uint256 alchemicaType = installationType.alchemicaType;
 
-    //unclaimed alchemica must be settled before mutating harvestRate and capacity
+    //unclaimed alchemica must be settled before updating harvestRate and capacity
     settleUnclaimedAlchemica(_realmId, alchemicaType);
 
+    //Decrement harvest variables
     if (installationType.harvestRate > 0) {
-      s.parcels[_realmId].alchemicaHarvestRate[installationType.alchemicaType] -= installationType.harvestRate;
+      s.parcels[_realmId].alchemicaHarvestRate[alchemicaType] -= installationType.harvestRate;
     }
 
+    //Decrement reservoir variables
     if (installationType.capacity > 0) {
-      //@todo: handle the case where a user has more harvested than reservoir capacity after the update
+      s.parcels[_realmId].reservoirCapacity[alchemicaType] -= installationType.capacity;
+      s.parcels[_realmId].reservoirCount[alchemicaType]--;
+      s.parcels[_realmId].spilloverRate[alchemicaType] -= installationType.spillRate;
+      s.parcels[_realmId].spilloverRadius[alchemicaType] -= installationType.spillRadius;
 
-      //decrement storage vars
-      s.parcels[_realmId].reservoirCapacity[installationType.alchemicaType] -= installationType.capacity;
-      s.parcels[_realmId].reservoirCount[installationType.alchemicaType]--;
-      s.parcels[_realmId].spilloverRate[installationType.alchemicaType] -= installationType.spillRate;
-      s.parcels[_realmId].spilloverRadius[installationType.alchemicaType] -= installationType.spillRadius;
-
-      //todo: solution 1: revert until user has claimed
-      //todo: solution 2: claim for user and then unequip
+      if (s.parcels[_realmId].unclaimedAlchemica[alchemicaType] > s.parcels[_realmId].reservoirCapacity[alchemicaType]) {
+        //@todo: test harvesting and then unequipping
+        revert("LibAlchemica: Unclaimed alchemica greater than reservoir capacity");
+      }
     }
   }
 }

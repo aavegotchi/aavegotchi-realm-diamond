@@ -9,6 +9,7 @@ import "../../libraries/LibAlchemica.sol";
 import "../../libraries/LibSignature.sol";
 import "../../interfaces/AavegotchiDiamond.sol";
 import "../../test/AlchemicaToken.sol";
+import "hardhat/console.sol";
 
 uint256 constant bp = 100000000000000000000; // 100 ether in wei //@todo: maybe change this to 10e18?
 
@@ -34,12 +35,10 @@ contract AlchemicaFacet is Modifiers {
     s.alchemicaAddresses = _addresses;
   }
 
-  function startSurveying(uint256 _tokenId, uint256 _surveyingRound) external {
-    require(s.parcels[_tokenId].owner == msg.sender, "RealmFacet: Not owner");
-    require(_surveyingRound <= s.surveyingRound, "RealmFacet: Round not released");
-    require(_surveyingRound == s.parcels[_tokenId].roundsClaimed, "RealmFacet: Wrong round");
-    s.parcels[_tokenId].roundsClaimed++;
-    drawRandomNumbers(_tokenId, _surveyingRound);
+  function startSurveying(uint256 _tokenId) external onlyParcelOwner(_tokenId) {
+    require(s.parcels[_tokenId].currentRound <= s.surveyingRound, "RealmFacet: Round not released");
+    s.parcels[_tokenId].currentRound++;
+    drawRandomNumbers(_tokenId, s.parcels[_tokenId].currentRound - 1);
   }
 
   function drawRandomNumbers(uint256 _tokenId, uint256 _surveyingRound) internal {
@@ -67,8 +66,17 @@ contract AlchemicaFacet is Modifiers {
     s.surveyingRound++;
   }
 
+  function getRoundAlchemica(uint256 _realmId, uint256 _roundId) external view returns (uint256[] memory) {
+    return s.parcels[_realmId].roundAlchemica[_roundId];
+  }
+
+  function getRoundBaseAlchemica(uint256 _realmId, uint256 _roundId) external view returns (uint256[] memory) {
+    return s.parcels[_realmId].roundBaseAlchemica[_roundId];
+  }
+
   function setVars(
     uint256[4][5] calldata _alchemicas,
+    uint256[4] calldata _boostMultipliers,
     uint256[4] calldata _greatPortalCapacity,
     address _installationsDiamond,
     address _greatPortalDiamond,
@@ -83,6 +91,7 @@ contract AlchemicaFacet is Modifiers {
         s.totalAlchemicas[i][j] = _alchemicas[i][j];
       }
     }
+    s.boostMultipliers = _boostMultipliers;
     s.greatPortalCapacity = _greatPortalCapacity;
     s.installationsDiamond = _installationsDiamond;
     s.greatPortalDiamond = _greatPortalDiamond;
@@ -94,16 +103,17 @@ contract AlchemicaFacet is Modifiers {
   }
 
   // testing funcs
-  function testingStartSurveying(uint256 _tokenId, uint256 _surveyingRound) external {
-    require(s.parcels[_tokenId].owner == msg.sender, "RealmFacet: Not owner");
-    require(_surveyingRound <= s.surveyingRound, "RealmFacet: Round not released");
-    require(_surveyingRound == s.parcels[_tokenId].roundsClaimed, "RealmFacet: Wrong round");
-    s.parcels[_tokenId].roundsClaimed++;
+  function testingStartSurveying(uint256 _tokenId) external onlyParcelOwner(_tokenId) {
+    require(s.parcels[_tokenId].currentRound <= s.surveyingRound, "RealmFacet: Round not released");
+
+    s.parcels[_tokenId].currentRound++;
     uint256[] memory alchemicas = new uint256[](4);
     for (uint256 i; i < 4; i++) {
-      alchemicas[i] = uint256(keccak256(abi.encodePacked(block.number, msg.sender, i)));
+      alchemicas[i] = uint256(keccak256(abi.encodePacked(msg.sender, uint256(1))));
     }
-    LibRealm.updateRemainingAlchemicaFirstRound(_tokenId, alchemicas);
+
+    if (s.parcels[_tokenId].currentRound - 1 == 0) LibRealm.updateRemainingAlchemicaFirstRound(_tokenId, alchemicas);
+    else LibRealm.updateRemainingAlchemica(_tokenId, alchemicas, s.parcels[_tokenId].currentRound - 1);
   }
 
   function testingMintParcel(
@@ -157,6 +167,14 @@ contract AlchemicaFacet is Modifiers {
   struct SpilloverIO {
     uint256 rate;
     uint256 radius;
+  }
+
+  function getReservoirSpilloverRate(uint256 _tokenId, uint256 _alchemicaType) external view returns (uint256) {
+    return calculateSpilloverForReservoir(_tokenId, _alchemicaType).rate;
+  }
+
+  function getAltarSpilloverRate(uint256 _tokenId) external view returns (uint256) {
+    return calculateSpilloverForAltar(_tokenId).rate;
   }
 
   function calculateSpilloverForReservoir(uint256 _tokenId, uint256 _alchemicaType) internal view returns (SpilloverIO memory spillover) {
@@ -214,24 +232,21 @@ contract AlchemicaFacet is Modifiers {
     }
   }
 
+  function gotchiOwner(uint256 _gotchiId) internal view returns (address) {}
+
   function claimAvailableAlchemica(
     uint256 _tokenId,
     uint256 _alchemicaType,
     uint256 _gotchiId,
     bytes memory _signature
-  ) external onlyParcelOwner(_tokenId) {
-    //@todo: enforce the gotchiId via a positional hash
-    bytes32 messageHash = keccak256(abi.encodePacked(_alchemicaType, _tokenId, _gotchiId, s.parcels[_tokenId].alchemicaRemaining[_alchemicaType]));
+  ) external onlyParcelOwner(_tokenId) onlyGotchiOwner(_gotchiId) {
+    uint256 remaining = s.parcels[_tokenId].alchemicaRemaining[_alchemicaType];
+    bytes32 messageHash = keccak256(abi.encodePacked(_alchemicaType, _tokenId, _gotchiId, remaining));
     require(LibSignature.isValid(messageHash, _signature, s.backendPubKey), "AlchemicaFacet: Invalid signature");
 
-    //@todo: allow claimOperator
-
-    AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
-    require(diamond.ownerOf(_gotchiId) == msg.sender, "AlchemicaFacet: No permission to claim");
+    //@todo (future release): allow claimOperator
 
     uint256 available = getAvailableAlchemica(_tokenId)[_alchemicaType];
-
-    uint256 remaining = s.parcels[_tokenId].alchemicaRemaining[_alchemicaType];
 
     require(remaining >= available, "AlchemicaFacet: Not enough alchemica available");
 
@@ -258,14 +273,10 @@ contract AlchemicaFacet is Modifiers {
     uint256 _gotchiId,
     uint256 _lastChanneled,
     bytes memory _signature
-  ) external {
+  ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) {
     //@todo: write tests to check spillover is accurate
 
     //@todo: enforce duration (once per parcel per 24 hrs)
-
-    //@todo: enforce that gotchi owner is also parcel owner
-
-    //@todo: enforce LibSignature hash
 
     require(_lastChanneled == s.parcels[_realmId].gotchiChannelings[_gotchiId], "AlchemicaFacet: Incorrect last duration");
 
@@ -280,6 +291,8 @@ contract AlchemicaFacet is Modifiers {
 
     for (uint256 i; i < channelAmounts.length; i++) {
       AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
+
+      //Mint new tokens if the Great Portal Balance is less than capacity
       if (alchemica.balanceOf(s.greatPortalDiamond) < s.greatPortalCapacity[i]) {
         TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], spillover.rate);
 
@@ -288,6 +301,7 @@ contract AlchemicaFacet is Modifiers {
       } else {
         TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], spillover.rate);
 
+        //todo: transfer from Great Portal
         alchemica.transfer(alchemicaRecipient(_gotchiId), amounts.owner);
       }
     }
@@ -303,8 +317,7 @@ contract AlchemicaFacet is Modifiers {
     uint256 _gotchiId,
     uint256 _lastExitTime,
     bytes memory _signature
-  ) external {
-    require(msg.sender == s.gameManager, "AlchemicaFacet: Only Game Manager");
+  ) external onlyGameManager {
     require(_alchemica.length == 4, "AlchemicaFacet: Incorrect length");
 
     require(_lastExitTime == s.lastExitTime[_gotchiId], "AlchemicsFacet: Wrong last exit");

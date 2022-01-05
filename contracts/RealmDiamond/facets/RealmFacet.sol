@@ -78,14 +78,15 @@ contract RealmFacet is Modifiers {
     uint256 _y
   ) external onlyParcelOwner(_realmId) {
     LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
-    // refund 50% alchemica from great portal
-    // comment it out for testing
+
     InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
     InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
 
+    // todo: refund 50% alchemica from great portal
     for (uint8 i; i < installation.alchemicaCost.length; i++) {
       AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
 
+      //@todo: include upgrades in refund?
       uint256 alchemicaRefund = installation.alchemicaCost[i] / 2;
       alchemica.transfer(msg.sender, alchemicaRefund);
     }

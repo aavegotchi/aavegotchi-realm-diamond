@@ -3,6 +3,7 @@ pragma solidity 0.8.9;
 
 import {InstallationDiamondInterface} from "../interfaces/InstallationDiamond.sol";
 import {LibAppStorage, AppStorage, Parcel} from "./AppStorage.sol";
+import "hardhat/console.sol";
 
 library LibRealm {
   event SurveyParcel(uint256 _tokenId, uint256[] _alchemicas);
@@ -71,34 +72,48 @@ library LibRealm {
     uint256 i
   ) internal view returns (uint256) {
     AppStorage storage s = LibAppStorage.diamondStorage();
-    return (randomWords[i] % s.totalAlchemicas[s.parcels[_tokenId].size][i]) / 4; //25% of initial supply
+    return (randomWords[i] % s.totalAlchemicas[s.parcels[_tokenId].size][i]);
   }
 
   function updateRemainingAlchemicaFirstRound(uint256 _tokenId, uint256[] memory randomWords) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
     uint256[] memory alchemicas = new uint256[](4);
+    uint256[] memory roundAmounts = new uint256[](4);
     for (uint8 i; i < 4; i++) {
-      uint256 amount = calculateAmount(_tokenId, randomWords, i);
-      uint256 boost = s.parcels[_tokenId].alchemicaBoost[i]; //@todo: calculate final boost amount
-
-      s.parcels[_tokenId].alchemicaRemaining[i] = amount + boost;
-      alchemicas[i] = amount + boost;
+      uint256 baseAmount = calculateAmount(_tokenId, randomWords, i);
+      uint256 roundAmount = baseAmount / 4;
+      uint256 boost = s.parcels[_tokenId].alchemicaBoost[i] * s.boostMultipliers[i];
+      s.parcels[_tokenId].alchemicaRemaining[i] = roundAmount + boost;
+      roundAmounts[i] = roundAmount;
+      alchemicas[i] = roundAmount + boost;
     }
+
+    s.parcels[_tokenId].roundAlchemica[0] = alchemicas;
+    s.parcels[_tokenId].roundBaseAlchemica[0] = roundAmounts;
     emit SurveyParcel(_tokenId, alchemicas);
   }
 
   // TODO test formula
-  function updateRemainingAlchemica(uint256 _tokenId, uint256[] memory randomWords) internal {
+  function updateRemainingAlchemica(
+    uint256 _tokenId,
+    uint256[] memory randomWords,
+    uint256 _round
+  ) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
     uint256[] memory alchemicas = new uint256[](4);
+    uint256[] memory roundAmounts = new uint256[](4);
     for (uint8 i; i < 4; i++) {
-      uint256 amount = calculateAmount(_tokenId, randomWords, i) * 3; //75%;
-      uint256 roundAmount = amount / 9; //75% / 9 = 8.3%
-      uint256 boost = s.parcels[_tokenId].alchemicaBoost[i]; //@todo: calculate final boost amount
+      uint256 baseAmount = calculateAmount(_tokenId, randomWords, i); //100%;
+      uint256 roundAmount = (baseAmount - (baseAmount / 4)) / 9; //75% / 9 = 8.3%
+      uint256 boost = s.parcels[_tokenId].alchemicaBoost[i] * s.boostMultipliers[i];
 
       s.parcels[_tokenId].alchemicaRemaining[i] += roundAmount + boost;
+      roundAmounts[i] = roundAmount;
       alchemicas[i] = roundAmount + boost;
     }
+    //update round alchemica
+    s.parcels[_tokenId].roundAlchemica[_round] = alchemicas;
+    s.parcels[_tokenId].roundBaseAlchemica[_round] = roundAmounts;
     emit SurveyParcel(_tokenId, alchemicas);
   }
 }

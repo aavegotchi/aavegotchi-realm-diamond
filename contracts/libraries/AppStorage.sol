@@ -2,6 +2,7 @@
 pragma solidity 0.8.9;
 import {LibDiamond} from "./LibDiamond.sol";
 import {LibMeta} from "./LibMeta.sol";
+import "../interfaces/AavegotchiDiamond.sol";
 
 uint256 constant HUMBLE_WIDTH = 8;
 uint256 constant HUMBLE_HEIGHT = 8;
@@ -29,7 +30,9 @@ struct Parcel {
   uint256[64][64] tileGrid; //x, then y array of positions - for tiles under the installations (floor)
   uint256[4] alchemicaBoost; //fud, fomo, alpha, kek
   uint256[4] alchemicaRemaining; //fud, fomo, alpha, kek
-  uint256 roundsClaimed;
+  uint256 currentRound; //begins at 0 and increments after surveying has begun
+  mapping(uint256 => uint256[]) roundBaseAlchemica; //round alchemica not including boosts
+  mapping(uint256 => uint256[]) roundAlchemica; //round alchemica including boosts
   uint256[4] reservoirCapacity;
   uint256[4] spilloverRate;
   uint256[4] spilloverRadius;
@@ -60,6 +63,7 @@ struct AppStorage {
   address greatPortalDiamond;
   uint256 surveyingRound;
   uint256[4][5] totalAlchemicas;
+  uint256[4] boostMultipliers;
   address[4] alchemicaAddresses;
   uint256[4] greatPortalCapacity;
   // VRF
@@ -70,7 +74,7 @@ struct AppStorage {
   mapping(uint256 => uint256) vrfRequestIdToSurveyingRound;
   bytes backendPubKey;
   address gameManager;
-  mapping(uint256 => uint256) lastExitTime;
+  mapping(uint256 => uint256) lastExitTime; //for aavegotchis exiting alchemica
 }
 
 library LibAppStorage {
@@ -91,6 +95,17 @@ contract Modifiers {
 
   modifier onlyOwner() {
     LibDiamond.enforceIsContractOwner();
+    _;
+  }
+
+  modifier onlyGotchiOwner(uint256 _gotchiId) {
+    AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
+    require(LibMeta.msgSender() == diamond.ownerOf(_gotchiId), "AppStorage: Only Gotchi Owner can call");
+    _;
+  }
+
+  modifier onlyGameManager() {
+    require(msg.sender == s.gameManager, "AlchemicaFacet: Only Game Manager");
     _;
   }
 

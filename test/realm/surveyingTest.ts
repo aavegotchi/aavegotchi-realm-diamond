@@ -4,17 +4,21 @@ import {
 } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
-import { AlchemicaFacet, OwnershipFacet } from "../../typechain";
-import { upgrade } from "../scripts/upgrades/upgrade-realmSurveying";
+import { AlchemicaFacet, OwnershipFacet, RealmFacet } from "../../typechain";
+import { upgrade } from "../../scripts/realm/upgrades/upgrade-harvesting";
 import { MintParcelInput } from "../../types";
+import { BigNumberish } from "ethers";
 
 describe("Testing Realms Surveying", async function () {
-  const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
-  const realmIds = [2893, 3642, 2800, 7015, 8877, 6453, 15536, 4565, 5212];
+  const testAddress = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
+  const realmIds = [2258, 12184];
   let ownerAddress: string;
   let alchemicaFacet: AlchemicaFacet;
   let ownershipFacet: OwnershipFacet;
   let parcelsTest1: MintParcelInput[] = [];
+
+  const firstTestParcel = "2258";
+  const boostedTestParcel = "12184";
 
   before(async function () {
     this.timeout(20000000);
@@ -31,47 +35,43 @@ describe("Testing Realms Surveying", async function () {
     ownerAddress = await ownershipFacet.owner();
     console.log("ownerAddress", ownerAddress);
   });
-  it("Test surveying", async function () {
+  it("Test surveying first round", async function () {
     alchemicaFacet = await impersonate(
       testAddress,
       alchemicaFacet,
       ethers,
       network
     );
-    let alchemicas: any = [[], [], [], []];
+
     for (let i = 0; i < realmIds.length; i++) {
-      await alchemicaFacet.testingStartSurveying(realmIds[i], 0);
-      const alchemica = await alchemicaFacet.getRealmAlchemica(realmIds[i]);
-      for (let i = 0; i < alchemica.length; i++) {
-        alchemicas[i].push(Number(ethers.utils.formatUnits(alchemica[i], 0)));
-      }
+      await alchemicaFacet.testingStartSurveying(realmIds[i]);
     }
-    const average = (arr: number[]) =>
-      arr.reduce((a: number, b: number) => a + b, 0) / arr.length;
-    console.log(average(alchemicas[0]));
-    console.log(average(alchemicas[1]));
-    console.log(average(alchemicas[2]));
-    console.log(average(alchemicas[3]));
-    //expected averages 45294 22647 11323 4529
+
+    const roundAlchemica = await alchemicaFacet.getRoundAlchemica(
+      firstTestParcel,
+      "0"
+    );
+
+    expect(roundAlchemica[0]).to.gt(0);
+    expect(roundAlchemica[1]).to.gt(0);
+    expect(roundAlchemica[2]).to.gt(0);
+    expect(roundAlchemica[3]).to.gt(0);
   });
 
-  it("Test surveying rounds", async function () {
+  it("Test surveying other rounds", async function () {
+    //can't survey round 1
     await expect(
-      alchemicaFacet.testingStartSurveying(8094, 1)
+      alchemicaFacet.testingStartSurveying(firstTestParcel)
     ).to.be.revertedWith("RealmFacet: Round not released");
-    await expect(
-      alchemicaFacet.testingStartSurveying(8094, 2)
-    ).to.be.revertedWith("RealmFacet: Round not released");
-    await alchemicaFacet.testingStartSurveying(8094, 0);
-    await expect(
-      alchemicaFacet.testingStartSurveying(8094, 0)
-    ).to.be.revertedWith("RealmFacet: Wrong round");
+
     alchemicaFacet = await impersonate(
       ownerAddress,
       alchemicaFacet,
       ethers,
       network
     );
+
+    //progress to round 1
     await alchemicaFacet.progressSurveyingRound();
     alchemicaFacet = await impersonate(
       testAddress,
@@ -79,26 +79,99 @@ describe("Testing Realms Surveying", async function () {
       ethers,
       network
     );
-    await expect(
-      alchemicaFacet.testingStartSurveying(10479, 2)
-    ).to.be.revertedWith("RealmFacet: Round not released");
-    await expect(
-      alchemicaFacet.testingStartSurveying(10479, 1)
-    ).to.be.revertedWith("RealmFacet: Wrong round");
-    await alchemicaFacet.testingStartSurveying(10479, 0);
-    await expect(
-      alchemicaFacet.testingStartSurveying(10479, 0)
-    ).to.be.revertedWith("RealmFacet: Wrong round");
-    await alchemicaFacet.testingStartSurveying(10479, 1);
-    await expect(
-      alchemicaFacet.testingStartSurveying(10479, 0)
-    ).to.be.revertedWith("RealmFacet: Wrong round");
-    await expect(
-      alchemicaFacet.testingStartSurveying(10479, 1)
-    ).to.be.revertedWith("RealmFacet: Wrong round");
-    await expect(
-      alchemicaFacet.testingStartSurveying(10479, 2)
-    ).to.be.revertedWith("RealmFacet: Round not released");
+
+    for (let i = 0; i < realmIds.length; i++) {
+      await alchemicaFacet.testingStartSurveying(realmIds[i]);
+    }
+
+    const roundAlchemica = await alchemicaFacet.getRoundAlchemica(
+      firstTestParcel,
+      "1"
+    );
+
+    expect(roundAlchemica[0]).to.gt(0);
+    expect(roundAlchemica[1]).to.gt(0);
+    expect(roundAlchemica[2]).to.gt(0);
+    expect(roundAlchemica[3]).to.gt(0);
+  });
+  it("Round totals should equal 25% and 8.3%, respectively", async function () {
+    const firstRoundAlchemicas = await alchemicaFacet.getRoundAlchemica(
+      firstTestParcel,
+      "0"
+    );
+
+    const secondRoundAlchemicas = await alchemicaFacet.getRoundAlchemica(
+      firstTestParcel,
+      "1"
+    );
+
+    const nineRoundsAlchemica: BigNumberish[] = [];
+    secondRoundAlchemicas.forEach((alc) => {
+      nineRoundsAlchemica.push(alc.mul(9));
+    });
+
+    const finalTally: BigNumberish[] = [];
+    for (let index = 0; index < 4; index++) {
+      finalTally.push(
+        firstRoundAlchemicas[index].add(nineRoundsAlchemica[index])
+      );
+    }
+
+    const percentagesFirstRound: BigNumberish[] = [];
+    const percentagesRemainingRounds: BigNumberish[] = [];
+    for (let index = 0; index < 4; index++) {
+      const firstRoundAlchemica = Number(
+        ethers.utils.formatEther(firstRoundAlchemicas[index])
+      );
+      const secondRoundAlchemica = Number(
+        ethers.utils.formatEther(secondRoundAlchemicas[index])
+      );
+      const final = Number(ethers.utils.formatEther(finalTally[index]));
+
+      percentagesFirstRound.push((firstRoundAlchemica / final).toFixed(2));
+      percentagesRemainingRounds.push(
+        (secondRoundAlchemica / final).toFixed(3)
+      );
+    }
+
+    expect(percentagesFirstRound[0]).to.equal("0.25");
+    expect(percentagesRemainingRounds[0]).to.equal("0.083");
+  });
+
+  it("Boost amounts should be accurate", async function () {
+    const boostMultipliers = [1000, 500, 250, 100];
+
+    const realmFacet = (await ethers.getContractAt(
+      "RealmFacet",
+      maticDiamondAddress
+    )) as RealmFacet;
+
+    const parcelInfo = await realmFacet.getParcelInfo(boostedTestParcel);
+
+    const boosts = parcelInfo.boost;
+
+    const roundTotal = await alchemicaFacet.getRoundAlchemica(
+      boostedTestParcel,
+      "1"
+    );
+
+    const roundBase = await alchemicaFacet.getRoundBaseAlchemica(
+      boostedTestParcel,
+      "1"
+    );
+
+    const boostAmounts: BigNumberish[] = [];
+
+    roundTotal.forEach((num, index) => {
+      boostAmounts.push(roundTotal[index].sub(roundBase[index]));
+    });
+
+    boostAmounts.forEach((amt, index) => {
+      const boostAmount = Number(ethers.utils.formatEther(amt));
+      expect(
+        Number(boosts[index].toString()) * boostMultipliers[index]
+      ).to.equal(boostAmount);
+    });
   });
 
   it("Test testingMintParcel", async function () {
