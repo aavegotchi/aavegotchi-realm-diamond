@@ -276,7 +276,7 @@ contract AlchemicaFacet is Modifiers {
   ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) {
     //@todo: write tests to check spillover is accurate
 
-    //@todo: enforce duration (once per parcel per 24 hrs)
+    //@todo: test enforce duration (once per parcel per 24 hrs)
 
     require(_lastChanneled == s.parcels[_realmId].gotchiChannelings[_gotchiId], "AlchemicaFacet: Incorrect last duration");
 
