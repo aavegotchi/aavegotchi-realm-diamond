@@ -185,12 +185,12 @@ contract AlchemicaFacet is Modifiers {
 
     for (uint256 index = 0; index < 4; index++) {
       //First get the onchain amount
-      uint256 available = s.parcels[_tokenId].unclaimedAlchemica[index];
+      uint256 available = s.parcels[_realmId].unclaimedAlchemica[index];
 
       //Then get the floating amount
-      available += LibAlchemica.alchemicaSinceLastUpdate(_tokenId, index);
+      available += LibAlchemica.alchemicaSinceLastUpdate(_realmId, index);
 
-      uint256 capacity = s.parcels[_tokenId].reservoirCapacity[index];
+      uint256 capacity = s.parcels[_realmId].reservoirCapacity[index];
 
       //ensure that available alchemica is not higher than available reservoir capacity
       if (available > capacity) _availableAlchemica[index] = capacity;
@@ -282,29 +282,29 @@ contract AlchemicaFacet is Modifiers {
   /// @param _signature Message signature used for backend validation
 
   function claimAvailableAlchemica(
-    uint256 _tokenId,
+    uint256 _realmId,
     uint256 _alchemicaType,
     uint256 _gotchiId,
     bytes memory _signature
-  ) external onlyParcelOwner(_tokenId) onlyGotchiOwner(_gotchiId) {
-    uint256 remaining = s.parcels[_tokenId].alchemicaRemaining[_alchemicaType];
-    bytes32 messageHash = keccak256(abi.encodePacked(_alchemicaType, _tokenId, _gotchiId, remaining));
+  ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) {
+    uint256 remaining = s.parcels[_realmId].alchemicaRemaining[_alchemicaType];
+    bytes32 messageHash = keccak256(abi.encodePacked(_alchemicaType, _realmId, _gotchiId, remaining));
     require(LibSignature.isValid(messageHash, _signature, s.backendPubKey), "AlchemicaFacet: Invalid signature");
 
     //@todo (future release): allow claimOperator
 
-    uint256 available = getAvailableAlchemica(_tokenId)[_alchemicaType];
+    uint256 available = getAvailableAlchemica(_realmId)[_alchemicaType];
 
     require(remaining >= available, "AlchemicaFacet: Not enough alchemica available");
 
-    s.parcels[_tokenId].alchemicaRemaining[_alchemicaType] -= available;
+    s.parcels[_realmId].alchemicaRemaining[_alchemicaType] -= available;
 
-    s.parcels[_tokenId].lastUpdateTimestamp[_alchemicaType] = block.timestamp;
+    s.parcels[_realmId].lastUpdateTimestamp[_alchemicaType] = block.timestamp;
 
     AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[_alchemicaType]);
 
     //@todo: write tests to check spillover is accurate
-    SpilloverIO memory spillover = calculateSpilloverForReservoir(_tokenId, _alchemicaType);
+    SpilloverIO memory spillover = calculateSpilloverForReservoir(_realmId, _alchemicaType);
 
     TransferAmounts memory amounts = calculateTransferAmounts(available, spillover.rate);
 
@@ -312,7 +312,7 @@ contract AlchemicaFacet is Modifiers {
     alchemica.mint(alchemicaRecipient(_gotchiId), amounts.owner);
     alchemica.mint(s.greatPortalDiamond, amounts.spill);
 
-    emit AlchemicaClaimed(_tokenId, _gotchiId, _alchemicaType, available, spillover.rate, spillover.radius);
+    emit AlchemicaClaimed(_realmId, _gotchiId, _alchemicaType, available, spillover.rate, spillover.radius);
   }
 
   /// @notice Allow a parcel owner to channel alchemica

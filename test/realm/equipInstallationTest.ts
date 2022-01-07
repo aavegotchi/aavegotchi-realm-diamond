@@ -9,23 +9,27 @@ import {
   IERC20,
   InstallationFacet,
   ERC1155Facet,
+  OwnershipFacet,
 } from "../../typechain";
-import { upgrade } from "../../scripts/realm/upgrades/upgrade-equipInstallation";
+import { upgrade } from "../../scripts/realm/upgrades/upgrade-harvesting";
 import { InstallationType } from "../../types";
+import { deployDiamond } from "../../scripts/installation/deploy";
 
 describe("Testing Equip Installation", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
-  const installationsAddress = "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5";
-  const installationsOwner = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
+  // const installationsAddress = "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5";
 
   let realmFacet: RealmFacet;
   let installationFacet: InstallationFacet;
   let ghst: IERC20;
   let erc1155facet: ERC1155Facet;
+  let installationsAddress: string;
 
   before(async function () {
     this.timeout(20000000);
     await upgrade();
+
+    installationsAddress = await deployDiamond();
 
     realmFacet = (await ethers.getContractAt(
       "RealmFacet",
@@ -36,7 +40,7 @@ describe("Testing Equip Installation", async function () {
       installationsAddress
     )) as InstallationFacet;
     ghst = (await ethers.getContractAt(
-      "IERC20",
+      "contracts/interfaces/IERC20.sol:IERC20",
       "0x385eeac5cb85a38a9a07a70c73e0a3271cfb54a7"
     )) as IERC20;
 
@@ -46,8 +50,13 @@ describe("Testing Equip Installation", async function () {
     )) as ERC1155Facet;
   });
   it("Setup installation diamond", async function () {
+    const ownershipFacet = (await ethers.getContractAt(
+      "OwnershipFacet",
+      installationsAddress
+    )) as OwnershipFacet;
+    const owner = await ownershipFacet.owner();
     installationFacet = await impersonate(
-      installationsOwner,
+      owner,
       installationFacet,
       ethers,
       network
@@ -139,6 +148,9 @@ describe("Testing Equip Installation", async function () {
     await installationFacet.claimInstallations([0, 1, 2]);
     const balancePost = await erc1155facet.balanceOf(testAddress, 1);
     expect(balancePost).to.above(balancePre);
+
+    const itemTypes = await installationFacet.getInstallationTypes(["0", "1"]);
+    console.log("item types:", itemTypes);
   });
 
   it("Equip installation", async function () {
