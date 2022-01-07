@@ -24,14 +24,20 @@ contract RealmFacet is Modifiers {
     uint256[4] boost; //fud, fomo, alpha, kek
   }
 
-  event ResyncParcel(uint256 _tokenId);
+  event ResyncParcel(uint256 _realmId);
   event EquipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y);
   event UnequipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y);
 
+  ///@notice Return the maximum realm supply
+  ///@return The max realm token supply
   function maxSupply() external pure returns (uint256) {
     return MAX_SUPPLY;
   }
 
+  ///@notice Allow the diamond owner to mint new parcels
+  ///@param _to The address to mint the parcels to
+  ///@param _tokenIds The identifiers of tokens to mint
+  ///@param _metadata An array of structs containing the metadata of each parcel being minted
   function mintParcels(
     address _to,
     uint256[] calldata _tokenIds,
@@ -57,6 +63,13 @@ contract RealmFacet is Modifiers {
     }
   }
 
+  ///@notice Allow a parcel owner to equip an installation
+  ///@dev The _x and _y denote the size of the installation and are used to make sure that slot is available on a parcel
+  ///@param _realmId The identifier of the parcel which the installation is being equipped on
+  ///@param _installationId The identifier of the installation being equipped
+  ///@param _x The x(horizontal) coordinate of the installation
+  ///@param _y The y(vertical) coordinate of the installation
+
   function equipInstallation(
     uint256 _realmId,
     uint256 _installationId,
@@ -71,6 +84,12 @@ contract RealmFacet is Modifiers {
     emit EquipInstallation(_realmId, _installationId, _x, _y);
   }
 
+  ///@notice Allow a parcel owner to unequip an installation
+  ///@dev The _x and _y denote the size of the installation and are used to make sure that slot is available on a parcel
+  ///@param _realmId The identifier of the parcel which the installation is being unequipped from
+  ///@param _installationId The identifier of the installation being unequipped
+  ///@param _x The x(horizontal) coordinate of the installation
+  ///@param _y The y(vertical) coordinate of the installation
   function unequipInstallation(
     uint256 _realmId,
     uint256 _installationId,
@@ -110,6 +129,7 @@ contract RealmFacet is Modifiers {
 
   /**
   @dev Used to resync a parcel on the subgraph if metadata is added later 
+@param _tokenIds The parcels to resync
   */
   function resyncParcel(uint256[] calldata _tokenIds) external onlyOwner {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
@@ -119,14 +139,18 @@ contract RealmFacet is Modifiers {
 
   /**
   @dev Used to set diamond address for Baazaar
+  @param _diamondAddress New diamond address for the baazar
   */
   function setAavegotchiDiamond(address _diamondAddress) external onlyOwner {
     require(_diamondAddress != address(0), "RealmFacet: Cannot set diamond to zero address");
     s.aavegotchiDiamond = _diamondAddress;
   }
 
-  function getParcelInfo(uint256 _tokenId) external view returns (ParcelOutput memory output_) {
-    Parcel storage parcel = s.parcels[_tokenId];
+  ///@notice Fetch information about a parcel
+  ///@param _realmId The identifier of the parcel being queried
+  ///@return output_ A struct containing details about the parcel being queried
+  function getParcelInfo(uint256 _realmId) external view returns (ParcelOutput memory output_) {
+    Parcel storage parcel = s.parcels[_realmId];
     output_.parcelId = parcel.parcelId;
     output_.owner = parcel.owner;
     output_.coordinateX = parcel.coordinateX;
@@ -138,12 +162,12 @@ contract RealmFacet is Modifiers {
   }
 
   function checkCoordinates(
-    uint256 _tokenId,
+    uint256 _realmId,
     uint256 _coordinateX,
     uint256 _coordinateY,
     uint256 _installationId
   ) public view {
-    Parcel storage parcel = s.parcels[_tokenId];
+    Parcel storage parcel = s.parcels[_realmId];
     require(parcel.buildGrid[_coordinateX][_coordinateY] == _installationId, "RealmFacet: wrong coordinates");
   }
 
@@ -157,8 +181,8 @@ contract RealmFacet is Modifiers {
   }
 
   // used for testing atm
-  function getParcelCapacity(uint256 _tokenId) external view returns (uint256[4] memory) {
-    return s.parcels[_tokenId].reservoirCapacity;
+  function getParcelCapacity(uint256 _realmId) external view returns (uint256[4] memory) {
+    return s.parcels[_realmId].reservoirCapacity;
   }
 
   function getHumbleGrid(uint256 _parcelId) external view returns (uint256[8][8] memory output_) {
