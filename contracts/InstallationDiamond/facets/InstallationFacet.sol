@@ -22,11 +22,11 @@ contract InstallationFacet is Modifiers {
 
   event CraftTimeReduced(uint256 indexed _queueId, uint256 _blocksReduced);
 
-  event UpgradeTimeReduced(uint256 indexed _queueId, uint256 indexed _parcelId, uint256 _coordinateX, uint256 _coordinateY, uint256 _blocksReduced);
+  event UpgradeTimeReduced(uint256 indexed _queueId, uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _blocksReduced);
 
-  event UpgradeInitiated(uint256 indexed _parcelId, uint256 _coordinateX, uint256 _coordinateY, uint256 blockInitiated, uint256 readyBlock);
+  event UpgradeInitiated(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 blockInitiated, uint256 readyBlock);
 
-  event UpgradeFinalized(uint256 indexed _parcelId, uint256 _coordinateX, uint256 _coordinateY);
+  event UpgradeFinalized(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY);
 
   /***********************************|
    |             Read Functions         |
@@ -103,6 +103,8 @@ contract InstallationFacet is Modifiers {
     installationBalancesOfTokenWithTypes_ = ERC998.itemBalancesOfTokenWithTypes(_tokenContract, _tokenId);
   }
 
+  ///@notice Return the id for all the altars
+  ///@return  An array of 9 integers, each one representing an altar id
   function getAltarIds() external pure returns (uint256[] memory) {
     uint8[9] memory altarIds = [1, 2, 3, 4, 5, 6, 7, 8, 9];
     return castToUint256Array(altarIds);
@@ -234,7 +236,6 @@ contract InstallationFacet is Modifiers {
         //@todo: ensure this reverts if funds are insufficient
         LibERC20.transferFrom(s.alchemicaAddresses[j], msg.sender, address(this), s.installationTypes[_installationTypes[i]].alchemicaCost[j]);
       }
-
       if (installationType.craftTime == 0) {
         LibERC1155._safeMint(msg.sender, _installationTypes[i], 0);
       } else {

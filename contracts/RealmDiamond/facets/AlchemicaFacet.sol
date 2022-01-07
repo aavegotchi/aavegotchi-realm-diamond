@@ -15,7 +15,7 @@ uint256 constant bp = 100000000000000000000; // 100 ether in wei //@todo: maybe 
 
 contract AlchemicaFacet is Modifiers {
   event AlchemicaClaimed(
-    uint256 indexed _parcelId,
+    uint256 indexed _realmId,
     uint256 indexed _gotchiId,
     uint256 indexed _alchemicaType,
     uint256 _amount,
@@ -24,7 +24,7 @@ contract AlchemicaFacet is Modifiers {
   );
 
   event ChannelAlchemica(
-    uint256 indexed _parcelId,
+    uint256 indexed _realmId,
     uint256 indexed _gotchiId,
     uint256[4] _alchemica,
     uint256 _spilloverRate,
@@ -46,7 +46,7 @@ contract AlchemicaFacet is Modifiers {
     drawRandomNumbers(_realmId, s.parcels[_realmId].currentRound - 1);
   }
 
-  function drawRandomNumbers(uint256 _tokenId, uint256 _surveyingRound) internal {
+  function drawRandomNumbers(uint256 _realmId, uint256 _surveyingRound) internal {
     // Will revert if subscription is not set and funded.
     uint256 requestId = VRFCoordinatorV2Interface(s.vrfCoordinator).requestRandomWords(
       s.requestConfig.keyHash,
@@ -55,7 +55,7 @@ contract AlchemicaFacet is Modifiers {
       s.requestConfig.callbackGasLimit,
       s.requestConfig.numWords
     );
-    s.vrfRequestIdToTokenId[requestId] = _tokenId;
+    s.vrfRequestIdToTokenId[requestId] = _realmId;
     s.vrfRequestIdToSurveyingRound[requestId] = _surveyingRound;
   }
 
@@ -134,17 +134,17 @@ contract AlchemicaFacet is Modifiers {
   }
 
   // testing funcs
-  function testingStartSurveying(uint256 _tokenId) external onlyParcelOwner(_tokenId) {
-    require(s.parcels[_tokenId].currentRound <= s.surveyingRound, "RealmFacet: Round not released");
+  function testingStartSurveying(uint256 _realmId) external onlyParcelOwner(_realmId) {
+    require(s.parcels[_realmId].currentRound <= s.surveyingRound, "RealmFacet: Round not released");
 
-    s.parcels[_tokenId].currentRound++;
+    s.parcels[_realmId].currentRound++;
     uint256[] memory alchemicas = new uint256[](4);
     for (uint256 i; i < 4; i++) {
       alchemicas[i] = uint256(keccak256(abi.encodePacked(msg.sender, uint256(1))));
     }
 
-    if (s.parcels[_tokenId].currentRound - 1 == 0) LibRealm.updateRemainingAlchemicaFirstRound(_tokenId, alchemicas);
-    else LibRealm.updateRemainingAlchemica(_tokenId, alchemicas, s.parcels[_tokenId].currentRound - 1);
+    if (s.parcels[_realmId].currentRound - 1 == 0) LibRealm.updateRemainingAlchemicaFirstRound(_realmId, alchemicas);
+    else LibRealm.updateRemainingAlchemica(_realmId, alchemicas, s.parcels[_realmId].currentRound - 1);
   }
 
   function testingMintParcel(
@@ -178,7 +178,7 @@ contract AlchemicaFacet is Modifiers {
   }
 
   /// @notice Query the available alchemica in a parcel
-  //// @param _realmId identifier of parcel to query
+  /// @param _realmId identifier of parcel to query
   /// @return _availableAlchemica An array representing the available quantity of alchemicas
   function getAvailableAlchemica(uint256 _realmId) public view returns (uint256[4] memory _availableAlchemica) {
     //Calculate the # of blocks elapsed since the last
@@ -218,19 +218,19 @@ contract AlchemicaFacet is Modifiers {
     return calculateSpilloverForAltar(_realmId).rate;
   }
 
-  function calculateSpilloverForReservoir(uint256 _tokenId, uint256 _alchemicaType) internal view returns (SpilloverIO memory spillover) {
-    uint256 spilloverRate = s.parcels[_tokenId].spilloverRate[_alchemicaType] / s.parcels[_tokenId].reservoirCount[_alchemicaType];
-    uint256 spilloverRadius = s.parcels[_tokenId].spilloverRadius[_alchemicaType] / s.parcels[_tokenId].reservoirCount[_alchemicaType];
+  function calculateSpilloverForReservoir(uint256 _realmId, uint256 _alchemicaType) internal view returns (SpilloverIO memory spillover) {
+    uint256 spilloverRate = s.parcels[_realmId].spilloverRate[_alchemicaType] / s.parcels[_realmId].reservoirCount[_alchemicaType];
+    uint256 spilloverRadius = s.parcels[_realmId].spilloverRadius[_alchemicaType] / s.parcels[_realmId].reservoirCount[_alchemicaType];
 
     return SpilloverIO(spilloverRate, spilloverRadius);
   }
 
-  function calculateSpilloverForAltar(uint256 _tokenId) internal view returns (SpilloverIO memory spillover) {
+  function calculateSpilloverForAltar(uint256 _realmId) internal view returns (SpilloverIO memory spillover) {
     uint256[] memory altarIds = InstallationDiamondInterface(s.installationsDiamond).getAltarIds();
 
     uint256[] memory altarBalances = InstallationDiamondInterface(s.installationsDiamond).installationBalancesOfTokenByIds(
       address(this),
-      _tokenId,
+      _realmId,
       altarIds
     );
 
@@ -333,7 +333,7 @@ contract AlchemicaFacet is Modifiers {
 
     require(_lastChanneled == s.parcels[_realmId].gotchiChannelings[_gotchiId], "AlchemicaFacet: Incorrect last duration");
 
-    require(block.timestamp - _lastChanneled < 1 days, "AlchemicaFacet: Can't channel yet");
+    require(block.timestamp - _lastChanneled >= 1 days, "AlchemicaFacet: Can't channel yet");
 
     bytes32 messageHash = keccak256(abi.encodePacked(_realmId, _gotchiId, _lastChanneled));
     require(LibSignature.isValid(messageHash, _signature, s.backendPubKey), "AlchemicaFacet: Invalid signature");

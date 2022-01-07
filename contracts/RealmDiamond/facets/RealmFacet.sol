@@ -24,7 +24,7 @@ contract RealmFacet is Modifiers {
     uint256[4] boost; //fud, fomo, alpha, kek
   }
 
-  event ResyncParcel(uint256 _tokenId);
+  event ResyncParcel(uint256 _realmId);
   event EquipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y);
   event UnequipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y);
 
@@ -129,6 +129,7 @@ contract RealmFacet is Modifiers {
 
   /**
   @dev Used to resync a parcel on the subgraph if metadata is added later 
+@param _tokenIds The parcels to resync
   */
   function resyncParcel(uint256[] calldata _tokenIds) external onlyOwner {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
@@ -138,6 +139,7 @@ contract RealmFacet is Modifiers {
 
   /**
   @dev Used to set diamond address for Baazaar
+  @param _diamondAddress New diamond address for the baazar
   */
   function setAavegotchiDiamond(address _diamondAddress) external onlyOwner {
     require(_diamondAddress != address(0), "RealmFacet: Cannot set diamond to zero address");
@@ -160,12 +162,12 @@ contract RealmFacet is Modifiers {
   }
 
   function checkCoordinates(
-    uint256 _tokenId,
+    uint256 _realmId,
     uint256 _coordinateX,
     uint256 _coordinateY,
     uint256 _installationId
   ) public view {
-    Parcel storage parcel = s.parcels[_tokenId];
+    Parcel storage parcel = s.parcels[_realmId];
     require(parcel.buildGrid[_coordinateX][_coordinateY] == _installationId, "RealmFacet: wrong coordinates");
   }
 
@@ -179,8 +181,8 @@ contract RealmFacet is Modifiers {
   }
 
   // used for testing atm
-  function getParcelCapacity(uint256 _tokenId) external view returns (uint256[4] memory) {
-    return s.parcels[_tokenId].reservoirCapacity;
+  function getParcelCapacity(uint256 _realmId) external view returns (uint256[4] memory) {
+    return s.parcels[_realmId].reservoirCapacity;
   }
 
   function getHumbleGrid(uint256 _parcelId) external view returns (uint256[8][8] memory output_) {
