@@ -13,7 +13,7 @@ import {
   greatPortalCapacity,
 } from "../../setVars";
 
-export async function upgrade() {
+export async function upgrade(installationDiamond: string) {
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
 
   const requestConfig =
@@ -87,7 +87,9 @@ export async function upgrade() {
       alchemicaTotals(),
       boostMultipliers,
       greatPortalCapacity,
-      "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
+      installationDiamond
+        ? installationDiamond
+        : "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
       "0x0000000000000000000000000000000000000000",
       "0x0000000000000000000000000000000000000000",
       "0x0000000000000000000000000000000000000000",
@@ -116,7 +118,7 @@ export async function upgrade() {
 }
 
 if (require.main === module) {
-  upgrade()
+  upgrade("0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5")
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

@@ -27,9 +27,8 @@ describe("Testing Equip Installation", async function () {
 
   before(async function () {
     this.timeout(20000000);
-    await upgrade();
-
     installationsAddress = await deployDiamond();
+    await upgrade(installationsAddress);
 
     realmFacet = (await ethers.getContractAt(
       "RealmFacet",
@@ -151,6 +150,7 @@ describe("Testing Equip Installation", async function () {
 
     const itemTypes = await installationFacet.getInstallationTypes(["0", "1"]);
     console.log("item types:", itemTypes);
+    expect(itemTypes.length).to.equal(2);
   });
 
   it("Equip installation", async function () {
