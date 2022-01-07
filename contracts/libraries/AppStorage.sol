@@ -40,7 +40,6 @@ struct Parcel {
   uint256[4] alchemicaHarvestRate;
   uint256[4] lastUpdateTimestamp;
   uint256[4] unclaimedAlchemica;
-  mapping(uint256 => uint256) gotchiChannelings;
 }
 
 struct RequestConfig {
@@ -75,6 +74,7 @@ struct AppStorage {
   bytes backendPubKey;
   address gameManager;
   mapping(uint256 => uint256) lastExitTime; //for aavegotchis exiting alchemica
+  mapping(uint256 => uint256) gotchiChannelings;
 }
 
 library LibAppStorage {

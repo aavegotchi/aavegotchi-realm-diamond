@@ -331,7 +331,7 @@ contract AlchemicaFacet is Modifiers {
 
     //@todo: test enforce duration (once per parcel per 24 hrs)
 
-    require(_lastChanneled == s.parcels[_realmId].gotchiChannelings[_gotchiId], "AlchemicaFacet: Incorrect last duration");
+    require(_lastChanneled == s.gotchiChannelings[_gotchiId], "AlchemicaFacet: Incorrect last duration");
 
     require(block.timestamp - _lastChanneled >= 1 days, "AlchemicaFacet: Can't channel yet");
 
@@ -360,7 +360,7 @@ contract AlchemicaFacet is Modifiers {
     }
 
     //update latest channeling
-    s.parcels[_realmId].gotchiChannelings[_gotchiId] = block.timestamp;
+    s.gotchiChannelings[_gotchiId] = block.timestamp;
 
     emit ChannelAlchemica(_realmId, _gotchiId, channelAmounts, spillover.rate, spillover.radius);
   }
