@@ -31,14 +31,19 @@ contract AlchemicaFacet is Modifiers {
     uint256 _spilloverRadius
   );
 
+  /// @notice Allow the diamond owner to set the alchemica addresses
+  /// @param _addresses An array containing the alchemica token addresses
   function setAlchemicaAddresses(address[4] calldata _addresses) external onlyOwner {
     s.alchemicaAddresses = _addresses;
   }
 
-  function startSurveying(uint256 _tokenId) external onlyParcelOwner(_tokenId) {
-    require(s.parcels[_tokenId].currentRound <= s.surveyingRound, "RealmFacet: Round not released");
-    s.parcels[_tokenId].currentRound++;
-    drawRandomNumbers(_tokenId, s.parcels[_tokenId].currentRound - 1);
+  /// @notice Allow the owner of a parcel to start surveying his parcel
+  /// @dev Will throw if a surveying round has not started
+  /// @param _realmId Identifier of the parcel to survey
+  function startSurveying(uint256 _realmId) external onlyParcelOwner(_realmId) {
+    require(s.parcels[_realmId].currentRound <= s.surveyingRound, "RealmFacet: Round not released");
+    s.parcels[_realmId].currentRound++;
+    drawRandomNumbers(_realmId, s.parcels[_realmId].currentRound - 1);
   }
 
   function drawRandomNumbers(uint256 _tokenId, uint256 _surveyingRound) internal {
@@ -54,25 +59,51 @@ contract AlchemicaFacet is Modifiers {
     s.vrfRequestIdToSurveyingRound[requestId] = _surveyingRound;
   }
 
+  /// @notice Query details about all total alchemicas present
+  /// @return output_ A two dimensional array, each representing an alchemica value
   function getTotalAlchemicas() external view returns (uint256[4][5] memory) {
     return s.totalAlchemicas;
   }
 
-  function getRealmAlchemica(uint256 _tokenId) external view returns (uint256[4] memory) {
-    return s.parcels[_tokenId].alchemicaRemaining;
+  /// @notice Query details about the remaining alchemica in a parcel
+  /// @param _realmId The identifier of the parcel to query
+  /// @return output_ An array containing details about each remaining alchemica in the parcel
+  function getRealmAlchemica(uint256 _realmId) external view returns (uint256[4] memory) {
+    return s.parcels[_realmId].alchemicaRemaining;
   }
 
+  /// @notice Allow the diamond owner to increment the surveying round
   function progressSurveyingRound() external onlyOwner {
     s.surveyingRound++;
   }
 
+  /// @notice Query details about all alchemica gathered in a surveying round in a parcel
+  /// @param _realmId Identifier of the parcel to query
+  /// @param _roundId Identifier of the surveying round to query
+  /// @return output_ An array representing the numbers of alchemica gathered in a round
   function getRoundAlchemica(uint256 _realmId, uint256 _roundId) external view returns (uint256[] memory) {
     return s.parcels[_realmId].roundAlchemica[_roundId];
   }
 
+  /// @notice Query details about the base alchemica gathered in a surveying round in a parcel
+  /// @param _realmId Identifier of the parcel to query
+  /// @param _roundId Identifier of the surveying round to query
+  /// @return output_ An array representing the numbers of base alchemica gathered in a round
   function getRoundBaseAlchemica(uint256 _realmId, uint256 _roundId) external view returns (uint256[] memory) {
     return s.parcels[_realmId].roundBaseAlchemica[_roundId];
   }
+
+  /// @notice Allow the diamond owner to set some important diamond state variables
+  /// @param _alchemicas A nested array containing the amount of alchemicas available
+  /// @param _boostMultipliers The boost multiplers applied to each parcel
+  /// @param _greatPortalCapacity The individual alchemica capacity of the great portal
+  /// @param _installationsDiamond The installations diamond address
+  /// @param _greatPortalDiamond The greatPortalDiamond address
+  /// @param _vrfCoordinator The chainlink vrfCoordinator address
+  /// @param _linkAddress The link token address
+  /// @param _alchemicaAddresses The four alchemica token addresses
+  /// @param _backendPubKey The Realm(gotchiverse) backend public key
+  /// @param _gameManager The address of the game manager
 
   function setVars(
     uint256[4][5] calldata _alchemicas,
@@ -146,7 +177,10 @@ contract AlchemicaFacet is Modifiers {
     alchemica.mint(msg.sender, _amount);
   }
 
-  function getAvailableAlchemica(uint256 _tokenId) public view returns (uint256[4] memory _availableAlchemica) {
+  /// @notice Query the available alchemica in a parcel
+  //// @param _realmId identifier of parcel to query
+  /// @return _availableAlchemica An array representing the available quantity of alchemicas
+  function getAvailableAlchemica(uint256 _realmId) public view returns (uint256[4] memory _availableAlchemica) {
     //Calculate the # of blocks elapsed since the last
 
     for (uint256 index = 0; index < 4; index++) {
@@ -169,12 +203,19 @@ contract AlchemicaFacet is Modifiers {
     uint256 radius;
   }
 
-  function getReservoirSpilloverRate(uint256 _tokenId, uint256 _alchemicaType) external view returns (uint256) {
-    return calculateSpilloverForReservoir(_tokenId, _alchemicaType).rate;
+  /// @notice Query the Reservoir spillover rate of a particular alchemica in a parcel
+  /// @param _realmId Identifier of parcel to query
+  /// @param _alchemicaType Alchemica to query
+  /// @return The reservoir spillover rate of the alchemica in the queried parcel
+  function getReservoirSpilloverRate(uint256 _realmId, uint256 _alchemicaType) external view returns (uint256) {
+    return calculateSpilloverForReservoir(_realmId, _alchemicaType).rate;
   }
 
-  function getAltarSpilloverRate(uint256 _tokenId) external view returns (uint256) {
-    return calculateSpilloverForAltar(_tokenId).rate;
+  /// @notice Query the Altar spillover rate
+  /// @param _realmId Identifier of portal to query
+  /// @return The portal spillover rate
+  function getAltarSpilloverRate(uint256 _realmId) external view returns (uint256) {
+    return calculateSpilloverForAltar(_realmId).rate;
   }
 
   function calculateSpilloverForReservoir(uint256 _tokenId, uint256 _alchemicaType) internal view returns (SpilloverIO memory spillover) {
@@ -234,6 +275,12 @@ contract AlchemicaFacet is Modifiers {
 
   function gotchiOwner(uint256 _gotchiId) internal view returns (address) {}
 
+  /// @notice Allow parcel owner to claim available alchemica with his parent NFT(Aavegotchi)
+  /// @param _realmId Identifier of parcel to claim alchemica from
+  /// @param _alchemicaType Alchemica to claim
+  /// @param _gotchiId Identifier of Aavegotchi to use for alchemica collecction/claiming
+  /// @param _signature Message signature used for backend validation
+
   function claimAvailableAlchemica(
     uint256 _tokenId,
     uint256 _alchemicaType,
@@ -268,6 +315,12 @@ contract AlchemicaFacet is Modifiers {
     emit AlchemicaClaimed(_tokenId, _gotchiId, _alchemicaType, available, spillover.rate, spillover.radius);
   }
 
+  /// @notice Allow a parcel owner to channel alchemica
+  /// @dev This transfers alchemica to the parent ERC721 token with id _gotchiId and also to the great portal
+  /// @param _realmId Identifier of parcel where alchemica is being channeled from
+  /// @param _gotchiId Identifier of parent ERC721 aavegotchi which alchemica is channeled to
+  /// @param _lastChanneled The last time alchemica was channeled in this _realmId
+  /// @param _signature Message signature used for backend validation
   function channelAlchemica(
     uint256 _realmId,
     uint256 _gotchiId,
@@ -312,6 +365,11 @@ contract AlchemicaFacet is Modifiers {
     emit ChannelAlchemica(_realmId, _gotchiId, channelAmounts, spillover.rate, spillover.radius);
   }
 
+  /// @notice Allow the game manager to transfer alchemica to a certain ERC721 parent aavegotchi
+  /// @param _alchemica Identifiers of alchemica tokens to transfer
+  /// @param _gotchiId Identifier of parent ERC721 aavegotchi which alchemica is transferred to
+  /// @param _lastExitTime The last time alchemica was exited/transferred to _gotchiId
+  /// @param _signature Message signature used for backend validation
   function exitAlchemica(
     uint256[] calldata _alchemica,
     uint256 _gotchiId,

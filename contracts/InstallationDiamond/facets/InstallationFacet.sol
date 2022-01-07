@@ -37,9 +37,9 @@ contract InstallationFacet is Modifiers {
     uint256 balance;
   }
 
-  ///@notice Returns balance for each installation that exists for an account
-  ///@param _account Address of the account to query
-  ///@return bals_ An array of structs,each struct containing details about each installation owned
+  /// @notice Returns balance for each installation that exists for an account
+  /// @param _account Address of the account to query
+  /// @return bals_ An array of structs,each struct containing details about each installation owned
   function installationsBalances(address _account) external view returns (InstallationIdIO[] memory bals_) {
     uint256 count = s.ownerInstallations[_account].length;
     bals_ = new InstallationIdIO[](count);
@@ -50,9 +50,9 @@ contract InstallationFacet is Modifiers {
     }
   }
 
-  ///@notice Returns balance for each installation(and their types) that exists for an account
-  ///@param _owner Address of the account to query
-  ///@return output_ An array of structs containing details about each installation owned(including the installation types)
+  /// @notice Returns balance for each installation(and their types) that exists for an account
+  /// @param _owner Address of the account to query
+  /// @return output_ An array of structs containing details about each installation owned(including the installation types)
   function installationsBalancesWithTypes(address _owner) external view returns (ItemTypeIO[] memory output_) {
     uint256 count = s.ownerInstallations[_owner].length;
     output_ = new ItemTypeIO[](count);
@@ -77,10 +77,10 @@ contract InstallationFacet is Modifiers {
     value = s.nftInstallationBalances[_tokenContract][_tokenId][_id];
   }
 
-  ///@notice Returns the balances for all ERC1155 items for a ERC721 token
-  ///@param _tokenContract Contract address for the token to query
-  ///@param _tokenId Identifier of the token to query
-  ///@return bals_ An array of structs containing details about each item owned
+  /// @notice Returns the balances for all ERC1155 items for a ERC721 token
+  /// @param _tokenContract Contract address for the token to query
+  /// @param _tokenId Identifier of the token to query
+  /// @return bals_ An array of structs containing details about each item owned
   function installationBalancesOfToken(address _tokenContract, uint256 _tokenId) public view returns (InstallationIdIO[] memory bals_) {
     uint256 count = s.nftInstallations[_tokenContract][_tokenId].length;
     bals_ = new InstallationIdIO[](count);
@@ -91,10 +91,10 @@ contract InstallationFacet is Modifiers {
     }
   }
 
-  ///@notice Returns the balances for all ERC1155 items for a ERC721 token
-  ///@param _tokenContract Contract address for the token to query
-  ///@param _tokenId Identifier of the token to query
-  ///@return installationBalancesOfTokenWithTypes_ An array of structs containing details about each installation owned(including installation types)
+  /// @notice Returns the balances for all ERC1155 items for a ERC721 token
+  /// @param _tokenContract Contract address for the token to query
+  /// @param _tokenId Identifier of the token to query
+  /// @return installationBalancesOfTokenWithTypes_ An array of structs containing details about each installation owned(including installation types)
   function installationBalancesOfTokenWithTypes(address _tokenContract, uint256 _tokenId)
     external
     view
@@ -117,14 +117,23 @@ contract InstallationFacet is Modifiers {
     return array;
   }
 
+  /// @notice Check the spillover rate of an installation type
+  /// @param _id id of the installationType to query
+  /// @return the spillover rate the installation type with identifier _id
   function spilloverRateOfId(uint256 _id) external view returns (uint256) {
     return s.installationTypes[_id].spillRate;
   }
 
+  /// @notice Check the spillover radius of an installation type
+  /// @param _id id of the installationType to query
+  /// @return the spillover radius rate the installation type with identifier _id
   function spilloverRadiusOfId(uint256 _id) external view returns (uint256) {
     return s.installationTypes[_id].spillRadius;
   }
 
+  /// @notice Check the spillover rates of multiple installation types
+  /// @param _ids An array containing ids of the installationTypes to query
+  /// @return An array containing the corresponding spillover rates of the installation types queried
   function spilloverRatesOfIds(uint256[] calldata _ids) external view returns (uint256[] memory) {
     uint256[] memory rates = new uint256[](_ids.length);
     for (uint256 i = 0; i < _ids.length; i++) {
@@ -133,6 +142,9 @@ contract InstallationFacet is Modifiers {
     return rates;
   }
 
+  /// @notice Check the spillover radius of multiple installation types
+  /// @param _ids An array containing ids of the installationTypes to query
+  /// @return An array containing the corresponding spillover radius of the installation types queried
   function spilloverRadiusOfIds(uint256[] calldata _ids) external view returns (uint256[] memory) {
     uint256[] memory rates = new uint256[](_ids.length);
     for (uint256 i = 0; i < _ids.length; i++) {
@@ -141,6 +153,11 @@ contract InstallationFacet is Modifiers {
     return rates;
   }
 
+  /// @notice Query the installation balances of an ERC721 parent token
+  /// @param _tokenContract The token contract of the ERC721 parent token
+  /// @param _tokenId The identifier of the ERC721 parent token
+  /// @param _ids An array containing the ids of the installationTypes to query
+  /// @return An array containing the corresponding balances of the installation types queried
   function installationBalancesOfTokenByIds(
     address _tokenContract,
     uint256 _tokenId,
@@ -153,17 +170,17 @@ contract InstallationFacet is Modifiers {
     return balances;
   }
 
-  ///@notice Query the item type of a particular installation
-  ///@param _installationTypeId Item to query
-  ///@return installationType A struct containing details about the item type of an item with identifier `_itemId`
+  /// @notice Query the item type of a particular installation
+  /// @param _installationTypeId Item to query
+  /// @return installationType A struct containing details about the item type of an item with identifier `_itemId`
   function getInstallationType(uint256 _installationTypeId) external view returns (InstallationType memory installationType) {
     require(_installationTypeId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
     installationType = s.installationTypes[_installationTypeId];
   }
 
-  ///@notice Query the item type of multiple installation types
-  ///@param _installationTypeIds An array containing the identifiers of items to query
-  ///@return installationTypes_ An array of structs,each struct containing details about the item type of the corresponding item
+  /// @notice Query the item type of multiple installation types
+  /// @param _installationTypeIds An array containing the identifiers of items to query
+  /// @return installationTypes_ An array of structs,each struct containing details about the item type of the corresponding item
   function getInstallationTypes(uint256[] calldata _installationTypeIds) external view returns (InstallationType[] memory installationTypes_) {
     if (_installationTypeIds.length == 0) {
       installationTypes_ = s.installationTypes;
@@ -175,15 +192,15 @@ contract InstallationFacet is Modifiers {
     }
   }
 
-  /**
-        @notice Get the URI for a voucher type
-        @return URI for token type
-    */
+  /// @notice Get the URI for a voucher type
+  /// @return URI for token type
   function uri(uint256 _id) external view returns (string memory) {
     require(_id < s.installationTypes.length, "InstallationFacet: Item _id not found");
     return LibStrings.strWithUint(s.baseUri, _id);
   }
 
+  /// @notice Query the alchemica token addresses
+  /// @return An array containing the alchemica token addresses
   function getAlchemicaAddresses() external view returns (address[] memory) {
     return s.alchemicaAddresses;
   }
@@ -192,12 +209,19 @@ contract InstallationFacet is Modifiers {
    |             Write Functions        |
    |__________________________________*/
 
+  /// @notice Allow the Diamond owner to deprecate an installation
+  /// @dev Deprecated installations cannot be crafted by users
+  /// @param _installationIds An array containing the identifiers of installations to deprecate
   function deprecateInstallations(uint256[] calldata _installationIds) external onlyOwner {
     for (uint8 i = 0; i < _installationIds.length; i++) {
       s.installationTypes[_installationIds[i]].deprecated = true;
     }
   }
 
+  /// @notice Allow a user to craft installations
+  /// @dev Will throw even if one of the installationTypes is deprecated
+  /// @dev Puts the installation into a queue
+  /// @param _installationTypes An array containing the identifiers of the installationTypes to craft
   function craftInstallations(uint256[] calldata _installationTypes) external {
     for (uint8 i = 0; i < _installationTypes.length; i++) {
       //level check
@@ -227,6 +251,11 @@ contract InstallationFacet is Modifiers {
     //after queue is over, user can claim installation
   }
 
+  /// @notice Allow a user to speed up multiple queues(installation craft time) by paying the correct amount of $GLMR tokens
+  /// @dev Will throw if the caller is not the queue owner
+  /// @dev $GLMR tokens are burnt upon usage
+  /// @param _queueIds An array containing the identifiers of queues to speed up
+  /// @param _amounts An array containing the corresponding amounts of $GLMR tokens to pay for each queue speedup
   function reduceCraftTime(uint256[] calldata _queueIds, uint256[] calldata _amounts) external {
     require(_queueIds.length == _amounts.length, "InstallationFacet: Mismatched arrays");
     for (uint8 i; i < _queueIds.length; i++) {
@@ -245,6 +274,10 @@ contract InstallationFacet is Modifiers {
     }
   }
 
+  /// @notice Allow a user to claim installations from ready queues
+  /// @dev Will throw if the caller is not the queue owner
+  /// @dev Will throw if one of the queues is not ready
+  /// @param _queueIds An array containing the identifiers of queues to claim
   function claimInstallations(uint256[] calldata _queueIds) external {
     for (uint8 i; i < _queueIds.length; i++) {
       uint256 queueId = _queueIds[i];
@@ -263,6 +296,12 @@ contract InstallationFacet is Modifiers {
     }
   }
 
+  /// @notice Allow a user to equip an installation to a parcel
+  /// @dev Will throw if the caller is not the parcel diamond contract
+  /// @dev Will also throw if various prerequisites for the installation are not met
+  /// @param _owner Owner of the installation to equip
+  /// @param _realmId The identifier of the parcel to equip the installation to
+  /// @param _installationId Identifier of the installation to equip
   function equipInstallation(
     address _owner,
     uint256 _realmId,
@@ -286,6 +325,11 @@ contract InstallationFacet is Modifiers {
     } else revert("InstallationFacet: Tech Tree reqs not met");
   }
 
+  /// @notice Allow a user to unequip an installation from a parcel
+  /// @dev Will throw if the caller is not the parcel diamond contract
+  /// @param _owner Owner of the installation to unequip
+  /// @param _realmId The identifier of the parcel to unequip the installation from
+  /// @param _installationId Identifier of the installation to unequip
   function unequipInstallation(
     address _owner,
     uint256 _realmId,
@@ -314,6 +358,9 @@ contract InstallationFacet is Modifiers {
     LibInstallation._unequipInstallation(_owner, _realmId, _installationId);
   }
 
+  /// @notice Allow a user to upgrade an installation in a parcel
+  /// @dev Will throw if the caller is not the owner of the parcel in which the installation is installed
+  /// @param _upgradeQueue A struct containing details about the queue which contains the installation to upgrade
   function upgradeInstallation(UpgradeQueue calldata _upgradeQueue) external {
     // check owner
     address parcelOwner = IERC721(s.realmDiamond).ownerOf(_upgradeQueue.parcelId);
@@ -350,6 +397,10 @@ contract InstallationFacet is Modifiers {
     emit UpgradeInitiated(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, block.number, readyBlock);
   }
 
+  /// @notice Allow a user to reduce the upgrade time of an ongoing queue
+  /// @dev Will throw if the caller is not the owner of the queue
+  /// @param _queueId The identifier of the queue whose upgrade time is to be reduced
+  /// @param _amount The correct amount of $GLMR token to be paid
   function reduceUpgradeTime(uint256 _queueId, uint256 _amount) external {
     UpgradeQueue storage upgradeQueue = s.upgradeQueue[_queueId];
     require(msg.sender == upgradeQueue.owner, "InstallationFacet: Not owner");
@@ -364,6 +415,8 @@ contract InstallationFacet is Modifiers {
     emit UpgradeTimeReduced(_queueId, upgradeQueue.parcelId, upgradeQueue.coordinateX, upgradeQueue.coordinateY, _amount);
   }
 
+  /// @notice Allow anyone to finalize any existing queue upgrade
+  /// @dev Only three queue upgrades can be finalized in one transaction
   function finalizeUpgrade() public {
     require(s.upgradeQueue.length > 0, "InstallationFacet: No upgrades");
     //can only process 3 upgrades per tx
@@ -395,6 +448,8 @@ contract InstallationFacet is Modifiers {
     }
   }
 
+  /// @notice Query details about all ongoing craft queues
+  /// @return output_ An array of structs, each representing an ongoing craft queue
   function getCraftQueue() external view returns (QueueItem[] memory output_) {
     uint256 counter;
     for (uint256 i; i < s.craftQueue.length; i++) {
@@ -405,6 +460,8 @@ contract InstallationFacet is Modifiers {
     }
   }
 
+  /// @notice Query details about all ongoing upgrade queues
+  /// @return output_ An array of structs, each representing an ongoing upgrade queue
   function getUpgradeQueue() external view returns (UpgradeQueue[] memory output_) {
     return s.upgradeQueue;
   }
@@ -413,10 +470,16 @@ contract InstallationFacet is Modifiers {
    |             Owner Functions        |
    |__________________________________*/
 
+  /// @notice Allow the diamond owner to set the alchemica addresses
+  /// @param _addresses An array containing the alchemica token addresses
   function setAlchemicaAddresses(address[] memory _addresses) external onlyOwner {
     s.alchemicaAddresses = _addresses;
   }
 
+  /// @notice Allow the diamond owner to set some important contract addresses
+  /// @param _aavegotchiDiamond The aavegotchi diamond address
+  /// @param _realmDiamond The Realm diamond address
+  /// @param _glmr The $GLMR token address
   function setAddresses(
     address _aavegotchiDiamond,
     address _realmDiamond,
@@ -427,6 +490,8 @@ contract InstallationFacet is Modifiers {
     s.glmr = _glmr;
   }
 
+  /// @notice Allow the diamond owner to add an installation type
+  /// @param _installationTypes An array of structs, each struct representing each installationType to be added
   function addInstallationTypes(InstallationType[] calldata _installationTypes) external onlyOwner {
     for (uint16 i = 0; i < _installationTypes.length; i++) {
       s.installationTypes.push(
@@ -465,12 +530,16 @@ contract InstallationFacet is Modifiers {
     }
   }
 
+  /// @notice Allow the diamond owner to delete all installationTypes
   function eraseInstallationTypes() external onlyOwner {
     for (uint256 i; i < s.installationTypes.length; i++) {
       delete s.installationTypes[i];
     }
   }
 
+  /// @notice Allow the diamond owner to edit an installationType
+  /// @param _typeId Identifier of the installationType to edit
+  /// @param _installationType A struct containing the new properties of the installationType being edited
   function editInstallationType(uint256 _typeId, InstallationType calldata _installationType) external onlyOwner {
     s.installationTypes[_typeId] = _installationType;
   }
