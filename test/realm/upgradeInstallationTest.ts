@@ -10,10 +10,16 @@ import {
   OwnershipFacet,
   AlchemicaToken,
   InstallationDiamond,
+  InstallationFacet,
 } from "../../typechain";
-import { upgrade } from "../scripts/upgrades/upgrade-upgradeInstallation";
+import { upgrade } from "../../scripts/realm/upgrades/upgrade-harvesting";
 import { UpgradeQueue } from "../../types";
 import { BigNumberish } from "@ethersproject/bignumber";
+import {
+  alchemicaTotals,
+  boostMultipliers,
+  greatPortalCapacity,
+} from "../../scripts/setVars";
 
 describe("Testing Equip Installation", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
@@ -22,36 +28,9 @@ describe("Testing Equip Installation", async function () {
   const alchemicaForTester = ethers.utils.parseUnits("500000");
   const testParcelId = 2893;
 
-  let hardcodedAlchemicasTotals: any = [
-    [14154, 7076, 3538, 1414],
-    [56618, 28308, 14154, 5660],
-    [452946, 226472, 113236, 45294],
-    [452946, 226472, 113236, 45294],
-    [905894, 452946, 226472, 90588],
-  ];
-  for (let i = 0; i < hardcodedAlchemicasTotals.length; i++) {
-    for (let j = 0; j < hardcodedAlchemicasTotals[i].length; j++) {
-      hardcodedAlchemicasTotals[i][j] = ethers.utils.parseUnits(
-        hardcodedAlchemicasTotals[i][j].toString()
-      );
-    }
-  }
-
-  const greatPortalCapacity: [
-    BigNumberish,
-    BigNumberish,
-    BigNumberish,
-    BigNumberish
-  ] = [
-    ethers.utils.parseUnits("1250000000"),
-    ethers.utils.parseUnits("625000000"),
-    ethers.utils.parseUnits("312500000"),
-    ethers.utils.parseUnits("125000000"),
-  ];
-
   let alchemicaFacet: AlchemicaFacet;
   let realmFacet: RealmFacet;
-  let installationDiamond: InstallationDiamond;
+  let installationDiamond: InstallationFacet;
   let ownerAddress: string;
   let fud: AlchemicaToken;
   let fomo: AlchemicaToken;
@@ -73,7 +52,7 @@ describe("Testing Equip Installation", async function () {
     installationDiamond = (await ethers.getContractAt(
       "InstallationDiamond",
       installationsAddress
-    )) as InstallationDiamond;
+    )) as InstallationFacet;
     const ownershipFacet = (await ethers.getContractAt(
       "OwnershipFacet",
       maticDiamondAddress
@@ -128,14 +107,22 @@ describe("Testing Equip Installation", async function () {
 
     const backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
     await alchemicaFacet.setVars(
-      hardcodedAlchemicasTotals,
+      //@ts-ignore
+      alchemicaTotals(),
+      boostMultipliers,
       greatPortalCapacity,
-      installationsAddress,
-      maticDiamondAddress,
+      "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
       "0x0000000000000000000000000000000000000000",
       "0x0000000000000000000000000000000000000000",
-      [fud.address, fomo.address, alpha.address, kek.address],
-      ethers.utils.hexDataSlice(backendSigner.publicKey, 1)
+      "0x0000000000000000000000000000000000000000",
+      [
+        "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
+        "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
+        "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
+        "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
+      ],
+      "0x",
+      "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5"
     );
     await network.provider.send("hardhat_setBalance", [
       maticDiamondAddress,
@@ -262,9 +249,15 @@ describe("Testing Equip Installation", async function () {
     for (let i = 0; i < 21000; i++) {
       ethers.provider.send("evm_mine", []);
     }
-    const balancePre = await installationDiamond.balanceOf(testAddress, 2);
+
+    const erc1155facet = await ethers.getContractAt(
+      "ERC1155Facet",
+      installationDiamond.address
+    );
+
+    const balancePre = await erc1155facet.balanceOf(testAddress, 2);
     await installationDiamond.claimInstallations([0]);
-    const balancePost = await installationDiamond.balanceOf(testAddress, 2);
+    const balancePost = await erc1155facet.balanceOf(testAddress, 2);
     expect(balancePost).to.above(balancePre);
   });
   it("Survey Parcel", async function () {
