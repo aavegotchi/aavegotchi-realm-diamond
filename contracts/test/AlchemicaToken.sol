@@ -6,15 +6,16 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 
 contract AlchemicaToken is ERC20Capped, Ownable {
-  uint256 public maxSupply;
-  mapping(address => mapping(address => uint256)) internal individualAllowance; // Mapping of allowance per owner/spender
+  //@todo: auto-approve installationDiamond to spend
 
   constructor(
     string memory name,
     string memory symbol,
     uint256 _maxSupply,
     address _realmDiamond
-  ) ERC20(name, symbol) ERC20Capped(_maxSupply) {}
+  ) ERC20(name, symbol) ERC20Capped(_maxSupply) {
+    transferOwnership(_realmDiamond);
+  }
 
   /// @notice Mint _value tokens for msg.sender
   /// @param _value Amount of tokens to mint

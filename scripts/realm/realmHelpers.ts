@@ -1,10 +1,24 @@
 import { ethers } from "ethers";
-import { InstallationTypeInput, InstallationTypeOutput } from "../../types";
+import {
+  AlchemicaFacet,
+  AlchemicaToken,
+  ERC1155Facet,
+  InstallationFacet,
+  OwnershipFacet,
+  RealmFacet,
+} from "../../typechain";
+import {
+  InstallationTypeInput,
+  InstallationTypeOutput,
+  TestBeforeVars,
+} from "../../types";
+import { maticDiamondAddress } from "../helperFunctions";
+import { deployDiamond } from "../installation/deploy";
+import { upgrade } from "./upgrades/upgrade-harvesting";
 
 export function outputInstallation(
   installation: InstallationTypeInput
 ): InstallationTypeOutput {
-  if (installation.level > 9) throw new Error("Level too high");
   if (installation.width > 64) throw new Error("Width too much");
   if (installation.height > 64) throw new Error("Height too much");
 
@@ -35,9 +49,9 @@ export function testInstallations() {
   installations.push(
     outputInstallation({
       installationType: 0,
-      level: 0,
-      width: 0,
-      height: 0,
+      level: 1,
+      width: 1,
+      height: 1,
       alchemicaType: 0,
       alchemicaCost: [0, 0, 0, 0],
       harvestRate: 0,
@@ -45,7 +59,7 @@ export function testInstallations() {
       spillRadius: 0,
       spillRate: 0,
       craftTime: 0,
-      deprecated: false,
+      deprecated: true,
       nextLevelId: 0,
       prerequisites: [],
     })
@@ -88,4 +102,104 @@ export function testInstallations() {
   );
 
   return installations;
+}
+
+export async function deployAlchemica(ethers: any) {
+  const Fud = await ethers.getContractFactory("AlchemicaToken");
+  let fud = (await Fud.deploy(
+    "FUD",
+    "FUD",
+    ethers.utils.parseUnits("1000000000000"),
+    maticDiamondAddress
+  )) as AlchemicaToken;
+  const Fomo = await ethers.getContractFactory("AlchemicaToken");
+  let fomo = (await Fomo.deploy(
+    "FOMO",
+    "FOMO",
+    ethers.utils.parseUnits("250000000000"),
+    maticDiamondAddress
+  )) as AlchemicaToken;
+  const Alpha = await ethers.getContractFactory("AlchemicaToken");
+  let alpha = (await Alpha.deploy(
+    "ALPHA",
+    "ALPHA",
+    ethers.utils.parseUnits("125000000000"),
+    maticDiamondAddress
+  )) as AlchemicaToken;
+  const Kek = await ethers.getContractFactory("AlchemicaToken");
+  let kek = (await Kek.deploy(
+    "KEK",
+    "KEK",
+    ethers.utils.parseUnits("100000000000"),
+    maticDiamondAddress
+  )) as AlchemicaToken;
+
+  // fud = await fud.deployed();
+  // fomo = await fomo.deployed();
+  // alpha = await alpha.deployed();
+  // kek = await kek.deployed();
+
+  return {
+    fud,
+    fomo,
+    alpha,
+    kek,
+  };
+}
+
+export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
+  const installationsAddress = await deployDiamond();
+
+  await upgrade(installationsAddress);
+
+  const alchemicaFacet = (await ethers.getContractAt(
+    "AlchemicaFacet",
+    maticDiamondAddress
+  )) as AlchemicaFacet;
+  const realmFacet = (await ethers.getContractAt(
+    "RealmFacet",
+    maticDiamondAddress
+  )) as RealmFacet;
+  const installationDiamond = (await ethers.getContractAt(
+    "InstallationFacet",
+    installationsAddress
+  )) as InstallationFacet;
+
+  const erc1155Facet = (await ethers.getContractAt(
+    "ERC1155Facet",
+    installationsAddress
+  )) as ERC1155Facet;
+
+  const ownershipFacet = (await ethers.getContractAt(
+    "OwnershipFacet",
+    maticDiamondAddress
+  )) as OwnershipFacet;
+  const ownerAddress = await ownershipFacet.owner();
+
+  const installationOwnershipFacet = (await ethers.getContractAt(
+    "OwnershipFacet",
+    installationsAddress
+  )) as OwnershipFacet;
+  const installationOwner = await installationOwnershipFacet.owner();
+
+  const alchemica = await deployAlchemica(ethers);
+
+  const fud = alchemica.fud;
+  const fomo = alchemica.fomo;
+  const alpha = alchemica.alpha;
+  const kek = alchemica.kek;
+
+  return {
+    alchemicaFacet,
+    installationsAddress,
+    realmFacet,
+    installationDiamond,
+    erc1155Facet,
+    ownerAddress,
+    installationOwner,
+    fud,
+    fomo,
+    alpha,
+    kek,
+  };
 }

@@ -226,6 +226,8 @@ contract InstallationFacet is Modifiers {
   /// @param _installationTypes An array containing the identifiers of the installationTypes to craft
   function craftInstallations(uint256[] calldata _installationTypes) external {
     for (uint8 i = 0; i < _installationTypes.length; i++) {
+      require(_installationTypes[i] < s.installationTypes.length, "InstallationFacet: Installation does not exist");
+
       //level check
       require(s.installationTypes[_installationTypes[i]].level == 1, "InstallationFacet: can only craft level 1");
 
@@ -235,6 +237,7 @@ contract InstallationFacet is Modifiers {
       for (uint8 j = 0; j < installationType.alchemicaCost.length; j++) {
         //@todo: Test - ensure this reverts if funds are insufficient
         //@todo: Test - Confirm that alchemica costs are transferred to the Realm Diamond
+
         LibERC20.transferFrom(s.alchemicaAddresses[j], msg.sender, s.realmDiamond, s.installationTypes[_installationTypes[i]].alchemicaCost[j]);
       }
       if (installationType.craftTime == 0) {
@@ -371,8 +374,6 @@ contract InstallationFacet is Modifiers {
     require(parcelOwner == _upgradeQueue.owner, "InstallationFacet: not owner");
     // check coordinates
     RealmDiamond realm = RealmDiamond(s.realmDiamond);
-
-    console.log("installation id:", _upgradeQueue.installationId);
 
     realm.checkCoordinates(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId);
     // check tech tree

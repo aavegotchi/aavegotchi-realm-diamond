@@ -1,4 +1,12 @@
 import { BigNumberish } from "@ethersproject/bignumber";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import {
+  AlchemicaFacet,
+  AlchemicaToken,
+  ERC1155Facet,
+  InstallationFacet,
+  RealmFacet,
+} from "./typechain";
 
 export interface AxiosMetadataResponse {
   data: ParcelMetadata[];
@@ -67,9 +75,9 @@ export interface InstallationType {
 export interface InstallationTypeInput {
   deprecated: boolean;
   installationType: number;
-  level: BigNumberish;
-  width: BigNumberish;
-  height: BigNumberish;
+  level: Level;
+  width: Width;
+  height: Height;
   alchemicaType: 0 | 1 | 2 | 3;
   alchemicaCost: number[];
   harvestRate: number;
@@ -81,12 +89,15 @@ export interface InstallationTypeInput {
   prerequisites: number[];
 }
 
+export type Level = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+export type Width = 1 | 2 | 3 | 4;
+export type Height = 1 | 2 | 3 | 4;
 export interface InstallationTypeOutput {
   deprecated: boolean;
   installationType: BigNumberish;
-  level: BigNumberish;
-  width: BigNumberish;
-  height: BigNumberish;
+  level: Level;
+  width: Width;
+  height: Height;
   alchemicaType: BigNumberish;
   alchemicaCost: BigNumberish[];
   harvestRate: BigNumberish;
@@ -96,4 +107,24 @@ export interface InstallationTypeOutput {
   craftTime: BigNumberish;
   nextLevelId: BigNumberish;
   prerequisites: BigNumberish[];
+}
+
+export type AlchemicaTotals = [
+  [BigNumberish, BigNumberish, BigNumberish, BigNumberish]
+];
+
+//Test
+
+export interface TestBeforeVars {
+  alchemicaFacet: AlchemicaFacet;
+  realmFacet: RealmFacet;
+  installationDiamond: InstallationFacet;
+  ownerAddress: string;
+  installationsAddress: string;
+  fud: AlchemicaToken;
+  fomo: AlchemicaToken;
+  alpha: AlchemicaToken;
+  kek: AlchemicaToken;
+  erc1155Facet: ERC1155Facet;
+  installationOwner: string;
 }
