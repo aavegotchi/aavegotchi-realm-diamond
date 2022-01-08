@@ -79,11 +79,11 @@ export interface InstallationTypeInput {
   width: Width;
   height: Height;
   alchemicaType: 0 | 1 | 2 | 3;
-  alchemicaCost: number[];
-  harvestRate: number;
-  capacity: number;
-  spillRadius: number;
-  spillRate: number;
+  alchemicaCost: BigNumberish[];
+  harvestRate: BigNumberish;
+  capacity: BigNumberish;
+  spillRadius: BigNumberish;
+  spillRate: BigNumberish;
   craftTime: number;
   nextLevelId: number;
   prerequisites: number[];

@@ -95,7 +95,7 @@ describe("Testing Equip Installation", async function () {
     );
     await g.alchemicaFacet.testingAlchemicaFaucet(
       0,
-      ethers.utils.parseUnits("10500")
+      ethers.utils.parseUnits("20000")
     );
     await g.alchemicaFacet.testingAlchemicaFaucet(
       1,
@@ -164,29 +164,29 @@ describe("Testing Equip Installation", async function () {
       testParcelId
     );
 
-    console.log("available alchemica", availableAlchemica);
     expect(Number(ethers.utils.formatUnits(availableAlchemica[0]))).to.equal(0);
-    for (let i = 0; i < 2000; i++) {
+    for (let i = 0; i < 60000; i++) {
       ethers.provider.send("evm_mine", []);
     }
     let parcelCapacity = await g.realmFacet.getParcelCapacity(testParcelId);
     availableAlchemica = await g.alchemicaFacet.getAvailableAlchemica(
       testParcelId
     );
-    console.log("available alchemica", availableAlchemica);
 
     expect(Number(ethers.utils.formatUnits(availableAlchemica[0]))).to.equal(
       Number(ethers.utils.formatUnits(parcelCapacity[0]))
     );
   });
   it("Claim Alchemica", async function () {
-    let balance = await g.fud.balanceOf(testAddress);
-    expect(Number(ethers.utils.formatUnits(balance))).to.equal(0);
+    const preBalance = await g.fud.balanceOf(testAddress);
     //@ts-ignore
     let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+    const alchemicaRemaining = await g.alchemicaFacet.getRealmAlchemica(
+      testParcelId
+    );
     let messageHash = ethers.utils.solidityKeccak256(
-      ["uint256", "uint256"],
-      [0, testGotchiId]
+      ["uint256", "uint256", "uint256", "uint256"],
+      [0, testParcelId, testGotchiId, alchemicaRemaining[0]]
     );
     let signedMessage = await backendSigner.signMessage(
       ethers.utils.arrayify(messageHash)
@@ -206,15 +206,17 @@ describe("Testing Equip Installation", async function () {
     let parcelCapacity = await g.realmFacet.getParcelCapacity(testParcelId);
     const alchemicaMinusSpillover = 0.8;
     expect(Number(ethers.utils.formatUnits(availableAlchemica[0]))).to.equal(0);
-    let claimedAlchemica = await g.fud.balanceOf(testAddress);
-    expect(Number(ethers.utils.formatUnits(claimedAlchemica))).to.equal(
+    let totalAlchemica = await g.fud.balanceOf(testAddress);
+    expect(
+      Number(ethers.utils.formatUnits(totalAlchemica)) -
+        Number(ethers.utils.formatUnits(preBalance))
+    ).to.equal(
       alchemicaMinusSpillover *
         Number(ethers.utils.formatUnits(parcelCapacity[0]))
     );
   });
   it("Equip level 2 and claim alchemica", async function () {
-    let balance = await g.fud.balanceOf(testAddress);
-    await g.realmFacet.equipInstallation(testParcelId, 2, 6, 6);
+    await g.realmFacet.equipInstallation(testParcelId, 2, 10, 10);
     const upgradeQueue: UpgradeQueue = {
       parcelId: testParcelId,
       coordinateX: 3,
@@ -228,23 +230,14 @@ describe("Testing Equip Installation", async function () {
     for (let i = 0; i < 20000; i++) {
       ethers.provider.send("evm_mine", []);
     }
-    await g.installationDiamond.finalizeUpgrade();
-    for (let i = 0; i < 2000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
-    let availableAlchemica = await g.alchemicaFacet.getAvailableAlchemica(
-      testParcelId
-    );
-    let parcelCapacity = await g.realmFacet.getParcelCapacity(testParcelId);
-    expect(Number(ethers.utils.formatUnits(availableAlchemica[0]))).to.equal(
-      Number(ethers.utils.formatUnits(parcelCapacity[0]))
-    );
-
     //@ts-ignore
     let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+    const alchemicaRemaining = await g.alchemicaFacet.getRealmAlchemica(
+      testParcelId
+    );
     let messageHash = ethers.utils.solidityKeccak256(
-      ["uint256", "uint256"],
-      [0, testGotchiId]
+      ["uint256", "uint256", "uint256", "uint256"],
+      [0, testParcelId, testGotchiId, alchemicaRemaining[0]]
     );
     let signedMessage = await backendSigner.signMessage(
       ethers.utils.arrayify(messageHash)
@@ -258,12 +251,43 @@ describe("Testing Equip Installation", async function () {
       testGotchiId,
       signature
     );
+    let startBalance = await g.fud.balanceOf(testAddress);
+    await g.installationDiamond.finalizeUpgrade();
+    for (let i = 0; i < 60000; i++) {
+      ethers.provider.send("evm_mine", []);
+    }
+    let availableAlchemica = await g.alchemicaFacet.getAvailableAlchemica(
+      testParcelId
+    );
+    let parcelCapacity = await g.realmFacet.getParcelCapacity(testParcelId);
+    expect(Number(ethers.utils.formatUnits(availableAlchemica[0]))).to.equal(
+      Number(ethers.utils.formatUnits(parcelCapacity[0]))
+    );
+    const alchemicaRemaining2 = await g.alchemicaFacet.getRealmAlchemica(
+      testParcelId
+    );
+    let messageHash2 = ethers.utils.solidityKeccak256(
+      ["uint256", "uint256", "uint256", "uint256"],
+      [0, testParcelId, testGotchiId, alchemicaRemaining2[0]]
+    );
+    let signedMessage2 = await backendSigner.signMessage(
+      ethers.utils.arrayify(messageHash2)
+    );
+    let signature2 = ethers.utils.arrayify(signedMessage2);
+
+    signedMessage = await backendSigner.signMessage(messageHash);
+    await g.alchemicaFacet.claimAvailableAlchemica(
+      testParcelId,
+      0,
+      testGotchiId,
+      signature2
+    );
 
     let claimedAlchemica = await g.fud.balanceOf(testAddress);
     const alchemicaMinusSpillover = 0.85;
     expect(
       Number(ethers.utils.formatUnits(claimedAlchemica)) -
-        Number(ethers.utils.formatUnits(balance))
+        Number(ethers.utils.formatUnits(startBalance))
     ).to.equal(
       alchemicaMinusSpillover *
         Number(ethers.utils.formatUnits(parcelCapacity[0]))
