@@ -31,6 +31,8 @@ contract AlchemicaFacet is Modifiers {
     uint256 _spilloverRadius
   );
 
+  event ExitAlchemica(uint256 indexed _gotchiId, uint256[] _alchemica);
+
   /// @notice Allow the diamond owner to set the alchemica addresses
   /// @param _addresses An array containing the alchemica token addresses
   function setAlchemicaAddresses(address[4] calldata _addresses) external onlyOwner {
@@ -390,5 +392,7 @@ contract AlchemicaFacet is Modifiers {
       AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
       alchemica.transferFrom(s.greatPortalDiamond, alchemicaRecipient(_gotchiId), _alchemica[i]);
     }
+
+    emit ExitAlchemica(_gotchiId, _alchemica);
   }
 }
