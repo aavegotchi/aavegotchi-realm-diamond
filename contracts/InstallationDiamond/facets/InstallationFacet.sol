@@ -233,8 +233,8 @@ contract InstallationFacet is Modifiers {
       //take the required alchemica
       InstallationType memory installationType = s.installationTypes[_installationTypes[i]];
       for (uint8 j = 0; j < installationType.alchemicaCost.length; j++) {
-        //@todo: ensure this reverts if funds are insufficient
-        //@todo: Confirm that alchemica costs are transferred to the Realm Diamond
+        //@todo: Test - ensure this reverts if funds are insufficient
+        //@todo: Test - Confirm that alchemica costs are transferred to the Realm Diamond
         LibERC20.transferFrom(s.alchemicaAddresses[j], msg.sender, s.realmDiamond, s.installationTypes[_installationTypes[i]].alchemicaCost[j]);
       }
       if (installationType.craftTime == 0) {
@@ -268,6 +268,8 @@ contract InstallationFacet is Modifiers {
       require(block.number <= queueItem.readyBlock, "InstallationFacet: installation already done");
 
       IERC20 glmr = IERC20(s.glmr);
+
+      //@todo: test GLMR to reduce upgrade time
       require(glmr.balanceOf(msg.sender) >= _amounts[i], "InstallationFacet: not enough GLMR");
       glmr.burnFrom(msg.sender, _amounts[i]);
 

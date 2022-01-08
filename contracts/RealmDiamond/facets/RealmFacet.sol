@@ -101,7 +101,7 @@ contract RealmFacet is Modifiers {
     InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
     InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
 
-    // todo: refund 50% alchemica from great portal
+    // todo: test - refund 50% alchemica from great portal
     for (uint8 i; i < installation.alchemicaCost.length; i++) {
       AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
 

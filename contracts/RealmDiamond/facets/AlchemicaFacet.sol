@@ -329,7 +329,7 @@ contract AlchemicaFacet is Modifiers {
   ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) {
     //@todo: write tests to check spillover is accurate
 
-    //@todo: test enforce duration (once per parcel per 24 hrs)
+    //@todo: test - enforce duration (once per parcel per 24 hrs)
 
     require(_lastChanneled == s.gotchiChannelings[_gotchiId], "AlchemicaFacet: Incorrect last duration");
 
@@ -346,6 +346,8 @@ contract AlchemicaFacet is Modifiers {
       AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
 
       //Mint new tokens if the Great Portal Balance is less than capacity
+
+      //@todo: test minting new tokens vs. transferring
       if (alchemica.balanceOf(s.greatPortalDiamond) < s.greatPortalCapacity[i]) {
         TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], spillover.rate);
 

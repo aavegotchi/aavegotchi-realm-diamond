@@ -14,16 +14,11 @@ library LibAlchemica {
     uint256 alchemicaSinceUpdate = alchemicaSinceLastUpdate(_tokenId, _alchemicaType);
 
     if (alchemicaSinceUpdate > 0) {
-      console.log("halp");
-
       //Cannot settle more than capacity
       if (alchemicaSinceUpdate > capacity) {
-        console.log("since update:");
         s.parcels[_tokenId].unclaimedAlchemica[_alchemicaType] = capacity;
       } else {
         //Increment alchemica
-        //@todo: check math
-        console.log("incrmeent");
         s.parcels[_tokenId].unclaimedAlchemica[_alchemicaType] += alchemicaSinceUpdate;
       }
     }
@@ -95,6 +90,10 @@ library LibAlchemica {
 
       if (s.parcels[_realmId].unclaimedAlchemica[alchemicaType] > s.parcels[_realmId].reservoirCapacity[alchemicaType]) {
         //@todo: test harvesting and then unequipping
+
+        //step 1 - unequip all harvesters
+        //step 2 - claim alchemica balance
+        //step 3 - unequip reservoir
         revert("LibAlchemica: Unclaimed alchemica greater than reservoir capacity");
       }
     }
