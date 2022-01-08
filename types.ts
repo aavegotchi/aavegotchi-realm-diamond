@@ -41,14 +41,47 @@ export interface UpgradeQueue {
   parcelId: BigNumberish;
   coordinateX: BigNumberish;
   coordinateY: BigNumberish;
-  prevInstallationId: BigNumberish;
-  nextInstallationId: BigNumberish;
+  installationId: BigNumberish;
   readyBlock: BigNumberish;
   claimed: boolean;
   owner: string;
 }
 
 export interface InstallationType {
+  deprecated: boolean;
+  installationType: BigNumberish;
+  level: BigNumberish;
+  width: BigNumberish;
+  height: BigNumberish;
+  alchemicaType: BigNumberish;
+  alchemicaCost: BigNumberish[];
+  harvestRate: BigNumberish;
+  capacity: BigNumberish;
+  spillRadius: BigNumberish;
+  spillRate: BigNumberish;
+  craftTime: BigNumberish;
+  nextLevelId: BigNumberish;
+  prerequisites: BigNumberish[];
+}
+
+export interface InstallationTypeInput {
+  deprecated: boolean;
+  installationType: number;
+  level: BigNumberish;
+  width: BigNumberish;
+  height: BigNumberish;
+  alchemicaType: 0 | 1 | 2 | 3;
+  alchemicaCost: number[];
+  harvestRate: number;
+  capacity: number;
+  spillRadius: number;
+  spillRate: number;
+  craftTime: number;
+  nextLevelId: number;
+  prerequisites: number[];
+}
+
+export interface InstallationTypeOutput {
   deprecated: boolean;
   installationType: BigNumberish;
   level: BigNumberish;

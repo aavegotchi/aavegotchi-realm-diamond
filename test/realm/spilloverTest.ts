@@ -9,58 +9,38 @@ import {
   RealmFacet,
   OwnershipFacet,
   AlchemicaToken,
-  InstallationDiamond,
+  InstallationFacet,
 } from "../../typechain";
-import { upgrade } from "../scripts/upgrades/upgrade-spillover";
+import { upgrade } from "../../scripts/realm/upgrades/upgrade-harvesting";
 import { UpgradeQueue } from "../../types";
-import { BigNumberish } from "@ethersproject/bignumber";
+import { deployDiamond } from "../../scripts/installation/deploy";
+import {
+  alchemicaTotals,
+  boostMultipliers,
+  greatPortalCapacity,
+} from "../../scripts/setVars";
+import { testInstallations } from "../../scripts/realm/realmHelpers";
 
 describe("Testing Equip Installation", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
-  const installationsAddress = "0x75139C13199A3470A0505AdBEa4f25570FFf362b";
-  const installationsOwner = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
   const testParcelId = 2893;
   const testGotchiId = 22306;
 
-  let hardcodedAlchemicasTotals: any = [
-    [14154, 7076, 3538, 1414],
-    [56618, 28308, 14154, 5660],
-    [452946, 226472, 113236, 45294],
-    [452946, 226472, 113236, 45294],
-    [905894, 452946, 226472, 90588],
-  ];
-  for (let i = 0; i < hardcodedAlchemicasTotals.length; i++) {
-    for (let j = 0; j < hardcodedAlchemicasTotals[i].length; j++) {
-      hardcodedAlchemicasTotals[i][j] = ethers.utils.parseUnits(
-        hardcodedAlchemicasTotals[i][j].toString()
-      );
-    }
-  }
-
-  const greatPortalCapacity: [
-    BigNumberish,
-    BigNumberish,
-    BigNumberish,
-    BigNumberish
-  ] = [
-    ethers.utils.parseUnits("1250000000"),
-    ethers.utils.parseUnits("625000000"),
-    ethers.utils.parseUnits("312500000"),
-    ethers.utils.parseUnits("125000000"),
-  ];
-
   let alchemicaFacet: AlchemicaFacet;
   let realmFacet: RealmFacet;
-  let installationDiamond: InstallationDiamond;
+  let installationFacet: InstallationFacet;
+  let installationsOwner: string;
   let ownerAddress: string;
   let fud: AlchemicaToken;
   let fomo: AlchemicaToken;
   let alpha: AlchemicaToken;
   let kek: AlchemicaToken;
+  let installationsAddress: string;
 
   before(async function () {
     this.timeout(20000000);
-    await upgrade();
+    installationsAddress = await deployDiamond();
+    await upgrade(installationsAddress);
 
     alchemicaFacet = (await ethers.getContractAt(
       "AlchemicaFacet",
@@ -70,15 +50,24 @@ describe("Testing Equip Installation", async function () {
       "RealmFacet",
       maticDiamondAddress
     )) as RealmFacet;
-    installationDiamond = (await ethers.getContractAt(
-      "InstallationDiamond",
+
+    installationFacet = (await ethers.getContractAt(
+      "InstallationFacet",
       installationsAddress
-    )) as InstallationDiamond;
+    )) as InstallationFacet;
+
     const ownershipFacet = (await ethers.getContractAt(
       "OwnershipFacet",
       maticDiamondAddress
     )) as OwnershipFacet;
     ownerAddress = await ownershipFacet.owner();
+
+    const installationOwner = (await ethers.getContractAt(
+      "OwnershipFacet",
+      installationsAddress
+    )) as OwnershipFacet;
+    const owner = await installationOwner.owner();
+    installationsOwner = owner;
   });
   it("Deploy alchemica ERC20s", async function () {
     const Fud = await ethers.getContractFactory("AlchemicaToken");
@@ -128,14 +117,17 @@ describe("Testing Equip Installation", async function () {
     //@ts-ignore
     const backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
     await alchemicaFacet.setVars(
-      hardcodedAlchemicasTotals,
+      //@ts-ignore
+      alchemicaTotals(),
+      boostMultipliers,
       greatPortalCapacity,
       installationsAddress,
       maticDiamondAddress,
       "0x0000000000000000000000000000000000000000",
       "0x0000000000000000000000000000000000000000",
       [fud.address, fomo.address, alpha.address, kek.address],
-      ethers.utils.hexDataSlice(backendSigner.publicKey, 1)
+      ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
+      ownerAddress
     );
     await network.provider.send("hardhat_setBalance", [
       maticDiamondAddress,
@@ -143,84 +135,33 @@ describe("Testing Equip Installation", async function () {
     ]);
   });
   it("Setup installation diamond", async function () {
-    installationDiamond = await impersonate(
+    installationFacet = await impersonate(
       installationsOwner,
-      installationDiamond,
+      installationFacet,
       ethers,
       network
     );
-    const setAlchemicaAddresses = [
+    const alchemicaAddresses = [
       fud.address,
       fomo.address,
       alpha.address,
       kek.address,
     ];
-    await installationDiamond.setAlchemicaAddresses(setAlchemicaAddresses);
+
+    await installationFacet.setAlchemicaAddresses(alchemicaAddresses);
     const getAlchemicaAddresses =
-      await installationDiamond.getAlchemicaAddresses();
-    expect(setAlchemicaAddresses).to.eql(getAlchemicaAddresses);
-    let installationsTypes = await installationDiamond.getInstallationTypes([]);
-    const installations = [];
-    installations.push({
-      installationType: 0,
-      level: 0,
-      width: 0,
-      height: 0,
-      alchemicaType: 0,
-      alchemicaCost: [0, 0, 0, 0],
-      harvestRate: 0,
-      capacity: 0,
-      spillRadius: 0,
-      spillRate: 0,
-      craftTime: 0,
-    });
-    installations.push({
-      installationType: 0,
-      level: 1,
-      width: 2,
-      height: 2,
-      alchemicaType: 0,
-      alchemicaCost: [ethers.utils.parseUnits("100"), 0, 0, 0],
-      harvestRate: ethers.utils.parseUnits("2"),
-      capacity: 0,
-      spillRadius: 0,
-      spillRate: 0,
-      craftTime: 10000,
-    });
-    installations.push({
-      installationType: 1,
-      level: 1,
-      width: 2,
-      height: 2,
-      alchemicaType: 0,
-      alchemicaCost: [ethers.utils.parseUnits("200"), 0, 0, 0],
-      harvestRate: 0,
-      capacity: ethers.utils.parseUnits("500"),
-      spillRadius: ethers.utils.parseUnits("100"),
-      spillRate: ethers.utils.parseUnits("20"),
-      craftTime: 20000,
-    });
-    installations.push({
-      installationType: 1,
-      level: 2,
-      width: 2,
-      height: 2,
-      alchemicaType: 0,
-      alchemicaCost: [ethers.utils.parseUnits("400"), 0, 0, 0],
-      harvestRate: 0,
-      capacity: ethers.utils.parseUnits("1500"),
-      spillRadius: ethers.utils.parseUnits("50"),
-      spillRate: ethers.utils.parseUnits("10"),
-      craftTime: 15000,
-    });
-    await installationDiamond.addInstallationTypes(installations);
-    installationsTypes = await installationDiamond.getInstallationTypes([]);
-    expect(installationsTypes.length).to.equal(installations.length);
+      await installationFacet.getAlchemicaAddresses();
+    expect(alchemicaAddresses).to.eql(getAlchemicaAddresses);
+    let installationsTypes = await installationFacet.getInstallationTypes([]);
+
+    await installationFacet.addInstallationTypes(testInstallations());
+    installationsTypes = await installationFacet.getInstallationTypes([]);
+    expect(installationsTypes.length).to.equal(testInstallations().length);
   });
   it("Craft installations", async function () {
-    installationDiamond = await impersonate(
+    installationFacet = await impersonate(
       testAddress,
-      installationDiamond,
+      installationFacet,
       ethers,
       network
     );
@@ -267,20 +208,26 @@ describe("Testing Equip Installation", async function () {
       installationsAddress,
       ethers.utils.parseUnits("1000000000")
     );
-    await installationDiamond.craftInstallations([1, 2, 2]);
+    await installationFacet.craftInstallations([1, 2, 2]);
     await expect(
-      installationDiamond.claimInstallations([0, 1, 2])
+      installationFacet.claimInstallations([0, 1, 2])
     ).to.be.revertedWith("InstallationFacet: installation not ready");
     for (let i = 0; i < 21000; i++) {
       ethers.provider.send("evm_mine", []);
     }
-    const balancePre = await installationDiamond.balanceOf(testAddress, 2);
-    await installationDiamond.claimInstallations([0, 1, 2]);
-    const balancePost = await installationDiamond.balanceOf(testAddress, 2);
+
+    const erc1155facet = await ethers.getContractAt(
+      "ERC1155Facet",
+      installationsAddress
+    );
+
+    const balancePre = await erc1155facet.balanceOf(testAddress, 2);
+    await installationFacet.claimInstallations([0, 1, 2]);
+    const balancePost = await erc1155facet.balanceOf(testAddress, 2);
     expect(balancePost).to.above(balancePre);
   });
   it("Survey Parcel", async function () {
-    await alchemicaFacet.testingStartSurveying(testParcelId, 0);
+    await alchemicaFacet.testingStartSurveying(testParcelId);
   });
   it("Equip installations", async function () {
     realmFacet = await impersonate(testAddress, realmFacet, ethers, network);
@@ -289,6 +236,8 @@ describe("Testing Equip Installation", async function () {
     let availableAlchemica = await alchemicaFacet.getAvailableAlchemica(
       testParcelId
     );
+
+    console.log("available alchemica", availableAlchemica);
     expect(Number(ethers.utils.formatUnits(availableAlchemica[0]))).to.equal(0);
     for (let i = 0; i < 2000; i++) {
       ethers.provider.send("evm_mine", []);
@@ -297,6 +246,8 @@ describe("Testing Equip Installation", async function () {
     availableAlchemica = await alchemicaFacet.getAvailableAlchemica(
       testParcelId
     );
+    console.log("available alchemica", availableAlchemica);
+
     expect(Number(ethers.utils.formatUnits(availableAlchemica[0]))).to.equal(
       Number(ethers.utils.formatUnits(parcelCapacity[0]))
     );
@@ -341,17 +292,16 @@ describe("Testing Equip Installation", async function () {
       parcelId: testParcelId,
       coordinateX: 3,
       coordinateY: 3,
-      prevInstallationId: 2,
-      nextInstallationId: 3,
+      installationId: 2,
       readyBlock: 0,
       claimed: false,
       owner: testAddress,
     };
-    await installationDiamond.upgradeInstallation(upgradeQueue);
+    await installationFacet.upgradeInstallation(upgradeQueue);
     for (let i = 0; i < 20000; i++) {
       ethers.provider.send("evm_mine", []);
     }
-    await installationDiamond.finalizeUpgrade();
+    await installationFacet.finalizeUpgrade();
     for (let i = 0; i < 2000; i++) {
       ethers.provider.send("evm_mine", []);
     }

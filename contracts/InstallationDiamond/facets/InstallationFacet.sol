@@ -370,6 +370,8 @@ contract InstallationFacet is Modifiers {
     // check coordinates
     RealmDiamond realm = RealmDiamond(s.realmDiamond);
 
+    console.log("installation id:", _upgradeQueue.installationId);
+
     realm.checkCoordinates(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId);
     // check tech tree
 
