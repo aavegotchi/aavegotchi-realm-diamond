@@ -25,7 +25,7 @@ describe("Testing Equip Installation", async function () {
   before(async function () {
     this.timeout(20000000);
 
-    const g = await beforeTest(ethers);
+    g = await beforeTest(ethers);
   });
   it("Deploy alchemica ERC20s", async function () {
     g.alchemicaFacet = await impersonate(
@@ -133,7 +133,7 @@ describe("Testing Equip Installation", async function () {
     await g.installationDiamond.craftInstallations([1, 2, 2]);
     await expect(
       g.installationDiamond.claimInstallations([0, 1, 2])
-    ).to.be.revertedWith("g.installationDiamond: installation not ready");
+    ).to.be.revertedWith("InstallationFacet: installation not ready");
     for (let i = 0; i < 21000; i++) {
       ethers.provider.send("evm_mine", []);
     }
