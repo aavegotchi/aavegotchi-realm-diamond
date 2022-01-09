@@ -14,6 +14,7 @@ import {
   beforeTest,
   testInstallations,
 } from "../../scripts/realm/realmHelpers";
+import { GLMR } from "../../typechain";
 
 describe("Testing Equip Installation", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
@@ -145,8 +146,21 @@ describe("Testing Equip Installation", async function () {
       Number(ethers.utils.formatUnits(kekPreCraft))
     );
     await expect(
-      g.installationDiamond.claimInstallations([0, 1, 2])
+      g.installationDiamond.claimInstallations([0])
     ).to.be.revertedWith("InstallationFacet: installation not ready");
+
+    g.glmr = await impersonate(testAddress, g.glmr, ethers, network);
+    await g.glmr.mint(ethers.utils.parseUnits("100000"));
+    await g.glmr.approve(
+      g.installationDiamond.address,
+      ethers.utils.parseUnits("100000")
+    );
+    await g.installationDiamond.reduceCraftTime([0], [100]);
+    await expect(
+      g.installationDiamond.claimInstallations([0])
+    ).to.be.revertedWith("InstallationFacet: installation not ready");
+    await g.installationDiamond.reduceCraftTime([0], [10000]);
+    await g.installationDiamond.claimInstallations([0]);
     for (let i = 0; i < 21000; i++) {
       ethers.provider.send("evm_mine", []);
     }
@@ -157,7 +171,7 @@ describe("Testing Equip Installation", async function () {
     );
 
     const balancePre = await erc1155facet.balanceOf(testAddress, 2);
-    await g.installationDiamond.claimInstallations([0, 1, 2]);
+    await g.installationDiamond.claimInstallations([1, 2]);
     const balancePost = await erc1155facet.balanceOf(testAddress, 2);
     expect(balancePost).to.above(balancePre);
   });

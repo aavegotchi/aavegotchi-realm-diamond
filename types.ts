@@ -4,6 +4,7 @@ import {
   AlchemicaFacet,
   AlchemicaToken,
   ERC1155Facet,
+  GLMR,
   InstallationFacet,
   RealmFacet,
 } from "./typechain";
@@ -125,6 +126,7 @@ export interface TestBeforeVars {
   fomo: AlchemicaToken;
   alpha: AlchemicaToken;
   kek: AlchemicaToken;
+  glmr: GLMR;
   erc1155Facet: ERC1155Facet;
   installationOwner: string;
 }

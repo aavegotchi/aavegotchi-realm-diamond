@@ -256,6 +256,7 @@ contract InstallationFacet is Modifiers {
   /// @notice Allow a user to speed up multiple queues(installation craft time) by paying the correct amount of $GLMR tokens
   /// @dev Will throw if the caller is not the queue owner
   /// @dev $GLMR tokens are burnt upon usage
+  /// @dev amount expressed in block numbers
   /// @param _queueIds An array containing the identifiers of queues to speed up
   /// @param _amounts An array containing the corresponding amounts of $GLMR tokens to pay for each queue speedup
   function reduceCraftTime(uint256[] calldata _queueIds, uint256[] calldata _amounts) external {
@@ -269,9 +270,12 @@ contract InstallationFacet is Modifiers {
 
       IERC20 glmr = IERC20(s.glmr);
 
-      //@todo: test GLMR to reduce upgrade time
-      require(glmr.balanceOf(msg.sender) >= _amounts[i], "InstallationFacet: not enough GLMR");
-      glmr.burnFrom(msg.sender, _amounts[i]);
+      uint256 blockLeft = queueItem.readyBlock - block.number;
+      if (_amounts[i] <= blockLeft) {
+        glmr.burnFrom(msg.sender, _amounts[i] * 10**18);
+      } else {
+        glmr.burnFrom(msg.sender, blockLeft * 10**18);
+      }
 
       queueItem.readyBlock -= _amounts[i];
       emit CraftTimeReduced(queueId, _amounts[i]);
@@ -412,8 +416,13 @@ contract InstallationFacet is Modifiers {
     require(block.number <= upgradeQueue.readyBlock, "InstallationFacet: Upgrade already done");
 
     IERC20 glmr = IERC20(s.glmr);
-    require(glmr.balanceOf(msg.sender) >= _amount, "InstallationFacet: Not enough GLMR");
-    glmr.burnFrom(msg.sender, _amount);
+
+    uint256 blockLeft = upgradeQueue.readyBlock - block.number;
+    if (_amount <= blockLeft) {
+      glmr.burnFrom(msg.sender, _amount * 10**18);
+    } else {
+      glmr.burnFrom(msg.sender, blockLeft * 10**18);
+    }
 
     upgradeQueue.readyBlock -= _amount;
     emit UpgradeTimeReduced(_queueId, upgradeQueue.parcelId, upgradeQueue.coordinateX, upgradeQueue.coordinateY, _amount);

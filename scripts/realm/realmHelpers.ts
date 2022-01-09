@@ -6,13 +6,17 @@ import {
   InstallationFacet,
   OwnershipFacet,
   RealmFacet,
+  GLMR,
 } from "../../typechain";
 import {
   InstallationTypeInput,
   InstallationTypeOutput,
   TestBeforeVars,
 } from "../../types";
-import { maticDiamondAddress } from "../helperFunctions";
+import {
+  maticDiamondAddress,
+  maticAavegotchiDiamondAddress,
+} from "../helperFunctions";
 import { deployDiamond } from "../installation/deploy";
 import { upgrade } from "./upgrades/upgrade-harvesting";
 
@@ -152,16 +156,15 @@ export async function deployAlchemica(ethers: any) {
     maticDiamondAddress
   )) as AlchemicaToken;
 
-  // fud = await fud.deployed();
-  // fomo = await fomo.deployed();
-  // alpha = await alpha.deployed();
-  // kek = await kek.deployed();
+  const Glmr = await ethers.getContractFactory("GLMR");
+  let glmr = (await Glmr.deploy()) as GLMR;
 
   return {
     fud,
     fomo,
     alpha,
     kek,
+    glmr,
   };
 }
 
@@ -206,6 +209,13 @@ export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
   const fomo = alchemica.fomo;
   const alpha = alchemica.alpha;
   const kek = alchemica.kek;
+  const glmr = alchemica.glmr;
+
+  await installationDiamond.setAddresses(
+    maticAavegotchiDiamondAddress,
+    maticDiamondAddress,
+    glmr.address
+  );
 
   return {
     alchemicaFacet,
@@ -219,5 +229,6 @@ export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
     fomo,
     alpha,
     kek,
+    glmr,
   };
 }
