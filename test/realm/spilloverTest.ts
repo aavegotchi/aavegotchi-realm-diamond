@@ -133,8 +133,17 @@ describe("Testing Equip Installation", async function () {
       g.installationsAddress,
       ethers.utils.parseUnits("1000000000")
     );
-
+    let fudPreCraft = await g.fud.balanceOf(maticDiamondAddress);
+    let kekPreCraft = await g.kek.balanceOf(maticDiamondAddress);
     await g.installationDiamond.craftInstallations([1, 2, 2]);
+    let fudAfterCraft = await g.fud.balanceOf(maticDiamondAddress);
+    let kekAfterCraft = await g.kek.balanceOf(maticDiamondAddress);
+    expect(Number(ethers.utils.formatUnits(fudAfterCraft))).to.above(
+      Number(ethers.utils.formatUnits(fudPreCraft))
+    );
+    expect(Number(ethers.utils.formatUnits(kekAfterCraft))).to.above(
+      Number(ethers.utils.formatUnits(kekPreCraft))
+    );
     await expect(
       g.installationDiamond.claimInstallations([0, 1, 2])
     ).to.be.revertedWith("InstallationFacet: installation not ready");

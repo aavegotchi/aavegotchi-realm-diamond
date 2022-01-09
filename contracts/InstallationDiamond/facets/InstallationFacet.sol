@@ -235,8 +235,6 @@ contract InstallationFacet is Modifiers {
       //take the required alchemica
       InstallationType memory installationType = s.installationTypes[_installationTypes[i]];
       for (uint8 j = 0; j < installationType.alchemicaCost.length; j++) {
-        //@todo: Test - Confirm that alchemica costs are transferred to the Realm Diamond
-
         LibERC20.transferFrom(s.alchemicaAddresses[j], msg.sender, s.realmDiamond, s.installationTypes[_installationTypes[i]].alchemicaCost[j]);
       }
       if (installationType.craftTime == 0) {
