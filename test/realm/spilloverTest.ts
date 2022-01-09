@@ -230,7 +230,9 @@ describe("Testing Equip Installation", async function () {
     let availableAlchemica = await g.alchemicaFacet.getAvailableAlchemica(
       testParcelId
     );
+
     let parcelCapacity = await g.realmFacet.getParcelCapacity(testParcelId);
+
     const alchemicaMinusSpillover = 0.8;
     expect(Number(ethers.utils.formatUnits(availableAlchemica[0]))).to.equal(0);
     let totalAlchemica = await g.fud.balanceOf(testAddress);
@@ -293,6 +295,7 @@ describe("Testing Equip Installation", async function () {
     const alchemicaRemaining2 = await g.alchemicaFacet.getRealmAlchemica(
       testParcelId
     );
+
     let messageHash2 = ethers.utils.solidityKeccak256(
       ["uint256", "uint256", "uint256", "uint256"],
       [0, testParcelId, testGotchiId, alchemicaRemaining2[0]]
@@ -311,6 +314,8 @@ describe("Testing Equip Installation", async function () {
     );
 
     let claimedAlchemica = await g.fud.balanceOf(testAddress);
+
+    //combined spillover of reservoirs is 15%
     const alchemicaMinusSpillover = 0.85;
     expect(
       Number(ethers.utils.formatUnits(claimedAlchemica)) -

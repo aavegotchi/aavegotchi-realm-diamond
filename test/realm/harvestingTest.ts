@@ -141,6 +141,36 @@ describe("Testing Equip Installation", async function () {
     expect(balancePost).to.above(balancePre);
   });
 
+  it("Reverts if installation does not exist", async function () {
+    g.installationDiamond = await impersonate(
+      g.installationOwner,
+      g.installationDiamond,
+      ethers,
+      network
+    );
+    const installation = outputInstallation({
+      installationType: 0,
+      level: 1,
+      width: 2,
+      height: 2,
+      alchemicaType: 0,
+      alchemicaCost: [0, 0, 0, 0],
+      harvestRate: 0,
+      capacity: 0,
+      spillRadius: 0,
+      spillRate: 0,
+      craftTime: 0,
+      deprecated: false,
+      nextLevelId: 1,
+      prerequisites: [],
+    });
+    await g.installationDiamond.addInstallationTypes([installation]);
+
+    await expect(
+      g.installationDiamond.craftInstallations([5])
+    ).to.be.revertedWith("InstallationFacet: Installation does not exist");
+  });
+
   it("Crafting reverts with insufficient balance", async function () {
     g.installationDiamond = await impersonate(
       g.installationOwner,
@@ -166,11 +196,9 @@ describe("Testing Equip Installation", async function () {
     });
     await g.installationDiamond.addInstallationTypes([installation]);
 
-    console.log("added");
-
     await expect(
-      g.installationDiamond.craftInstallations([4])
-    ).to.be.revertedWith("InstallationFacet: Installation does not exist");
+      g.installationDiamond.craftInstallations([5])
+    ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
   });
 
   it("Survey Parcel", async function () {
