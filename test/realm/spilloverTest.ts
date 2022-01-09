@@ -93,6 +93,9 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
+    await expect(
+      g.installationDiamond.craftInstallations([1, 2, 2])
+    ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
     await g.alchemicaFacet.testingAlchemicaFaucet(
       0,
       ethers.utils.parseUnits("20000")
@@ -130,6 +133,7 @@ describe("Testing Equip Installation", async function () {
       g.installationsAddress,
       ethers.utils.parseUnits("1000000000")
     );
+
     await g.installationDiamond.craftInstallations([1, 2, 2]);
     await expect(
       g.installationDiamond.claimInstallations([0, 1, 2])
