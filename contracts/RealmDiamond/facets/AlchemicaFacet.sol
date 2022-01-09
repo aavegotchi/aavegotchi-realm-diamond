@@ -11,7 +11,7 @@ import "../../interfaces/AavegotchiDiamond.sol";
 import "../../test/AlchemicaToken.sol";
 import "hardhat/console.sol";
 
-uint256 constant bp = 100000000000000000000; // 100 ether in wei //@todo: maybe change this to 10e18?
+uint256 constant bp = 100 ether;
 
 contract AlchemicaFacet is Modifiers {
   event AlchemicaClaimed(
