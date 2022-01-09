@@ -306,7 +306,6 @@ contract AlchemicaFacet is Modifiers {
 
     AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[_alchemicaType]);
 
-    //@todo: write tests to check spillover is accurate
     SpilloverIO memory spillover = calculateSpilloverForReservoir(_realmId, _alchemicaType);
 
     TransferAmounts memory amounts = calculateTransferAmounts(available, spillover.rate);
@@ -330,8 +329,6 @@ contract AlchemicaFacet is Modifiers {
     uint256 _lastChanneled,
     bytes memory _signature
   ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) {
-    //@todo: write tests to check spillover is accurate
-
     //@todo: test - enforce duration (once per parcel per 24 hrs)
 
     require(_lastChanneled == s.gotchiChannelings[_gotchiId], "AlchemicaFacet: Incorrect last duration");
