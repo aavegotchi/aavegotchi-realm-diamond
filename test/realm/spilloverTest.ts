@@ -336,7 +336,15 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
+    const harvester = await g.installationDiamond.getInstallationType(1);
+    const harvesterFudCost = harvester.alchemicaCost[0];
+    const balancePre = await g.fud.balanceOf(testAddress);
     await g.realmFacet.unequipInstallation(testParcelId, 1, 0, 0);
+    const balancePost = await g.fud.balanceOf(testAddress);
+    expect(Number(ethers.utils.formatUnits(balancePost))).to.equal(
+      Number(ethers.utils.formatUnits(balancePre)) +
+        Number(ethers.utils.formatUnits(harvesterFudCost)) / 2
+    );
     await expect(
       g.realmFacet.unequipInstallation(testParcelId, 2, 10, 10)
     ).to.be.revertedWith(
