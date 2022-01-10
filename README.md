@@ -1,16 +1,23 @@
 # Aavegotchi REALM Diamond
 
+## How to Test
+
+- Clone repo
+- `npm install`
+- Generate types: `npx hardhat typechain`. If doesn't work, use `TS_NODE_TRANSPILE_ONLY=1 npx hardhat compile`
+- Test scripts:
+  - `realm/harvestingTest.ts`
+  - `realm/spilloverTest.ts`
+  - `equipInstallationTest.ts`
+  - `surveyingTest.ts`
+
 ## Deployed Vars
 
 ### Matic (Final)
 
-- DiamondCutFacet deployed: 0x59145F61a9d8E5aa04023D33ECcca50Ce468c07C
 - Diamond deployed: 0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11
-- DiamondInit deployed: 0x45944862B6274ea45FBC6063996112D41e4C2E49
-- DiamondLoupeFacet deployed: 0x45944862B6274ea45FBC6063996112D41e4C2E49
-- OwnershipFacet deployed: 0x45944862B6274ea45FBC6063996112D41e4C2E49
-- ERC721Facet deployed: 0x5b952caCB2c7aceBdaa370b80eaF03e95135df42
-- RealmFacet deployed: 0xe58cBE144dD5556C84874deC1b3F2d0D6Ac45F1b
+- Link: https://louper.dev/diamond/0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11?network=polygon
+
 
 ### Kovan
 
