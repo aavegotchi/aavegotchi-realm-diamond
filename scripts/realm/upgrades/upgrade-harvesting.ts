@@ -62,7 +62,7 @@ export async function upgrade(installationDiamond: string) {
         "function equipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y) external",
         "function unequipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y) external",
         "function checkCoordinates(uint256 _tokenId, uint256 _coordinateX, uint256 _coordinateY, uint256 _installationId) public view",
-        "function upgradeInstallation(uint256 _realmId, uint256 _prevInstallationId, uint256 _nextInstallationId) external",
+        "function upgradeInstallation(uint256 _realmId, uint256 _prevInstallationId, uint256 _nextInstallationId, uint256 _coordinateX, uint256 _coordinateY) external",
         "function getParcelCapacity(uint256 _tokenId) external view returns(uint256[4] memory)",
         "function getHumbleGrid(uint256 _parcelId) external view returns (uint256[8][8] memory output_)",
         "function getReasonableGrid(uint256 _parcelId) external view returns (uint256[16][16] memory output_)",

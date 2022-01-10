@@ -23,6 +23,8 @@ interface RealmDiamond {
   function upgradeInstallation(
     uint256 _realmId,
     uint256 _prevInstallationId,
-    uint256 _nextInstallationId
+    uint256 _nextInstallationId,
+    uint256 _coordinateX,
+    uint256 _coordinateY
   ) external;
 }

@@ -221,6 +221,7 @@ describe("Testing Equip Installation", async function () {
     let signature = ethers.utils.arrayify(signedMessage);
 
     signedMessage = await backendSigner.signMessage(messageHash);
+
     await g.alchemicaFacet.claimAvailableAlchemica(
       testParcelId,
       0,
@@ -324,5 +325,47 @@ describe("Testing Equip Installation", async function () {
       alchemicaMinusSpillover *
         Number(ethers.utils.formatUnits(parcelCapacity[0]))
     );
+  });
+  it("Test unequipping", async function () {
+    for (let i = 0; i < 5000; i++) {
+      ethers.provider.send("evm_mine", []);
+    }
+    g.realmFacet = await impersonate(
+      testAddress,
+      g.realmFacet,
+      ethers,
+      network
+    );
+    await g.realmFacet.unequipInstallation(testParcelId, 1, 0, 0);
+    await expect(
+      g.realmFacet.unequipInstallation(testParcelId, 2, 10, 10)
+    ).to.be.revertedWith(
+      "LibAlchemica: Unclaimed alchemica greater than reservoir capacity"
+    );
+    //@ts-ignore
+    let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+    const alchemicaRemaining = await g.alchemicaFacet.getRealmAlchemica(
+      testParcelId
+    );
+    let messageHash = ethers.utils.solidityKeccak256(
+      ["uint256", "uint256", "uint256", "uint256"],
+      [0, testParcelId, testGotchiId, alchemicaRemaining[0]]
+    );
+    let signedMessage = await backendSigner.signMessage(
+      ethers.utils.arrayify(messageHash)
+    );
+    let signature = ethers.utils.arrayify(signedMessage);
+
+    signedMessage = await backendSigner.signMessage(messageHash);
+
+    await g.alchemicaFacet.claimAvailableAlchemica(
+      testParcelId,
+      0,
+      testGotchiId,
+      signature
+    );
+
+    await g.realmFacet.unequipInstallation(testParcelId, 3, 3, 3);
+    await g.realmFacet.unequipInstallation(testParcelId, 2, 10, 10);
   });
 });

@@ -448,7 +448,13 @@ contract InstallationFacet is Modifiers {
         LibInstallation._equipInstallation(queueUpgrade.owner, queueUpgrade.parcelId, nextLevelId);
 
         RealmDiamond realm = RealmDiamond(s.realmDiamond);
-        realm.upgradeInstallation(queueUpgrade.parcelId, queueUpgrade.installationId, nextLevelId);
+        realm.upgradeInstallation(
+          queueUpgrade.parcelId,
+          queueUpgrade.installationId,
+          nextLevelId,
+          queueUpgrade.coordinateX,
+          queueUpgrade.coordinateY
+        );
         // pop upgrade from array
         s.upgradeQueue[index] = s.upgradeQueue[s.upgradeQueue.length - 1];
         s.upgradeQueue.pop();

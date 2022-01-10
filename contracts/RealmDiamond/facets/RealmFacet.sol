@@ -177,8 +177,12 @@ contract RealmFacet is Modifiers {
   function upgradeInstallation(
     uint256 _realmId,
     uint256 _prevInstallationId,
-    uint256 _nextInstallationId
+    uint256 _nextInstallationId,
+    uint256 _coordinateX,
+    uint256 _coordinateY
   ) external onlyInstallationDiamond {
+    LibRealm.removeInstallation(_realmId, _prevInstallationId, _coordinateX, _coordinateY);
+    LibRealm.placeInstallation(_realmId, _nextInstallationId, _coordinateX, _coordinateY);
     LibAlchemica.reduceTraits(_realmId, _prevInstallationId);
     LibAlchemica.increaseTraits(_realmId, _nextInstallationId);
   }

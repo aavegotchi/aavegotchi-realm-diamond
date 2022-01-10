@@ -188,15 +188,17 @@ contract AlchemicaFacet is Modifiers {
     for (uint256 index = 0; index < 4; index++) {
       //First get the onchain amount
       uint256 available = s.parcels[_realmId].unclaimedAlchemica[index];
-
       //Then get the floating amount
       available += LibAlchemica.alchemicaSinceLastUpdate(_realmId, index);
 
       uint256 capacity = s.parcels[_realmId].reservoirCapacity[index];
 
       //ensure that available alchemica is not higher than available reservoir capacity
-      if (available > capacity) _availableAlchemica[index] = capacity;
-      else _availableAlchemica[index] = available;
+      if (available > capacity) {
+        _availableAlchemica[index] = capacity;
+      } else {
+        _availableAlchemica[index] = available;
+      }
     }
   }
 
@@ -301,6 +303,7 @@ contract AlchemicaFacet is Modifiers {
     require(remaining >= available, "AlchemicaFacet: Not enough alchemica available");
 
     s.parcels[_realmId].alchemicaRemaining[_alchemicaType] -= available;
+    s.parcels[_realmId].unclaimedAlchemica[_alchemicaType] = 0;
 
     s.parcels[_realmId].lastUpdateTimestamp[_alchemicaType] = block.timestamp;
 
