@@ -228,27 +228,9 @@ contract AlchemicaFacet is Modifiers {
   }
 
   function calculateSpilloverForAltar(uint256 _realmId) internal view returns (SpilloverIO memory spillover) {
-    uint256[] memory altarIds = InstallationDiamondInterface(s.installationsDiamond).getAltarIds();
-
-    uint256[] memory altarBalances = InstallationDiamondInterface(s.installationsDiamond).installationBalancesOfTokenByIds(
-      address(this),
-      _realmId,
-      altarIds
-    );
-
-    uint256 altarId = 0;
-
-    for (uint256 i = 0; i < altarBalances.length; i++) {
-      if (altarBalances[i] > 0) {
-        altarId = altarIds[i];
-        break;
-      }
-    }
-
-    //getting balances and spillover rates
+    uint256 altarId = s.parcels[_realmId].altarId;
     uint256 rate = InstallationDiamondInterface(s.installationsDiamond).spilloverRateOfId(altarId);
     uint256 radius = InstallationDiamondInterface(s.installationsDiamond).spilloverRadiusOfId(altarId);
-
     return SpilloverIO(rate, radius);
   }
 

@@ -49,17 +49,23 @@ library LibAlchemica {
 
     //handle harvester
     if (installationType.harvestRate > 0) {
-      s.parcels[_realmId].alchemicaHarvestRate[installationType.alchemicaType] += installationType.harvestRate;
+      s.parcels[_realmId].alchemicaHarvestRate[alchemicaType] += installationType.harvestRate;
     }
 
     //reservoir
     if (installationType.capacity > 0) {
-      s.parcels[_realmId].reservoirCapacity[installationType.alchemicaType] += installationType.capacity;
+      s.parcels[_realmId].reservoirCapacity[alchemicaType] += installationType.capacity;
 
       //increment storage vars
-      s.parcels[_realmId].reservoirCount[installationType.alchemicaType]++;
-      s.parcels[_realmId].spilloverRate[installationType.alchemicaType] += installationType.spillRate;
-      s.parcels[_realmId].spilloverRadius[installationType.alchemicaType] += installationType.spillRadius;
+      s.parcels[_realmId].reservoirCount[alchemicaType]++;
+      s.parcels[_realmId].spilloverRate[alchemicaType] += installationType.spillRate;
+      s.parcels[_realmId].spilloverRadius[alchemicaType] += installationType.spillRadius;
+    }
+
+    //Altar
+    if (installationType.installationType == 2) {
+      require(s.parcels[_realmId].altarId == 0, "LibAlchemica: Cannot equip two altars");
+      s.parcels[_realmId].altarId = _installationId;
     }
   }
 
@@ -78,6 +84,12 @@ library LibAlchemica {
     //Decrement harvest variables
     if (installationType.harvestRate > 0) {
       s.parcels[_realmId].alchemicaHarvestRate[alchemicaType] -= installationType.harvestRate;
+    }
+
+    //Altar
+    if (installationType.installationType == 2) {
+      //@question: do we need any special exceptions for the Altar? Should be handled by tech tree
+      s.parcels[_realmId].altarId = 0;
     }
 
     //Decrement reservoir variables

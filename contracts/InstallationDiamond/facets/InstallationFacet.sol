@@ -133,27 +133,27 @@ contract InstallationFacet is Modifiers {
     return s.installationTypes[_id].spillRadius;
   }
 
-  /// @notice Check the spillover rates of multiple installation types
-  /// @param _ids An array containing ids of the installationTypes to query
-  /// @return An array containing the corresponding spillover rates of the installation types queried
-  function spilloverRatesOfIds(uint256[] calldata _ids) external view returns (uint256[] memory) {
-    uint256[] memory rates = new uint256[](_ids.length);
-    for (uint256 i = 0; i < _ids.length; i++) {
-      rates[i] = s.installationTypes[i].spillRate;
-    }
-    return rates;
-  }
+  // /// @notice Check the spillover rates of multiple installation types
+  // /// @param _ids An array containing ids of the installationTypes to query
+  // /// @return An array containing the corresponding spillover rates of the installation types queried
+  // function spilloverRatesOfIds(uint256[] calldata _ids) external view returns (uint256[] memory) {
+  //   uint256[] memory rates = new uint256[](_ids.length);
+  //   for (uint256 i = 0; i < _ids.length; i++) {
+  //     rates[i] = s.installationTypes[i].spillRate;
+  //   }
+  //   return rates;
+  // }
 
-  /// @notice Check the spillover radius of multiple installation types
-  /// @param _ids An array containing ids of the installationTypes to query
-  /// @return An array containing the corresponding spillover radius of the installation types queried
-  function spilloverRadiusOfIds(uint256[] calldata _ids) external view returns (uint256[] memory) {
-    uint256[] memory rates = new uint256[](_ids.length);
-    for (uint256 i = 0; i < _ids.length; i++) {
-      rates[i] = s.installationTypes[i].spillRadius;
-    }
-    return rates;
-  }
+  // /// @notice Check the spillover radius of multiple installation types
+  // /// @param _ids An array containing ids of the installationTypes to query
+  // /// @return An array containing the corresponding spillover radius of the installation types queried
+  // function spilloverRadiusOfIds(uint256[] calldata _ids) external view returns (uint256[] memory) {
+  //   uint256[] memory rates = new uint256[](_ids.length);
+  //   for (uint256 i = 0; i < _ids.length; i++) {
+  //     rates[i] = s.installationTypes[i].spillRadius;
+  //   }
+  //   return rates;
+  // }
 
   /// @notice Query the installation balances of an ERC721 parent token
   /// @param _tokenContract The token contract of the ERC721 parent token
@@ -531,28 +531,6 @@ contract InstallationFacet is Modifiers {
           _installationTypes[i].prerequisites
         )
       );
-
-      // bool deprecated;
-      //   uint16 installationType; //0 = harvester, 1 = reservoir, 2 = altar, 3 = gotchi lodge, 4 = wall, 5 = NFT display
-      //   uint16 level;
-      //   uint256 width;
-      //   uint256 height;
-      //   uint16 alchemicaType; //0 = none 1 = fud, 2 = fomo, 3 = alpha, 4 = kek
-      //   uint256[] alchemicaCost; // [fud, fomo, alpha, kek]
-      //   uint256 harvestRate;
-      //   uint256 capacity;
-      //   uint256 spillRadius;
-      //   uint256 spillRate;
-      //   uint256 craftTime; // in blocks
-      //   uint256 nextLevelId; //the ID of the next level of this installation. Used for upgrades.
-      //   uint256[] prerequisites; //IDs of installations that must be present before this installation can be added
-    }
-  }
-
-  /// @notice Allow the diamond owner to delete all installationTypes
-  function eraseInstallationTypes() external onlyOwner {
-    for (uint256 i; i < s.installationTypes.length; i++) {
-      delete s.installationTypes[i];
     }
   }
 

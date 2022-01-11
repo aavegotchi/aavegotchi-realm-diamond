@@ -40,6 +40,7 @@ struct Parcel {
   uint256[4] alchemicaHarvestRate;
   uint256[4] lastUpdateTimestamp;
   uint256[4] unclaimedAlchemica;
+  uint256 altarId;
 }
 
 struct RequestConfig {
