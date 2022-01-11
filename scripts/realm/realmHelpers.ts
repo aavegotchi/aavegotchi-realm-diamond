@@ -171,7 +171,21 @@ export async function deployAlchemica(ethers: any) {
 export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
   const installationsAddress = await deployDiamond();
 
-  await upgrade(installationsAddress);
+  const alchemica = await deployAlchemica(ethers);
+
+  const fud = alchemica.fud;
+  const fomo = alchemica.fomo;
+  const alpha = alchemica.alpha;
+  const kek = alchemica.kek;
+  const glmr = alchemica.glmr;
+
+  await upgrade(installationsAddress, {
+    fud: alchemica.fud.address,
+    fomo: alchemica.fomo.address,
+    alpha: alchemica.alpha.address,
+    kek: alchemica.kek.address,
+    glmr: alchemica.glmr.address,
+  });
 
   const alchemicaFacet = (await ethers.getContractAt(
     "AlchemicaFacet",
@@ -202,14 +216,6 @@ export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
     installationsAddress
   )) as OwnershipFacet;
   const installationOwner = await installationOwnershipFacet.owner();
-
-  const alchemica = await deployAlchemica(ethers);
-
-  const fud = alchemica.fud;
-  const fomo = alchemica.fomo;
-  const alpha = alchemica.alpha;
-  const kek = alchemica.kek;
-  const glmr = alchemica.glmr;
 
   await installationDiamond.setAddresses(
     maticAavegotchiDiamondAddress,

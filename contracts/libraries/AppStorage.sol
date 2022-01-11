@@ -75,6 +75,7 @@ struct AppStorage {
   address gameManager;
   mapping(uint256 => uint256) lastExitTime; //for aavegotchis exiting alchemica
   mapping(uint256 => uint256) gotchiChannelings;
+  address glmrAddress;
 }
 
 library LibAppStorage {

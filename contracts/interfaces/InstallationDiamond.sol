@@ -39,8 +39,6 @@ interface InstallationDiamondInterface {
     uint256 balance;
   }
 
-  function setAlchemicaAddresses(address[] memory _addresses) external;
-
   function craftInstallations(uint256[] calldata _installationTypes) external;
 
   function claimInstallations(uint256[] calldata _queueIds) external;
@@ -82,8 +80,6 @@ interface InstallationDiamondInterface {
   function finalizeUpgrade() external;
 
   function installationsBalances(address _account) external view returns (InstallationIdIO[] memory bals_);
-
-  function getAltarIds() external pure returns (uint256[] memory);
 
   function spilloverRateOfId(uint256 _id) external view returns (uint256);
 

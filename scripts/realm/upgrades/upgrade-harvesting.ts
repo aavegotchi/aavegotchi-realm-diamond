@@ -6,6 +6,7 @@ import {
 } from "../../../tasks/deployUpgrade";
 import { AlchemicaFacet__factory } from "../../../typechain";
 import { AlchemicaFacetInterface } from "../../../typechain/AlchemicaFacet";
+import { Alchemica } from "../../../types";
 import { maticDiamondAddress } from "../../helperFunctions";
 import {
   alchemicaTotals,
@@ -13,7 +14,10 @@ import {
   greatPortalCapacity,
 } from "../../setVars";
 
-export async function upgrade(installationDiamond: string) {
+export async function upgrade(
+  installationDiamond: string,
+  alchemica: Alchemica
+) {
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
 
   const requestConfig =
@@ -26,12 +30,11 @@ export async function upgrade(installationDiamond: string) {
     {
       facetName: "AlchemicaFacet",
       addSelectors: [
-        "function setAlchemicaAddresses(address[4] calldata _addresses) external",
         "function startSurveying(uint256 _tokenId) external",
         "function getTotalAlchemicas() external view returns (uint256[4][5] memory)",
         "function getRealmAlchemica(uint256 _tokenId) external view returns (uint256[4] memory)",
         "function progressSurveyingRound() external",
-        "function setVars(uint256[4][5] calldata _alchemicas, uint256[4] calldata _boostMultipliers, uint256[4] _greatPortalCapacity, address _installationsDiamond, address _vrfCoordinator, address _linkAddress, address[4] calldata _alchemicaAddresses, bytes memory _backendPubKey, address _gameManager) external",
+        "function setVars(uint256[4][5] calldata _alchemicas, uint256[4] calldata _boostMultipliers, uint256[4] _greatPortalCapacity, address _installationsDiamond, address _vrfCoordinator, address _linkAddress, address[4] calldata _alchemicaAddresses, address _glmrAddress, bytes memory _backendPubKey, address _gameManager) external",
         "function testingStartSurveying(uint256 _tokenId) external",
         `function testingMintParcel(address _to, uint256[] calldata _tokenIds, ${mintParcelsInput}[] memory _metadata) external`,
         "function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external",
@@ -41,8 +44,6 @@ export async function upgrade(installationDiamond: string) {
         "function exitAlchemica(uint256[] calldata _alchemica, uint256 _gotchiId,uint256 _lastExitTime, bytes memory _signature) external",
         "function getRoundAlchemica(uint256 _realmId, uint256 _roundId) external view returns (uint256[] memory)",
         "function getRoundBaseAlchemica(uint256 _realmId, uint256 _roundId) external view returns (uint256[] memory)",
-        "function getReservoirSpilloverRate(uint256 _tokenId, uint256 _alchemicaType) external view returns (uint256)",
-        "function getAltarSpilloverRate(uint256 _tokenId) external view returns (uint256)",
       ],
       removeSelectors: [],
     },
@@ -92,12 +93,8 @@ export async function upgrade(installationDiamond: string) {
         : "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
       "0x0000000000000000000000000000000000000000",
       "0x0000000000000000000000000000000000000000",
-      [
-        "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
-        "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
-        "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
-        "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
-      ],
+      [alchemica.fud, alchemica.fomo, alchemica.alpha, alchemica.kek],
+      alchemica.glmr,
       "0x",
       "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
     ]
@@ -117,7 +114,13 @@ export async function upgrade(installationDiamond: string) {
 }
 
 if (require.main === module) {
-  upgrade("0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5")
+  upgrade("0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5", {
+    fud: "",
+    fomo: "",
+    alpha: "",
+    kek: "",
+    glmr: "",
+  })
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

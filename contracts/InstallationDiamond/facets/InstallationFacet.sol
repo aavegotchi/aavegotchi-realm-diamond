@@ -103,22 +103,6 @@ contract InstallationFacet is Modifiers {
     installationBalancesOfTokenWithTypes_ = ERC998.itemBalancesOfTokenWithTypes(_tokenContract, _tokenId);
   }
 
-  ///@notice Return the id for all the altars
-  ///@return  An array of 9 integers, each one representing an altar id
-  function getAltarIds() external pure returns (uint256[] memory) {
-    uint8[9] memory altarIds = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    return castToUint256Array(altarIds);
-  }
-
-  function castToUint256Array(uint8[9] memory _ids) internal pure returns (uint256[] memory) {
-    uint256[] memory array = new uint256[](_ids.length);
-    for (uint256 index = 0; index < _ids.length; index++) {
-      uint8 id = _ids[index];
-      array[index] = id;
-    }
-    return array;
-  }
-
   /// @notice Check the spillover rate of an installation type
   /// @param _id id of the installationType to query
   /// @return the spillover rate the installation type with identifier _id
@@ -488,12 +472,6 @@ contract InstallationFacet is Modifiers {
   /***********************************|
    |             Owner Functions        |
    |__________________________________*/
-
-  /// @notice Allow the diamond owner to set the alchemica addresses
-  /// @param _addresses An array containing the alchemica token addresses
-  function setAlchemicaAddresses(address[] memory _addresses) external onlyOwner {
-    s.alchemicaAddresses = _addresses;
-  }
 
   /// @notice Allow the diamond owner to set some important contract addresses
   /// @param _aavegotchiDiamond The aavegotchi diamond address

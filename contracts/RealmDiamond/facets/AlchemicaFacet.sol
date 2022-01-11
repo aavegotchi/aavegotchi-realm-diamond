@@ -33,12 +33,6 @@ contract AlchemicaFacet is Modifiers {
 
   event ExitAlchemica(uint256 indexed _gotchiId, uint256[] _alchemica);
 
-  /// @notice Allow the diamond owner to set the alchemica addresses
-  /// @param _addresses An array containing the alchemica token addresses
-  function setAlchemicaAddresses(address[4] calldata _addresses) external onlyOwner {
-    s.alchemicaAddresses = _addresses;
-  }
-
   /// @notice Allow the owner of a parcel to start surveying his parcel
   /// @dev Will throw if a surveying round has not started
   /// @param _realmId Identifier of the parcel to survey
@@ -114,6 +108,7 @@ contract AlchemicaFacet is Modifiers {
     address _vrfCoordinator,
     address _linkAddress,
     address[4] calldata _alchemicaAddresses,
+    address _glmrAddress,
     bytes memory _backendPubKey,
     address _gameManager
   ) external onlyOwner {
@@ -130,6 +125,7 @@ contract AlchemicaFacet is Modifiers {
     s.alchemicaAddresses = _alchemicaAddresses;
     s.backendPubKey = _backendPubKey;
     s.gameManager = _gameManager;
+    s.glmrAddress = _glmrAddress;
   }
 
   /// @dev This function will be removed in production.
@@ -205,33 +201,11 @@ contract AlchemicaFacet is Modifiers {
     uint256 radius;
   }
 
-  /// @notice Query the Reservoir spillover rate of a particular alchemica in a parcel
-  /// @param _realmId Identifier of parcel to query
-  /// @param _alchemicaType Alchemica to query
-  /// @return The reservoir spillover rate of the alchemica in the queried parcel
-  function getReservoirSpilloverRate(uint256 _realmId, uint256 _alchemicaType) external view returns (uint256) {
-    return calculateSpilloverForReservoir(_realmId, _alchemicaType).rate;
-  }
-
-  /// @notice Query the Altar spillover rate
-  /// @param _realmId Identifier of portal to query
-  /// @return The portal spillover rate
-  function getAltarSpilloverRate(uint256 _realmId) external view returns (uint256) {
-    return calculateSpilloverForAltar(_realmId).rate;
-  }
-
   function calculateSpilloverForReservoir(uint256 _realmId, uint256 _alchemicaType) internal view returns (SpilloverIO memory spillover) {
     uint256 spilloverRate = s.parcels[_realmId].spilloverRate[_alchemicaType] / s.parcels[_realmId].reservoirCount[_alchemicaType];
     uint256 spilloverRadius = s.parcels[_realmId].spilloverRadius[_alchemicaType] / s.parcels[_realmId].reservoirCount[_alchemicaType];
 
     return SpilloverIO(spilloverRate, spilloverRadius);
-  }
-
-  function calculateSpilloverForAltar(uint256 _realmId) internal view returns (SpilloverIO memory spillover) {
-    uint256 altarId = s.parcels[_realmId].altarId;
-    uint256 rate = InstallationDiamondInterface(s.installationsDiamond).spilloverRateOfId(altarId);
-    uint256 radius = InstallationDiamondInterface(s.installationsDiamond).spilloverRadiusOfId(altarId);
-    return SpilloverIO(rate, radius);
   }
 
   struct TransferAmounts {
@@ -270,7 +244,7 @@ contract AlchemicaFacet is Modifiers {
   ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) {
     for (uint256 i = 0; i < _alchemicaTypes.length; i++) {
       uint256 remaining = s.parcels[_realmId].alchemicaRemaining[_alchemicaTypes[i]];
-      // bytes32 messageHash = keccak256(abi.encodePacked(_alchemicaTypes[i], _realmId, _gotchiId, remaining));
+
       require(
         LibSignature.isValid(keccak256(abi.encodePacked(_alchemicaTypes[i], _realmId, _gotchiId, remaining)), _signature, s.backendPubKey),
         "AlchemicaFacet: Invalid signature"
@@ -319,13 +293,14 @@ contract AlchemicaFacet is Modifiers {
 
     require(block.timestamp - _lastChanneled >= 1 days, "AlchemicaFacet: Can't channel yet");
 
-    // bytes32 messageHash = keccak256(abi.encodePacked(_realmId, _gotchiId, _lastChanneled));
+    //Use _lastChanneled to ensure that each signature hash is unique
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _lastChanneled)), _signature, s.backendPubKey),
       "AlchemicaFacet: Invalid signature"
     );
 
-    SpilloverIO memory spillover = calculateSpilloverForAltar(_realmId);
+    uint256 rate = InstallationDiamondInterface(s.installationsDiamond).spilloverRateOfId(s.parcels[_realmId].altarId);
+    uint256 radius = InstallationDiamondInterface(s.installationsDiamond).spilloverRadiusOfId(s.parcels[_realmId].altarId);
 
     uint256[4] memory channelAmounts = [uint256(100e18), uint256(50e18), uint256(25e18), uint256(10e18)];
 
@@ -336,12 +311,12 @@ contract AlchemicaFacet is Modifiers {
 
       //@todo: test minting new tokens vs. transferring
       if (alchemica.balanceOf(address(this)) < s.greatPortalCapacity[i]) {
-        TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], spillover.rate);
+        TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], rate);
 
         alchemica.mint(alchemicaRecipient(_gotchiId), amounts.owner);
         alchemica.mint(address(this), amounts.spill);
       } else {
-        TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], spillover.rate);
+        TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], rate);
 
         //todo: test transfer from Great Portal
         alchemica.transferFrom(address(this), alchemicaRecipient(_gotchiId), amounts.owner);
@@ -351,7 +326,7 @@ contract AlchemicaFacet is Modifiers {
     //update latest channeling
     s.gotchiChannelings[_gotchiId] = block.timestamp;
 
-    emit ChannelAlchemica(_realmId, _gotchiId, channelAmounts, spillover.rate, spillover.radius);
+    emit ChannelAlchemica(_realmId, _gotchiId, channelAmounts, rate, radius);
   }
 
   /// @notice Allow the game manager to transfer alchemica to a certain ERC721 parent aavegotchi

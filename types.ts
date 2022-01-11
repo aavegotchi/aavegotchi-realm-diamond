@@ -130,3 +130,11 @@ export interface TestBeforeVars {
   erc1155Facet: ERC1155Facet;
   installationOwner: string;
 }
+
+export interface Alchemica {
+  fud: string;
+  fomo: string;
+  alpha: string;
+  kek: string;
+  glmr: string;
+}

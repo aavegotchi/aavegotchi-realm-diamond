@@ -5,14 +5,8 @@ import {
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
 
-import { Wallet } from "ethers";
-
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import {
-  alchemicaTotals,
-  boostMultipliers,
-  greatPortalCapacity,
-} from "../../scripts/setVars";
+
 import {
   beforeTest,
   outputInstallation,
@@ -48,25 +42,6 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
-    //@ts-ignore
-    const backendSigner: Wallet = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
-
-    await g.alchemicaFacet.setVars(
-      //@ts-ignore
-      alchemicaTotals(),
-      boostMultipliers,
-      greatPortalCapacity,
-      g.installationsAddress,
-      "0x0000000000000000000000000000000000000000",
-      "0x0000000000000000000000000000000000000000",
-      [g.fud.address, g.fomo.address, g.alpha.address, g.kek.address],
-      ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
-      g.ownerAddress
-    );
-    await network.provider.send("hardhat_setBalance", [
-      maticDiamondAddress,
-      "0x1000000000000000",
-    ]);
   });
 
   it("Alchemica are owned by Realm Diamond", async function () {
@@ -81,16 +56,10 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
-    const setAlchemicaAddresses = [
-      g.fud.address,
-      g.fomo.address,
-      g.alpha.address,
-      g.kek.address,
-    ];
-    await g.installationDiamond.setAlchemicaAddresses(setAlchemicaAddresses);
-    const getAlchemicaAddresses =
-      await g.installationDiamond.getAlchemicaAddresses();
-    expect(setAlchemicaAddresses).to.eql(getAlchemicaAddresses);
+
+    // const getAlchemicaAddresses =
+    //   await g.installationDiamond.getAlchemicaAddresses();
+    // // expect(g.fud.address).to.eql(getAlchemicaAddresses[0]);
     let installationsTypes = await g.installationDiamond.getInstallationTypes(
       []
     );

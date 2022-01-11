@@ -58,18 +58,6 @@ describe("Installations tests", async function () {
       maticGhstAddress
     )) as IERC20;
   });
-  it("Set alchemica addresses", async function () {
-    const setAlchemicaAddresses = [
-      maticGhstAddress,
-      maticGhstAddress,
-      maticGhstAddress,
-      maticGhstAddress,
-    ];
-    await installationFacet.setAlchemicaAddresses(setAlchemicaAddresses);
-    const getAlchemicaAddresses =
-      await installationFacet.getAlchemicaAddresses();
-    expect(setAlchemicaAddresses).to.eql(getAlchemicaAddresses);
-  });
 
   it("Set Diamond Addresses", async function () {
     await installationFacet.setAddresses(

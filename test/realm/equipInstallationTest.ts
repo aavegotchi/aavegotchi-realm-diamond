@@ -61,16 +61,7 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
-    const setAlchemicaAddresses = [
-      "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
-      "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
-      "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
-      "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
-    ];
-    await installationFacet.setAlchemicaAddresses(setAlchemicaAddresses);
-    const getAlchemicaAddresses =
-      await installationFacet.getAlchemicaAddresses();
-    expect(setAlchemicaAddresses).to.eql(getAlchemicaAddresses);
+
     let installationsTypes = await installationFacet.getInstallationTypes([]);
     const installations: InstallationType[] = [];
     installations.push({
