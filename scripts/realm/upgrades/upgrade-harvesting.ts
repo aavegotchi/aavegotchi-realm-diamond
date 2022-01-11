@@ -44,8 +44,6 @@ export async function upgrade(
         "function exitAlchemica(uint256[] calldata _alchemica, uint256 _gotchiId,uint256 _lastExitTime, bytes memory _signature) external",
         "function getRoundAlchemica(uint256 _realmId, uint256 _roundId) external view returns (uint256[] memory)",
         "function getRoundBaseAlchemica(uint256 _realmId, uint256 _roundId) external view returns (uint256[] memory)",
-        "function getReservoirSpilloverRate(uint256 _tokenId, uint256 _alchemicaType) external view returns (uint256)",
-        "function getAltarSpilloverRate(uint256 _tokenId) external view returns (uint256)",
         "function getLastChanneled(uint256 _gotchiId) public view returns (uint256)",
         "function getAlchemicaAddresses() external view returns (address[4] memory)",
       ],

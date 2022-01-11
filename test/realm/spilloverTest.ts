@@ -45,6 +45,7 @@ describe("Testing Equip Installation", async function () {
       "0x0000000000000000000000000000000000000000",
       "0x0000000000000000000000000000000000000000",
       [g.fud.address, g.fomo.address, g.alpha.address, g.kek.address],
+      g.glmr.address,
       ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
       g.ownerAddress
     );

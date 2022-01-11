@@ -132,7 +132,7 @@ describe("Testing Equip Installation", async function () {
     await g.installationDiamond.addInstallationTypes([installation]);
 
     await expect(
-      g.installationDiamond.craftInstallations([5])
+      g.installationDiamond.craftInstallations([10])
     ).to.be.revertedWith("InstallationFacet: Installation does not exist");
   });
 
@@ -149,7 +149,12 @@ describe("Testing Equip Installation", async function () {
       width: 2,
       height: 2,
       alchemicaType: 0,
-      alchemicaCost: [1000, 1000, 1000, 1000],
+      alchemicaCost: [
+        ethers.utils.parseUnits("1000000"),
+        ethers.utils.parseUnits("1000000"),
+        ethers.utils.parseUnits("1000000"),
+        ethers.utils.parseUnits("1000000"),
+      ],
       harvestRate: 0,
       capacity: 0,
       spillRadius: 0,
@@ -162,7 +167,7 @@ describe("Testing Equip Installation", async function () {
     await g.installationDiamond.addInstallationTypes([installation]);
 
     await expect(
-      g.installationDiamond.craftInstallations([5])
+      g.installationDiamond.craftInstallations([6])
     ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
   });
 
