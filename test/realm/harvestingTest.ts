@@ -37,10 +37,10 @@ describe("Testing Equip Installation", async function () {
     g.alpha = await impersonate(maticDiamondAddress, g.alpha, ethers, network);
     g.kek = await impersonate(maticDiamondAddress, g.kek, ethers, network);
 
-    await g.fud.mint(testAddress, ethers.utils.parseEther("10"));
-    await g.fomo.mint(testAddress, ethers.utils.parseEther("10"));
-    await g.alpha.mint(testAddress, ethers.utils.parseEther("10"));
-    await g.kek.mint(testAddress, ethers.utils.parseEther("10"));
+    await g.fud.mint(testAddress, ethers.utils.parseEther("10000"));
+    await g.fomo.mint(testAddress, ethers.utils.parseEther("10000"));
+    await g.alpha.mint(testAddress, ethers.utils.parseEther("10000"));
+    await g.kek.mint(testAddress, ethers.utils.parseEther("10000"));
 
     g.alchemicaFacet = await impersonate(
       g.ownerAddress,
