@@ -211,6 +211,14 @@ contract InstallationFacet is Modifiers {
    |             Write Functions        |
    |__________________________________*/
 
+  ///@notice A convenience method that approves the Installation Diamond to spend alchemica on behalf of the user.
+  ///@param _amount Amount to approve
+  function approveSpendAlchemica(uint256 _amount) external {
+    for (uint256 i = 0; i < 4; i++) {
+      IERC20(s.alchemicaAddresses[i]).approve(address(this), _amount);
+    }
+  }
+
   /// @notice Allow the Diamond owner to deprecate an installation
   /// @dev Deprecated installations cannot be crafted by users
   /// @param _installationIds An array containing the identifiers of installations to deprecate
