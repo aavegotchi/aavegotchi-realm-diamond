@@ -122,6 +122,24 @@ export function testInstallations() {
       prerequisites: [],
     })
   );
+  installations.push(
+    outputInstallation({
+      installationType: 2,
+      level: 1,
+      width: 2,
+      height: 2,
+      alchemicaType: 0,
+      alchemicaCost: [10, 10, 10, 10],
+      harvestRate: 0,
+      capacity: 0,
+      spillRadius: 0,
+      spillRate: 20,
+      craftTime: 10000,
+      deprecated: false,
+      nextLevelId: 0,
+      prerequisites: [],
+    })
+  );
 
   return installations;
 }

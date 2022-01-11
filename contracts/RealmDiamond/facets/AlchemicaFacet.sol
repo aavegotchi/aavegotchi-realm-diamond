@@ -291,8 +291,6 @@ contract AlchemicaFacet is Modifiers {
     uint256 _lastChanneled,
     bytes memory _signature
   ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) {
-    //@todo: test - enforce duration (once per parcel per 24 hrs)
-
     require(_lastChanneled == s.gotchiChannelings[_gotchiId], "AlchemicaFacet: Incorrect last duration");
 
     require(block.timestamp - _lastChanneled >= 1 days, "AlchemicaFacet: Can't channel yet");
@@ -313,7 +311,6 @@ contract AlchemicaFacet is Modifiers {
 
       //Mint new tokens if the Great Portal Balance is less than capacity
 
-      //@todo: test minting new tokens vs. transferring
       if (alchemica.balanceOf(address(this)) < s.greatPortalCapacity[i]) {
         TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], rate);
 
@@ -322,8 +319,7 @@ contract AlchemicaFacet is Modifiers {
       } else {
         TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], rate);
 
-        //todo: test transfer from Great Portal
-        alchemica.transferFrom(address(this), alchemicaRecipient(_gotchiId), amounts.owner);
+        alchemica.transfer(alchemicaRecipient(_gotchiId), amounts.owner);
       }
     }
 
@@ -331,6 +327,14 @@ contract AlchemicaFacet is Modifiers {
     s.gotchiChannelings[_gotchiId] = block.timestamp;
 
     emit ChannelAlchemica(_realmId, _gotchiId, channelAmounts, rate, radius);
+  }
+
+  /// @notice Return the last timestamp of a channeling
+  /// @dev used as a parameter in channelAlchemica
+  /// @param _gotchiId Identifier of parent ERC721 aavegotchi
+  /// @return last channeling timestamp
+  function getLastChanneled(uint256 _gotchiId) public view returns (uint256) {
+    return s.gotchiChannelings[_gotchiId];
   }
 
   /// @notice Allow the game manager to transfer alchemica to a certain ERC721 parent aavegotchi
