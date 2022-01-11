@@ -43,6 +43,7 @@ export async function upgrade(installationDiamond: string) {
         "function getRoundBaseAlchemica(uint256 _realmId, uint256 _roundId) external view returns (uint256[] memory)",
         "function getReservoirSpilloverRate(uint256 _tokenId, uint256 _alchemicaType) external view returns (uint256)",
         "function getAltarSpilloverRate(uint256 _tokenId) external view returns (uint256)",
+        "function getLastChanneled(uint256 _gotchiId) public view returns (uint256)",
       ],
       removeSelectors: [],
     },
