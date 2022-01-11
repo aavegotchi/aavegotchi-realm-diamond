@@ -148,9 +148,6 @@ describe("Testing Equip Installation", async function () {
       ethers.utils.parseUnits("1000000000")
     );
 
-    const balance = await ghst.balanceOf(testAddress);
-    console.log("balance:", balance.toString());
-
     await installationFacet.craftInstallations([1, 1, 1]);
     await expect(installationFacet.claimInstallations([0])).to.be.revertedWith(
       "InstallationFacet: installation not ready"
@@ -203,7 +200,6 @@ describe("Testing Equip Installation", async function () {
     let totalCost = BigNumber.from(0);
 
     alchemicaCost.forEach((alc) => {
-      console.log("alchemica cost:", alc.toString());
       totalCost = totalCost.add(alc);
     });
 

@@ -4,50 +4,38 @@ import {
 } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
-import { AlchemicaFacet, OwnershipFacet, RealmFacet } from "../../typechain";
-import { upgrade } from "../../scripts/realm/upgrades/upgrade-harvesting";
-import { MintParcelInput } from "../../types";
+import { RealmFacet } from "../../typechain";
+
+import { MintParcelInput, TestBeforeVars } from "../../types";
 import { BigNumberish } from "ethers";
+import { beforeTest } from "../../scripts/realm/realmHelpers";
 
 describe("Testing Realms Surveying", async function () {
   const testAddress = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
   const realmIds = [2258, 12184];
-  let ownerAddress: string;
-  let alchemicaFacet: AlchemicaFacet;
-  let ownershipFacet: OwnershipFacet;
   let parcelsTest1: MintParcelInput[] = [];
 
   const firstTestParcel = "2258";
   const boostedTestParcel = "12184";
+  let g: TestBeforeVars;
 
   before(async function () {
     this.timeout(20000000);
-    await upgrade();
-
-    alchemicaFacet = (await ethers.getContractAt(
-      "AlchemicaFacet",
-      maticDiamondAddress
-    )) as AlchemicaFacet;
-    ownershipFacet = (await ethers.getContractAt(
-      "OwnershipFacet",
-      maticDiamondAddress
-    )) as OwnershipFacet;
-    ownerAddress = await ownershipFacet.owner();
-    console.log("ownerAddress", ownerAddress);
+    g = await beforeTest(ethers);
   });
   it("Test surveying first round", async function () {
-    alchemicaFacet = await impersonate(
+    g.alchemicaFacet = await impersonate(
       testAddress,
-      alchemicaFacet,
+      g.alchemicaFacet,
       ethers,
       network
     );
 
     for (let i = 0; i < realmIds.length; i++) {
-      await alchemicaFacet.testingStartSurveying(realmIds[i]);
+      await g.alchemicaFacet.testingStartSurveying(realmIds[i]);
     }
 
-    const roundAlchemica = await alchemicaFacet.getRoundAlchemica(
+    const roundAlchemica = await g.alchemicaFacet.getRoundAlchemica(
       firstTestParcel,
       "0"
     );
@@ -61,30 +49,30 @@ describe("Testing Realms Surveying", async function () {
   it("Test surveying other rounds", async function () {
     //can't survey round 1
     await expect(
-      alchemicaFacet.testingStartSurveying(firstTestParcel)
+      g.alchemicaFacet.testingStartSurveying(firstTestParcel)
     ).to.be.revertedWith("RealmFacet: Round not released");
 
-    alchemicaFacet = await impersonate(
-      ownerAddress,
-      alchemicaFacet,
+    g.alchemicaFacet = await impersonate(
+      g.ownerAddress,
+      g.alchemicaFacet,
       ethers,
       network
     );
 
     //progress to round 1
-    await alchemicaFacet.progressSurveyingRound();
-    alchemicaFacet = await impersonate(
+    await g.alchemicaFacet.progressSurveyingRound();
+    g.alchemicaFacet = await impersonate(
       testAddress,
-      alchemicaFacet,
+      g.alchemicaFacet,
       ethers,
       network
     );
 
     for (let i = 0; i < realmIds.length; i++) {
-      await alchemicaFacet.testingStartSurveying(realmIds[i]);
+      await g.alchemicaFacet.testingStartSurveying(realmIds[i]);
     }
 
-    const roundAlchemica = await alchemicaFacet.getRoundAlchemica(
+    const roundAlchemica = await g.alchemicaFacet.getRoundAlchemica(
       firstTestParcel,
       "1"
     );
@@ -95,12 +83,12 @@ describe("Testing Realms Surveying", async function () {
     expect(roundAlchemica[3]).to.gt(0);
   });
   it("Round totals should equal 25% and 8.3%, respectively", async function () {
-    const firstRoundAlchemicas = await alchemicaFacet.getRoundAlchemica(
+    const firstRoundAlchemicas = await g.alchemicaFacet.getRoundAlchemica(
       firstTestParcel,
       "0"
     );
 
-    const secondRoundAlchemicas = await alchemicaFacet.getRoundAlchemica(
+    const secondRoundAlchemicas = await g.alchemicaFacet.getRoundAlchemica(
       firstTestParcel,
       "1"
     );
@@ -150,12 +138,12 @@ describe("Testing Realms Surveying", async function () {
 
     const boosts = parcelInfo.boost;
 
-    const roundTotal = await alchemicaFacet.getRoundAlchemica(
+    const roundTotal = await g.alchemicaFacet.getRoundAlchemica(
       boostedTestParcel,
       "1"
     );
 
-    const roundBase = await alchemicaFacet.getRoundBaseAlchemica(
+    const roundBase = await g.alchemicaFacet.getRoundBaseAlchemica(
       boostedTestParcel,
       "1"
     );
@@ -189,6 +177,10 @@ describe("Testing Realms Surveying", async function () {
       district: 1,
       parcelAddress: "i-like-surveying",
     });
-    await alchemicaFacet.testingMintParcel(testAddress, [100000], parcelsTest1);
+    await g.alchemicaFacet.testingMintParcel(
+      testAddress,
+      [100000],
+      parcelsTest1
+    );
   });
 });
