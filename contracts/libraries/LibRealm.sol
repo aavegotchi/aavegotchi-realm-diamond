@@ -75,25 +75,6 @@ library LibRealm {
     return (randomWords[i] % s.totalAlchemicas[s.parcels[_tokenId].size][i]);
   }
 
-  function updateRemainingAlchemicaFirstRound(uint256 _tokenId, uint256[] memory randomWords) internal {
-    AppStorage storage s = LibAppStorage.diamondStorage();
-    uint256[] memory alchemicas = new uint256[](4);
-    uint256[] memory roundAmounts = new uint256[](4);
-    for (uint8 i; i < 4; i++) {
-      uint256 baseAmount = calculateAmount(_tokenId, randomWords, i);
-      uint256 roundAmount = baseAmount / 4;
-      uint256 boost = s.parcels[_tokenId].alchemicaBoost[i] * s.boostMultipliers[i];
-      s.parcels[_tokenId].alchemicaRemaining[i] = roundAmount + boost;
-      roundAmounts[i] = roundAmount;
-      alchemicas[i] = roundAmount + boost;
-    }
-
-    s.parcels[_tokenId].roundAlchemica[0] = alchemicas;
-    s.parcels[_tokenId].roundBaseAlchemica[0] = roundAmounts;
-    emit SurveyParcel(_tokenId, alchemicas);
-  }
-
-  // TODO refactor between two functions
   function updateRemainingAlchemica(
     uint256 _tokenId,
     uint256[] memory randomWords,
@@ -104,7 +85,9 @@ library LibRealm {
     uint256[] memory roundAmounts = new uint256[](4);
     for (uint8 i; i < 4; i++) {
       uint256 baseAmount = calculateAmount(_tokenId, randomWords, i); //100%;
-      uint256 roundAmount = (baseAmount - (baseAmount / 4)) / 9; //75% / 9 = 8.3%
+
+      //first round is 25%, rounds after are 8.3%
+      uint256 roundAmount = _round == 0 ? baseAmount / 4 : (baseAmount - (baseAmount / 4)) / 9;
       uint256 boost = s.parcels[_tokenId].alchemicaBoost[i] * s.boostMultipliers[i];
 
       s.parcels[_tokenId].alchemicaRemaining[i] += roundAmount + boost;

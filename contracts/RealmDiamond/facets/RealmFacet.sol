@@ -104,7 +104,7 @@ contract RealmFacet is Modifiers {
     for (uint8 i; i < installation.alchemicaCost.length; i++) {
       AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
 
-      //@todo: include upgrades in refund?
+      //@question: include upgrades in refund?
       uint256 alchemicaRefund = installation.alchemicaCost[i] / 2;
 
       alchemica.transfer(msg.sender, alchemicaRefund);

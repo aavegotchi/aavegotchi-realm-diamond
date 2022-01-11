@@ -14,7 +14,6 @@ import {
   beforeTest,
   testInstallations,
 } from "../../scripts/realm/realmHelpers";
-import { GLMR } from "../../typechain";
 
 describe("Testing Equip Installation", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
@@ -43,7 +42,6 @@ describe("Testing Equip Installation", async function () {
       boostMultipliers,
       greatPortalCapacity,
       g.installationsAddress,
-      maticDiamondAddress,
       "0x0000000000000000000000000000000000000000",
       "0x0000000000000000000000000000000000000000",
       [g.fud.address, g.fomo.address, g.alpha.address, g.kek.address],
@@ -224,7 +222,7 @@ describe("Testing Equip Installation", async function () {
 
     await g.alchemicaFacet.claimAvailableAlchemica(
       testParcelId,
-      0,
+      [0],
       testGotchiId,
       signature
     );
@@ -277,7 +275,7 @@ describe("Testing Equip Installation", async function () {
     signedMessage = await backendSigner.signMessage(messageHash);
     await g.alchemicaFacet.claimAvailableAlchemica(
       testParcelId,
-      0,
+      [0],
       testGotchiId,
       signature
     );
@@ -309,7 +307,7 @@ describe("Testing Equip Installation", async function () {
     signedMessage = await backendSigner.signMessage(messageHash);
     await g.alchemicaFacet.claimAvailableAlchemica(
       testParcelId,
-      0,
+      [0],
       testGotchiId,
       signature2
     );
@@ -368,7 +366,7 @@ describe("Testing Equip Installation", async function () {
 
     await g.alchemicaFacet.claimAvailableAlchemica(
       testParcelId,
-      0,
+      [0],
       testGotchiId,
       signature
     );

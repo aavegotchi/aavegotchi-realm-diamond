@@ -59,7 +59,6 @@ struct AppStorage {
   mapping(uint256 => address) approved;
   address aavegotchiDiamond;
   address installationsDiamond;
-  address greatPortalDiamond;
   uint256 surveyingRound;
   uint256[4][5] totalAlchemicas;
   uint256[4] boostMultipliers;

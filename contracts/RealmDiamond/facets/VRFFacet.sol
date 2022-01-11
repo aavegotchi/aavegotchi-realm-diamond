@@ -12,11 +12,7 @@ contract VRFFacet is Modifiers {
   function rawFulfillRandomWords(uint256 requestId, uint256[] memory randomWords) external {
     require(LibMeta.msgSender() == s.vrfCoordinator, "Only VRFCoordinator can fulfill");
     uint256 tokenId = s.vrfRequestIdToTokenId[requestId];
-    if (s.vrfRequestIdToSurveyingRound[requestId] == 0) {
-      LibRealm.updateRemainingAlchemicaFirstRound(tokenId, randomWords);
-    } else {
-      LibRealm.updateRemainingAlchemica(tokenId, randomWords, s.vrfRequestIdToSurveyingRound[requestId]);
-    }
+    LibRealm.updateRemainingAlchemica(tokenId, randomWords, s.vrfRequestIdToSurveyingRound[requestId]);
   }
 
   function setConfig(RequestConfig calldata _requestConfig) external onlyOwner {

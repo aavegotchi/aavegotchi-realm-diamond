@@ -100,7 +100,6 @@ contract AlchemicaFacet is Modifiers {
   /// @param _boostMultipliers The boost multiplers applied to each parcel
   /// @param _greatPortalCapacity The individual alchemica capacity of the great portal
   /// @param _installationsDiamond The installations diamond address
-  /// @param _greatPortalDiamond The greatPortalDiamond address
   /// @param _vrfCoordinator The chainlink vrfCoordinator address
   /// @param _linkAddress The link token address
   /// @param _alchemicaAddresses The four alchemica token addresses
@@ -112,7 +111,6 @@ contract AlchemicaFacet is Modifiers {
     uint256[4] calldata _boostMultipliers,
     uint256[4] calldata _greatPortalCapacity,
     address _installationsDiamond,
-    address _greatPortalDiamond,
     address _vrfCoordinator,
     address _linkAddress,
     address[4] calldata _alchemicaAddresses,
@@ -127,7 +125,6 @@ contract AlchemicaFacet is Modifiers {
     s.boostMultipliers = _boostMultipliers;
     s.greatPortalCapacity = _greatPortalCapacity;
     s.installationsDiamond = _installationsDiamond;
-    s.greatPortalDiamond = _greatPortalDiamond;
     s.vrfCoordinator = _vrfCoordinator;
     s.linkAddress = _linkAddress;
     s.alchemicaAddresses = _alchemicaAddresses;
@@ -135,7 +132,7 @@ contract AlchemicaFacet is Modifiers {
     s.gameManager = _gameManager;
   }
 
-  // testing funcs
+  /// @dev This function will be removed in production.
   function testingStartSurveying(uint256 _realmId) external onlyParcelOwner(_realmId) {
     require(s.parcels[_realmId].currentRound <= s.surveyingRound, "RealmFacet: Round not released");
 
@@ -145,10 +142,10 @@ contract AlchemicaFacet is Modifiers {
       alchemicas[i] = uint256(keccak256(abi.encodePacked(msg.sender, uint256(1))));
     }
 
-    if (s.parcels[_realmId].currentRound - 1 == 0) LibRealm.updateRemainingAlchemicaFirstRound(_realmId, alchemicas);
-    else LibRealm.updateRemainingAlchemica(_realmId, alchemicas, s.parcels[_realmId].currentRound - 1);
+    LibRealm.updateRemainingAlchemica(_realmId, alchemicas, s.parcels[_realmId].currentRound - 1);
   }
 
+  /// @dev This function will be removed in production.
   function testingMintParcel(
     address _to,
     uint256[] calldata _tokenIds,
@@ -174,6 +171,7 @@ contract AlchemicaFacet is Modifiers {
     }
   }
 
+  /// @dev This function will be removed in production.
   function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external {
     AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[_alchemicaType]);
     alchemica.mint(msg.sender, _amount);
@@ -248,10 +246,8 @@ contract AlchemicaFacet is Modifiers {
     }
 
     //getting balances and spillover rates
-    uint256 rate = InstallationDiamondInterface(s.installationsDiamond).spilloverRateOfId(altarId); // uint256 dummySpilloverRate = 80000; //80%
-
+    uint256 rate = InstallationDiamondInterface(s.installationsDiamond).spilloverRateOfId(altarId);
     uint256 radius = InstallationDiamondInterface(s.installationsDiamond).spilloverRadiusOfId(altarId);
-    // uint256 dummySpilloverRadius = 1000; //1000 gotchis
 
     return SpilloverIO(rate, radius);
   }
@@ -278,46 +274,49 @@ contract AlchemicaFacet is Modifiers {
     return diamond.ownerOf(_gotchiId);
   }
 
-  function gotchiOwner(uint256 _gotchiId) internal view returns (address) {}
-
   /// @notice Allow parcel owner to claim available alchemica with his parent NFT(Aavegotchi)
   /// @param _realmId Identifier of parcel to claim alchemica from
-  /// @param _alchemicaType Alchemica to claim
+  /// @param _alchemicaTypes Alchemica types to claim
   /// @param _gotchiId Identifier of Aavegotchi to use for alchemica collecction/claiming
   /// @param _signature Message signature used for backend validation
 
   function claimAvailableAlchemica(
     uint256 _realmId,
-    uint256 _alchemicaType,
+    uint256[] calldata _alchemicaTypes,
     uint256 _gotchiId,
     bytes memory _signature
   ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) {
-    uint256 remaining = s.parcels[_realmId].alchemicaRemaining[_alchemicaType];
-    bytes32 messageHash = keccak256(abi.encodePacked(_alchemicaType, _realmId, _gotchiId, remaining));
-    require(LibSignature.isValid(messageHash, _signature, s.backendPubKey), "AlchemicaFacet: Invalid signature");
+    for (uint256 i = 0; i < _alchemicaTypes.length; i++) {
+      uint256 remaining = s.parcels[_realmId].alchemicaRemaining[_alchemicaTypes[i]];
+      // bytes32 messageHash = keccak256(abi.encodePacked(_alchemicaTypes[i], _realmId, _gotchiId, remaining));
+      require(
+        LibSignature.isValid(keccak256(abi.encodePacked(_alchemicaTypes[i], _realmId, _gotchiId, remaining)), _signature, s.backendPubKey),
+        "AlchemicaFacet: Invalid signature"
+      );
 
-    //@todo (future release): allow claimOperator
+      //@todo (future release): allow claimOperator
 
-    uint256 available = getAvailableAlchemica(_realmId)[_alchemicaType];
+      uint256 available = getAvailableAlchemica(_realmId)[_alchemicaTypes[i]];
 
-    require(remaining >= available, "AlchemicaFacet: Not enough alchemica available");
+      require(remaining >= available, "AlchemicaFacet: Not enough alchemica available");
 
-    s.parcels[_realmId].alchemicaRemaining[_alchemicaType] -= available;
-    s.parcels[_realmId].unclaimedAlchemica[_alchemicaType] = 0;
+      s.parcels[_realmId].alchemicaRemaining[_alchemicaTypes[i]] -= available;
+      s.parcels[_realmId].unclaimedAlchemica[_alchemicaTypes[i]] = 0;
 
-    s.parcels[_realmId].lastUpdateTimestamp[_alchemicaType] = block.timestamp;
+      s.parcels[_realmId].lastUpdateTimestamp[_alchemicaTypes[i]] = block.timestamp;
 
-    AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[_alchemicaType]);
+      AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[_alchemicaTypes[i]]);
 
-    SpilloverIO memory spillover = calculateSpilloverForReservoir(_realmId, _alchemicaType);
+      SpilloverIO memory spillover = calculateSpilloverForReservoir(_realmId, _alchemicaTypes[i]);
 
-    TransferAmounts memory amounts = calculateTransferAmounts(available, spillover.rate);
+      TransferAmounts memory amounts = calculateTransferAmounts(available, spillover.rate);
 
-    //Mint new tokens
-    alchemica.mint(alchemicaRecipient(_gotchiId), amounts.owner);
-    alchemica.mint(s.greatPortalDiamond, amounts.spill);
+      //Mint new tokens
+      alchemica.mint(alchemicaRecipient(_gotchiId), amounts.owner);
+      alchemica.mint(address(this), amounts.spill);
 
-    emit AlchemicaClaimed(_realmId, _gotchiId, _alchemicaType, available, spillover.rate, spillover.radius);
+      emit AlchemicaClaimed(_realmId, _gotchiId, _alchemicaTypes[i], available, spillover.rate, spillover.radius);
+    }
   }
 
   /// @notice Allow a parcel owner to channel alchemica
@@ -338,8 +337,11 @@ contract AlchemicaFacet is Modifiers {
 
     require(block.timestamp - _lastChanneled >= 1 days, "AlchemicaFacet: Can't channel yet");
 
-    bytes32 messageHash = keccak256(abi.encodePacked(_realmId, _gotchiId, _lastChanneled));
-    require(LibSignature.isValid(messageHash, _signature, s.backendPubKey), "AlchemicaFacet: Invalid signature");
+    // bytes32 messageHash = keccak256(abi.encodePacked(_realmId, _gotchiId, _lastChanneled));
+    require(
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _lastChanneled)), _signature, s.backendPubKey),
+      "AlchemicaFacet: Invalid signature"
+    );
 
     SpilloverIO memory spillover = calculateSpilloverForAltar(_realmId);
 
@@ -351,16 +353,16 @@ contract AlchemicaFacet is Modifiers {
       //Mint new tokens if the Great Portal Balance is less than capacity
 
       //@todo: test minting new tokens vs. transferring
-      if (alchemica.balanceOf(s.greatPortalDiamond) < s.greatPortalCapacity[i]) {
+      if (alchemica.balanceOf(address(this)) < s.greatPortalCapacity[i]) {
         TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], spillover.rate);
 
         alchemica.mint(alchemicaRecipient(_gotchiId), amounts.owner);
-        alchemica.mint(s.greatPortalDiamond, amounts.spill);
+        alchemica.mint(address(this), amounts.spill);
       } else {
         TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], spillover.rate);
 
-        //todo: transfer from Great Portal
-        alchemica.transfer(alchemicaRecipient(_gotchiId), amounts.owner);
+        //todo: test transfer from Great Portal
+        alchemica.transferFrom(address(this), alchemicaRecipient(_gotchiId), amounts.owner);
       }
     }
 
@@ -391,7 +393,7 @@ contract AlchemicaFacet is Modifiers {
 
     for (uint256 i = 0; i < _alchemica.length; i++) {
       AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
-      alchemica.transferFrom(s.greatPortalDiamond, alchemicaRecipient(_gotchiId), _alchemica[i]);
+      alchemica.transferFrom(address(this), alchemicaRecipient(_gotchiId), _alchemica[i]);
     }
 
     emit ExitAlchemica(_gotchiId, _alchemica);

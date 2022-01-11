@@ -57,7 +57,6 @@ describe("Testing Equip Installation", async function () {
       boostMultipliers,
       greatPortalCapacity,
       g.installationsAddress,
-      maticDiamondAddress,
       "0x0000000000000000000000000000000000000000",
       "0x0000000000000000000000000000000000000000",
       [g.fud.address, g.fomo.address, g.alpha.address, g.kek.address],
