@@ -76,6 +76,7 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y
   ) external onlyParcelOwner(_realmId) {
+    require(s.parcels[_realmId].currentRound >= 1, "RealmFacet: Must survey before equipping");
     LibRealm.placeInstallation(_realmId, _installationId, _x, _y);
     InstallationDiamondInterface(s.installationsDiamond).equipInstallation(msg.sender, _realmId, _installationId);
 
@@ -104,7 +105,7 @@ contract RealmFacet is Modifiers {
     for (uint8 i; i < installation.alchemicaCost.length; i++) {
       AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
 
-      //@question: include upgrades in refund?
+      //@question : include upgrades in refund?
       uint256 alchemicaRefund = installation.alchemicaCost[i] / 2;
 
       alchemica.transfer(msg.sender, alchemicaRefund);
