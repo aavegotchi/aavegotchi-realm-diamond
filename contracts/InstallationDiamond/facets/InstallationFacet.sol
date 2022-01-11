@@ -185,12 +185,6 @@ contract InstallationFacet is Modifiers {
     return LibStrings.strWithUint(s.baseUri, _id);
   }
 
-  /// @notice Query the alchemica token addresses
-  /// @return An array containing the alchemica token addresses
-  function getAlchemicaAddresses() external view returns (address[] memory) {
-    return s.alchemicaAddresses;
-  }
-
   /***********************************|
    |             Write Functions        |
    |__________________________________*/
@@ -219,7 +213,12 @@ contract InstallationFacet is Modifiers {
       //take the required alchemica
       InstallationType memory installationType = s.installationTypes[_installationTypes[i]];
       for (uint8 j = 0; j < installationType.alchemicaCost.length; j++) {
-        LibERC20.transferFrom(s.alchemicaAddresses[j], msg.sender, s.realmDiamond, s.installationTypes[_installationTypes[i]].alchemicaCost[j]);
+        LibERC20.transferFrom(
+          RealmDiamond(s.realmDiamond).getAlchemicaAddresses()[j],
+          msg.sender,
+          s.realmDiamond,
+          s.installationTypes[_installationTypes[i]].alchemicaCost[j]
+        );
       }
       if (installationType.craftTime == 0) {
         LibERC1155._safeMint(msg.sender, _installationTypes[i], 0);

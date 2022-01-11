@@ -13,6 +13,8 @@ interface RealmDiamond {
     uint256[4] boost;
   }
 
+  function getAlchemicaAddresses() external view returns (address[4] memory);
+
   function checkCoordinates(
     uint256 _tokenId,
     uint256 _coordinateX,

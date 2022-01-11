@@ -57,9 +57,6 @@ describe("Testing Equip Installation", async function () {
       network
     );
 
-    // const getAlchemicaAddresses =
-    //   await g.installationDiamond.getAlchemicaAddresses();
-    // // expect(g.fud.address).to.eql(getAlchemicaAddresses[0]);
     let installationsTypes = await g.installationDiamond.getInstallationTypes(
       []
     );

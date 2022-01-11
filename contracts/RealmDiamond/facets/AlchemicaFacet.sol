@@ -55,6 +55,10 @@ contract AlchemicaFacet is Modifiers {
     s.vrfRequestIdToSurveyingRound[requestId] = _surveyingRound;
   }
 
+  function getAlchemicaAddresses() external view returns (address[4] memory) {
+    return s.alchemicaAddresses;
+  }
+
   /// @notice Query details about all total alchemicas present
   /// @return output_ A two dimensional array, each representing an alchemica value
   function getTotalAlchemicas() external view returns (uint256[4][5] memory) {
