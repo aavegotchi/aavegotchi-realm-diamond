@@ -12,179 +12,117 @@ import {
   OwnershipFacet,
 } from "../../typechain";
 import { upgrade } from "../../scripts/realm/upgrades/upgrade-harvesting";
-import { InstallationType } from "../../types";
+import { InstallationType, TestBeforeVars } from "../../types";
 import { deployDiamond } from "../../scripts/installation/deploy";
 import { BigNumber } from "ethers";
+import {
+  beforeTest,
+  testInstallations,
+} from "../../scripts/realm/realmHelpers";
 
 describe("Testing Equip Installation", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
-  // const installationsAddress = "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5";
 
-  let realmFacet: RealmFacet;
-  let installationFacet: InstallationFacet;
   let ghst: IERC20;
-  let erc1155facet: ERC1155Facet;
-  let installationsAddress: string;
+  let g: TestBeforeVars;
 
   before(async function () {
     this.timeout(20000000);
-    installationsAddress = await deployDiamond();
-    await upgrade(installationsAddress);
+    g = await beforeTest(ethers);
 
-    realmFacet = (await ethers.getContractAt(
-      "RealmFacet",
-      maticDiamondAddress
-    )) as RealmFacet;
-    installationFacet = (await ethers.getContractAt(
-      "InstallationFacet",
-      installationsAddress
-    )) as InstallationFacet;
     ghst = (await ethers.getContractAt(
       "contracts/interfaces/IERC20.sol:IERC20",
       "0x385eeac5cb85a38a9a07a70c73e0a3271cfb54a7"
     )) as IERC20;
-
-    erc1155facet = (await ethers.getContractAt(
-      "ERC1155Facet",
-      installationsAddress
-    )) as ERC1155Facet;
   });
-  it("Setup installation diamond", async function () {
-    const ownershipFacet = (await ethers.getContractAt(
-      "OwnershipFacet",
-      installationsAddress
-    )) as OwnershipFacet;
-    const owner = await ownershipFacet.owner();
-    installationFacet = await impersonate(
-      owner,
-      installationFacet,
-      ethers,
-      network
-    );
 
-    let installationsTypes = await installationFacet.getInstallationTypes([]);
-    const installations: InstallationType[] = [];
-    installations.push({
-      installationType: 0,
-      level: 0,
-      width: 0,
-      height: 0,
-      alchemicaType: 0,
-      alchemicaCost: [0, 0, 0, 0],
-      harvestRate: 0,
-      capacity: 0,
-      spillRadius: 0,
-      spillRate: 0,
-      craftTime: 0,
-      deprecated: false,
-      nextLevelId: 0,
-      prerequisites: [],
-    });
-    installations.push({
-      installationType: 0,
-      level: 1,
-      width: 2,
-      height: 2,
-      alchemicaType: 0,
-      alchemicaCost: [
-        ethers.utils.parseEther("0.01"),
-        ethers.utils.parseEther("0.2"),
-        0,
-        ethers.utils.parseEther("0.03"),
-      ],
-      harvestRate: 2,
-      capacity: 0,
-      spillRadius: 0,
-      spillRate: 0,
-      craftTime: 10000,
-      deprecated: false,
-      nextLevelId: 0,
-      prerequisites: [],
-    });
-    installations.push({
-      installationType: 1,
-      level: 1,
-      width: 4,
-      height: 4,
-      alchemicaType: 4,
-      alchemicaCost: [
-        ethers.utils.parseEther("0.04"),
-        ethers.utils.parseEther("0.05"),
-        ethers.utils.parseEther("0.06"),
-        ethers.utils.parseEther("0.06"),
-      ],
-      harvestRate: 0,
-      capacity: 50000,
-      spillRadius: 100,
-      spillRate: 100,
-      craftTime: 20000,
-      deprecated: false,
-      nextLevelId: 0,
-      prerequisites: [],
-    });
-    await installationFacet.addInstallationTypes(installations);
-    installationsTypes = await installationFacet.getInstallationTypes([]);
-    expect(installationsTypes.length).to.equal(installations.length);
-  });
   it("Can craft installations", async function () {
+    await g.installationDiamond.addInstallationTypes(testInstallations());
     ghst = await impersonate(testAddress, ghst, ethers, network);
-    installationFacet = await impersonate(
+    g.installationDiamond = await impersonate(
       testAddress,
-      installationFacet,
+      g.installationDiamond,
       ethers,
       network
     );
     await ghst.approve(
-      installationsAddress,
+      g.installationsAddress,
       ethers.utils.parseUnits("1000000000")
     );
 
-    await installationFacet.craftInstallations([1, 1, 1]);
-    await expect(installationFacet.claimInstallations([0])).to.be.revertedWith(
-      "InstallationFacet: installation not ready"
+    g.alchemicaFacet.testingAlchemicaFaucet(
+      "0",
+      ethers.utils.parseEther("1000")
     );
+    g.alchemicaFacet.testingAlchemicaFaucet(
+      "1",
+      ethers.utils.parseEther("1000")
+    );
+    g.alchemicaFacet.testingAlchemicaFaucet(
+      "2",
+      ethers.utils.parseEther("1000")
+    );
+    g.alchemicaFacet.testingAlchemicaFaucet(
+      "3",
+      ethers.utils.parseEther("1000")
+    );
+
+    await g.installationDiamond.craftInstallations([1, 1, 1]);
+    await expect(
+      g.installationDiamond.claimInstallations([0])
+    ).to.be.revertedWith("g.installationDiamond: installation not ready");
     for (let i = 0; i < 11000; i++) {
       ethers.provider.send("evm_mine", []);
     }
-    const balancePre = await erc1155facet.balanceOf(testAddress, 1);
-    await installationFacet.claimInstallations([0, 1, 2]);
-    const balancePost = await erc1155facet.balanceOf(testAddress, 1);
+    const balancePre = await g.erc1155Facet.balanceOf(testAddress, 1);
+    await g.installationDiamond.claimInstallations([0, 1, 2]);
+    const balancePost = await g.erc1155Facet.balanceOf(testAddress, 1);
     expect(balancePost).to.above(balancePre);
 
-    const itemTypes = await installationFacet.getInstallationTypes(["0", "1"]);
+    const itemTypes = await g.installationDiamond.getInstallationTypes([
+      "0",
+      "1",
+    ]);
     expect(itemTypes.length).to.equal(2);
   });
 
   it("Can equip installation", async function () {
-    realmFacet = await impersonate(testAddress, realmFacet, ethers, network);
-    await realmFacet.equipInstallation(2893, 1, 2, 2);
+    g.realmFacet = await impersonate(
+      testAddress,
+      g.realmFacet,
+      ethers,
+      network
+    );
+    await g.realmFacet.equipInstallation(2893, 1, 2, 2);
     await expect(
-      realmFacet.equipInstallation(2893, 1, 1, 1)
+      g.realmFacet.equipInstallation(2893, 1, 1, 1)
     ).to.be.revertedWith("LibRealm: Invalid spot");
     await expect(
-      realmFacet.equipInstallation(2893, 1, 2, 1)
+      g.realmFacet.equipInstallation(2893, 1, 2, 1)
     ).to.be.revertedWith("LibRealm: Invalid spot");
     await expect(
-      realmFacet.equipInstallation(2893, 1, 2, 2)
+      g.realmFacet.equipInstallation(2893, 1, 2, 2)
     ).to.be.revertedWith("LibRealm: Invalid spot");
     await expect(
-      realmFacet.equipInstallation(2893, 1, 3, 3)
+      g.realmFacet.equipInstallation(2893, 1, 3, 3)
     ).to.be.revertedWith("LibRealm: Invalid spot");
     await expect(
-      realmFacet.equipInstallation(2893, 1, 62, 10)
+      g.realmFacet.equipInstallation(2893, 1, 62, 10)
     ).to.be.revertedWith("LibRealm: x exceeding width");
     await expect(
-      realmFacet.equipInstallation(2893, 1, 10, 30)
+      g.realmFacet.equipInstallation(2893, 1, 10, 30)
     ).to.be.revertedWith("LibRealm: y exceeding height");
-    await realmFacet.equipInstallation(2893, 1, 6, 6);
-    await realmFacet.equipInstallation(2893, 1, 20, 20);
+    await g.realmFacet.equipInstallation(2893, 1, 6, 6);
+    await g.realmFacet.equipInstallation(2893, 1, 20, 20);
     await expect(
-      realmFacet.equipInstallation(2893, 1, 18, 18)
+      g.realmFacet.equipInstallation(2893, 1, 18, 18)
     ).to.be.revertedWith("LibItems: Doesn't have that many to transfer");
   });
 
   it("Should receive 50% of installation cost after unequipping", async function () {
-    const installationType = await installationFacet.getInstallationType("1");
+    const installationType = await g.installationDiamond.getInstallationType(
+      "1"
+    );
 
     const alchemicaCost = installationType.alchemicaCost;
 
@@ -196,7 +134,7 @@ describe("Testing Equip Installation", async function () {
 
     const refund = totalCost.div(2);
     const beforeBalance = await ghst.balanceOf(testAddress);
-    await realmFacet.unequipInstallation("2893", "1", "2", "2");
+    await g.realmFacet.unequipInstallation("2893", "1", "2", "2");
     const afterBalance = await ghst.balanceOf(testAddress);
     expect(afterBalance).to.equal(beforeBalance.add(refund));
   });
