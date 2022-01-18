@@ -451,14 +451,20 @@ contract InstallationFacet is Modifiers {
   }
 
   /// @notice Query details about all ongoing craft queues
+  /// @param _owner Address to query queue
   /// @return output_ An array of structs, each representing an ongoing craft queue
-  function getCraftQueue() external view returns (QueueItem[] memory output_) {
+  function getCraftQueue(address _owner) external view returns (QueueItem[] memory output_) {
+    uint256 length = s.craftQueue.length;
+    output_ = new QueueItem[](length);
     uint256 counter;
-    for (uint256 i; i < s.craftQueue.length; i++) {
-      if (s.craftQueue[i].owner == msg.sender) {
+    for (uint256 i; i < length; i++) {
+      if (s.craftQueue[i].owner == _owner) {
         output_[counter] = s.craftQueue[i];
         counter++;
       }
+    }
+    assembly {
+      mstore(output_, counter)
     }
   }
 

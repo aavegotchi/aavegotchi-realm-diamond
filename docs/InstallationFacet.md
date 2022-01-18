@@ -192,13 +192,19 @@ Return the id for all the altars
 ### getCraftQueue
 
 ```solidity
-function getCraftQueue() external view returns (struct QueueItem[] output_)
+function getCraftQueue(address _owner) external view returns (struct QueueItem[] output_)
 ```
 
 Query details about all ongoing craft queues
 
 
 
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _owner | address | Address to query
 
 #### Returns
 
