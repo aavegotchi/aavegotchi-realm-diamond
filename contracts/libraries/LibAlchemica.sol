@@ -15,7 +15,7 @@ library LibAlchemica {
 
     if (alchemicaSinceUpdate > 0) {
       //Cannot settle more than capacity
-      if (alchemicaSinceUpdate > capacity) {
+      if (s.parcels[_tokenId].unclaimedAlchemica[_alchemicaType] + alchemicaSinceUpdate > capacity) {
         s.parcels[_tokenId].unclaimedAlchemica[_alchemicaType] = capacity;
       } else {
         //Increment alchemica
