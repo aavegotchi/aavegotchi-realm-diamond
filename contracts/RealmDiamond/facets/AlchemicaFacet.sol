@@ -246,6 +246,8 @@ contract AlchemicaFacet is Modifiers {
     uint256 _gotchiId,
     bytes memory _signature
   ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) {
+    uint256[4] memory _availableAlchemica = getAvailableAlchemica(_realmId);
+
     for (uint256 i = 0; i < _alchemicaTypes.length; i++) {
       uint256 remaining = s.parcels[_realmId].alchemicaRemaining[_alchemicaTypes[i]];
 
@@ -256,27 +258,32 @@ contract AlchemicaFacet is Modifiers {
 
       //@todo (future release): allow claimOperator
 
-      uint256 available = getAvailableAlchemica(_realmId)[_alchemicaTypes[i]];
-
+      uint256 available = _availableAlchemica[_alchemicaTypes[i]];
       require(remaining >= available, "AlchemicaFacet: Not enough alchemica available");
 
       s.parcels[_realmId].alchemicaRemaining[_alchemicaTypes[i]] -= available;
       s.parcels[_realmId].unclaimedAlchemica[_alchemicaTypes[i]] = 0;
-
       s.parcels[_realmId].lastUpdateTimestamp[_alchemicaTypes[i]] = block.timestamp;
 
-      AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[_alchemicaTypes[i]]);
-
       SpilloverIO memory spillover = calculateSpilloverForReservoir(_realmId, _alchemicaTypes[i]);
-
       TransferAmounts memory amounts = calculateTransferAmounts(available, spillover.rate);
 
       //Mint new tokens
-      alchemica.mint(alchemicaRecipient(_gotchiId), amounts.owner);
-      alchemica.mint(address(this), amounts.spill);
+      _mintAvailableAlchemica(_alchemicaTypes[i], _gotchiId, amounts.owner, amounts.spill);
 
       emit AlchemicaClaimed(_realmId, _gotchiId, _alchemicaTypes[i], available, spillover.rate, spillover.radius);
     }
+  }
+
+  function _mintAvailableAlchemica(
+    uint256 _alchemicaType,
+    uint256 _gotchiId,
+    uint256 _owner,
+    uint256 _spill
+  ) internal {
+      AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[_alchemicaType]);
+      alchemica.mint(alchemicaRecipient(_gotchiId), _owner);
+      alchemica.mint(address(this), _spill);
   }
 
   /// @notice Allow a parcel owner to channel alchemica
