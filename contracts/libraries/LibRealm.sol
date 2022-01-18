@@ -83,7 +83,7 @@ library LibRealm {
     AppStorage storage s = LibAppStorage.diamondStorage();
     uint256[] memory alchemicas = new uint256[](4);
     uint256[] memory roundAmounts = new uint256[](4);
-    for (uint8 i; i < 4; i++) {
+    for (uint i; i < 4; i++) {
       uint256 baseAmount = calculateAmount(_tokenId, randomWords, i); //100%;
 
       //first round is 25%, rounds after are 8.3%

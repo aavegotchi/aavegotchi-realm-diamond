@@ -116,7 +116,7 @@ contract AlchemicaFacet is Modifiers {
     bytes memory _backendPubKey,
     address _gameManager
   ) external onlyOwner {
-    for (uint8 i; i < _alchemicas.length; i++) {
+    for (uint i; i < _alchemicas.length; i++) {
       for (uint256 j; j < _alchemicas[i].length; j++) {
         s.totalAlchemicas[i][j] = _alchemicas[i][j];
       }

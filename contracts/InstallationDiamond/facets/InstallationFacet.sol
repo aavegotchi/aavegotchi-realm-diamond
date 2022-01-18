@@ -193,7 +193,7 @@ contract InstallationFacet is Modifiers {
   /// @dev Deprecated installations cannot be crafted by users
   /// @param _installationIds An array containing the identifiers of installations to deprecate
   function deprecateInstallations(uint256[] calldata _installationIds) external onlyOwner {
-    for (uint8 i = 0; i < _installationIds.length; i++) {
+    for (uint i = 0; i < _installationIds.length; i++) {
       s.installationTypes[_installationIds[i]].deprecated = true;
     }
   }
@@ -203,7 +203,7 @@ contract InstallationFacet is Modifiers {
   /// @dev Puts the installation into a queue
   /// @param _installationTypes An array containing the identifiers of the installationTypes to craft
   function craftInstallations(uint256[] calldata _installationTypes) external {
-    for (uint8 i = 0; i < _installationTypes.length; i++) {
+    for (uint i = 0; i < _installationTypes.length; i++) {
       require(_installationTypes[i] < s.installationTypes.length, "InstallationFacet: Installation does not exist");
 
       //level check
@@ -212,7 +212,7 @@ contract InstallationFacet is Modifiers {
       require(!s.installationTypes[_installationTypes[i]].deprecated, "InstallationFacet: Installation has been deprecated");
       //take the required alchemica
       InstallationType memory installationType = s.installationTypes[_installationTypes[i]];
-      for (uint8 j = 0; j < installationType.alchemicaCost.length; j++) {
+      for (uint j = 0; j < installationType.alchemicaCost.length; j++) {
         LibERC20.transferFrom(
           RealmDiamond(s.realmDiamond).getAlchemicaAddresses()[j],
           msg.sender,
@@ -244,7 +244,7 @@ contract InstallationFacet is Modifiers {
   /// @param _amounts An array containing the corresponding amounts of $GLMR tokens to pay for each queue speedup
   function reduceCraftTime(uint256[] calldata _queueIds, uint256[] calldata _amounts) external {
     require(_queueIds.length == _amounts.length, "InstallationFacet: Mismatched arrays");
-    for (uint8 i; i < _queueIds.length; i++) {
+    for (uint i; i < _queueIds.length; i++) {
       uint256 queueId = _queueIds[i];
       QueueItem storage queueItem = s.craftQueue[queueId];
       require(msg.sender == queueItem.owner, "InstallationFacet: not owner");
@@ -270,7 +270,7 @@ contract InstallationFacet is Modifiers {
   /// @dev Will throw if one of the queues is not ready
   /// @param _queueIds An array containing the identifiers of queues to claim
   function claimInstallations(uint256[] calldata _queueIds) external {
-    for (uint8 i; i < _queueIds.length; i++) {
+    for (uint i; i < _queueIds.length; i++) {
       uint256 queueId = _queueIds[i];
 
       QueueItem memory queueItem = s.craftQueue[queueId];
@@ -416,7 +416,7 @@ contract InstallationFacet is Modifiers {
   function finalizeUpgrade() public {
     require(s.upgradeQueue.length > 0, "InstallationFacet: No upgrades");
     //can only process 3 upgrades per tx
-    uint8 counter = 3;
+    uint counter = 3;
     for (uint256 index; index < s.upgradeQueue.length; index++) {
       UpgradeQueue memory queueUpgrade = s.upgradeQueue[index];
       // check that upgrade is ready
@@ -495,7 +495,7 @@ contract InstallationFacet is Modifiers {
   /// @notice Allow the diamond owner to add an installation type
   /// @param _installationTypes An array of structs, each struct representing each installationType to be added
   function addInstallationTypes(InstallationType[] calldata _installationTypes) external onlyOwner {
-    for (uint16 i = 0; i < _installationTypes.length; i++) {
+    for (uint i = 0; i < _installationTypes.length; i++) {
       s.installationTypes.push(
         InstallationType(
           _installationTypes[i].deprecated,
