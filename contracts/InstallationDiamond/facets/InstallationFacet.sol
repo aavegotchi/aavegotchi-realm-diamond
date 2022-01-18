@@ -117,6 +117,13 @@ contract InstallationFacet is Modifiers {
     return s.installationTypes[_id].spillRadius;
   }
 
+  /// @notice Check the spillover radius of an installation type
+  /// @param _id id of the installationType to query
+  /// @return the spillover rate and radius the installation type with identifier _id
+  function spilloverRateAndRadiusOfId(uint256 _id) external view returns (uint256, uint256) {
+    return (s.installationTypes[_id].spillRate, s.installationTypes[_id].spillRadius);
+  }
+
   // /// @notice Check the spillover rates of multiple installation types
   // /// @param _ids An array containing ids of the installationTypes to query
   // /// @return An array containing the corresponding spillover rates of the installation types queried

@@ -308,8 +308,7 @@ contract AlchemicaFacet is Modifiers {
       "AlchemicaFacet: Invalid signature"
     );
 
-    uint256 rate = InstallationDiamondInterface(s.installationsDiamond).spilloverRateOfId(s.parcels[_realmId].altarId);
-    uint256 radius = InstallationDiamondInterface(s.installationsDiamond).spilloverRadiusOfId(s.parcels[_realmId].altarId);
+    (uint256 rate, uint radius) = InstallationDiamondInterface(s.installationsDiamond).spilloverRateAndRadiusOfId(s.parcels[_realmId].altarId);
 
     uint256[4] memory channelAmounts = [uint256(100e18), uint256(50e18), uint256(25e18), uint256(10e18)];
 
