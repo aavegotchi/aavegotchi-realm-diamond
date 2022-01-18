@@ -93,7 +93,7 @@ contract RealmFacet is Modifiers {
     output_.boost = parcel.alchemicaBoost;
   }
 
-  function tempAdd721() external onlyOwner {
+  function addERC721Interface() external onlyOwner {
     LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
     //add erc721 interface id
     ds.supportedInterfaces[type(IERC721).interfaceId] = true;

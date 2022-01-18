@@ -4,6 +4,8 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../tasks/deployUpgrade";
+import { RealmFacet__factory } from "../../typechain";
+import { RealmFacetInterface } from "../../typechain/RealmFacet";
 import { maticDiamondAddress } from "../helperFunctions";
 
 export async function upgrade() {
@@ -12,12 +14,18 @@ export async function upgrade() {
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "RealmFacet",
-      addSelectors: [" function tempAdd721() external"],
+      addSelectors: ["function addERC721Interface() external"],
       removeSelectors: [],
     },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
+
+  const iface: RealmFacetInterface = new ethers.utils.Interface(
+    RealmFacet__factory.abi
+  ) as RealmFacetInterface;
+
+  const calldata = iface.encodeFunctionData("addERC721Interface");
 
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
@@ -25,42 +33,11 @@ export async function upgrade() {
     facetsAndAddSelectors: joined,
     useLedger: false,
     useMultisig: false,
+    initAddress: maticDiamondAddress,
+    initCalldata: calldata,
   };
 
   await run("deployUpgrade", args);
-
-  /*
-  //quickly execute function
-  console.log("adding erc721 interface id");
-  const realmFacet = await ethers.getContractAt(
-    "RealmFacet",
-    maticDiamondAddress
-  );
-  await realmFacet.tempAdd721();
-
-
-  //then remove function
-  console.log('removing function')
- const facets2: FacetsAndAddSelectors[] = [
-    {
-      facetName: "RealmFacet",
-      addSelectors: [],
-      removeSelectors: [" function tempAdd721() external"],
-    },
-  ];
-
-  const joined2 = convertFacetAndSelectorsToString(facets2);
-
-  const args2: DeployUpgradeTaskArgs = {
-    diamondUpgrader: diamondUpgrader,
-    diamondAddress: maticDiamondAddress,
-    facetsAndAddSelectors: joined,
-    useLedger: false,
-    useMultisig: false,
-  };
-
-  await run("deployUpgrade", args2);
-  */
 }
 
 if (require.main === module) {
