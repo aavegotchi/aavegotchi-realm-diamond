@@ -203,21 +203,23 @@ contract InstallationFacet is Modifiers {
   /// @dev Puts the installation into a queue
   /// @param _installationTypes An array containing the identifiers of the installationTypes to craft
   function craftInstallations(uint256[] calldata _installationTypes) external {
+    address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
+
     for (uint i = 0; i < _installationTypes.length; i++) {
       require(_installationTypes[i] < s.installationTypes.length, "InstallationFacet: Installation does not exist");
 
-      //level check
-      require(s.installationTypes[_installationTypes[i]].level == 1, "InstallationFacet: can only craft level 1");
-
-      require(!s.installationTypes[_installationTypes[i]].deprecated, "InstallationFacet: Installation has been deprecated");
-      //take the required alchemica
       InstallationType memory installationType = s.installationTypes[_installationTypes[i]];
+      //level check
+      require(installationType.level == 1, "InstallationFacet: can only craft level 1");
+      require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
+
+      //take the required alchemica
       for (uint j = 0; j < installationType.alchemicaCost.length; j++) {
         LibERC20.transferFrom(
-          RealmDiamond(s.realmDiamond).getAlchemicaAddresses()[j],
+          alchemicaAddresses[j],
           msg.sender,
           s.realmDiamond,
-          s.installationTypes[_installationTypes[i]].alchemicaCost[j]
+          installationType.alchemicaCost[j]
         );
       }
       if (installationType.craftTime == 0) {
