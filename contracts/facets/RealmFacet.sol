@@ -7,6 +7,7 @@ import "../libraries/LibStrings.sol";
 import "../libraries/LibMeta.sol";
 import "../libraries/LibERC721.sol";
 import {InstallationDiamond} from "../interfaces/InstallationDiamond.sol";
+import "../interfaces/IERC721.sol";
 
 contract RealmFacet is Modifiers {
   uint256 constant MAX_SUPPLY = 420069;
@@ -90,5 +91,11 @@ contract RealmFacet is Modifiers {
     output_.parcelAddress = parcel.parcelAddress;
     output_.district = parcel.district;
     output_.boost = parcel.alchemicaBoost;
+  }
+
+  function addERC721Interface() external onlyOwner {
+    LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+    //add erc721 interface id
+    ds.supportedInterfaces[type(IERC721).interfaceId] = true;
   }
 }
