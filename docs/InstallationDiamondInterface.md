@@ -338,6 +338,27 @@ function spilloverRatesOfIds(uint256[] _ids) external view returns (uint256[])
 |---|---|---|
 | _0 | uint256[] | undefined
 
+### spilloverRateAndRadiusOfId
+
+```solidity
+function spilloverRateAndRadiusOfId(uint256 _id) external view returns (uint256, uint256)
+```
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _id | uint256 | undefined
+
+#### Returns
+
+| Name | Type | Description |
+|------|---|---|
+| _0   | uint256 | undefined
+| _1   | uint256 | undefined
+
 ### unequipInstallation
 
 ```solidity

@@ -192,13 +192,19 @@ Return the id for all the altars
 ### getCraftQueue
 
 ```solidity
-function getCraftQueue() external view returns (struct QueueItem[] output_)
+function getCraftQueue(address _owner) external view returns (struct QueueItem[] output_)
 ```
 
 Query details about all ongoing craft queues
 
 
 
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _owner | address | Address to query
 
 #### Returns
 
@@ -536,6 +542,29 @@ Check the spillover rates of multiple installation types
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256[] | An array containing the corresponding spillover rates of the installation types queried
+
+### spilloverRateAndRadiusOfId
+
+```solidity
+function spilloverRateAndRadiusOfId(uint256 _id) external view returns (uint256, uint256)
+```
+
+Check the spillover rate and radius of an installation type
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _id | uint256 | id of the installationType to query
+
+#### Returns
+
+| Name | Type | Description |
+|------|---|---|
+| _0   | uint256 | the spillover rate the installation type with identifier _id
+| _1   | uint256 | the spillover radius the installation type with identifier _id
 
 ### unequipInstallation
 

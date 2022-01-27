@@ -102,7 +102,7 @@ contract RealmFacet is Modifiers {
     InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
     InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
 
-    for (uint8 i; i < installation.alchemicaCost.length; i++) {
+    for (uint i; i < installation.alchemicaCost.length; i++) {
       AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
 
       //@question : include upgrades in refund?

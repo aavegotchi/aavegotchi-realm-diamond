@@ -79,7 +79,7 @@ library LibERC1155 {
     InstallationAppStorage storage s = LibAppStorageInstallation.diamondStorage();
     s.ownerInstallationBalances[_to][_id] += _value;
     if (s.ownerInstallationIndexes[_to][_id] == 0) {
-      s.ownerInstallations[_to].push(uint16(_id));
+      s.ownerInstallations[_to].push(_id);
       s.ownerInstallationIndexes[_to][_id] = s.ownerInstallations[_to].length;
     }
   }
@@ -99,7 +99,7 @@ library LibERC1155 {
       uint256 lastIndex = s.ownerInstallations[_from].length - 1;
       if (index != lastIndex) {
         uint256 lastId = s.ownerInstallations[_from][lastIndex];
-        s.ownerInstallations[_from][index] = uint16(lastId);
+        s.ownerInstallations[_from][index] = lastId;
         s.ownerInstallationIndexes[_from][lastId] = index + 1;
       }
       s.ownerInstallations[_from].pop();
