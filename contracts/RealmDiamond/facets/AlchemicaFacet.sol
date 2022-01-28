@@ -364,7 +364,7 @@ contract AlchemicaFacet is Modifiers {
 
     for (uint256 i = 0; i < _alchemica.length; i++) {
       AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
-      alchemica.transferFrom(address(this), alchemicaRecipient(_gotchiId), _alchemica[i]);
+      alchemica.transfer(alchemicaRecipient(_gotchiId), _alchemica[i]);
     }
 
     emit ExitAlchemica(_gotchiId, _alchemica);
