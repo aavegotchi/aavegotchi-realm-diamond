@@ -263,14 +263,10 @@ contract InstallationFacet is Modifiers {
       IERC20 glmr = IERC20(s.glmr);
 
       uint256 blockLeft = queueItem.readyBlock - block.number;
-      if (_amounts[i] <= blockLeft) {
-        glmr.burnFrom(msg.sender, _amounts[i] * 10**18);
-      } else {
-        glmr.burnFrom(msg.sender, blockLeft * 10**18);
-      }
-
-      queueItem.readyBlock -= _amounts[i];
-      emit CraftTimeReduced(queueId, _amounts[i]);
+      uint256 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
+      glmr.burnFrom(msg.sender, removeBlocks * 10**18);
+      queueItem.readyBlock -= removeBlocks;
+      emit CraftTimeReduced(queueId, removeBlocks);
     }
   }
 
@@ -410,14 +406,10 @@ contract InstallationFacet is Modifiers {
     IERC20 glmr = IERC20(s.glmr);
 
     uint256 blockLeft = upgradeQueue.readyBlock - block.number;
-    if (_amount <= blockLeft) {
-      glmr.burnFrom(msg.sender, _amount * 10**18);
-    } else {
-      glmr.burnFrom(msg.sender, blockLeft * 10**18);
-    }
-
-    upgradeQueue.readyBlock -= _amount;
-    emit UpgradeTimeReduced(_queueId, upgradeQueue.parcelId, upgradeQueue.coordinateX, upgradeQueue.coordinateY, _amount);
+    uint256 removeBlocks = _amount <= blockLeft ? _amount : blockLeft;
+    glmr.burnFrom(msg.sender, removeBlocks * 10**18);
+    upgradeQueue.readyBlock -= removeBlocks;
+    emit UpgradeTimeReduced(_queueId, upgradeQueue.parcelId, upgradeQueue.coordinateX, upgradeQueue.coordinateY, removeBlocks);
   }
 
   /// @notice Allow anyone to finalize any existing queue upgrade
