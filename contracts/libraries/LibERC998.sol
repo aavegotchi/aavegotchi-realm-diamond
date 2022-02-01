@@ -11,30 +11,6 @@ struct ItemTypeIO {
 }
 
 library ERC998 {
-  /// @dev This emits when a token is transferred to an ERC721 token
-  /// @param _toContract The contract the token is transferred to
-  /// @param _toTokenId The token the token is transferred to
-  /// @param _tokenId The token that is transferred
-  /// @param _amount The amount of tokens transferred
-  event TransferToParent(
-    address indexed _toContract,
-    uint256 indexed _toTokenId,
-    uint256 _tokenId,
-    uint256 _amount
-  );
-
-  /// @dev This emits when a token is transferred from an ERC721 token
-  /// @param _fromContract The contract the token is transferred from
-  /// @param _fromTokenId The token the token is transferred from
-  /// @param _tokenId The token that is transferred
-  /// @param _amount The amount of tokens transferred
-  event TransferFromParent(
-    address indexed _fromContract,
-    uint256 indexed _fromTokenId,
-    uint256 _tokenId,
-    uint256 _amount
-  );
-
   function itemBalancesOfTokenWithTypes(address _tokenContract, uint256 _tokenId)
     internal
     view
@@ -64,44 +40,6 @@ library ERC998 {
       s.nftInstallations[_toContract][_toTokenId].push(_id);
       s.nftInstallationIndexes[_toContract][_toTokenId][_id] = s.nftInstallations[_toContract][_toTokenId].length;
     }
-
-    emit TransferToParent(_toContract, _toTokenId, _id, _value);
-  }
-
-  function addToOwner(
-    address _to,
-    uint256 _id,
-    uint256 _value
-  ) internal {
-    InstallationAppStorage storage s = LibAppStorageInstallation.diamondStorage();
-    s.ownerInstallationBalances[_to][_id] += _value;
-    if (s.ownerInstallationIndexes[_to][_id] == 0) {
-      s.ownerInstallations[_to].push(_id);
-      s.ownerInstallationIndexes[_to][_id] = s.ownerInstallations[_to].length;
-    }
-  }
-
-  function removeFromOwner(
-    address _from,
-    uint256 _id,
-    uint256 _value
-  ) internal {
-    InstallationAppStorage storage s = LibAppStorageInstallation.diamondStorage();
-    uint256 bal = s.ownerInstallationBalances[_from][_id];
-    require(_value <= bal, "LibItems: Doesn't have that many to transfer");
-    bal -= _value;
-    s.ownerInstallationBalances[_from][_id] = bal;
-    if (bal == 0) {
-      uint256 index = s.ownerInstallationIndexes[_from][_id] - 1;
-      uint256 lastIndex = s.ownerInstallations[_from].length - 1;
-      if (index != lastIndex) {
-        uint256 lastId = s.ownerInstallations[_from][lastIndex];
-        s.ownerInstallations[_from][index] = lastId;
-        s.ownerInstallationIndexes[_from][lastId] = index + 1;
-      }
-      s.ownerInstallations[_from].pop();
-      delete s.ownerInstallationIndexes[_from][_id];
-    }
   }
 
   function removeFromParent(
@@ -126,7 +64,5 @@ library ERC998 {
       s.nftInstallations[_fromContract][_fromTokenId].pop();
       delete s.nftInstallationIndexes[_fromContract][_fromTokenId][_id];
     }
-
-    emit TransferFromParent(_fromContract, _fromTokenId, _id, _value);
   }
 }
