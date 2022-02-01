@@ -110,7 +110,7 @@ contract RealmFacet is Modifiers {
 
       alchemica.transfer(msg.sender, alchemicaRefund);
     }
-    InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(msg.sender, _realmId, _installationId);
+    InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(_realmId, _installationId);
 
     LibAlchemica.reduceTraits(_realmId, _installationId);
 

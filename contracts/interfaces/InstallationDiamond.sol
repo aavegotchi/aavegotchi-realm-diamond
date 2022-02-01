@@ -50,7 +50,6 @@ interface InstallationDiamondInterface {
   ) external;
 
   function unequipInstallation(
-    address _owner,
     uint256 _realmId,
     uint256 _installationId
   ) external;

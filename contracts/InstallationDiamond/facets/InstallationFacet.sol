@@ -323,11 +323,9 @@ contract InstallationFacet is Modifiers {
 
   /// @notice Allow a user to unequip an installation from a parcel
   /// @dev Will throw if the caller is not the parcel diamond contract
-  /// @param _owner Owner of the installation to unequip
   /// @param _realmId The identifier of the parcel to unequip the installation from
   /// @param _installationId Identifier of the installation to unequip
   function unequipInstallation(
-    address _owner,
     uint256 _realmId,
     uint256 _installationId
   ) external onlyRealmDiamond {
@@ -351,7 +349,7 @@ contract InstallationFacet is Modifiers {
       }
     }
 
-    LibInstallation._unequipInstallation(_owner, _realmId, _installationId);
+    LibInstallation._unequipInstallation(_realmId, _installationId);
   }
 
   /// @notice Allow a user to upgrade an installation in a parcel
@@ -423,7 +421,7 @@ contract InstallationFacet is Modifiers {
       // check that upgrade is ready
       if (block.number >= queueUpgrade.readyBlock) {
         // burn old installation
-        LibInstallation._unequipInstallation(queueUpgrade.owner, queueUpgrade.parcelId, queueUpgrade.installationId);
+        LibInstallation._unequipInstallation(queueUpgrade.parcelId, queueUpgrade.installationId);
         // mint new installation
 
         uint256 nextLevelId = s.installationTypes[queueUpgrade.installationId].nextLevelId;
