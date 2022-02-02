@@ -28,6 +28,8 @@ contract InstallationFacet is Modifiers {
 
   event UpgradeFinalized(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY);
 
+  event AddressesUpdated(address _aavegotchiDiamond, address _realmDiamond, address _glmr);
+
   /***********************************|
    |             Read Functions         |
    |__________________________________*/
@@ -493,6 +495,7 @@ contract InstallationFacet is Modifiers {
     s.aavegotchiDiamond = _aavegotchiDiamond;
     s.realmDiamond = _realmDiamond;
     s.glmr = _glmr;
+    emit AddressesUpdated(_aavegotchiDiamond, _realmDiamond, _glmr);
   }
 
   /// @notice Allow the diamond owner to add an installation type
