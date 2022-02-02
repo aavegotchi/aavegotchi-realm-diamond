@@ -98,7 +98,8 @@ contract ERC1155Facet is Modifiers {
     */
   function setBaseURI(string memory _value) external onlyOwner {
     s.baseUri = _value;
-    for (uint256 i; i < s.installationTypes.length; i++) {
+    uint256 _installationTypesLength = s.installationTypes.length;
+    for (uint256 i; i < _installationTypesLength; i++) {
       emit LibERC1155.URI(LibStrings.strWithUint(_value, i), i);
     }
   }

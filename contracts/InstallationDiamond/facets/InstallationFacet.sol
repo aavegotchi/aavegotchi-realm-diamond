@@ -212,8 +212,10 @@ contract InstallationFacet is Modifiers {
   function craftInstallations(uint256[] calldata _installationTypes) external {
     address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
 
+    uint _installationTypesLength = s.installationTypes.length;
+    uint _nextCraftId = s.nextCraftId;
     for (uint i = 0; i < _installationTypes.length; i++) {
-      require(_installationTypes[i] < s.installationTypes.length, "InstallationFacet: Installation does not exist");
+      require(_installationTypes[i] < _installationTypesLength, "InstallationFacet: Installation does not exist");
 
       InstallationType memory installationType = s.installationTypes[_installationTypes[i]];
       //level check
@@ -236,12 +238,13 @@ contract InstallationFacet is Modifiers {
 
         //put the installation into a queue
         //each wearable needs a unique queue id
-        s.craftQueue.push(QueueItem(s.nextCraftId, readyBlock, _installationTypes[i], false, msg.sender));
+        s.craftQueue.push(QueueItem(_nextCraftId, readyBlock, _installationTypes[i], false, msg.sender));
 
-        emit AddedToQueue(s.nextCraftId, _installationTypes[i], readyBlock, msg.sender);
-        s.nextCraftId++;
+        emit AddedToQueue(_nextCraftId, _installationTypes[i], readyBlock, msg.sender);
+        _nextCraftId++;
       }
     }
+    s.nextCraftId = _nextCraftId;
     //after queue is over, user can claim installation
   }
 
@@ -416,7 +419,8 @@ contract InstallationFacet is Modifiers {
     require(s.upgradeQueue.length > 0, "InstallationFacet: No upgrades");
     //can only process 3 upgrades per tx
     uint counter = 3;
-    for (uint256 index; index < s.upgradeQueue.length; index++) {
+    uint256 _upgradeQueueLength = s.upgradeQueue.length;
+    for (uint256 index; index < _upgradeQueueLength; index++) {
       UpgradeQueue memory queueUpgrade = s.upgradeQueue[index];
       // check that upgrade is ready
       if (block.number >= queueUpgrade.readyBlock) {
