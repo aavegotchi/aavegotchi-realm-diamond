@@ -4,11 +4,11 @@ import {LibDiamond} from "./LibDiamond.sol";
 import "hardhat/console.sol";
 
 struct InstallationType {
+  uint256 width;
+  uint256 height;
   bool deprecated;
   uint16 installationType; //0 = harvester, 1 = reservoir, 2 = altar, 3 = gotchi lodge, 4 = wall, 5 = NFT display
   uint16 level;
-  uint256 width;
-  uint256 height;
   uint16 alchemicaType; //0 = none 1 = fud, 2 = fomo, 3 = alpha, 4 = kek
   uint256[] alchemicaCost; // [fud, fomo, alpha, kek]
   uint256 harvestRate;

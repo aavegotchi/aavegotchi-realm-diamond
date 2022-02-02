@@ -501,11 +501,11 @@ contract InstallationFacet is Modifiers {
     for (uint i = 0; i < _installationTypes.length; i++) {
       s.installationTypes.push(
         InstallationType(
+          _installationTypes[i].width,
+          _installationTypes[i].height,
           _installationTypes[i].deprecated,
           _installationTypes[i].installationType,
           _installationTypes[i].level,
-          _installationTypes[i].width,
-          _installationTypes[i].height,
           _installationTypes[i].alchemicaType,
           _installationTypes[i].alchemicaCost,
           _installationTypes[i].harvestRate,
