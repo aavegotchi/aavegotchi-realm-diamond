@@ -10,30 +10,20 @@ struct ItemTypeIO {
   InstallationType installationType;
 }
 
-library ERC998 {
+library LibERC998 {
   /// @dev This emits when a token is transferred to an ERC721 token
   /// @param _toContract The contract the token is transferred to
   /// @param _toTokenId The token the token is transferred to
   /// @param _tokenId The token that is transferred
   /// @param _amount The amount of tokens transferred
-  event TransferToParent(
-    address indexed _toContract,
-    uint256 indexed _toTokenId,
-    uint256 _tokenId,
-    uint256 _amount
-  );
+  event TransferToParent(address indexed _toContract, uint256 indexed _toTokenId, uint256 _tokenId, uint256 _amount);
 
   /// @dev This emits when a token is transferred from an ERC721 token
   /// @param _fromContract The contract the token is transferred from
   /// @param _fromTokenId The token the token is transferred from
   /// @param _tokenId The token that is transferred
   /// @param _amount The amount of tokens transferred
-  event TransferFromParent(
-    address indexed _fromContract,
-    uint256 indexed _fromTokenId,
-    uint256 _tokenId,
-    uint256 _amount
-  );
+  event TransferFromParent(address indexed _fromContract, uint256 indexed _fromTokenId, uint256 _tokenId, uint256 _amount);
 
   function itemBalancesOfTokenWithTypes(address _tokenContract, uint256 _tokenId)
     internal

@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-import {ERC998, ItemTypeIO} from "../../libraries/LibERC998.sol";
+import {LibERC998, ItemTypeIO} from "../../libraries/LibERC998.sol";
 import {LibAppStorageInstallation, InstallationType, QueueItem, UpgradeQueue, Modifiers} from "../../libraries/AppStorageInstallation.sol";
 import {LibStrings} from "../../libraries/LibStrings.sol";
 import {LibMeta} from "../../libraries/LibMeta.sol";
 import {LibERC1155} from "../../libraries/LibERC1155.sol";
-import {ERC998} from "../../libraries/LibERC998.sol";
 import {LibERC20} from "../../libraries/LibERC20.sol";
 import {LibInstallation} from "../../libraries/LibInstallation.sol";
 import {IERC721} from "../../interfaces/IERC721.sol";
@@ -100,7 +99,7 @@ contract InstallationFacet is Modifiers {
     view
     returns (ItemTypeIO[] memory installationBalancesOfTokenWithTypes_)
   {
-    installationBalancesOfTokenWithTypes_ = ERC998.itemBalancesOfTokenWithTypes(_tokenContract, _tokenId);
+    installationBalancesOfTokenWithTypes_ = LibERC998.itemBalancesOfTokenWithTypes(_tokenContract, _tokenId);
   }
 
   /// @notice Check the spillover rate of an installation type
@@ -200,7 +199,7 @@ contract InstallationFacet is Modifiers {
   /// @dev Deprecated installations cannot be crafted by users
   /// @param _installationIds An array containing the identifiers of installations to deprecate
   function deprecateInstallations(uint256[] calldata _installationIds) external onlyOwner {
-    for (uint i = 0; i < _installationIds.length; i++) {
+    for (uint256 i = 0; i < _installationIds.length; i++) {
       s.installationTypes[_installationIds[i]].deprecated = true;
     }
   }
@@ -212,7 +211,7 @@ contract InstallationFacet is Modifiers {
   function craftInstallations(uint256[] calldata _installationTypes) external {
     address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
 
-    for (uint i = 0; i < _installationTypes.length; i++) {
+    for (uint256 i = 0; i < _installationTypes.length; i++) {
       require(_installationTypes[i] < s.installationTypes.length, "InstallationFacet: Installation does not exist");
 
       InstallationType memory installationType = s.installationTypes[_installationTypes[i]];
@@ -221,13 +220,8 @@ contract InstallationFacet is Modifiers {
       require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
 
       //take the required alchemica
-      for (uint j = 0; j < installationType.alchemicaCost.length; j++) {
-        LibERC20.transferFrom(
-          alchemicaAddresses[j],
-          msg.sender,
-          s.realmDiamond,
-          installationType.alchemicaCost[j]
-        );
+      for (uint256 j = 0; j < installationType.alchemicaCost.length; j++) {
+        LibERC20.transferFrom(alchemicaAddresses[j], msg.sender, s.realmDiamond, installationType.alchemicaCost[j]);
       }
       if (installationType.craftTime == 0) {
         LibERC1155._safeMint(msg.sender, _installationTypes[i], 0);
@@ -253,7 +247,7 @@ contract InstallationFacet is Modifiers {
   /// @param _amounts An array containing the corresponding amounts of $GLMR tokens to pay for each queue speedup
   function reduceCraftTime(uint256[] calldata _queueIds, uint256[] calldata _amounts) external {
     require(_queueIds.length == _amounts.length, "InstallationFacet: Mismatched arrays");
-    for (uint i; i < _queueIds.length; i++) {
+    for (uint256 i; i < _queueIds.length; i++) {
       uint256 queueId = _queueIds[i];
       QueueItem storage queueItem = s.craftQueue[queueId];
       require(msg.sender == queueItem.owner, "InstallationFacet: not owner");
@@ -279,7 +273,7 @@ contract InstallationFacet is Modifiers {
   /// @dev Will throw if one of the queues is not ready
   /// @param _queueIds An array containing the identifiers of queues to claim
   function claimInstallations(uint256[] calldata _queueIds) external {
-    for (uint i; i < _queueIds.length; i++) {
+    for (uint256 i; i < _queueIds.length; i++) {
       uint256 queueId = _queueIds[i];
 
       QueueItem memory queueItem = s.craftQueue[queueId];
@@ -425,7 +419,7 @@ contract InstallationFacet is Modifiers {
   function finalizeUpgrade() public {
     require(s.upgradeQueue.length > 0, "InstallationFacet: No upgrades");
     //can only process 3 upgrades per tx
-    uint counter = 3;
+    uint256 counter = 3;
     for (uint256 index; index < s.upgradeQueue.length; index++) {
       UpgradeQueue memory queueUpgrade = s.upgradeQueue[index];
       // check that upgrade is ready
@@ -504,7 +498,7 @@ contract InstallationFacet is Modifiers {
   /// @notice Allow the diamond owner to add an installation type
   /// @param _installationTypes An array of structs, each struct representing each installationType to be added
   function addInstallationTypes(InstallationType[] calldata _installationTypes) external onlyOwner {
-    for (uint i = 0; i < _installationTypes.length; i++) {
+    for (uint256 i = 0; i < _installationTypes.length; i++) {
       s.installationTypes.push(
         InstallationType(
           _installationTypes[i].deprecated,

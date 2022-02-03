@@ -7,7 +7,8 @@ import "hardhat-contract-sizer";
 import "@nomiclabs/hardhat-etherscan";
 import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname + "/.env" });
-require("./tasks/generateDiamondABI.js");
+require("./tasks/generateDiamondABI_realm.js");
+require("./tasks/generateDiamondABI_installation.js");
 require("./tasks/verifyFacet.js");
 require("./tasks/mintParcels.ts");
 
@@ -45,10 +46,10 @@ module.exports = {
       //   timeout: 90000
     },
     mumbai: {
-      url: process.env.MUMBAI_URL,
-      accounts: [process.env.SECRET],
-      blockGasLimit: 20000000,
-      gasPrice: 1000000000,
+      url: process.env.MUMBAI_MORALIS,
+      accounts: [process.env.ITEM_MANAGER],
+      // blockGasLimit: 20000000,
+      // gasPrice: 1000000000,
     },
     kovan: {
       url: process.env.KOVAN_URL,

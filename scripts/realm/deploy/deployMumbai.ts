@@ -12,21 +12,33 @@ import {
   RealmFacet,
   VRFFacet,
   AlchemicaToken,
-} from "../../typechain";
-import { gasPrice, impersonate } from "./helperFunctions";
+} from "../../../typechain";
+import { gasPrice, impersonate } from "../../helperFunctions";
+import { deployAlchemica } from "../realmHelpers";
+import { alchemicaTotals, boostMultipliers } from "../../setVars";
+import { deployDiamond } from "../../installation/deploy";
 
-const { getSelectors, FacetCutAction } = require("./libraries/diamond.js");
+const { getSelectors, FacetCutAction } = require("../../libraries/diamond.js");
 
-export async function deployDiamond() {
-  const accounts: Signer[] = await ethers.getSigners();
-  const deployer = accounts[0];
-  const deployerAddress = await deployer.getAddress();
-  console.log("Deployer:", deployerAddress);
+interface Diamond {
+  address: string;
+}
 
+async function deployRealmDiamond(deployerAddress: string) {
   // deploy DiamondCutFacet
   const DiamondCutFacet = await ethers.getContractFactory("DiamondCutFacet");
+
+  const gasData = await ethers.provider.getFeeData();
+
+  console.log("gas data:", gasData);
+
+  console.log("Deploying diamond cut facet:");
   const diamondCutFacet = await DiamondCutFacet.deploy({
-    gasPrice: gasPrice,
+    gasPrice: gasData.gasPrice ? gasData.gasPrice : gasPrice,
+    // maxFeePerGas: gasData.maxFeePerGas ? gasData.maxFeePerGas : "10000",
+    // maxPriorityFeePerGas: gasData.maxPriorityFeePerGas
+    // ? gasData.maxPriorityFeePerGas
+    // : "10000",
   });
   await diamondCutFacet.deployed();
   console.log("DiamondCutFacet deployed:", diamondCutFacet.address);
@@ -110,49 +122,26 @@ export async function deployDiamond() {
     );
   }
 
-  // deploy alchemicas ERC20
-  const alchemica = await ethers.getContractFactory("AlchemicaToken");
-  let fud = (await alchemica.deploy(
-    "FUD",
-    "FUD",
-    ethers.utils.parseUnits("1000000000000"),
-    diamond.address
-  )) as AlchemicaToken;
-  console.log("FUD deployed to ", fud.address);
-  let fomo = (await alchemica.deploy(
-    "FOMO",
-    "FOMO",
-    ethers.utils.parseUnits("250000000000"),
-    diamond.address
-  )) as AlchemicaToken;
-  console.log("FOMO deployed to ", fomo.address);
-  let alpha = (await alchemica.deploy(
-    "ALPHA",
-    "ALPHA",
-    ethers.utils.parseUnits("125000000000"),
-    diamond.address
-  )) as AlchemicaToken;
-  console.log("ALPHA deployed to ", alpha.address);
-  let kek = (await alchemica.deploy(
-    "KEK",
-    "KEK",
-    ethers.utils.parseUnits("100000000000"),
-    diamond.address
-  )) as AlchemicaToken;
-  console.log("KEK deployed to ", kek.address);
+  return diamond as Diamond;
+}
 
-  await fud.transferOwnership(diamond.address);
-  await fomo.transferOwnership(diamond.address);
-  await alpha.transferOwnership(diamond.address);
-  await kek.transferOwnership(diamond.address);
+export async function deployMumbai() {
+  const accounts: Signer[] = await ethers.getSigners();
+  const deployer = accounts[0];
 
-  const hardcodedAlchemicasTotals: any = [
-    [14154, 7076, 3538, 1414],
-    [56618, 28308, 14154, 5660],
-    [452946, 226472, 113236, 45294],
-    [452946, 226472, 113236, 45294],
-    [905894, 452946, 226472, 90588],
-  ];
+  console.log("nonce:", await deployer.getTransactionCount());
+
+  const deployerAddress = await deployer.getAddress();
+  console.log("Deployer:", deployerAddress);
+
+  console.log("Deploying Realm Diamond");
+  const realmDiamond = await deployRealmDiamond(deployerAddress);
+
+  console.log("Deploying Installation Diamond");
+  const installationDiamond = await deployDiamond();
+
+  console.log("Deploying Alchemicas");
+  const alchemica = await deployAlchemica(ethers);
 
   const greatPortalCapacity: [
     BigNumberish,
@@ -166,47 +155,56 @@ export async function deployDiamond() {
     ethers.utils.parseUnits("125000000"),
   ];
 
-  for (let i = 0; i < hardcodedAlchemicasTotals.length; i++) {
-    for (let j = 0; j < hardcodedAlchemicasTotals[i].length; j++) {
-      hardcodedAlchemicasTotals[i][j] = ethers.utils.parseUnits(
-        hardcodedAlchemicasTotals[i][j].toString()
-      );
-    }
-  }
-
   const alchemicaFacet = (await ethers.getContractAt(
     "AlchemicaFacet",
-    diamond.address
+    realmDiamond.address
   )) as AlchemicaFacet;
 
   //Mumbai-specific
   const vrfCoordinator = "0xb96A95d11cE0B8E3AEdf332c9Df17fC31D379651";
   const linkAddress = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB";
-  const installationDiamond = "0x6Ead866C75B485d4d1c123dc51eb6f749a02C797";
-  const backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+  // const installationDiamond = "0x6Ead866C75B485d4d1c123dc51eb6f749a02C797";
+  //@ts-ignore
+  const backendSigner = new ethers.Wallet(process.env.MUMBAI_REALM_PK); // PK should start with '0x'
 
-  const initVars = await alchemicaFacet.setVars(
+  console.log("Setting vars");
+  const tx = await alchemicaFacet.setVars(
     //@ts-ignore
-    hardcodedAlchemicasTotals,
+    alchemicaTotals(),
+    boostMultipliers,
     greatPortalCapacity,
     installationDiamond,
-    diamond.address,
     vrfCoordinator,
     linkAddress,
-    [fud.address, fomo.address, alpha.address, kek.address],
-    ethers.utils.hexDataSlice(backendSigner.publicKey, 1)
+    [
+      alchemica.fud.address,
+      alchemica.fomo.address,
+      alchemica.alpha.address,
+      alchemica.kek.address,
+    ],
+    alchemica.glmr.address,
+    ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
+    deployerAddress,
+    { gasPrice: gasPrice }
   );
 
-  const initVarsReceipt = await initVars.wait();
-  console.log("initVarsReceipt", initVarsReceipt);
+  await tx.wait();
 
-  return diamond.address;
+  console.log("RealmDiamond deployed:", realmDiamond.address);
+  console.log("InstallationDiamond deployed:", installationDiamond);
+  console.log("FUD deployed:", alchemica.fud.address);
+  console.log("FOMO deployed:", alchemica.fomo.address);
+  console.log("ALPHA deployed:", alchemica.alpha.address);
+  console.log("KEK deployed:", alchemica.kek.address);
+  console.log("GLMR deployed:", alchemica.glmr.address);
+
+  return realmDiamond.address;
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 if (require.main === module) {
-  deployDiamond()
+  deployMumbai()
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);
