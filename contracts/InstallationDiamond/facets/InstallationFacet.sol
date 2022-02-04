@@ -27,6 +27,8 @@ contract InstallationFacet is Modifiers {
 
   event UpgradeFinalized(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY);
 
+  event AddressesUpdated(address _aavegotchiDiamond, address _realmDiamond, address _glmr);
+
   /***********************************|
    |             Read Functions         |
    |__________________________________*/
@@ -211,8 +213,10 @@ contract InstallationFacet is Modifiers {
   function craftInstallations(uint256[] calldata _installationTypes) external {
     address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
 
+    uint256 _installationTypesLength = s.installationTypes.length;
+    uint256 _nextCraftId = s.nextCraftId;
     for (uint256 i = 0; i < _installationTypes.length; i++) {
-      require(_installationTypes[i] < s.installationTypes.length, "InstallationFacet: Installation does not exist");
+      require(_installationTypes[i] < _installationTypesLength, "InstallationFacet: Installation does not exist");
 
       InstallationType memory installationType = s.installationTypes[_installationTypes[i]];
       //level check
@@ -230,12 +234,13 @@ contract InstallationFacet is Modifiers {
 
         //put the installation into a queue
         //each wearable needs a unique queue id
-        s.craftQueue.push(QueueItem(s.nextCraftId, readyBlock, _installationTypes[i], false, msg.sender));
+        s.craftQueue.push(QueueItem(_nextCraftId, readyBlock, _installationTypes[i], false, msg.sender));
 
-        emit AddedToQueue(s.nextCraftId, _installationTypes[i], readyBlock, msg.sender);
-        s.nextCraftId++;
+        emit AddedToQueue(_nextCraftId, _installationTypes[i], readyBlock, msg.sender);
+        _nextCraftId++;
       }
     }
+    s.nextCraftId = _nextCraftId;
     //after queue is over, user can claim installation
   }
 
@@ -257,14 +262,10 @@ contract InstallationFacet is Modifiers {
       IERC20 glmr = IERC20(s.glmr);
 
       uint256 blockLeft = queueItem.readyBlock - block.number;
-      if (_amounts[i] <= blockLeft) {
-        glmr.burnFrom(msg.sender, _amounts[i] * 10**18);
-      } else {
-        glmr.burnFrom(msg.sender, blockLeft * 10**18);
-      }
-
-      queueItem.readyBlock -= _amounts[i];
-      emit CraftTimeReduced(queueId, _amounts[i]);
+      uint256 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
+      glmr.burnFrom(msg.sender, removeBlocks * 10**18);
+      queueItem.readyBlock -= removeBlocks;
+      emit CraftTimeReduced(queueId, removeBlocks);
     }
   }
 
@@ -321,14 +322,9 @@ contract InstallationFacet is Modifiers {
 
   /// @notice Allow a user to unequip an installation from a parcel
   /// @dev Will throw if the caller is not the parcel diamond contract
-  /// @param _owner Owner of the installation to unequip
   /// @param _realmId The identifier of the parcel to unequip the installation from
   /// @param _installationId Identifier of the installation to unequip
-  function unequipInstallation(
-    address _owner,
-    uint256 _realmId,
-    uint256 _installationId
-  ) external onlyRealmDiamond {
+  function unequipInstallation(uint256 _realmId, uint256 _installationId) external onlyRealmDiamond {
     InstallationIdIO[] memory installationBalances = installationBalancesOfToken(s.realmDiamond, _realmId);
 
     uint256 removeInstallationBalance = balanceOfToken(s.realmDiamond, _realmId, _installationId);
@@ -349,7 +345,7 @@ contract InstallationFacet is Modifiers {
       }
     }
 
-    LibInstallation._unequipInstallation(_owner, _realmId, _installationId);
+    LibInstallation._unequipInstallation(_realmId, _installationId);
   }
 
   /// @notice Allow a user to upgrade an installation in a parcel
@@ -404,14 +400,10 @@ contract InstallationFacet is Modifiers {
     IERC20 glmr = IERC20(s.glmr);
 
     uint256 blockLeft = upgradeQueue.readyBlock - block.number;
-    if (_amount <= blockLeft) {
-      glmr.burnFrom(msg.sender, _amount * 10**18);
-    } else {
-      glmr.burnFrom(msg.sender, blockLeft * 10**18);
-    }
-
-    upgradeQueue.readyBlock -= _amount;
-    emit UpgradeTimeReduced(_queueId, upgradeQueue.parcelId, upgradeQueue.coordinateX, upgradeQueue.coordinateY, _amount);
+    uint256 removeBlocks = _amount <= blockLeft ? _amount : blockLeft;
+    glmr.burnFrom(msg.sender, removeBlocks * 10**18);
+    upgradeQueue.readyBlock -= removeBlocks;
+    emit UpgradeTimeReduced(_queueId, upgradeQueue.parcelId, upgradeQueue.coordinateX, upgradeQueue.coordinateY, removeBlocks);
   }
 
   /// @notice Allow anyone to finalize any existing queue upgrade
@@ -420,12 +412,13 @@ contract InstallationFacet is Modifiers {
     require(s.upgradeQueue.length > 0, "InstallationFacet: No upgrades");
     //can only process 3 upgrades per tx
     uint256 counter = 3;
-    for (uint256 index; index < s.upgradeQueue.length; index++) {
+    uint256 _upgradeQueueLength = s.upgradeQueue.length;
+    for (uint256 index; index < _upgradeQueueLength; index++) {
       UpgradeQueue memory queueUpgrade = s.upgradeQueue[index];
       // check that upgrade is ready
       if (block.number >= queueUpgrade.readyBlock) {
         // burn old installation
-        LibInstallation._unequipInstallation(queueUpgrade.owner, queueUpgrade.parcelId, queueUpgrade.installationId);
+        LibInstallation._unequipInstallation(queueUpgrade.parcelId, queueUpgrade.installationId);
         // mint new installation
 
         uint256 nextLevelId = s.installationTypes[queueUpgrade.installationId].nextLevelId;
@@ -493,6 +486,7 @@ contract InstallationFacet is Modifiers {
     s.aavegotchiDiamond = _aavegotchiDiamond;
     s.realmDiamond = _realmDiamond;
     s.glmr = _glmr;
+    emit AddressesUpdated(_aavegotchiDiamond, _realmDiamond, _glmr);
   }
 
   /// @notice Allow the diamond owner to add an installation type
@@ -501,11 +495,11 @@ contract InstallationFacet is Modifiers {
     for (uint256 i = 0; i < _installationTypes.length; i++) {
       s.installationTypes.push(
         InstallationType(
+          _installationTypes[i].width,
+          _installationTypes[i].height,
           _installationTypes[i].deprecated,
           _installationTypes[i].installationType,
           _installationTypes[i].level,
-          _installationTypes[i].width,
-          _installationTypes[i].height,
           _installationTypes[i].alchemicaType,
           _installationTypes[i].alchemicaCost,
           _installationTypes[i].harvestRate,

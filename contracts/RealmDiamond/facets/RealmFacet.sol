@@ -27,6 +27,8 @@ contract RealmFacet is Modifiers {
   event ResyncParcel(uint256 _realmId);
   event EquipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y);
   event UnequipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y);
+  event AavegotchiDiamondUpdated(address _aavegotchiDiamond);
+  event InstallationUpgraded(uint256 _realmId, uint256 _prevInstallationId, uint256 _nextInstallationId, uint256 _coordinateX, uint256 _coordinateY);
 
   /// @notice Return the maximum realm supply
   /// @return The max realm token supply
@@ -110,7 +112,7 @@ contract RealmFacet is Modifiers {
 
       alchemica.transfer(msg.sender, alchemicaRefund);
     }
-    InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(msg.sender, _realmId, _installationId);
+    InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(_realmId, _installationId);
 
     LibAlchemica.reduceTraits(_realmId, _installationId);
 
@@ -145,6 +147,7 @@ contract RealmFacet is Modifiers {
   function setAavegotchiDiamond(address _diamondAddress) external onlyOwner {
     require(_diamondAddress != address(0), "RealmFacet: Cannot set diamond to zero address");
     s.aavegotchiDiamond = _diamondAddress;
+    emit AavegotchiDiamondUpdated(_diamondAddress);
   }
 
   /// @notice Fetch information about a parcel
@@ -183,6 +186,7 @@ contract RealmFacet is Modifiers {
     LibRealm.placeInstallation(_realmId, _nextInstallationId, _coordinateX, _coordinateY);
     LibAlchemica.reduceTraits(_realmId, _prevInstallationId);
     LibAlchemica.increaseTraits(_realmId, _nextInstallationId);
+    emit InstallationUpgraded(_realmId, _prevInstallationId, _nextInstallationId, _coordinateX, _coordinateY);
   }
 
   // used for testing atm

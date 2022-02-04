@@ -33,6 +33,8 @@ contract AlchemicaFacet is Modifiers {
 
   event ExitAlchemica(uint256 indexed _gotchiId, uint256[] _alchemica);
 
+  event SurveyingRoundProgressed(uint256 indexed _newRound);
+
   /// @notice Allow the owner of a parcel to start surveying his parcel
   /// @dev Will throw if a surveying round has not started
   /// @param _realmId Identifier of the parcel to survey
@@ -75,6 +77,7 @@ contract AlchemicaFacet is Modifiers {
   /// @notice Allow the diamond owner to increment the surveying round
   function progressSurveyingRound() external onlyOwner {
     s.surveyingRound++;
+    emit SurveyingRoundProgressed(s.surveyingRound);
   }
 
   /// @notice Query details about all alchemica gathered in a surveying round in a parcel
@@ -364,7 +367,7 @@ contract AlchemicaFacet is Modifiers {
 
     for (uint256 i = 0; i < _alchemica.length; i++) {
       AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
-      alchemica.transferFrom(address(this), alchemicaRecipient(_gotchiId), _alchemica[i]);
+      alchemica.transfer(alchemicaRecipient(_gotchiId), _alchemica[i]);
     }
 
     emit ExitAlchemica(_gotchiId, _alchemica);
