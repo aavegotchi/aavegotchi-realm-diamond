@@ -50,7 +50,7 @@ contract AlchemicaVesting is Ownable {
   constructor (address beneficiary, uint256 start, uint256 decayFactor, bool revocable) public {
     require(beneficiary != address(0), "TokenVesting: beneficiary is the zero address");
     require(start >= block.timestamp || start == 0, "TokenVesting: start must after the current block timestamp or 0");
-    require(decayFactor < PRECISION, "TokenVesting: decay factor is too large");
+    require(decayFactor > 0 && decayFactor < PRECISION, "TokenVesting: invalid decay factor");
 
     _beneficiary = beneficiary;
     _start = start == 0 ? block.timestamp : start;
