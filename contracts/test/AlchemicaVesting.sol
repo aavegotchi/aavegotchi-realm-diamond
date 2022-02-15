@@ -175,7 +175,7 @@ contract AlchemicaVesting is Ownable {
   }
 
   /** 
-    * @dev Calculates the proportion of tokens in bp that should be vested given a duration. 
+    * @dev Calculates the proportion of tokens that should be vested given a duration. 
     * The proportion of tokens follows the CDF of the geometric distribution.
     * Unsafe if there are too many periods, so we'll just return the entire balance
     * if we exceed 100 periods (100 years).
