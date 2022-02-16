@@ -8,14 +8,14 @@ export async function mintTokens() {
 
   const currentAccount = accounts[0].address;
 
-  const mumbaiDeployed = "0x8b055a69EBE80388937eF947B495a04F50aAf094";
+  const mumbaiDeployed = "0x13fFC4d451383e2d9Bb6b38AB827D95eC551DA82";
 
   const alchemicaFacet = (await ethers.getContractAt(
     "AlchemicaFacet",
     mumbaiDeployed
   )) as AlchemicaFacet;
 
-  const fudAddress = "0xdc20b206Fb31159a8c09C0497A7e0356D424678a";
+  const fudAddress = "0xdc27a8BF85508387cB8c3B97BA77f3941eDFF45f";
   const fud = (await ethers.getContractAt(
     "AlchemicaToken",
     fudAddress
@@ -24,12 +24,12 @@ export async function mintTokens() {
   let balance = await fud.balanceOf(currentAccount);
   console.log("ba;:", balance.toString());
 
-  //   await alchemicaFacet.testingAlchemicaFaucet(
-  //     "0",
-  //     ethers.utils.parseEther("100")
-  //   );
+  await alchemicaFacet.testingAlchemicaFaucet(
+    "0",
+    ethers.utils.parseEther("100")
+  );
 
-  //   balance = await fud.balanceOf(currentAccount);
+  balance = await fud.balanceOf(currentAccount);
 
   const owner = await fud.owner();
   console.log("owner:", owner);
