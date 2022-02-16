@@ -13,10 +13,7 @@ import {
   InstallationTypeOutput,
   TestBeforeVars,
 } from "../../types";
-import {
-  maticDiamondAddress,
-  maticAavegotchiDiamondAddress,
-} from "../helperFunctions";
+import { maticAavegotchiDiamondAddress } from "../helperFunctions";
 import { deployDiamond } from "../installation/deploy";
 import { upgrade } from "./upgrades/upgrade-harvesting";
 
@@ -144,34 +141,34 @@ export function testInstallations() {
   return installations;
 }
 
-export async function deployAlchemica(ethers: any) {
+export async function deployAlchemica(ethers: any, diamondAddress: string) {
   const Fud = await ethers.getContractFactory("AlchemicaToken");
   let fud = (await Fud.deploy(
     "FUD",
     "FUD",
     ethers.utils.parseUnits("1000000000000"),
-    maticDiamondAddress
+    diamondAddress
   )) as AlchemicaToken;
   const Fomo = await ethers.getContractFactory("AlchemicaToken");
   let fomo = (await Fomo.deploy(
     "FOMO",
     "FOMO",
     ethers.utils.parseUnits("250000000000"),
-    maticDiamondAddress
+    diamondAddress
   )) as AlchemicaToken;
   const Alpha = await ethers.getContractFactory("AlchemicaToken");
   let alpha = (await Alpha.deploy(
     "ALPHA",
     "ALPHA",
     ethers.utils.parseUnits("125000000000"),
-    maticDiamondAddress
+    diamondAddress
   )) as AlchemicaToken;
   const Kek = await ethers.getContractFactory("AlchemicaToken");
   let kek = (await Kek.deploy(
     "KEK",
     "KEK",
     ethers.utils.parseUnits("100000000000"),
-    maticDiamondAddress
+    diamondAddress
   )) as AlchemicaToken;
 
   const Glmr = await ethers.getContractFactory("GLMR");
@@ -186,10 +183,13 @@ export async function deployAlchemica(ethers: any) {
   };
 }
 
-export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
+export async function beforeTest(
+  ethers: any,
+  diamondAddress: string
+): Promise<TestBeforeVars> {
   const installationsAddress = await deployDiamond();
 
-  const alchemica = await deployAlchemica(ethers);
+  const alchemica = await deployAlchemica(ethers, diamondAddress);
 
   const fud = alchemica.fud;
   const fomo = alchemica.fomo;
@@ -207,11 +207,11 @@ export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
 
   const alchemicaFacet = (await ethers.getContractAt(
     "AlchemicaFacet",
-    maticDiamondAddress
+    diamondAddress
   )) as AlchemicaFacet;
   const realmFacet = (await ethers.getContractAt(
     "RealmFacet",
-    maticDiamondAddress
+    diamondAddress
   )) as RealmFacet;
   const installationDiamond = (await ethers.getContractAt(
     "InstallationFacet",
@@ -225,7 +225,7 @@ export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
 
   const ownershipFacet = (await ethers.getContractAt(
     "OwnershipFacet",
-    maticDiamondAddress
+    diamondAddress
   )) as OwnershipFacet;
   const ownerAddress = await ownershipFacet.owner();
 
@@ -237,7 +237,7 @@ export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
 
   await installationDiamond.setAddresses(
     maticAavegotchiDiamondAddress,
-    maticDiamondAddress,
+    diamondAddress,
     glmr.address
   );
 

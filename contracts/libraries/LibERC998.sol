@@ -10,7 +10,7 @@ struct ItemTypeIO {
   InstallationType installationType;
 }
 
-library ERC998 {
+library LibERC998 {
   function itemBalancesOfTokenWithTypes(address _tokenContract, uint256 _tokenId)
     internal
     view

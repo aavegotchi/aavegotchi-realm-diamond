@@ -26,7 +26,7 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: process.env.MATIC_URL,
+        url: process.env.MUMBAI_MORALIS,
         timeout: 2000000,
         blockNumber: 23571000,
       },

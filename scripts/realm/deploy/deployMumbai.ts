@@ -8,9 +8,6 @@ import {
   Diamond__factory,
   OwnershipFacet,
   AlchemicaFacet,
-  ERC721Facet,
-  RealmFacet,
-  VRFFacet,
   AlchemicaToken,
 } from "../../../typechain";
 import { gasPrice, impersonate } from "../../helperFunctions";
@@ -141,7 +138,7 @@ export async function deployMumbai() {
   const installationDiamond = await deployDiamond();
 
   console.log("Deploying Alchemicas");
-  const alchemica = await deployAlchemica(ethers);
+  const alchemica = await deployAlchemica(ethers, realmDiamond.address);
 
   const greatPortalCapacity: [
     BigNumberish,
@@ -197,6 +194,30 @@ export async function deployMumbai() {
   console.log("ALPHA deployed:", alchemica.alpha.address);
   console.log("KEK deployed:", alchemica.kek.address);
   console.log("GLMR deployed:", alchemica.glmr.address);
+
+  const fudToken = (await ethers.getContractAt(
+    "AlchemicaToken",
+    alchemica.fud.address
+  )) as AlchemicaToken;
+  const owner = await fudToken.owner();
+  console.log("owner:", owner);
+
+  const deployedAlchemicaFacet = (await ethers.getContractAt(
+    "AlchemicaFacet",
+    realmDiamond.address
+  )) as AlchemicaFacet;
+
+  await deployedAlchemicaFacet.testingAlchemicaFaucet(
+    "0",
+    ethers.utils.parseEther("10")
+  );
+
+  const signers = await ethers.getSigners();
+  const currentAccount = signers[0].address;
+
+  const balance = await fudToken.balanceOf(currentAccount);
+
+  console.log("balance:", balance.toString());
 
   return realmDiamond.address;
 }
