@@ -199,8 +199,8 @@ describe("Vesting", function () {
     it("Should allow alchemica releases from multiple alchemica tokens", async() => {
       const AlchemicaToken = await hre.ethers.getContractFactory("AlchemicaToken");
       alpha = await AlchemicaToken.deploy(
-        "FUD", 
-        "FUD", 
+        "ALPHA", 
+        "ALPHA", 
         ETHER.mul(100), 
         await beneficiary.getAddress(), 
         gameplayVestingContract.address,
@@ -211,8 +211,8 @@ describe("Vesting", function () {
       await gameplayVestingContract.release(fud.address);
       await ecosystemVestingContract.release(alpha.address);
       await ecosystemVestingContract.release(fud.address);
-      expect(await alpha.balanceOf(await beneficiary.getAddress())).to.be.gt(0);
-      expect(await fud.balanceOf(await beneficiary.getAddress())).to.be.gt(0);
+      expect(await alpha.balanceOf(await dao.getAddress())).to.be.gt(0);
+      expect(await fud.balanceOf(await dao.getAddress())).to.be.gt(0);
       expect(await alpha.balanceOf(await beneficiary.getAddress())).to.be.gt(0);
       expect(await fud.balanceOf(await beneficiary.getAddress())).to.be.gt(0);
     });
