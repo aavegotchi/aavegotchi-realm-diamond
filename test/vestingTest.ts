@@ -211,10 +211,10 @@ describe("Vesting", function () {
       await gameplayVestingContract.release(fud.address);
       await ecosystemVestingContract.release(alpha.address);
       await ecosystemVestingContract.release(fud.address);
-      expect(await alpha.balanceOf(gameplayVestingContract.address)).to.be.gt(0);
-      expect(await fud.balanceOf(gameplayVestingContract.address)).to.be.gt(0);
-      expect(await alpha.balanceOf(ecosystemVestingContract.address)).to.be.gt(0);
-      expect(await fud.balanceOf(ecosystemVestingContract.address)).to.be.gt(0);
+      expect(await alpha.balanceOf(await beneficiary.getAddress())).to.be.gt(0);
+      expect(await fud.balanceOf(await beneficiary.getAddress())).to.be.gt(0);
+      expect(await alpha.balanceOf(await beneficiary.getAddress())).to.be.gt(0);
+      expect(await fud.balanceOf(await beneficiary.getAddress())).to.be.gt(0);
     });
   });
 });
