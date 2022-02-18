@@ -3,14 +3,18 @@ import {
   AlchemicaFacet,
   AlchemicaToken,
   ERC1155Facet,
+  ERC1155FacetTile,
   InstallationFacet,
+  TileFacet,
   OwnershipFacet,
   RealmFacet,
   GLMR,
 } from "../../typechain";
 import {
   InstallationTypeInput,
+  TileTypeInput,
   InstallationTypeOutput,
+  TileTypeOutput,
   TestBeforeVars,
 } from "../../types";
 import {
@@ -18,6 +22,7 @@ import {
   maticAavegotchiDiamondAddress,
 } from "../helperFunctions";
 import { deployDiamond } from "../installation/deploy";
+import { deployDiamondTile } from "../tile/deploy";
 import { upgrade } from "./upgrades/upgrade-harvesting";
 
 export function outputInstallation(
@@ -43,6 +48,24 @@ export function outputInstallation(
     craftTime: installation.craftTime,
     nextLevelId: installation.nextLevelId,
     prerequisites: installation.prerequisites,
+  };
+
+  return output;
+}
+
+export function outputTile(tile: TileTypeInput): TileTypeOutput {
+  if (tile.width > 64) throw new Error("Width too much");
+  if (tile.height > 64) throw new Error("Height too much");
+
+  let output: TileTypeOutput = {
+    deprecated: false,
+    tileType: tile.tileType,
+    width: tile.width,
+    height: tile.height,
+    alchemicaCost: tile.alchemicaCost.map((val) =>
+      ethers.utils.parseEther(val.toString())
+    ),
+    craftTime: tile.craftTime,
   };
 
   return output;
@@ -144,6 +167,51 @@ export function testInstallations() {
   return installations;
 }
 
+export function testTiles() {
+  const tiles: TileTypeOutput[] = [];
+  tiles.push(
+    outputTile({
+      tileType: 0,
+      width: 1,
+      height: 1,
+      alchemicaCost: [0, 0, 0, 0],
+      craftTime: 0,
+      deprecated: true,
+    })
+  );
+  tiles.push(
+    outputTile({
+      tileType: 1,
+      width: 2,
+      height: 2,
+      alchemicaCost: [5, 5, 5, 5],
+      craftTime: 1000,
+      deprecated: true,
+    })
+  );
+  tiles.push(
+    outputTile({
+      deprecated: true,
+      tileType: 2,
+      width: 4,
+      height: 4,
+      alchemicaCost: [10, 10, 10, 10],
+      craftTime: 2000,
+    })
+  );
+  tiles.push(
+    outputTile({
+      deprecated: true,
+      tileType: 3,
+      width: 8,
+      height: 8,
+      alchemicaCost: [20, 20, 20, 20],
+      craftTime: 5000,
+    })
+  );
+  return tiles;
+}
+
 export async function deployAlchemica(ethers: any) {
   const Fud = await ethers.getContractFactory("AlchemicaToken");
   let fud = (await Fud.deploy(
@@ -188,6 +256,7 @@ export async function deployAlchemica(ethers: any) {
 
 export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
   const installationsAddress = await deployDiamond();
+  const tileAddress = await deployDiamondTile();
 
   const alchemica = await deployAlchemica(ethers);
 
@@ -217,11 +286,19 @@ export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
     "InstallationFacet",
     installationsAddress
   )) as InstallationFacet;
+  const tileDiamond = (await ethers.getContractAt(
+    "TileFacet",
+    tileAddress
+  )) as TileFacet;
 
   const erc1155Facet = (await ethers.getContractAt(
     "ERC1155Facet",
     installationsAddress
   )) as ERC1155Facet;
+  const erc1155FacetTile = (await ethers.getContractAt(
+    "ERC1155FacetTile",
+    tileAddress
+  )) as ERC1155FacetTile;
 
   const ownershipFacet = (await ethers.getContractAt(
     "OwnershipFacet",
@@ -233,9 +310,19 @@ export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
     "OwnershipFacet",
     installationsAddress
   )) as OwnershipFacet;
+  const tileOwnershipFacet = (await ethers.getContractAt(
+    "OwnershipFacet",
+    tileAddress
+  )) as OwnershipFacet;
   const installationOwner = await installationOwnershipFacet.owner();
+  const tileOwner = await tileOwnershipFacet.owner();
 
   await installationDiamond.setAddresses(
+    maticAavegotchiDiamondAddress,
+    maticDiamondAddress,
+    glmr.address
+  );
+  await tileDiamond.setAddresses(
     maticAavegotchiDiamondAddress,
     maticDiamondAddress,
     glmr.address
@@ -247,6 +334,7 @@ export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
     realmFacet,
     installationDiamond,
     erc1155Facet,
+    erc1155FacetTile,
     ownerAddress,
     installationOwner,
     fud,
@@ -254,5 +342,8 @@ export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
     alpha,
     kek,
     glmr,
+    tileDiamond,
+    tileAddress,
+    tileOwner,
   };
 }

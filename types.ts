@@ -4,9 +4,11 @@ import {
   AlchemicaFacet,
   AlchemicaToken,
   ERC1155Facet,
+  ERC1155FacetTile,
   GLMR,
   InstallationFacet,
   RealmFacet,
+  TileFacet,
 } from "./typechain";
 
 export interface AxiosMetadataResponse {
@@ -90,9 +92,18 @@ export interface InstallationTypeInput {
   prerequisites: number[];
 }
 
+export interface TileTypeInput {
+  deprecated: boolean;
+  tileType: number;
+  width: Width;
+  height: Height;
+  alchemicaCost: BigNumberish[];
+  craftTime: number;
+}
+
 export type Level = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
-export type Width = 1 | 2 | 3 | 4;
-export type Height = 1 | 2 | 3 | 4;
+export type Width = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type Height = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export interface InstallationTypeOutput {
   deprecated: boolean;
   installationType: BigNumberish;
@@ -110,6 +121,15 @@ export interface InstallationTypeOutput {
   prerequisites: BigNumberish[];
 }
 
+export interface TileTypeOutput {
+  deprecated: boolean;
+  tileType: BigNumberish;
+  width: Width;
+  height: Height;
+  alchemicaCost: BigNumberish[];
+  craftTime: BigNumberish;
+}
+
 export type AlchemicaTotals = [
   [BigNumberish, BigNumberish, BigNumberish, BigNumberish]
 ];
@@ -120,15 +140,19 @@ export interface TestBeforeVars {
   alchemicaFacet: AlchemicaFacet;
   realmFacet: RealmFacet;
   installationDiamond: InstallationFacet;
+  tileDiamond: TileFacet;
   ownerAddress: string;
   installationsAddress: string;
+  tileAddress: string;
   fud: AlchemicaToken;
   fomo: AlchemicaToken;
   alpha: AlchemicaToken;
   kek: AlchemicaToken;
   glmr: GLMR;
   erc1155Facet: ERC1155Facet;
+  erc1155FacetTile: ERC1155FacetTile;
   installationOwner: string;
+  tileOwner: string;
 }
 
 export interface Alchemica {

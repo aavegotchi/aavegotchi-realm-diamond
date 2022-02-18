@@ -76,6 +76,7 @@ struct AppStorage {
   mapping(uint256 => uint256) lastExitTime; //for aavegotchis exiting alchemica
   mapping(uint256 => uint256) gotchiChannelings;
   address glmrAddress;
+  address tileDiamond;
 }
 
 library LibAppStorage {
