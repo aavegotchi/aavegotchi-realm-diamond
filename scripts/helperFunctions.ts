@@ -2,6 +2,10 @@ import { Signer } from "@ethersproject/abstract-signer";
 import { Contract } from "@ethersproject/contracts";
 import { HardhatRuntimeEnvironment, Network } from "hardhat/types";
 import { DiamondLoupeFacet, OwnershipFacet } from "../typechain";
+import {
+  mumbaiDiamondAddress,
+  mumbaiInstallationDiamondAddress,
+} from "./installation/helperFunctions";
 
 export const gasPrice = 500000000000;
 
@@ -103,4 +107,16 @@ export async function getDiamondSigner(
   } else {
     throw Error("Incorrect network selected");
   }
+}
+
+export function realmDiamondAddress(network: string) {
+  if (["mumbai", "localhost", "hardhat"].includes(network))
+    return mumbaiInstallationDiamondAddress;
+  return maticDiamondAddress;
+}
+
+export function installationDiamondAddress(network: string) {
+  if (["mumbai", "localhost", "hardhat"].includes(network))
+    return mumbaiInstallationDiamondAddress;
+  return "";
 }
