@@ -266,15 +266,11 @@ contract RealmFacet is Modifiers {
 
   function getHumbleGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[8][8] memory output_) {
     require(s.parcels[_parcelId].size == 0, "RealmFacet: Not humble");
-    if (_gridType == 0) {
-      for (uint256 i; i < 8; i++) {
-        for (uint256 j; j < 8; j++) {
+    for (uint256 i; i < 8; i++) {
+      for (uint256 j; j < 8; j++) {
+        if (_gridType == 0) {
           output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
-        }
-      }
-    } else if (_gridType == 1) {
-      for (uint256 i; i < 8; i++) {
-        for (uint256 j; j < 8; j++) {
+        } else if (_gridType == 1) {
           output_[i][j] = s.parcels[_parcelId].tileGrid[i][j];
         }
       }
@@ -283,15 +279,11 @@ contract RealmFacet is Modifiers {
 
   function getReasonableGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[16][16] memory output_) {
     require(s.parcels[_parcelId].size == 1, "RealmFacet: Not reasonable");
-    if (_gridType == 0) {
-      for (uint256 i; i < 16; i++) {
-        for (uint256 j; j < 16; j++) {
+    for (uint256 i; i < 16; i++) {
+      for (uint256 j; j < 16; j++) {
+        if (_gridType == 0) {
           output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
-        }
-      }
-    } else if (_gridType == 1) {
-      for (uint256 i; i < 16; i++) {
-        for (uint256 j; j < 16; j++) {
+        } else if (_gridType == 1) {
           output_[i][j] = s.parcels[_parcelId].tileGrid[i][j];
         }
       }
@@ -300,15 +292,11 @@ contract RealmFacet is Modifiers {
 
   function getSpaciousVerticalGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[32][64] memory output_) {
     require(s.parcels[_parcelId].size == 2, "RealmFacet: Not spacious vertical");
-    if (_gridType == 0) {
-      for (uint256 i; i < 64; i++) {
-        for (uint256 j; j < 32; j++) {
+    for (uint256 i; i < 64; i++) {
+      for (uint256 j; j < 32; j++) {
+        if (_gridType == 0) {
           output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
-        }
-      }
-    } else if (_gridType == 1) {
-      for (uint256 i; i < 64; i++) {
-        for (uint256 j; j < 32; j++) {
+        } else if (_gridType == 1) {
           output_[i][j] = s.parcels[_parcelId].tileGrid[i][j];
         }
       }
@@ -317,15 +305,11 @@ contract RealmFacet is Modifiers {
 
   function getSpaciousHorizontalGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[64][32] memory output_) {
     require(s.parcels[_parcelId].size == 3, "RealmFacet: Not spacious horizontal");
-    if (_gridType == 0) {
-      for (uint256 i; i < 32; i++) {
-        for (uint256 j; j < 64; j++) {
+    for (uint256 i; i < 32; i++) {
+      for (uint256 j; j < 64; j++) {
+        if (_gridType == 0) {
           output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
-        }
-      }
-    } else if (_gridType == 1) {
-      for (uint256 i; i < 32; i++) {
-        for (uint256 j; j < 64; j++) {
+        } else if (_gridType == 1) {
           output_[i][j] = s.parcels[_parcelId].tileGrid[i][j];
         }
       }
