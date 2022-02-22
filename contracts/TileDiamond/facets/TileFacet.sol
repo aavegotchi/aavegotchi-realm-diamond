@@ -12,8 +12,6 @@ import {IERC721} from "../../interfaces/IERC721.sol";
 import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
 
-import "hardhat/console.sol";
-
 contract TileFacet is Modifiers {
   event AddedToQueue(uint256 indexed _queueId, uint256 indexed _tileId, uint256 _readyBlock, address _sender);
 

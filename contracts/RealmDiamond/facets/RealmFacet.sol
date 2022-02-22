@@ -10,6 +10,7 @@ import "../../libraries/LibRealm.sol";
 import "../../libraries/LibAlchemica.sol";
 import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamond.sol";
 import "../../test/AlchemicaToken.sol";
+import "../../libraries/LibSignature.sol";
 
 contract RealmFacet is Modifiers {
   uint256 constant MAX_SUPPLY = 420069;
@@ -77,8 +78,13 @@ contract RealmFacet is Modifiers {
     uint256 _realmId,
     uint256 _installationId,
     uint256 _x,
-    uint256 _y
+    uint256 _y,
+    bytes memory _signature
   ) external onlyParcelOwner(_realmId) {
+    require(
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _installationId, _x, _y)), _signature, s.backendPubKey),
+      "RealmFacet: Invalid signature"
+    );
     require(s.parcels[_realmId].currentRound >= 1, "RealmFacet: Must survey before equipping");
     LibRealm.placeInstallation(_realmId, _installationId, _x, _y);
     InstallationDiamondInterface(s.installationsDiamond).equipInstallation(msg.sender, _realmId, _installationId);
@@ -98,8 +104,13 @@ contract RealmFacet is Modifiers {
     uint256 _realmId,
     uint256 _installationId,
     uint256 _x,
-    uint256 _y
+    uint256 _y,
+    bytes memory _signature
   ) external onlyParcelOwner(_realmId) {
+    require(
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _installationId, _x, _y)), _signature, s.backendPubKey),
+      "RealmFacet: Invalid signature"
+    );
     LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
 
     InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
@@ -130,8 +141,13 @@ contract RealmFacet is Modifiers {
     uint256 _realmId,
     uint256 _tileId,
     uint256 _x,
-    uint256 _y
+    uint256 _y,
+    bytes memory _signature
   ) external onlyParcelOwner(_realmId) {
+    require(
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _tileId, _x, _y)), _signature, s.backendPubKey),
+      "RealmFacet: Invalid signature"
+    );
     require(s.parcels[_realmId].currentRound >= 1, "RealmFacet: Must survey before equipping");
     LibRealm.placeTile(_realmId, _tileId, _x, _y);
     TileDiamondInterface(s.tileDiamond).equipTile(msg.sender, _realmId, _tileId);
@@ -149,8 +165,13 @@ contract RealmFacet is Modifiers {
     uint256 _realmId,
     uint256 _tileId,
     uint256 _x,
-    uint256 _y
+    uint256 _y,
+    bytes memory _signature
   ) external onlyParcelOwner(_realmId) {
+    require(
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _tileId, _x, _y)), _signature, s.backendPubKey),
+      "RealmFacet: Invalid signature"
+    );
     LibRealm.removeTile(_realmId, _tileId, _x, _y);
 
     TileDiamondInterface tileDiamond = TileDiamondInterface(s.tileDiamond);

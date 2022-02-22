@@ -62,10 +62,10 @@ export async function upgrade(
     {
       facetName: "RealmFacet",
       addSelectors: [
-        "function equipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y) external",
-        "function unequipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y) external",
-        "function equipTile(uint256 _realmId, uint256 _tileId, uint256 _x, uint256 _y) external",
-        "function unequipTile(uint256 _realmId, uint256 _tileId, uint256 _x, uint256 _y) external",
+        "function equipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y, bytes _signature) external",
+        "function unequipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y, bytes _signature) external",
+        "function equipTile(uint256 _realmId, uint256 _tileId, uint256 _x, uint256 _y, bytes _signature) external",
+        "function unequipTile(uint256 _realmId, uint256 _tileId, uint256 _x, uint256 _y, bytes _signature) external",
         "function checkCoordinates(uint256 _tokenId, uint256 _coordinateX, uint256 _coordinateY, uint256 _installationId) public view",
         "function upgradeInstallation(uint256 _realmId, uint256 _prevInstallationId, uint256 _nextInstallationId, uint256 _coordinateX, uint256 _coordinateY) external",
         "function getParcelCapacity(uint256 _tokenId) external view returns(uint256[4] memory)",

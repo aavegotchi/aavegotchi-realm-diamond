@@ -18,6 +18,22 @@ describe("Testing Tiles", async function () {
 
   let g: TestBeforeVars;
 
+  const genSignature = async (tileId: number, x: number, y: number) => {
+    //@ts-ignore
+    let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+
+    let messageHash1 = ethers.utils.solidityKeccak256(
+      ["uint256", "uint256", "uint256", "uint256"],
+      [testParcelId, tileId, x, y]
+    );
+    let signedMessage1 = await backendSigner.signMessage(
+      ethers.utils.arrayify(messageHash1)
+    );
+    let signature1 = ethers.utils.arrayify(signedMessage1);
+
+    return signature1;
+  };
+
   before(async function () {
     this.timeout(20000000);
 
@@ -160,17 +176,45 @@ describe("Testing Tiles", async function () {
       ethers,
       network
     );
-    await g.realmFacet.equipTile(testParcelId, 1, 0, 0);
+
     await expect(
-      g.realmFacet.equipTile(testParcelId, 2, 1, 1)
+      g.realmFacet.equipTile(testParcelId, 1, 0, 0, await genSignature(1, 0, 1))
+    ).to.be.revertedWith("RealmFacet: Invalid signature");
+    await g.realmFacet.equipTile(
+      testParcelId,
+      1,
+      0,
+      0,
+      await genSignature(1, 0, 0)
+    );
+    await expect(
+      g.realmFacet.equipTile(testParcelId, 2, 1, 1, await genSignature(2, 1, 1))
     ).to.be.revertedWith("LibRealm: Invalid spot");
     await expect(
-      g.realmFacet.equipTile(testParcelId, 2, 100, 0)
+      g.realmFacet.equipTile(
+        testParcelId,
+        2,
+        100,
+        0,
+        await genSignature(2, 100, 0)
+      )
     ).to.be.revertedWith("LibRealm: x exceeding width");
     await expect(
-      g.realmFacet.equipTile(testParcelId, 2, 0, 100)
+      g.realmFacet.equipTile(
+        testParcelId,
+        2,
+        0,
+        100,
+        await genSignature(2, 0, 100)
+      )
     ).to.be.revertedWith("LibRealm: y exceeding height");
-    await g.realmFacet.equipTile(testParcelId, 2, 3, 3);
+    await g.realmFacet.equipTile(
+      testParcelId,
+      2,
+      3,
+      3,
+      await genSignature(2, 3, 3)
+    );
   });
 
   it("Test unequipping", async function () {
@@ -181,12 +225,36 @@ describe("Testing Tiles", async function () {
       network
     );
     await expect(
-      g.realmFacet.unequipTile(testParcelId, 1, 3, 3)
+      g.realmFacet.unequipTile(
+        testParcelId,
+        1,
+        3,
+        3,
+        await genSignature(1, 3, 3)
+      )
     ).to.be.revertedWith("LibRealm: wrong tileId");
-    await g.realmFacet.unequipTile(testParcelId, 1, 0, 0);
+    await g.realmFacet.unequipTile(
+      testParcelId,
+      1,
+      0,
+      0,
+      await genSignature(1, 0, 0)
+    );
     await expect(
-      g.realmFacet.unequipTile(testParcelId, 1, 0, 0)
+      g.realmFacet.unequipTile(
+        testParcelId,
+        1,
+        0,
+        0,
+        await genSignature(1, 0, 0)
+      )
     ).to.be.revertedWith("LibRealm: wrong tileId");
-    await g.realmFacet.unequipTile(testParcelId, 2, 3, 3);
+    await g.realmFacet.unequipTile(
+      testParcelId,
+      2,
+      3,
+      3,
+      await genSignature(2, 3, 3)
+    );
   });
 });

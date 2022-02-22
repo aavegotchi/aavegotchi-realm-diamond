@@ -22,6 +22,22 @@ describe("Testing Equip Installation", async function () {
 
   let g: TestBeforeVars;
 
+  const genSignature = async (tileId: number, x: number, y: number) => {
+    //@ts-ignore
+    let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+
+    let messageHash1 = ethers.utils.solidityKeccak256(
+      ["uint256", "uint256", "uint256", "uint256"],
+      [testParcelId, tileId, x, y]
+    );
+    let signedMessage1 = await backendSigner.signMessage(
+      ethers.utils.arrayify(messageHash1)
+    );
+    let signature1 = ethers.utils.arrayify(signedMessage1);
+
+    return signature1;
+  };
+
   before(async function () {
     this.timeout(20000000);
 
@@ -175,8 +191,20 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
-    await g.realmFacet.equipInstallation(testParcelId, 1, 0, 0);
-    await g.realmFacet.equipInstallation(testParcelId, 2, 3, 3);
+    await g.realmFacet.equipInstallation(
+      testParcelId,
+      1,
+      0,
+      0,
+      await genSignature(1, 0, 0)
+    );
+    await g.realmFacet.equipInstallation(
+      testParcelId,
+      2,
+      3,
+      3,
+      await genSignature(2, 3, 3)
+    );
     let availableAlchemica = await g.alchemicaFacet.getAvailableAlchemica(
       testParcelId
     );
@@ -236,7 +264,13 @@ describe("Testing Equip Installation", async function () {
     );
   });
   it("Equip level 2 and claim alchemica", async function () {
-    await g.realmFacet.equipInstallation(testParcelId, 2, 10, 10);
+    await g.realmFacet.equipInstallation(
+      testParcelId,
+      2,
+      10,
+      10,
+      await genSignature(2, 10, 10)
+    );
     const upgradeQueue: UpgradeQueue = {
       parcelId: testParcelId,
       coordinateX: 3,
@@ -329,14 +363,26 @@ describe("Testing Equip Installation", async function () {
     const harvester = await g.installationDiamond.getInstallationType(1);
     const harvesterFudCost = harvester.alchemicaCost[0];
     const balancePre = await g.fud.balanceOf(testAddress);
-    await g.realmFacet.unequipInstallation(testParcelId, 1, 0, 0);
+    await g.realmFacet.unequipInstallation(
+      testParcelId,
+      1,
+      0,
+      0,
+      await genSignature(1, 0, 0)
+    );
     const balancePost = await g.fud.balanceOf(testAddress);
     expect(Number(ethers.utils.formatUnits(balancePost))).to.equal(
       Number(ethers.utils.formatUnits(balancePre)) +
         Number(ethers.utils.formatUnits(harvesterFudCost)) / 2
     );
     await expect(
-      g.realmFacet.unequipInstallation(testParcelId, 2, 10, 10)
+      g.realmFacet.unequipInstallation(
+        testParcelId,
+        2,
+        10,
+        10,
+        await genSignature(2, 10, 10)
+      )
     ).to.be.revertedWith(
       "LibAlchemica: Unclaimed alchemica greater than reservoir capacity"
     );
@@ -363,7 +409,19 @@ describe("Testing Equip Installation", async function () {
       signature
     );
 
-    await g.realmFacet.unequipInstallation(testParcelId, 3, 3, 3);
-    await g.realmFacet.unequipInstallation(testParcelId, 2, 10, 10);
+    await g.realmFacet.unequipInstallation(
+      testParcelId,
+      3,
+      3,
+      3,
+      await genSignature(3, 3, 3)
+    );
+    await g.realmFacet.unequipInstallation(
+      testParcelId,
+      2,
+      10,
+      10,
+      await genSignature(2, 10, 10)
+    );
   });
 });
