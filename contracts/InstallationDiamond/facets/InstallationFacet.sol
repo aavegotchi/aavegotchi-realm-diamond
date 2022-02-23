@@ -508,7 +508,8 @@ contract InstallationFacet is Modifiers {
           _installationTypes[i].spillRate,
           _installationTypes[i].craftTime,
           _installationTypes[i].nextLevelId,
-          _installationTypes[i].prerequisites
+          _installationTypes[i].prerequisites,
+          _installationTypes[i].name
         )
       );
     }

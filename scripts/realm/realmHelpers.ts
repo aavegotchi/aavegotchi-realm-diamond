@@ -48,6 +48,7 @@ export function outputInstallation(
     craftTime: installation.craftTime,
     nextLevelId: installation.nextLevelId,
     prerequisites: installation.prerequisites,
+    name: installation.name,
   };
 
   return output;
@@ -66,6 +67,7 @@ export function outputTile(tile: TileTypeInput): TileTypeOutput {
       ethers.utils.parseEther(val.toString())
     ),
     craftTime: tile.craftTime,
+    name: tile.name,
   };
 
   return output;
@@ -89,6 +91,7 @@ export function testInstallations() {
       deprecated: true,
       nextLevelId: 0,
       prerequisites: [],
+      name: "",
     })
   );
   installations.push(
@@ -107,6 +110,7 @@ export function testInstallations() {
       deprecated: false,
       nextLevelId: 0,
       prerequisites: [],
+      name: "Altar level 1",
     })
   );
   installations.push(
@@ -125,6 +129,7 @@ export function testInstallations() {
       deprecated: false,
       nextLevelId: 3,
       prerequisites: [],
+      name: "FUD Reservoir level 1",
     })
   );
   installations.push(
@@ -143,6 +148,7 @@ export function testInstallations() {
       deprecated: false,
       nextLevelId: 0,
       prerequisites: [],
+      name: "FUD Reservoir level 2",
     })
   );
   installations.push(
@@ -161,6 +167,7 @@ export function testInstallations() {
       deprecated: false,
       nextLevelId: 0,
       prerequisites: [],
+      name: "FUD Harvester level 1",
     })
   );
 
@@ -177,6 +184,7 @@ export function testTiles() {
       alchemicaCost: [0, 0, 0, 0],
       craftTime: 0,
       deprecated: true,
+      name: "",
     })
   );
   tiles.push(
@@ -187,6 +195,7 @@ export function testTiles() {
       alchemicaCost: [5, 5, 5, 5],
       craftTime: 1000,
       deprecated: true,
+      name: "tile 1",
     })
   );
   tiles.push(
@@ -197,6 +206,7 @@ export function testTiles() {
       height: 4,
       alchemicaCost: [10, 10, 10, 10],
       craftTime: 2000,
+      name: "tile 2",
     })
   );
   tiles.push(
@@ -207,6 +217,7 @@ export function testTiles() {
       height: 8,
       alchemicaCost: [20, 20, 20, 20],
       craftTime: 5000,
+      name: "tile 3",
     })
   );
   return tiles;

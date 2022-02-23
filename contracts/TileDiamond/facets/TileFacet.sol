@@ -306,7 +306,8 @@ contract TileFacet is Modifiers {
           _tileTypes[i].deprecated,
           _tileTypes[i].tileType,
           _tileTypes[i].alchemicaCost,
-          _tileTypes[i].craftTime
+          _tileTypes[i].craftTime,
+          _tileTypes[i].name
         )
       );
     }

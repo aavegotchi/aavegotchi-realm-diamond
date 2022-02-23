@@ -18,6 +18,7 @@ struct InstallationType {
   uint256 craftTime; // in blocks
   uint256 nextLevelId; //the ID of the next level of this installation. Used for upgrades.
   uint256[] prerequisites; //IDs of installations that must be present before this installation can be added
+  string name;
 }
 
 //Prerequisites:

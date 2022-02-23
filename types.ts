@@ -73,6 +73,7 @@ export interface InstallationType {
   craftTime: BigNumberish;
   nextLevelId: BigNumberish;
   prerequisites: BigNumberish[];
+  name: string;
 }
 
 export interface InstallationTypeInput {
@@ -90,6 +91,7 @@ export interface InstallationTypeInput {
   craftTime: number;
   nextLevelId: number;
   prerequisites: number[];
+  name: string;
 }
 
 export interface TileTypeInput {
@@ -99,6 +101,7 @@ export interface TileTypeInput {
   height: Height;
   alchemicaCost: BigNumberish[];
   craftTime: number;
+  name: string;
 }
 
 export type Level = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
@@ -119,6 +122,7 @@ export interface InstallationTypeOutput {
   craftTime: BigNumberish;
   nextLevelId: BigNumberish;
   prerequisites: BigNumberish[];
+  name: string;
 }
 
 export interface TileTypeOutput {
@@ -128,6 +132,7 @@ export interface TileTypeOutput {
   height: Height;
   alchemicaCost: BigNumberish[];
   craftTime: BigNumberish;
+  name: string;
 }
 
 export type AlchemicaTotals = [

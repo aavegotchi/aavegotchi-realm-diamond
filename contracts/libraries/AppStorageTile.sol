@@ -10,6 +10,7 @@ struct TileType {
   uint16 tileType;
   uint256[] alchemicaCost; // [fud, fomo, alpha, kek]
   uint256 craftTime; // in blocks
+  string name;
 }
 
 struct QueueItem {
