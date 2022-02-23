@@ -3,7 +3,7 @@ pragma solidity 0.8.9;
 
 import {InstallationDiamondInterface} from "../interfaces/InstallationDiamond.sol";
 import {TileDiamondInterface} from "../interfaces/TileDiamond.sol";
-import {LibAppStorage, AppStorage, Parcel} from "./AppStorage.sol";
+import "./AppStorage.sol";
 import "hardhat/console.sol";
 
 library LibRealm {
@@ -17,21 +17,9 @@ library LibRealm {
     uint256 _y
   ) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
-    uint8[5] memory widths = [
-      8, //humble
-      16, //reasonable
-      32, //spacious vertical
-      64, //spacious horizontal
-      64 //partner
-    ];
+    uint256[5] memory widths = getWidths();
 
-    uint8[5] memory heights = [
-      8, //humble
-      16, //reasonable
-      64, //spacious vertical
-      32, //spacious horizontal
-      64 //partner
-    ];
+    uint256[5] memory heights = getHeights();
 
     InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
     InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
@@ -74,21 +62,9 @@ library LibRealm {
     uint256 _y
   ) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
-    uint8[5] memory widths = [
-      8, //humble
-      16, //reasonable
-      32, //spacious vertical
-      64, //spacious horizontal
-      64 //partner
-    ];
+    uint256[5] memory widths = getWidths();
 
-    uint8[5] memory heights = [
-      8, //humble
-      16, //reasonable
-      64, //spacious vertical
-      32, //spacious horizontal
-      64 //partner
-    ];
+    uint256[5] memory heights = getHeights();
 
     TileDiamondInterface tilesDiamond = TileDiamondInterface(s.tileDiamond);
     TileDiamondInterface.TileType memory tile = tilesDiamond.getTileType(_tileId);
@@ -156,5 +132,27 @@ library LibRealm {
     s.parcels[_tokenId].roundAlchemica[_round] = alchemicas;
     s.parcels[_tokenId].roundBaseAlchemica[_round] = roundAmounts;
     emit SurveyParcel(_tokenId, alchemicas);
+  }
+
+  function getWidths() internal pure returns (uint256[5] memory) {
+    uint256[5] memory widths = [
+      HUMBLE_WIDTH, //humble
+      REASONABLE_WIDTH, //reasonable
+      SPACIOUS_WIDTH, //spacious vertical
+      SPACIOUS_HEIGHT, //spacious horizontal
+      PAARTNER_WIDTH //partner
+    ];
+    return widths;
+  }
+
+  function getHeights() internal pure returns (uint256[5] memory) {
+    uint256[5] memory heights = [
+      HUMBLE_HEIGHT, //humble
+      REASONABLE_HEIGHT, //reasonable
+      SPACIOUS_HEIGHT, //spacious vertical
+      SPACIOUS_WIDTH, //spacious horizontal
+      PAARTNER_HEIGHT //partner
+    ];
+    return heights;
   }
 }
