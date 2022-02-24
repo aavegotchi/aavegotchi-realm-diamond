@@ -110,7 +110,7 @@ export function testInstallations() {
       deprecated: false,
       nextLevelId: 0,
       prerequisites: [],
-      name: "FUD Harvester level 1",
+      name: "Altar level 1",
     })
   );
   installations.push(
@@ -165,28 +165,9 @@ export function testInstallations() {
       spillRate: 20,
       craftTime: 10000,
       deprecated: false,
-      nextLevelId: 5,
-      prerequisites: [],
-      name: "Altar level 1",
-    })
-  );
-  installations.push(
-    outputInstallation({
-      installationType: 2,
-      level: 2,
-      width: 2,
-      height: 2,
-      alchemicaType: 0,
-      alchemicaCost: [10, 10, 10, 10],
-      harvestRate: 0,
-      capacity: 0,
-      spillRadius: 0,
-      spillRate: 20,
-      craftTime: 10000,
-      deprecated: false,
       nextLevelId: 0,
       prerequisites: [],
-      name: "Altar level 2",
+      name: "FUD Harvester level 1",
     })
   );
 

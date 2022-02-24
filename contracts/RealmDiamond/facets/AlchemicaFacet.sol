@@ -305,13 +305,7 @@ contract AlchemicaFacet is Modifiers {
   ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) {
     require(_lastChanneled == s.gotchiChannelings[_gotchiId], "AlchemicaFacet: Incorrect last duration");
 
-    require(block.timestamp - _lastChanneled >= 1 days, "AlchemicaFacet: Gotchi can't channel yet");
-
-    InstallationDiamondInterface.InstallationType memory altar = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(
-      s.parcels[_realmId].altarId
-    );
-
-    require(block.timestamp > s.parcelChannelings[_realmId] + 24 hours / altar.level, "AlchemicaFacet: Parcel can't channel yet");
+    require(block.timestamp - _lastChanneled >= 1 days, "AlchemicaFacet: Can't channel yet");
 
     //Use _lastChanneled to ensure that each signature hash is unique
     require(
@@ -342,7 +336,6 @@ contract AlchemicaFacet is Modifiers {
 
     //update latest channeling
     s.gotchiChannelings[_gotchiId] = block.timestamp;
-    s.parcelChannelings[_realmId] = block.timestamp;
 
     emit ChannelAlchemica(_realmId, _gotchiId, channelAmounts, rate, radius);
   }

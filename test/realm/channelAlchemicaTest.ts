@@ -14,49 +14,13 @@ import {
   beforeTest,
   testInstallations,
 } from "../../scripts/realm/realmHelpers";
-import { BigNumberish } from "ethers";
 
 describe("Testing Equip Installation", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
   const testParcelId = 2893;
   const testGotchiId = 22306;
-  const testGotchiId2 = 23491;
-  const testGotchiId3 = 19652;
 
   let g: TestBeforeVars;
-
-  const genSignatureItem = async (tileId: number, x: number, y: number) => {
-    //@ts-ignore
-    let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
-
-    let messageHash1 = ethers.utils.solidityKeccak256(
-      ["uint256", "uint256", "uint256", "uint256"],
-      [testParcelId, tileId, x, y]
-    );
-    let signedMessage1 = await backendSigner.signMessage(
-      ethers.utils.arrayify(messageHash1)
-    );
-    let signature1 = ethers.utils.arrayify(signedMessage1);
-
-    return signature1;
-  };
-
-  const genSignatureChanneling = async (
-    testGotchiId: number,
-    lastChanneled: BigNumberish
-  ) => {
-    //@ts-ignore
-    let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
-    let messageHash = ethers.utils.solidityKeccak256(
-      ["uint256", "uint256", "uint256"],
-      [testParcelId, testGotchiId, lastChanneled]
-    );
-    let signedMessage = await backendSigner.signMessage(
-      ethers.utils.arrayify(messageHash)
-    );
-    let signature = ethers.utils.arrayify(signedMessage);
-    return signature;
-  };
 
   before(async function () {
     this.timeout(20000000);
@@ -83,8 +47,7 @@ describe("Testing Equip Installation", async function () {
       [g.fud.address, g.fomo.address, g.alpha.address, g.kek.address],
       g.glmr.address,
       ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
-      g.ownerAddress,
-      g.tileAddress
+      g.ownerAddress
     );
     await network.provider.send("hardhat_setBalance", [
       maticDiamondAddress,
@@ -137,19 +100,19 @@ describe("Testing Equip Installation", async function () {
     );
     await g.alchemicaFacet.testingAlchemicaFaucet(
       0,
-      ethers.utils.parseUnits("30000")
+      ethers.utils.parseUnits("20000")
     );
     await g.alchemicaFacet.testingAlchemicaFaucet(
       1,
-      ethers.utils.parseUnits("30000")
+      ethers.utils.parseUnits("300")
     );
     await g.alchemicaFacet.testingAlchemicaFaucet(
       2,
-      ethers.utils.parseUnits("30000")
+      ethers.utils.parseUnits("300")
     );
     await g.alchemicaFacet.testingAlchemicaFaucet(
       3,
-      ethers.utils.parseUnits("30000")
+      ethers.utils.parseUnits("300")
     );
     g.fud = await impersonate(testAddress, g.fud, ethers, network);
     g.fomo = await impersonate(testAddress, g.fomo, ethers, network);
@@ -177,113 +140,57 @@ describe("Testing Equip Installation", async function () {
       ethers.provider.send("evm_mine", []);
     }
     await g.installationDiamond.claimInstallations([0]);
-    await g.realmFacet.equipInstallation(
-      testParcelId,
-      4,
-      0,
-      0,
-      await genSignatureItem(4, 0, 0)
-    );
+    await g.realmFacet.equipInstallation(testParcelId, 4, 0, 0);
   });
   it("Test 1 day cooldown", async function () {
-    let lastChanneled = await g.alchemicaFacet.getLastChanneled(testGotchiId);
+    const lastChanneled = await g.alchemicaFacet.getLastChanneled(testGotchiId);
+    //@ts-ignore
+    let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+    let messageHash = ethers.utils.solidityKeccak256(
+      ["uint256", "uint256", "uint256"],
+      [testParcelId, testGotchiId, lastChanneled]
+    );
+    let signedMessage = await backendSigner.signMessage(
+      ethers.utils.arrayify(messageHash)
+    );
+    let signature = ethers.utils.arrayify(signedMessage);
 
+    signedMessage = await backendSigner.signMessage(messageHash);
     await g.alchemicaFacet.channelAlchemica(
       testParcelId,
       testGotchiId,
       lastChanneled,
-      await genSignatureChanneling(testGotchiId, lastChanneled)
+      signature
     );
     await expect(
       g.alchemicaFacet.channelAlchemica(
         testParcelId,
         testGotchiId,
         lastChanneled,
-        await genSignatureChanneling(testGotchiId, lastChanneled)
+        signature
       )
     ).to.be.revertedWith("AlchemicaFacet: Incorrect last duration");
-    lastChanneled = await g.alchemicaFacet.getLastChanneled(testGotchiId);
+    const lastChanneled2 = await g.alchemicaFacet.getLastChanneled(
+      testGotchiId
+    );
+    let messageHash2 = ethers.utils.solidityKeccak256(
+      ["uint256", "uint256", "uint256"],
+      [testParcelId, testGotchiId, lastChanneled2]
+    );
+    let signedMessage2 = await backendSigner.signMessage(
+      ethers.utils.arrayify(messageHash2)
+    );
+    let signature2 = ethers.utils.arrayify(signedMessage2);
 
+    signedMessage2 = await backendSigner.signMessage(messageHash2);
     await expect(
       g.alchemicaFacet.channelAlchemica(
         testParcelId,
         testGotchiId,
-        lastChanneled,
-        await genSignatureChanneling(testGotchiId, lastChanneled)
+        lastChanneled2,
+        signature2
       )
-    ).to.be.revertedWith("AlchemicaFacet: Gotchi can't channel yet");
-  });
-  it("Test multiple channel cooldown based on altar level", async function () {
-    let lastChanneled = await g.alchemicaFacet.getLastChanneled(testGotchiId2);
-
-    await network.provider.send("evm_increaseTime", [86400]);
-    await network.provider.send("evm_mine");
-    await g.alchemicaFacet.channelAlchemica(
-      testParcelId,
-      testGotchiId2,
-      lastChanneled,
-      await genSignatureChanneling(testGotchiId2, lastChanneled)
-    );
-    const upgradeQueue: UpgradeQueue = {
-      parcelId: testParcelId,
-      coordinateX: 0,
-      coordinateY: 0,
-      installationId: 4,
-      readyBlock: 0,
-      claimed: false,
-      owner: testAddress,
-    };
-    await g.installationDiamond.upgradeInstallation(upgradeQueue);
-    for (let i = 0; i < 11000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
-    await g.installationDiamond.finalizeUpgrade();
-
-    await network.provider.send("evm_increaseTime", [86400]);
-    await network.provider.send("evm_mine");
-
-    lastChanneled = await g.alchemicaFacet.getLastChanneled(testGotchiId);
-
-    await g.alchemicaFacet.channelAlchemica(
-      testParcelId,
-      testGotchiId,
-      lastChanneled,
-      await genSignatureChanneling(testGotchiId, lastChanneled)
-    );
-
-    await network.provider.send("evm_increaseTime", [43200]);
-    await network.provider.send("evm_mine");
-
-    lastChanneled = await g.alchemicaFacet.getLastChanneled(testGotchiId3);
-
-    await g.alchemicaFacet.channelAlchemica(
-      testParcelId,
-      testGotchiId3,
-      lastChanneled,
-      await genSignatureChanneling(testGotchiId3, lastChanneled)
-    );
-
-    lastChanneled = await g.alchemicaFacet.getLastChanneled(testGotchiId2);
-
-    await expect(
-      g.alchemicaFacet.channelAlchemica(
-        testParcelId,
-        testGotchiId2,
-        lastChanneled,
-        await genSignatureChanneling(testGotchiId2, lastChanneled)
-      )
-    ).to.be.revertedWith("AlchemicaFacet: Parcel can't channel yet");
-
-    lastChanneled = await g.alchemicaFacet.getLastChanneled(testGotchiId3);
-
-    await expect(
-      g.alchemicaFacet.channelAlchemica(
-        testParcelId,
-        testGotchiId3,
-        lastChanneled,
-        await genSignatureChanneling(testGotchiId3, lastChanneled)
-      )
-    ).to.be.revertedWith("AlchemicaFacet: Gotchi can't channel yet");
+    ).to.be.revertedWith("AlchemicaFacet: Can't channel yet");
   });
   it("Test minting new tokens on channeling", async function () {
     const spillrate = 0.2;
