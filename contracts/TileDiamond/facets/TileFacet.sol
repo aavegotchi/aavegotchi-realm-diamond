@@ -245,8 +245,12 @@ contract TileFacet is Modifiers {
   /// @dev Will throw if the caller is not the parcel diamond contract
   /// @param _realmId The identifier of the parcel to unequip the tile from
   /// @param _tileId Identifier of the tile to unequip
-  function unequipTile(uint256 _realmId, uint256 _tileId) external onlyRealmDiamond {
-    LibTile._unequipTile(_realmId, _tileId);
+  function unequipTile(
+    address _owner,
+    uint256 _realmId,
+    uint256 _tileId
+  ) external onlyRealmDiamond {
+    LibTile._unequipTile(_owner, _realmId, _tileId);
   }
 
   /// @notice Query details about all ongoing craft queues

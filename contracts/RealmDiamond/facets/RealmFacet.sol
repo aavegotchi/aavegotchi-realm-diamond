@@ -174,17 +174,7 @@ contract RealmFacet is Modifiers {
     );
     LibRealm.removeTile(_realmId, _tileId, _x, _y);
 
-    TileDiamondInterface tileDiamond = TileDiamondInterface(s.tileDiamond);
-    TileDiamondInterface.TileType memory tile = tileDiamond.getTileType(_tileId);
-
-    for (uint256 i; i < tile.alchemicaCost.length; i++) {
-      AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
-
-      uint256 alchemicaRefund = tile.alchemicaCost[i] / 2;
-
-      alchemica.transfer(msg.sender, alchemicaRefund);
-    }
-    TileDiamondInterface(s.tileDiamond).unequipTile(_realmId, _tileId);
+    TileDiamondInterface(s.tileDiamond).unequipTile(msg.sender, _realmId, _tileId);
 
     emit UnequipTile(_realmId, _tileId, _x, _y);
   }

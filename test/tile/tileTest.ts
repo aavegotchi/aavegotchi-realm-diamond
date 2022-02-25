@@ -233,12 +233,17 @@ describe("Testing Tiles", async function () {
         await genSignature(1, 3, 3)
       )
     ).to.be.revertedWith("LibRealm: wrong tileId");
+    const balancePre = await g.erc1155FacetTile.balanceOf(testAddress, 1);
     await g.realmFacet.unequipTile(
       testParcelId,
       1,
       0,
       0,
       await genSignature(1, 0, 0)
+    );
+    const balancePost = await g.erc1155FacetTile.balanceOf(testAddress, 1);
+    expect(Number(ethers.utils.formatUnits(balancePost))).to.above(
+      Number(ethers.utils.formatUnits(balancePre))
     );
     await expect(
       g.realmFacet.unequipTile(

@@ -31,7 +31,11 @@ interface TileDiamondInterface {
     uint256 _tileId
   ) external;
 
-  function unequipTile(uint256 _realmId, uint256 _tileId) external;
+  function unequipTile(
+    address _owner,
+    uint256 _realmId,
+    uint256 _tileId
+  ) external;
 
   function addTileTypes(TileType[] calldata _tileTypes) external;
 
