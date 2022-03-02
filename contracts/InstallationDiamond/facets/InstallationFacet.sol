@@ -4,7 +4,6 @@ pragma solidity 0.8.9;
 import {LibERC998, ItemTypeIO} from "../../libraries/LibERC998.sol";
 import {LibAppStorageInstallation, InstallationType, QueueItem, UpgradeQueue, Modifiers} from "../../libraries/AppStorageInstallation.sol";
 import {LibStrings} from "../../libraries/LibStrings.sol";
-import {LibMeta} from "../../libraries/LibMeta.sol";
 import {LibERC1155} from "../../libraries/LibERC1155.sol";
 import {LibERC20} from "../../libraries/LibERC20.sol";
 import {LibInstallation} from "../../libraries/LibInstallation.sol";
@@ -121,30 +120,9 @@ contract InstallationFacet is Modifiers {
   /// @notice Check the spillover radius of an installation type
   /// @param _id id of the installationType to query
   /// @return the spillover rate and radius the installation type with identifier _id
-  function spilloverRateAndRadiusOfId(uint256 _id) external view returns (uint256, uint256) {
-    return (s.installationTypes[_id].spillRate, s.installationTypes[_id].spillRadius);
-  }
-
-  // /// @notice Check the spillover rates of multiple installation types
-  // /// @param _ids An array containing ids of the installationTypes to query
-  // /// @return An array containing the corresponding spillover rates of the installation types queried
-  // function spilloverRatesOfIds(uint256[] calldata _ids) external view returns (uint256[] memory) {
-  //   uint256[] memory rates = new uint256[](_ids.length);
-  //   for (uint256 i = 0; i < _ids.length; i++) {
-  //     rates[i] = s.installationTypes[i].spillRate;
-  //   }
-  //   return rates;
-  // }
-
-  // /// @notice Check the spillover radius of multiple installation types
-  // /// @param _ids An array containing ids of the installationTypes to query
-  // /// @return An array containing the corresponding spillover radius of the installation types queried
-  // function spilloverRadiusOfIds(uint256[] calldata _ids) external view returns (uint256[] memory) {
-  //   uint256[] memory rates = new uint256[](_ids.length);
-  //   for (uint256 i = 0; i < _ids.length; i++) {
-  //     rates[i] = s.installationTypes[i].spillRadius;
-  //   }
-  //   return rates;
+  // todo remove comment and refactor facet due to size
+  // function spilloverRateAndRadiusOfId(uint256 _id) external view returns (uint256, uint256) {
+  //   return (s.installationTypes[_id].spillRate, s.installationTypes[_id].spillRadius);
   // }
 
   /// @notice Query the installation balances of an ERC721 parent token
@@ -152,17 +130,18 @@ contract InstallationFacet is Modifiers {
   /// @param _tokenId The identifier of the ERC721 parent token
   /// @param _ids An array containing the ids of the installationTypes to query
   /// @return An array containing the corresponding balances of the installation types queried
-  function installationBalancesOfTokenByIds(
-    address _tokenContract,
-    uint256 _tokenId,
-    uint256[] calldata _ids
-  ) external view returns (uint256[] memory) {
-    uint256[] memory balances = new uint256[](_ids.length);
-    for (uint256 i = 0; i < _ids.length; i++) {
-      balances[i] = balanceOfToken(_tokenContract, _tokenId, _ids[i]);
-    }
-    return balances;
-  }
+  // todo remove comment and refactor facet due to size
+  // function installationBalancesOfTokenByIds(
+  //   address _tokenContract,
+  //   uint256 _tokenId,
+  //   uint256[] calldata _ids
+  // ) external view returns (uint256[] memory) {
+  //   uint256[] memory balances = new uint256[](_ids.length);
+  //   for (uint256 i = 0; i < _ids.length; i++) {
+  //     balances[i] = balanceOfToken(_tokenContract, _tokenId, _ids[i]);
+  //   }
+  //   return balances;
+  // }
 
   /// @notice Query the item type of a particular installation
   /// @param _installationTypeId Item to query
@@ -200,11 +179,12 @@ contract InstallationFacet is Modifiers {
   /// @notice Allow the Diamond owner to deprecate an installation
   /// @dev Deprecated installations cannot be crafted by users
   /// @param _installationIds An array containing the identifiers of installations to deprecate
-  function deprecateInstallations(uint256[] calldata _installationIds) external onlyOwner {
-    for (uint256 i = 0; i < _installationIds.length; i++) {
-      s.installationTypes[_installationIds[i]].deprecated = true;
-    }
-  }
+  // todo remove comment and refactor facet due to size
+  // function deprecateInstallations(uint256[] calldata _installationIds) external onlyOwner {
+  //   for (uint256 i = 0; i < _installationIds.length; i++) {
+  //     s.installationTypes[_installationIds[i]].deprecated = true;
+  //   }
+  // }
 
   /// @notice Allow a user to craft installations
   /// @dev Will throw even if one of the installationTypes is deprecated
@@ -358,8 +338,19 @@ contract InstallationFacet is Modifiers {
     // check coordinates
     RealmDiamond realm = RealmDiamond(s.realmDiamond);
 
+    //check upgradeQueueCapacity
+    uint256 upgradeQueueCapacity = realm.getParcelUpgradeQueueCapacity(_upgradeQueue.parcelId);
+    uint256 upgradeQueueLength = realm.getParcelUpgradeQueueLength(_upgradeQueue.parcelId);
+    require(upgradeQueueCapacity + 1 > upgradeQueueLength, "InstallationFacet: UpgradeQueue full");
+
     realm.checkCoordinates(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId);
-    // check tech tree
+
+    //take the required alchemica
+    address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
+    InstallationType memory installationType = s.installationTypes[_upgradeQueue.installationId];
+    for (uint256 i; i < installationType.alchemicaCost.length; i++) {
+      LibERC20.transferFrom(alchemicaAddresses[i], msg.sender, s.realmDiamond, installationType.alchemicaCost[i]);
+    }
 
     //current installation
     InstallationType memory prevInstallation = s.installationTypes[_upgradeQueue.installationId];
@@ -383,6 +374,9 @@ contract InstallationFacet is Modifiers {
       _upgradeQueue.owner
     );
     s.upgradeQueue.push(upgrade);
+
+    // update upgradeQueueLength
+    realm.addUpgradeQueueLength(_upgradeQueue.parcelId);
 
     emit UpgradeInitiated(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, block.number, readyBlock);
   }
@@ -434,6 +428,10 @@ contract InstallationFacet is Modifiers {
           queueUpgrade.coordinateX,
           queueUpgrade.coordinateY
         );
+
+        // update updateQueueLength
+        realm.subUpgradeQueueLength(queueUpgrade.parcelId);
+
         // pop upgrade from array
         s.upgradeQueue[index] = s.upgradeQueue[s.upgradeQueue.length - 1];
         s.upgradeQueue.pop();
@@ -506,6 +504,7 @@ contract InstallationFacet is Modifiers {
           _installationTypes[i].capacity,
           _installationTypes[i].spillRadius,
           _installationTypes[i].spillRate,
+          _installationTypes[i].upgradeQueueBoost,
           _installationTypes[i].craftTime,
           _installationTypes[i].nextLevelId,
           _installationTypes[i].prerequisites,

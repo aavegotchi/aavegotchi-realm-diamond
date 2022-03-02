@@ -19,6 +19,7 @@ interface InstallationDiamondInterface {
     uint256 capacity;
     uint256 spillRadius;
     uint256 spillRate;
+    uint256 upgradeQueueBoost;
     uint256 craftTime; // in blocks
     uint256 nextLevelId; //the ID of the next level of this installation. Used for upgrades.
     uint256[] prerequisites; //IDs of installations that must be present before this installation can be added
@@ -49,10 +50,7 @@ interface InstallationDiamondInterface {
     uint256 _installationId
   ) external;
 
-  function unequipInstallation(
-    uint256 _realmId,
-    uint256 _installationId
-  ) external;
+  function unequipInstallation(uint256 _realmId, uint256 _installationId) external;
 
   function addInstallationTypes(InstallationType[] calldata _installationTypes) external;
 

@@ -70,6 +70,7 @@ export interface InstallationType {
   capacity: BigNumberish;
   spillRadius: BigNumberish;
   spillRate: BigNumberish;
+  upgradeQueueBoost: BigNumberish;
   craftTime: BigNumberish;
   nextLevelId: BigNumberish;
   prerequisites: BigNumberish[];
@@ -88,6 +89,7 @@ export interface InstallationTypeInput {
   capacity: BigNumberish;
   spillRadius: BigNumberish;
   spillRate: BigNumberish;
+  upgradeQueueBoost: BigNumberish;
   craftTime: number;
   nextLevelId: number;
   prerequisites: number[];
@@ -119,6 +121,7 @@ export interface InstallationTypeOutput {
   capacity: BigNumberish;
   spillRadius: BigNumberish;
   spillRate: BigNumberish;
+  upgradeQueueBoost: BigNumberish;
   craftTime: BigNumberish;
   nextLevelId: BigNumberish;
   prerequisites: BigNumberish[];

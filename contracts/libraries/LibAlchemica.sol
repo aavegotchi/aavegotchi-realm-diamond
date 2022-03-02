@@ -68,6 +68,11 @@ library LibAlchemica {
       s.parcels[_realmId].altarId = _installationId;
       s.parcelChannelings[_realmId] = block.timestamp - 24 hours;
     }
+
+    // upgradeQueueBoost
+    if (installationType.upgradeQueueBoost > 0) {
+      s.parcels[_realmId].upgradeQueueCapacity += installationType.upgradeQueueBoost;
+    }
   }
 
   function reduceTraits(uint256 _realmId, uint256 _installationId) internal {
@@ -106,6 +111,11 @@ library LibAlchemica {
         //step 3 - unequip reservoir
         revert("LibAlchemica: Unclaimed alchemica greater than reservoir capacity");
       }
+    }
+
+    // upgradeQueueBoost
+    if (installationType.upgradeQueueBoost > 0) {
+      s.parcels[_realmId].upgradeQueueCapacity -= installationType.upgradeQueueBoost;
     }
   }
 }
