@@ -5,6 +5,7 @@ import {
   ERC1155Facet,
   ERC1155FacetTile,
   InstallationFacet,
+  InstallationAdminFacet,
   TileFacet,
   OwnershipFacet,
   RealmFacet,
@@ -178,6 +179,26 @@ export function testInstallations() {
   );
   installations.push(
     outputInstallation({
+      installationType: 2,
+      level: 2,
+      width: 2,
+      height: 2,
+      alchemicaType: 0,
+      alchemicaCost: [10, 10, 10, 10],
+      harvestRate: 0,
+      capacity: 0,
+      spillRadius: 0,
+      spillRate: 20,
+      upgradeQueueBoost: 0,
+      craftTime: 10000,
+      deprecated: false,
+      nextLevelId: 0,
+      prerequisites: [],
+      name: "Altar level 2",
+    })
+  );
+  installations.push(
+    outputInstallation({
       installationType: 3,
       level: 1,
       width: 2,
@@ -323,6 +344,10 @@ export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
     "InstallationFacet",
     installationsAddress
   )) as InstallationFacet;
+  const installationAdminFacet = (await ethers.getContractAt(
+    "InstallationAdminFacet",
+    installationsAddress
+  )) as InstallationAdminFacet;
   const tileDiamond = (await ethers.getContractAt(
     "TileFacet",
     tileAddress
@@ -354,7 +379,7 @@ export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
   const installationOwner = await installationOwnershipFacet.owner();
   const tileOwner = await tileOwnershipFacet.owner();
 
-  await installationDiamond.setAddresses(
+  await installationAdminFacet.setAddresses(
     maticAavegotchiDiamondAddress,
     maticDiamondAddress,
     glmr.address
@@ -370,6 +395,7 @@ export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
     installationsAddress,
     realmFacet,
     installationDiamond,
+    installationAdminFacet,
     erc1155Facet,
     erc1155FacetTile,
     ownerAddress,

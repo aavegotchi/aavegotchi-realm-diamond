@@ -83,7 +83,7 @@ describe("Testing Equip Installation", async function () {
       []
     );
 
-    await g.installationDiamond.addInstallationTypes(testInstallations());
+    await g.installationAdminFacet.addInstallationTypes(testInstallations());
     installationsTypes = await g.installationDiamond.getInstallationTypes([]);
     expect(installationsTypes.length).to.equal(testInstallations().length);
   });
@@ -142,7 +142,7 @@ describe("Testing Equip Installation", async function () {
     );
     let fudPreCraft = await g.fud.balanceOf(maticDiamondAddress);
     let kekPreCraft = await g.kek.balanceOf(maticDiamondAddress);
-    await g.installationDiamond.craftInstallations([2, 2, 2, 5]);
+    await g.installationDiamond.craftInstallations([2, 2, 2, 6]);
     let fudAfterCraft = await g.fud.balanceOf(maticDiamondAddress);
     let kekAfterCraft = await g.kek.balanceOf(maticDiamondAddress);
     expect(Number(ethers.utils.formatUnits(fudAfterCraft))).to.above(
@@ -214,10 +214,10 @@ describe("Testing Equip Installation", async function () {
     ).to.be.revertedWith("InstallationFacet: UpgradeQueue full");
     await g.realmFacet.equipInstallation(
       testParcelId,
-      5,
       6,
       6,
-      await genSignature(5, 6, 6)
+      6,
+      await genSignature(6, 6, 6)
     );
     await g.installationDiamond.upgradeInstallation(upgradeQueue2);
   });

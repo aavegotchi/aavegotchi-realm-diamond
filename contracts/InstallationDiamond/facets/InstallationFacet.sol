@@ -26,8 +26,6 @@ contract InstallationFacet is Modifiers {
 
   event UpgradeFinalized(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY);
 
-  event AddressesUpdated(address _aavegotchiDiamond, address _realmDiamond, address _glmr);
-
   /***********************************|
    |             Read Functions         |
    |__________________________________*/
@@ -120,28 +118,26 @@ contract InstallationFacet is Modifiers {
   /// @notice Check the spillover radius of an installation type
   /// @param _id id of the installationType to query
   /// @return the spillover rate and radius the installation type with identifier _id
-  // todo remove comment and refactor facet due to size
-  // function spilloverRateAndRadiusOfId(uint256 _id) external view returns (uint256, uint256) {
-  //   return (s.installationTypes[_id].spillRate, s.installationTypes[_id].spillRadius);
-  // }
+  function spilloverRateAndRadiusOfId(uint256 _id) external view returns (uint256, uint256) {
+    return (s.installationTypes[_id].spillRate, s.installationTypes[_id].spillRadius);
+  }
 
   /// @notice Query the installation balances of an ERC721 parent token
   /// @param _tokenContract The token contract of the ERC721 parent token
   /// @param _tokenId The identifier of the ERC721 parent token
   /// @param _ids An array containing the ids of the installationTypes to query
   /// @return An array containing the corresponding balances of the installation types queried
-  // todo remove comment and refactor facet due to size
-  // function installationBalancesOfTokenByIds(
-  //   address _tokenContract,
-  //   uint256 _tokenId,
-  //   uint256[] calldata _ids
-  // ) external view returns (uint256[] memory) {
-  //   uint256[] memory balances = new uint256[](_ids.length);
-  //   for (uint256 i = 0; i < _ids.length; i++) {
-  //     balances[i] = balanceOfToken(_tokenContract, _tokenId, _ids[i]);
-  //   }
-  //   return balances;
-  // }
+  function installationBalancesOfTokenByIds(
+    address _tokenContract,
+    uint256 _tokenId,
+    uint256[] calldata _ids
+  ) external view returns (uint256[] memory) {
+    uint256[] memory balances = new uint256[](_ids.length);
+    for (uint256 i = 0; i < _ids.length; i++) {
+      balances[i] = balanceOfToken(_tokenContract, _tokenId, _ids[i]);
+    }
+    return balances;
+  }
 
   /// @notice Query the item type of a particular installation
   /// @param _installationTypeId Item to query
@@ -172,19 +168,44 @@ contract InstallationFacet is Modifiers {
     return LibStrings.strWithUint(s.baseUri, _id);
   }
 
+  /// @notice Query details about all ongoing craft queues
+  /// @param _owner Address to query queue
+  /// @return output_ An array of structs, each representing an ongoing craft queue
+  function getCraftQueue(address _owner) external view returns (QueueItem[] memory output_) {
+    uint256 length = s.craftQueue.length;
+    output_ = new QueueItem[](length);
+    uint256 counter;
+    for (uint256 i; i < length; i++) {
+      if (s.craftQueue[i].owner == _owner) {
+        output_[counter] = s.craftQueue[i];
+        counter++;
+      }
+    }
+    assembly {
+      mstore(output_, counter)
+    }
+  }
+
+  /// @notice Query details about all ongoing upgrade queues
+  /// @return output_ An array of structs, each representing an ongoing upgrade queue
+  function getUpgradeQueue(address _owner) external view returns (UpgradeQueue[] memory output_) {
+    uint256 length = s.upgradeQueue.length;
+    output_ = new UpgradeQueue[](length);
+    uint256 counter;
+    for (uint256 i; i < length; i++) {
+      if (s.craftQueue[i].owner == _owner) {
+        output_[counter] = s.upgradeQueue[i];
+        counter++;
+      }
+    }
+    assembly {
+      mstore(output_, counter)
+    }
+  }
+
   /***********************************|
    |             Write Functions        |
    |__________________________________*/
-
-  /// @notice Allow the Diamond owner to deprecate an installation
-  /// @dev Deprecated installations cannot be crafted by users
-  /// @param _installationIds An array containing the identifiers of installations to deprecate
-  // todo remove comment and refactor facet due to size
-  // function deprecateInstallations(uint256[] calldata _installationIds) external onlyOwner {
-  //   for (uint256 i = 0; i < _installationIds.length; i++) {
-  //     s.installationTypes[_installationIds[i]].deprecated = true;
-  //   }
-  // }
 
   /// @notice Allow a user to craft installations
   /// @dev Will throw even if one of the installationTypes is deprecated
@@ -230,25 +251,24 @@ contract InstallationFacet is Modifiers {
   /// @dev amount expressed in block numbers
   /// @param _queueIds An array containing the identifiers of queues to speed up
   /// @param _amounts An array containing the corresponding amounts of $GLMR tokens to pay for each queue speedup
-  // todo remove comment and refactor facet due to size
-  // function reduceCraftTime(uint256[] calldata _queueIds, uint256[] calldata _amounts) external {
-  //   require(_queueIds.length == _amounts.length, "InstallationFacet: Mismatched arrays");
-  //   for (uint256 i; i < _queueIds.length; i++) {
-  //     uint256 queueId = _queueIds[i];
-  //     QueueItem storage queueItem = s.craftQueue[queueId];
-  //     require(msg.sender == queueItem.owner, "InstallationFacet: not owner");
+  function reduceCraftTime(uint256[] calldata _queueIds, uint256[] calldata _amounts) external {
+    require(_queueIds.length == _amounts.length, "InstallationFacet: Mismatched arrays");
+    for (uint256 i; i < _queueIds.length; i++) {
+      uint256 queueId = _queueIds[i];
+      QueueItem storage queueItem = s.craftQueue[queueId];
+      require(msg.sender == queueItem.owner, "InstallationFacet: not owner");
 
-  //     require(block.number <= queueItem.readyBlock, "InstallationFacet: installation already done");
+      require(block.number <= queueItem.readyBlock, "InstallationFacet: installation already done");
 
-  //     IERC20 glmr = IERC20(s.glmr);
+      IERC20 glmr = IERC20(s.glmr);
 
-  //     uint256 blockLeft = queueItem.readyBlock - block.number;
-  //     uint256 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
-  //     glmr.burnFrom(msg.sender, removeBlocks * 10**18);
-  //     queueItem.readyBlock -= removeBlocks;
-  //     emit CraftTimeReduced(queueId, removeBlocks);
-  //   }
-  // }
+      uint256 blockLeft = queueItem.readyBlock - block.number;
+      uint256 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
+      glmr.burnFrom(msg.sender, removeBlocks * 10**18);
+      queueItem.readyBlock -= removeBlocks;
+      emit CraftTimeReduced(queueId, removeBlocks);
+    }
+  }
 
   /// @notice Allow a user to claim installations from ready queues
   /// @dev Will throw if the caller is not the queue owner
@@ -458,82 +478,5 @@ contract InstallationFacet is Modifiers {
       if (counter == 0) break;
       if (counter == 3) revert("InstallationFacet: No upgrades ready");
     }
-  }
-
-  /// @notice Query details about all ongoing craft queues
-  /// @param _owner Address to query queue
-  /// @return output_ An array of structs, each representing an ongoing craft queue
-  function getCraftQueue(address _owner) external view returns (QueueItem[] memory output_) {
-    uint256 length = s.craftQueue.length;
-    output_ = new QueueItem[](length);
-    uint256 counter;
-    for (uint256 i; i < length; i++) {
-      if (s.craftQueue[i].owner == _owner) {
-        output_[counter] = s.craftQueue[i];
-        counter++;
-      }
-    }
-    assembly {
-      mstore(output_, counter)
-    }
-  }
-
-  /// @notice Query details about all ongoing upgrade queues
-  /// @return output_ An array of structs, each representing an ongoing upgrade queue
-  function getUpgradeQueue() external view returns (UpgradeQueue[] memory output_) {
-    return s.upgradeQueue;
-  }
-
-  /***********************************|
-   |             Owner Functions        |
-   |__________________________________*/
-
-  /// @notice Allow the diamond owner to set some important contract addresses
-  /// @param _aavegotchiDiamond The aavegotchi diamond address
-  /// @param _realmDiamond The Realm diamond address
-  /// @param _glmr The $GLMR token address
-  function setAddresses(
-    address _aavegotchiDiamond,
-    address _realmDiamond,
-    address _glmr
-  ) external onlyOwner {
-    s.aavegotchiDiamond = _aavegotchiDiamond;
-    s.realmDiamond = _realmDiamond;
-    s.glmr = _glmr;
-    emit AddressesUpdated(_aavegotchiDiamond, _realmDiamond, _glmr);
-  }
-
-  /// @notice Allow the diamond owner to add an installation type
-  /// @param _installationTypes An array of structs, each struct representing each installationType to be added
-  function addInstallationTypes(InstallationType[] calldata _installationTypes) external onlyOwner {
-    for (uint256 i = 0; i < _installationTypes.length; i++) {
-      s.installationTypes.push(
-        InstallationType(
-          _installationTypes[i].width,
-          _installationTypes[i].height,
-          _installationTypes[i].deprecated,
-          _installationTypes[i].installationType,
-          _installationTypes[i].level,
-          _installationTypes[i].alchemicaType,
-          _installationTypes[i].alchemicaCost,
-          _installationTypes[i].harvestRate,
-          _installationTypes[i].capacity,
-          _installationTypes[i].spillRadius,
-          _installationTypes[i].spillRate,
-          _installationTypes[i].upgradeQueueBoost,
-          _installationTypes[i].craftTime,
-          _installationTypes[i].nextLevelId,
-          _installationTypes[i].prerequisites,
-          _installationTypes[i].name
-        )
-      );
-    }
-  }
-
-  /// @notice Allow the diamond owner to edit an installationType
-  /// @param _typeId Identifier of the installationType to edit
-  /// @param _installationType A struct containing the new properties of the installationType being edited
-  function editInstallationType(uint256 _typeId, InstallationType calldata _installationType) external onlyOwner {
-    s.installationTypes[_typeId] = _installationType;
   }
 }
