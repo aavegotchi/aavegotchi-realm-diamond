@@ -324,12 +324,12 @@ contract RealmFacet is Modifiers {
     }
   }
 
-  function getPaartnerGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[64][64] memory) {
+  function getPaartnerGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[64][64] memory output_) {
     require(s.parcels[_parcelId].size == 4, "RealmFacet: Not paartner");
     if (_gridType == 0) {
-      return s.parcels[_parcelId].buildGrid;
+      output_ = s.parcels[_parcelId].buildGrid;
     } else if (_gridType == 1) {
-      return s.parcels[_parcelId].tileGrid;
+      output_ = s.parcels[_parcelId].tileGrid;
     }
   }
 

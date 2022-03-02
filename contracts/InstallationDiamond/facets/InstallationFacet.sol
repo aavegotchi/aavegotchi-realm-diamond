@@ -230,24 +230,25 @@ contract InstallationFacet is Modifiers {
   /// @dev amount expressed in block numbers
   /// @param _queueIds An array containing the identifiers of queues to speed up
   /// @param _amounts An array containing the corresponding amounts of $GLMR tokens to pay for each queue speedup
-  function reduceCraftTime(uint256[] calldata _queueIds, uint256[] calldata _amounts) external {
-    require(_queueIds.length == _amounts.length, "InstallationFacet: Mismatched arrays");
-    for (uint256 i; i < _queueIds.length; i++) {
-      uint256 queueId = _queueIds[i];
-      QueueItem storage queueItem = s.craftQueue[queueId];
-      require(msg.sender == queueItem.owner, "InstallationFacet: not owner");
+  // todo remove comment and refactor facet due to size
+  // function reduceCraftTime(uint256[] calldata _queueIds, uint256[] calldata _amounts) external {
+  //   require(_queueIds.length == _amounts.length, "InstallationFacet: Mismatched arrays");
+  //   for (uint256 i; i < _queueIds.length; i++) {
+  //     uint256 queueId = _queueIds[i];
+  //     QueueItem storage queueItem = s.craftQueue[queueId];
+  //     require(msg.sender == queueItem.owner, "InstallationFacet: not owner");
 
-      require(block.number <= queueItem.readyBlock, "InstallationFacet: installation already done");
+  //     require(block.number <= queueItem.readyBlock, "InstallationFacet: installation already done");
 
-      IERC20 glmr = IERC20(s.glmr);
+  //     IERC20 glmr = IERC20(s.glmr);
 
-      uint256 blockLeft = queueItem.readyBlock - block.number;
-      uint256 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
-      glmr.burnFrom(msg.sender, removeBlocks * 10**18);
-      queueItem.readyBlock -= removeBlocks;
-      emit CraftTimeReduced(queueId, removeBlocks);
-    }
-  }
+  //     uint256 blockLeft = queueItem.readyBlock - block.number;
+  //     uint256 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
+  //     glmr.burnFrom(msg.sender, removeBlocks * 10**18);
+  //     queueItem.readyBlock -= removeBlocks;
+  //     emit CraftTimeReduced(queueId, removeBlocks);
+  //   }
+  // }
 
   /// @notice Allow a user to claim installations from ready queues
   /// @dev Will throw if the caller is not the queue owner
@@ -345,6 +346,15 @@ contract InstallationFacet is Modifiers {
 
     realm.checkCoordinates(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId);
 
+    // check unique hash
+    bytes32 uniqueHash = keccak256(
+      abi.encodePacked(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId)
+    );
+
+    require(s.upgradeHashes[uniqueHash] == 0, "InstallationFacet: upgrade hash not unique");
+
+    s.upgradeHashes[uniqueHash] = _upgradeQueue.parcelId;
+
     //take the required alchemica
     address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
     InstallationType memory installationType = s.installationTypes[_upgradeQueue.installationId];
@@ -406,15 +416,15 @@ contract InstallationFacet is Modifiers {
     require(s.upgradeQueue.length > 0, "InstallationFacet: No upgrades");
     //can only process 3 upgrades per tx
     uint256 counter = 3;
+    uint256 offset;
     uint256 _upgradeQueueLength = s.upgradeQueue.length;
     for (uint256 index; index < _upgradeQueueLength; index++) {
-      UpgradeQueue memory queueUpgrade = s.upgradeQueue[index];
+      UpgradeQueue memory queueUpgrade = s.upgradeQueue[index - offset];
       // check that upgrade is ready
       if (block.number >= queueUpgrade.readyBlock) {
         // burn old installation
         LibInstallation._unequipInstallation(queueUpgrade.parcelId, queueUpgrade.installationId);
         // mint new installation
-
         uint256 nextLevelId = s.installationTypes[queueUpgrade.installationId].nextLevelId;
         LibERC1155._safeMint(queueUpgrade.owner, nextLevelId, index);
         // equip new installation
@@ -432,11 +442,17 @@ contract InstallationFacet is Modifiers {
         // update updateQueueLength
         realm.subUpgradeQueueLength(queueUpgrade.parcelId);
 
+        // clean unique hash
+        bytes32 uniqueHash = keccak256(
+          abi.encodePacked(queueUpgrade.parcelId, queueUpgrade.coordinateX, queueUpgrade.coordinateY, queueUpgrade.installationId)
+        );
+        s.upgradeHashes[uniqueHash] = 0;
+
         // pop upgrade from array
         s.upgradeQueue[index] = s.upgradeQueue[s.upgradeQueue.length - 1];
         s.upgradeQueue.pop();
         counter--;
-
+        offset++;
         emit UpgradeFinalized(queueUpgrade.parcelId, queueUpgrade.coordinateX, queueUpgrade.coordinateY);
       }
       if (counter == 0) break;

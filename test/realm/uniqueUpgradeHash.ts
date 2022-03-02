@@ -180,13 +180,13 @@ describe("Testing Equip Installation", async function () {
     );
     await g.realmFacet.equipInstallation(
       testParcelId,
-      2,
+      5,
       3,
       3,
-      await genSignature(2, 3, 3)
+      await genSignature(5, 3, 3)
     );
   });
-  it("Test upgrade queue", async function () {
+  it("Test upgrade unique", async function () {
     const upgradeQueue: UpgradeQueue = {
       parcelId: testParcelId,
       coordinateX: 0,
@@ -196,29 +196,13 @@ describe("Testing Equip Installation", async function () {
       claimed: false,
       owner: testAddress,
     };
-    const upgradeQueue2: UpgradeQueue = {
-      parcelId: testParcelId,
-      coordinateX: 3,
-      coordinateY: 3,
-      installationId: 2,
-      readyBlock: 0,
-      claimed: false,
-      owner: testAddress,
-    };
     await g.installationDiamond.upgradeInstallation(upgradeQueue);
     await expect(
       g.installationDiamond.upgradeInstallation(upgradeQueue)
-    ).to.be.revertedWith("InstallationFacet: UpgradeQueue full");
-    await expect(
-      g.installationDiamond.upgradeInstallation(upgradeQueue2)
-    ).to.be.revertedWith("InstallationFacet: UpgradeQueue full");
-    await g.realmFacet.equipInstallation(
-      testParcelId,
-      5,
-      6,
-      6,
-      await genSignature(5, 6, 6)
-    );
-    await g.installationDiamond.upgradeInstallation(upgradeQueue2);
+    ).to.be.revertedWith("InstallationFacet: upgrade hash not unique");
+    for (let i = 0; i < 20000; i++) {
+      ethers.provider.send("evm_mine", []);
+    }
+    await g.installationDiamond.finalizeUpgrade();
   });
 });
