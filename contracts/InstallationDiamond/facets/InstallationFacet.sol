@@ -371,12 +371,13 @@ contract InstallationFacet is Modifiers {
       abi.encodePacked(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId)
     );
 
+    //The same upgrade cannot be queued twice
     require(s.upgradeHashes[uniqueHash] == 0, "InstallationFacet: upgrade hash not unique");
 
     s.upgradeHashes[uniqueHash] = _upgradeQueue.parcelId;
 
     //take the required alchemica
-    address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
+    address[4] memory alchemicaAddresses = realm.getAlchemicaAddresses();
     InstallationType memory installationType = s.installationTypes[_upgradeQueue.installationId];
     for (uint256 i; i < installationType.alchemicaCost.length; i++) {
       LibERC20.transferFrom(alchemicaAddresses[i], msg.sender, s.realmDiamond, installationType.alchemicaCost[i]);
