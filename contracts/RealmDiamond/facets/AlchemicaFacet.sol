@@ -372,4 +372,18 @@ contract AlchemicaFacet is Modifiers {
 
     emit ExitAlchemica(_gotchiId, _alchemica);
   }
+
+  /// @notice Helper function to batch transfer alchemica
+  /// @param _targets Array of target addresses
+  /// @param _amounts Nested array of amounts to transfer. 
+  /// @dev The inner array element order for _amounts is FUD, FOMO, ALPHA, KEK
+  function batchTransferAlchemica(address[] calldata _targets, uint256[4][] calldata _amounts) external {
+    require(_targets.length == _amounts.length, "AlchemicaFacet: Mismatched array lengths");
+    for(uint i = 0; i < _targets.length; i++) {
+      for(uint j = 0; j < _amounts[i].length; j++) {
+        AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[j]);
+        alchemica.transferFrom(msg.sender, _targets[i], _amounts[i][j]);
+      }
+    }
+  }
 }
