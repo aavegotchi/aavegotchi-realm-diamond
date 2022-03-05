@@ -381,8 +381,10 @@ contract AlchemicaFacet is Modifiers {
     require(_targets.length == _amounts.length, "AlchemicaFacet: Mismatched array lengths");
     for(uint i = 0; i < _targets.length; i++) {
       for(uint j = 0; j < _amounts[i].length; j++) {
-        AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[j]);
-        alchemica.transferFrom(msg.sender, _targets[i], _amounts[i][j]);
+        if(_amounts[i][j] > 0) {
+          AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[j]);
+          alchemica.transferFrom(msg.sender, _targets[i], _amounts[i][j]);
+        }
       }
     }
   }
