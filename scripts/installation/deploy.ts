@@ -55,6 +55,7 @@ export async function deployDiamond() {
     "DiamondLoupeFacet",
     "OwnershipFacet",
     "InstallationFacet",
+    "InstallationAdminFacet",
     "ERC1155Facet",
   ];
   const cut = [];

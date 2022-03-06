@@ -15,6 +15,7 @@ struct InstallationType {
   uint256 capacity;
   uint256 spillRadius;
   uint256 spillRate;
+  uint256 upgradeQueueBoost;
   uint256 craftTime; // in blocks
   uint256 nextLevelId; //the ID of the next level of this installation. Used for upgrades.
   uint256[] prerequisites; //IDs of installations that must be present before this installation can be added
@@ -69,6 +70,7 @@ struct InstallationAppStorage {
   mapping(address => uint256[]) ownerInstallations;
   mapping(address => mapping(uint256 => uint256)) ownerInstallationIndexes;
   UpgradeQueue[] upgradeQueue;
+  mapping(bytes32 => uint256) upgradeHashes;
 }
 
 library LibAppStorageInstallation {

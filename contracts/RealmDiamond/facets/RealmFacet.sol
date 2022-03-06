@@ -249,6 +249,14 @@ contract RealmFacet is Modifiers {
     emit InstallationUpgraded(_realmId, _prevInstallationId, _nextInstallationId, _coordinateX, _coordinateY);
   }
 
+  function addUpgradeQueueLength(uint256 _realmId) external onlyInstallationDiamond {
+    s.parcels[_realmId].upgradeQueueLength++;
+  }
+
+  function subUpgradeQueueLength(uint256 _realmId) external onlyInstallationDiamond {
+    s.parcels[_realmId].upgradeQueueLength--;
+  }
+
   // used for testing atm
   function getParcelCapacity(uint256 _realmId) external view returns (uint256[4] memory) {
     return s.parcels[_realmId].reservoirCapacity;
@@ -306,12 +314,20 @@ contract RealmFacet is Modifiers {
     }
   }
 
-  function getPaartnerGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[64][64] memory) {
+  function getPaartnerGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[64][64] memory output_) {
     require(s.parcels[_parcelId].size == 4, "RealmFacet: Not paartner");
     if (_gridType == 0) {
-      return s.parcels[_parcelId].buildGrid;
+      output_ = s.parcels[_parcelId].buildGrid;
     } else if (_gridType == 1) {
-      return s.parcels[_parcelId].tileGrid;
+      output_ = s.parcels[_parcelId].tileGrid;
     }
+  }
+
+  function getParcelUpgradeQueueLength(uint256 _parcelId) external view returns (uint256) {
+    return s.parcels[_parcelId].upgradeQueueLength;
+  }
+
+  function getParcelUpgradeQueueCapacity(uint256 _parcelId) external view returns (uint256) {
+    return s.parcels[_parcelId].upgradeQueueCapacity;
   }
 }

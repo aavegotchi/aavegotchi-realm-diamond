@@ -5,6 +5,7 @@ import {
   ERC1155Facet,
   ERC1155FacetTile,
   InstallationFacet,
+  InstallationAdminFacet,
   TileFacet,
   OwnershipFacet,
   RealmFacet,
@@ -45,6 +46,7 @@ export function outputInstallation(
     capacity: ethers.utils.parseEther(installation.capacity.toString()),
     spillRadius: ethers.utils.parseEther(installation.spillRadius.toString()),
     spillRate: ethers.utils.parseEther(installation.spillRate.toString()),
+    upgradeQueueBoost: installation.upgradeQueueBoost,
     craftTime: installation.craftTime,
     nextLevelId: installation.nextLevelId,
     prerequisites: installation.prerequisites,
@@ -87,6 +89,7 @@ export function testInstallations() {
       capacity: 0,
       spillRadius: 0,
       spillRate: 0,
+      upgradeQueueBoost: 0,
       craftTime: 0,
       deprecated: true,
       nextLevelId: 0,
@@ -106,6 +109,7 @@ export function testInstallations() {
       capacity: 0,
       spillRadius: 0,
       spillRate: 0,
+      upgradeQueueBoost: 0,
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 0,
@@ -125,7 +129,8 @@ export function testInstallations() {
       capacity: 500,
       spillRadius: 100,
       spillRate: 20,
-      craftTime: 20000,
+      upgradeQueueBoost: 0,
+      craftTime: 10000,
       deprecated: false,
       nextLevelId: 3,
       prerequisites: [],
@@ -144,6 +149,7 @@ export function testInstallations() {
       capacity: 750,
       spillRadius: 75,
       spillRate: 10,
+      upgradeQueueBoost: 0,
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 0,
@@ -163,11 +169,52 @@ export function testInstallations() {
       capacity: 0,
       spillRadius: 0,
       spillRate: 20,
+      upgradeQueueBoost: 0,
+      craftTime: 10000,
+      deprecated: false,
+      nextLevelId: 5,
+      prerequisites: [],
+      name: "Altar level 1",
+    })
+  );
+  installations.push(
+    outputInstallation({
+      installationType: 2,
+      level: 2,
+      width: 2,
+      height: 2,
+      alchemicaType: 0,
+      alchemicaCost: [10, 10, 10, 10],
+      harvestRate: 0,
+      capacity: 0,
+      spillRadius: 0,
+      spillRate: 20,
+      upgradeQueueBoost: 0,
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 0,
       prerequisites: [],
       name: "FUD Harvester level 1",
+    })
+  );
+  installations.push(
+    outputInstallation({
+      installationType: 3,
+      level: 1,
+      width: 2,
+      height: 2,
+      alchemicaType: 0,
+      alchemicaCost: [10, 10, 10, 10],
+      harvestRate: 0,
+      capacity: 0,
+      spillRadius: 0,
+      spillRate: 0,
+      upgradeQueueBoost: 1,
+      craftTime: 10000,
+      deprecated: false,
+      nextLevelId: 0,
+      prerequisites: [],
+      name: "BuildQueue level 1",
     })
   );
 
@@ -297,6 +344,10 @@ export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
     "InstallationFacet",
     installationsAddress
   )) as InstallationFacet;
+  const installationAdminFacet = (await ethers.getContractAt(
+    "InstallationAdminFacet",
+    installationsAddress
+  )) as InstallationAdminFacet;
   const tileDiamond = (await ethers.getContractAt(
     "TileFacet",
     tileAddress
@@ -328,7 +379,7 @@ export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
   const installationOwner = await installationOwnershipFacet.owner();
   const tileOwner = await tileOwnershipFacet.owner();
 
-  await installationDiamond.setAddresses(
+  await installationAdminFacet.setAddresses(
     maticAavegotchiDiamondAddress,
     maticDiamondAddress,
     glmr.address
@@ -344,6 +395,7 @@ export async function beforeTest(ethers: any): Promise<TestBeforeVars> {
     installationsAddress,
     realmFacet,
     installationDiamond,
+    installationAdminFacet,
     erc1155Facet,
     erc1155FacetTile,
     ownerAddress,

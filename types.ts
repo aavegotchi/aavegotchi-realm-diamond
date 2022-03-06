@@ -1,11 +1,11 @@
 import { BigNumberish } from "@ethersproject/bignumber";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
   AlchemicaFacet,
   AlchemicaToken,
   ERC1155Facet,
   ERC1155FacetTile,
   GLMR,
+  InstallationAdminFacet,
   InstallationFacet,
   RealmFacet,
   TileFacet,
@@ -70,6 +70,7 @@ export interface InstallationType {
   capacity: BigNumberish;
   spillRadius: BigNumberish;
   spillRate: BigNumberish;
+  upgradeQueueBoost: BigNumberish;
   craftTime: BigNumberish;
   nextLevelId: BigNumberish;
   prerequisites: BigNumberish[];
@@ -88,6 +89,7 @@ export interface InstallationTypeInput {
   capacity: BigNumberish;
   spillRadius: BigNumberish;
   spillRate: BigNumberish;
+  upgradeQueueBoost: BigNumberish;
   craftTime: number;
   nextLevelId: number;
   prerequisites: number[];
@@ -119,6 +121,7 @@ export interface InstallationTypeOutput {
   capacity: BigNumberish;
   spillRadius: BigNumberish;
   spillRate: BigNumberish;
+  upgradeQueueBoost: BigNumberish;
   craftTime: BigNumberish;
   nextLevelId: BigNumberish;
   prerequisites: BigNumberish[];
@@ -145,6 +148,7 @@ export interface TestBeforeVars {
   alchemicaFacet: AlchemicaFacet;
   realmFacet: RealmFacet;
   installationDiamond: InstallationFacet;
+  installationAdminFacet: InstallationAdminFacet;
   tileDiamond: TileFacet;
   ownerAddress: string;
   installationsAddress: string;
