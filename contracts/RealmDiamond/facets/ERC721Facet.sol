@@ -6,6 +6,7 @@ import "../../libraries/LibDiamond.sol";
 import "../../libraries/LibStrings.sol";
 import "../../libraries/LibMeta.sol";
 import "../../libraries/LibERC721.sol";
+import {IERC721} from "../../interfaces/IERC721.sol";
 import {ERC721Marketplace} from "../../interfaces/ERC721Marketplace.sol";
 
 contract ERC721Facet is Modifiers {
@@ -200,5 +201,10 @@ contract ERC721Facet is Modifiers {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
       safeTransferFrom(_from, _to, _tokenIds[index], _data);
     }
+  }
+
+  function addSupportForERC165() external onlyOwner {
+    LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+    ds.supportedInterfaces[type(IERC721).interfaceId] = true;
   }
 }

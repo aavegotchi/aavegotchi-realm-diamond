@@ -41,6 +41,8 @@ struct Parcel {
   uint256[4] lastUpdateTimestamp;
   uint256[4] unclaimedAlchemica;
   uint256 altarId;
+  uint256 upgradeQueueCapacity;
+  uint256 upgradeQueueLength;
 }
 
 struct RequestConfig {
@@ -76,6 +78,7 @@ struct AppStorage {
   mapping(uint256 => uint256) lastExitTime; //for aavegotchis exiting alchemica
   mapping(uint256 => uint256) gotchiChannelings;
   address glmrAddress;
+  address tileDiamond;
 }
 
 library LibAppStorage {

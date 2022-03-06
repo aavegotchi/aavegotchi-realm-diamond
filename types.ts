@@ -1,12 +1,14 @@
 import { BigNumberish } from "@ethersproject/bignumber";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
   AlchemicaFacet,
   AlchemicaToken,
   ERC1155Facet,
+  ERC1155FacetTile,
   GLMR,
+  InstallationAdminFacet,
   InstallationFacet,
   RealmFacet,
+  TileFacet,
 } from "./typechain";
 
 export interface AxiosMetadataResponse {
@@ -68,9 +70,11 @@ export interface InstallationType {
   capacity: BigNumberish;
   spillRadius: BigNumberish;
   spillRate: BigNumberish;
+  upgradeQueueBoost: BigNumberish;
   craftTime: BigNumberish;
   nextLevelId: BigNumberish;
   prerequisites: BigNumberish[];
+  name: string;
 }
 
 export interface InstallationTypeInput {
@@ -85,14 +89,26 @@ export interface InstallationTypeInput {
   capacity: BigNumberish;
   spillRadius: BigNumberish;
   spillRate: BigNumberish;
+  upgradeQueueBoost: BigNumberish;
   craftTime: number;
   nextLevelId: number;
   prerequisites: number[];
+  name: string;
+}
+
+export interface TileTypeInput {
+  deprecated: boolean;
+  tileType: number;
+  width: Width;
+  height: Height;
+  alchemicaCost: BigNumberish[];
+  craftTime: number;
+  name: string;
 }
 
 export type Level = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
-export type Width = 1 | 2 | 3 | 4;
-export type Height = 1 | 2 | 3 | 4;
+export type Width = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type Height = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export interface InstallationTypeOutput {
   deprecated: boolean;
   installationType: BigNumberish;
@@ -105,9 +121,21 @@ export interface InstallationTypeOutput {
   capacity: BigNumberish;
   spillRadius: BigNumberish;
   spillRate: BigNumberish;
+  upgradeQueueBoost: BigNumberish;
   craftTime: BigNumberish;
   nextLevelId: BigNumberish;
   prerequisites: BigNumberish[];
+  name: string;
+}
+
+export interface TileTypeOutput {
+  deprecated: boolean;
+  tileType: BigNumberish;
+  width: Width;
+  height: Height;
+  alchemicaCost: BigNumberish[];
+  craftTime: BigNumberish;
+  name: string;
 }
 
 export type AlchemicaTotals = [
@@ -120,15 +148,20 @@ export interface TestBeforeVars {
   alchemicaFacet: AlchemicaFacet;
   realmFacet: RealmFacet;
   installationDiamond: InstallationFacet;
+  installationAdminFacet: InstallationAdminFacet;
+  tileDiamond: TileFacet;
   ownerAddress: string;
   installationsAddress: string;
+  tileAddress: string;
   fud: AlchemicaToken;
   fomo: AlchemicaToken;
   alpha: AlchemicaToken;
   kek: AlchemicaToken;
   glmr: GLMR;
   erc1155Facet: ERC1155Facet;
+  erc1155FacetTile: ERC1155FacetTile;
   installationOwner: string;
+  tileOwner: string;
 }
 
 export interface Alchemica {

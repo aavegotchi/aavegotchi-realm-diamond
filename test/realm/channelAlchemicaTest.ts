@@ -72,7 +72,7 @@ describe("Testing Equip Installation", async function () {
       []
     );
 
-    await g.installationDiamond.addInstallationTypes(testInstallations());
+    await g.installationAdminFacet.addInstallationTypes(testInstallations());
     installationsTypes = await g.installationDiamond.getInstallationTypes([]);
     expect(installationsTypes.length).to.equal(testInstallations().length);
   });
