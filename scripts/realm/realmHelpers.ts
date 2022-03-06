@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { Network, NetworkConfig } from "hardhat/types";
 import {
   AlchemicaFacet,
@@ -528,6 +528,27 @@ export const genEquipInstallationSignature = async (
   let signature1 = ethers.utils.arrayify(signedMessage1);
 
   return signature1;
+};
+
+export const genChannelAlchemicaSignature = async (
+  parcelId: number,
+  gotchiId: number,
+  lastChanneled: BigNumber
+) => {
+  //@ts-ignore
+  let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+  let messageHash = ethers.utils.solidityKeccak256(
+    ["uint256", "uint256", "uint256"],
+    [parcelId, gotchiId, lastChanneled]
+  );
+  let signedMessage = await backendSigner.signMessage(
+    ethers.utils.arrayify(messageHash)
+  );
+  let signature = ethers.utils.arrayify(signedMessage);
+
+  return signature;
+
+  // signedMessage = await backendSigner.signMessage(messageHash);
 };
 
 export async function faucetAlchemica(
