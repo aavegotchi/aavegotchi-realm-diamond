@@ -102,7 +102,7 @@ describe("Testing Equip Installation", async function () {
     );
     await expect(
       g.installationDiamond.craftInstallations([2, 2, 2, 5])
-    ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
+    ).to.be.revertedWith("ERC20: insufficient allowance");
     await g.alchemicaFacet.testingAlchemicaFaucet(
       0,
       ethers.utils.parseUnits("20000")
