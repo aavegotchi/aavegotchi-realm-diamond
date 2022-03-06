@@ -110,13 +110,19 @@ export async function getDiamondSigner(
 }
 
 export function realmDiamondAddress(network: string) {
-  if (["mumbai", "localhost", "hardhat"].includes(network))
+  if (["mumbai", "localhost"].includes(network))
     return mumbaiInstallationDiamondAddress;
   return maticDiamondAddress;
 }
 
 export function installationDiamondAddress(network: string) {
-  if (["mumbai", "localhost", "hardhat"].includes(network))
+  if (["mumbai", "localhost"].includes(network))
     return mumbaiInstallationDiamondAddress;
   return "";
+}
+
+export async function mineBlocks(ethers: any, count: number) {
+  //convert to hex and handle invalid leading 0 problem
+  const number = ethers.utils.hexlify(count).replace("0x0", "0x");
+  await ethers.provider.send("hardhat_mine", [number]);
 }

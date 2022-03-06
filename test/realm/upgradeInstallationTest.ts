@@ -1,6 +1,7 @@
 import {
   impersonate,
   maticDiamondAddress,
+  mineBlocks,
 } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
@@ -118,9 +119,8 @@ describe("Testing Equip Installation", async function () {
     await expect(
       g.installationDiamond.claimInstallations([0])
     ).to.be.revertedWith("InstallationFacet: installation not ready");
-    for (let i = 0; i < 21000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
+
+    await mineBlocks(ethers, 21000);
 
     const erc1155facet = await ethers.getContractAt(
       "ERC1155Facet",
@@ -163,9 +163,9 @@ describe("Testing Equip Installation", async function () {
     expect(ethers.utils.formatUnits(capacityPreUpgrade[0])).to.equal(
       ethers.utils.formatUnits(capacityPostUpgradePreReadyBlock[0])
     );
-    for (let i = 0; i < 51000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
+
+    await mineBlocks(ethers, 51000);
+
     await g.installationDiamond.finalizeUpgrade();
     let capacityPostUpgradePostReadyBlock =
       await g.realmFacet.getParcelCapacity(testParcelId);

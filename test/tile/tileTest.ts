@@ -1,6 +1,7 @@
 import {
   impersonate,
   maticDiamondAddress,
+  mineBlocks,
 } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
@@ -152,9 +153,8 @@ describe("Testing Tiles", async function () {
     );
     await g.tileDiamond.reduceCraftTime([0], [10000]);
     await g.tileDiamond.claimTiles([0]);
-    for (let i = 0; i < 21000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
+
+    await mineBlocks(ethers, 21000);
 
     const erc1155facet = await ethers.getContractAt(
       "ERC1155FacetTile",

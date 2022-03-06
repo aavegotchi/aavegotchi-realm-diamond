@@ -89,6 +89,9 @@ export async function upgrade(
     AlchemicaFacet__factory.abi
   ) as AlchemicaFacetInterface;
 
+  //@ts-ignore
+  const backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+
   const calldata = iface.encodeFunctionData(
     //@ts-ignore
     "setVars",
@@ -103,7 +106,7 @@ export async function upgrade(
       "0x0000000000000000000000000000000000000000",
       [alchemica.fud, alchemica.fomo, alchemica.alpha, alchemica.kek],
       alchemica.glmr,
-      "0x",
+      ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
       "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
       "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
     ]

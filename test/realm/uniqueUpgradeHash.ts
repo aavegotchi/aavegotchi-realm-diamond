@@ -1,6 +1,7 @@
 import {
   impersonate,
   maticDiamondAddress,
+  mineBlocks,
 } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
@@ -155,9 +156,7 @@ describe("Testing Equip Installation", async function () {
       g.installationDiamond.claimInstallations([0])
     ).to.be.revertedWith("InstallationFacet: installation not ready");
 
-    for (let i = 0; i < 21000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
+    await mineBlocks(ethers, 21000);
 
     await g.installationDiamond.claimInstallations([1, 2, 3]);
   });
@@ -200,9 +199,8 @@ describe("Testing Equip Installation", async function () {
     await expect(
       g.installationDiamond.upgradeInstallation(upgradeQueue)
     ).to.be.revertedWith("InstallationFacet: upgrade hash not unique");
-    for (let i = 0; i < 20000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
+    await mineBlocks(ethers, 20000);
+
     await g.installationDiamond.finalizeUpgrade();
   });
 });

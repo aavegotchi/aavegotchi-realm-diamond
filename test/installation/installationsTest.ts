@@ -3,6 +3,7 @@ import {
   maticAavegotchiDiamondAddress,
   maticGhstAddress,
   maticRealmDiamondAddress,
+  mineBlocks,
 } from "../../scripts/helperFunctions";
 import { InstallationFacet, ERC1155Facet, IERC20 } from "../../typechain";
 import { expect } from "chai";
@@ -142,9 +143,9 @@ describe("Installations tests", async function () {
     await expect(installationFacet.claimInstallations([0])).to.be.revertedWith(
       "InstallationFacet: installation not ready"
     );
-    for (let i = 0; i < 11000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
+
+    await mineBlocks(ethers, 11000);
+
     const balancePre = await erc1155Facet.balanceOf(testAddress, 0);
     await installationFacet.claimInstallations([0, 1, 2, 3, 4]);
     const balancePost = await erc1155Facet.balanceOf(testAddress, 0);
@@ -182,9 +183,9 @@ describe("Installations tests", async function () {
       network
     );
     await installationFacet.craftInstallations([1, 1, 1, 1]);
-    for (let i = 0; i < 51000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
+
+    await mineBlocks(ethers, 51000);
+
     await installationFacet.claimInstallations([5, 6, 7, 8]);
     const balancePreHarv = ethers.utils.formatUnits(
       await erc1155Facet.balanceOf(testAddress, 0),
@@ -295,9 +296,8 @@ describe("Installations tests", async function () {
     );
 
     //Complete upgrade
-    for (let i = 0; i < 10001; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
+    await mineBlocks(ethers, 10001);
+
     await installationFacet.finalizeUpgrade();
 
     upgradeQueue = await installationFacet.getUpgradeQueue();

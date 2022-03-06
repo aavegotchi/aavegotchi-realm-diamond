@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import { Network, NetworkConfig } from "hardhat/types";
 import {
   AlchemicaFacet,
   AlchemicaToken,
@@ -23,6 +24,7 @@ import {
   maticDiamondAddress,
 } from "../helperFunctions";
 import { deployDiamond } from "../installation/deploy";
+import { impersonate } from "../installation/helperFunctions";
 import { deployDiamondTile } from "../tile/deploy";
 import { upgrade } from "./upgrades/upgrade-harvesting";
 
@@ -404,12 +406,12 @@ export async function deployAlchemica(ethers: any, diamondAddress: string) {
 
 export async function beforeTest(
   ethers: any,
-  diamondAddress: string
+  realmDiamondAddress: string
 ): Promise<TestBeforeVars> {
   const installationsAddress = await deployDiamond();
   const tileAddress = await deployDiamondTile();
 
-  const alchemica = await deployAlchemica(ethers, diamondAddress);
+  const alchemica = await deployAlchemica(ethers, realmDiamondAddress);
 
   const fud = alchemica.fud;
   const fomo = alchemica.fomo;
@@ -428,11 +430,11 @@ export async function beforeTest(
 
   const alchemicaFacet = (await ethers.getContractAt(
     "AlchemicaFacet",
-    diamondAddress
+    realmDiamondAddress
   )) as AlchemicaFacet;
   const realmFacet = (await ethers.getContractAt(
     "RealmFacet",
-    diamondAddress
+    realmDiamondAddress
   )) as RealmFacet;
   const installationDiamond = (await ethers.getContractAt(
     "InstallationFacet",
@@ -458,7 +460,7 @@ export async function beforeTest(
 
   const ownershipFacet = (await ethers.getContractAt(
     "OwnershipFacet",
-    diamondAddress
+    realmDiamondAddress
   )) as OwnershipFacet;
 
   const ownerAddress = await ownershipFacet.owner();
@@ -482,7 +484,7 @@ export async function beforeTest(
   );
   await tileDiamond.setAddresses(
     maticAavegotchiDiamondAddress,
-    diamondAddress,
+    realmDiamondAddress,
     glmr.address
   );
 
@@ -505,4 +507,78 @@ export async function beforeTest(
     tileAddress,
     tileOwner,
   };
+}
+
+export const genEquipInstallationSignature = async (
+  tileId: number,
+  x: number,
+  y: number,
+  parcelId: number
+) => {
+  //@ts-ignore
+  let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+
+  let messageHash1 = ethers.utils.solidityKeccak256(
+    ["uint256", "uint256", "uint256", "uint256"],
+    [parcelId, tileId, x, y]
+  );
+  let signedMessage1 = await backendSigner.signMessage(
+    ethers.utils.arrayify(messageHash1)
+  );
+  let signature1 = ethers.utils.arrayify(signedMessage1);
+
+  return signature1;
+};
+
+export async function faucetAlchemica(
+  alchemicaFacet: AlchemicaFacet,
+  amounts: string[]
+) {
+  await alchemicaFacet.testingAlchemicaFaucet(
+    0,
+    ethers.utils.parseUnits(amounts[0])
+  );
+  await alchemicaFacet.testingAlchemicaFaucet(
+    1,
+    ethers.utils.parseUnits(amounts[1])
+  );
+  await alchemicaFacet.testingAlchemicaFaucet(
+    2,
+    ethers.utils.parseUnits(amounts[2])
+  );
+  await alchemicaFacet.testingAlchemicaFaucet(
+    3,
+    ethers.utils.parseUnits(amounts[3])
+  );
+}
+
+export async function approveAlchemica(
+  g: TestBeforeVars,
+  ethers: any,
+  address: string,
+  network: Network
+) {
+  g.fud = await impersonate(address, g.fud, ethers, network);
+  g.fomo = await impersonate(address, g.fomo, ethers, network);
+  g.alpha = await impersonate(address, g.alpha, ethers, network);
+  g.kek = await impersonate(address, g.kek, ethers, network);
+
+  await g.fud.approve(
+    g.installationsAddress,
+    ethers.utils.parseUnits("1000000000")
+  );
+  await g.fomo.approve(
+    g.installationsAddress,
+    ethers.utils.parseUnits("1000000000")
+  );
+  await g.alpha.approve(
+    g.installationsAddress,
+    ethers.utils.parseUnits("1000000000")
+  );
+  await g.kek.approve(
+    g.installationsAddress,
+    ethers.utils.parseUnits("1000000000")
+  );
+
+  return g;
 }

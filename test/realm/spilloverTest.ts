@@ -1,6 +1,7 @@
 import {
   impersonate,
   maticDiamondAddress,
+  mineBlocks,
 } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
@@ -167,9 +168,8 @@ describe("Testing Equip Installation", async function () {
     ).to.be.revertedWith("InstallationFacet: installation not ready");
     await g.installationDiamond.reduceCraftTime([0], [10000]);
     await g.installationDiamond.claimInstallations([0]);
-    for (let i = 0; i < 21000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
+
+    await mineBlocks(ethers, 21000);
 
     const erc1155facet = await ethers.getContractAt(
       "ERC1155Facet",
@@ -210,9 +210,8 @@ describe("Testing Equip Installation", async function () {
     );
 
     expect(Number(ethers.utils.formatUnits(availableAlchemica[0]))).to.equal(0);
-    for (let i = 0; i < 60000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
+    await mineBlocks(ethers, 60000);
+
     let parcelCapacity = await g.realmFacet.getParcelCapacity(testParcelId);
     availableAlchemica = await g.alchemicaFacet.getAvailableAlchemica(
       testParcelId
@@ -281,9 +280,9 @@ describe("Testing Equip Installation", async function () {
       owner: testAddress,
     };
     await g.installationDiamond.upgradeInstallation(upgradeQueue);
-    for (let i = 0; i < 20000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
+
+    await mineBlocks(ethers, 20000);
+
     //@ts-ignore
     let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
     const alchemicaRemaining = await g.alchemicaFacet.getRealmAlchemica(
@@ -307,9 +306,8 @@ describe("Testing Equip Installation", async function () {
     );
     let startBalance = await g.fud.balanceOf(testAddress);
     await g.installationDiamond.finalizeUpgrade();
-    for (let i = 0; i < 60000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
+    await mineBlocks(ethers, 60000);
+
     let availableAlchemica = await g.alchemicaFacet.getAvailableAlchemica(
       testParcelId
     );
@@ -351,9 +349,8 @@ describe("Testing Equip Installation", async function () {
     );
   });
   it("Test unequipping", async function () {
-    for (let i = 0; i < 5000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
+    await mineBlocks(ethers, 5000);
+
     g.realmFacet = await impersonate(
       testAddress,
       g.realmFacet,
