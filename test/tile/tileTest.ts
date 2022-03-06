@@ -37,7 +37,7 @@ describe("Testing Tiles", async function () {
   before(async function () {
     this.timeout(20000000);
 
-    g = await beforeTest(ethers);
+    g = await beforeTest(ethers, maticDiamondAddress);
   });
   it("Deploy alchemica ERC20s", async function () {
     g.alchemicaFacet = await impersonate(
