@@ -95,7 +95,7 @@ describe("Testing Tiles", async function () {
       network
     );
     await expect(g.tileDiamond.craftTiles([1, 2, 2])).to.be.revertedWith(
-      "ERC20: transfer amount exceeds balance"
+      "ERC20: insufficient allowance"
     );
     await g.alchemicaFacet.testingAlchemicaFaucet(
       0,
