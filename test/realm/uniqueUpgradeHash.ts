@@ -2,6 +2,7 @@ import {
   impersonate,
   maticDiamondAddress,
   mineBlocks,
+  realmDiamondAddress,
 } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
@@ -12,7 +13,9 @@ import {
   greatPortalCapacity,
 } from "../../scripts/setVars";
 import {
+  approveAlchemica,
   beforeTest,
+  faucetAlchemica,
   testInstallations,
 } from "../../scripts/realm/realmHelpers";
 
@@ -23,55 +26,12 @@ describe("Testing Equip Installation", async function () {
 
   let g: TestBeforeVars;
 
-  const genSignature = async (tileId: number, x: number, y: number) => {
-    //@ts-ignore
-    let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
-
-    let messageHash1 = ethers.utils.solidityKeccak256(
-      ["uint256", "uint256", "uint256", "uint256"],
-      [testParcelId, tileId, x, y]
-    );
-    let signedMessage1 = await backendSigner.signMessage(
-      ethers.utils.arrayify(messageHash1)
-    );
-    let signature1 = ethers.utils.arrayify(signedMessage1);
-
-    return signature1;
-  };
-
   before(async function () {
     this.timeout(20000000);
 
-    g = await beforeTest(ethers);
+    g = await beforeTest(ethers, realmDiamondAddress(network.name));
   });
-  it("Deploy alchemica ERC20s", async function () {
-    g.alchemicaFacet = await impersonate(
-      g.ownerAddress,
-      g.alchemicaFacet,
-      ethers,
-      network
-    );
-    //@ts-ignore
-    const backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
-    await g.alchemicaFacet.setVars(
-      //@ts-ignore
-      alchemicaTotals(),
-      boostMultipliers,
-      greatPortalCapacity,
-      g.installationsAddress,
-      "0x0000000000000000000000000000000000000000",
-      "0x0000000000000000000000000000000000000000",
-      [g.fud.address, g.fomo.address, g.alpha.address, g.kek.address],
-      g.glmr.address,
-      ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
-      g.ownerAddress,
-      g.tileAddress
-    );
-    await network.provider.send("hardhat_setBalance", [
-      maticDiamondAddress,
-      "0x1000000000000000",
-    ]);
-  });
+
   it("Setup installation diamond", async function () {
     g.installationDiamond = await impersonate(
       g.installationOwner,
@@ -104,43 +64,12 @@ describe("Testing Equip Installation", async function () {
     await expect(
       g.installationDiamond.craftInstallations([2, 2, 2, 6])
     ).to.be.revertedWith("ERC20: insufficient allowance");
-    await g.alchemicaFacet.testingAlchemicaFaucet(
-      0,
-      ethers.utils.parseUnits("20000")
-    );
-    await g.alchemicaFacet.testingAlchemicaFaucet(
-      1,
-      ethers.utils.parseUnits("20000")
-    );
-    await g.alchemicaFacet.testingAlchemicaFaucet(
-      2,
-      ethers.utils.parseUnits("20000")
-    );
-    await g.alchemicaFacet.testingAlchemicaFaucet(
-      3,
-      ethers.utils.parseUnits("20000")
-    );
-    g.fud = await impersonate(testAddress, g.fud, ethers, network);
-    g.fomo = await impersonate(testAddress, g.fomo, ethers, network);
-    g.alpha = await impersonate(testAddress, g.alpha, ethers, network);
-    g.kek = await impersonate(testAddress, g.kek, ethers, network);
+
+    await faucetAlchemica(g.alchemicaFacet, "50000");
     g.fud.transfer(maticDiamondAddress, ethers.utils.parseUnits("10000"));
-    await g.fud.approve(
-      g.installationsAddress,
-      ethers.utils.parseUnits("1000000000")
-    );
-    await g.fomo.approve(
-      g.installationsAddress,
-      ethers.utils.parseUnits("1000000000")
-    );
-    await g.alpha.approve(
-      g.installationsAddress,
-      ethers.utils.parseUnits("1000000000")
-    );
-    await g.kek.approve(
-      g.installationsAddress,
-      ethers.utils.parseUnits("1000000000")
-    );
+
+    approveAlchemica(g, ethers, testAddress, network);
+
     let fudPreCraft = await g.fud.balanceOf(maticDiamondAddress);
     let kekPreCraft = await g.kek.balanceOf(maticDiamondAddress);
     await g.installationDiamond.craftInstallations([2, 2, 2, 6]);

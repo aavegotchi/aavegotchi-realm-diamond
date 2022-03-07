@@ -69,7 +69,7 @@ describe("Testing Equip Installation", async function () {
       network
     );
 
-    await faucetAlchemica(g.alchemicaFacet, ["20000", "300", "300", "300"]);
+    await faucetAlchemica(g.alchemicaFacet, "20000");
     g = await approveAlchemica(g, ethers, testAddress, network);
 
     g.fud.transfer(maticDiamondAddress, ethers.utils.parseUnits("10000"));

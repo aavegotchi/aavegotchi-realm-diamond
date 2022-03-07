@@ -553,24 +553,12 @@ export const genChannelAlchemicaSignature = async (
 
 export async function faucetAlchemica(
   alchemicaFacet: AlchemicaFacet,
-  amounts: string[]
+  amount: string
 ) {
-  await alchemicaFacet.testingAlchemicaFaucet(
-    0,
-    ethers.utils.parseUnits(amounts[0])
-  );
-  await alchemicaFacet.testingAlchemicaFaucet(
-    1,
-    ethers.utils.parseUnits(amounts[1])
-  );
-  await alchemicaFacet.testingAlchemicaFaucet(
-    2,
-    ethers.utils.parseUnits(amounts[2])
-  );
-  await alchemicaFacet.testingAlchemicaFaucet(
-    3,
-    ethers.utils.parseUnits(amounts[3])
-  );
+  const parsed = ethers.utils.parseUnits(amount);
+  for (let index = 0; index < 4; index++) {
+    await alchemicaFacet.testingAlchemicaFaucet(index, parsed);
+  }
 }
 
 export async function approveAlchemica(
