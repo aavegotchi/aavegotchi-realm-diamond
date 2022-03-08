@@ -9,7 +9,7 @@ import "../../libraries/LibERC721.sol";
 import "../../libraries/LibRealm.sol";
 import "../../libraries/LibAlchemica.sol";
 import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamond.sol";
-import "../../Alchemica/AlchemicaToken.sol";
+import "../../test/AlchemicaToken.sol";
 import "../../libraries/LibSignature.sol";
 
 contract RealmFacet is Modifiers {
