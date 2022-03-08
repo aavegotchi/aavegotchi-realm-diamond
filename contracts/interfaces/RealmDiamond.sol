@@ -29,4 +29,12 @@ interface RealmDiamond {
     uint256 _coordinateX,
     uint256 _coordinateY
   ) external;
+
+  function getParcelUpgradeQueueLength(uint256 _parcelId) external view returns (uint256);
+
+  function getParcelUpgradeQueueCapacity(uint256 _parcelId) external view returns (uint256);
+
+  function addUpgradeQueueLength(uint256 _realmId) external;
+
+  function subUpgradeQueueLength(uint256 _realmId) external;
 }

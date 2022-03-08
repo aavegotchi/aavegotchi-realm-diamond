@@ -10,6 +10,7 @@ import "../../libraries/LibRealm.sol";
 import "../../libraries/LibAlchemica.sol";
 import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamond.sol";
 import "../../Alchemica/AlchemicaToken.sol";
+import "../../libraries/LibSignature.sol";
 
 contract RealmFacet is Modifiers {
   uint256 constant MAX_SUPPLY = 420069;
@@ -27,6 +28,8 @@ contract RealmFacet is Modifiers {
   event ResyncParcel(uint256 _realmId);
   event EquipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y);
   event UnequipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y);
+  event EquipTile(uint256 _realmId, uint256 _tileId, uint256 _x, uint256 _y);
+  event UnequipTile(uint256 _realmId, uint256 _tileId, uint256 _x, uint256 _y);
   event AavegotchiDiamondUpdated(address _aavegotchiDiamond);
   event InstallationUpgraded(uint256 _realmId, uint256 _prevInstallationId, uint256 _nextInstallationId, uint256 _coordinateX, uint256 _coordinateY);
 
@@ -66,18 +69,22 @@ contract RealmFacet is Modifiers {
   }
 
   /// @notice Allow a parcel owner to equip an installation
-  /// @dev The _x and _y denote the size of the installation and are used to make sure that slot is available on a parcel
+  /// @dev The _x and _y denote the starting coordinates of the installation and are used to make sure that slot is available on a parcel
   /// @param _realmId The identifier of the parcel which the installation is being equipped on
   /// @param _installationId The identifier of the installation being equipped
   /// @param _x The x(horizontal) coordinate of the installation
   /// @param _y The y(vertical) coordinate of the installation
-
   function equipInstallation(
     uint256 _realmId,
     uint256 _installationId,
     uint256 _x,
-    uint256 _y
+    uint256 _y,
+    bytes memory _signature
   ) external onlyParcelOwner(_realmId) {
+    require(
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _installationId, _x, _y)), _signature, s.backendPubKey),
+      "RealmFacet: Invalid signature"
+    );
     require(s.parcels[_realmId].currentRound >= 1, "RealmFacet: Must survey before equipping");
     LibRealm.placeInstallation(_realmId, _installationId, _x, _y);
     InstallationDiamondInterface(s.installationsDiamond).equipInstallation(msg.sender, _realmId, _installationId);
@@ -88,7 +95,7 @@ contract RealmFacet is Modifiers {
   }
 
   /// @notice Allow a parcel owner to unequip an installation
-  /// @dev The _x and _y denote the size of the installation and are used to make sure that slot is available on a parcel
+  /// @dev The _x and _y denote the starting coordinates of the installation and are used to make sure that slot is available on a parcel
   /// @param _realmId The identifier of the parcel which the installation is being unequipped from
   /// @param _installationId The identifier of the installation being unequipped
   /// @param _x The x(horizontal) coordinate of the installation
@@ -97,14 +104,19 @@ contract RealmFacet is Modifiers {
     uint256 _realmId,
     uint256 _installationId,
     uint256 _x,
-    uint256 _y
+    uint256 _y,
+    bytes memory _signature
   ) external onlyParcelOwner(_realmId) {
+    require(
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _installationId, _x, _y)), _signature, s.backendPubKey),
+      "RealmFacet: Invalid signature"
+    );
     LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
 
     InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
     InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
 
-    for (uint i; i < installation.alchemicaCost.length; i++) {
+    for (uint256 i; i < installation.alchemicaCost.length; i++) {
       AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
 
       //@question : include upgrades in refund?
@@ -117,6 +129,54 @@ contract RealmFacet is Modifiers {
     LibAlchemica.reduceTraits(_realmId, _installationId);
 
     emit UnequipInstallation(_realmId, _installationId, _x, _y);
+  }
+
+  /// @notice Allow a parcel owner to equip a tile
+  /// @dev The _x and _y denote the starting coordinates of the tile and are used to make sure that slot is available on a parcel
+  /// @param _realmId The identifier of the parcel which the tile is being equipped on
+  /// @param _tileId The identifier of the tile being equipped
+  /// @param _x The x(horizontal) coordinate of the tile
+  /// @param _y The y(vertical) coordinate of the tile
+  function equipTile(
+    uint256 _realmId,
+    uint256 _tileId,
+    uint256 _x,
+    uint256 _y,
+    bytes memory _signature
+  ) external onlyParcelOwner(_realmId) {
+    require(
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _tileId, _x, _y)), _signature, s.backendPubKey),
+      "RealmFacet: Invalid signature"
+    );
+    require(s.parcels[_realmId].currentRound >= 1, "RealmFacet: Must survey before equipping");
+    LibRealm.placeTile(_realmId, _tileId, _x, _y);
+    TileDiamondInterface(s.tileDiamond).equipTile(msg.sender, _realmId, _tileId);
+
+    emit EquipTile(_realmId, _tileId, _x, _y);
+  }
+
+  /// @notice Allow a parcel owner to unequip a tile
+  /// @dev The _x and _y denote the starting coordinates of the tile and are used to make sure that slot is available on a parcel
+  /// @param _realmId The identifier of the parcel which the tile is being unequipped from
+  /// @param _tileId The identifier of the tile being unequipped
+  /// @param _x The x(horizontal) coordinate of the tile
+  /// @param _y The y(vertical) coordinate of the tile
+  function unequipTile(
+    uint256 _realmId,
+    uint256 _tileId,
+    uint256 _x,
+    uint256 _y,
+    bytes memory _signature
+  ) external onlyParcelOwner(_realmId) {
+    require(
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _tileId, _x, _y)), _signature, s.backendPubKey),
+      "RealmFacet: Invalid signature"
+    );
+    LibRealm.removeTile(_realmId, _tileId, _x, _y);
+
+    TileDiamondInterface(s.tileDiamond).unequipTile(msg.sender, _realmId, _tileId);
+
+    emit UnequipTile(_realmId, _tileId, _x, _y);
   }
 
   struct ParcelOutput {
@@ -189,48 +249,85 @@ contract RealmFacet is Modifiers {
     emit InstallationUpgraded(_realmId, _prevInstallationId, _nextInstallationId, _coordinateX, _coordinateY);
   }
 
+  function addUpgradeQueueLength(uint256 _realmId) external onlyInstallationDiamond {
+    s.parcels[_realmId].upgradeQueueLength++;
+  }
+
+  function subUpgradeQueueLength(uint256 _realmId) external onlyInstallationDiamond {
+    s.parcels[_realmId].upgradeQueueLength--;
+  }
+
   // used for testing atm
   function getParcelCapacity(uint256 _realmId) external view returns (uint256[4] memory) {
     return s.parcels[_realmId].reservoirCapacity;
   }
 
-  function getHumbleGrid(uint256 _parcelId) external view returns (uint256[8][8] memory output_) {
+  function getHumbleGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[8][8] memory output_) {
     require(s.parcels[_parcelId].size == 0, "RealmFacet: Not humble");
     for (uint256 i; i < 8; i++) {
       for (uint256 j; j < 8; j++) {
-        output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+        if (_gridType == 0) {
+          output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+        } else if (_gridType == 1) {
+          output_[i][j] = s.parcels[_parcelId].tileGrid[i][j];
+        }
       }
     }
   }
 
-  function getReasonableGrid(uint256 _parcelId) external view returns (uint256[16][16] memory output_) {
+  function getReasonableGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[16][16] memory output_) {
     require(s.parcels[_parcelId].size == 1, "RealmFacet: Not reasonable");
     for (uint256 i; i < 16; i++) {
       for (uint256 j; j < 16; j++) {
-        output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+        if (_gridType == 0) {
+          output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+        } else if (_gridType == 1) {
+          output_[i][j] = s.parcels[_parcelId].tileGrid[i][j];
+        }
       }
     }
   }
 
-  function getSpaciousVerticalGrid(uint256 _parcelId) external view returns (uint256[32][64] memory output_) {
+  function getSpaciousVerticalGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[32][64] memory output_) {
     require(s.parcels[_parcelId].size == 2, "RealmFacet: Not spacious vertical");
     for (uint256 i; i < 64; i++) {
       for (uint256 j; j < 32; j++) {
-        output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+        if (_gridType == 0) {
+          output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+        } else if (_gridType == 1) {
+          output_[i][j] = s.parcels[_parcelId].tileGrid[i][j];
+        }
       }
     }
   }
 
-  function getSpaciousHorizontalGrid(uint256 _parcelId) external view returns (uint256[64][32] memory output_) {
+  function getSpaciousHorizontalGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[64][32] memory output_) {
     require(s.parcels[_parcelId].size == 3, "RealmFacet: Not spacious horizontal");
     for (uint256 i; i < 32; i++) {
       for (uint256 j; j < 64; j++) {
-        output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+        if (_gridType == 0) {
+          output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+        } else if (_gridType == 1) {
+          output_[i][j] = s.parcels[_parcelId].tileGrid[i][j];
+        }
       }
     }
   }
 
-  function getPaartnerGrid(uint256 _parcelId) external view returns (uint256[64][64] memory) {
-    return s.parcels[_parcelId].buildGrid;
+  function getPaartnerGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[64][64] memory output_) {
+    require(s.parcels[_parcelId].size == 4, "RealmFacet: Not paartner");
+    if (_gridType == 0) {
+      output_ = s.parcels[_parcelId].buildGrid;
+    } else if (_gridType == 1) {
+      output_ = s.parcels[_parcelId].tileGrid;
+    }
+  }
+
+  function getParcelUpgradeQueueLength(uint256 _parcelId) external view returns (uint256) {
+    return s.parcels[_parcelId].upgradeQueueLength;
+  }
+
+  function getParcelUpgradeQueueCapacity(uint256 _parcelId) external view returns (uint256) {
+    return s.parcels[_parcelId].upgradeQueueCapacity;
   }
 }

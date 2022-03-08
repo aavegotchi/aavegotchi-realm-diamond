@@ -1,6 +1,7 @@
 import {
   impersonate,
   maticDiamondAddress,
+  mineBlocks,
 } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
@@ -21,6 +22,22 @@ describe("Testing Equip Installation", async function () {
   const testGotchiId = 22306;
 
   let g: TestBeforeVars;
+
+  const genSignature = async (tileId: number, x: number, y: number) => {
+    //@ts-ignore
+    let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+
+    let messageHash1 = ethers.utils.solidityKeccak256(
+      ["uint256", "uint256", "uint256", "uint256"],
+      [testParcelId, tileId, x, y]
+    );
+    let signedMessage1 = await backendSigner.signMessage(
+      ethers.utils.arrayify(messageHash1)
+    );
+    let signature1 = ethers.utils.arrayify(signedMessage1);
+
+    return signature1;
+  };
 
   before(async function () {
     this.timeout(20000000);
@@ -47,7 +64,8 @@ describe("Testing Equip Installation", async function () {
       [g.fud.address, g.fomo.address, g.alpha.address, g.kek.address],
       g.glmr.address,
       ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
-      g.ownerAddress
+      g.ownerAddress,
+      g.tileAddress
     );
     await network.provider.send("hardhat_setBalance", [
       maticDiamondAddress,
@@ -150,9 +168,8 @@ describe("Testing Equip Installation", async function () {
     ).to.be.revertedWith("InstallationFacet: installation not ready");
     await g.installationDiamond.reduceCraftTime([0], [10000]);
     await g.installationDiamond.claimInstallations([0]);
-    for (let i = 0; i < 21000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
+
+    await mineBlocks(ethers, 21000);
 
     const erc1155facet = await ethers.getContractAt(
       "ERC1155Facet",
@@ -174,16 +191,27 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
-    await g.realmFacet.equipInstallation(testParcelId, 1, 0, 0);
-    await g.realmFacet.equipInstallation(testParcelId, 2, 3, 3);
+    await g.realmFacet.equipInstallation(
+      testParcelId,
+      1,
+      0,
+      0,
+      await genSignature(1, 0, 0)
+    );
+    await g.realmFacet.equipInstallation(
+      testParcelId,
+      2,
+      3,
+      3,
+      await genSignature(2, 3, 3)
+    );
     let availableAlchemica = await g.alchemicaFacet.getAvailableAlchemica(
       testParcelId
     );
 
     expect(Number(ethers.utils.formatUnits(availableAlchemica[0]))).to.equal(0);
-    for (let i = 0; i < 60000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
+    await mineBlocks(ethers, 60000);
+
     let parcelCapacity = await g.realmFacet.getParcelCapacity(testParcelId);
     availableAlchemica = await g.alchemicaFacet.getAvailableAlchemica(
       testParcelId
@@ -235,7 +263,13 @@ describe("Testing Equip Installation", async function () {
     );
   });
   it("Equip level 2 and claim alchemica", async function () {
-    await g.realmFacet.equipInstallation(testParcelId, 2, 10, 10);
+    await g.realmFacet.equipInstallation(
+      testParcelId,
+      2,
+      10,
+      10,
+      await genSignature(2, 10, 10)
+    );
     const upgradeQueue: UpgradeQueue = {
       parcelId: testParcelId,
       coordinateX: 3,
@@ -246,9 +280,9 @@ describe("Testing Equip Installation", async function () {
       owner: testAddress,
     };
     await g.installationDiamond.upgradeInstallation(upgradeQueue);
-    for (let i = 0; i < 20000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
+
+    await mineBlocks(ethers, 20000);
+
     //@ts-ignore
     let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
     const alchemicaRemaining = await g.alchemicaFacet.getRealmAlchemica(
@@ -272,9 +306,8 @@ describe("Testing Equip Installation", async function () {
     );
     let startBalance = await g.fud.balanceOf(testAddress);
     await g.installationDiamond.finalizeUpgrade();
-    for (let i = 0; i < 60000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
+    await mineBlocks(ethers, 60000);
+
     let availableAlchemica = await g.alchemicaFacet.getAvailableAlchemica(
       testParcelId
     );
@@ -316,9 +349,8 @@ describe("Testing Equip Installation", async function () {
     );
   });
   it("Test unequipping", async function () {
-    for (let i = 0; i < 5000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
+    await mineBlocks(ethers, 5000);
+
     g.realmFacet = await impersonate(
       testAddress,
       g.realmFacet,
@@ -328,14 +360,26 @@ describe("Testing Equip Installation", async function () {
     const harvester = await g.installationDiamond.getInstallationType(1);
     const harvesterFudCost = harvester.alchemicaCost[0];
     const balancePre = await g.fud.balanceOf(testAddress);
-    await g.realmFacet.unequipInstallation(testParcelId, 1, 0, 0);
+    await g.realmFacet.unequipInstallation(
+      testParcelId,
+      1,
+      0,
+      0,
+      await genSignature(1, 0, 0)
+    );
     const balancePost = await g.fud.balanceOf(testAddress);
     expect(Number(ethers.utils.formatUnits(balancePost))).to.equal(
       Number(ethers.utils.formatUnits(balancePre)) +
         Number(ethers.utils.formatUnits(harvesterFudCost)) / 2
     );
     await expect(
-      g.realmFacet.unequipInstallation(testParcelId, 2, 10, 10)
+      g.realmFacet.unequipInstallation(
+        testParcelId,
+        2,
+        10,
+        10,
+        await genSignature(2, 10, 10)
+      )
     ).to.be.revertedWith(
       "LibAlchemica: Unclaimed alchemica greater than reservoir capacity"
     );
@@ -362,7 +406,19 @@ describe("Testing Equip Installation", async function () {
       signature
     );
 
-    await g.realmFacet.unequipInstallation(testParcelId, 3, 3, 3);
-    await g.realmFacet.unequipInstallation(testParcelId, 2, 10, 10);
+    await g.realmFacet.unequipInstallation(
+      testParcelId,
+      3,
+      3,
+      3,
+      await genSignature(3, 3, 3)
+    );
+    await g.realmFacet.unequipInstallation(
+      testParcelId,
+      2,
+      10,
+      10,
+      await genSignature(2, 10, 10)
+    );
   });
 });

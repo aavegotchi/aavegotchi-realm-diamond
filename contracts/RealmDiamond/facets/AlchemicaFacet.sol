@@ -117,9 +117,10 @@ contract AlchemicaFacet is Modifiers {
     address[4] calldata _alchemicaAddresses,
     address _glmrAddress,
     bytes memory _backendPubKey,
-    address _gameManager
+    address _gameManager,
+    address _tileDiamond
   ) external onlyOwner {
-    for (uint i; i < _alchemicas.length; i++) {
+    for (uint256 i; i < _alchemicas.length; i++) {
       for (uint256 j; j < _alchemicas[i].length; j++) {
         s.totalAlchemicas[i][j] = _alchemicas[i][j];
       }
@@ -133,6 +134,7 @@ contract AlchemicaFacet is Modifiers {
     s.backendPubKey = _backendPubKey;
     s.gameManager = _gameManager;
     s.glmrAddress = _glmrAddress;
+    s.tileDiamond = _tileDiamond;
   }
 
   /// @dev This function will be removed in production.
@@ -284,9 +286,9 @@ contract AlchemicaFacet is Modifiers {
     uint256 _owner,
     uint256 _spill
   ) internal {
-      AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[_alchemicaType]);
-      alchemica.mint(alchemicaRecipient(_gotchiId), _owner);
-      alchemica.mint(address(this), _spill);
+    AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[_alchemicaType]);
+    alchemica.mint(alchemicaRecipient(_gotchiId), _owner);
+    alchemica.mint(address(this), _spill);
   }
 
   /// @notice Allow a parcel owner to channel alchemica
@@ -311,7 +313,7 @@ contract AlchemicaFacet is Modifiers {
       "AlchemicaFacet: Invalid signature"
     );
 
-    (uint256 rate, uint radius) = InstallationDiamondInterface(s.installationsDiamond).spilloverRateAndRadiusOfId(s.parcels[_realmId].altarId);
+    (uint256 rate, uint256 radius) = InstallationDiamondInterface(s.installationsDiamond).spilloverRateAndRadiusOfId(s.parcels[_realmId].altarId);
 
     uint256[4] memory channelAmounts = [uint256(100e18), uint256(50e18), uint256(25e18), uint256(10e18)];
 
@@ -371,5 +373,28 @@ contract AlchemicaFacet is Modifiers {
     }
 
     emit ExitAlchemica(_gotchiId, _alchemica);
+  }
+
+  /// @notice Helper function to batch transfer alchemica
+  /// @param _targets Array of target addresses
+  /// @param _amounts Nested array of amounts to transfer. 
+  /// @dev The inner array element order for _amounts is FUD, FOMO, ALPHA, KEK
+  function batchTransferAlchemica(address[] calldata _targets, uint256[4][] calldata _amounts) external {
+    require(_targets.length == _amounts.length, "AlchemicaFacet: Mismatched array lengths");
+
+    AlchemicaToken[4] memory alchemicas = [
+      AlchemicaToken(s.alchemicaAddresses[0]),
+      AlchemicaToken(s.alchemicaAddresses[1]),
+      AlchemicaToken(s.alchemicaAddresses[2]),
+      AlchemicaToken(s.alchemicaAddresses[3])
+    ];
+
+    for(uint i = 0; i < _targets.length; i++) {
+      for(uint j = 0; j < _amounts[i].length; j++) {
+        if(_amounts[i][j] > 0) {
+          alchemicas[j].transferFrom(msg.sender, _targets[i], _amounts[i][j]);
+        }
+      }
+    }
   }
 }

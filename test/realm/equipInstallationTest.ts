@@ -1,6 +1,7 @@
 import {
   impersonate,
   maticDiamondAddress,
+  mineBlocks,
 } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
@@ -71,9 +72,9 @@ describe("Testing Equip Installation", async function () {
     await expect(
       g.installationDiamond.claimInstallations([0])
     ).to.be.revertedWith("g.installationDiamond: installation not ready");
-    for (let i = 0; i < 11000; i++) {
-      ethers.provider.send("evm_mine", []);
-    }
+
+    await mineBlocks(ethers, 11000);
+
     const balancePre = await g.erc1155Facet.balanceOf(testAddress, 1);
     await g.installationDiamond.claimInstallations([0, 1, 2]);
     const balancePost = await g.erc1155Facet.balanceOf(testAddress, 1);

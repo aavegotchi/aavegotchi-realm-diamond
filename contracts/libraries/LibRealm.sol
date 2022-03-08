@@ -2,7 +2,8 @@
 pragma solidity 0.8.9;
 
 import {InstallationDiamondInterface} from "../interfaces/InstallationDiamond.sol";
-import {LibAppStorage, AppStorage, Parcel} from "./AppStorage.sol";
+import {TileDiamondInterface} from "../interfaces/TileDiamond.sol";
+import "./AppStorage.sol";
 import "hardhat/console.sol";
 
 library LibRealm {
@@ -16,21 +17,9 @@ library LibRealm {
     uint256 _y
   ) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
-    uint8[5] memory widths = [
-      8, //humble
-      16, //reasonable
-      32, //spacious vertical
-      64, //spacious horizontal
-      64 //partner
-    ];
+    uint256[5] memory widths = getWidths();
 
-    uint8[5] memory heights = [
-      8, //humble
-      16, //reasonable
-      64, //spacious vertical
-      32, //spacious horizontal
-      64 //partner
-    ];
+    uint256[5] memory heights = getHeights();
 
     InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
     InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
@@ -66,6 +55,51 @@ library LibRealm {
     }
   }
 
+  function placeTile(
+    uint256 _realmId,
+    uint256 _tileId,
+    uint256 _x,
+    uint256 _y
+  ) internal {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+    uint256[5] memory widths = getWidths();
+
+    uint256[5] memory heights = getHeights();
+
+    TileDiamondInterface tilesDiamond = TileDiamondInterface(s.tileDiamond);
+    TileDiamondInterface.TileType memory tile = tilesDiamond.getTileType(_tileId);
+
+    Parcel storage parcel = s.parcels[_realmId];
+
+    //Check if these slots are available onchain
+    require(_x <= widths[parcel.size] - tile.width - 1, "LibRealm: x exceeding width");
+    require(_y <= heights[parcel.size] - tile.height - 1, "LibRealm: y exceeding height");
+    for (uint256 indexW = _x; indexW < _x + tile.width; indexW++) {
+      for (uint256 indexH = _y; indexH < _y + tile.height; indexH++) {
+        require(parcel.tileGrid[indexW][indexH] == 0, "LibRealm: Invalid spot");
+        parcel.tileGrid[indexW][indexH] = _tileId;
+      }
+    }
+  }
+
+  function removeTile(
+    uint256 _realmId,
+    uint256 _tileId,
+    uint256 _x,
+    uint256 _y
+  ) internal {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+    TileDiamondInterface tilesDiamond = TileDiamondInterface(s.tileDiamond);
+    TileDiamondInterface.TileType memory tile = tilesDiamond.getTileType(_tileId);
+    Parcel storage parcel = s.parcels[_realmId];
+    require(parcel.tileGrid[_x][_y] == _tileId, "LibRealm: wrong tileId");
+    for (uint256 indexW = _x; indexW < _x + tile.width; indexW++) {
+      for (uint256 indexH = _y; indexH < _y + tile.height; indexH++) {
+        parcel.tileGrid[indexW][indexH] = 0;
+      }
+    }
+  }
+
   function calculateAmount(
     uint256 _tokenId,
     uint256[] memory randomWords,
@@ -83,7 +117,7 @@ library LibRealm {
     AppStorage storage s = LibAppStorage.diamondStorage();
     uint256[] memory alchemicas = new uint256[](4);
     uint256[] memory roundAmounts = new uint256[](4);
-    for (uint i; i < 4; i++) {
+    for (uint256 i; i < 4; i++) {
       uint256 baseAmount = calculateAmount(_tokenId, randomWords, i); //100%;
 
       //first round is 25%, rounds after are 8.3%
@@ -98,5 +132,27 @@ library LibRealm {
     s.parcels[_tokenId].roundAlchemica[_round] = alchemicas;
     s.parcels[_tokenId].roundBaseAlchemica[_round] = roundAmounts;
     emit SurveyParcel(_tokenId, alchemicas);
+  }
+
+  function getWidths() internal pure returns (uint256[5] memory) {
+    uint256[5] memory widths = [
+      HUMBLE_WIDTH, //humble
+      REASONABLE_WIDTH, //reasonable
+      SPACIOUS_WIDTH, //spacious vertical
+      SPACIOUS_HEIGHT, //spacious horizontal
+      PAARTNER_WIDTH //partner
+    ];
+    return widths;
+  }
+
+  function getHeights() internal pure returns (uint256[5] memory) {
+    uint256[5] memory heights = [
+      HUMBLE_HEIGHT, //humble
+      REASONABLE_HEIGHT, //reasonable
+      SPACIOUS_HEIGHT, //spacious vertical
+      SPACIOUS_WIDTH, //spacious horizontal
+      PAARTNER_HEIGHT //partner
+    ];
+    return heights;
   }
 }
