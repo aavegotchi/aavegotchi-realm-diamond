@@ -8,7 +8,7 @@ import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "../../libraries/LibAlchemica.sol";
 import "../../libraries/LibSignature.sol";
 import "../../interfaces/AavegotchiDiamond.sol";
-import "../../test/AlchemicaToken.sol";
+import "../../Alchemica/AlchemicaToken.sol";
 import "hardhat/console.sol";
 
 uint256 constant bp = 100 ether;
