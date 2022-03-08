@@ -6,7 +6,7 @@ import "../../libraries/LibERC721.sol";
 import "../../libraries/LibRealm.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "@chainlink/contracts/src/v0.8/dev/VRFConsumerBaseV2.sol";
+import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 
 contract VRFFacet is Modifiers {
   function rawFulfillRandomWords(uint256 requestId, uint256[] memory randomWords) external {
