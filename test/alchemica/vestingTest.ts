@@ -43,7 +43,7 @@ describe("Vesting", function () {
     beneficiary = signers[1];
     dao = signers[2];
     proxyAdmin = (await deployProxyAdmin(owner)).contract;
-    let tokenFactory = await ethers.getContractFactory("Token");
+    let tokenFactory = await ethers.getContractFactory("ERC20Generic");
     token = await tokenFactory.deploy();
     anotherToken = await tokenFactory.deploy();
     vestingImplementation = (await deployVestingImplementation(owner)).contract;
