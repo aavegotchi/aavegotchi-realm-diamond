@@ -114,7 +114,7 @@ export function testInstallations() {
       upgradeQueueBoost: 0,
       craftTime: 10000,
       deprecated: false,
-      nextLevelId: 0,
+      nextLevelId: 7,
       prerequisites: [],
       name: "Altar level 1",
     })
@@ -174,7 +174,7 @@ export function testInstallations() {
       upgradeQueueBoost: 0,
       craftTime: 10000,
       deprecated: false,
-      nextLevelId: 5,
+      nextLevelId: 7,
       prerequisites: [],
       name: "Altar level 1",
     })
@@ -217,6 +217,26 @@ export function testInstallations() {
       nextLevelId: 0,
       prerequisites: [],
       name: "BuildQueue level 1",
+    })
+  );
+  installations.push(
+    outputInstallation({
+      installationType: 2,
+      level: 2,
+      width: 2,
+      height: 2,
+      alchemicaType: 0,
+      alchemicaCost: [100, 20, 0, 30],
+      harvestRate: 2,
+      capacity: 0,
+      spillRadius: 0,
+      spillRate: 20,
+      upgradeQueueBoost: 0,
+      craftTime: 10000,
+      deprecated: false,
+      nextLevelId: 0,
+      prerequisites: [],
+      name: "Altar level 2",
     })
   );
 

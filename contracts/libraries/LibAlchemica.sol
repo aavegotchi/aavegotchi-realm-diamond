@@ -66,6 +66,7 @@ library LibAlchemica {
     if (installationType.installationType == 2) {
       require(s.parcels[_realmId].altarId == 0, "LibAlchemica: Cannot equip two altars");
       s.parcels[_realmId].altarId = _installationId;
+      s.parcelChannelings[_realmId] = block.timestamp - 24 hours;
     }
 
     // upgradeQueueBoost
