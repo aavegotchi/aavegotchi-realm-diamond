@@ -9,7 +9,7 @@ import "../../libraries/LibERC721.sol";
 import "../../libraries/LibRealm.sol";
 import "../../libraries/LibAlchemica.sol";
 import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamond.sol";
-import "../../test/AlchemicaToken.sol";
+import "../../Alchemica/AlchemicaToken.sol";
 
 contract RealmFacet is Modifiers {
   uint256 constant MAX_SUPPLY = 420069;
