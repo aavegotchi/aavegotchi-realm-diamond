@@ -14,6 +14,7 @@ import { gasPrice, impersonate } from "../../helperFunctions";
 import { deployAlchemica } from "../realmHelpers";
 import { alchemicaTotals, boostMultipliers } from "../../setVars";
 import { deployDiamond } from "../../installation/deploy";
+import { deployDiamondTile } from "../../tile/deploy";
 
 const { getSelectors, FacetCutAction } = require("../../libraries/diamond.js");
 
@@ -137,6 +138,8 @@ export async function deployMumbai() {
   console.log("Deploying Installation Diamond");
   const installationDiamond = await deployDiamond();
 
+  const tileDiamond = await deployDiamondTile();
+
   console.log("Deploying Alchemicas");
   const alchemica = await deployAlchemica(ethers, realmDiamond.address);
 
@@ -182,6 +185,7 @@ export async function deployMumbai() {
     alchemica.glmr.address,
     ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
     deployerAddress,
+    tileDiamond,
     { gasPrice: gasPrice }
   );
 
