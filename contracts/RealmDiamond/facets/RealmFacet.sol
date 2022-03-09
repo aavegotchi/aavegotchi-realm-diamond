@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.9;
 
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../../libraries/AppStorage.sol";
 import "../../libraries/LibDiamond.sol";
 import "../../libraries/LibStrings.sol";
@@ -9,7 +10,6 @@ import "../../libraries/LibERC721.sol";
 import "../../libraries/LibRealm.sol";
 import "../../libraries/LibAlchemica.sol";
 import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamond.sol";
-import "../../test/AlchemicaToken.sol";
 import "../../libraries/LibSignature.sol";
 
 contract RealmFacet is Modifiers {
@@ -117,7 +117,7 @@ contract RealmFacet is Modifiers {
     InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
 
     for (uint256 i; i < installation.alchemicaCost.length; i++) {
-      AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
+      IERC20 alchemica = IERC20(s.alchemicaAddresses[i]);
 
       //@question : include upgrades in refund?
       uint256 alchemicaRefund = installation.alchemicaCost[i] / 2;
