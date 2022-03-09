@@ -230,9 +230,8 @@ contract InstallationFacet is Modifiers {
       require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
 
       //take the required alchemica
-      for (uint256 j = 0; j < installationType.alchemicaCost.length; j++) {
-        LibERC20.transferFrom(alchemicaAddresses[j], msg.sender, s.realmDiamond, installationType.alchemicaCost[j]);
-      }
+      LibInstallation._splitAlchemica(installationType.alchemicaCost, alchemicaAddresses);
+
       if (installationType.craftTime == 0) {
         LibERC1155._safeMint(msg.sender, _installationTypes[i], 0);
       } else {
@@ -384,9 +383,7 @@ contract InstallationFacet is Modifiers {
     //take the required alchemica
     address[4] memory alchemicaAddresses = realm.getAlchemicaAddresses();
     InstallationType memory installationType = s.installationTypes[_upgradeQueue.installationId];
-    for (uint256 i; i < installationType.alchemicaCost.length; i++) {
-      LibERC20.transferFrom(alchemicaAddresses[i], msg.sender, s.realmDiamond, installationType.alchemicaCost[i]);
-    }
+    LibInstallation._splitAlchemica(installationType.alchemicaCost, alchemicaAddresses);
 
     //current installation
     InstallationType memory prevInstallation = s.installationTypes[_upgradeQueue.installationId];
