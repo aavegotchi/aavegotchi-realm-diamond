@@ -8,7 +8,7 @@ import {
 } from "../../helpers/helpers";
 import { address, increaseTime, mine, aboutEquals } from "../../helpers/utils";
 import { GWEI, ETHER, YEAR } from "../../helpers/constants";
-import { ERC20Generic } from "../../typechain/ERC20Generic";
+import { ERC20MintableBurnable } from "../../typechain/ERC20MintableBurnable";
 
 describe("Vesting", function () {
   let signers: Signer[];
@@ -16,8 +16,8 @@ describe("Vesting", function () {
   let beneficiary: Signer;
   let dao: Signer;
   let proxyAdmin: Contract;
-  let token: ERC20Generic;
-  let anotherToken: ERC20Generic;
+  let token: ERC20MintableBurnable;
+  let anotherToken: ERC20MintableBurnable;
   let vestingContract: Contract;
   let vestingImplementation: Contract;
 
@@ -27,7 +27,7 @@ describe("Vesting", function () {
     beneficiary = signers[1];
     dao = signers[2];
     proxyAdmin = (await deployProxyAdmin(owner)).contract;
-    let tokenFactory = await ethers.getContractFactory("ERC20Generic");
+    let tokenFactory = await ethers.getContractFactory("ERC20MintableBurnable");
     token = await tokenFactory.deploy();
     anotherToken = await tokenFactory.deploy();
     vestingImplementation = (await deployVestingImplementation(owner)).contract;
@@ -95,7 +95,7 @@ describe("Vesting", function () {
       ).to.equal(true);
       await vestingContract.release(token.address);
       expect(
-        aboutEquals(await token.balanceOf(address(beneficiary)), ETHER.div(10))
+        aboutEquals(await token.balanceOf(await address(beneficiary)), ETHER.div(10))
       ).to.equal(true);
     });
 
@@ -110,7 +110,7 @@ describe("Vesting", function () {
       ).to.equal(true);
       await vestingContract.release(token.address);
       expect(
-        aboutEquals(await token.balanceOf(address(beneficiary)), ETHER.div(10))
+        aboutEquals(await token.balanceOf(await address(beneficiary)), ETHER.div(10))
       ).to.equal(true);
     });
 
@@ -126,7 +126,7 @@ describe("Vesting", function () {
       await vestingContract.release(token.address);
       expect(
         aboutEquals(
-          await token.balanceOf(address(beneficiary)),
+          await token.balanceOf(await address(beneficiary)),
           ETHER.mul(8).div(100)
         )
       ).to.equal(true);
@@ -144,7 +144,7 @@ describe("Vesting", function () {
       await vestingContract.release(token.address);
       expect(
         aboutEquals(
-          await token.balanceOf(address(beneficiary)),
+          await token.balanceOf(await address(beneficiary)),
           ETHER.mul(8).div(100)
         )
       ).to.equal(true);
@@ -162,7 +162,7 @@ describe("Vesting", function () {
       await vestingContract.release(token.address);
       expect(
         aboutEquals(
-          await token.balanceOf(address(beneficiary)),
+          await token.balanceOf(await address(beneficiary)),
           ETHER.mul(128).div(1000)
         )
       ).to.equal(true);
