@@ -66,6 +66,10 @@ export const kovanDiamondAddress = "0xa37D0c085121B6b7190A34514Ca28fC15Bb4dc22";
 export const maticDiamondAddress = "0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11";
 export const maticAavegotchiDiamondAddress =
   "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
+export const aavegotchiDAOAddress =
+  "0xFFE6280ae4E864D9aF836B562359FD828EcE8020";
+//todo random address to be changed
+export const pixelCraftAddress = "0xB79Fad4cA981472442f53D16365fDf0305fFd8E9";
 
 export async function diamondOwner(address: string, ethers: any) {
   return await (await ethers.getContractAt("OwnershipFacet", address)).owner();

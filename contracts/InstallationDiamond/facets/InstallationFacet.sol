@@ -7,6 +7,7 @@ import {LibStrings} from "../../libraries/LibStrings.sol";
 import {LibERC1155} from "../../libraries/LibERC1155.sol";
 import {LibERC20} from "../../libraries/LibERC20.sol";
 import {LibInstallation} from "../../libraries/LibInstallation.sol";
+import {LibItems} from "../../libraries/LibItems.sol";
 import {IERC721} from "../../interfaces/IERC721.sol";
 import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
@@ -203,6 +204,11 @@ contract InstallationFacet is Modifiers {
     }
   }
 
+  function getAltarLevel(uint256 _altarId) external view returns (uint256 altarLevel_) {
+    require(_altarId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
+    altarLevel_ = s.installationTypes[_altarId].level;
+  }
+
   /***********************************|
    |             Write Functions        |
    |__________________________________*/
@@ -225,9 +231,8 @@ contract InstallationFacet is Modifiers {
       require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
 
       //take the required alchemica
-      for (uint256 j = 0; j < installationType.alchemicaCost.length; j++) {
-        LibERC20.transferFrom(alchemicaAddresses[j], msg.sender, s.realmDiamond, installationType.alchemicaCost[j]);
-      }
+      LibItems._splitAlchemica(installationType.alchemicaCost, alchemicaAddresses);
+
       if (installationType.craftTime == 0) {
         LibERC1155._safeMint(msg.sender, _installationTypes[i], 0);
       } else {
@@ -379,9 +384,7 @@ contract InstallationFacet is Modifiers {
     //take the required alchemica
     address[4] memory alchemicaAddresses = realm.getAlchemicaAddresses();
     InstallationType memory installationType = s.installationTypes[_upgradeQueue.installationId];
-    for (uint256 i; i < installationType.alchemicaCost.length; i++) {
-      LibERC20.transferFrom(alchemicaAddresses[i], msg.sender, s.realmDiamond, installationType.alchemicaCost[i]);
-    }
+    LibItems._splitAlchemica(installationType.alchemicaCost, alchemicaAddresses);
 
     //current installation
     InstallationType memory prevInstallation = s.installationTypes[_upgradeQueue.installationId];

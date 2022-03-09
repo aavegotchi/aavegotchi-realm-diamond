@@ -305,7 +305,13 @@ contract AlchemicaFacet is Modifiers {
   ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) {
     require(_lastChanneled == s.gotchiChannelings[_gotchiId], "AlchemicaFacet: Incorrect last duration");
 
-    require(block.timestamp - _lastChanneled >= 1 days, "AlchemicaFacet: Can't channel yet");
+    //Gotchis can only channel every 24 hrs
+    require(block.timestamp - _lastChanneled >= 1 days, "AlchemicaFacet: Gotchi can't channel yet");
+
+    uint256 altarLevel = InstallationDiamondInterface(s.installationsDiamond).getAltarLevel(s.parcels[_realmId].altarId);
+
+    //How often Altars can channel depends on their level
+    require(block.timestamp > s.parcelChannelings[_realmId] + s.channelingLimits[altarLevel], "AlchemicaFacet: Parcel can't channel yet");
 
     //Use _lastChanneled to ensure that each signature hash is unique
     require(
@@ -336,6 +342,7 @@ contract AlchemicaFacet is Modifiers {
 
     //update latest channeling
     s.gotchiChannelings[_gotchiId] = block.timestamp;
+    s.parcelChannelings[_realmId] = block.timestamp;
 
     emit ChannelAlchemica(_realmId, _gotchiId, channelAmounts, rate, radius);
   }
@@ -377,7 +384,7 @@ contract AlchemicaFacet is Modifiers {
 
   /// @notice Helper function to batch transfer alchemica
   /// @param _targets Array of target addresses
-  /// @param _amounts Nested array of amounts to transfer. 
+  /// @param _amounts Nested array of amounts to transfer.
   /// @dev The inner array element order for _amounts is FUD, FOMO, ALPHA, KEK
   function batchTransferAlchemica(address[] calldata _targets, uint256[4][] calldata _amounts) external {
     require(_targets.length == _amounts.length, "AlchemicaFacet: Mismatched array lengths");
@@ -389,12 +396,19 @@ contract AlchemicaFacet is Modifiers {
       IERC20Mintable(s.alchemicaAddresses[3])
     ];
 
-    for(uint i = 0; i < _targets.length; i++) {
-      for(uint j = 0; j < _amounts[i].length; j++) {
-        if(_amounts[i][j] > 0) {
+    for (uint256 i = 0; i < _targets.length; i++) {
+      for (uint256 j = 0; j < _amounts[i].length; j++) {
+        if (_amounts[i][j] > 0) {
           alchemicas[j].transferFrom(msg.sender, _targets[i], _amounts[i][j]);
         }
       }
+    }
+  }
+
+  function setChannelingLimits(uint256[] calldata _altarLevel, uint256[] calldata _limits) external onlyOwner {
+    require(_altarLevel.length == _limits.length, "AlchemicaFacet: array mismatch");
+    for (uint256 i; i < _limits.length; i++) {
+      s.channelingLimits[_altarLevel[i]] = _limits[i];
     }
   }
 }

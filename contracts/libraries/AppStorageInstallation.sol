@@ -54,6 +54,8 @@ struct UpgradeQueue {
 struct InstallationAppStorage {
   address realmDiamond;
   address aavegotchiDiamond;
+  address pixelCraft;
+  address aavegotchiDAO;
   address glmr;
   address[] alchemicaAddresses;
   string baseUri;

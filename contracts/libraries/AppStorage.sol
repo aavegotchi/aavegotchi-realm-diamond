@@ -76,7 +76,12 @@ struct AppStorage {
   bytes backendPubKey;
   address gameManager;
   mapping(uint256 => uint256) lastExitTime; //for aavegotchis exiting alchemica
+  // gotchiId => lastChanneledGotchi
   mapping(uint256 => uint256) gotchiChannelings;
+  // parcelId => lastChanneledParcel
+  mapping(uint256 => uint256) parcelChannelings;
+  // altarLevel => cooldown hours in seconds
+  mapping(uint256 => uint256) channelingLimits;
   address glmrAddress;
   address tileDiamond;
 }

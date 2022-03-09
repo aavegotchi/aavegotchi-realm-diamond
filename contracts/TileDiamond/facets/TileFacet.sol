@@ -8,6 +8,7 @@ import {LibMeta} from "../../libraries/LibMeta.sol";
 import {LibERC1155Tile} from "../../libraries/LibERC1155Tile.sol";
 import {LibERC20} from "../../libraries/LibERC20.sol";
 import {LibTile} from "../../libraries/LibTile.sol";
+import {LibItems} from "../../libraries/LibItems.sol";
 import {IERC721} from "../../interfaces/IERC721.sol";
 import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
@@ -160,9 +161,8 @@ contract TileFacet is Modifiers {
       TileType memory tileType = s.tileTypes[_tileTypes[i]];
 
       //take the required alchemica
-      for (uint256 j = 0; j < tileType.alchemicaCost.length; j++) {
-        LibERC20.transferFrom(alchemicaAddresses[j], msg.sender, s.realmDiamond, tileType.alchemicaCost[j]);
-      }
+      LibItems._splitAlchemica(tileType.alchemicaCost, alchemicaAddresses);
+
       if (tileType.craftTime == 0) {
         LibERC1155Tile._safeMint(msg.sender, _tileTypes[i], 0);
       } else {
@@ -291,11 +291,15 @@ contract TileFacet is Modifiers {
   function setAddresses(
     address _aavegotchiDiamond,
     address _realmDiamond,
-    address _glmr
+    address _glmr,
+    address _pixelCraft,
+    address _aavegotchiDAO
   ) external onlyOwner {
     s.aavegotchiDiamond = _aavegotchiDiamond;
     s.realmDiamond = _realmDiamond;
     s.glmr = _glmr;
+    s.pixelCraft = _pixelCraft;
+    s.aavegotchiDAO = _aavegotchiDAO;
     emit AddressesUpdated(_aavegotchiDiamond, _realmDiamond, _glmr);
   }
 

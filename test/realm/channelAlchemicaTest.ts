@@ -6,7 +6,7 @@ import {
 } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
-import { TestBeforeVars } from "../../types";
+import { TestBeforeVars, UpgradeQueue } from "../../types";
 
 import {
   approveAlchemica,
@@ -21,6 +21,8 @@ describe("Testing Equip Installation", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
   const testParcelId = 2893;
   const testGotchiId = 22306;
+  const testGotchiId2 = 23491;
+  const testGotchiId3 = 19652;
 
   let g: TestBeforeVars;
 
@@ -28,6 +30,15 @@ describe("Testing Equip Installation", async function () {
     this.timeout(20000000);
 
     g = await beforeTest(ethers, realmDiamondAddress(network.name));
+
+    g.alchemicaFacet = await impersonate(
+      g.ownerAddress,
+      g.alchemicaFacet,
+      ethers,
+      network
+    );
+
+    await g.alchemicaFacet.setChannelingLimits([1, 2], [86400, 64800]);
   });
 
   it("Setup installation diamond", async function () {
@@ -126,7 +137,107 @@ describe("Testing Equip Installation", async function () {
         lastChanneled2,
         signature2
       )
-    ).to.be.revertedWith("AlchemicaFacet: Can't channel yet");
+    ).to.be.revertedWith("AlchemicaFacet: Gotchi can't channel yet");
+  });
+  it("Test multiple channel cooldown based on altar level", async function () {
+    let lastChanneled = await g.alchemicaFacet.getLastChanneled(testGotchiId2);
+
+    let signature = await genChannelAlchemicaSignature(
+      testParcelId,
+      testGotchiId2,
+      lastChanneled
+    );
+
+    await network.provider.send("evm_increaseTime", [86400]);
+    await network.provider.send("evm_mine");
+    await g.alchemicaFacet.channelAlchemica(
+      testParcelId,
+      testGotchiId2,
+      lastChanneled,
+      signature
+    );
+    const upgradeQueue: UpgradeQueue = {
+      parcelId: testParcelId,
+      coordinateX: 0,
+      coordinateY: 0,
+      installationId: 4,
+      readyBlock: 0,
+      claimed: false,
+      owner: testAddress,
+    };
+    await g.installationDiamond.upgradeInstallation(upgradeQueue);
+    await mineBlocks(ethers, 11000);
+    await g.installationDiamond.finalizeUpgrade();
+
+    await network.provider.send("evm_increaseTime", [86400]);
+    await network.provider.send("evm_mine");
+
+    lastChanneled = await g.alchemicaFacet.getLastChanneled(testGotchiId);
+
+    signature = await genChannelAlchemicaSignature(
+      testParcelId,
+      testGotchiId,
+      lastChanneled
+    );
+
+    await g.alchemicaFacet.channelAlchemica(
+      testParcelId,
+      testGotchiId,
+      lastChanneled,
+      signature
+    );
+
+    await network.provider.send("evm_increaseTime", [64800]);
+    await network.provider.send("evm_mine");
+
+    lastChanneled = await g.alchemicaFacet.getLastChanneled(testGotchiId3);
+
+    signature = await genChannelAlchemicaSignature(
+      testParcelId,
+      testGotchiId3,
+      lastChanneled
+    );
+
+    await g.alchemicaFacet.channelAlchemica(
+      testParcelId,
+      testGotchiId3,
+      lastChanneled,
+      signature
+    );
+
+    lastChanneled = await g.alchemicaFacet.getLastChanneled(testGotchiId2);
+
+    signature = await genChannelAlchemicaSignature(
+      testParcelId,
+      testGotchiId2,
+      lastChanneled
+    );
+
+    await expect(
+      g.alchemicaFacet.channelAlchemica(
+        testParcelId,
+        testGotchiId2,
+        lastChanneled,
+        signature
+      )
+    ).to.be.revertedWith("AlchemicaFacet: Parcel can't channel yet");
+
+    lastChanneled = await g.alchemicaFacet.getLastChanneled(testGotchiId3);
+
+    signature = await genChannelAlchemicaSignature(
+      testParcelId,
+      testGotchiId3,
+      lastChanneled
+    );
+
+    await expect(
+      g.alchemicaFacet.channelAlchemica(
+        testParcelId,
+        testGotchiId3,
+        lastChanneled,
+        signature
+      )
+    ).to.be.revertedWith("AlchemicaFacet: Gotchi can't channel yet");
   });
   it("Test minting new tokens on channeling", async function () {
     const spillrate = 0.2;

@@ -46,6 +46,8 @@ export async function upgrade(
         "function getRoundBaseAlchemica(uint256 _realmId, uint256 _roundId) external view returns (uint256[] memory)",
         "function getLastChanneled(uint256 _gotchiId) public view returns (uint256)",
         "function getAlchemicaAddresses() external view returns (address[4] memory)",
+        "function setChannelingLimits(uint256[] calldata _altarLevel, uint256[] calldata _limits) external",
+        "function batchTransferAlchemica(address[] calldata _targets, uint256[4][] calldata _amounts) external",
       ],
       removeSelectors: [],
     },
