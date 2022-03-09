@@ -307,11 +307,9 @@ contract AlchemicaFacet is Modifiers {
 
     require(block.timestamp - _lastChanneled >= 1 days, "AlchemicaFacet: Gotchi can't channel yet");
 
-    InstallationDiamondInterface.InstallationType memory altar = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(
-      s.parcels[_realmId].altarId
-    );
+    uint256 altarLevel = InstallationDiamondInterface(s.installationsDiamond).getAltarLevel(s.parcels[_realmId].altarId);
 
-    require(block.timestamp > s.parcelChannelings[_realmId] + s.channelingLimits[altar.level], "AlchemicaFacet: Parcel can't channel yet");
+    require(block.timestamp > s.parcelChannelings[_realmId] + s.channelingLimits[altarLevel], "AlchemicaFacet: Parcel can't channel yet");
 
     //Use _lastChanneled to ensure that each signature hash is unique
     require(

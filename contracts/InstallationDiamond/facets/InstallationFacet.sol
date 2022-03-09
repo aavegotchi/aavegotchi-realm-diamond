@@ -203,6 +203,11 @@ contract InstallationFacet is Modifiers {
     }
   }
 
+  function getAltarLevel(uint256 _altarId) external view returns (uint256 altarLevel_) {
+    require(_altarId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
+    altarLevel_ = s.installationTypes[_altarId].level;
+  }
+
   /***********************************|
    |             Write Functions        |
    |__________________________________*/
