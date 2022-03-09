@@ -8,6 +8,7 @@ import {
 } from "../../helpers/helpers";
 import { address, increaseTime, mine, aboutEquals } from "../../helpers/utils";
 import { GWEI, ETHER, YEAR } from "../../helpers/constants";
+import { ERC20Generic } from "../../typechain/ERC20Generic";
 
 describe("Vesting", function () {
   let signers: Signer[];
@@ -15,8 +16,8 @@ describe("Vesting", function () {
   let beneficiary: Signer;
   let dao: Signer;
   let proxyAdmin: Contract;
-  let token: Contract;
-  let anotherToken: Contract;
+  let token: ERC20Generic;
+  let anotherToken: ERC20Generic;
   let vestingContract: Contract;
   let vestingImplementation: Contract;
 
