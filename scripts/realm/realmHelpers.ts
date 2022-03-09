@@ -1,5 +1,5 @@
 import { BigNumber, ethers } from "ethers";
-import { Network, NetworkConfig } from "hardhat/types";
+import { Network } from "hardhat/types";
 import {
   AlchemicaFacet,
   AlchemicaToken,
@@ -22,6 +22,8 @@ import {
 import {
   maticAavegotchiDiamondAddress,
   maticDiamondAddress,
+  pixelCraftAddress,
+  aavegotchiDAOAddress,
 } from "../helperFunctions";
 import { deployDiamond } from "../installation/deploy";
 import { impersonate } from "../installation/helperFunctions";
@@ -500,12 +502,16 @@ export async function beforeTest(
   await installationAdminFacet.setAddresses(
     maticAavegotchiDiamondAddress,
     maticDiamondAddress,
-    glmr.address
+    glmr.address,
+    pixelCraftAddress,
+    aavegotchiDAOAddress
   );
   await tileDiamond.setAddresses(
     maticAavegotchiDiamondAddress,
     realmDiamondAddress,
-    glmr.address
+    glmr.address,
+    pixelCraftAddress,
+    aavegotchiDAOAddress
   );
 
   return {

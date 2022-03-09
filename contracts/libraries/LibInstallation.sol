@@ -26,19 +26,4 @@ library LibInstallation {
     emit LibERC1155.TransferFromParent(s.realmDiamond, _realmId, _installationId, 1);
     LibERC1155._burn(s.realmDiamond, _installationId, 1);
   }
-
-  function _splitAlchemica(uint256[] memory _alchemicaCost, address[4] memory _alchemicaAddresses) internal {
-    InstallationAppStorage storage s = LibAppStorageInstallation.diamondStorage();
-    //take the required alchemica and split it
-    for (uint256 i = 0; i < _alchemicaCost.length; i++) {
-      uint256 greatPortal = (_alchemicaCost[i] * 40) / 100;
-      uint256 pixelCraftPart = (_alchemicaCost[i] * 40) / 100;
-      uint256 aavegotchiDAO = (_alchemicaCost[i] * 15) / 100;
-      uint256 burn = (_alchemicaCost[i] * 5) / 100;
-      LibERC20.transferFrom(_alchemicaAddresses[i], msg.sender, s.realmDiamond, greatPortal);
-      LibERC20.transferFrom(_alchemicaAddresses[i], msg.sender, s.pixelCraft, pixelCraftPart);
-      LibERC20.transferFrom(_alchemicaAddresses[i], msg.sender, s.aavegotchiDAO, aavegotchiDAO);
-      LibERC20.transferFrom(_alchemicaAddresses[i], msg.sender, address(0), burn);
-    }
-  }
 }

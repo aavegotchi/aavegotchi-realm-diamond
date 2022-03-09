@@ -22,4 +22,9 @@ contract AlchemicaToken is ERC20Capped, Ownable {
   function mint(address _to, uint256 _value) public onlyOwner {
     _mint(_to, _value);
   }
+
+  function burnFrom(address account, uint256 amount) public virtual {
+    _spendAllowance(account, _msgSender(), amount);
+    _burn(account, amount);
+  }
 }

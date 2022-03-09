@@ -1,7 +1,9 @@
 import {
+  aavegotchiDAOAddress,
   impersonate,
   maticDiamondAddress,
   mineBlocks,
+  pixelCraftAddress,
 } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
@@ -126,16 +128,36 @@ describe("Testing Tiles", async function () {
     await g.fomo.approve(g.tileAddress, ethers.utils.parseUnits("1000000000"));
     await g.alpha.approve(g.tileAddress, ethers.utils.parseUnits("1000000000"));
     await g.kek.approve(g.tileAddress, ethers.utils.parseUnits("1000000000"));
-    let fudPreCraft = await g.fud.balanceOf(maticDiamondAddress);
-    let kekPreCraft = await g.kek.balanceOf(maticDiamondAddress);
+    let fudPreCraftPortal = await g.fud.balanceOf(maticDiamondAddress);
+    let kekPreCraftPortal = await g.kek.balanceOf(maticDiamondAddress);
+    let fudPreCraftPixelCraft = await g.fud.balanceOf(pixelCraftAddress);
+    let kekPreCraftPixelCraft = await g.kek.balanceOf(pixelCraftAddress);
+    let fudPreCraftDAO = await g.fud.balanceOf(aavegotchiDAOAddress);
+    let kekPreCraftDAO = await g.kek.balanceOf(aavegotchiDAOAddress);
     await g.tileDiamond.craftTiles([1, 2, 2, 3]);
-    let fudAfterCraft = await g.fud.balanceOf(maticDiamondAddress);
-    let kekAfterCraft = await g.kek.balanceOf(maticDiamondAddress);
-    expect(Number(ethers.utils.formatUnits(fudAfterCraft))).to.above(
-      Number(ethers.utils.formatUnits(fudPreCraft))
+    let fudAfterCraftPortal = await g.fud.balanceOf(maticDiamondAddress);
+    let kekAfterCraftPortal = await g.kek.balanceOf(maticDiamondAddress);
+    let fudAfterCraftPixelCraft = await g.fud.balanceOf(pixelCraftAddress);
+    let kekAfterCraftPixelCraft = await g.kek.balanceOf(pixelCraftAddress);
+    let fudAfterCraftDAO = await g.fud.balanceOf(aavegotchiDAOAddress);
+    let kekAfterCraftDAO = await g.kek.balanceOf(aavegotchiDAOAddress);
+    expect(Number(ethers.utils.formatUnits(fudAfterCraftPortal))).to.above(
+      Number(ethers.utils.formatUnits(fudPreCraftPortal))
     );
-    expect(Number(ethers.utils.formatUnits(kekAfterCraft))).to.above(
-      Number(ethers.utils.formatUnits(kekPreCraft))
+    expect(Number(ethers.utils.formatUnits(kekAfterCraftPortal))).to.above(
+      Number(ethers.utils.formatUnits(kekPreCraftPortal))
+    );
+    expect(Number(ethers.utils.formatUnits(fudAfterCraftPixelCraft))).to.above(
+      Number(ethers.utils.formatUnits(fudPreCraftPixelCraft))
+    );
+    expect(Number(ethers.utils.formatUnits(kekAfterCraftPixelCraft))).to.above(
+      Number(ethers.utils.formatUnits(kekPreCraftPixelCraft))
+    );
+    expect(Number(ethers.utils.formatUnits(fudAfterCraftDAO))).to.above(
+      Number(ethers.utils.formatUnits(fudPreCraftDAO))
+    );
+    expect(Number(ethers.utils.formatUnits(kekAfterCraftDAO))).to.above(
+      Number(ethers.utils.formatUnits(kekPreCraftDAO))
     );
     await expect(g.tileDiamond.claimTiles([0])).to.be.revertedWith(
       "TileFacet: tile not ready"

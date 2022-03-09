@@ -7,6 +7,7 @@ import {LibStrings} from "../../libraries/LibStrings.sol";
 import {LibERC1155} from "../../libraries/LibERC1155.sol";
 import {LibERC20} from "../../libraries/LibERC20.sol";
 import {LibInstallation} from "../../libraries/LibInstallation.sol";
+import {LibItems} from "../../libraries/LibItems.sol";
 import {IERC721} from "../../interfaces/IERC721.sol";
 import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
@@ -230,7 +231,7 @@ contract InstallationFacet is Modifiers {
       require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
 
       //take the required alchemica
-      LibInstallation._splitAlchemica(installationType.alchemicaCost, alchemicaAddresses);
+      LibItems._splitAlchemica(installationType.alchemicaCost, alchemicaAddresses);
 
       if (installationType.craftTime == 0) {
         LibERC1155._safeMint(msg.sender, _installationTypes[i], 0);
@@ -383,7 +384,7 @@ contract InstallationFacet is Modifiers {
     //take the required alchemica
     address[4] memory alchemicaAddresses = realm.getAlchemicaAddresses();
     InstallationType memory installationType = s.installationTypes[_upgradeQueue.installationId];
-    LibInstallation._splitAlchemica(installationType.alchemicaCost, alchemicaAddresses);
+    LibItems._splitAlchemica(installationType.alchemicaCost, alchemicaAddresses);
 
     //current installation
     InstallationType memory prevInstallation = s.installationTypes[_upgradeQueue.installationId];
