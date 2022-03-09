@@ -4,6 +4,7 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
+import { ERC721Facet } from "../../../typechain";
 import { maticDiamondAddress } from "../../helperFunctions";
 
 export async function upgrade() {
@@ -11,7 +12,7 @@ export async function upgrade() {
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "RealmFacet",
+      facetName: "ERC721Facet",
       addSelectors: [],
       removeSelectors: [],
     },
@@ -30,6 +31,13 @@ export async function upgrade() {
   };
 
   await run("deployUpgrade", args);
+
+  const facet = (await ethers.getContractAt(
+    "ERC721Facet",
+    maticDiamondAddress
+  )) as ERC721Facet;
+  const tokenuri = await facet.tokenURI("59");
+  console.log("token uri:", tokenuri);
 }
 
 if (require.main === module) {
