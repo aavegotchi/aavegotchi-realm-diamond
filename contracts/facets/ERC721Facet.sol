@@ -178,7 +178,7 @@ contract ERC721Facet is Modifiers {
   ///  3986. The URI may point to a JSON file that conforms to the "ERC721
   ///  Metadata JSON Schema".
   function tokenURI(uint256 _tokenId) external pure returns (string memory) {
-    return LibStrings.strWithUint("https://aavegotchi.com/metadata/realm/", _tokenId); //Here is your URL!
+    return LibStrings.strWithUint("https://app.aavegotchi.com/metadata/realm/", _tokenId); //Here is your URL!
   }
 
   struct MintParcelInput {
