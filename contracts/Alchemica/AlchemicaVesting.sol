@@ -187,11 +187,11 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
     * @dev Calculates the proportion of tokens that should be vested given a duration. 
     * The proportion of tokens follows the CDF of the geometric distribution.
     * Unsafe if there are too many periods, so we'll just return the entire balance
-    * if we exceed 100 periods (100 years).
+    * if we exceed 30 periods (30 years).
     */
   function _proportionVested(uint256 duration) private view returns (uint256) {
     uint256 periods = duration / DECAY_PERIOD;
-    if (periods > 100) return PRECISION;
+    if (periods > 29) return PRECISION;
     uint256 timeInCurrentPeriod = duration % DECAY_PERIOD;
 
     // The proportion of tokens the beneficiary is NOT entitled to yet

@@ -57,6 +57,7 @@ describe("Vesting", function () {
   });
 
   describe("Nonrevocable Vesting Contract", function () {
+
     it("Should deploy an unrevocable vesting contract and deposit some tokens", async () => {
       vestingContract = (
         await deployAndInitializeVestingProxy(
@@ -211,6 +212,35 @@ describe("Vesting", function () {
       expect(await anotherToken.balanceOf(await address(beneficiary))).to.be.gt(
         0
       );
+    });
+
+    it("Should deploy an unrevocable vesting contract and release the full amount after 30 years", async () => {
+      vestingContract = (
+        await deployAndInitializeVestingProxy(
+          owner,
+          vestingImplementation,
+          await address(beneficiary),
+          proxyAdmin,
+          BigNumber.from("0"),
+          ETHER.div(5),
+          false
+        )
+      ).contract;
+      
+      expect(await vestingContract.beneficiary()).to.equal(await beneficiary.getAddress());
+      expect(await vestingContract.revocable()).to.equal(false);
+      expect(await vestingContract.released(token.address)).to.equal(BigNumber.from("0"));
+      expect(await vestingContract.releasableAmount(token.address)).to.equal(BigNumber.from("0"));
+      await token.connect(owner).mint(vestingContract.address, ETHER);
+      expect(await token.balanceOf(vestingContract.address)).to.equal(ETHER);
+
+      await increaseTime(YEAR * 30);
+      await mine();
+      expect(await vestingContract.releasableAmount(token.address)).to.equal(ETHER);
+
+      await vestingContract.release(token.address);
+      expect(await token.balanceOf(vestingContract.address)).to.equal(BigNumber.from("0"));
+      expect(await token.balanceOf(await address(beneficiary))).to.equal(ETHER);
     });
   });
 
