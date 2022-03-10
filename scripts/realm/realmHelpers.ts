@@ -1,5 +1,5 @@
 import { BigNumber, ethers } from "ethers";
-import { Network, NetworkConfig } from "hardhat/types";
+import { Network } from "hardhat/types";
 import {
   AlchemicaFacet,
   AlchemicaToken,
@@ -22,6 +22,8 @@ import {
 import {
   maticAavegotchiDiamondAddress,
   maticDiamondAddress,
+  pixelCraftAddress,
+  aavegotchiDAOAddress,
 } from "../helperFunctions";
 import { deployDiamond } from "../installation/deploy";
 import { impersonate } from "../installation/helperFunctions";
@@ -114,7 +116,7 @@ export function testInstallations() {
       upgradeQueueBoost: 0,
       craftTime: 10000,
       deprecated: false,
-      nextLevelId: 0,
+      nextLevelId: 7,
       prerequisites: [],
       name: "Altar level 1",
     })
@@ -174,7 +176,7 @@ export function testInstallations() {
       upgradeQueueBoost: 0,
       craftTime: 10000,
       deprecated: false,
-      nextLevelId: 5,
+      nextLevelId: 7,
       prerequisites: [],
       name: "Altar level 1",
     })
@@ -217,6 +219,26 @@ export function testInstallations() {
       nextLevelId: 0,
       prerequisites: [],
       name: "BuildQueue level 1",
+    })
+  );
+  installations.push(
+    outputInstallation({
+      installationType: 2,
+      level: 2,
+      width: 2,
+      height: 2,
+      alchemicaType: 0,
+      alchemicaCost: [100, 20, 0, 30],
+      harvestRate: 2,
+      capacity: 0,
+      spillRadius: 0,
+      spillRate: 20,
+      upgradeQueueBoost: 0,
+      craftTime: 10000,
+      deprecated: false,
+      nextLevelId: 0,
+      prerequisites: [],
+      name: "Altar level 2",
     })
   );
 
@@ -480,12 +502,16 @@ export async function beforeTest(
   await installationAdminFacet.setAddresses(
     maticAavegotchiDiamondAddress,
     maticDiamondAddress,
-    glmr.address
+    glmr.address,
+    pixelCraftAddress,
+    aavegotchiDAOAddress
   );
   await tileDiamond.setAddresses(
     maticAavegotchiDiamondAddress,
     realmDiamondAddress,
-    glmr.address
+    glmr.address,
+    pixelCraftAddress,
+    aavegotchiDAOAddress
   );
 
   return {

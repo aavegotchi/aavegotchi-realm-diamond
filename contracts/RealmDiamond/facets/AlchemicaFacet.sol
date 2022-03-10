@@ -8,7 +8,7 @@ import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "../../libraries/LibAlchemica.sol";
 import "../../libraries/LibSignature.sol";
 import "../../interfaces/AavegotchiDiamond.sol";
-import "../../Alchemica/AlchemicaToken.sol";
+import "../../interfaces/IERC20Mintable.sol";
 import "hardhat/console.sol";
 
 uint256 constant bp = 100 ether;
@@ -178,7 +178,7 @@ contract AlchemicaFacet is Modifiers {
 
   /// @dev This function will be removed in production.
   function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external {
-    AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[_alchemicaType]);
+    IERC20Mintable alchemica = IERC20Mintable(s.alchemicaAddresses[_alchemicaType]);
     alchemica.mint(msg.sender, _amount);
   }
 
@@ -286,7 +286,7 @@ contract AlchemicaFacet is Modifiers {
     uint256 _owner,
     uint256 _spill
   ) internal {
-    AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[_alchemicaType]);
+    IERC20Mintable alchemica = IERC20Mintable(s.alchemicaAddresses[_alchemicaType]);
     alchemica.mint(alchemicaRecipient(_gotchiId), _owner);
     alchemica.mint(address(this), _spill);
   }
@@ -305,7 +305,13 @@ contract AlchemicaFacet is Modifiers {
   ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) {
     require(_lastChanneled == s.gotchiChannelings[_gotchiId], "AlchemicaFacet: Incorrect last duration");
 
-    require(block.timestamp - _lastChanneled >= 1 days, "AlchemicaFacet: Can't channel yet");
+    //Gotchis can only channel every 24 hrs
+    require(block.timestamp - _lastChanneled >= 1 days, "AlchemicaFacet: Gotchi can't channel yet");
+
+    uint256 altarLevel = InstallationDiamondInterface(s.installationsDiamond).getAltarLevel(s.parcels[_realmId].altarId);
+
+    //How often Altars can channel depends on their level
+    require(block.timestamp > s.parcelChannelings[_realmId] + s.channelingLimits[altarLevel], "AlchemicaFacet: Parcel can't channel yet");
 
     //Use _lastChanneled to ensure that each signature hash is unique
     require(
@@ -318,7 +324,7 @@ contract AlchemicaFacet is Modifiers {
     uint256[4] memory channelAmounts = [uint256(100e18), uint256(50e18), uint256(25e18), uint256(10e18)];
 
     for (uint256 i; i < channelAmounts.length; i++) {
-      AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
+      IERC20Mintable alchemica = IERC20Mintable(s.alchemicaAddresses[i]);
 
       //Mint new tokens if the Great Portal Balance is less than capacity
 
@@ -336,6 +342,7 @@ contract AlchemicaFacet is Modifiers {
 
     //update latest channeling
     s.gotchiChannelings[_gotchiId] = block.timestamp;
+    s.parcelChannelings[_realmId] = block.timestamp;
 
     emit ChannelAlchemica(_realmId, _gotchiId, channelAmounts, rate, radius);
   }
@@ -368,7 +375,7 @@ contract AlchemicaFacet is Modifiers {
     require(LibSignature.isValid(messageHash, _signature, s.backendPubKey), "AlchemicaFacet: Invalid signature");
 
     for (uint256 i = 0; i < _alchemica.length; i++) {
-      AlchemicaToken alchemica = AlchemicaToken(s.alchemicaAddresses[i]);
+      IERC20Mintable alchemica = IERC20Mintable(s.alchemicaAddresses[i]);
       alchemica.transfer(alchemicaRecipient(_gotchiId), _alchemica[i]);
     }
 
@@ -377,24 +384,31 @@ contract AlchemicaFacet is Modifiers {
 
   /// @notice Helper function to batch transfer alchemica
   /// @param _targets Array of target addresses
-  /// @param _amounts Nested array of amounts to transfer. 
+  /// @param _amounts Nested array of amounts to transfer.
   /// @dev The inner array element order for _amounts is FUD, FOMO, ALPHA, KEK
   function batchTransferAlchemica(address[] calldata _targets, uint256[4][] calldata _amounts) external {
     require(_targets.length == _amounts.length, "AlchemicaFacet: Mismatched array lengths");
 
-    AlchemicaToken[4] memory alchemicas = [
-      AlchemicaToken(s.alchemicaAddresses[0]),
-      AlchemicaToken(s.alchemicaAddresses[1]),
-      AlchemicaToken(s.alchemicaAddresses[2]),
-      AlchemicaToken(s.alchemicaAddresses[3])
+    IERC20Mintable[4] memory alchemicas = [
+      IERC20Mintable(s.alchemicaAddresses[0]),
+      IERC20Mintable(s.alchemicaAddresses[1]),
+      IERC20Mintable(s.alchemicaAddresses[2]),
+      IERC20Mintable(s.alchemicaAddresses[3])
     ];
 
-    for(uint i = 0; i < _targets.length; i++) {
-      for(uint j = 0; j < _amounts[i].length; j++) {
-        if(_amounts[i][j] > 0) {
+    for (uint256 i = 0; i < _targets.length; i++) {
+      for (uint256 j = 0; j < _amounts[i].length; j++) {
+        if (_amounts[i][j] > 0) {
           alchemicas[j].transferFrom(msg.sender, _targets[i], _amounts[i][j]);
         }
       }
+    }
+  }
+
+  function setChannelingLimits(uint256[] calldata _altarLevel, uint256[] calldata _limits) external onlyOwner {
+    require(_altarLevel.length == _limits.length, "AlchemicaFacet: array mismatch");
+    for (uint256 i; i < _limits.length; i++) {
+      s.channelingLimits[_altarLevel[i]] = _limits[i];
     }
   }
 }
