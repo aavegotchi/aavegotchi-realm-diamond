@@ -32,9 +32,9 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
   mapping (address => uint256) private _released;
   mapping (address => bool) private _revoked;
   
-  function replaceBeneficiary(address newBeneficiary) external {
+  function replaceBeneficiary(address newBeneficiary_) external {
     require(msg.sender == _beneficiary, "Not authorized");
-    _beneficiary = newBeneficiary;
+    _beneficiary = newBeneficiary_;
   }
 
   /**
@@ -42,23 +42,23 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
     * beneficiary, distributing the tokens by the geometric distribution. 
     * The amount distributed is reduced by some amount every year
     * to asymptotically distribute the entire balance (like bitcoin halving).
-    * @param beneficiary address of the beneficiary to whom vested tokens are transferred
-    * @param start the time (as Unix time) at which point vesting starts. 0 if current time is desired
-    * @param decayFactor the proportion of tokens to receive in the first period. vesting
+    * @param beneficiary_ address of the beneficiary to whom vested tokens are transferred
+    * @param start_ the time (as Unix time) at which point vesting starts. 0 if current time is desired
+    * @param decayFactor_ the proportion of tokens to receive in the first period. vesting
     * will decrease geometrically from this value. scaled by precision
-    * @param revocable whether the vesting is revocable or not
+    * @param revocable_ whether the vesting is revocable or not
     */
-  function initialize(address beneficiary, uint256 start, uint256 decayFactor, bool revocable) public initializer {
-    require(beneficiary != address(0), "TokenVesting: beneficiary is the zero address");
-    require(start >= block.timestamp || start == 0, "TokenVesting: start must after the current block timestamp or 0");
-    require(decayFactor > 0 && decayFactor < PRECISION, "TokenVesting: invalid decay factor");
+  function initialize(address beneficiary_, uint256 start_, uint256 decayFactor_, bool revocable_) public initializer {
+    require(beneficiary_ != address(0), "TokenVesting: beneficiary is the zero address");
+    require(start_ >= block.timestamp || start_ == 0, "TokenVesting: start must after the current block timestamp or 0");
+    require(decayFactor_ > 0 && decayFactor_ < PRECISION, "TokenVesting: invalid decay factor");
 
     __Ownable_init();
 
-    _beneficiary = beneficiary;
-    _start = start == 0 ? block.timestamp : start;
-    _decayFactor = decayFactor;
-    _revocable = revocable;
+    _beneficiary = beneficiary_;
+    _start = start_ == 0 ? block.timestamp : start_;
+    _decayFactor = decayFactor_;
+    _revocable = revocable_;
   }
 
   /**

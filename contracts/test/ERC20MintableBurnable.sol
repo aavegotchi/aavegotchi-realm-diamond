@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 /// @title Mintable and burnable ERC20 for testing
 contract ERC20MintableBurnable is ERC20 {
 
-  constructor() ERC20("ERC20MintableBurnable", "MOCK20") public {
+  constructor() ERC20("ERC20MintableBurnable", "MOCK20") {
   }
 
   function mint(address _account, uint256 _value) public {
