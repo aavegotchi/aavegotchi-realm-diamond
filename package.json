@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "deploy:alchemica:matic": "VERIFY=true TS_NODE_TRANSPILE_ONLY=1 npx hardhat run scripts/deployAlchemica.ts --network matic"
+  },
   "dependencies": {
     "@chainlink/contracts": "^0.4.0",
     "@ethersproject/experimental": "^5.4.0",
@@ -33,7 +36,7 @@
     "@types/node": "^16.6.1",
     "buidler-contract-sizer": "^1.0.2",
     "chalk": "^4.1.1",
-    "hardhat-gas-reporter": "^1.0.4",
+    "hardhat-gas-reporter": "^1.0.8",
     "moment": "^2.29.1",
     "prettier-plugin-solidity": "^1.0.0-beta.17",
     "solidity-coverage": "^0.7.16",

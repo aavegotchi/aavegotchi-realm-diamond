@@ -68,6 +68,7 @@ export async function deployAndInitializeVestingProxy(
     start,
     decayFactor,
     revocable,
+    {gasLimit: 1000000}
   );
   return {contract: alchemicaVesting, constructorArgs: proxyVerify.constructorArgs};
 }
