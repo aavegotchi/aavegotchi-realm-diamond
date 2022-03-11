@@ -44,7 +44,7 @@ async function deployVestingContracts(
   let ecosystemVestingProxy = await deployAndInitializeVestingProxy(
     owner,
     vestingImplementation.contract,
-    ECOSYSTEM_VESTING_BENEFICIARY,
+    ECOSYSTEM_VESTING_BENEFICIARY, // TODO: update beneficiary in constants
     proxyAdmin,
     BigNumber.from(await currentTimestamp()),
     ETHER.div(10), // 10% decay per year
@@ -55,7 +55,7 @@ async function deployVestingContracts(
   let gameplayVestingProxy = await deployAndInitializeVestingProxy(
     owner,
     vestingImplementation.contract,
-    GAMEPLAY_VESTING_BENEFICIARY,
+    GAMEPLAY_VESTING_BENEFICIARY, // TODO: update beneficiary in constants
     proxyAdmin,
     BigNumber.from(await currentTimestamp()),
     ETHER.div(10), // 10% decay per year
