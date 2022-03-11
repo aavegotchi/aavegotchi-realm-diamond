@@ -23,7 +23,13 @@ task(
   files = fs.readdirSync("." + libraryBasePath);
   for (const file of files) {
     let jsonFile = file.replace("sol", "json");
-    if (["AppStorage.json", "AppStorageInstallation.json"].includes(jsonFile))
+    if (
+      [
+        "AppStorage.json",
+        "AppStorageInstallation.json",
+        "AppStorageTile.json",
+      ].includes(jsonFile)
+    )
       jsonFile = "Modifiers.json";
     let json = fs.readFileSync(
       `./artifacts${libraryBasePath}${file}/${jsonFile}`
@@ -34,7 +40,13 @@ task(
   files = fs.readdirSync("." + sharedLibraryBasePath);
   for (const file of files) {
     let jsonFile = file.replace("sol", "json");
-    if (["AppStorage.json", "AppStorageInstallation.json"].includes(jsonFile))
+    if (
+      [
+        "AppStorage.json",
+        "AppStorageInstallation.json",
+        "AppStorageTile.json",
+      ].includes(jsonFile)
+    )
       jsonFile = "Modifiers.json";
     let json = fs.readFileSync(
       `./artifacts${sharedLibraryBasePath}${file}/${jsonFile}`
