@@ -16,7 +16,7 @@ import {
   verify
 } from "../helpers/helpers";
 import {VerifyParams} from "../helpers/types";
-import {sleep, address} from "../helpers/utils";
+import {sleep, address, currentTimestamp} from "../helpers/utils";
 import {
   ECOSYSTEM_VESTING_BENEFICIARY,
   GAMEPLAY_VESTING_BENEFICIARY,
@@ -25,6 +25,7 @@ import {
   ALPHA_PARAMS,
   KEK_PARAMS,
   REALM_DIAMOND,
+  ETHER,
 } from "../helpers/constants";
 
 
@@ -45,6 +46,9 @@ async function deployVestingContracts(
     vestingImplementation.contract,
     ECOSYSTEM_VESTING_BENEFICIARY,
     proxyAdmin,
+    BigNumber.from(await currentTimestamp()),
+    ETHER.div(10), // 10% decay per year
+    true,
   );
   console.log("Ecosystem Vesting: " + ecosystemVestingProxy.contract.address);
   returnParams.push(ecosystemVestingProxy);
@@ -53,6 +57,9 @@ async function deployVestingContracts(
     vestingImplementation.contract,
     GAMEPLAY_VESTING_BENEFICIARY,
     proxyAdmin,
+    BigNumber.from(await currentTimestamp()),
+    ETHER.div(10), // 10% decay per year
+    true,
   )
   console.log("Gameplay Vesting: " + gameplayVestingProxy.contract.address);
   returnParams.push(gameplayVestingProxy);
@@ -90,20 +97,6 @@ async function deployAlchemica(
     returnParams.push(alchemicaProxy);
   }
 
-  return returnParams;
-}
-
-async function deployGAX(
-  owner: Signer,
-) {
-  let returnParams: VerifyParams[] = [];
-  let gaxFactory = await deployGAXFactory(owner);
-  returnParams.push(gaxFactory);
-  let gaxRouter = await deployGAXRouter(
-    owner,
-    gaxFactory.contract,
-  );
-  returnParams.push(gaxRouter);
   return returnParams;
 }
 
