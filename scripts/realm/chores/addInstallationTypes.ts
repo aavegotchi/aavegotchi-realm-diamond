@@ -1,6 +1,10 @@
 //@ts-ignore
 import hardhat, { run, ethers, network } from "hardhat";
-import { InstallationFacet, OwnershipFacet } from "../../../typechain";
+import {
+  InstallationAdminFacet,
+  InstallationFacet,
+  OwnershipFacet,
+} from "../../../typechain";
 import { InstallationTypeInput } from "../../../types";
 import { installationDiamondAddress } from "../../helperFunctions";
 import { goldenAaltar, testInstallations } from "../realmHelpers";
@@ -42,13 +46,19 @@ async function addInstallations() {
     throw Error("Incorrect network selected");
   }
 
+  const installationAdminFacet = (await ethers.getContractAt(
+    "InstallationAdminFacet",
+    diamondAddress,
+    signer
+  )) as InstallationAdminFacet;
+
   const installationFacet = (await ethers.getContractAt(
     "InstallationFacet",
     diamondAddress,
     signer
   )) as InstallationFacet;
 
-  const tx = await installationFacet.addInstallationTypes(goldenAaltar(), {
+  const tx = await installationAdminFacet.addInstallationTypes(goldenAaltar(), {
     gasPrice: gasPrice,
   });
   await tx.wait();

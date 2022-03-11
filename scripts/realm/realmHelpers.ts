@@ -315,7 +315,7 @@ export function goldenAaltar() {
       nextLevelId: 1,
       prerequisites: [],
       name: "Golden Aaltar",
-      upgradeQueueBoost: 0,
+      upgradeQueueBoost: 1,
     })
   );
 
