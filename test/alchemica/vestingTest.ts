@@ -6,7 +6,13 @@ import {
   deployAndInitializeVestingProxy,
   deployProxyAdmin,
 } from "../../helpers/helpers";
-import { address, increaseTime, mine, aboutEquals } from "../../helpers/utils";
+import { 
+  address, 
+  increaseTime, 
+  mine, 
+  aboutEquals, 
+  currentTimestamp 
+} from "../../helpers/utils";
 import { GWEI, ETHER, YEAR } from "../../helpers/constants";
 import { ERC20MintableBurnable } from "../../typechain/ERC20MintableBurnable";
 
@@ -242,6 +248,76 @@ describe("Vesting", function () {
       expect(await token.balanceOf(vestingContract.address)).to.equal(BigNumber.from("0"));
       expect(await token.balanceOf(await address(beneficiary))).to.equal(ETHER);
     });
+
+    it("Should vest 10% properly per year with a start date 6 months in the past", async() => {
+      vestingContract = (
+        await deployAndInitializeVestingProxy(
+          owner,
+          vestingImplementation,
+          await address(beneficiary),
+          proxyAdmin,
+          BigNumber.from(await currentTimestamp()).sub(YEAR / 2),
+          ETHER.div(10),
+          false
+        )
+      ).contract;
+      expect(await vestingContract.beneficiary()).to.equal(await beneficiary.getAddress());
+      expect(await vestingContract.revocable()).to.equal(false);
+      await token.connect(owner).mint(vestingContract.address, ETHER);
+      expect(await vestingContract.released(token.address)).to.equal(BigNumber.from("0"));
+      expect(await token.balanceOf(vestingContract.address)).to.equal(ETHER);
+
+      // Should vest 5% instantly
+      expect(
+        aboutEquals(
+          await vestingContract.releasableAmount(await address(token)),
+          ETHER.mul(5).div(100),
+        )
+      ).to.equal(true);
+      await vestingContract.release(await address(token));
+      expect(
+        aboutEquals(
+          await token.balanceOf(await address(beneficiary)),
+          ETHER.mul(5).div(100),
+        )
+      ).to.equal(true);
+      // Should vest 5% after 6 months
+      await token.burn(await address(beneficiary), await token.balanceOf(await address(beneficiary)));
+      await increaseTime(YEAR / 2);
+      await mine();
+      expect(
+        aboutEquals(
+          await vestingContract.releasableAmount(await address(token)),
+          ETHER.mul(5).div(100),
+        )
+      ).to.equal(true);
+      await vestingContract.release(await address(token));
+      expect(
+        aboutEquals(
+          await token.balanceOf(await address(beneficiary)),
+          ETHER.mul(5).div(100),
+        )
+      ).to.equal(true);
+      
+      
+      // Should vest 17.1% after 30 months
+      await token.burn(await address(beneficiary), await token.balanceOf(await address(beneficiary)));
+      await increaseTime(YEAR * 2);
+      await mine();
+      expect(
+        aboutEquals(
+          await vestingContract.releasableAmount(await address(token)),
+          ETHER.mul(171).div(1000),
+        )
+      ).to.equal(true);
+      await vestingContract.release(await address(token));
+      expect(
+        aboutEquals(
+          await token.balanceOf(await address(beneficiary)),
+          ETHER.mul(171).div(1000),
+        )
+      ).to.equal(true);
+    })
   });
 
   describe("Revocable Vesting Contract", function () {

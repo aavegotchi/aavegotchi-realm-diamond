@@ -50,7 +50,6 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
     */
   function initialize(address beneficiary_, uint256 start_, uint256 decayFactor_, bool revocable_) public initializer {
     require(beneficiary_ != address(0), "TokenVesting: beneficiary is the zero address");
-    require(start_ >= block.timestamp || start_ == 0, "TokenVesting: start must after the current block timestamp or 0");
     require(decayFactor_ > 0 && decayFactor_ < PRECISION, "TokenVesting: invalid decay factor");
 
     __Ownable_init();
