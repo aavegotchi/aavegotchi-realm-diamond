@@ -12,7 +12,7 @@ import {
   InstallationAdminFacet,
   InstallationFacet,
 } from "../../../typechain";
-import { gasPrice } from "../../helperFunctions";
+import { gasPrice, maticAavegotchiDiamondAddress } from "../../helperFunctions";
 import { deployAlchemica, goldenAaltar } from "../realmHelpers";
 import { alchemicaTotals, boostMultipliers } from "../../setVars";
 import { deployDiamond } from "../../installation/deploy";
@@ -172,7 +172,7 @@ export async function deployMumbai() {
   const backendSigner = new ethers.Wallet(process.env.MUMBAI_REALM_PK); // PK should start with '0x'
 
   console.log("Setting vars");
-  const tx = await alchemicaFacet.setVars(
+  let tx = await alchemicaFacet.setVars(
     //@ts-ignore
     alchemicaTotals(),
     boostMultipliers,
@@ -193,6 +193,21 @@ export async function deployMumbai() {
     { gasPrice: gasPrice }
   );
 
+  await tx.wait();
+
+  const pixelcraft = deployerAddress;
+  const dao = deployerAddress;
+
+  console.log("Setting Installation addresses");
+  const adminFacet = await ethers.getContractAt("InstallationAdminFacet");
+  console.log("Setting addresses");
+  tx = await adminFacet.setAddresses(
+    maticAavegotchiDiamondAddress,
+    realmDiamond.address,
+    alchemica.glmr,
+    pixelcraft,
+    dao
+  );
   await tx.wait();
 
   console.log("RealmDiamond deployed:", realmDiamond.address);

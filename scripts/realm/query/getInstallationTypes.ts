@@ -1,13 +1,19 @@
 //@ts-ignore
+
+import { Signer } from "ethers";
 import hardhat, { run, ethers, network } from "hardhat";
 import {
+  AlchemicaFacet,
+  AlchemicaToken,
   InstallationAdminFacet,
   InstallationFacet,
   OwnershipFacet,
 } from "../../../typechain";
-import { InstallationTypeInput } from "../../../types";
-import { installationDiamondAddress } from "../../helperFunctions";
-import { goldenAaltar, testInstallations } from "../realmHelpers";
+
+import {
+  installationDiamondAddress,
+  realmDiamondAddress,
+} from "../../helperFunctions";
 
 const gasPrice = 20000000000;
 
@@ -27,7 +33,7 @@ async function addInstallations() {
   let currentOwner = await ownershipFacet.owner();
 
   console.log("Current owner is:", currentOwner);
-  let signer: any;
+  let signer: Signer;
 
   const testing = ["hardhat", "localhost"].includes(hardhat.network.name);
 
@@ -52,9 +58,55 @@ async function addInstallations() {
     signer
   )) as InstallationFacet;
 
-  const types = await installationFacet.getInstallationTypes([]);
+  const types = await installationFacet.getInstallationTypes([0]);
 
   console.log("types:", types);
+
+  // const account = await signer.getAddress();
+
+  // console.log("Signer:", account);
+
+  // const tokens = [fudAddress, fomoAddress, alphaAddress, kekAddress];
+
+  // const alchemicaFacet = await ethers.getContractAt(
+  //   "AlchemicaFacet",
+  //   realmDiamondAddress(network.name)
+  // );
+
+  // // await faucetAlchemica(alchemicaFacet, "10000");
+
+  // for (let index = 0; index < tokens.length; index++) {
+  //   const token = tokens[index];
+  //   const tokenContract = (await ethers.getContractAt(
+  //     "AlchemicaToken",
+  //     token,
+  //     signer
+  //   )) as AlchemicaToken;
+
+  //   const balance = await tokenContract.balanceOf(account);
+  //   const allowance = await tokenContract.allowance(account, diamondAddress);
+  //   console.log("Balance:", balance.toString());
+  //   console.log("Allowance:", allowance.toString());
+
+  //   // const tx = await tokenContract.approve(
+  //   //   diamondAddress,
+  //   //   ethers.utils.parseEther("100")
+  //   // );
+  //   // await tx.wait();
+  //   console.log("Approved token");
+  // }
+
+  // const realmDiamond = (await ethers.getContractAt(
+  //   "AlchemicaFacet",
+  //   realmDiamondAddress(network.name)
+  // )) as AlchemicaFacet;
+
+  // // console.log("realm diamond:", realmDiamondAddress(network.name));
+
+  // // const alchemicaAddresses = await realmDiamond.getAlchemicaAddresses();
+  // // console.log("addresses:", alchemicaAddresses);
+
+  // await installationFacet.craftInstallations([0]);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
