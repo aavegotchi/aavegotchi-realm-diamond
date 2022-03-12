@@ -583,7 +583,8 @@ export async function faucetAlchemica(
 ) {
   const parsed = ethers.utils.parseUnits(amount);
   for (let index = 0; index < 4; index++) {
-    await alchemicaFacet.testingAlchemicaFaucet(index, parsed);
+    const tx = await alchemicaFacet.testingAlchemicaFaucet(index, parsed);
+    await tx.wait();
   }
 }
 

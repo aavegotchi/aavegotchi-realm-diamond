@@ -17,9 +17,13 @@ import { InstallationType, TestBeforeVars } from "../../types";
 import { deployDiamond } from "../../scripts/installation/deploy";
 import { BigNumber } from "ethers";
 import {
+  approveAlchemica,
   beforeTest,
+  faucetAlchemica,
+  genEquipInstallationSignature,
   testInstallations,
 } from "../../scripts/realm/realmHelpers";
+import { maticRealmDiamondAddress } from "../../scripts/installation/helperFunctions";
 
 describe("Testing Equip Installation", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
@@ -29,7 +33,7 @@ describe("Testing Equip Installation", async function () {
 
   before(async function () {
     this.timeout(20000000);
-    g = await beforeTest(ethers);
+    g = await beforeTest(ethers, maticRealmDiamondAddress);
 
     ghst = (await ethers.getContractAt(
       "contracts/interfaces/IERC20.sol:IERC20",
@@ -38,7 +42,7 @@ describe("Testing Equip Installation", async function () {
   });
 
   it("Can craft installations", async function () {
-    await g.installationDiamond.addInstallationTypes(testInstallations());
+    await g.installationAdminFacet.addInstallationTypes(testInstallations());
     ghst = await impersonate(testAddress, ghst, ethers, network);
     g.installationDiamond = await impersonate(
       testAddress,
@@ -51,27 +55,20 @@ describe("Testing Equip Installation", async function () {
       ethers.utils.parseUnits("1000000000")
     );
 
-    g.alchemicaFacet.testingAlchemicaFaucet(
-      "0",
-      ethers.utils.parseEther("1000")
+    g.alchemicaFacet = await impersonate(
+      testAddress,
+      g.alchemicaFacet,
+      ethers,
+      network
     );
-    g.alchemicaFacet.testingAlchemicaFaucet(
-      "1",
-      ethers.utils.parseEther("1000")
-    );
-    g.alchemicaFacet.testingAlchemicaFaucet(
-      "2",
-      ethers.utils.parseEther("1000")
-    );
-    g.alchemicaFacet.testingAlchemicaFaucet(
-      "3",
-      ethers.utils.parseEther("1000")
-    );
+
+    await faucetAlchemica(g.alchemicaFacet, "10000");
+    await approveAlchemica(g, ethers, testAddress, network);
 
     await g.installationDiamond.craftInstallations([1, 1, 1]);
     await expect(
       g.installationDiamond.claimInstallations([0])
-    ).to.be.revertedWith("g.installationDiamond: installation not ready");
+    ).to.be.revertedWith("InstallationFacet: installation not ready");
 
     await mineBlocks(ethers, 11000);
 
@@ -94,29 +91,89 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
-    await g.realmFacet.equipInstallation(2893, 1, 2, 2);
+    await g.realmFacet.equipInstallation(
+      2893,
+      1,
+      2,
+      2,
+      await genEquipInstallationSignature(1, 2, 2, 2893)
+    );
     await expect(
-      g.realmFacet.equipInstallation(2893, 1, 1, 1)
+      g.realmFacet.equipInstallation(
+        2893,
+        1,
+        1,
+        1,
+        await genEquipInstallationSignature(1, 1, 1, 2893)
+      )
     ).to.be.revertedWith("LibRealm: Invalid spot");
     await expect(
-      g.realmFacet.equipInstallation(2893, 1, 2, 1)
+      g.realmFacet.equipInstallation(
+        2893,
+        1,
+        2,
+        1,
+        await genEquipInstallationSignature(1, 2, 1, 2893)
+      )
     ).to.be.revertedWith("LibRealm: Invalid spot");
     await expect(
-      g.realmFacet.equipInstallation(2893, 1, 2, 2)
+      g.realmFacet.equipInstallation(
+        2893,
+        1,
+        2,
+        2,
+        await genEquipInstallationSignature(1, 2, 2, 2893)
+      )
     ).to.be.revertedWith("LibRealm: Invalid spot");
     await expect(
-      g.realmFacet.equipInstallation(2893, 1, 3, 3)
+      g.realmFacet.equipInstallation(
+        2893,
+        1,
+        3,
+        3,
+        await genEquipInstallationSignature(1, 3, 3, 2893)
+      )
     ).to.be.revertedWith("LibRealm: Invalid spot");
     await expect(
-      g.realmFacet.equipInstallation(2893, 1, 62, 10)
+      g.realmFacet.equipInstallation(
+        2893,
+        1,
+        62,
+        10,
+        await genEquipInstallationSignature(1, 62, 10, 2893)
+      )
     ).to.be.revertedWith("LibRealm: x exceeding width");
     await expect(
-      g.realmFacet.equipInstallation(2893, 1, 10, 30)
+      g.realmFacet.equipInstallation(
+        2893,
+        1,
+        10,
+        30,
+        await genEquipInstallationSignature(1, 10, 30, 2893)
+      )
     ).to.be.revertedWith("LibRealm: y exceeding height");
-    await g.realmFacet.equipInstallation(2893, 1, 6, 6);
-    await g.realmFacet.equipInstallation(2893, 1, 20, 20);
+    await g.realmFacet.equipInstallation(
+      2893,
+      1,
+      6,
+      6,
+      await genEquipInstallationSignature(1, 6, 6, 2893)
+    );
+    await g.realmFacet.equipInstallation(
+      2893,
+      1,
+      20,
+      20,
+      await genEquipInstallationSignature(1, 20, 20, 2893)
+    );
     await expect(
-      g.realmFacet.equipInstallation(2893, 1, 18, 18)
+      g.realmFacet.equipInstallation(
+        2893,
+        1,
+        18,
+        18,
+        await genEquipInstallationSignature(1, 18, 18, 2893)
+      )
     ).to.be.revertedWith("LibItems: Doesn't have that many to transfer");
   });
 
@@ -135,7 +192,13 @@ describe("Testing Equip Installation", async function () {
 
     const refund = totalCost.div(2);
     const beforeBalance = await ghst.balanceOf(testAddress);
-    await g.realmFacet.unequipInstallation("2893", "1", "2", "2");
+    await g.realmFacet.unequipInstallation(
+      "2893",
+      "1",
+      "2",
+      "2",
+      await genEquipInstallationSignature(1, 2, 2, 2893)
+    );
     const afterBalance = await ghst.balanceOf(testAddress);
     expect(afterBalance).to.equal(beforeBalance.add(refund));
   });
