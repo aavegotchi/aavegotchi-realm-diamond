@@ -16,8 +16,8 @@ contract VRFFacet is Modifiers {
   }
 
   // TODO: REMOVE THIS FUNCTION IN PRODUCTION
-  function testRawFulfillRandomWords(uint256 tokenId, uint256[] memory randomWords) external {
-    LibRealm.updateRemainingAlchemica(tokenId, randomWords, 0);
+  function testRawFulfillRandomWords(uint256 tokenId, uint256[] memory randomWords uint256 round) external {
+    LibRealm.updateRemainingAlchemica(tokenId, randomWords, round);
   }
 
   function setConfig(RequestConfig calldata _requestConfig) external onlyOwner {
