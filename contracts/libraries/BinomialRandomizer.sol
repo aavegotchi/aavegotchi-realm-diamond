@@ -5,16 +5,24 @@ library BinomialRandomizer {
 
   uint256 private constant BASE_DENOMINATOR = 10_000;
 
-  // Averages out to 100_000_000 over many rolls
-  function calculateAlchemicaSurveyAmount(uint256 seed, uint256 average) internal pure returns (uint256 value) {
-    return simulateBinomial(
+  /// @notice Calculates the alchemica amount of parcels
+  /// @param seed The seed to use for the randomization
+  /// @param average The average value of the randomization
+  /// @return totalPull A random value calculated by the binomial distribution
+  /// @dev Arbitrary fields are chosen to make the distribution meet the average
+  /// and provide a desirable distribution curve
+  function calculateAlchemicaSurveyAmount(
+    uint256 seed, 
+    uint256 average
+  ) internal pure returns (uint256 totalPull) {
+    totalPull = simulateBinomial(
       seed,
-      30,
-      4,
-      13,
-      60_000_000,
-      73_000_000,
-      14_000
+      30, // Number of rolls
+      4, // Reciprocal of the chance to win
+      13, // The amount of tail to cut off to prevent a heavy tail
+      60_000_000, // The floor is 60% of the average
+      73_000_000, // Arbitrary
+      14_000 // Arbitrary
     ) * average / 100_000_000;
   }
 
@@ -32,6 +40,9 @@ library BinomialRandomizer {
     value = base * getMultiplierResult(rolls, multiplier)/(n*BASE_DENOMINATOR) + floor;
   }
 
+  /// @notice Helper function to exponentiate the result based on the number of successful rolls
+  /// @param rolls The number of successful rolls
+  /// @param multiplier The multiplier to use for exponentiation
   function getMultiplierResult(
     uint256 rolls,
     uint256 multiplier // scaled by BASE_DENOMINATOR
@@ -45,7 +56,10 @@ library BinomialRandomizer {
     result -= BASE_DENOMINATOR;
   }
 
-
+  /// @notice Helper function that uses the random seed to generate and count a sequence of rolls
+  /// @param seed The seed to use for the randomization
+  /// @param n The number of rolls to generate
+  /// @param divisor The reciprocal of the chance to win
   function countRolls(
     uint256 seed, 
     uint256 n, 
