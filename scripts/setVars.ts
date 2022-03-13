@@ -2,12 +2,14 @@ import { ethers } from "hardhat";
 import { BigNumberish } from "@ethersproject/bignumber";
 
 export function alchemicaTotals() {
+  // The average total alchemica pulls of act 1 for each parcel size
+  // for all rounds
   const hardcodedAlchemicasTotals: number[][] = [
-    [14154, 7076, 3538, 1414],
-    [56618, 28308, 14154, 5660],
-    [452946, 226472, 113236, 45294],
-    [452946, 226472, 113236, 45294],
-    [905894, 452946, 226472, 90588],
+    [28_473, 14_237, 7_118, 2_847],
+    [113_893, 56_947, 28_473, 11_389],
+    [911_145, 455_573, 227_786, 91_115],
+    [911_145, 455_573, 227_786, 91_115],
+    [1_822_290, 911_145, 455_573, 182_229],
   ];
 
   const alchemicaTotalsBN: BigNumberish[][] = [];
