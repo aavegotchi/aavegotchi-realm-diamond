@@ -86,5 +86,5 @@ interface InstallationDiamondInterface {
 
   function getAltarLevel(uint256 _altarId) external view returns (uint256 altarLevel_);
 
-  function isLodge(uint256 _installationId) external view returns (bool res_);
+  function getLodgeLevel(uint256 _installationId) external view returns (uint256 lodgeLevel_);
 }

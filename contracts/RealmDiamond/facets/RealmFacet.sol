@@ -86,10 +86,13 @@ contract RealmFacet is Modifiers {
       "RealmFacet: Invalid signature"
     );
     require(s.parcels[_realmId].currentRound >= 1, "RealmFacet: Must survey before equipping");
-    bool isLodge = InstallationDiamondInterface(s.installationsDiamond).isLodge(_installationId);
-    if (isLodge) {
-      require(!s.parcels[_realmId].lodgeEquipped, "RealmFacet: Lodge already equipped");
-      s.parcels[_realmId].lodgeEquipped = true;
+    uint256 lodgeLevel;
+    try InstallationDiamondInterface(s.installationsDiamond).getLodgeLevel(_installationId) returns (uint256 level) {
+      lodgeLevel = level;
+    } catch {}
+    if (lodgeLevel > 0) {
+      require(s.parcels[_realmId].lodgeId == 0, "RealmFacet: Lodge already equipped");
+      s.parcels[_realmId].lodgeId = _installationId;
     }
     LibRealm.placeInstallation(_realmId, _installationId, _x, _y);
     InstallationDiamondInterface(s.installationsDiamond).equipInstallation(msg.sender, _realmId, _installationId);
@@ -116,8 +119,11 @@ contract RealmFacet is Modifiers {
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
-    bool isLodge = InstallationDiamondInterface(s.installationsDiamond).isLodge(_installationId);
-    if (isLodge) s.parcels[_realmId].lodgeEquipped = false;
+    uint256 lodgeLevel;
+    try InstallationDiamondInterface(s.installationsDiamond).getLodgeLevel(_installationId) returns (uint256 level) {
+      lodgeLevel = level;
+    } catch {}
+    if (lodgeLevel > 0) s.parcels[_realmId].lodgeId = 0;
     LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
 
     InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
