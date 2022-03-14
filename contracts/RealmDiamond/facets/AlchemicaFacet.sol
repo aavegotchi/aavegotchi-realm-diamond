@@ -9,6 +9,7 @@ import "../../libraries/LibAlchemica.sol";
 import "../../libraries/LibSignature.sol";
 import "../../interfaces/AavegotchiDiamond.sol";
 import "../../interfaces/IERC20Mintable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
 import "hardhat/console.sol";
 
 uint256 constant bp = 100 ether;
@@ -404,6 +405,37 @@ contract AlchemicaFacet is Modifiers {
       }
     }
   }
+
+  struct PermitParams {
+    address owner;
+    address spender;
+    uint256[4] values;
+    uint256 deadline;
+    uint8[4] v;
+    bytes32[4] r;
+    bytes32[4] s;
+  }
+
+  function batchPermitAlchemica(
+    PermitParams[] calldata permitParams
+  ) external {
+    for (uint256 i = 0; i < permitParams.length; i++) {
+      PermitParams memory params = permitParams[i];
+      for (uint256 j = 0; j < 4; j++) {
+        if (params.values[j] > 0) {
+          IERC20Permit(s.alchemicaAddresses[j]).permit(
+            params.owner, 
+            params.spender, 
+            params.values[j], 
+            params.deadline, 
+            params.v[j], 
+            params.r[j],
+            params.s[j]
+          );
+        }
+      }
+    }
+  } 
 
   function setChannelingLimits(uint256[] calldata _altarLevel, uint256[] calldata _limits) external onlyOwner {
     require(_altarLevel.length == _limits.length, "AlchemicaFacet: array mismatch");
