@@ -241,7 +241,26 @@ export function testInstallations() {
       name: "Altar level 2",
     })
   );
-
+  installations.push(
+    outputInstallation({
+      installationType: 3,
+      level: 1,
+      width: 2,
+      height: 2,
+      alchemicaType: 0,
+      alchemicaCost: [10, 10, 10, 10],
+      harvestRate: 0,
+      capacity: 0,
+      spillRadius: 0,
+      spillRate: 0,
+      upgradeQueueBoost: 1,
+      craftTime: 10000,
+      deprecated: false,
+      nextLevelId: 0,
+      prerequisites: [],
+      name: "Gotchi Lodge level 1",
+    })
+  );
   return installations;
 }
 

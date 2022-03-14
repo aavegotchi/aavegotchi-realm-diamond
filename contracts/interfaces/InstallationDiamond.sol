@@ -85,4 +85,6 @@ interface InstallationDiamondInterface {
   function spilloverRateAndRadiusOfId(uint256 _id) external view returns (uint256, uint256);
 
   function getAltarLevel(uint256 _altarId) external view returns (uint256 altarLevel_);
+
+  function isLodge(uint256 _installationId) external view returns (bool res_);
 }

@@ -209,6 +209,11 @@ contract InstallationFacet is Modifiers {
     altarLevel_ = s.installationTypes[_altarId].level;
   }
 
+  function isLodge(uint256 _installationId) external view returns (bool res_) {
+    require(_installationId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
+    if (s.installationTypes[_installationId].installationType == 3) res_ = true;
+  }
+
   /***********************************|
    |             Write Functions        |
    |__________________________________*/
