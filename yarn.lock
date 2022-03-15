@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@chainlink/contracts@^0.2.2":
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/@chainlink/contracts/-/contracts-0.2.3.tgz#f4ef1750caef1682c537a99559b5b95629436303"
-  integrity sha512-hf4b8OEfEqfjC9addvXCrE2SEybNwN1r971vxFYhL/l/yDTTMAk0jmGZYtfUPDOB/qY7FfrOXuxlEVQ+ojZgZw==
+"@chainlink/contracts@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@chainlink/contracts/-/contracts-0.4.0.tgz#4bcfd486d02cdc73047f27904119d0f8cb7291f4"
+  integrity sha512-yZGeCBd7d+qxfw9r/JxtPzsW2kCc6MorPRZ/tDKnaJI98H99j5P2Fosfehmcwk6wVZlz+0Bp4kS1y480nw3Zow==
 
 "@cspotcode/source-map-consumer@0.8.0":
   version "0.8.0"
@@ -729,6 +729,11 @@
     ethereum-ens "^0.8.0"
     ethers "^4.0.0-beta.1"
     source-map-support "^0.5.19"
+
+"@openzeppelin/contracts-upgradeable@^4.5.2":
+  version "4.5.2"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.5.2.tgz#90d9e47bacfd8693bfad0ac8a394645575528d05"
+  integrity sha512-xgWZYaPlrEOQo3cBj97Ufiuv79SPd8Brh4GcFYhPgb6WvAq4ppz8dWKL6h+jLAK01rUqMRp/TS9AdXgAeNvCLA==
 
 "@openzeppelin/contracts@^4.1.0":
   version "4.5.0"

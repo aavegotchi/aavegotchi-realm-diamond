@@ -2,6 +2,7 @@ import {
   impersonate,
   maticDiamondAddress,
   mineBlocks,
+  realmDiamondAddress,
 } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
@@ -42,7 +43,7 @@ describe("Testing Equip Installation", async function () {
   before(async function () {
     this.timeout(20000000);
 
-    g = await beforeTest(ethers);
+    g = await beforeTest(ethers, realmDiamondAddress(network.name));
   });
   it("Deploy alchemica ERC20s", async function () {
     g.alchemicaFacet = await impersonate(
@@ -84,7 +85,7 @@ describe("Testing Equip Installation", async function () {
       []
     );
 
-    await g.installationDiamond.addInstallationTypes(testInstallations());
+    await g.installationAdminFacet.addInstallationTypes(testInstallations());
     installationsTypes = await g.installationDiamond.getInstallationTypes([]);
     expect(installationsTypes.length).to.equal(testInstallations().length);
   });
@@ -101,9 +102,10 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
+
     await expect(
       g.installationDiamond.craftInstallations([1, 2, 2])
-    ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
+    ).to.be.revertedWith("ERC20: insufficient allowance");
     await g.alchemicaFacet.testingAlchemicaFaucet(
       0,
       ethers.utils.parseUnits("20000")
