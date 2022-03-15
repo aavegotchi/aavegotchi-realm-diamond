@@ -1,7 +1,7 @@
 //@ts-ignore
 import { Signer } from "@ethersproject/abstract-signer";
 import { BigNumberish } from "@ethersproject/bignumber";
-import { ethers, network } from "hardhat";
+import { ethers } from "hardhat";
 import {
   DiamondCutFacet,
   DiamondInit__factory,
@@ -9,9 +9,11 @@ import {
   OwnershipFacet,
   AlchemicaFacet,
   AlchemicaToken,
+  InstallationAdminFacet,
+  InstallationFacet,
 } from "../../../typechain";
-import { gasPrice, impersonate } from "../../helperFunctions";
-import { deployAlchemica } from "../realmHelpers";
+import { gasPrice, maticAavegotchiDiamondAddress } from "../../helperFunctions";
+import { deployAlchemica, goldenAaltar } from "../realmHelpers";
 import { alchemicaTotals, boostMultipliers } from "../../setVars";
 import { deployDiamond } from "../../installation/deploy";
 import { deployDiamondTile } from "../../tile/deploy";
@@ -23,6 +25,8 @@ interface Diamond {
 }
 
 async function deployRealmDiamond(deployerAddress: string) {
+  console.log("Begin script");
+
   // deploy DiamondCutFacet
   const DiamondCutFacet = await ethers.getContractFactory("DiamondCutFacet");
 
@@ -168,7 +172,7 @@ export async function deployMumbai() {
   const backendSigner = new ethers.Wallet(process.env.MUMBAI_REALM_PK); // PK should start with '0x'
 
   console.log("Setting vars");
-  const tx = await alchemicaFacet.setVars(
+  let tx = await alchemicaFacet.setVars(
     //@ts-ignore
     alchemicaTotals(),
     boostMultipliers,
@@ -191,6 +195,21 @@ export async function deployMumbai() {
 
   await tx.wait();
 
+  const pixelcraft = deployerAddress;
+  const dao = deployerAddress;
+
+  console.log("Setting Installation addresses");
+  const adminFacet = await ethers.getContractAt("InstallationAdminFacet");
+  console.log("Setting addresses");
+  tx = await adminFacet.setAddresses(
+    maticAavegotchiDiamondAddress,
+    realmDiamond.address,
+    alchemica.glmr,
+    pixelcraft,
+    dao
+  );
+  await tx.wait();
+
   console.log("RealmDiamond deployed:", realmDiamond.address);
   console.log("InstallationDiamond deployed:", installationDiamond);
   console.log("FUD deployed:", alchemica.fud.address);
@@ -198,6 +217,7 @@ export async function deployMumbai() {
   console.log("ALPHA deployed:", alchemica.alpha.address);
   console.log("KEK deployed:", alchemica.kek.address);
   console.log("GLMR deployed:", alchemica.glmr.address);
+  console.log("Tile Diamond deployed:", tileDiamond);
 
   const fudToken = (await ethers.getContractAt(
     "AlchemicaToken",
@@ -222,6 +242,30 @@ export async function deployMumbai() {
   const balance = await fudToken.balanceOf(currentAccount);
 
   console.log("balance:", balance.toString());
+
+  const installationAdminFacet = (await ethers.getContractAt(
+    "InstallationAdminFacet",
+    installationDiamond,
+    signers[0]
+  )) as InstallationAdminFacet;
+
+  const installationFacet = (await ethers.getContractAt(
+    "InstallationFacet",
+    installationDiamond,
+    signers[0]
+  )) as InstallationFacet;
+
+  console.log("Adding Golden Altar");
+  const addTx = await installationAdminFacet.addInstallationTypes(
+    goldenAaltar(),
+    {
+      gasPrice: gasPrice,
+    }
+  );
+  await addTx.wait();
+
+  const installations = await installationFacet.getInstallationTypes([0]);
+  console.log("installations:", installations);
 
   return realmDiamond.address;
 }

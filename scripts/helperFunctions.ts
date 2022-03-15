@@ -114,13 +114,13 @@ export async function getDiamondSigner(
 }
 
 export function realmDiamondAddress(network: string) {
-  if (["mumbai", "localhost"].includes(network))
-    return mumbaiInstallationDiamondAddress;
+  if (["mumbai", "localhost", "hardhat"].includes(network))
+    return mumbaiDiamondAddress;
   return maticDiamondAddress;
 }
 
 export function installationDiamondAddress(network: string) {
-  if (["mumbai", "localhost"].includes(network))
+  if (["mumbai", "localhost", "hardhat"].includes(network))
     return mumbaiInstallationDiamondAddress;
   return "";
 }

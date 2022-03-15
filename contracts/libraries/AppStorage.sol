@@ -43,6 +43,7 @@ struct Parcel {
   uint256 altarId;
   uint256 upgradeQueueCapacity;
   uint256 upgradeQueueLength;
+  uint256 lodgeId;
 }
 
 struct RequestConfig {
