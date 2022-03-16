@@ -27,11 +27,13 @@ module.exports = {
     apiKey: process.env.POLYGON_API_KEY,
   },
   networks: {
-    hardhat: {
-      accounts: [{
-        privateKey: process.env.SECRET,
-        balance: "1000000000000000000000000",
-      }],
+    hardhat: {/*
+      accounts: [
+        {
+          privateKey: process.env.SECRET,
+          balance: "1000000000000000000000000",
+        },
+       ],*/
       forking: {
         url: process.env.MATIC_URL,
         timeout: 2000000,
