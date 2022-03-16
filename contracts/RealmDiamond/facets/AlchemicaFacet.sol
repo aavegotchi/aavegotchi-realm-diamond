@@ -194,7 +194,7 @@ contract AlchemicaFacet is Modifiers {
       //Then get the floating amount
       available += LibAlchemica.alchemicaSinceLastUpdate(_realmId, index);
 
-      uint256 capacity = s.parcels[_realmId].reservoirCapacity[index];
+      uint256 capacity = LibAlchemica.calculateTotalCapacity(_realmId, index);
 
       //ensure that available alchemica is not higher than available reservoir capacity
       if (available > capacity) {
@@ -211,7 +211,17 @@ contract AlchemicaFacet is Modifiers {
   }
 
   function calculateSpilloverForReservoir(uint256 _realmId, uint256 _alchemicaType) internal view returns (SpilloverIO memory spillover) {
-    uint256 spilloverRate = s.parcels[_realmId].spilloverRate[_alchemicaType] / s.parcels[_realmId].reservoirCount[_alchemicaType];
+    uint256 capacityXspillover;
+    uint256 totalCapacity;
+    for (uint256 i; i < s.parcels[_realmId].reservoirsCapacity[_alchemicaType].length; i++) {
+      uint256 capacity = s.parcels[_realmId].reservoirsCapacity[_alchemicaType][i];
+      totalCapacity += capacity;
+      uint256 spill = s.parcels[_realmId].spilloverRates[_alchemicaType][i];
+
+      capacityXspillover += capacity * spill;
+    }
+
+    uint256 spilloverRate = capacityXspillover / totalCapacity;
     uint256 spilloverRadius = s.parcels[_realmId].spilloverRadius[_alchemicaType] / s.parcels[_realmId].reservoirCount[_alchemicaType];
 
     return SpilloverIO(spilloverRate, spilloverRadius);

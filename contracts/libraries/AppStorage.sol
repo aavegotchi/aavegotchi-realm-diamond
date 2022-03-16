@@ -33,8 +33,10 @@ struct Parcel {
   uint256 currentRound; //begins at 0 and increments after surveying has begun
   mapping(uint256 => uint256[]) roundBaseAlchemica; //round alchemica not including boosts
   mapping(uint256 => uint256[]) roundAlchemica; //round alchemica including boosts
-  uint256[4] reservoirCapacity;
-  uint256[4] spilloverRate;
+  // alchemicaType => array of reservoir capacity
+  mapping(uint256 => uint256[]) reservoirsCapacity;
+  // alchemicaType => array of spillrate
+  mapping(uint256 => uint256[]) spilloverRates;
   uint256[4] spilloverRadius;
   uint256[4] reservoirCount;
   uint256[4] alchemicaHarvestRate;

@@ -9,7 +9,8 @@ library LibAlchemica {
   function settleUnclaimedAlchemica(uint256 _tokenId, uint256 _alchemicaType) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
-    uint256 capacity = s.parcels[_tokenId].reservoirCapacity[_alchemicaType];
+    // uint256 capacity = s.parcels[_tokenId].reservoirCapacity[_alchemicaType];
+    uint256 capacity = calculateTotalCapacity(_tokenId, _alchemicaType);
 
     uint256 alchemicaSinceUpdate = alchemicaSinceLastUpdate(_tokenId, _alchemicaType);
 
@@ -54,11 +55,11 @@ library LibAlchemica {
 
     //reservoir
     if (installationType.capacity > 0) {
-      s.parcels[_realmId].reservoirCapacity[alchemicaType] += installationType.capacity;
+      s.parcels[_realmId].reservoirsCapacity[alchemicaType].push(installationType.capacity);
 
       //increment storage vars
       s.parcels[_realmId].reservoirCount[alchemicaType]++;
-      s.parcels[_realmId].spilloverRate[alchemicaType] += installationType.spillRate;
+      s.parcels[_realmId].spilloverRates[alchemicaType].push(installationType.spillRate);
       s.parcels[_realmId].spilloverRadius[alchemicaType] += installationType.spillRadius;
     }
 
@@ -99,12 +100,26 @@ library LibAlchemica {
 
     //Decrement reservoir variables
     if (installationType.capacity > 0) {
-      s.parcels[_realmId].reservoirCapacity[alchemicaType] -= installationType.capacity;
+      for (uint256 i; i < s.parcels[_realmId].reservoirsCapacity[alchemicaType].length; i++) {
+        if (
+          s.parcels[_realmId].reservoirsCapacity[alchemicaType][i] == installationType.capacity &&
+          s.parcels[_realmId].spilloverRates[alchemicaType][i] == installationType.spillRate
+        ) {
+          // todo pop arrays
+          s.parcels[_realmId].reservoirsCapacity[alchemicaType][i] = s.parcels[_realmId].reservoirsCapacity[alchemicaType][
+            s.parcels[_realmId].reservoirsCapacity[alchemicaType].length - 1
+          ];
+          s.parcels[_realmId].reservoirsCapacity[alchemicaType].pop();
+          s.parcels[_realmId].spilloverRates[alchemicaType][i] = s.parcels[_realmId].spilloverRates[alchemicaType][
+            s.parcels[_realmId].spilloverRates[alchemicaType].length - 1
+          ];
+          s.parcels[_realmId].spilloverRates[alchemicaType].pop();
+        }
+      }
       s.parcels[_realmId].reservoirCount[alchemicaType]--;
-      s.parcels[_realmId].spilloverRate[alchemicaType] -= installationType.spillRate;
       s.parcels[_realmId].spilloverRadius[alchemicaType] -= installationType.spillRadius;
 
-      if (s.parcels[_realmId].unclaimedAlchemica[alchemicaType] > s.parcels[_realmId].reservoirCapacity[alchemicaType]) {
+      if (s.parcels[_realmId].unclaimedAlchemica[alchemicaType] > calculateTotalCapacity(_realmId, alchemicaType)) {
         //step 1 - unequip all harvesters
         //step 2 - claim alchemica balance
         //step 3 - unequip reservoir
@@ -115,6 +130,13 @@ library LibAlchemica {
     // upgradeQueueBoost
     if (installationType.upgradeQueueBoost > 0) {
       s.parcels[_realmId].upgradeQueueCapacity -= installationType.upgradeQueueBoost;
+    }
+  }
+
+  function calculateTotalCapacity(uint256 _tokenId, uint256 _alchemicaType) internal view returns (uint256 capacity_) {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+    for (uint256 i; i < s.parcels[_tokenId].reservoirsCapacity[_alchemicaType].length; i++) {
+      capacity_ += s.parcels[_tokenId].reservoirsCapacity[_alchemicaType][i];
     }
   }
 }

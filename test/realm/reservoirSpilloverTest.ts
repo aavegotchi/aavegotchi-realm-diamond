@@ -43,7 +43,7 @@ describe("Testing Equip Installation", async function () {
   before(async function () {
     this.timeout(20000000);
 
-    g = await beforeTest(ethers, realmDiamondAddress(network.name));
+    g = await beforeTest(ethers, realmDiamondAddress("mainnet"));
   });
   it("Deploy alchemica ERC20s", async function () {
     g.alchemicaFacet = await impersonate(
@@ -214,13 +214,13 @@ describe("Testing Equip Installation", async function () {
     expect(Number(ethers.utils.formatUnits(availableAlchemica[0]))).to.equal(0);
     await mineBlocks(ethers, 60000);
 
-    let parcelCapacity = await g.realmFacet.getParcelCapacity(testParcelId);
+    let parcelCapacity = await g.realmFacet.getParcelCapacity(testParcelId, 0);
     availableAlchemica = await g.alchemicaFacet.getAvailableAlchemica(
       testParcelId
     );
 
     expect(Number(ethers.utils.formatUnits(availableAlchemica[0]))).to.equal(
-      Number(ethers.utils.formatUnits(parcelCapacity[0]))
+      Number(ethers.utils.formatUnits(parcelCapacity))
     );
   });
   it("Claim Alchemica", async function () {
@@ -251,17 +251,16 @@ describe("Testing Equip Installation", async function () {
       testParcelId
     );
 
-    let parcelCapacity = await g.realmFacet.getParcelCapacity(testParcelId);
+    let parcelCapacity = await g.realmFacet.getParcelCapacity(testParcelId, 0);
 
-    const alchemicaMinusSpillover = 0.8;
+    const alchemicaMinusSpillover = 0.5;
     expect(Number(ethers.utils.formatUnits(availableAlchemica[0]))).to.equal(0);
     let totalAlchemica = await g.fud.balanceOf(testAddress);
     expect(
       Number(ethers.utils.formatUnits(totalAlchemica)) -
         Number(ethers.utils.formatUnits(preBalance))
     ).to.equal(
-      alchemicaMinusSpillover *
-        Number(ethers.utils.formatUnits(parcelCapacity[0]))
+      alchemicaMinusSpillover * Number(ethers.utils.formatUnits(parcelCapacity))
     );
   });
   it("Equip level 2 and claim alchemica", async function () {
@@ -313,9 +312,9 @@ describe("Testing Equip Installation", async function () {
     let availableAlchemica = await g.alchemicaFacet.getAvailableAlchemica(
       testParcelId
     );
-    let parcelCapacity = await g.realmFacet.getParcelCapacity(testParcelId);
+    let parcelCapacity = await g.realmFacet.getParcelCapacity(testParcelId, 0);
     expect(Number(ethers.utils.formatUnits(availableAlchemica[0]))).to.equal(
-      Number(ethers.utils.formatUnits(parcelCapacity[0]))
+      Number(ethers.utils.formatUnits(parcelCapacity))
     );
     const alchemicaRemaining2 = await g.alchemicaFacet.getRealmAlchemica(
       testParcelId
@@ -340,14 +339,14 @@ describe("Testing Equip Installation", async function () {
 
     let claimedAlchemica = await g.fud.balanceOf(testAddress);
 
-    //combined spillover of reservoirs is 15%
-    const alchemicaMinusSpillover = 0.85;
+    //combined spillover of reservoirs is 30%
+    const alchemicaMinusSpillover = 0.7;
+
     expect(
       Number(ethers.utils.formatUnits(claimedAlchemica)) -
         Number(ethers.utils.formatUnits(startBalance))
     ).to.equal(
-      alchemicaMinusSpillover *
-        Number(ethers.utils.formatUnits(parcelCapacity[0]))
+      alchemicaMinusSpillover * Number(ethers.utils.formatUnits(parcelCapacity))
     );
   });
   it("Test unequipping", async function () {
