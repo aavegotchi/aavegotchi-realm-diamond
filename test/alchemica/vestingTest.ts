@@ -5,6 +5,7 @@ import {
   deployVestingImplementation,
   deployAndInitializeVestingProxy,
   deployProxyAdmin,
+  deployProxy,
 } from "../../helpers/helpers";
 import { 
   address, 
@@ -13,7 +14,7 @@ import {
   aboutEquals, 
   currentTimestamp 
 } from "../../helpers/utils";
-import { GWEI, ETHER, YEAR } from "../../helpers/constants";
+import { GWEI, ETHER, YEAR, GHST_ADDRESS } from "../../helpers/constants";
 import { ERC20MintableBurnable } from "../../typechain/ERC20MintableBurnable";
 
 describe("Vesting", function () {
@@ -215,9 +216,31 @@ describe("Vesting", function () {
         .mint(await address(vestingContract), ETHER);
       await vestingContract.batchRelease([token.address, anotherToken.address]);
       expect(await token.balanceOf(await address(beneficiary))).to.be.gt(0);
-      expect(await anotherToken.balanceOf(await address(beneficiary))).to.be.gt(
-        0
-      );
+      expect(await anotherToken.balanceOf(await address(beneficiary))).to.be.gt(0);
+    });
+
+    it("Should error when no tokens can be released", async () => {
+      await expect(
+        vestingContract.release(GHST_ADDRESS)
+      ).to.be.revertedWith(`NoTokensDue()`);
+    });
+
+    it("Should error when no tokens can be released (Partial release)", async () => {
+      await expect(
+        vestingContract.partialRelease(GHST_ADDRESS, 0)
+      ).to.be.revertedWith(`NoTokensDue()`);
+    });
+
+    it("Should error when too many tokens are released (Partial release)", async() => {
+      await expect(
+        vestingContract.partialRelease(token.address, ETHER.mul(ETHER))
+      ).to.be.revertedWith(`InvalidAmount()`);
+    });
+
+    it("Should not be able to revoke", async () => {
+      await expect(
+        vestingContract.connect(owner).revoke(token.address)
+      ).to.be.revertedWith(`NotRevocable()`);
     });
 
     it("Should deploy an unrevocable vesting contract and release the full amount after 30 years", async () => {
@@ -317,7 +340,38 @@ describe("Vesting", function () {
           ETHER.mul(171).div(1000),
         )
       ).to.equal(true);
-    })
+    });
+
+
+    it("Should not be able to initialize beneficiary with zero", async () => {
+      let proxy = (await deployProxy(vestingImplementation, proxyAdmin)).contract;
+      let vestingContract = await vestingImplementation.attach(proxy.address);
+      await expect(vestingContract.connect(owner).initialize(
+        ethers.constants.AddressZero,
+        0,
+        ETHER.mul(20).div(100),
+        false
+      )).to.be.revertedWith(`ZeroAddress()`);
+    });
+    
+    it("Should not be able to initialize decay factor with zero or >=1", async () => {
+      let proxy = (await deployProxy(vestingImplementation, proxyAdmin)).contract;
+      let vestingContract = await vestingImplementation.attach(proxy.address);
+      await expect(vestingContract.connect(owner).initialize(
+        await address(beneficiary),
+        0,
+        0,
+        false
+      )).to.be.revertedWith(`InvalidDecayFactor(0)`);
+      
+      await expect(vestingContract.connect(owner).initialize(
+        await address(beneficiary),
+        0,
+        ETHER,
+        false
+      )).to.be.revertedWith(`InvalidDecayFactor(1000000000000000000)`);
+    });
+
   });
 
   describe("Revocable Vesting Contract", function () {
@@ -381,5 +435,13 @@ describe("Vesting", function () {
         ownerBalance
       );
     });
+
+    it("Should not be able to revoke after a revoke", async () => {
+      await expect(
+        vestingContract.connect(owner).revoke(token.address)
+      ).to.be.revertedWith(`AlreadyRevoked()`);
+    });
+
+
   });
 });

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
@@ -13,6 +13,14 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
 
   event TokensReleased(address token, uint256 amount);
   event TokenVestingRevoked(address token);
+
+  error Unauthorized(address caller);
+  error ZeroAddress();
+  error InvalidDecayFactor(uint256 decayFactor);
+  error NoTokensDue();
+  error InvalidAmount();
+  error NotRevocable();
+  error AlreadyRevoked();
 
   uint256 private constant DECAY_PERIOD = 60 * 60 * 24 * 365; // 1 year
   // Tokens will vest with this amount of precision.
@@ -33,7 +41,7 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
   mapping (address => bool) private _revoked;
   
   function replaceBeneficiary(address newBeneficiary_) external {
-    require(msg.sender == _beneficiary, "Not authorized");
+    if (msg.sender != _beneficiary) revert Unauthorized(msg.sender);
     _beneficiary = newBeneficiary_;
   }
 
@@ -49,8 +57,8 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
     * @param revocable_ whether the vesting is revocable or not
     */
   function initialize(address beneficiary_, uint256 start_, uint256 decayFactor_, bool revocable_) public initializer {
-    require(beneficiary_ != address(0), "TokenVesting: beneficiary is the zero address");
-    require(decayFactor_ > 0 && decayFactor_ < PRECISION, "TokenVesting: invalid decay factor");
+    if(beneficiary_ == address(0)) revert ZeroAddress();
+    if(decayFactor_ == 0 || decayFactor_ >= PRECISION) revert InvalidDecayFactor(decayFactor_);
 
     __Ownable_init();
 
@@ -109,7 +117,7 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
   function release(IERC20 token) public {
     uint256 unreleased = releasableAmount(token);
 
-    require(unreleased > 0, "TokenVesting: no tokens are due");
+    if(unreleased == 0) revert NoTokensDue();
 
     _released[address(token)] = _released[address(token)] + unreleased;
 
@@ -126,8 +134,8 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
   
   function partialRelease(IERC20 token, uint256 value) public {
     uint256 unreleased = releasableAmount(token);
-    require(unreleased > 0, "TokenVesting: no tokens are due");
-    require(value <= unreleased, "value is greater than unreleased amount");
+    if(unreleased == 0) revert NoTokensDue();
+    if(value > unreleased) revert InvalidAmount();
     
     _released[address(token)] = _released[address(token)] + value;
 
@@ -142,8 +150,8 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
     * @param token ERC20 token which is being vested
     */
   function revoke(IERC20 token) public onlyOwner {
-    require(_revocable, "TokenVesting: cannot revoke");
-    require(!_revoked[address(token)], "TokenVesting: token already revoked");
+    if(!_revocable) revert NotRevocable();
+    if(_revoked[address(token)]) revert AlreadyRevoked();
 
     uint256 balance = token.balanceOf(address(this));
 
