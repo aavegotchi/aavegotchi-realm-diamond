@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import {
   AlchemicaParams,
 } from "./types";
@@ -10,9 +10,10 @@ export const YEAR = 60 * 60 * 24 * 365;
 export const DAO_TREASURY_ADDRESS = "0x6fb7e0AAFBa16396Ad6c1046027717bcA25F821f";
 export const WMATIC_ADDRESS = "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270";
 export const ECOSYSTEM_VESTING_BENEFICIARY = DAO_TREASURY_ADDRESS;
-export const GAMEPLAY_VESTING_BENEFICIARY = DAO_TREASURY_ADDRESS;
+export const GAMEPLAY_VESTING_BENEFICIARY = "0xd82974D2E506388e1d82Ab9d77A7337F4A470284"; //TODO: REPLACE THIS
 export const REALM_DIAMOND = "0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11";
 export const GHST_ADDRESS = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
+export const QUICKSWAP_ROUTER_ADDRESS = "0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff";
 
 export const PROXY_ADMIN_ADDRESS = "0xbE50b0594edeA37C34dF287778d85B9546Fdb309";
 
@@ -41,3 +42,19 @@ export const KEK_PARAMS: AlchemicaParams = {
   symbol: "KEK",
   supply: BigNumber.from(10).mul(ETHER).mul(GWEI),
 };
+
+export const INITIAL_ALCHEMICA_SEED: 
+[[BigNumber, BigNumber, BigNumber, BigNumber], 
+  [BigNumber, BigNumber, BigNumber, BigNumber]] = 
+[[
+  BigNumber.from(10000), // FUD
+  BigNumber.from(10000), // FOMO
+  BigNumber.from(10000), // ALPHA
+  BigNumber.from(10000), // KEK
+],
+[
+  BigNumber.from(10000), // GHST
+  BigNumber.from(10000),
+  BigNumber.from(10000),
+  BigNumber.from(10000),
+]];

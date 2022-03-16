@@ -28,10 +28,14 @@ module.exports = {
   },
   networks: {
     hardhat: {
+      accounts: [{
+        privateKey: process.env.SECRET,
+        balance: "1000000000000000000000000",
+      }],
       forking: {
         url: process.env.MATIC_URL,
         timeout: 2000000,
-        // blockNumber: 23571000,
+        blockNumber: 26015056,
       },
       blockGasLimit: 20000000,
       timeout: 2000000,
@@ -44,9 +48,8 @@ module.exports = {
       url: process.env.MATIC_URL,
       accounts: [process.env.SECRET],
       // blockGasLimit: 20000000,
-      blockGasLimit: 20000000,
       maxFeePerGas: 50 * GWEI,
-      maxPriorityFeePerGas: GWEI,
+      maxPriorityFeePerGas: 1 * GWEI,
       //   timeout: 90000
     },
     mumbai: {

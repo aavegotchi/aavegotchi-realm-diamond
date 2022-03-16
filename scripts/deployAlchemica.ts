@@ -4,6 +4,7 @@ import {
   BigNumber,
   Signer,
   Contract,
+  Wallet,
 } from 'ethers';
 import {
   deployProxyAdmin, 
@@ -11,8 +12,6 @@ import {
   deployAndInitializeVestingProxy, 
   deployAlchemicaImplementation,
   deployAndInitializeAlchemicaProxy,
-  deployGAXFactory,
-  deployGAXRouter,
   verify
 } from "../helpers/helpers";
 import {VerifyParams} from "../helpers/types";
@@ -26,8 +25,17 @@ import {
   KEK_PARAMS,
   REALM_DIAMOND,
   ETHER,
+  QUICKSWAP_ROUTER_ADDRESS,
+  GHST_ADDRESS,
+  INITIAL_ALCHEMICA_SEED,
 } from "../helpers/constants";
-
+import {
+  IERC20,
+  IUniswapV2Router02,
+  AlchemicaToken,
+  AlchemicaVesting,
+} from "../typechain/";
+import * as dotenv from "dotenv";
 
 
 async function deployVestingContracts(
@@ -46,7 +54,7 @@ async function deployVestingContracts(
     vestingImplementation.contract,
     ECOSYSTEM_VESTING_BENEFICIARY, // TODO: update beneficiary in constants
     proxyAdmin,
-    BigNumber.from(await currentTimestamp()),
+    BigNumber.from(await currentTimestamp() - 10000),
     ETHER.div(10), // 10% decay per year
     true,
   );
@@ -55,9 +63,9 @@ async function deployVestingContracts(
   let gameplayVestingProxy = await deployAndInitializeVestingProxy(
     owner,
     vestingImplementation.contract,
-    GAMEPLAY_VESTING_BENEFICIARY, // TODO: update beneficiary in constants
+    await address(owner), // TODO: update beneficiary in constants
     proxyAdmin,
-    BigNumber.from(await currentTimestamp()),
+    BigNumber.from(await currentTimestamp() - 10000),
     ETHER.div(10), // 10% decay per year
     true,
   )
@@ -100,10 +108,65 @@ async function deployAlchemica(
   return returnParams;
 }
 
+async function releaseAndLP(
+  beneficiary: Signer,
+  vestingContract: AlchemicaVesting,
+  alchemicas: [AlchemicaToken, AlchemicaToken, AlchemicaToken, AlchemicaToken],) 
+{
+  const alchIn = INITIAL_ALCHEMICA_SEED[0];
+  const ghstIn = INITIAL_ALCHEMICA_SEED[1];
+  const names = ["FUD", "FOMO", "ALPHA", "KEK"];
+  const router: IUniswapV2Router02 = await hre.ethers.getContractAt("IUniswapV2Router02", QUICKSWAP_ROUTER_ADDRESS);
+  const ghst = await hre.ethers.getContractAt("contracts/interfaces/IERC20.sol:IERC20", GHST_ADDRESS);
+  let tx = await vestingContract.connect(beneficiary).batchRelease(
+    [
+      await address(alchemicas[0]),
+      await address(alchemicas[1]),
+      await address(alchemicas[2]),
+      await address(alchemicas[3]),
+    ],
+  );
+  await tx.wait();
+  tx = await ghst.connect(beneficiary).approve(
+    await address(router),
+    ghstIn[0].add(ghstIn[1]).add(ghstIn[2]).add(ghstIn[3]),
+  );
+  await tx.wait();
+  console.log("GHST approved");
+  for(let i = 0; i < alchemicas.length; i++) {
+    let alchemica = alchemicas[i];
+    console.log(
+      (await alchemica.balanceOf(await address(beneficiary))).toString() + 
+      " " +  names[i] + " received."
+    );
+    tx = await alchemica.connect(beneficiary).approve(await address(router), alchIn[i]);
+    await tx.wait();
+    console.log(names[i] + " approved");
+
+    await sleep(10000);
+    tx = await router.connect(beneficiary).addLiquidity(
+      await address(alchemica),
+      GHST_ADDRESS,
+      alchIn[i],
+      ghstIn[i],
+      0,
+      0,
+      await address(beneficiary),
+      await currentTimestamp() + 1000,
+    );
+    await tx.wait();
+    console.log(
+      alchIn[i].toString() + 
+      " " + names[i] + " (wei) added to liquidity pool with " + 
+      ghstIn[i].toString() + " GHST (wei)");
+  }
+}
+
 async function main() {
   let verifyParams: VerifyParams[] = [];
   const signers = await hre.ethers.getSigners();
   const owner = signers[0];
+  console.log(await address(owner));
   const proxyAdmin = await deployProxyAdmin(owner);
   console.log("ProxyAdmin: ", proxyAdmin.contract.address);
   verifyParams.push(proxyAdmin);
@@ -122,6 +185,24 @@ async function main() {
 
   if(process.env.VERIFY) {
     await verify(verifyParams);
+  }
+  const ghst = await hre.ethers.getContractAt("contracts/interfaces/IERC20.sol:IERC20", GHST_ADDRESS);
+  const ownerBalance = await ghst.balanceOf(await address(owner));
+  if(ownerBalance.gt(0)) {
+  
+    await releaseAndLP(
+      owner,
+      gameplayVesting.contract as AlchemicaVesting,
+      [
+        fud.contract as AlchemicaToken, 
+        fomo.contract as AlchemicaToken, 
+        alpha.contract as AlchemicaToken, 
+        kek.contract as AlchemicaToken
+      ],
+    )
+  }
+  else {
+    console.log("Skipping liquidity provision as there is no GHST to LP.");
   }
 }
 

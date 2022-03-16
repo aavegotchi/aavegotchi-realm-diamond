@@ -40,6 +40,7 @@ export async function deployProxy(
 ) : Promise<VerifyParams> {
   let Proxy = await hre.ethers.getContractFactory("TransparentUpgradeableProxy");
   let proxy =  await Proxy.deploy(await address(logic), await address(admin), []);
+  await proxy.deployed();
   return {contract: proxy, constructorArgs: [await address(logic), await address(admin), []]};
 }
 
@@ -63,13 +64,14 @@ export async function deployAndInitializeVestingProxy(
   let proxyVerify = await deployProxy(implementation, proxyAdmin);
   let proxy = proxyVerify.contract;
   let alchemicaVesting = await implementation.attach(proxy.address);
-  await alchemicaVesting.connect(owner).initialize(
+  let tx = await alchemicaVesting.connect(owner).initialize(
     beneficiary,
     start,
     decayFactor,
     revocable,
     {gasLimit: 1000000}
   );
+  await tx.wait();
   return {contract: alchemicaVesting, constructorArgs: proxyVerify.constructorArgs};
 }
 
@@ -88,6 +90,7 @@ export async function deployAlchemicaImplementation(
 ): Promise<VerifyParams> {
   let AlchemicaToken = await hre.ethers.getContractFactory("AlchemicaToken");
   let implementation = await AlchemicaToken.connect(owner).deploy();
+  await implementation.deployed();
   return {contract: implementation, constructorArgs: []};
 }
 
@@ -104,7 +107,7 @@ export async function deployAndInitializeAlchemicaProxy(
 ): Promise<VerifyParams> {
   let proxy = await deployProxy(implementation, proxyAdmin);
   let alchemicaToken = implementation.attach(await address(proxy.contract));
-  await alchemicaToken.connect(owner).initialize(
+  let tx = await alchemicaToken.connect(owner).initialize(
     name,
     symbol,
     supply,
@@ -113,6 +116,7 @@ export async function deployAndInitializeAlchemicaProxy(
     await address(gameplayVestingContract),
     {gasLimit: 10000000},
   );
+  await tx.wait();
   return {contract: alchemicaToken, constructorArgs: proxy.constructorArgs};
 }
 
