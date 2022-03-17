@@ -32,3 +32,12 @@
 - OwnershipFacet deployed: 0x835b3034dCF252148bE27696FBcc8e4f4ff27D46
 - ERC721Facet deployed: 0x835b3034dCF252148bE27696FBcc8e4f4ff27D46
 - RealmFacet deployed: 0x8f5f9150a1A09757A6874c941A8369Bdb6C2155D
+
+### Installation Types
+
+- 0 = altar
+- 1 = harvester
+- 2 = reservoir
+- 3 = gotchi lodge
+- 4 = wall
+- 5 = NFT display
