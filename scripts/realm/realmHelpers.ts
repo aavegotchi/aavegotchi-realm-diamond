@@ -103,7 +103,7 @@ export function testInstallations() {
   );
   installations.push(
     outputInstallation({
-      installationType: 2,
+      installationType: 0,
       level: 1,
       width: 2,
       height: 2,
@@ -123,7 +123,7 @@ export function testInstallations() {
   );
   installations.push(
     outputInstallation({
-      installationType: 1,
+      installationType: 2,
       level: 1,
       width: 2,
       height: 2,
@@ -143,7 +143,7 @@ export function testInstallations() {
   );
   installations.push(
     outputInstallation({
-      installationType: 1,
+      installationType: 2,
       level: 2,
       width: 2,
       height: 2,
@@ -163,7 +163,7 @@ export function testInstallations() {
   );
   installations.push(
     outputInstallation({
-      installationType: 2,
+      installationType: 0,
       level: 1,
       width: 2,
       height: 2,
@@ -183,7 +183,7 @@ export function testInstallations() {
   );
   installations.push(
     outputInstallation({
-      installationType: 0,
+      installationType: 1,
       level: 2,
       width: 2,
       height: 2,
@@ -203,7 +203,7 @@ export function testInstallations() {
   );
   installations.push(
     outputInstallation({
-      installationType: 3,
+      installationType: 6,
       level: 1,
       width: 2,
       height: 2,
@@ -223,7 +223,7 @@ export function testInstallations() {
   );
   installations.push(
     outputInstallation({
-      installationType: 2,
+      installationType: 0,
       level: 2,
       width: 2,
       height: 2,

@@ -88,10 +88,10 @@ contract RealmFacet is Modifiers {
     InstallationDiamondInterface.InstallationType memory installation = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(
       _installationId
     );
-    if (installation.installationType != 2) {
+    if (installation.installationType != 0) {
       require(s.parcels[_realmId].altarId > 0, "RealmFacet: Must equip Altar");
     }
-    if (installation.installationType == 0 || installation.installationType == 1) {
+    if (installation.installationType == 1 || installation.installationType == 2) {
       require(s.parcels[_realmId].currentRound >= 1, "RealmFacet: Must survey before equipping");
     }
     if (installation.installationType == 3) {

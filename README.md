@@ -41,3 +41,4 @@
 - 3 = gotchi lodge
 - 4 = wall
 - 5 = NFT display
+- 6 = buildqueue booster
