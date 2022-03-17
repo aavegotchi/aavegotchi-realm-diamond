@@ -40,6 +40,7 @@ contract AlchemicaFacet is Modifiers {
   /// @param _realmId Identifier of the parcel to survey
   function startSurveying(uint256 _realmId) external onlyParcelOwner(_realmId) {
     require(s.parcels[_realmId].currentRound <= s.surveyingRound, "RealmFacet: Round not released");
+    require(s.parcels[_realmId].altarId > 0, "RealmFacet: Must equip Altar");
     s.parcels[_realmId].currentRound++;
     drawRandomNumbers(_realmId, s.parcels[_realmId].currentRound - 1);
   }
@@ -140,7 +141,7 @@ contract AlchemicaFacet is Modifiers {
   /// @dev This function will be removed in production.
   function testingStartSurveying(uint256 _realmId) external onlyParcelOwner(_realmId) {
     require(s.parcels[_realmId].currentRound <= s.surveyingRound, "RealmFacet: Round not released");
-
+    require(s.parcels[_realmId].altarId > 0, "RealmFacet: Must equip Altar");
     s.parcels[_realmId].currentRound++;
     uint256[] memory alchemicas = new uint256[](4);
     for (uint256 i; i < 4; i++) {
