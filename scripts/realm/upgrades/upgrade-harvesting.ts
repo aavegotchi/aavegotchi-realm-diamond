@@ -48,6 +48,7 @@ export async function upgrade(
         "function getAlchemicaAddresses() external view returns (address[4] memory)",
         "function setChannelingLimits(uint256[] calldata _altarLevel, uint256[] calldata _limits) external",
         "function batchTransferAlchemica(address[] calldata _targets, uint256[4][] calldata _amounts) external",
+        "function batchTransferAlchemicaToGotchis(uint256[] calldata _gotchiIds, uint256[4][] calldata _amounts) external",
       ],
       removeSelectors: [],
     },
