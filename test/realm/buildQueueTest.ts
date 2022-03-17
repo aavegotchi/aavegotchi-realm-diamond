@@ -32,34 +32,6 @@ describe("Testing Equip Installation", async function () {
 
     g = await beforeTest(ethers, realmDiamondAddress(network.name));
   });
-  // it("Deploy alchemica ERC20s", async function () {
-  //   g.alchemicaFacet = await impersonate(
-  //     g.ownerAddress,
-  //     g.alchemicaFacet,
-  //     ethers,
-  //     network
-  //   );
-  //   //@ts-ignore
-  //   const backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
-  //   await g.alchemicaFacet.setVars(
-  //     //@ts-ignore
-  //     alchemicaTotals(),
-  //     boostMultipliers,
-  //     greatPortalCapacity,
-  //     g.installationsAddress,
-  //     "0x0000000000000000000000000000000000000000",
-  //     "0x0000000000000000000000000000000000000000",
-  //     [g.fud.address, g.fomo.address, g.alpha.address, g.kek.address],
-  //     g.glmr.address,
-  //     ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
-  //     g.ownerAddress,
-  //     g.tileAddress
-  //   );
-  //   await network.provider.send("hardhat_setBalance", [
-  //     maticDiamondAddress,
-  //     "0x1000000000000000",
-  //   ]);
-  // });
   it("Setup installation diamond", async function () {
     g.installationDiamond = await impersonate(
       g.installationOwner,
@@ -76,7 +48,7 @@ describe("Testing Equip Installation", async function () {
     installationsTypes = await g.installationDiamond.getInstallationTypes([]);
     expect(installationsTypes.length).to.equal(testInstallations().length);
   });
-  it("Craft installations", async function () {
+  it("Craft installations and equip altar", async function () {
     g.installationDiamond = await impersonate(
       testAddress,
       g.installationDiamond,
@@ -99,7 +71,7 @@ describe("Testing Equip Installation", async function () {
 
     let fudPreCraft = await g.fud.balanceOf(maticDiamondAddress);
     let kekPreCraft = await g.kek.balanceOf(maticDiamondAddress);
-    await g.installationDiamond.craftInstallations([2, 2, 2, 6]);
+    await g.installationDiamond.craftInstallations([1, 2, 2, 2, 6]);
     let fudAfterCraft = await g.fud.balanceOf(maticDiamondAddress);
     let kekAfterCraft = await g.kek.balanceOf(maticDiamondAddress);
     expect(Number(ethers.utils.formatUnits(fudAfterCraft))).to.above(
@@ -114,18 +86,25 @@ describe("Testing Equip Installation", async function () {
 
     await mineBlocks(ethers, 21000);
 
-    await g.installationDiamond.claimInstallations([1, 2, 3]);
-  });
-  it("Survey Parcel", async function () {
-    await g.alchemicaFacet.testingStartSurveying(testParcelId);
-  });
-  it("Equip installations", async function () {
+    await g.installationDiamond.claimInstallations([0, 1, 2, 3, 4]);
     g.realmFacet = await impersonate(
       testAddress,
       g.realmFacet,
       ethers,
       network
     );
+    await g.realmFacet.equipInstallation(
+      testParcelId,
+      1,
+      10,
+      10,
+      await genEquipInstallationSignature(1, 10, 10, testParcelId)
+    );
+  });
+  it("Survey Parcel", async function () {
+    await g.alchemicaFacet.testingStartSurveying(testParcelId);
+  });
+  it("Equip installations", async function () {
     await g.realmFacet.equipInstallation(
       testParcelId,
       2,

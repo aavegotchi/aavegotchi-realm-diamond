@@ -85,12 +85,16 @@ contract RealmFacet is Modifiers {
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
-    require(s.parcels[_realmId].currentRound >= 1, "RealmFacet: Must survey before equipping");
-    uint256 lodgeLevel;
-    try InstallationDiamondInterface(s.installationsDiamond).getLodgeLevel(_installationId) returns (uint256 level) {
-      lodgeLevel = level;
-    } catch {}
-    if (lodgeLevel > 0) {
+    InstallationDiamondInterface.InstallationType memory installation = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(
+      _installationId
+    );
+    if (installation.installationType != 2) {
+      require(s.parcels[_realmId].altarId > 0, "RealmFacet: Must equip Altar");
+    }
+    if (installation.installationType == 0 || installation.installationType == 1) {
+      require(s.parcels[_realmId].currentRound >= 1, "RealmFacet: Must survey before equipping");
+    }
+    if (installation.installationType == 3) {
       require(s.parcels[_realmId].lodgeId == 0, "RealmFacet: Lodge already equipped");
       s.parcels[_realmId].lodgeId = _installationId;
     }
@@ -119,15 +123,15 @@ contract RealmFacet is Modifiers {
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
-    uint256 lodgeLevel;
-    try InstallationDiamondInterface(s.installationsDiamond).getLodgeLevel(_installationId) returns (uint256 level) {
-      lodgeLevel = level;
-    } catch {}
-    if (lodgeLevel > 0) s.parcels[_realmId].lodgeId = 0;
-    LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
 
     InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
     InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
+
+    if (installation.installationType == 3) {
+      s.parcels[_realmId].lodgeId = 0;
+    }
+
+    LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
 
     for (uint256 i; i < installation.alchemicaCost.length; i++) {
       IERC20 alchemica = IERC20(s.alchemicaAddresses[i]);

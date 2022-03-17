@@ -103,7 +103,7 @@ export function testInstallations() {
   );
   installations.push(
     outputInstallation({
-      installationType: 0,
+      installationType: 2,
       level: 1,
       width: 2,
       height: 2,
@@ -113,7 +113,7 @@ export function testInstallations() {
       capacity: 0,
       spillRadius: 0,
       spillRate: 0,
-      upgradeQueueBoost: 0,
+      upgradeQueueBoost: 1,
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 7,
@@ -183,7 +183,7 @@ export function testInstallations() {
   );
   installations.push(
     outputInstallation({
-      installationType: 2,
+      installationType: 0,
       level: 2,
       width: 2,
       height: 2,
