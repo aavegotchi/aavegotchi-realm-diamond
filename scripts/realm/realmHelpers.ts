@@ -403,6 +403,96 @@ export function goldenAaltar() {
   return installations;
 }
 
+export function testnetAltar() {
+  const installations: InstallationTypeOutput[] = [];
+
+  //Void
+  installations.push(
+    outputInstallation({
+      installationType: 0,
+      level: 1,
+      width: 2,
+      height: 2,
+      alchemicaType: 0,
+      alchemicaCost: [0, 0, 0, 0],
+      harvestRate: 0,
+      capacity: 0,
+      spillRadius: 0,
+      spillRate: 50,
+      craftTime: 0,
+      deprecated: true,
+      nextLevelId: 1,
+      prerequisites: [],
+      name: "The Void",
+      upgradeQueueBoost: 0,
+    })
+  );
+
+  //Level 1 GA
+  installations.push(
+    outputInstallation({
+      installationType: 0,
+      level: 1,
+      width: 2,
+      height: 2,
+      alchemicaType: 0,
+      alchemicaCost: [100, 20, 0, 30],
+      harvestRate: 2,
+      capacity: 0,
+      spillRadius: 0,
+      spillRate: 45,
+      craftTime: 1000,
+      deprecated: false,
+      nextLevelId: 2,
+      prerequisites: [],
+      name: "Alchemical Aaltar (Testnet)",
+      upgradeQueueBoost: 1,
+    })
+  );
+  installations.push(
+    outputInstallation({
+      installationType: 0,
+      level: 2,
+      width: 2,
+      height: 2,
+      alchemicaType: 0,
+      alchemicaCost: [400, 50, 60, 60],
+      harvestRate: 0,
+      capacity: 500,
+      spillRadius: 100,
+      spillRate: 40,
+      craftTime: 20000,
+      deprecated: false,
+      nextLevelId: 3,
+      prerequisites: [1],
+      name: "Alchemical Aaltar (Testnet)",
+      upgradeQueueBoost: 1,
+    })
+  );
+  installations.push(
+    outputInstallation({
+      installationType: 0,
+      level: 3,
+      width: 2,
+      height: 2,
+      alchemicaType: 0,
+      alchemicaCost: [40, 50, 60, 60],
+      harvestRate: 0,
+      capacity: 0,
+      spillRadius: 0,
+      spillRate: 35,
+      craftTime: 10000,
+      deprecated: false,
+      nextLevelId: 4,
+      prerequisites: [2],
+      name: "Alchemical Aaltar (Testnet)",
+      upgradeQueueBoost: 1,
+    })
+  );
+
+  return installations;
+}
+
 export async function deployAlchemica(ethers: any, diamondAddress: string) {
   const Fud = await ethers.getContractFactory("AlchemicaToken");
   let fud = (await Fud.deploy(

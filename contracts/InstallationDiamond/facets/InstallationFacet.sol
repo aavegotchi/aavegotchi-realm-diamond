@@ -373,8 +373,10 @@ contract InstallationFacet is Modifiers {
 
     //check upgradeQueueCapacity
     uint256 upgradeQueueCapacity = realm.getParcelUpgradeQueueCapacity(_upgradeQueue.parcelId);
+
     uint256 upgradeQueueLength = realm.getParcelUpgradeQueueLength(_upgradeQueue.parcelId);
-    require(upgradeQueueCapacity + 1 > upgradeQueueLength, "InstallationFacet: UpgradeQueue full");
+
+    require(upgradeQueueCapacity > upgradeQueueLength, "InstallationFacet: UpgradeQueue full");
 
     realm.checkCoordinates(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId);
 
