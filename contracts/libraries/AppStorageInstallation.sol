@@ -73,6 +73,7 @@ struct InstallationAppStorage {
   mapping(address => mapping(uint256 => uint256)) ownerInstallationIndexes;
   UpgradeQueue[] upgradeQueue;
   mapping(bytes32 => uint256) upgradeHashes;
+  bool gameActive;
 }
 
 library LibAppStorageInstallation {
@@ -93,6 +94,11 @@ contract Modifiers {
 
   modifier onlyRealmDiamond() {
     require(msg.sender == s.realmDiamond, "LibDiamond: Must be realm diamond");
+    _;
+  }
+
+  modifier gameActive() {
+    require(s.gameActive, "AppStorage: game not active");
     _;
   }
 }

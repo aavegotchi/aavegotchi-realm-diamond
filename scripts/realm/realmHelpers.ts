@@ -674,6 +674,28 @@ export const genEquipInstallationSignature = async (
   return signature1;
 };
 
+export const genUpgradeInstallationSignature = async (
+  realmId: number,
+  prevInstallationId: number,
+  nextInstallationId: number,
+  coordinateX: number,
+  coordinateY: number
+) => {
+  //@ts-ignore
+  let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+
+  let messageHash = ethers.utils.solidityKeccak256(
+    ["uint256", "uint256", "uint256", "uint256", "uint256"],
+    [realmId, prevInstallationId, nextInstallationId, coordinateX, coordinateY]
+  );
+  let signedMessage = await backendSigner.signMessage(
+    ethers.utils.arrayify(messageHash)
+  );
+  let signature = ethers.utils.arrayify(signedMessage);
+
+  return signature;
+};
+
 export const genChannelAlchemicaSignature = async (
   parcelId: number,
   gotchiId: number,
