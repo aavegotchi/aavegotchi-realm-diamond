@@ -206,7 +206,14 @@ contract InstallationFacet is Modifiers {
 
   function getAltarLevel(uint256 _altarId) external view returns (uint256 altarLevel_) {
     require(_altarId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
+    require(s.installationTypes[_altarId].installationType == 2, "InstallationFacet: Not Altar");
     altarLevel_ = s.installationTypes[_altarId].level;
+  }
+
+  function getLodgeLevel(uint256 _installationId) external view returns (uint256 lodgeLevel_) {
+    require(_installationId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
+    require(s.installationTypes[_installationId].installationType == 3, "InstallationFacet: Not Lodge");
+    lodgeLevel_ = s.installationTypes[_installationId].level;
   }
 
   /***********************************|
