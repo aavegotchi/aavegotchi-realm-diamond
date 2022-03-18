@@ -2,6 +2,7 @@ import { BigNumberish } from "@ethersproject/bignumber";
 import {
   AlchemicaFacet,
   AlchemicaToken,
+  VRFFacet,
   ERC1155Facet,
   ERC1155FacetTile,
   GLMR,
@@ -147,6 +148,7 @@ export type AlchemicaTotals = [
 export interface TestBeforeVars {
   alchemicaFacet: AlchemicaFacet;
   realmFacet: RealmFacet;
+  vrfFacet: VRFFacet;
   installationDiamond: InstallationFacet;
   installationAdminFacet: InstallationAdminFacet;
   tileDiamond: TileFacet;

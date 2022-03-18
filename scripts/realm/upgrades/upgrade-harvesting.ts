@@ -56,6 +56,7 @@ export async function upgrade(
       facetName: "VRFFacet",
       addSelectors: [
         "function rawFulfillRandomWords(uint256 requestId, uint256[] memory randomWords) external",
+        `function testRawFulfillRandomWords(uint256 tokenId, uint256[] memory randomWords, uint256 round) external`,
         `function setConfig(${requestConfig} _requestConfig) external`,
         "function subscribe() external",
         "function topUpSubscription(uint256 amount) external",

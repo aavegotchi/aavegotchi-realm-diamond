@@ -10,6 +10,7 @@ import {
   TileFacet,
   OwnershipFacet,
   RealmFacet,
+  VRFFacet,
   GLMR,
 } from "../../typechain";
 import {
@@ -477,6 +478,10 @@ export async function beforeTest(
     "RealmFacet",
     realmDiamondAddress
   )) as RealmFacet;
+  const vrfFacet = (await ethers.getContractAt(
+    "VRFFacet",
+    realmDiamondAddress,
+  )) as VRFFacet;
   const installationDiamond = (await ethers.getContractAt(
     "InstallationFacet",
     installationsAddress
@@ -537,6 +542,7 @@ export async function beforeTest(
     alchemicaFacet,
     installationsAddress,
     realmFacet,
+    vrfFacet,
     installationDiamond,
     installationAdminFacet,
     erc1155Facet,
