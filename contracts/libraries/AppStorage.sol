@@ -85,6 +85,7 @@ struct AppStorage {
   mapping(uint256 => uint256) channelingLimits;
   address glmrAddress;
   address tileDiamond;
+  bool gameActive;
 }
 
 library LibAppStorage {
@@ -121,6 +122,11 @@ contract Modifiers {
 
   modifier onlyInstallationDiamond() {
     require(LibMeta.msgSender() == s.installationsDiamond, "AppStorage: Only Installation diamond can call");
+    _;
+  }
+
+  modifier gameActive() {
+    require(s.gameActive, "AppStorage: game not active");
     _;
   }
 }
