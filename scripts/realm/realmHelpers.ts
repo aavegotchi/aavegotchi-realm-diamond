@@ -631,9 +631,9 @@ export async function beforeTest(
     network
   );
 
-  let ownerInstallationFacet = await impersonate(
+  let ownerInstallationAdminFacet = await impersonate(
     installationOwner,
-    installationDiamond,
+    installationAdminFacet,
     ethers,
     network
   );
@@ -644,7 +644,7 @@ export async function beforeTest(
     network
   );
   await ownerRealmFacet.setGameActive(true);
-  await ownerInstallationFacet.setGameActive(true);
+  await ownerInstallationAdminFacet.setGameActive(true);
   await ownerTileFacet.setGameActive(true);
 
   return {

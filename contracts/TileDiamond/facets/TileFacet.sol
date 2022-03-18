@@ -327,4 +327,8 @@ contract TileFacet is Modifiers {
   function editTileType(uint256 _typeId, TileType calldata _tileType) external onlyOwner {
     s.tileTypes[_typeId] = _tileType;
   }
+
+  function setGameActive(bool _gameActive) external onlyOwner {
+    s.gameActive = _gameActive;
+  }
 }

@@ -17,6 +17,7 @@ import {
   beforeTest,
   faucetAlchemica,
   genEquipInstallationSignature,
+  genUpgradeInstallationSignature,
   testInstallations,
 } from "../../scripts/realm/realmHelpers";
 
@@ -139,6 +140,7 @@ describe("Testing Equip Installation", async function () {
       claimed: false,
       owner: testAddress,
     };
+
     await g.installationDiamond.upgradeInstallation(upgradeQueue);
     await expect(
       g.installationDiamond.upgradeInstallation(upgradeQueue)
