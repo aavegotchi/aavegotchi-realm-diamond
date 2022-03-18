@@ -93,9 +93,7 @@ describe("Testing Equip Installation", async function () {
 
     await g.installationDiamond.claimInstallations([0]);
   });
-  it("Survey Parcel", async function () {
-    await g.alchemicaFacet.testingStartSurveying(testParcelId);
-  });
+
   it("Equip installations", async function () {
     g.realmFacet = await impersonate(
       testAddress,
@@ -111,6 +109,11 @@ describe("Testing Equip Installation", async function () {
       await genEquipInstallationSignature(1, 0, 0, testParcelId)
     );
   });
+
+  it("Survey Parcel", async function () {
+    await g.alchemicaFacet.testingStartSurveying(testParcelId);
+  });
+
   it("Test upgrade queue", async function () {
     const upgradeQueue: UpgradeQueue = {
       parcelId: testParcelId,
