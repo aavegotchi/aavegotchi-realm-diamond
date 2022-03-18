@@ -630,7 +630,22 @@ export async function beforeTest(
     ethers,
     network
   );
+
+  let ownerInstallationFacet = await impersonate(
+    installationOwner,
+    installationDiamond,
+    ethers,
+    network
+  );
+  let ownerTileFacet = await impersonate(
+    tileOwner,
+    tileDiamond,
+    ethers,
+    network
+  );
   await ownerRealmFacet.setGameActive(true);
+  await ownerInstallationFacet.setGameActive(true);
+  await ownerTileFacet.setGameActive(true);
 
   return {
     alchemicaFacet,

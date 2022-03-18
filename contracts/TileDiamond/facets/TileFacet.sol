@@ -150,7 +150,7 @@ contract TileFacet is Modifiers {
   /// @notice Allow a user to craft tiles
   /// @dev Puts the tile into a queue
   /// @param _tileTypes An array containing the identifiers of the tileTypes to craft
-  function craftTiles(uint256[] calldata _tileTypes) external {
+  function craftTiles(uint256[] calldata _tileTypes) external gameActive {
     address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
 
     uint256 _tileTypesLength = s.tileTypes.length;
@@ -186,7 +186,7 @@ contract TileFacet is Modifiers {
   /// @dev amount expressed in block numbers
   /// @param _queueIds An array containing the identifiers of queues to speed up
   /// @param _amounts An array containing the corresponding amounts of $GLMR tokens to pay for each queue speedup
-  function reduceCraftTime(uint256[] calldata _queueIds, uint256[] calldata _amounts) external {
+  function reduceCraftTime(uint256[] calldata _queueIds, uint256[] calldata _amounts) external gameActive {
     require(_queueIds.length == _amounts.length, "TileFacet: Mismatched arrays");
     for (uint256 i; i < _queueIds.length; i++) {
       uint256 queueId = _queueIds[i];
@@ -209,7 +209,7 @@ contract TileFacet is Modifiers {
   /// @dev Will throw if the caller is not the queue owner
   /// @dev Will throw if one of the queues is not ready
   /// @param _queueIds An array containing the identifiers of queues to claim
-  function claimTiles(uint256[] calldata _queueIds) external {
+  function claimTiles(uint256[] calldata _queueIds) external gameActive {
     for (uint256 i; i < _queueIds.length; i++) {
       uint256 queueId = _queueIds[i];
 
