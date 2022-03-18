@@ -18,6 +18,7 @@ import {
   faucetAlchemica,
   genEquipInstallationSignature,
   testInstallations,
+  testnetAltar,
 } from "../../scripts/realm/realmHelpers";
 
 describe("Testing Equip Installation", async function () {
@@ -32,6 +33,7 @@ describe("Testing Equip Installation", async function () {
 
     g = await beforeTest(ethers, realmDiamondAddress(network.name));
   });
+
   it("Setup installation diamond", async function () {
     g.installationDiamond = await impersonate(
       g.installationOwner,
@@ -44,11 +46,11 @@ describe("Testing Equip Installation", async function () {
       []
     );
 
-    await g.installationAdminFacet.addInstallationTypes(testInstallations());
+    await g.installationAdminFacet.addInstallationTypes(testnetAltar());
     installationsTypes = await g.installationDiamond.getInstallationTypes([]);
-    expect(installationsTypes.length).to.equal(testInstallations().length);
+    expect(installationsTypes.length).to.equal(testnetAltar().length);
   });
-  it("Craft installations and equip altar", async function () {
+  it("Craft installations", async function () {
     g.installationDiamond = await impersonate(
       testAddress,
       g.installationDiamond,
@@ -61,8 +63,9 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
+
     await expect(
-      g.installationDiamond.craftInstallations([2, 2, 2, 5])
+      g.installationDiamond.craftInstallations([1])
     ).to.be.revertedWith("ERC20: insufficient allowance");
 
     await faucetAlchemica(g.alchemicaFacet, "20000");
@@ -71,7 +74,9 @@ describe("Testing Equip Installation", async function () {
 
     let fudPreCraft = await g.fud.balanceOf(maticDiamondAddress);
     let kekPreCraft = await g.kek.balanceOf(maticDiamondAddress);
-    await g.installationDiamond.craftInstallations([1, 2, 2, 2, 6]);
+
+    //Craft an Altar
+    await g.installationDiamond.craftInstallations([1]);
     let fudAfterCraft = await g.fud.balanceOf(maticDiamondAddress);
     let kekAfterCraft = await g.kek.balanceOf(maticDiamondAddress);
     expect(Number(ethers.utils.formatUnits(fudAfterCraft))).to.above(
@@ -86,7 +91,12 @@ describe("Testing Equip Installation", async function () {
 
     await mineBlocks(ethers, 21000);
 
-    await g.installationDiamond.claimInstallations([0, 1, 2, 3, 4]);
+    await g.installationDiamond.claimInstallations([0]);
+  });
+  it("Survey Parcel", async function () {
+    await g.alchemicaFacet.testingStartSurveying(testParcelId);
+  });
+  it("Equip installations", async function () {
     g.realmFacet = await impersonate(
       testAddress,
       g.realmFacet,
@@ -96,28 +106,9 @@ describe("Testing Equip Installation", async function () {
     await g.realmFacet.equipInstallation(
       testParcelId,
       1,
-      10,
-      10,
-      await genEquipInstallationSignature(1, 10, 10, testParcelId)
-    );
-  });
-  it("Survey Parcel", async function () {
-    await g.alchemicaFacet.testingStartSurveying(testParcelId);
-  });
-  it("Equip installations", async function () {
-    await g.realmFacet.equipInstallation(
-      testParcelId,
-      2,
       0,
       0,
-      await genEquipInstallationSignature(2, 0, 0, testParcelId)
-    );
-    await g.realmFacet.equipInstallation(
-      testParcelId,
-      2,
-      3,
-      3,
-      await genEquipInstallationSignature(2, 3, 3, testParcelId)
+      await genEquipInstallationSignature(1, 0, 0, testParcelId)
     );
   });
   it("Test upgrade queue", async function () {
@@ -125,34 +116,34 @@ describe("Testing Equip Installation", async function () {
       parcelId: testParcelId,
       coordinateX: 0,
       coordinateY: 0,
-      installationId: 2,
+      installationId: 1,
       readyBlock: 0,
       claimed: false,
       owner: testAddress,
     };
-    const upgradeQueue2: UpgradeQueue = {
-      parcelId: testParcelId,
-      coordinateX: 3,
-      coordinateY: 3,
-      installationId: 2,
-      readyBlock: 0,
-      claimed: false,
-      owner: testAddress,
-    };
+    // const upgradeQueue2: UpgradeQueue = {
+    //   parcelId: testParcelId,
+    //   coordinateX: 3,
+    //   coordinateY: 3,
+    //   installationId: 2,
+    //   readyBlock: 0,
+    //   claimed: false,
+    //   owner: testAddress,
+    // };
     await g.installationDiamond.upgradeInstallation(upgradeQueue);
-    await expect(
-      g.installationDiamond.upgradeInstallation(upgradeQueue)
-    ).to.be.revertedWith("InstallationFacet: UpgradeQueue full");
-    await expect(
-      g.installationDiamond.upgradeInstallation(upgradeQueue2)
-    ).to.be.revertedWith("InstallationFacet: UpgradeQueue full");
-    await g.realmFacet.equipInstallation(
-      testParcelId,
-      6,
-      6,
-      6,
-      await genEquipInstallationSignature(6, 6, 6, testParcelId)
-    );
-    await g.installationDiamond.upgradeInstallation(upgradeQueue2);
+    // await expect(
+    //   g.installationDiamond.upgradeInstallation(upgradeQueue)
+    // ).to.be.revertedWith("InstallationFacet: UpgradeQueue full");
+    // await expect(
+    //   g.installationDiamond.upgradeInstallation(upgradeQueue2)
+    // ).to.be.revertedWith("InstallationFacet: UpgradeQueue full");
+    // await g.realmFacet.equipInstallation(
+    //   testParcelId,
+    //   6,
+    //   6,
+    //   6,
+    //   await genEquipInstallationSignature(6, 6, 6, testParcelId)
+    // );
+    // await g.installationDiamond.upgradeInstallation(upgradeQueue2);
   });
 });

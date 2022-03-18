@@ -63,7 +63,7 @@ library LibAlchemica {
     }
 
     //Altar
-    if (installationType.installationType == 2) {
+    if (installationType.installationType == 0) {
       require(s.parcels[_realmId].altarId == 0, "LibAlchemica: Cannot equip two altars");
       s.parcels[_realmId].altarId = _installationId;
     }
@@ -92,7 +92,7 @@ library LibAlchemica {
     }
 
     //Altar
-    if (installationType.installationType == 2) {
+    if (installationType.installationType == 0) {
       //@question: do we need any special exceptions for the Altar? Should be handled by tech tree
       s.parcels[_realmId].altarId = 0;
     }

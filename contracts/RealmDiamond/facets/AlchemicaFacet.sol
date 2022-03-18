@@ -39,7 +39,8 @@ contract AlchemicaFacet is Modifiers {
   /// @dev Will throw if a surveying round has not started
   /// @param _realmId Identifier of the parcel to survey
   function startSurveying(uint256 _realmId) external onlyParcelOwner(_realmId) {
-    require(s.parcels[_realmId].currentRound <= s.surveyingRound, "RealmFacet: Round not released");
+    require(s.parcels[_realmId].currentRound <= s.surveyingRound, "AlchemicaFacet: Round not released");
+    require(s.parcels[_realmId].altarId > 0, "AlchemicaFacet: Must equip Altar");
     s.parcels[_realmId].currentRound++;
     drawRandomNumbers(_realmId, s.parcels[_realmId].currentRound - 1);
   }
@@ -139,8 +140,8 @@ contract AlchemicaFacet is Modifiers {
 
   /// @dev This function will be removed in production.
   function testingStartSurveying(uint256 _realmId) external onlyParcelOwner(_realmId) {
-    require(s.parcels[_realmId].currentRound <= s.surveyingRound, "RealmFacet: Round not released");
-
+    require(s.parcels[_realmId].currentRound <= s.surveyingRound, "AlchemicaFacet: Round not released");
+    require(s.parcels[_realmId].altarId > 0, "AlchemicaFacet: Must equip Altar");
     s.parcels[_realmId].currentRound++;
     uint256[] memory alchemicas = new uint256[](4);
     for (uint256 i; i < 4; i++) {
@@ -157,7 +158,7 @@ contract AlchemicaFacet is Modifiers {
     RealmFacet.MintParcelInput[] memory _metadata
   ) external {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
-      require(s.tokenIds.length < 420069, "RealmFacet: Cannot mint more than 420,069 parcels");
+      require(s.tokenIds.length < 420069, "AlchemicaFacet: Cannot mint more than 420,069 parcels");
       uint256 tokenId = _tokenIds[index];
       RealmFacet.MintParcelInput memory metadata = _metadata[index];
       require(_tokenIds.length == _metadata.length, "Inputs must be same length");
