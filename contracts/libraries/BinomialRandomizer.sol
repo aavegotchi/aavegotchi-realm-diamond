@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 pragma solidity 0.8.9;
 
 
@@ -70,7 +72,11 @@ library BinomialRandomizer {
   ) internal pure returns (uint256 rolls) {
     uint256 workingSeed = seed; // We keep the old seed around to generate a new seed.
     for(uint256 i = 0; i < n;) {
-      if(workingSeed % divisor == 0) rolls++;
+      if(workingSeed % divisor == 0) {
+        unchecked {
+          ++rolls;
+        }
+      }
       // If there is not enough value left for the next roll, we make a new seed.
       if((workingSeed /= divisor) < divisor ** 4) {
         workingSeed = uint256(keccak256(abi.encode(seed, i)));
