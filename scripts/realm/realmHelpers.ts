@@ -1,4 +1,5 @@
 import { BigNumber, ethers } from "ethers";
+import { network } from "hardhat";
 import { Network } from "hardhat/types";
 import {
   AlchemicaFacet,
@@ -622,6 +623,14 @@ export async function beforeTest(
     pixelCraftAddress,
     aavegotchiDAOAddress
   );
+
+  let ownerRealmFacet = await impersonate(
+    ownerAddress,
+    realmFacet,
+    ethers,
+    network
+  );
+  await ownerRealmFacet.setGameActive(true);
 
   return {
     alchemicaFacet,

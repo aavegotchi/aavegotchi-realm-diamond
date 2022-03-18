@@ -80,7 +80,7 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) {
+  ) external onlyParcelOwner(_realmId) gameActive {
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
@@ -118,7 +118,7 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) {
+  ) external onlyParcelOwner(_realmId) gameActive {
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
@@ -160,7 +160,7 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) {
+  ) external onlyParcelOwner(_realmId) gameActive {
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _tileId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
@@ -184,7 +184,7 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) {
+  ) external onlyParcelOwner(_realmId) gameActive {
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _tileId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
@@ -225,6 +225,10 @@ contract RealmFacet is Modifiers {
     require(_diamondAddress != address(0), "RealmFacet: Cannot set diamond to zero address");
     s.aavegotchiDiamond = _diamondAddress;
     emit AavegotchiDiamondUpdated(_diamondAddress);
+  }
+
+  function setGameActive(bool _gameActive) external onlyOwner {
+    s.gameActive = _gameActive;
   }
 
   /// @notice Fetch information about a parcel

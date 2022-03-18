@@ -38,7 +38,7 @@ contract AlchemicaFacet is Modifiers {
   /// @notice Allow the owner of a parcel to start surveying his parcel
   /// @dev Will throw if a surveying round has not started
   /// @param _realmId Identifier of the parcel to survey
-  function startSurveying(uint256 _realmId) external onlyParcelOwner(_realmId) {
+  function startSurveying(uint256 _realmId) external onlyParcelOwner(_realmId) gameActive {
     require(s.parcels[_realmId].currentRound <= s.surveyingRound, "AlchemicaFacet: Round not released");
     require(s.parcels[_realmId].altarId > 0, "AlchemicaFacet: Must equip Altar");
     s.parcels[_realmId].currentRound++;
@@ -251,7 +251,7 @@ contract AlchemicaFacet is Modifiers {
     uint256[] calldata _alchemicaTypes,
     uint256 _gotchiId,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) {
+  ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) gameActive {
     uint256[4] memory _availableAlchemica = getAvailableAlchemica(_realmId);
 
     for (uint256 i = 0; i < _alchemicaTypes.length; i++) {
@@ -303,7 +303,7 @@ contract AlchemicaFacet is Modifiers {
     uint256 _gotchiId,
     uint256 _lastChanneled,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) {
+  ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) gameActive {
     require(_lastChanneled == s.gotchiChannelings[_gotchiId], "AlchemicaFacet: Incorrect last duration");
 
     //Gotchis can only channel every 24 hrs
@@ -409,17 +409,17 @@ contract AlchemicaFacet is Modifiers {
   //todo: add test
   function batchTransferTokensToGotchis(
     uint256[] calldata _gotchiIds,
-    IERC20[] calldata _tokenAddresses,
+    address[] calldata _tokenAddresses,
     uint256[][] calldata _amounts
   ) external {
     require(_gotchiIds.length == _amounts.length, "AlchemicaFacet: Mismatched array lengths");
-    require(_tokenAddresses.length == _amounts.length, "AlchemicaFacet: Mistatched array lengths");
+    require(_tokenAddresses.length == _amounts.length, "AlchemicaFacet: Mismatched array lengths");
 
     for (uint256 i = 0; i < _gotchiIds.length; i++) {
       for (uint256 j = 0; j < _amounts[i].length; j++) {
         uint256 amount = _amounts[i][j];
         if (amount > 0) {
-          _tokenAddresses[j].transferFrom(msg.sender, alchemicaRecipient(_gotchiIds[i]), amount);
+          IERC20(_tokenAddresses[j]).transferFrom(msg.sender, alchemicaRecipient(_gotchiIds[i]), amount);
         }
       }
     }
