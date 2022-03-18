@@ -406,6 +406,25 @@ contract AlchemicaFacet is Modifiers {
     }
   }
 
+  //todo: add test
+  function batchTransferTokensToGotchis(
+    uint256[] calldata _gotchiIds,
+    IERC20[] calldata _tokenAddresses,
+    uint256[][] calldata _amounts
+  ) external {
+    require(_gotchiIds.length == _amounts.length, "AlchemicaFacet: Mismatched array lengths");
+    require(_tokenAddresses.length == _amounts.length, "AlchemicaFacet: Mistatched array lengths");
+
+    for (uint256 i = 0; i < _gotchiIds.length; i++) {
+      for (uint256 j = 0; j < _amounts[i].length; j++) {
+        uint256 amount = _amounts[i][j];
+        if (amount > 0) {
+          _tokenAddresses[j].transferFrom(msg.sender, alchemicaRecipient(_gotchiIds[i]), amount);
+        }
+      }
+    }
+  }
+
   function batchTransferAlchemicaToGotchis(uint256[] calldata _gotchiIds, uint256[4][] calldata _amounts) external {
     require(_gotchiIds.length == _amounts.length, "AlchemicaFacet: Mismatched array lengths");
 

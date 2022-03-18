@@ -13,7 +13,7 @@ import {
   InstallationFacet,
 } from "../../../typechain";
 import { gasPrice, maticAavegotchiDiamondAddress } from "../../helperFunctions";
-import { deployAlchemica, goldenAaltar } from "../realmHelpers";
+import { deployAlchemica, goldenAaltar, testnetAltar } from "../realmHelpers";
 import { alchemicaTotals, boostMultipliers } from "../../setVars";
 import { deployDiamond } from "../../installation/deploy";
 import { deployDiamondTile } from "../../tile/deploy";
@@ -30,17 +30,9 @@ async function deployRealmDiamond(deployerAddress: string) {
   // deploy DiamondCutFacet
   const DiamondCutFacet = await ethers.getContractFactory("DiamondCutFacet");
 
-  const gasData = await ethers.provider.getFeeData();
-
-  console.log("gas data:", gasData);
-
   console.log("Deploying diamond cut facet:");
   const diamondCutFacet = await DiamondCutFacet.deploy({
-    gasPrice: gasData.gasPrice ? gasData.gasPrice : gasPrice,
-    // maxFeePerGas: gasData.maxFeePerGas ? gasData.maxFeePerGas : "10000",
-    // maxPriorityFeePerGas: gasData.maxPriorityFeePerGas
-    // ? gasData.maxPriorityFeePerGas
-    // : "10000",
+    gasPrice: gasPrice,
   });
   await diamondCutFacet.deployed();
   console.log("DiamondCutFacet deployed:", diamondCutFacet.address);
@@ -199,12 +191,15 @@ export async function deployMumbai() {
   const dao = deployerAddress;
 
   console.log("Setting Installation addresses");
-  const adminFacet = await ethers.getContractAt("InstallationAdminFacet");
+  const adminFacet = await ethers.getContractAt(
+    "InstallationAdminFacet",
+    installationDiamond
+  );
   console.log("Setting addresses");
   tx = await adminFacet.setAddresses(
     maticAavegotchiDiamondAddress,
     realmDiamond.address,
-    alchemica.glmr,
+    alchemica.glmr.address,
     pixelcraft,
     dao
   );
@@ -257,14 +252,14 @@ export async function deployMumbai() {
 
   console.log("Adding Golden Altar");
   const addTx = await installationAdminFacet.addInstallationTypes(
-    goldenAaltar(),
+    testnetAltar(),
     {
       gasPrice: gasPrice,
     }
   );
   await addTx.wait();
 
-  const installations = await installationFacet.getInstallationTypes([0]);
+  const installations = await installationFacet.getInstallationTypes([]);
   console.log("installations:", installations);
 
   return realmDiamond.address;
