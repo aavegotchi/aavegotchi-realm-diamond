@@ -52,7 +52,6 @@ struct TileAppStorage {
   mapping(address => uint256[]) ownerTiles;
   mapping(address => mapping(uint256 => uint256)) ownerTileIndexes;
   UpgradeQueue[] upgradeQueue;
-  bool gameActive;
 }
 
 library LibAppStorageTile {
@@ -73,11 +72,6 @@ contract Modifiers {
 
   modifier onlyRealmDiamond() {
     require(msg.sender == s.realmDiamond, "LibDiamond: Must be realm diamond");
-    _;
-  }
-
-  modifier gameActive() {
-    require(s.gameActive, "AppStorage: game not active");
     _;
   }
 }

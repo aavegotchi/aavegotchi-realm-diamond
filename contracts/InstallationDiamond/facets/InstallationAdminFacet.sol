@@ -71,8 +71,4 @@ contract InstallationAdminFacet is Modifiers {
   function editInstallationType(uint256 _typeId, InstallationType calldata _installationType) external onlyOwner {
     s.installationTypes[_typeId] = _installationType;
   }
-
-  function setGameActive(bool _gameActive) external onlyOwner {
-    s.gameActive = _gameActive;
-  }
 }

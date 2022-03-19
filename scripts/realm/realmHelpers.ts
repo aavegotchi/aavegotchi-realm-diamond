@@ -38,7 +38,7 @@ export function outputInstallation(
   if (installation.height > 64) throw new Error("Height too much");
 
   let output: InstallationTypeOutput = {
-    deprecated: false,
+    deprecated: installation.deprecated,
     installationType: installation.installationType,
     level: installation.level,
     width: installation.width,
@@ -442,7 +442,7 @@ export function testnetAltar() {
       capacity: 0,
       spillRadius: 0,
       spillRate: 45,
-      craftTime: 1000,
+      craftTime: 0,
       deprecated: false,
       nextLevelId: 2,
       prerequisites: [],
@@ -631,21 +631,7 @@ export async function beforeTest(
     network
   );
 
-  let ownerInstallationAdminFacet = await impersonate(
-    installationOwner,
-    installationAdminFacet,
-    ethers,
-    network
-  );
-  let ownerTileFacet = await impersonate(
-    tileOwner,
-    tileDiamond,
-    ethers,
-    network
-  );
   await ownerRealmFacet.setGameActive(true);
-  await ownerInstallationAdminFacet.setGameActive(true);
-  await ownerTileFacet.setGameActive(true);
 
   return {
     alchemicaFacet,

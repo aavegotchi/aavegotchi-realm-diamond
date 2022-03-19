@@ -218,7 +218,7 @@ contract InstallationFacet is Modifiers {
   /// @dev Will throw even if one of the installationTypes is deprecated
   /// @dev Puts the installation into a queue
   /// @param _installationTypes An array containing the identifiers of the installationTypes to craft
-  function craftInstallations(uint256[] calldata _installationTypes) external gameActive {
+  function craftInstallations(uint256[] calldata _installationTypes) external {
     address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
 
     uint256 _installationTypesLength = s.installationTypes.length;
@@ -257,7 +257,7 @@ contract InstallationFacet is Modifiers {
   /// @dev amount expressed in block numbers
   /// @param _queueIds An array containing the identifiers of queues to speed up
   /// @param _amounts An array containing the corresponding amounts of $GLMR tokens to pay for each queue speedup
-  function reduceCraftTime(uint256[] calldata _queueIds, uint256[] calldata _amounts) external gameActive {
+  function reduceCraftTime(uint256[] calldata _queueIds, uint256[] calldata _amounts) external {
     require(_queueIds.length == _amounts.length, "InstallationFacet: Mismatched arrays");
     for (uint256 i; i < _queueIds.length; i++) {
       uint256 queueId = _queueIds[i];
@@ -280,7 +280,7 @@ contract InstallationFacet is Modifiers {
   /// @dev Will throw if the caller is not the queue owner
   /// @dev Will throw if one of the queues is not ready
   /// @param _queueIds An array containing the identifiers of queues to claim
-  function claimInstallations(uint256[] calldata _queueIds) external gameActive {
+  function claimInstallations(uint256[] calldata _queueIds) external {
     for (uint256 i; i < _queueIds.length; i++) {
       uint256 queueId = _queueIds[i];
 
@@ -358,7 +358,7 @@ contract InstallationFacet is Modifiers {
   /// @notice Allow a user to upgrade an installation in a parcel
   /// @dev Will throw if the caller is not the owner of the parcel in which the installation is installed
   /// @param _upgradeQueue A struct containing details about the queue which contains the installation to upgrade
-  function upgradeInstallation(UpgradeQueue calldata _upgradeQueue) external gameActive {
+  function upgradeInstallation(UpgradeQueue calldata _upgradeQueue) external {
     // check owner
     address parcelOwner = IERC721(s.realmDiamond).ownerOf(_upgradeQueue.parcelId);
     require(parcelOwner == _upgradeQueue.owner, "InstallationFacet: not owner");
@@ -422,7 +422,7 @@ contract InstallationFacet is Modifiers {
   /// @dev Will throw if the caller is not the owner of the queue
   /// @param _queueId The identifier of the queue whose upgrade time is to be reduced
   /// @param _amount The correct amount of $GLMR token to be paid
-  function reduceUpgradeTime(uint256 _queueId, uint256 _amount) external gameActive {
+  function reduceUpgradeTime(uint256 _queueId, uint256 _amount) external {
     UpgradeQueue storage upgradeQueue = s.upgradeQueue[_queueId];
     require(msg.sender == upgradeQueue.owner, "InstallationFacet: Not owner");
 
@@ -439,7 +439,7 @@ contract InstallationFacet is Modifiers {
 
   /// @notice Allow anyone to finalize any existing queue upgrade
   /// @dev Only three queue upgrades can be finalized in one transaction
-  function finalizeUpgrade() public gameActive {
+  function finalizeUpgrade() public {
     require(s.upgradeQueue.length > 0, "InstallationFacet: No upgrades");
     //can only process 3 upgrades per tx
     uint256 counter = 3;
