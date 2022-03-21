@@ -554,20 +554,22 @@ export async function beforeTest(
   };
 }
 
+const backendSigner = () => {
+  //@ts-ignore
+  return new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+};
+
 export const genEquipInstallationSignature = async (
   tileId: number,
   x: number,
   y: number,
   parcelId: number
 ) => {
-  //@ts-ignore
-  let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
-
   let messageHash1 = ethers.utils.solidityKeccak256(
     ["uint256", "uint256", "uint256", "uint256"],
     [parcelId, tileId, x, y]
   );
-  let signedMessage1 = await backendSigner.signMessage(
+  let signedMessage1 = await backendSigner().signMessage(
     ethers.utils.arrayify(messageHash1)
   );
   let signature1 = ethers.utils.arrayify(signedMessage1);
@@ -580,14 +582,11 @@ export const genClaimAlchemicaSignature = async (
   gotchiId: number,
   amount: BigNumber
 ) => {
-  //@ts-ignore
-  let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
-
   let messageHash = ethers.utils.solidityKeccak256(
     ["uint256", "uint256", "uint256", "uint256"],
     [0, parcelId, gotchiId, amount]
   );
-  let signedMessage = await backendSigner.signMessage(
+  let signedMessage = await backendSigner().signMessage(
     ethers.utils.arrayify(messageHash)
   );
   let signature = ethers.utils.arrayify(signedMessage);
@@ -601,12 +600,12 @@ export const genChannelAlchemicaSignature = async (
   lastChanneled: BigNumber
 ) => {
   //@ts-ignore
-  let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+
   let messageHash = ethers.utils.solidityKeccak256(
     ["uint256", "uint256", "uint256"],
     [parcelId, gotchiId, lastChanneled]
   );
-  let signedMessage = await backendSigner.signMessage(
+  let signedMessage = await backendSigner().signMessage(
     ethers.utils.arrayify(messageHash)
   );
   let signature = ethers.utils.arrayify(signedMessage);

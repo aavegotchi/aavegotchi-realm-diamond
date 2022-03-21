@@ -370,8 +370,7 @@ describe("Testing Equip Installation", async function () {
     ).to.be.revertedWith(
       "LibAlchemica: Unclaimed alchemica greater than reservoir capacity"
     );
-    //@ts-ignore
-    let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+
     const alchemicaRemaining = await g.alchemicaFacet.getRealmAlchemica(
       testParcelId
     );
