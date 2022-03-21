@@ -105,7 +105,6 @@ library LibAlchemica {
           s.parcels[_realmId].reservoirsCapacity[alchemicaType][i] == installationType.capacity &&
           s.parcels[_realmId].spilloverRates[alchemicaType][i] == installationType.spillRate
         ) {
-          // todo pop arrays
           s.parcels[_realmId].reservoirsCapacity[alchemicaType][i] = s.parcels[_realmId].reservoirsCapacity[alchemicaType][
             s.parcels[_realmId].reservoirsCapacity[alchemicaType].length - 1
           ];
@@ -114,6 +113,7 @@ library LibAlchemica {
             s.parcels[_realmId].spilloverRates[alchemicaType].length - 1
           ];
           s.parcels[_realmId].spilloverRates[alchemicaType].pop();
+          break;
         }
       }
       s.parcels[_realmId].reservoirCount[alchemicaType]--;
