@@ -98,7 +98,7 @@ export function testInstallations() {
       deprecated: true,
       nextLevelId: 0,
       prerequisites: [],
-      name: "",
+      name: "The Void",
     })
   );
   installations.push(
