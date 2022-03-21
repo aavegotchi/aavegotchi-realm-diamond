@@ -14,6 +14,8 @@ import {
 } from "../../scripts/setVars";
 import {
   beforeTest,
+  genClaimAlchemicaSignature,
+  genEquipInstallationSignature,
   testInstallations,
 } from "../../scripts/realm/realmHelpers";
 
@@ -23,22 +25,6 @@ describe("Testing Equip Installation", async function () {
   const testGotchiId = 22306;
 
   let g: TestBeforeVars;
-
-  const genSignature = async (tileId: number, x: number, y: number) => {
-    //@ts-ignore
-    let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
-
-    let messageHash1 = ethers.utils.solidityKeccak256(
-      ["uint256", "uint256", "uint256", "uint256"],
-      [testParcelId, tileId, x, y]
-    );
-    let signedMessage1 = await backendSigner.signMessage(
-      ethers.utils.arrayify(messageHash1)
-    );
-    let signature1 = ethers.utils.arrayify(signedMessage1);
-
-    return signature1;
-  };
 
   before(async function () {
     this.timeout(20000000);
@@ -198,14 +184,14 @@ describe("Testing Equip Installation", async function () {
       1,
       0,
       0,
-      await genSignature(1, 0, 0)
+      await genEquipInstallationSignature(1, 0, 0, testParcelId)
     );
     await g.realmFacet.equipInstallation(
       testParcelId,
       2,
       3,
       3,
-      await genSignature(2, 3, 3)
+      await genEquipInstallationSignature(2, 3, 3, testParcelId)
     );
     let availableAlchemica = await g.alchemicaFacet.getAvailableAlchemica(
       testParcelId
@@ -269,7 +255,7 @@ describe("Testing Equip Installation", async function () {
       2,
       10,
       10,
-      await genSignature(2, 10, 10)
+      await genEquipInstallationSignature(2, 10, 10, testParcelId)
     );
     const upgradeQueue: UpgradeQueue = {
       parcelId: testParcelId,
@@ -366,7 +352,7 @@ describe("Testing Equip Installation", async function () {
       1,
       0,
       0,
-      await genSignature(1, 0, 0)
+      await genEquipInstallationSignature(1, 0, 0, testParcelId)
     );
     const balancePost = await g.fud.balanceOf(testAddress);
     expect(Number(ethers.utils.formatUnits(balancePost))).to.equal(
@@ -379,7 +365,7 @@ describe("Testing Equip Installation", async function () {
         2,
         10,
         10,
-        await genSignature(2, 10, 10)
+        await genEquipInstallationSignature(2, 10, 10, testParcelId)
       )
     ).to.be.revertedWith(
       "LibAlchemica: Unclaimed alchemica greater than reservoir capacity"
@@ -389,22 +375,16 @@ describe("Testing Equip Installation", async function () {
     const alchemicaRemaining = await g.alchemicaFacet.getRealmAlchemica(
       testParcelId
     );
-    let messageHash = ethers.utils.solidityKeccak256(
-      ["uint256", "uint256", "uint256", "uint256"],
-      [0, testParcelId, testGotchiId, alchemicaRemaining[0]]
-    );
-    let signedMessage = await backendSigner.signMessage(
-      ethers.utils.arrayify(messageHash)
-    );
-    let signature = ethers.utils.arrayify(signedMessage);
-
-    signedMessage = await backendSigner.signMessage(messageHash);
 
     await g.alchemicaFacet.claimAvailableAlchemica(
       testParcelId,
       [0],
       testGotchiId,
-      signature
+      await genClaimAlchemicaSignature(
+        testParcelId,
+        testGotchiId,
+        alchemicaRemaining[0]
+      )
     );
 
     await g.realmFacet.unequipInstallation(
@@ -412,14 +392,14 @@ describe("Testing Equip Installation", async function () {
       3,
       3,
       3,
-      await genSignature(3, 3, 3)
+      await genEquipInstallationSignature(3, 3, 3, testParcelId)
     );
     await g.realmFacet.unequipInstallation(
       testParcelId,
       2,
       10,
       10,
-      await genSignature(2, 10, 10)
+      await genEquipInstallationSignature(2, 10, 10, testParcelId)
     );
   });
 });
