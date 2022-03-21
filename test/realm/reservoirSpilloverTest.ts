@@ -95,12 +95,29 @@ describe("Testing Equip Installation", async function () {
       g.installationDiamond.craftInstallations([1, 2, 2])
     ).to.be.revertedWith("ERC20: insufficient allowance");
 
-    await faucetAlchemica(g.alchemicaFacet, "20000");
+    await faucetAlchemica(g.alchemicaFacet, "50000");
     await approveAlchemica(g, ethers, testAddress, network);
+
+    await g.fud.transfer(
+      realmDiamondAddress("mainnet"),
+      ethers.utils.parseUnits("5000")
+    );
+    await g.fomo.transfer(
+      realmDiamondAddress("mainnet"),
+      ethers.utils.parseUnits("5000")
+    );
+    await g.alpha.transfer(
+      realmDiamondAddress("mainnet"),
+      ethers.utils.parseUnits("5000")
+    );
+    await g.kek.transfer(
+      realmDiamondAddress("mainnet"),
+      ethers.utils.parseUnits("5000")
+    );
 
     let fudPreCraft = await g.fud.balanceOf(maticDiamondAddress);
     let kekPreCraft = await g.kek.balanceOf(maticDiamondAddress);
-    await g.installationDiamond.craftInstallations([1, 2, 2]);
+    await g.installationDiamond.craftInstallations([1, 2, 2, 2, 2]);
     let fudAfterCraft = await g.fud.balanceOf(maticDiamondAddress);
     let kekAfterCraft = await g.kek.balanceOf(maticDiamondAddress);
     expect(Number(ethers.utils.formatUnits(fudAfterCraft))).to.above(
@@ -134,7 +151,7 @@ describe("Testing Equip Installation", async function () {
     );
 
     const balancePre = await erc1155facet.balanceOf(testAddress, 2);
-    await g.installationDiamond.claimInstallations([1, 2]);
+    await g.installationDiamond.claimInstallations([1, 2, 3, 4]);
     const balancePost = await erc1155facet.balanceOf(testAddress, 2);
     expect(balancePost).to.above(balancePre);
   });
@@ -359,5 +376,64 @@ describe("Testing Equip Installation", async function () {
       10,
       await genEquipInstallationSignature(2, 10, 10, testParcelId)
     );
+  });
+  it("Test unequipping reduceTraits loop", async function () {
+    const reservoirLevel1Capacity = 500;
+    await expect(
+      g.alchemicaFacet.calculateSpilloverForReservoir(testParcelId, 0)
+    ).to.be.revertedWith("AlchemicaFacet: no reservoirs equipped");
+    const capacityPre = await g.realmFacet.getParcelCapacity(testParcelId, 0);
+    expect(Number(ethers.utils.formatUnits(capacityPre))).to.equal(0);
+    await g.realmFacet.equipInstallation(
+      testParcelId,
+      2,
+      3,
+      3,
+      await genEquipInstallationSignature(2, 3, 3, testParcelId)
+    );
+    const capacityPreOneReservoir = await g.realmFacet.getParcelCapacity(
+      testParcelId,
+      0
+    );
+    expect(Number(ethers.utils.formatUnits(capacityPreOneReservoir))).to.equal(
+      reservoirLevel1Capacity
+    );
+    await g.realmFacet.equipInstallation(
+      testParcelId,
+      2,
+      6,
+      6,
+      await genEquipInstallationSignature(2, 6, 6, testParcelId)
+    );
+    const capacityPreTwoReservoir = await g.realmFacet.getParcelCapacity(
+      testParcelId,
+      0
+    );
+    expect(Number(ethers.utils.formatUnits(capacityPreTwoReservoir))).to.equal(
+      reservoirLevel1Capacity * 2
+    );
+    await g.realmFacet.unequipInstallation(
+      testParcelId,
+      2,
+      3,
+      3,
+      await genEquipInstallationSignature(2, 3, 3, testParcelId)
+    );
+    const capacityPostOneReservoir = await g.realmFacet.getParcelCapacity(
+      testParcelId,
+      0
+    );
+    expect(Number(ethers.utils.formatUnits(capacityPostOneReservoir))).to.equal(
+      reservoirLevel1Capacity
+    );
+    await g.realmFacet.unequipInstallation(
+      testParcelId,
+      2,
+      6,
+      6,
+      await genEquipInstallationSignature(2, 6, 6, testParcelId)
+    );
+    const capacityPost = await g.realmFacet.getParcelCapacity(testParcelId, 0);
+    expect(Number(ethers.utils.formatUnits(capacityPost))).to.equal(0);
   });
 });

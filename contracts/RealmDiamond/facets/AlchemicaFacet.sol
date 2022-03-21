@@ -210,7 +210,7 @@ contract AlchemicaFacet is Modifiers {
     uint256 radius;
   }
 
-  function calculateSpilloverForReservoir(uint256 _realmId, uint256 _alchemicaType) internal view returns (SpilloverIO memory spillover) {
+  function calculateSpilloverForReservoir(uint256 _realmId, uint256 _alchemicaType) public view returns (SpilloverIO memory spillover) {
     uint256 capacityXspillover;
     uint256 totalCapacity;
     for (uint256 i; i < s.parcels[_realmId].reservoirsCapacity[_alchemicaType].length; i++) {
@@ -220,6 +220,7 @@ contract AlchemicaFacet is Modifiers {
 
       capacityXspillover += capacity * spill;
     }
+    require(totalCapacity > 0, "AlchemicaFacet: no reservoirs equipped");
 
     uint256 spilloverRate = capacityXspillover / totalCapacity;
     uint256 spilloverRadius = s.parcels[_realmId].spilloverRadius[_alchemicaType] / s.parcels[_realmId].reservoirCount[_alchemicaType];

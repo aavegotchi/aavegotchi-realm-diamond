@@ -26,6 +26,8 @@ export async function upgrade(
   const mintParcelsInput =
     "(uint256 coordinateX, uint256 coordinateY, uint256 district, string parcelId, string parcelAddress, uint256 size, uint256[4] boost)";
 
+  const spilloverIO = "(uint256 rate, uint256 radius)";
+
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "AlchemicaFacet",
@@ -48,6 +50,7 @@ export async function upgrade(
         "function getAlchemicaAddresses() external view returns (address[4] memory)",
         "function setChannelingLimits(uint256[] calldata _altarLevel, uint256[] calldata _limits) external",
         "function batchTransferAlchemica(address[] calldata _targets, uint256[4][] calldata _amounts) external",
+        `function calculateSpilloverForReservoir(uint256 _realmId, uint256 _alchemicaType) public view returns (${spilloverIO} memory spillover)`,
       ],
       removeSelectors: [],
     },
