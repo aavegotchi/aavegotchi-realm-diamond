@@ -471,12 +471,17 @@ describe("Vesting", function () {
     });
 
     it("Should not be able to withdraw after revoke", async () => {
+      // burn all the beneficiary's tokens
+      await token.connect(owner).burn(await beneficiary.getAddress(), await token.balanceOf(await beneficiary.getAddress()));
+      expect(await token.balanceOf(await beneficiary.getAddress())).to.equal(0);
       await token.connect(owner).mint(vestingContract.address, ETHER);
+      expect(await token.balanceOf(vestingContract.address)).to.equal(ETHER);
       const release = await vestingContract.releasableAmount(token.address);
 
       console.log("release:", release.toString());
 
       await vestingContract.release(token.address);
+      expect(await token.balanceOf(await beneficiary.getAddress())).to.equal(ETHER);
       await expect(vestingContract.release(token.address)).to.be.revertedWith('NoTokensDue()');
     });
   });
