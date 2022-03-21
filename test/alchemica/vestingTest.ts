@@ -474,8 +474,14 @@ describe("Vesting", function () {
       // burn all the beneficiary's tokens
       await token.connect(owner).burn(await beneficiary.getAddress(), await token.balanceOf(await beneficiary.getAddress()));
       expect(await token.balanceOf(await beneficiary.getAddress())).to.equal(0);
+
+      // vesting contract should have no tokens because they were collected in a previous test
+      expect(await token.balanceOf(vestingContract.address)).to.equal(0);
+
+      // mint some tokens to the vesting contract
       await token.connect(owner).mint(vestingContract.address, ETHER);
       expect(await token.balanceOf(vestingContract.address)).to.equal(ETHER);
+
       const release = await vestingContract.releasableAmount(token.address);
 
       console.log("release:", release.toString());
