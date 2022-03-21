@@ -486,8 +486,11 @@ describe("Vesting", function () {
 
       console.log("release:", release.toString());
 
+      // first release should succeed and deplete the contract
       await vestingContract.release(token.address);
       expect(await token.balanceOf(await beneficiary.getAddress())).to.equal(ETHER);
+
+      // a second release should fail because there are no tokens to release
       await expect(vestingContract.release(token.address)).to.be.revertedWith('NoTokensDue()');
     });
   });
