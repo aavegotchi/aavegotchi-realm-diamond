@@ -35,8 +35,8 @@ describe("Vesting", function () {
     dao = signers[2];
     proxyAdmin = (await deployProxyAdmin(owner)).contract;
     let tokenFactory = await ethers.getContractFactory("ERC20MintableBurnable");
-    token = await tokenFactory.deploy();
-    anotherToken = await tokenFactory.deploy();
+    token = (await tokenFactory.deploy()) as ERC20MintableBurnable;
+    anotherToken = (await tokenFactory.deploy()) as ERC20MintableBurnable;
     vestingImplementation = (await deployVestingImplementation(owner)).contract;
     await token.deployed();
     await anotherToken.deployed();
@@ -415,7 +415,7 @@ describe("Vesting", function () {
 
     it("Time passes after cliff. Owner revokes. Beneficiary gets vested tokens. Vesting contract holds no more tokens. Owner receives the rest.", async () => {
       const ownerBalance = await token.balanceOf(await owner.getAddress());
-      await increaseTime(20000);
+      await increaseTime(200000);
       await vestingContract.connect(owner).revoke(token.address);
       expect(await token.balanceOf(vestingContract.address)).to.be.gt(
         BigNumber.from(0)
