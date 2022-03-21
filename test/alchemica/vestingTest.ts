@@ -444,6 +444,7 @@ describe("Vesting", function () {
     it("Time passes after cliff. Owner revokes. Beneficiary gets vested tokens. Vesting contract holds no more tokens. Owner receives the rest.", async () => {
       const ownerBalance = await token.balanceOf(await owner.getAddress());
       await increaseTime(YEAR * 30);
+      await mine();
       await vestingContract.connect(owner).revoke(token.address);
       expect(await token.balanceOf(vestingContract.address)).to.be.gt(
         BigNumber.from(0)
@@ -452,7 +453,6 @@ describe("Vesting", function () {
         BigNumber.from(0)
       );
       await vestingContract.release(token.address);
-      await mine();
       expect(await token.balanceOf(vestingContract.address)).to.equal(
         BigNumber.from(0)
       );
@@ -471,11 +471,13 @@ describe("Vesting", function () {
     });
 
     it("Should not be able to withdraw after revoke", async () => {
+      await token.connect(owner).mint(vestingContract.address, ETHER);
       const release = await vestingContract.releasableAmount(token.address);
 
       console.log("release:", release.toString());
 
       await vestingContract.release(token.address);
+      await expect(vestingContract.release(token.address)).to.be.revertedWith('NoTokensDue()');
     });
   });
 });
