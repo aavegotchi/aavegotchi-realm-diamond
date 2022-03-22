@@ -37,8 +37,8 @@ struct Parcel {
   mapping(uint256 => uint256[]) reservoirsCapacity;
   // alchemicaType => array of spillrate
   mapping(uint256 => uint256[]) spilloverRates;
-  uint256[4] spilloverRadius;
-  uint256[4] reservoirCount;
+  // alchemicaType => array of spillradius
+  mapping(uint256 => uint256[]) spilloverRadiuses;
   uint256[4] alchemicaHarvestRate;
   uint256[4] lastUpdateTimestamp;
   uint256[4] unclaimedAlchemica;

@@ -58,9 +58,8 @@ library LibAlchemica {
       s.parcels[_realmId].reservoirsCapacity[alchemicaType].push(installationType.capacity);
 
       //increment storage vars
-      s.parcels[_realmId].reservoirCount[alchemicaType]++;
       s.parcels[_realmId].spilloverRates[alchemicaType].push(installationType.spillRate);
-      s.parcels[_realmId].spilloverRadius[alchemicaType] += installationType.spillRadius;
+      s.parcels[_realmId].spilloverRadiuses[alchemicaType].push(installationType.spillRadius);
     }
 
     //Altar
@@ -103,21 +102,15 @@ library LibAlchemica {
       for (uint256 i; i < s.parcels[_realmId].reservoirsCapacity[alchemicaType].length; i++) {
         if (
           s.parcels[_realmId].reservoirsCapacity[alchemicaType][i] == installationType.capacity &&
-          s.parcels[_realmId].spilloverRates[alchemicaType][i] == installationType.spillRate
+          s.parcels[_realmId].spilloverRates[alchemicaType][i] == installationType.spillRate &&
+          s.parcels[_realmId].spilloverRadiuses[alchemicaType][i] == installationType.spillRadius
         ) {
-          s.parcels[_realmId].reservoirsCapacity[alchemicaType][i] = s.parcels[_realmId].reservoirsCapacity[alchemicaType][
-            s.parcels[_realmId].reservoirsCapacity[alchemicaType].length - 1
-          ];
-          s.parcels[_realmId].reservoirsCapacity[alchemicaType].pop();
-          s.parcels[_realmId].spilloverRates[alchemicaType][i] = s.parcels[_realmId].spilloverRates[alchemicaType][
-            s.parcels[_realmId].spilloverRates[alchemicaType].length - 1
-          ];
-          s.parcels[_realmId].spilloverRates[alchemicaType].pop();
+          popArray(s.parcels[_realmId].spilloverRates[alchemicaType], i);
+          popArray(s.parcels[_realmId].spilloverRadiuses[alchemicaType], i);
+          popArray(s.parcels[_realmId].reservoirsCapacity[alchemicaType], i);
           break;
         }
       }
-      s.parcels[_realmId].reservoirCount[alchemicaType]--;
-      s.parcels[_realmId].spilloverRadius[alchemicaType] -= installationType.spillRadius;
 
       if (s.parcels[_realmId].unclaimedAlchemica[alchemicaType] > calculateTotalCapacity(_realmId, alchemicaType)) {
         //step 1 - unequip all harvesters
@@ -138,5 +131,10 @@ library LibAlchemica {
     for (uint256 i; i < s.parcels[_tokenId].reservoirsCapacity[_alchemicaType].length; i++) {
       capacity_ += s.parcels[_tokenId].reservoirsCapacity[_alchemicaType][i];
     }
+  }
+
+  function popArray(uint256[] storage _array, uint256 _index) internal {
+    _array[_index] = _array[_array.length - 1];
+    _array.pop();
   }
 }
