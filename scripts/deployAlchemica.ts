@@ -17,7 +17,6 @@ import {
 import {VerifyParams} from "../helpers/types";
 import {sleep, address, currentTimestamp} from "../helpers/utils";
 import {
-  ECOSYSTEM_VESTING_BENEFICIARY,
   FUD_PARAMS,
   FOMO_PARAMS,
   ALPHA_PARAMS,
@@ -34,7 +33,6 @@ import {
   AlchemicaToken,
   AlchemicaVesting,
 } from "../typechain/";
-import * as dotenv from "dotenv";
 
 
 async function deployVestingContracts(
@@ -51,7 +49,7 @@ async function deployVestingContracts(
   let ecosystemVestingProxy = await deployAndInitializeVestingProxy(
     owner,
     vestingImplementation.contract,
-    ECOSYSTEM_VESTING_BENEFICIARY, // TODO: update beneficiary in constants
+    await address(owner),
     proxyAdmin,
     BigNumber.from(await currentTimestamp() - 10000),
     ETHER.div(10), // 10% decay per year
@@ -62,7 +60,7 @@ async function deployVestingContracts(
   let gameplayVestingProxy = await deployAndInitializeVestingProxy(
     owner,
     vestingImplementation.contract,
-    await address(owner), // TODO: update beneficiary in constants
+    await address(owner),
     proxyAdmin,
     BigNumber.from(await currentTimestamp() - 10000),
     ETHER.div(10), // 10% decay per year
@@ -187,22 +185,7 @@ async function main() {
   }
   const ghst = await hre.ethers.getContractAt("contracts/interfaces/IERC20.sol:IERC20", GHST_ADDRESS);
   const ownerBalance = await ghst.balanceOf(await address(owner));
-  if(ownerBalance.gte(ETHER.mul(10000))) {
-  
-    await releaseAndLP(
-      owner,
-      gameplayVesting.contract as AlchemicaVesting,
-      [
-        fud.contract as AlchemicaToken, 
-        fomo.contract as AlchemicaToken, 
-        alpha.contract as AlchemicaToken, 
-        kek.contract as AlchemicaToken
-      ],
-    )
-  }
-  else {
-    console.log("Skipping liquidity provision as there is no GHST to LP.");
-  }
+
 }
 
 main()
