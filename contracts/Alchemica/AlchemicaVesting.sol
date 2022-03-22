@@ -8,6 +8,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
+import "hardhat/console.sol";
+
 contract AlchemicaVesting is Initializable, OwnableUpgradeable {
   using SafeERC20 for IERC20;
 
@@ -37,28 +39,33 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
 
   bool private _revocable;
 
-  mapping (address => uint256) private _released;
-  mapping (address => bool) private _revoked;
-  
+  mapping(address => uint256) private _released;
+  mapping(address => bool) private _revoked;
+
   function replaceBeneficiary(address newBeneficiary_) external {
     if (msg.sender != _beneficiary) revert Unauthorized(msg.sender);
     _beneficiary = newBeneficiary_;
   }
 
   /**
-    * @dev Creates a vesting contract that vests its balance of any ERC20 token to the
-    * beneficiary, distributing the tokens by the geometric distribution. 
-    * The amount distributed is reduced by some amount every year
-    * to asymptotically distribute the entire balance (like bitcoin halving).
-    * @param beneficiary_ address of the beneficiary to whom vested tokens are transferred
-    * @param start_ the time (as Unix time) at which point vesting starts. 0 if current time is desired
-    * @param decayFactor_ the proportion of tokens to receive in the first period. vesting
-    * will decrease geometrically from this value. scaled by precision
-    * @param revocable_ whether the vesting is revocable or not
-    */
-  function initialize(address beneficiary_, uint256 start_, uint256 decayFactor_, bool revocable_) public initializer {
-    if(beneficiary_ == address(0)) revert ZeroAddress();
-    if(decayFactor_ == 0 || decayFactor_ >= PRECISION) revert InvalidDecayFactor(decayFactor_);
+   * @dev Creates a vesting contract that vests its balance of any ERC20 token to the
+   * beneficiary, distributing the tokens by the geometric distribution.
+   * The amount distributed is reduced by some amount every year
+   * to asymptotically distribute the entire balance (like bitcoin halving).
+   * @param beneficiary_ address of the beneficiary to whom vested tokens are transferred
+   * @param start_ the time (as Unix time) at which point vesting starts. 0 if current time is desired
+   * @param decayFactor_ the proportion of tokens to receive in the first period. vesting
+   * will decrease geometrically from this value. scaled by precision
+   * @param revocable_ whether the vesting is revocable or not
+   */
+  function initialize(
+    address beneficiary_,
+    uint256 start_,
+    uint256 decayFactor_,
+    bool revocable_
+  ) public initializer {
+    if (beneficiary_ == address(0)) revert ZeroAddress();
+    if (decayFactor_ == 0 || decayFactor_ >= PRECISION) revert InvalidDecayFactor(decayFactor_);
 
     __Ownable_init();
 
@@ -69,55 +76,55 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
   }
 
   /**
-    * @return the beneficiary of the tokens.
-    */
+   * @return the beneficiary of the tokens.
+   */
   function beneficiary() public view returns (address) {
     return _beneficiary;
   }
 
   /**
-    * @return the start time of the token vesting.
-    */
+   * @return the start time of the token vesting.
+   */
   function start() public view returns (uint256) {
     return _start;
   }
 
   /**
-    * @return the decay factor for token distribution. 
-    */
+   * @return the decay factor for token distribution.
+   */
   function decayFactor() public view returns (uint256) {
     return _decayFactor;
   }
 
   /**
-    * @return true if the vesting is revocable.
-    */
+   * @return true if the vesting is revocable.
+   */
   function revocable() public view returns (bool) {
     return _revocable;
   }
 
   /**
-    * @return the amount of the token released.
-    */
+   * @return the amount of the token released.
+   */
   function released(address token) public view returns (uint256) {
     return _released[token];
   }
 
   /**
-    * @return true if the token is revoked.
-    */
+   * @return true if the token is revoked.
+   */
   function revoked(address token) public view returns (bool) {
     return _revoked[token];
   }
 
   /**
-    * @notice Transfers vested tokens to beneficiary.
-    * @param token ERC20 token which is being vested
-    */
+   * @notice Transfers vested tokens to beneficiary.
+   * @param token ERC20 token which is being vested
+   */
   function release(IERC20 token) public {
     uint256 unreleased = releasableAmount(token);
 
-    if(unreleased == 0) revert NoTokensDue();
+    if (unreleased == 0) revert NoTokensDue();
 
     _released[address(token)] = _released[address(token)] + unreleased;
 
@@ -131,12 +138,15 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
       release(IERC20(tokens[i]));
     }
   }
-  
+
   function partialRelease(IERC20 token, uint256 value) public {
     uint256 unreleased = releasableAmount(token);
-    if(unreleased == 0) revert NoTokensDue();
-    if(value > unreleased) revert InvalidAmount();
-    
+
+    console.log("unreleased:", unreleased);
+
+    if (unreleased == 0) revert NoTokensDue();
+    if (value > unreleased) revert InvalidAmount();
+
     _released[address(token)] = _released[address(token)] + value;
 
     token.safeTransfer(_beneficiary, value);
@@ -145,18 +155,23 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
   }
 
   /**
-    * @notice Allows the owner to revoke the vesting. Tokens already vested
-    * remain in the contract, the rest are returned to the owner.
-    * @param token ERC20 token which is being vested
-    */
+   * @notice Allows the owner to revoke the vesting. Tokens already vested
+   * remain in the contract, the rest are returned to the owner.
+   * @param token ERC20 token which is being vested
+   */
   function revoke(IERC20 token) public onlyOwner {
-    if(!_revocable) revert NotRevocable();
-    if(_revoked[address(token)]) revert AlreadyRevoked();
+    if (!_revocable) revert NotRevocable();
+    if (_revoked[address(token)]) revert AlreadyRevoked();
 
     uint256 balance = token.balanceOf(address(this));
 
     uint256 unreleased = releasableAmount(token);
+
+    console.log("unreleased:", unreleased);
+
     uint256 refund = balance - unreleased;
+
+    console.log("refund:", refund);
 
     _revoked[address(token)] = true;
 
@@ -166,17 +181,17 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
   }
 
   /**
-    * @dev Calculates the amount that has already vested but hasn't been released yet.
-    * @param token ERC20 token which is being vested
-    */
+   * @dev Calculates the amount that has already vested but hasn't been released yet.
+   * @param token ERC20 token which is being vested
+   */
   function releasableAmount(IERC20 token) public view returns (uint256) {
     return _vestedAmount(token) - _released[address(token)];
   }
 
   /**
-    * @dev Calculates the amount that has already vested.
-    * @param token ERC20 token which is being vested
-    */
+   * @dev Calculates the amount that has already vested.
+   * @param token ERC20 token which is being vested
+   */
   function _vestedAmount(IERC20 token) private view returns (uint256) {
     uint256 currentBalance = token.balanceOf(address(this));
     uint256 totalBalance = currentBalance + _released[address(token)];
@@ -186,37 +201,37 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
     } else if (_revoked[address(token)]) {
       return totalBalance;
     } else {
-      return totalBalance * _proportionVested(block.timestamp - _start) / PRECISION;
+      return (totalBalance * _proportionVested(block.timestamp - _start)) / PRECISION;
     }
   }
 
-  /** 
-    * @dev Calculates the proportion of tokens that should be vested given a duration. 
-    * The proportion of tokens follows the CDF of the geometric distribution.
-    * Unsafe if there are too many periods, so we'll just return the entire balance
-    * if we exceed 30 periods (30 years).
-    */
+  /**
+   * @dev Calculates the proportion of tokens that should be vested given a duration.
+   * The proportion of tokens follows the CDF of the geometric distribution.
+   * Unsafe if there are too many periods, so we'll just return the entire balance
+   * if we exceed 30 periods (30 years).
+   */
   function _proportionVested(uint256 duration) private view returns (uint256) {
     uint256 periods = duration / DECAY_PERIOD;
     if (periods > 29) return PRECISION;
     uint256 timeInCurrentPeriod = duration % DECAY_PERIOD;
 
     // The proportion of tokens the beneficiary is NOT entitled to yet
-    // without taking into account the time spent in the current period. 
-    // Though slightly confusing, using this representation 
+    // without taking into account the time spent in the current period.
+    // Though slightly confusing, using this representation
     // makes the math easier and simpler in the loop.
     uint256 propLastPeriod = PRECISION;
     for (uint256 i = 0; i < periods; i++) {
-      propLastPeriod = propLastPeriod * (PRECISION - _decayFactor) / PRECISION;
+      propLastPeriod = (propLastPeriod * (PRECISION - _decayFactor)) / PRECISION;
     }
     // The proportion of tokens the beneficiary is NOT entitled to yet
-    // if the entire current period has passed. 
-    uint256 propThisPeriod = propLastPeriod * (PRECISION - _decayFactor) / PRECISION;
+    // if the entire current period has passed.
+    uint256 propThisPeriod = (propLastPeriod * (PRECISION - _decayFactor)) / PRECISION;
 
     return
       // The proportion of tokens the beneficiary is entitled to from the last period
-      (PRECISION - propLastPeriod) + 
+      (PRECISION - propLastPeriod) +
       // The proportion of tokens the beneficiary is entitled to from the current period
-      ((propLastPeriod - propThisPeriod) * timeInCurrentPeriod / DECAY_PERIOD); 
+      (((propLastPeriod - propThisPeriod) * timeInCurrentPeriod) / DECAY_PERIOD);
   }
 }
