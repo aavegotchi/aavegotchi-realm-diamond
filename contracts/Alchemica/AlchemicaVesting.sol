@@ -8,8 +8,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "hardhat/console.sol";
-
 contract AlchemicaVesting is Initializable, OwnableUpgradeable {
   using SafeERC20 for IERC20;
 
@@ -142,8 +140,6 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
   function partialRelease(IERC20 token, uint256 value) public {
     uint256 unreleased = releasableAmount(token);
 
-    console.log("unreleased:", unreleased);
-
     if (unreleased == 0) revert NoTokensDue();
     if (value > unreleased) revert InvalidAmount();
 
@@ -167,11 +163,7 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
 
     uint256 unreleased = releasableAmount(token);
 
-    console.log("unreleased:", unreleased);
-
     uint256 refund = balance - unreleased;
-
-    console.log("refund:", refund);
 
     _revoked[address(token)] = true;
 
