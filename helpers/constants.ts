@@ -7,6 +7,7 @@ export const GWEI = BigNumber.from(1e9);
 export const ETHER = GWEI.mul(GWEI);
 export const YEAR = 60 * 60 * 24 * 365;
 
+
 export const DAO_TREASURY_ADDRESS = "0x6fb7e0AAFBa16396Ad6c1046027717bcA25F821f";
 export const WMATIC_ADDRESS = "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270";
 export const ECOSYSTEM_VESTING_BENEFICIARY = DAO_TREASURY_ADDRESS;
@@ -20,6 +21,36 @@ export const FUD_ADDRESS = "0xdd4C5431A126c62a2DFA1d4844579e8a25dcAA82";
 export const FOMO_ADDRESS = "0xFE34bB4a7eEa6Ed2c8d1655420C1d5E2975B8678";
 export const ALPHA_ADDRESS = "0x6933f6411c09646c35c42021B9cFe10963a40A22";
 export const KEK_ADDRESS = "0x75253c9f53912FC789210dFA217e3802c26B97d5";
+
+export const DOMAIN_TYPES = [
+  {
+    name: "name",
+    type: "string",
+  },
+  {
+    name: "version",
+    type: "string",
+  },
+  {
+    name: "chainId",
+    type: "uint256",
+  },
+  {
+    name: "verifyingContract",
+    type: "address",
+  },
+];
+
+export const PERMIT_TYPES = {
+  //EIP712Domain: DOMAIN_TYPES,
+  Permit: [
+    { name: "owner", type: "address", },
+    { name: "spender", type: "address", },
+    { name: "value", type: "uint256", },
+    { name: "nonce", type: "uint256", },
+    { name: "deadline", type: "uint256", },
+  ],
+};
 
 export const FUD_PARAMS: AlchemicaParams = {
   name: "Gotchiverse FUD",

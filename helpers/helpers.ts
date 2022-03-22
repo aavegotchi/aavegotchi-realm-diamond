@@ -1,20 +1,31 @@
 import * as hre from "hardhat";
 import { ethers } from "hardhat";
+import {
+  HardhatRuntimeEnvironment,
+} from "hardhat/types";
 import { 
   BigNumber, 
   Signer, 
   Contract, 
-  ContractFactory,} 
+  ContractFactory,
+  Wallet,
+  BytesLike,
+  utils,
+  Signature,
+} 
   from "ethers";
+
 
 import {
   ETHER,
   GWEI,
   WMATIC_ADDRESS,
+  PERMIT_TYPES,
 } from "./constants";
 
 import {
   VerifyParams,
+  Domain,
 } from "./types";
 
 import {
@@ -24,6 +35,74 @@ import {
   address,
   sleep,
 } from "./utils";
+
+export async function createDomain(
+  token: Contract,
+): Promise<Domain> {
+  const domain = {
+    name: await token.name(),
+    version: '1',
+    chainId: 137,
+    verifyingContract: token.address,
+  };
+  return domain;
+}
+
+export async function permit(
+  hre: HardhatRuntimeEnvironment,
+  token: Contract,
+  owner: Wallet,
+  spender: string,
+  value: BigNumber,
+  nonce: BigNumber,
+  deadline: BigNumber,
+) {
+    const sig = await permitRSV(
+      hre,
+      owner,
+      spender,
+      value,
+      nonce,
+      deadline,
+      await createDomain(token),
+    );
+    return await token.connect(owner).permit(
+      await address(owner),
+      spender,
+      value,
+      deadline,
+      sig.v,
+      sig.r,
+      sig.s,
+    )
+}
+
+export async function permitRSV(
+  hre: HardhatRuntimeEnvironment,
+  owner: Wallet,
+  spender: string,
+  value: BigNumber,
+  nonce: BigNumber,
+  deadline: BigNumber,
+  domain: Domain,
+) {
+  const message = {
+    owner: await address(owner),
+    spender: spender,
+    value: value,
+    nonce: nonce,
+    deadline: deadline,
+  }
+
+  const result = await owner._signTypedData(
+    domain,
+    PERMIT_TYPES,
+    message,
+  );  
+  let sig: Signature = ethers.utils.splitSignature(result);
+
+  return sig;
+};
 
 export async function deployProxyAdmin(
   owner: Signer,

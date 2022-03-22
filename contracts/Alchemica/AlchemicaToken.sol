@@ -23,10 +23,9 @@ contract AlchemicaToken is
   ) public initializer {
     __Context_init_unchained();
     __Ownable_init_unchained();
-    __EIP712_init_unchained(_name, "1");
     __ERC20_init_unchained(_name, _symbol);
     __ERC20Capped_init_unchained(_maxSupply);
-    __ERC20Permit_init_unchained(_name);
+    __ERC20Permit_init(_name);
     transferOwnership(_realmDiamond);
     _mint(_gameplayVestingContract, _maxSupply / 10);
     _mint(_ecosystemVestingContract, _maxSupply / 10);
