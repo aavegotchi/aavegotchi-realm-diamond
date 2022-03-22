@@ -55,11 +55,7 @@ library LibAlchemica {
 
     //reservoir
     if (installationType.capacity > 0) {
-      s.parcels[_realmId].reservoirsCapacity[alchemicaType].push(installationType.capacity);
-
-      //increment storage vars
-      s.parcels[_realmId].spilloverRates[alchemicaType].push(installationType.spillRate);
-      s.parcels[_realmId].spilloverRadiuses[alchemicaType].push(installationType.spillRadius);
+      s.parcels[_realmId].reservoirs[alchemicaType].push(_installationId);
     }
 
     //Altar
@@ -99,15 +95,9 @@ library LibAlchemica {
 
     //Decrement reservoir variables
     if (installationType.capacity > 0) {
-      for (uint256 i; i < s.parcels[_realmId].reservoirsCapacity[alchemicaType].length; i++) {
-        if (
-          s.parcels[_realmId].reservoirsCapacity[alchemicaType][i] == installationType.capacity &&
-          s.parcels[_realmId].spilloverRates[alchemicaType][i] == installationType.spillRate &&
-          s.parcels[_realmId].spilloverRadiuses[alchemicaType][i] == installationType.spillRadius
-        ) {
-          popArray(s.parcels[_realmId].spilloverRates[alchemicaType], i);
-          popArray(s.parcels[_realmId].spilloverRadiuses[alchemicaType], i);
-          popArray(s.parcels[_realmId].reservoirsCapacity[alchemicaType], i);
+      for (uint256 i; i < s.parcels[_realmId].reservoirs[alchemicaType].length; i++) {
+        if (s.parcels[_realmId].reservoirs[alchemicaType][i] == _installationId) {
+          popArray(s.parcels[_realmId].reservoirs[alchemicaType], i);
           break;
         }
       }
@@ -128,8 +118,8 @@ library LibAlchemica {
 
   function calculateTotalCapacity(uint256 _tokenId, uint256 _alchemicaType) internal view returns (uint256 capacity_) {
     AppStorage storage s = LibAppStorage.diamondStorage();
-    for (uint256 i; i < s.parcels[_tokenId].reservoirsCapacity[_alchemicaType].length; i++) {
-      capacity_ += s.parcels[_tokenId].reservoirsCapacity[_alchemicaType][i];
+    for (uint256 i; i < s.parcels[_tokenId].reservoirs[_alchemicaType].length; i++) {
+      capacity_ += InstallationDiamondInterface(s.installationsDiamond).getReservoirCapacity(s.parcels[_tokenId].reservoirs[_alchemicaType][i]);
     }
   }
 

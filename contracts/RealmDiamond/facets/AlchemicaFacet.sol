@@ -214,14 +214,14 @@ contract AlchemicaFacet is Modifiers {
     uint256 capacityXspillrate;
     uint256 capacityXspillradius;
     uint256 totalCapacity;
-    for (uint256 i; i < s.parcels[_realmId].reservoirsCapacity[_alchemicaType].length; i++) {
-      uint256 capacity = s.parcels[_realmId].reservoirsCapacity[_alchemicaType][i];
-      totalCapacity += capacity;
-      uint256 spillrate = s.parcels[_realmId].spilloverRates[_alchemicaType][i];
-      uint256 spillradius = s.parcels[_realmId].spilloverRadiuses[_alchemicaType][i];
+    for (uint256 i; i < s.parcels[_realmId].reservoirs[_alchemicaType].length; i++) {
+      InstallationDiamondInterface.ReservoirStats memory reservoirStats = InstallationDiamondInterface(s.installationsDiamond).getReservoirStats(
+        s.parcels[_realmId].reservoirs[_alchemicaType][i]
+      );
+      totalCapacity += reservoirStats.capacity;
 
-      capacityXspillrate += capacity * spillrate;
-      capacityXspillradius += capacity * spillradius;
+      capacityXspillrate += reservoirStats.capacity * reservoirStats.spillRate;
+      capacityXspillradius += reservoirStats.capacity * reservoirStats.spillRadius;
     }
     require(totalCapacity > 0, "AlchemicaFacet: no reservoirs equipped");
 

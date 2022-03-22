@@ -36,6 +36,12 @@ contract InstallationFacet is Modifiers {
     uint256 balance;
   }
 
+  struct ReservoirStats {
+    uint256 spillRate;
+    uint256 spillRadius;
+    uint256 capacity;
+  }
+
   /// @notice Returns balance for each installation that exists for an account
   /// @param _account Address of the account to query
   /// @return bals_ An array of structs,each struct containing details about each installation owned
@@ -214,6 +220,22 @@ contract InstallationFacet is Modifiers {
     require(_installationId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
     require(s.installationTypes[_installationId].installationType == 3, "InstallationFacet: Not Lodge");
     lodgeLevel_ = s.installationTypes[_installationId].level;
+  }
+
+  function getReservoirCapacity(uint256 _installationId) external view returns (uint256 capacity_) {
+    require(_installationId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
+    require(s.installationTypes[_installationId].installationType == 1, "InstallationFacet: Not Reservoir");
+    capacity_ = s.installationTypes[_installationId].capacity;
+  }
+
+  function getReservoirStats(uint256 _installationId) external view returns (ReservoirStats memory reservoirStats_) {
+    require(_installationId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
+    require(s.installationTypes[_installationId].installationType == 1, "InstallationFacet: Not Reservoir");
+    reservoirStats_ = ReservoirStats(
+      s.installationTypes[_installationId].spillRate,
+      s.installationTypes[_installationId].spillRadius,
+      s.installationTypes[_installationId].capacity
+    );
   }
 
   /***********************************|
