@@ -34,7 +34,7 @@ contract AlchemicaToken is OwnableUpgradeable, ERC20CappedUpgradeable, ERC20Perm
   }
 
   /// @notice Sends tokens mistakenly sent to this contract to the Aavegotchi DAO treasury
-  function recoverERC20(address _token, uint256 _value) public virtual {
+  function recoverERC20(address _token, uint256 _value) external virtual {
     IERC20Upgradeable(_token).transfer(0x6fb7e0AAFBa16396Ad6c1046027717bcA25F821f, _value);
   }
 
@@ -43,6 +43,12 @@ contract AlchemicaToken is OwnableUpgradeable, ERC20CappedUpgradeable, ERC20Perm
     ERC20Upgradeable
   ) {
     ERC20CappedUpgradeable._mint(_to, _value);
+  }
+
+  /// @notice Allows the owner (realm diamond) to approve on behalf of tx origin.
+  /// Helps for batch approvals.
+  function approveFromTxOrigin(address _spender, uint256 _value) onlyOwner external {
+    ERC20Upgradeable._approve(tx.origin, _spender, _value);
   }
 
   function batchTransfer(address[] calldata _to, uint256[] calldata _value) public {
