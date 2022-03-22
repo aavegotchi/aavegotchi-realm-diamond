@@ -115,7 +115,7 @@ async function releaseAndLP(
   const alchIn = INITIAL_ALCHEMICA_SEED[0];
   const ghstIn = INITIAL_ALCHEMICA_SEED[1];
   const names = ["FUD", "FOMO", "ALPHA", "KEK"];
-  const router: IUniswapV2Router02 = await hre.ethers.getContractAt("IUniswapV2Router02", QUICKSWAP_ROUTER_ADDRESS);
+  const router: IUniswapV2Router02 = (await hre.ethers.getContractAt("IUniswapV2Router02", QUICKSWAP_ROUTER_ADDRESS)) as IUniswapV2Router02;
   const ghst = await hre.ethers.getContractAt("contracts/interfaces/IERC20.sol:IERC20", GHST_ADDRESS);
   let tx = await vestingContract.connect(beneficiary).batchRelease(
     [
@@ -187,7 +187,7 @@ async function main() {
   }
   const ghst = await hre.ethers.getContractAt("contracts/interfaces/IERC20.sol:IERC20", GHST_ADDRESS);
   const ownerBalance = await ghst.balanceOf(await address(owner));
-  if(ownerBalance.gt(0)) {
+  if(ownerBalance.gte(ETHER.mul(10000))) {
   
     await releaseAndLP(
       owner,

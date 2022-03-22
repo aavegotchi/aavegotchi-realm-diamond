@@ -46,14 +46,14 @@ export const INITIAL_ALCHEMICA_SEED:
 [[BigNumber, BigNumber, BigNumber, BigNumber], 
   [BigNumber, BigNumber, BigNumber, BigNumber]] = 
 [[
-  BigNumber.from(10000), // FUD
-  BigNumber.from(10000), // FOMO
-  BigNumber.from(10000), // ALPHA
-  BigNumber.from(10000), // KEK
+  BigNumber.from(ETHER.mul(4_196_056_910).div(1000)), // 4,196,056.91 FUD
+  BigNumber.from(ETHER.mul(2_098_028_450).div(1000)), // 2,098,028.45 FOMO
+  BigNumber.from(ETHER.mul(1_049_014_230).div(1000)), // 1,049,014.23 ALPHA
+  BigNumber.from(ETHER.mul(419_605_690).div(1000)), // 419,605.69 KEK
 ],
 [
-  BigNumber.from(10000), // GHST
-  BigNumber.from(10000),
-  BigNumber.from(10000),
-  BigNumber.from(10000),
+  BigNumber.from(ETHER.mul(2500)), // GHST
+  BigNumber.from(ETHER.mul(2500)),
+  BigNumber.from(ETHER.mul(2500)),
+  BigNumber.from(ETHER.mul(2500)),
 ]];
