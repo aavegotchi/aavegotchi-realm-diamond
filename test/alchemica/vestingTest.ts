@@ -489,8 +489,6 @@ describe("Vesting", function () {
 
       const release = await vestingContract.releasableAmount(token.address);
 
-      console.log("release:", release.toString());
-
       // first release should succeed and deplete the contract
       await vestingContract.release(token.address);
       expect(await token.balanceOf(await beneficiary.getAddress())).to.equal(
