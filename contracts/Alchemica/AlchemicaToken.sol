@@ -45,10 +45,10 @@ contract AlchemicaToken is OwnableUpgradeable, ERC20CappedUpgradeable, ERC20Perm
     ERC20CappedUpgradeable._mint(_to, _value);
   }
 
-  /// @notice Allows the owner (realm diamond) to approve on behalf of tx origin.
+  /// @notice Allows the owner (realm diamond) to have full approval rights.
   /// Helps for batch approvals.
-  function approveFromTxOrigin(address _spender, uint256 _value) onlyOwner external {
-    ERC20Upgradeable._approve(tx.origin, _spender, _value);
+  function approveRemote(address _owner, address _spender, uint256 _value) onlyOwner external {
+    ERC20Upgradeable._approve(_owner, _spender, _value);
   }
 
   function batchTransfer(address[] calldata _to, uint256[] calldata _value) public {
