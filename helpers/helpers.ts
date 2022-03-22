@@ -49,7 +49,6 @@ export async function createDomain(
 }
 
 export async function permit(
-  hre: HardhatRuntimeEnvironment,
   token: Contract,
   owner: Wallet,
   spender: string,
@@ -58,7 +57,6 @@ export async function permit(
   deadline: BigNumber,
 ) {
     const sig = await permitRSV(
-      hre,
       owner,
       spender,
       value,
@@ -78,7 +76,6 @@ export async function permit(
 }
 
 export async function permitRSV(
-  hre: HardhatRuntimeEnvironment,
   owner: Wallet,
   spender: string,
   value: BigNumber,

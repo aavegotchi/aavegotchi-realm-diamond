@@ -72,7 +72,6 @@ describe("Alchemica", function () {
 
   it("Should permit", async function () {
     await permit(
-      hre,
       fud,
       owner as Wallet,
       await owner.getAddress(),
