@@ -193,8 +193,11 @@ describe("Testing Equip Installation", async function () {
     await g.alchemicaFacet.testingStartSurveying(testParcelId);
   });
   it("Test spillover level 1", async function () {
+    const spilloverLevel1 =
+      await g.installationDiamond.spilloverRateAndRadiusOfId(4);
+
     const spillrateLevel1 = Number(
-      ethers.utils.formatUnits(await g.installationDiamond.spilloverRateOfId(4))
+      ethers.utils.formatUnits(spilloverLevel1[0])
     );
     const playerShare = 100 - spillrateLevel1;
 
@@ -240,8 +243,11 @@ describe("Testing Equip Installation", async function () {
   it("Test spillover level 2", async function () {
     await mineBlocks(ethers, 71000);
 
+    const spilloverLevel2 =
+      await g.installationDiamond.spilloverRateAndRadiusOfId(7);
+
     const spillrateLevel2 = Number(
-      ethers.utils.formatUnits(await g.installationDiamond.spilloverRateOfId(7))
+      ethers.utils.formatUnits(spilloverLevel2[0])
     );
     const playerShare = 100 - spillrateLevel2;
 

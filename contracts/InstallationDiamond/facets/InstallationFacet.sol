@@ -108,20 +108,6 @@ contract InstallationFacet is Modifiers {
     installationBalancesOfTokenWithTypes_ = LibERC998.itemBalancesOfTokenWithTypes(_tokenContract, _tokenId);
   }
 
-  /// @notice Check the spillover rate of an installation type
-  /// @param _id id of the installationType to query
-  /// @return the spillover rate the installation type with identifier _id
-  function spilloverRateOfId(uint256 _id) external view returns (uint256) {
-    return s.installationTypes[_id].spillRate;
-  }
-
-  /// @notice Check the spillover radius of an installation type
-  /// @param _id id of the installationType to query
-  /// @return the spillover radius rate the installation type with identifier _id
-  function spilloverRadiusOfId(uint256 _id) external view returns (uint256) {
-    return s.installationTypes[_id].spillRadius;
-  }
-
   /// @notice Check the spillover radius of an installation type
   /// @param _id id of the installationType to query
   /// @return the spillover rate and radius the installation type with identifier _id

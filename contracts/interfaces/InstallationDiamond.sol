@@ -76,17 +76,11 @@ interface InstallationDiamondInterface {
 
   function spilloverRatesOfIds(uint256[] calldata _ids) external view returns (uint256[] memory);
 
-  function spilloverRadiusOfIds(uint256[] calldata _ids) external view returns (uint256[] memory);
-
   function upgradeInstallation(UpgradeQueue calldata _upgradeQueue) external;
 
   function finalizeUpgrade() external;
 
   function installationsBalances(address _account) external view returns (InstallationIdIO[] memory bals_);
-
-  function spilloverRateOfId(uint256 _id) external view returns (uint256);
-
-  function spilloverRadiusOfId(uint256 _id) external view returns (uint256);
 
   function spilloverRateAndRadiusOfId(uint256 _id) external view returns (uint256, uint256);
 
