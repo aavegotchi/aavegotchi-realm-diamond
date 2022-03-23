@@ -81,7 +81,7 @@ struct AppStorage {
   mapping(uint256 => uint256) parcelChannelings;
   // altarLevel => cooldown hours in seconds
   mapping(uint256 => uint256) channelingLimits;
-  address glmrAddress;
+  address gltrAddress;
   address tileDiamond;
 }
 

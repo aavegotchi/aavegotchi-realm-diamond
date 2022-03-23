@@ -36,7 +36,7 @@ struct TileAppStorage {
   address aavegotchiDiamond;
   address pixelCraft;
   address aavegotchiDAO;
-  address glmr;
+  address gltr;
   address[] alchemicaAddresses;
   string baseUri;
   TileType[] tileTypes;

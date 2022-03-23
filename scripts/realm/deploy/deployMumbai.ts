@@ -186,7 +186,7 @@ export async function deployMumbai() {
       alchemica.alpha.address,
       alchemica.kek.address,
     ],
-    alchemica.glmr.address,
+    alchemica.gltr.address,
     ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
     deployerAddress,
     tileDiamond,
@@ -204,7 +204,7 @@ export async function deployMumbai() {
   tx = await adminFacet.setAddresses(
     maticAavegotchiDiamondAddress,
     realmDiamond.address,
-    alchemica.glmr,
+    alchemica.gltr,
     pixelcraft,
     dao
   );
@@ -216,7 +216,7 @@ export async function deployMumbai() {
   console.log("FOMO deployed:", alchemica.fomo.address);
   console.log("ALPHA deployed:", alchemica.alpha.address);
   console.log("KEK deployed:", alchemica.kek.address);
-  console.log("GLMR deployed:", alchemica.glmr.address);
+  console.log("GLTR deployed:", alchemica.gltr.address);
   console.log("Tile Diamond deployed:", tileDiamond);
 
   const fudToken = (await ethers.getContractAt(

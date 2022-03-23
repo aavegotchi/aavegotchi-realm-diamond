@@ -115,7 +115,7 @@ contract AlchemicaFacet is Modifiers {
     address _vrfCoordinator,
     address _linkAddress,
     address[4] calldata _alchemicaAddresses,
-    address _glmrAddress,
+    address _gltrAddress,
     bytes memory _backendPubKey,
     address _gameManager,
     address _tileDiamond
@@ -133,7 +133,7 @@ contract AlchemicaFacet is Modifiers {
     s.alchemicaAddresses = _alchemicaAddresses;
     s.backendPubKey = _backendPubKey;
     s.gameManager = _gameManager;
-    s.glmrAddress = _glmrAddress;
+    s.gltrAddress = _gltrAddress;
     s.tileDiamond = _tileDiamond;
   }
 

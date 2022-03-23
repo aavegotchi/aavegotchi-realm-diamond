@@ -20,7 +20,7 @@ contract TileFacet is Modifiers {
 
   event CraftTimeReduced(uint256 indexed _queueId, uint256 _blocksReduced);
 
-  event AddressesUpdated(address _aavegotchiDiamond, address _realmDiamond, address _glmr);
+  event AddressesUpdated(address _aavegotchiDiamond, address _realmDiamond, address _gltr);
 
   /***********************************|
    |             Read Functions         |
@@ -180,12 +180,12 @@ contract TileFacet is Modifiers {
     //after queue is over, user can claim tile
   }
 
-  /// @notice Allow a user to speed up multiple queues(tile craft time) by paying the correct amount of $GLMR tokens
+  /// @notice Allow a user to speed up multiple queues(tile craft time) by paying the correct amount of $GLTR tokens
   /// @dev Will throw if the caller is not the queue owner
-  /// @dev $GLMR tokens are burnt upon usage
+  /// @dev $GLTR tokens are burnt upon usage
   /// @dev amount expressed in block numbers
   /// @param _queueIds An array containing the identifiers of queues to speed up
-  /// @param _amounts An array containing the corresponding amounts of $GLMR tokens to pay for each queue speedup
+  /// @param _amounts An array containing the corresponding amounts of $GLTR tokens to pay for each queue speedup
   function reduceCraftTime(uint256[] calldata _queueIds, uint256[] calldata _amounts) external {
     require(_queueIds.length == _amounts.length, "TileFacet: Mismatched arrays");
     for (uint256 i; i < _queueIds.length; i++) {
@@ -195,11 +195,11 @@ contract TileFacet is Modifiers {
 
       require(block.number <= queueItem.readyBlock, "TileFacet: tile already done");
 
-      IERC20 glmr = IERC20(s.glmr);
+      IERC20 gltr = IERC20(s.gltr);
 
       uint256 blockLeft = queueItem.readyBlock - block.number;
       uint256 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
-      glmr.burnFrom(msg.sender, removeBlocks * 10**18);
+      gltr.burnFrom(msg.sender, removeBlocks * 10**18);
       queueItem.readyBlock -= removeBlocks;
       emit CraftTimeReduced(queueId, removeBlocks);
     }
@@ -287,20 +287,20 @@ contract TileFacet is Modifiers {
   /// @notice Allow the diamond owner to set some important contract addresses
   /// @param _aavegotchiDiamond The aavegotchi diamond address
   /// @param _realmDiamond The Realm diamond address
-  /// @param _glmr The $GLMR token address
+  /// @param _gltr The $GLTR token address
   function setAddresses(
     address _aavegotchiDiamond,
     address _realmDiamond,
-    address _glmr,
+    address _gltr,
     address _pixelCraft,
     address _aavegotchiDAO
   ) external onlyOwner {
     s.aavegotchiDiamond = _aavegotchiDiamond;
     s.realmDiamond = _realmDiamond;
-    s.glmr = _glmr;
+    s.gltr = _gltr;
     s.pixelCraft = _pixelCraft;
     s.aavegotchiDAO = _aavegotchiDAO;
-    emit AddressesUpdated(_aavegotchiDiamond, _realmDiamond, _glmr);
+    emit AddressesUpdated(_aavegotchiDiamond, _realmDiamond, _gltr);
   }
 
   /// @notice Allow the diamond owner to add a tile type

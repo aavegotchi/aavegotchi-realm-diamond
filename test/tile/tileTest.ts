@@ -60,7 +60,7 @@ describe("Testing Tiles", async function () {
       "0x0000000000000000000000000000000000000000",
       "0x0000000000000000000000000000000000000000",
       [g.fud.address, g.fomo.address, g.alpha.address, g.kek.address],
-      g.glmr.address,
+      g.gltr.address,
       ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
       g.ownerAddress,
       g.tileAddress
@@ -163,9 +163,9 @@ describe("Testing Tiles", async function () {
       "TileFacet: tile not ready"
     );
 
-    g.glmr = await impersonate(testAddress, g.glmr, ethers, network);
-    await g.glmr.mint(ethers.utils.parseUnits("100000"));
-    await g.glmr.approve(
+    g.gltr = await impersonate(testAddress, g.gltr, ethers, network);
+    await g.gltr.mint(ethers.utils.parseUnits("100000"));
+    await g.gltr.approve(
       g.tileDiamond.address,
       ethers.utils.parseUnits("100000")
     );

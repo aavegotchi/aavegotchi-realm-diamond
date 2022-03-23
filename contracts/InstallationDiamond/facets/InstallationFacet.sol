@@ -44,7 +44,7 @@ contract InstallationFacet is Modifiers {
 
   /// @notice Returns balance for each installation that exists for an account
   /// @param _account Address of the account to query
-  /// @return bals_ An array of structs,each struct containing details about each installation owned
+  /// @return bals_ An array of structs, each struct containing details about each installation owned
   function installationsBalances(address _account) external view returns (InstallationIdIO[] memory bals_) {
     uint256 count = s.ownerInstallations[_account].length;
     bals_ = new InstallationIdIO[](count);
@@ -279,26 +279,26 @@ contract InstallationFacet is Modifiers {
     //after queue is over, user can claim installation
   }
 
-  /// @notice Allow a user to speed up multiple queues(installation craft time) by paying the correct amount of $GLMR tokens
+  /// @notice Allow a user to speed up multiple queues(installation craft time) by paying the correct amount of $GLTR tokens
   /// @dev Will throw if the caller is not the queue owner
-  /// @dev $GLMR tokens are burnt upon usage
+  /// @dev $GLTR tokens are burnt upon usage
   /// @dev amount expressed in block numbers
   /// @param _queueIds An array containing the identifiers of queues to speed up
-  /// @param _amounts An array containing the corresponding amounts of $GLMR tokens to pay for each queue speedup
+  /// @param _amounts An array containing the corresponding amounts of $GLTR tokens to pay for each queue speedup
   function reduceCraftTime(uint256[] calldata _queueIds, uint256[] calldata _amounts) external {
     require(_queueIds.length == _amounts.length, "InstallationFacet: Mismatched arrays");
     for (uint256 i; i < _queueIds.length; i++) {
       uint256 queueId = _queueIds[i];
       QueueItem storage queueItem = s.craftQueue[queueId];
-      require(msg.sender == queueItem.owner, "InstallationFacet: not owner");
+      require(msg.sender == queueItem.owner, "InstallationFacet: Not owner");
 
       require(block.number <= queueItem.readyBlock, "InstallationFacet: installation already done");
 
-      IERC20 glmr = IERC20(s.glmr);
+      IERC20 gltr = IERC20(s.gltr);
 
       uint256 blockLeft = queueItem.readyBlock - block.number;
       uint256 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
-      glmr.burnFrom(msg.sender, removeBlocks * 10**18);
+      gltr.burnFrom(msg.sender, removeBlocks * 10**18);
       queueItem.readyBlock -= removeBlocks;
       emit CraftTimeReduced(queueId, removeBlocks);
     }
@@ -314,10 +314,10 @@ contract InstallationFacet is Modifiers {
 
       QueueItem memory queueItem = s.craftQueue[queueId];
 
-      require(msg.sender == queueItem.owner, "InstallationFacet: not owner");
+      require(msg.sender == queueItem.owner, "InstallationFacet: Not owner");
       require(!queueItem.claimed, "InstallationFacet: already claimed");
 
-      require(block.number >= queueItem.readyBlock, "InstallationFacet: installation not ready");
+      require(block.number >= queueItem.readyBlock, "InstallationFacet: Installation not ready");
 
       // mint installation
       LibERC1155._safeMint(msg.sender, queueItem.installationType, queueItem.id);
@@ -389,7 +389,7 @@ contract InstallationFacet is Modifiers {
   function upgradeInstallation(UpgradeQueue calldata _upgradeQueue) external {
     // check owner
     address parcelOwner = IERC721(s.realmDiamond).ownerOf(_upgradeQueue.parcelId);
-    require(parcelOwner == _upgradeQueue.owner, "InstallationFacet: not owner");
+    require(parcelOwner == _upgradeQueue.owner, "InstallationFacet: Not owner");
     // check coordinates
     RealmDiamond realm = RealmDiamond(s.realmDiamond);
 
@@ -406,7 +406,7 @@ contract InstallationFacet is Modifiers {
     );
 
     //The same upgrade cannot be queued twice
-    require(s.upgradeHashes[uniqueHash] == 0, "InstallationFacet: upgrade hash not unique");
+    require(s.upgradeHashes[uniqueHash] == 0, "InstallationFacet: Upgrade hash not unique");
 
     s.upgradeHashes[uniqueHash] = _upgradeQueue.parcelId;
 
@@ -422,8 +422,8 @@ contract InstallationFacet is Modifiers {
 
     //next level
     InstallationType memory nextInstallation = s.installationTypes[prevInstallation.nextLevelId];
-    require(prevInstallation.installationType == nextInstallation.installationType, "InstallationFacet: wrong installation type");
-    require(prevInstallation.alchemicaType == nextInstallation.alchemicaType, "InstallationFacet: wrong alchemicaType");
+    require(prevInstallation.installationType == nextInstallation.installationType, "InstallationFacet: Wrong installation type");
+    require(prevInstallation.alchemicaType == nextInstallation.alchemicaType, "InstallationFacet: Wrong alchemicaType");
     require(prevInstallation.level == nextInstallation.level - 1, "InstallationFacet: Wrong installation level");
 
     uint256 readyBlock = block.number + nextInstallation.craftTime;
@@ -447,18 +447,18 @@ contract InstallationFacet is Modifiers {
   /// @notice Allow a user to reduce the upgrade time of an ongoing queue
   /// @dev Will throw if the caller is not the owner of the queue
   /// @param _queueId The identifier of the queue whose upgrade time is to be reduced
-  /// @param _amount The correct amount of $GLMR token to be paid
+  /// @param _amount The correct amount of $GLTR token to be paid
   function reduceUpgradeTime(uint256 _queueId, uint256 _amount) external {
     UpgradeQueue storage upgradeQueue = s.upgradeQueue[_queueId];
     require(msg.sender == upgradeQueue.owner, "InstallationFacet: Not owner");
 
     require(block.number <= upgradeQueue.readyBlock, "InstallationFacet: Upgrade already done");
 
-    IERC20 glmr = IERC20(s.glmr);
+    IERC20 gltr = IERC20(s.gltr);
 
     uint256 blockLeft = upgradeQueue.readyBlock - block.number;
     uint256 removeBlocks = _amount <= blockLeft ? _amount : blockLeft;
-    glmr.burnFrom(msg.sender, removeBlocks * 10**18);
+    gltr.burnFrom(msg.sender, removeBlocks * 10**18);
     upgradeQueue.readyBlock -= removeBlocks;
     emit UpgradeTimeReduced(_queueId, upgradeQueue.parcelId, upgradeQueue.coordinateX, upgradeQueue.coordinateY, removeBlocks);
   }

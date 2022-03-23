@@ -10,7 +10,7 @@ import {
   TileFacet,
   OwnershipFacet,
   RealmFacet,
-  GLMR,
+  GLTR,
 } from "../../typechain";
 import {
   InstallationTypeInput,
@@ -433,15 +433,15 @@ export async function deployAlchemica(ethers: any, diamondAddress: string) {
     diamondAddress
   )) as AlchemicaToken;
 
-  const Glmr = await ethers.getContractFactory("GLMR");
-  let glmr = (await Glmr.deploy()) as GLMR;
+  const Glmr = await ethers.getContractFactory("GLTR");
+  let gltr = (await Glmr.deploy()) as GLTR;
 
   return {
     fud,
     fomo,
     alpha,
     kek,
-    glmr,
+    gltr,
   };
 }
 
@@ -458,7 +458,7 @@ export async function beforeTest(
   const fomo = alchemica.fomo;
   const alpha = alchemica.alpha;
   const kek = alchemica.kek;
-  const glmr = alchemica.glmr;
+  const gltr = alchemica.gltr;
 
   //Upgrade Realm Diamond
   await upgrade(installationsAddress, {
@@ -466,7 +466,7 @@ export async function beforeTest(
     fomo: alchemica.fomo.address,
     alpha: alchemica.alpha.address,
     kek: alchemica.kek.address,
-    glmr: alchemica.glmr.address,
+    gltr: alchemica.gltr.address,
   });
 
   const alchemicaFacet = (await ethers.getContractAt(
@@ -521,14 +521,14 @@ export async function beforeTest(
   await installationAdminFacet.setAddresses(
     maticAavegotchiDiamondAddress,
     maticDiamondAddress,
-    glmr.address,
+    gltr.address,
     pixelCraftAddress,
     aavegotchiDAOAddress
   );
   await tileDiamond.setAddresses(
     maticAavegotchiDiamondAddress,
     realmDiamondAddress,
-    glmr.address,
+    gltr.address,
     pixelCraftAddress,
     aavegotchiDAOAddress
   );
@@ -547,7 +547,7 @@ export async function beforeTest(
     fomo,
     alpha,
     kek,
-    glmr,
+    gltr,
     tileDiamond,
     tileAddress,
     tileOwner,

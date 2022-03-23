@@ -1,1 +1,2244 @@
-[{"inputs":[{"internalType":"address","name":"_owner","type":"address"},{"internalType":"uint256","name":"_id","type":"uint256"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"bal_","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"_owners","type":"address[]"},{"internalType":"uint256[]","name":"_ids","type":"uint256[]"}],"name":"balanceOfBatch","outputs":[{"internalType":"uint256[]","name":"bals","type":"uint256[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"operators_","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_from","type":"address"},{"internalType":"address","name":"_to","type":"address"},{"internalType":"uint256[]","name":"_ids","type":"uint256[]"},{"internalType":"uint256[]","name":"_values","type":"uint256[]"},{"internalType":"bytes","name":"_data","type":"bytes"}],"name":"safeBatchTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_from","type":"address"},{"internalType":"address","name":"_to","type":"address"},{"internalType":"uint256","name":"_id","type":"uint256"},{"internalType":"uint256","name":"_value","type":"uint256"},{"internalType":"bytes","name":"_data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"_value","type":"string"}],"name":"setBaseURI","outputs":[],"stateMutability":"nonpayable","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"_aavegotchiDiamond","type":"address"},{"indexed":false,"internalType":"address","name":"_realmDiamond","type":"address"},{"indexed":false,"internalType":"address","name":"_glmr","type":"address"},{"indexed":false,"internalType":"address","name":"_pixelCraft","type":"address"},{"indexed":false,"internalType":"address","name":"_aavegotchiDAO","type":"address"}],"name":"AddressesUpdated","type":"event"},{"inputs":[{"components":[{"internalType":"uint256","name":"width","type":"uint256"},{"internalType":"uint256","name":"height","type":"uint256"},{"internalType":"bool","name":"deprecated","type":"bool"},{"internalType":"uint16","name":"installationType","type":"uint16"},{"internalType":"uint16","name":"level","type":"uint16"},{"internalType":"uint16","name":"alchemicaType","type":"uint16"},{"internalType":"uint256[]","name":"alchemicaCost","type":"uint256[]"},{"internalType":"uint256","name":"harvestRate","type":"uint256"},{"internalType":"uint256","name":"capacity","type":"uint256"},{"internalType":"uint256","name":"spillRadius","type":"uint256"},{"internalType":"uint256","name":"spillRate","type":"uint256"},{"internalType":"uint256","name":"upgradeQueueBoost","type":"uint256"},{"internalType":"uint256","name":"craftTime","type":"uint256"},{"internalType":"uint256","name":"nextLevelId","type":"uint256"},{"internalType":"uint256[]","name":"prerequisites","type":"uint256[]"},{"internalType":"string","name":"name","type":"string"}],"internalType":"struct InstallationType[]","name":"_installationTypes","type":"tuple[]"}],"name":"addInstallationTypes","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256[]","name":"_installationIds","type":"uint256[]"}],"name":"deprecateInstallations","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_typeId","type":"uint256"},{"components":[{"internalType":"uint256","name":"width","type":"uint256"},{"internalType":"uint256","name":"height","type":"uint256"},{"internalType":"bool","name":"deprecated","type":"bool"},{"internalType":"uint16","name":"installationType","type":"uint16"},{"internalType":"uint16","name":"level","type":"uint16"},{"internalType":"uint16","name":"alchemicaType","type":"uint16"},{"internalType":"uint256[]","name":"alchemicaCost","type":"uint256[]"},{"internalType":"uint256","name":"harvestRate","type":"uint256"},{"internalType":"uint256","name":"capacity","type":"uint256"},{"internalType":"uint256","name":"spillRadius","type":"uint256"},{"internalType":"uint256","name":"spillRate","type":"uint256"},{"internalType":"uint256","name":"upgradeQueueBoost","type":"uint256"},{"internalType":"uint256","name":"craftTime","type":"uint256"},{"internalType":"uint256","name":"nextLevelId","type":"uint256"},{"internalType":"uint256[]","name":"prerequisites","type":"uint256[]"},{"internalType":"string","name":"name","type":"string"}],"internalType":"struct InstallationType","name":"_installationType","type":"tuple"}],"name":"editInstallationType","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_aavegotchiDiamond","type":"address"},{"internalType":"address","name":"_realmDiamond","type":"address"},{"internalType":"address","name":"_glmr","type":"address"},{"internalType":"address","name":"_pixelCraft","type":"address"},{"internalType":"address","name":"_aavegotchiDAO","type":"address"}],"name":"setAddresses","outputs":[],"stateMutability":"nonpayable","type":"function"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"_queueId","type":"uint256"},{"indexed":true,"internalType":"uint256","name":"_installationId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_readyBlock","type":"uint256"},{"indexed":false,"internalType":"address","name":"_sender","type":"address"}],"name":"AddedToQueue","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"_queueId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_blocksReduced","type":"uint256"}],"name":"CraftTimeReduced","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"_queueId","type":"uint256"}],"name":"QueueClaimed","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"_realmId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_coordinateX","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_coordinateY","type":"uint256"}],"name":"UpgradeFinalized","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"_realmId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_coordinateX","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_coordinateY","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"blockInitiated","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"readyBlock","type":"uint256"}],"name":"UpgradeInitiated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"_queueId","type":"uint256"},{"indexed":true,"internalType":"uint256","name":"_realmId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_coordinateX","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_coordinateY","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_blocksReduced","type":"uint256"}],"name":"UpgradeTimeReduced","type":"event"},{"inputs":[{"internalType":"address","name":"_tokenContract","type":"address"},{"internalType":"uint256","name":"_tokenId","type":"uint256"},{"internalType":"uint256","name":"_id","type":"uint256"}],"name":"balanceOfToken","outputs":[{"internalType":"uint256","name":"value","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256[]","name":"_queueIds","type":"uint256[]"}],"name":"claimInstallations","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256[]","name":"_installationTypes","type":"uint256[]"}],"name":"craftInstallations","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_owner","type":"address"},{"internalType":"uint256","name":"_realmId","type":"uint256"},{"internalType":"uint256","name":"_installationId","type":"uint256"}],"name":"equipInstallation","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"finalizeUpgrade","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_altarId","type":"uint256"}],"name":"getAltarLevel","outputs":[{"internalType":"uint256","name":"altarLevel_","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_owner","type":"address"}],"name":"getCraftQueue","outputs":[{"components":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"readyBlock","type":"uint256"},{"internalType":"uint256","name":"installationType","type":"uint256"},{"internalType":"bool","name":"claimed","type":"bool"},{"internalType":"address","name":"owner","type":"address"}],"internalType":"struct QueueItem[]","name":"output_","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_installationTypeId","type":"uint256"}],"name":"getInstallationType","outputs":[{"components":[{"internalType":"uint256","name":"width","type":"uint256"},{"internalType":"uint256","name":"height","type":"uint256"},{"internalType":"bool","name":"deprecated","type":"bool"},{"internalType":"uint16","name":"installationType","type":"uint16"},{"internalType":"uint16","name":"level","type":"uint16"},{"internalType":"uint16","name":"alchemicaType","type":"uint16"},{"internalType":"uint256[]","name":"alchemicaCost","type":"uint256[]"},{"internalType":"uint256","name":"harvestRate","type":"uint256"},{"internalType":"uint256","name":"capacity","type":"uint256"},{"internalType":"uint256","name":"spillRadius","type":"uint256"},{"internalType":"uint256","name":"spillRate","type":"uint256"},{"internalType":"uint256","name":"upgradeQueueBoost","type":"uint256"},{"internalType":"uint256","name":"craftTime","type":"uint256"},{"internalType":"uint256","name":"nextLevelId","type":"uint256"},{"internalType":"uint256[]","name":"prerequisites","type":"uint256[]"},{"internalType":"string","name":"name","type":"string"}],"internalType":"struct InstallationType","name":"installationType","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256[]","name":"_installationTypeIds","type":"uint256[]"}],"name":"getInstallationTypes","outputs":[{"components":[{"internalType":"uint256","name":"width","type":"uint256"},{"internalType":"uint256","name":"height","type":"uint256"},{"internalType":"bool","name":"deprecated","type":"bool"},{"internalType":"uint16","name":"installationType","type":"uint16"},{"internalType":"uint16","name":"level","type":"uint16"},{"internalType":"uint16","name":"alchemicaType","type":"uint16"},{"internalType":"uint256[]","name":"alchemicaCost","type":"uint256[]"},{"internalType":"uint256","name":"harvestRate","type":"uint256"},{"internalType":"uint256","name":"capacity","type":"uint256"},{"internalType":"uint256","name":"spillRadius","type":"uint256"},{"internalType":"uint256","name":"spillRate","type":"uint256"},{"internalType":"uint256","name":"upgradeQueueBoost","type":"uint256"},{"internalType":"uint256","name":"craftTime","type":"uint256"},{"internalType":"uint256","name":"nextLevelId","type":"uint256"},{"internalType":"uint256[]","name":"prerequisites","type":"uint256[]"},{"internalType":"string","name":"name","type":"string"}],"internalType":"struct InstallationType[]","name":"installationTypes_","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_owner","type":"address"}],"name":"getUpgradeQueue","outputs":[{"components":[{"internalType":"uint256","name":"parcelId","type":"uint256"},{"internalType":"uint256","name":"coordinateX","type":"uint256"},{"internalType":"uint256","name":"coordinateY","type":"uint256"},{"internalType":"uint256","name":"installationId","type":"uint256"},{"internalType":"uint256","name":"readyBlock","type":"uint256"},{"internalType":"bool","name":"claimed","type":"bool"},{"internalType":"address","name":"owner","type":"address"}],"internalType":"struct UpgradeQueue[]","name":"output_","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_tokenContract","type":"address"},{"internalType":"uint256","name":"_tokenId","type":"uint256"}],"name":"installationBalancesOfToken","outputs":[{"components":[{"internalType":"uint256","name":"installationId","type":"uint256"},{"internalType":"uint256","name":"balance","type":"uint256"}],"internalType":"struct InstallationFacet.InstallationIdIO[]","name":"bals_","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_tokenContract","type":"address"},{"internalType":"uint256","name":"_tokenId","type":"uint256"},{"internalType":"uint256[]","name":"_ids","type":"uint256[]"}],"name":"installationBalancesOfTokenByIds","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_tokenContract","type":"address"},{"internalType":"uint256","name":"_tokenId","type":"uint256"}],"name":"installationBalancesOfTokenWithTypes","outputs":[{"components":[{"internalType":"uint256","name":"balance","type":"uint256"},{"internalType":"uint256","name":"itemId","type":"uint256"},{"components":[{"internalType":"uint256","name":"width","type":"uint256"},{"internalType":"uint256","name":"height","type":"uint256"},{"internalType":"bool","name":"deprecated","type":"bool"},{"internalType":"uint16","name":"installationType","type":"uint16"},{"internalType":"uint16","name":"level","type":"uint16"},{"internalType":"uint16","name":"alchemicaType","type":"uint16"},{"internalType":"uint256[]","name":"alchemicaCost","type":"uint256[]"},{"internalType":"uint256","name":"harvestRate","type":"uint256"},{"internalType":"uint256","name":"capacity","type":"uint256"},{"internalType":"uint256","name":"spillRadius","type":"uint256"},{"internalType":"uint256","name":"spillRate","type":"uint256"},{"internalType":"uint256","name":"upgradeQueueBoost","type":"uint256"},{"internalType":"uint256","name":"craftTime","type":"uint256"},{"internalType":"uint256","name":"nextLevelId","type":"uint256"},{"internalType":"uint256[]","name":"prerequisites","type":"uint256[]"},{"internalType":"string","name":"name","type":"string"}],"internalType":"struct InstallationType","name":"installationType","type":"tuple"}],"internalType":"struct ItemTypeIO[]","name":"installationBalancesOfTokenWithTypes_","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_account","type":"address"}],"name":"installationsBalances","outputs":[{"components":[{"internalType":"uint256","name":"installationId","type":"uint256"},{"internalType":"uint256","name":"balance","type":"uint256"}],"internalType":"struct InstallationFacet.InstallationIdIO[]","name":"bals_","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_owner","type":"address"}],"name":"installationsBalancesWithTypes","outputs":[{"components":[{"internalType":"uint256","name":"balance","type":"uint256"},{"internalType":"uint256","name":"itemId","type":"uint256"},{"components":[{"internalType":"uint256","name":"width","type":"uint256"},{"internalType":"uint256","name":"height","type":"uint256"},{"internalType":"bool","name":"deprecated","type":"bool"},{"internalType":"uint16","name":"installationType","type":"uint16"},{"internalType":"uint16","name":"level","type":"uint16"},{"internalType":"uint16","name":"alchemicaType","type":"uint16"},{"internalType":"uint256[]","name":"alchemicaCost","type":"uint256[]"},{"internalType":"uint256","name":"harvestRate","type":"uint256"},{"internalType":"uint256","name":"capacity","type":"uint256"},{"internalType":"uint256","name":"spillRadius","type":"uint256"},{"internalType":"uint256","name":"spillRate","type":"uint256"},{"internalType":"uint256","name":"upgradeQueueBoost","type":"uint256"},{"internalType":"uint256","name":"craftTime","type":"uint256"},{"internalType":"uint256","name":"nextLevelId","type":"uint256"},{"internalType":"uint256[]","name":"prerequisites","type":"uint256[]"},{"internalType":"string","name":"name","type":"string"}],"internalType":"struct InstallationType","name":"installationType","type":"tuple"}],"internalType":"struct ItemTypeIO[]","name":"output_","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256[]","name":"_queueIds","type":"uint256[]"},{"internalType":"uint256[]","name":"_amounts","type":"uint256[]"}],"name":"reduceCraftTime","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_queueId","type":"uint256"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"reduceUpgradeTime","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_id","type":"uint256"}],"name":"spilloverRadiusOfId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_id","type":"uint256"}],"name":"spilloverRateAndRadiusOfId","outputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_id","type":"uint256"}],"name":"spilloverRateOfId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_realmId","type":"uint256"},{"internalType":"uint256","name":"_installationId","type":"uint256"}],"name":"unequipInstallation","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"components":[{"internalType":"uint256","name":"parcelId","type":"uint256"},{"internalType":"uint256","name":"coordinateX","type":"uint256"},{"internalType":"uint256","name":"coordinateY","type":"uint256"},{"internalType":"uint256","name":"installationId","type":"uint256"},{"internalType":"uint256","name":"readyBlock","type":"uint256"},{"internalType":"bool","name":"claimed","type":"bool"},{"internalType":"address","name":"owner","type":"address"}],"internalType":"struct UpgradeQueue","name":"_upgradeQueue","type":"tuple"}],"name":"upgradeInstallation","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_id","type":"uint256"}],"name":"uri","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"components":[{"internalType":"address","name":"facetAddress","type":"address"},{"internalType":"enum IDiamondCut.FacetCutAction","name":"action","type":"uint8"},{"internalType":"bytes4[]","name":"functionSelectors","type":"bytes4[]"}],"indexed":false,"internalType":"struct IDiamondCut.FacetCut[]","name":"_diamondCut","type":"tuple[]"},{"indexed":false,"internalType":"address","name":"_init","type":"address"},{"indexed":false,"internalType":"bytes","name":"_calldata","type":"bytes"}],"name":"DiamondCut","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_owner","type":"address"},{"indexed":true,"internalType":"address","name":"_operator","type":"address"},{"indexed":false,"internalType":"bool","name":"_approved","type":"bool"}],"name":"ApprovalForAll","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_owner","type":"address"},{"indexed":true,"internalType":"uint256","name":"_installationType","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_installationId","type":"uint256"}],"name":"MintInstallation","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_operator","type":"address"},{"indexed":true,"internalType":"address","name":"_from","type":"address"},{"indexed":true,"internalType":"address","name":"_to","type":"address"},{"indexed":false,"internalType":"uint256[]","name":"_ids","type":"uint256[]"},{"indexed":false,"internalType":"uint256[]","name":"_values","type":"uint256[]"}],"name":"TransferBatch","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_fromContract","type":"address"},{"indexed":true,"internalType":"uint256","name":"_fromTokenId","type":"uint256"},{"indexed":true,"internalType":"uint256","name":"_tokenTypeId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_value","type":"uint256"}],"name":"TransferFromParent","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_operator","type":"address"},{"indexed":true,"internalType":"address","name":"_from","type":"address"},{"indexed":true,"internalType":"address","name":"_to","type":"address"},{"indexed":false,"internalType":"uint256","name":"_id","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_value","type":"uint256"}],"name":"TransferSingle","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_toContract","type":"address"},{"indexed":true,"internalType":"uint256","name":"_toTokenId","type":"uint256"},{"indexed":true,"internalType":"uint256","name":"_tokenTypeId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_value","type":"uint256"}],"name":"TransferToParent","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"_value","type":"string"},{"indexed":true,"internalType":"uint256","name":"_tokenId","type":"uint256"}],"name":"URI","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_owner","type":"address"},{"indexed":true,"internalType":"address","name":"_operator","type":"address"},{"indexed":false,"internalType":"bool","name":"_approved","type":"bool"}],"name":"ApprovalForAll","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_owner","type":"address"},{"indexed":true,"internalType":"uint256","name":"_tileType","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_tileId","type":"uint256"}],"name":"MintTile","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_operator","type":"address"},{"indexed":true,"internalType":"address","name":"_from","type":"address"},{"indexed":true,"internalType":"address","name":"_to","type":"address"},{"indexed":false,"internalType":"uint256[]","name":"_ids","type":"uint256[]"},{"indexed":false,"internalType":"uint256[]","name":"_values","type":"uint256[]"}],"name":"TransferBatch","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_fromContract","type":"address"},{"indexed":true,"internalType":"uint256","name":"_fromTokenId","type":"uint256"},{"indexed":true,"internalType":"uint256","name":"_tokenTypeId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_value","type":"uint256"}],"name":"TransferFromParent","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_operator","type":"address"},{"indexed":true,"internalType":"address","name":"_from","type":"address"},{"indexed":true,"internalType":"address","name":"_to","type":"address"},{"indexed":false,"internalType":"uint256","name":"_id","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_value","type":"uint256"}],"name":"TransferSingle","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_toContract","type":"address"},{"indexed":true,"internalType":"uint256","name":"_toTokenId","type":"uint256"},{"indexed":true,"internalType":"uint256","name":"_tokenTypeId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_value","type":"uint256"}],"name":"TransferToParent","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"_value","type":"string"},{"indexed":true,"internalType":"uint256","name":"_tokenId","type":"uint256"}],"name":"URI","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_owner","type":"address"},{"indexed":true,"internalType":"address","name":"_approved","type":"address"},{"indexed":true,"internalType":"uint256","name":"_tokenId","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_owner","type":"address"},{"indexed":true,"internalType":"address","name":"_operator","type":"address"},{"indexed":false,"internalType":"bool","name":"_approved","type":"bool"}],"name":"ApprovalForAll","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_owner","type":"address"},{"indexed":true,"internalType":"uint256","name":"_tokenId","type":"uint256"}],"name":"MintParcel","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_from","type":"address"},{"indexed":true,"internalType":"address","name":"_to","type":"address"},{"indexed":true,"internalType":"uint256","name":"_tokenId","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"_tokenId","type":"uint256"},{"indexed":false,"internalType":"uint256[]","name":"_alchemicas","type":"uint256[]"}],"name":"SurveyParcel","type":"event"},{"anonymous":false,"inputs":[{"components":[{"internalType":"address","name":"facetAddress","type":"address"},{"internalType":"enum IDiamondCut.FacetCutAction","name":"action","type":"uint8"},{"internalType":"bytes4[]","name":"functionSelectors","type":"bytes4[]"}],"indexed":false,"internalType":"struct IDiamondCut.FacetCut[]","name":"_diamondCut","type":"tuple[]"},{"indexed":false,"internalType":"address","name":"_init","type":"address"},{"indexed":false,"internalType":"bytes","name":"_calldata","type":"bytes"}],"name":"DiamondCut","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_owner","type":"address"},{"indexed":true,"internalType":"address","name":"_operator","type":"address"},{"indexed":false,"internalType":"bool","name":"_approved","type":"bool"}],"name":"ApprovalForAll","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_owner","type":"address"},{"indexed":true,"internalType":"uint256","name":"_installationType","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_installationId","type":"uint256"}],"name":"MintInstallation","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_operator","type":"address"},{"indexed":true,"internalType":"address","name":"_from","type":"address"},{"indexed":true,"internalType":"address","name":"_to","type":"address"},{"indexed":false,"internalType":"uint256[]","name":"_ids","type":"uint256[]"},{"indexed":false,"internalType":"uint256[]","name":"_values","type":"uint256[]"}],"name":"TransferBatch","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_fromContract","type":"address"},{"indexed":true,"internalType":"uint256","name":"_fromTokenId","type":"uint256"},{"indexed":true,"internalType":"uint256","name":"_tokenTypeId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_value","type":"uint256"}],"name":"TransferFromParent","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_operator","type":"address"},{"indexed":true,"internalType":"address","name":"_from","type":"address"},{"indexed":true,"internalType":"address","name":"_to","type":"address"},{"indexed":false,"internalType":"uint256","name":"_id","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_value","type":"uint256"}],"name":"TransferSingle","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_toContract","type":"address"},{"indexed":true,"internalType":"uint256","name":"_toTokenId","type":"uint256"},{"indexed":true,"internalType":"uint256","name":"_tokenTypeId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_value","type":"uint256"}],"name":"TransferToParent","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"_value","type":"string"},{"indexed":true,"internalType":"uint256","name":"_tokenId","type":"uint256"}],"name":"URI","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_owner","type":"address"},{"indexed":true,"internalType":"address","name":"_operator","type":"address"},{"indexed":false,"internalType":"bool","name":"_approved","type":"bool"}],"name":"ApprovalForAll","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_owner","type":"address"},{"indexed":true,"internalType":"uint256","name":"_tileType","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_tileId","type":"uint256"}],"name":"MintTile","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_operator","type":"address"},{"indexed":true,"internalType":"address","name":"_from","type":"address"},{"indexed":true,"internalType":"address","name":"_to","type":"address"},{"indexed":false,"internalType":"uint256[]","name":"_ids","type":"uint256[]"},{"indexed":false,"internalType":"uint256[]","name":"_values","type":"uint256[]"}],"name":"TransferBatch","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_fromContract","type":"address"},{"indexed":true,"internalType":"uint256","name":"_fromTokenId","type":"uint256"},{"indexed":true,"internalType":"uint256","name":"_tokenTypeId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_value","type":"uint256"}],"name":"TransferFromParent","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_operator","type":"address"},{"indexed":true,"internalType":"address","name":"_from","type":"address"},{"indexed":true,"internalType":"address","name":"_to","type":"address"},{"indexed":false,"internalType":"uint256","name":"_id","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_value","type":"uint256"}],"name":"TransferSingle","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_toContract","type":"address"},{"indexed":true,"internalType":"uint256","name":"_toTokenId","type":"uint256"},{"indexed":true,"internalType":"uint256","name":"_tokenTypeId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_value","type":"uint256"}],"name":"TransferToParent","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"_value","type":"string"},{"indexed":true,"internalType":"uint256","name":"_tokenId","type":"uint256"}],"name":"URI","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_owner","type":"address"},{"indexed":true,"internalType":"address","name":"_approved","type":"address"},{"indexed":true,"internalType":"uint256","name":"_tokenId","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_owner","type":"address"},{"indexed":true,"internalType":"address","name":"_operator","type":"address"},{"indexed":false,"internalType":"bool","name":"_approved","type":"bool"}],"name":"ApprovalForAll","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_owner","type":"address"},{"indexed":true,"internalType":"uint256","name":"_tokenId","type":"uint256"}],"name":"MintParcel","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"_from","type":"address"},{"indexed":true,"internalType":"address","name":"_to","type":"address"},{"indexed":true,"internalType":"uint256","name":"_tokenId","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"_tokenId","type":"uint256"},{"indexed":false,"internalType":"uint256[]","name":"_alchemicas","type":"uint256[]"}],"name":"SurveyParcel","type":"event"}]
+[
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_owner", "type": "address" },
+      { "internalType": "uint256", "name": "_id", "type": "uint256" }
+    ],
+    "name": "balanceOf",
+    "outputs": [
+      { "internalType": "uint256", "name": "bal_", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address[]", "name": "_owners", "type": "address[]" },
+      { "internalType": "uint256[]", "name": "_ids", "type": "uint256[]" }
+    ],
+    "name": "balanceOfBatch",
+    "outputs": [
+      { "internalType": "uint256[]", "name": "bals", "type": "uint256[]" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "account", "type": "address" },
+      { "internalType": "address", "name": "operator", "type": "address" }
+    ],
+    "name": "isApprovedForAll",
+    "outputs": [
+      { "internalType": "bool", "name": "operators_", "type": "bool" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_from", "type": "address" },
+      { "internalType": "address", "name": "_to", "type": "address" },
+      { "internalType": "uint256[]", "name": "_ids", "type": "uint256[]" },
+      { "internalType": "uint256[]", "name": "_values", "type": "uint256[]" },
+      { "internalType": "bytes", "name": "_data", "type": "bytes" }
+    ],
+    "name": "safeBatchTransferFrom",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_from", "type": "address" },
+      { "internalType": "address", "name": "_to", "type": "address" },
+      { "internalType": "uint256", "name": "_id", "type": "uint256" },
+      { "internalType": "uint256", "name": "_value", "type": "uint256" },
+      { "internalType": "bytes", "name": "_data", "type": "bytes" }
+    ],
+    "name": "safeTransferFrom",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "owner", "type": "address" },
+      { "internalType": "address", "name": "operator", "type": "address" },
+      { "internalType": "bool", "name": "approved", "type": "bool" }
+    ],
+    "name": "setApprovalForAll",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "_value", "type": "string" }
+    ],
+    "name": "setBaseURI",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_aavegotchiDiamond",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_realmDiamond",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_gltr",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_pixelCraft",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_aavegotchiDAO",
+        "type": "address"
+      }
+    ],
+    "name": "AddressesUpdated",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "width", "type": "uint256" },
+          { "internalType": "uint256", "name": "height", "type": "uint256" },
+          { "internalType": "bool", "name": "deprecated", "type": "bool" },
+          {
+            "internalType": "uint16",
+            "name": "installationType",
+            "type": "uint16"
+          },
+          { "internalType": "uint16", "name": "level", "type": "uint16" },
+          {
+            "internalType": "uint16",
+            "name": "alchemicaType",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "alchemicaCost",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "harvestRate",
+            "type": "uint256"
+          },
+          { "internalType": "uint256", "name": "capacity", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "spillRadius",
+            "type": "uint256"
+          },
+          { "internalType": "uint256", "name": "spillRate", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "upgradeQueueBoost",
+            "type": "uint256"
+          },
+          { "internalType": "uint256", "name": "craftTime", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "nextLevelId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "prerequisites",
+            "type": "uint256[]"
+          },
+          { "internalType": "string", "name": "name", "type": "string" }
+        ],
+        "internalType": "struct InstallationType[]",
+        "name": "_installationTypes",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "addInstallationTypes",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "_installationIds",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "deprecateInstallations",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_typeId", "type": "uint256" },
+      {
+        "components": [
+          { "internalType": "uint256", "name": "width", "type": "uint256" },
+          { "internalType": "uint256", "name": "height", "type": "uint256" },
+          { "internalType": "bool", "name": "deprecated", "type": "bool" },
+          {
+            "internalType": "uint16",
+            "name": "installationType",
+            "type": "uint16"
+          },
+          { "internalType": "uint16", "name": "level", "type": "uint16" },
+          {
+            "internalType": "uint16",
+            "name": "alchemicaType",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "alchemicaCost",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "harvestRate",
+            "type": "uint256"
+          },
+          { "internalType": "uint256", "name": "capacity", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "spillRadius",
+            "type": "uint256"
+          },
+          { "internalType": "uint256", "name": "spillRate", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "upgradeQueueBoost",
+            "type": "uint256"
+          },
+          { "internalType": "uint256", "name": "craftTime", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "nextLevelId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "prerequisites",
+            "type": "uint256[]"
+          },
+          { "internalType": "string", "name": "name", "type": "string" }
+        ],
+        "internalType": "struct InstallationType",
+        "name": "_installationType",
+        "type": "tuple"
+      }
+    ],
+    "name": "editInstallationType",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_aavegotchiDiamond",
+        "type": "address"
+      },
+      { "internalType": "address", "name": "_realmDiamond", "type": "address" },
+      { "internalType": "address", "name": "_gltr", "type": "address" },
+      { "internalType": "address", "name": "_pixelCraft", "type": "address" },
+      { "internalType": "address", "name": "_aavegotchiDAO", "type": "address" }
+    ],
+    "name": "setAddresses",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_queueId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_installationId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_readyBlock",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_sender",
+        "type": "address"
+      }
+    ],
+    "name": "AddedToQueue",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_queueId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_blocksReduced",
+        "type": "uint256"
+      }
+    ],
+    "name": "CraftTimeReduced",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_queueId",
+        "type": "uint256"
+      }
+    ],
+    "name": "QueueClaimed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_realmId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_coordinateX",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_coordinateY",
+        "type": "uint256"
+      }
+    ],
+    "name": "UpgradeFinalized",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_realmId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_coordinateX",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_coordinateY",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "blockInitiated",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "readyBlock",
+        "type": "uint256"
+      }
+    ],
+    "name": "UpgradeInitiated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_queueId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_realmId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_coordinateX",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_coordinateY",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_blocksReduced",
+        "type": "uint256"
+      }
+    ],
+    "name": "UpgradeTimeReduced",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_tokenContract",
+        "type": "address"
+      },
+      { "internalType": "uint256", "name": "_tokenId", "type": "uint256" },
+      { "internalType": "uint256", "name": "_id", "type": "uint256" }
+    ],
+    "name": "balanceOfToken",
+    "outputs": [
+      { "internalType": "uint256", "name": "value", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256[]", "name": "_queueIds", "type": "uint256[]" }
+    ],
+    "name": "claimInstallations",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "_installationTypes",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "craftInstallations",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_owner", "type": "address" },
+      { "internalType": "uint256", "name": "_realmId", "type": "uint256" },
+      {
+        "internalType": "uint256",
+        "name": "_installationId",
+        "type": "uint256"
+      }
+    ],
+    "name": "equipInstallation",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "finalizeUpgrade",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_altarId", "type": "uint256" }
+    ],
+    "name": "getAltarLevel",
+    "outputs": [
+      { "internalType": "uint256", "name": "altarLevel_", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_owner", "type": "address" }
+    ],
+    "name": "getCraftQueue",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "id", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "readyBlock",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "installationType",
+            "type": "uint256"
+          },
+          { "internalType": "bool", "name": "claimed", "type": "bool" },
+          { "internalType": "address", "name": "owner", "type": "address" }
+        ],
+        "internalType": "struct QueueItem[]",
+        "name": "output_",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_installationTypeId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getInstallationType",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "width", "type": "uint256" },
+          { "internalType": "uint256", "name": "height", "type": "uint256" },
+          { "internalType": "bool", "name": "deprecated", "type": "bool" },
+          {
+            "internalType": "uint16",
+            "name": "installationType",
+            "type": "uint16"
+          },
+          { "internalType": "uint16", "name": "level", "type": "uint16" },
+          {
+            "internalType": "uint16",
+            "name": "alchemicaType",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "alchemicaCost",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "harvestRate",
+            "type": "uint256"
+          },
+          { "internalType": "uint256", "name": "capacity", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "spillRadius",
+            "type": "uint256"
+          },
+          { "internalType": "uint256", "name": "spillRate", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "upgradeQueueBoost",
+            "type": "uint256"
+          },
+          { "internalType": "uint256", "name": "craftTime", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "nextLevelId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "prerequisites",
+            "type": "uint256[]"
+          },
+          { "internalType": "string", "name": "name", "type": "string" }
+        ],
+        "internalType": "struct InstallationType",
+        "name": "installationType",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "_installationTypeIds",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "getInstallationTypes",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "width", "type": "uint256" },
+          { "internalType": "uint256", "name": "height", "type": "uint256" },
+          { "internalType": "bool", "name": "deprecated", "type": "bool" },
+          {
+            "internalType": "uint16",
+            "name": "installationType",
+            "type": "uint16"
+          },
+          { "internalType": "uint16", "name": "level", "type": "uint16" },
+          {
+            "internalType": "uint16",
+            "name": "alchemicaType",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "alchemicaCost",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "harvestRate",
+            "type": "uint256"
+          },
+          { "internalType": "uint256", "name": "capacity", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "spillRadius",
+            "type": "uint256"
+          },
+          { "internalType": "uint256", "name": "spillRate", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "upgradeQueueBoost",
+            "type": "uint256"
+          },
+          { "internalType": "uint256", "name": "craftTime", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "nextLevelId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "prerequisites",
+            "type": "uint256[]"
+          },
+          { "internalType": "string", "name": "name", "type": "string" }
+        ],
+        "internalType": "struct InstallationType[]",
+        "name": "installationTypes_",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_owner", "type": "address" }
+    ],
+    "name": "getUpgradeQueue",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "parcelId", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "coordinateX",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "coordinateY",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "installationId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "readyBlock",
+            "type": "uint256"
+          },
+          { "internalType": "bool", "name": "claimed", "type": "bool" },
+          { "internalType": "address", "name": "owner", "type": "address" }
+        ],
+        "internalType": "struct UpgradeQueue[]",
+        "name": "output_",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_tokenContract",
+        "type": "address"
+      },
+      { "internalType": "uint256", "name": "_tokenId", "type": "uint256" }
+    ],
+    "name": "installationBalancesOfToken",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "installationId",
+            "type": "uint256"
+          },
+          { "internalType": "uint256", "name": "balance", "type": "uint256" }
+        ],
+        "internalType": "struct InstallationFacet.InstallationIdIO[]",
+        "name": "bals_",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_tokenContract",
+        "type": "address"
+      },
+      { "internalType": "uint256", "name": "_tokenId", "type": "uint256" },
+      { "internalType": "uint256[]", "name": "_ids", "type": "uint256[]" }
+    ],
+    "name": "installationBalancesOfTokenByIds",
+    "outputs": [
+      { "internalType": "uint256[]", "name": "", "type": "uint256[]" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_tokenContract",
+        "type": "address"
+      },
+      { "internalType": "uint256", "name": "_tokenId", "type": "uint256" }
+    ],
+    "name": "installationBalancesOfTokenWithTypes",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "balance", "type": "uint256" },
+          { "internalType": "uint256", "name": "itemId", "type": "uint256" },
+          {
+            "components": [
+              { "internalType": "uint256", "name": "width", "type": "uint256" },
+              {
+                "internalType": "uint256",
+                "name": "height",
+                "type": "uint256"
+              },
+              { "internalType": "bool", "name": "deprecated", "type": "bool" },
+              {
+                "internalType": "uint16",
+                "name": "installationType",
+                "type": "uint16"
+              },
+              { "internalType": "uint16", "name": "level", "type": "uint16" },
+              {
+                "internalType": "uint16",
+                "name": "alchemicaType",
+                "type": "uint16"
+              },
+              {
+                "internalType": "uint256[]",
+                "name": "alchemicaCost",
+                "type": "uint256[]"
+              },
+              {
+                "internalType": "uint256",
+                "name": "harvestRate",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "capacity",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "spillRadius",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "spillRate",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "upgradeQueueBoost",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "craftTime",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "nextLevelId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256[]",
+                "name": "prerequisites",
+                "type": "uint256[]"
+              },
+              { "internalType": "string", "name": "name", "type": "string" }
+            ],
+            "internalType": "struct InstallationType",
+            "name": "installationType",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct ItemTypeIO[]",
+        "name": "installationBalancesOfTokenWithTypes_",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_account", "type": "address" }
+    ],
+    "name": "installationsBalances",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "installationId",
+            "type": "uint256"
+          },
+          { "internalType": "uint256", "name": "balance", "type": "uint256" }
+        ],
+        "internalType": "struct InstallationFacet.InstallationIdIO[]",
+        "name": "bals_",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_owner", "type": "address" }
+    ],
+    "name": "installationsBalancesWithTypes",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "balance", "type": "uint256" },
+          { "internalType": "uint256", "name": "itemId", "type": "uint256" },
+          {
+            "components": [
+              { "internalType": "uint256", "name": "width", "type": "uint256" },
+              {
+                "internalType": "uint256",
+                "name": "height",
+                "type": "uint256"
+              },
+              { "internalType": "bool", "name": "deprecated", "type": "bool" },
+              {
+                "internalType": "uint16",
+                "name": "installationType",
+                "type": "uint16"
+              },
+              { "internalType": "uint16", "name": "level", "type": "uint16" },
+              {
+                "internalType": "uint16",
+                "name": "alchemicaType",
+                "type": "uint16"
+              },
+              {
+                "internalType": "uint256[]",
+                "name": "alchemicaCost",
+                "type": "uint256[]"
+              },
+              {
+                "internalType": "uint256",
+                "name": "harvestRate",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "capacity",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "spillRadius",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "spillRate",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "upgradeQueueBoost",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "craftTime",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "nextLevelId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256[]",
+                "name": "prerequisites",
+                "type": "uint256[]"
+              },
+              { "internalType": "string", "name": "name", "type": "string" }
+            ],
+            "internalType": "struct InstallationType",
+            "name": "installationType",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct ItemTypeIO[]",
+        "name": "output_",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256[]", "name": "_queueIds", "type": "uint256[]" },
+      { "internalType": "uint256[]", "name": "_amounts", "type": "uint256[]" }
+    ],
+    "name": "reduceCraftTime",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_queueId", "type": "uint256" },
+      { "internalType": "uint256", "name": "_amount", "type": "uint256" }
+    ],
+    "name": "reduceUpgradeTime",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_id", "type": "uint256" }],
+    "name": "spilloverRadiusOfId",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_id", "type": "uint256" }],
+    "name": "spilloverRateAndRadiusOfId",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" },
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_id", "type": "uint256" }],
+    "name": "spilloverRateOfId",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_realmId", "type": "uint256" },
+      {
+        "internalType": "uint256",
+        "name": "_installationId",
+        "type": "uint256"
+      }
+    ],
+    "name": "unequipInstallation",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "parcelId", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "coordinateX",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "coordinateY",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "installationId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "readyBlock",
+            "type": "uint256"
+          },
+          { "internalType": "bool", "name": "claimed", "type": "bool" },
+          { "internalType": "address", "name": "owner", "type": "address" }
+        ],
+        "internalType": "struct UpgradeQueue",
+        "name": "_upgradeQueue",
+        "type": "tuple"
+      }
+    ],
+    "name": "upgradeInstallation",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_id", "type": "uint256" }],
+    "name": "uri",
+    "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "facetAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "enum IDiamondCut.FacetCutAction",
+            "name": "action",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes4[]",
+            "name": "functionSelectors",
+            "type": "bytes4[]"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct IDiamondCut.FacetCut[]",
+        "name": "_diamondCut",
+        "type": "tuple[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_init",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "_calldata",
+        "type": "bytes"
+      }
+    ],
+    "name": "DiamondCut",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_operator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "_approved",
+        "type": "bool"
+      }
+    ],
+    "name": "ApprovalForAll",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_installationType",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_installationId",
+        "type": "uint256"
+      }
+    ],
+    "name": "MintInstallation",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_operator",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "_ids",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "_values",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "TransferBatch",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_fromContract",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_fromTokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenTypeId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_value",
+        "type": "uint256"
+      }
+    ],
+    "name": "TransferFromParent",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_operator",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_value",
+        "type": "uint256"
+      }
+    ],
+    "name": "TransferSingle",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_toContract",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_toTokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenTypeId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_value",
+        "type": "uint256"
+      }
+    ],
+    "name": "TransferToParent",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "_value",
+        "type": "string"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "URI",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_operator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "_approved",
+        "type": "bool"
+      }
+    ],
+    "name": "ApprovalForAll",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tileType",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_tileId",
+        "type": "uint256"
+      }
+    ],
+    "name": "MintTile",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_operator",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "_ids",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "_values",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "TransferBatch",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_fromContract",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_fromTokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenTypeId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_value",
+        "type": "uint256"
+      }
+    ],
+    "name": "TransferFromParent",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_operator",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_value",
+        "type": "uint256"
+      }
+    ],
+    "name": "TransferSingle",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_toContract",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_toTokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenTypeId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_value",
+        "type": "uint256"
+      }
+    ],
+    "name": "TransferToParent",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "_value",
+        "type": "string"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "URI",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_approved",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "Approval",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_operator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "_approved",
+        "type": "bool"
+      }
+    ],
+    "name": "ApprovalForAll",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "MintParcel",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_to",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "Transfer",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "_alchemicas",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "SurveyParcel",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "facetAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "enum IDiamondCut.FacetCutAction",
+            "name": "action",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes4[]",
+            "name": "functionSelectors",
+            "type": "bytes4[]"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct IDiamondCut.FacetCut[]",
+        "name": "_diamondCut",
+        "type": "tuple[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_init",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "_calldata",
+        "type": "bytes"
+      }
+    ],
+    "name": "DiamondCut",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_operator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "_approved",
+        "type": "bool"
+      }
+    ],
+    "name": "ApprovalForAll",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_installationType",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_installationId",
+        "type": "uint256"
+      }
+    ],
+    "name": "MintInstallation",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_operator",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "_ids",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "_values",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "TransferBatch",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_fromContract",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_fromTokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenTypeId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_value",
+        "type": "uint256"
+      }
+    ],
+    "name": "TransferFromParent",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_operator",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_value",
+        "type": "uint256"
+      }
+    ],
+    "name": "TransferSingle",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_toContract",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_toTokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenTypeId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_value",
+        "type": "uint256"
+      }
+    ],
+    "name": "TransferToParent",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "_value",
+        "type": "string"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "URI",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_operator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "_approved",
+        "type": "bool"
+      }
+    ],
+    "name": "ApprovalForAll",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tileType",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_tileId",
+        "type": "uint256"
+      }
+    ],
+    "name": "MintTile",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_operator",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "_ids",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "_values",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "TransferBatch",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_fromContract",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_fromTokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenTypeId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_value",
+        "type": "uint256"
+      }
+    ],
+    "name": "TransferFromParent",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_operator",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_value",
+        "type": "uint256"
+      }
+    ],
+    "name": "TransferSingle",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_toContract",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_toTokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenTypeId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_value",
+        "type": "uint256"
+      }
+    ],
+    "name": "TransferToParent",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "_value",
+        "type": "string"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "URI",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_approved",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "Approval",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_operator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "_approved",
+        "type": "bool"
+      }
+    ],
+    "name": "ApprovalForAll",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "MintParcel",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_to",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "Transfer",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "_alchemicas",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "SurveyParcel",
+    "type": "event"
+  }
+]

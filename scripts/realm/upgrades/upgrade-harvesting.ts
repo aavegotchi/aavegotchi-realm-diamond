@@ -36,7 +36,7 @@ export async function upgrade(
         "function getTotalAlchemicas() external view returns (uint256[4][5] memory)",
         "function getRealmAlchemica(uint256 _tokenId) external view returns (uint256[4] memory)",
         "function progressSurveyingRound() external",
-        "function setVars(uint256[4][5] calldata _alchemicas, uint256[4] calldata _boostMultipliers, uint256[4] _greatPortalCapacity, address _installationsDiamond, address _vrfCoordinator, address _linkAddress, address[4] calldata _alchemicaAddresses, address _glmrAddress, bytes memory _backendPubKey, address _gameManager, address _tileDiamond) external",
+        "function setVars(uint256[4][5] calldata _alchemicas, uint256[4] calldata _boostMultipliers, uint256[4] _greatPortalCapacity, address _installationsDiamond, address _vrfCoordinator, address _linkAddress, address[4] calldata _alchemicaAddresses, address _gltrAddress, bytes memory _backendPubKey, address _gameManager, address _tileDiamond) external",
         "function testingStartSurveying(uint256 _tokenId) external",
         `function testingMintParcel(address _to, uint256[] calldata _tokenIds, ${mintParcelsInput}[] memory _metadata) external`,
         "function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external",
@@ -110,7 +110,7 @@ export async function upgrade(
       "0x0000000000000000000000000000000000000000",
       "0x0000000000000000000000000000000000000000",
       [alchemica.fud, alchemica.fomo, alchemica.alpha, alchemica.kek],
-      alchemica.glmr,
+      alchemica.gltr,
       ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
       "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
       "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
@@ -136,7 +136,7 @@ if (require.main === module) {
     fomo: "",
     alpha: "",
     kek: "",
-    glmr: "",
+    gltr: "",
   })
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
