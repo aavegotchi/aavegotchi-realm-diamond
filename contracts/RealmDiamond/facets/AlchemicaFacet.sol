@@ -4,11 +4,13 @@ pragma solidity 0.8.9;
 import "../../libraries/AppStorage.sol";
 import "./RealmFacet.sol";
 import "../../libraries/LibRealm.sol";
+import "../../libraries/LibMeta.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "../../libraries/LibAlchemica.sol";
 import "../../libraries/LibSignature.sol";
 import "../../interfaces/AavegotchiDiamond.sol";
 import "../../interfaces/IERC20Mintable.sol";
+import "../../interfaces/RemoteApprovable.sol";
 import "hardhat/console.sol";
 
 uint256 constant bp = 100 ether;
@@ -380,6 +382,19 @@ contract AlchemicaFacet is Modifiers {
     }
 
     emit ExitAlchemica(_gotchiId, _alchemica);
+  }
+
+  /// @notice Helper function to batch approve alchemica
+  /// @param _spender The spender's address
+  /// @param _amounts An array of amounts to approve.
+  /// @dev The element order is FUD, FOMO, ALPHA, KEK
+  /// @dev Uses a special approval function only available in AlchemicaToken
+  /// that gives special approval permissions to this contract
+  function batchApproveAlchemica(address _spender, uint256[4] calldata _amounts) external {
+    for (uint256 i = 0; i < _amounts.length; i++) {
+      RemoteApprovable alchemica = RemoteApprovable(s.alchemicaAddresses[i]);
+      alchemica.approveRemote(LibMeta.msgSender(), _spender, _amounts[i]);
+    }
   }
 
   /// @notice Helper function to batch transfer alchemica
