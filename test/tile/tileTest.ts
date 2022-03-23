@@ -188,9 +188,6 @@ describe("Testing Tiles", async function () {
     const balancePost = await erc1155facet.balanceOf(testAddress, 2);
     expect(balancePost).to.above(balancePre);
   });
-  it("Survey Parcel", async function () {
-    await g.alchemicaFacet.testingStartSurveying(testParcelId);
-  });
   it("Equip tiles", async function () {
     g.realmFacet = await impersonate(
       testAddress,

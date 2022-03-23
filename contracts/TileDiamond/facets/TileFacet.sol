@@ -208,13 +208,12 @@ contract TileFacet is Modifiers {
 
       QueueItem memory queueItem = s.craftQueue[queueId];
 
-      require(msg.sender == queueItem.owner, "TileFacet: not owner");
       require(!queueItem.claimed, "TileFacet: already claimed");
 
       require(block.number >= queueItem.readyBlock, "TileFacet: tile not ready");
 
       // mint tile
-      LibERC1155Tile._safeMint(msg.sender, queueItem.tileType, queueItem.id);
+      LibERC1155Tile._safeMint(queueItem.owner, queueItem.tileType, queueItem.id);
       s.craftQueue[queueId].claimed = true;
       emit QueueClaimed(queueId);
     }

@@ -165,7 +165,6 @@ contract RealmFacet is Modifiers {
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _tileId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
-    require(s.parcels[_realmId].currentRound >= 1, "RealmFacet: Must survey before equipping");
     LibRealm.placeTile(_realmId, _tileId, _x, _y);
     TileDiamondInterface(s.tileDiamond).equipTile(msg.sender, _realmId, _tileId);
 
