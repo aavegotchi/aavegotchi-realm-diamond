@@ -34,9 +34,9 @@ struct UpgradeQueue {
 struct TileAppStorage {
   address realmDiamond;
   address aavegotchiDiamond;
-  address pixelCraft;
+  address pixelcraft;
   address aavegotchiDAO;
-  address glmr;
+  address gltr;
   address[] alchemicaAddresses;
   string baseUri;
   TileType[] tileTypes;

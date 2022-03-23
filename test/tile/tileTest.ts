@@ -3,7 +3,7 @@ import {
   impersonate,
   maticDiamondAddress,
   mineBlocks,
-  pixelCraftAddress,
+  pixelcraftAddress,
 } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
@@ -60,7 +60,7 @@ describe("Testing Tiles", async function () {
       "0x0000000000000000000000000000000000000000",
       "0x0000000000000000000000000000000000000000",
       [g.fud.address, g.fomo.address, g.alpha.address, g.kek.address],
-      g.glmr.address,
+      g.gltr.address,
       ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
       g.ownerAddress,
       g.tileAddress
@@ -130,15 +130,15 @@ describe("Testing Tiles", async function () {
     await g.kek.approve(g.tileAddress, ethers.utils.parseUnits("1000000000"));
     let fudPreCraftPortal = await g.fud.balanceOf(maticDiamondAddress);
     let kekPreCraftPortal = await g.kek.balanceOf(maticDiamondAddress);
-    let fudPreCraftPixelCraft = await g.fud.balanceOf(pixelCraftAddress);
-    let kekPreCraftPixelCraft = await g.kek.balanceOf(pixelCraftAddress);
+    let fudPreCraftPixelCraft = await g.fud.balanceOf(pixelcraftAddress);
+    let kekPreCraftPixelCraft = await g.kek.balanceOf(pixelcraftAddress);
     let fudPreCraftDAO = await g.fud.balanceOf(aavegotchiDAOAddress);
     let kekPreCraftDAO = await g.kek.balanceOf(aavegotchiDAOAddress);
     await g.tileDiamond.craftTiles([1, 2, 2, 3]);
     let fudAfterCraftPortal = await g.fud.balanceOf(maticDiamondAddress);
     let kekAfterCraftPortal = await g.kek.balanceOf(maticDiamondAddress);
-    let fudAfterCraftPixelCraft = await g.fud.balanceOf(pixelCraftAddress);
-    let kekAfterCraftPixelCraft = await g.kek.balanceOf(pixelCraftAddress);
+    let fudAfterCraftPixelCraft = await g.fud.balanceOf(pixelcraftAddress);
+    let kekAfterCraftPixelCraft = await g.kek.balanceOf(pixelcraftAddress);
     let fudAfterCraftDAO = await g.fud.balanceOf(aavegotchiDAOAddress);
     let kekAfterCraftDAO = await g.kek.balanceOf(aavegotchiDAOAddress);
     expect(Number(ethers.utils.formatUnits(fudAfterCraftPortal))).to.above(
@@ -163,9 +163,9 @@ describe("Testing Tiles", async function () {
       "TileFacet: tile not ready"
     );
 
-    g.glmr = await impersonate(testAddress, g.glmr, ethers, network);
-    await g.glmr.mint(ethers.utils.parseUnits("100000"));
-    await g.glmr.approve(
+    g.gltr = await impersonate(testAddress, g.gltr, ethers, network);
+    await g.gltr.mint(ethers.utils.parseUnits("100000"));
+    await g.gltr.approve(
       g.tileDiamond.address,
       ethers.utils.parseUnits("100000")
     );

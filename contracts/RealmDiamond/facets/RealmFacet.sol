@@ -279,8 +279,8 @@ contract RealmFacet is Modifiers {
   }
 
   // used for testing atm
-  function getParcelCapacity(uint256 _realmId) external view returns (uint256[4] memory) {
-    return s.parcels[_realmId].reservoirCapacity;
+  function getParcelCapacity(uint256 _realmId, uint256 _alchemicaType) external view returns (uint256) {
+    return LibAlchemica.calculateTotalCapacity(_realmId, _alchemicaType);
   }
 
   function getHumbleGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[8][8] memory output_) {

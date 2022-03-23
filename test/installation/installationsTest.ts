@@ -141,7 +141,7 @@ describe("Installations tests", async function () {
     );
     await installationFacet.craftInstallations([0, 0, 0, 0, 0]);
     await expect(installationFacet.claimInstallations([0])).to.be.revertedWith(
-      "InstallationFacet: installation not ready"
+      "InstallationFacet: Installation not ready"
     );
 
     await mineBlocks(ethers, 11000);

@@ -69,7 +69,7 @@ export const maticAavegotchiDiamondAddress =
 export const aavegotchiDAOAddress =
   "0xFFE6280ae4E864D9aF836B562359FD828EcE8020";
 //todo random address to be changed
-export const pixelCraftAddress = "0xB79Fad4cA981472442f53D16365fDf0305fFd8E9";
+export const pixelcraftAddress = "0xB79Fad4cA981472442f53D16365fDf0305fFd8E9";
 
 export async function diamondOwner(address: string, ethers: any) {
   return await (await ethers.getContractAt("OwnershipFacet", address)).owner();

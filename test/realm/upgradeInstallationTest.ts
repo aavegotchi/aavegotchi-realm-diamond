@@ -118,7 +118,7 @@ describe("Testing Equip Installation", async function () {
     await g.installationDiamond.craftInstallations([2]);
     await expect(
       g.installationDiamond.claimInstallations([0])
-    ).to.be.revertedWith("InstallationFacet: installation not ready");
+    ).to.be.revertedWith("InstallationFacet: Installation not ready");
 
     await mineBlocks(ethers, 21000);
 

@@ -11,7 +11,7 @@ import {
   TileFacet,
   OwnershipFacet,
   RealmFacet,
-  GLMR,
+  GLTR,
 } from "../../typechain";
 import {
   InstallationTypeInput,
@@ -23,7 +23,7 @@ import {
 import {
   maticAavegotchiDiamondAddress,
   maticDiamondAddress,
-  pixelCraftAddress,
+  pixelcraftAddress,
   aavegotchiDAOAddress,
 } from "../helperFunctions";
 import { deployDiamond } from "../installation/deploy";
@@ -99,7 +99,7 @@ export function testInstallations() {
       deprecated: true,
       nextLevelId: 0,
       prerequisites: [],
-      name: "",
+      name: "The Void",
     })
   );
   installations.push(
@@ -133,7 +133,7 @@ export function testInstallations() {
       harvestRate: 0,
       capacity: 500,
       spillRadius: 100,
-      spillRate: 20,
+      spillRate: 50,
       upgradeQueueBoost: 0,
       craftTime: 10000,
       deprecated: false,
@@ -151,9 +151,9 @@ export function testInstallations() {
       alchemicaType: 0,
       alchemicaCost: [40, 50, 60, 60],
       harvestRate: 0,
-      capacity: 750,
+      capacity: 1000,
       spillRadius: 75,
-      spillRate: 10,
+      spillRate: 20,
       upgradeQueueBoost: 0,
       craftTime: 10000,
       deprecated: false,
@@ -524,15 +524,15 @@ export async function deployAlchemica(ethers: any, diamondAddress: string) {
     diamondAddress
   )) as AlchemicaToken;
 
-  const Glmr = await ethers.getContractFactory("GLMR");
-  let glmr = (await Glmr.deploy()) as GLMR;
+  const Glmr = await ethers.getContractFactory("GLTR");
+  let gltr = (await Glmr.deploy()) as GLTR;
 
   return {
     fud,
     fomo,
     alpha,
     kek,
-    glmr,
+    gltr,
   };
 }
 
@@ -549,7 +549,7 @@ export async function beforeTest(
   const fomo = alchemica.fomo;
   const alpha = alchemica.alpha;
   const kek = alchemica.kek;
-  const glmr = alchemica.glmr;
+  const gltr = alchemica.gltr;
 
   //Upgrade Realm Diamond
   await upgrade(installationsAddress, {
@@ -557,7 +557,7 @@ export async function beforeTest(
     fomo: alchemica.fomo.address,
     alpha: alchemica.alpha.address,
     kek: alchemica.kek.address,
-    glmr: alchemica.glmr.address,
+    gltr: alchemica.gltr.address,
   });
 
   const alchemicaFacet = (await ethers.getContractAt(
@@ -612,15 +612,15 @@ export async function beforeTest(
   await installationAdminFacet.setAddresses(
     maticAavegotchiDiamondAddress,
     maticDiamondAddress,
-    glmr.address,
-    pixelCraftAddress,
+    gltr.address,
+    pixelcraftAddress,
     aavegotchiDAOAddress
   );
   await tileDiamond.setAddresses(
     maticAavegotchiDiamondAddress,
     realmDiamondAddress,
-    glmr.address,
-    pixelCraftAddress,
+    gltr.address,
+    pixelcraftAddress,
     aavegotchiDAOAddress
   );
 
@@ -647,12 +647,17 @@ export async function beforeTest(
     fomo,
     alpha,
     kek,
-    glmr,
+    gltr,
     tileDiamond,
     tileAddress,
     tileOwner,
   };
 }
+
+const backendSigner = () => {
+  //@ts-ignore
+  return new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+};
 
 export const genEquipInstallationSignature = async (
   tileId: number,
@@ -660,14 +665,11 @@ export const genEquipInstallationSignature = async (
   y: number,
   parcelId: number
 ) => {
-  //@ts-ignore
-  let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
-
   let messageHash1 = ethers.utils.solidityKeccak256(
     ["uint256", "uint256", "uint256", "uint256"],
     [parcelId, tileId, x, y]
   );
-  let signedMessage1 = await backendSigner.signMessage(
+  let signedMessage1 = await backendSigner().signMessage(
     ethers.utils.arrayify(messageHash1)
   );
   let signature1 = ethers.utils.arrayify(signedMessage1);
@@ -693,6 +695,22 @@ export const genUpgradeInstallationSignature = async (
     ethers.utils.arrayify(messageHash)
   );
   let signature = ethers.utils.arrayify(signedMessage);
+  return signature;
+};
+
+export const genClaimAlchemicaSignature = async (
+  parcelId: number,
+  gotchiId: number,
+  amount: BigNumber
+) => {
+  let messageHash = ethers.utils.solidityKeccak256(
+    ["uint256", "uint256", "uint256", "uint256"],
+    [0, parcelId, gotchiId, amount]
+  );
+  let signedMessage = await backendSigner().signMessage(
+    ethers.utils.arrayify(messageHash)
+  );
+  let signature = ethers.utils.arrayify(signedMessage);
 
   return signature;
 };
@@ -703,12 +721,12 @@ export const genChannelAlchemicaSignature = async (
   lastChanneled: BigNumber
 ) => {
   //@ts-ignore
-  let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+
   let messageHash = ethers.utils.solidityKeccak256(
     ["uint256", "uint256", "uint256"],
     [parcelId, gotchiId, lastChanneled]
   );
-  let signedMessage = await backendSigner.signMessage(
+  let signedMessage = await backendSigner().signMessage(
     ethers.utils.arrayify(messageHash)
   );
   let signature = ethers.utils.arrayify(signedMessage);

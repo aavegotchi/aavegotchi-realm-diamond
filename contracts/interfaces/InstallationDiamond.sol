@@ -40,6 +40,12 @@ interface InstallationDiamondInterface {
     uint256 balance;
   }
 
+  struct ReservoirStats {
+    uint256 spillRate;
+    uint256 spillRadius;
+    uint256 capacity;
+  }
+
   function craftInstallations(uint256[] calldata _installationTypes) external;
 
   function claimInstallations(uint256[] calldata _queueIds) external;
@@ -85,4 +91,10 @@ interface InstallationDiamondInterface {
   function spilloverRateAndRadiusOfId(uint256 _id) external view returns (uint256, uint256);
 
   function getAltarLevel(uint256 _altarId) external view returns (uint256 altarLevel_);
+
+  function getLodgeLevel(uint256 _installationId) external view returns (uint256 lodgeLevel_);
+
+  function getReservoirCapacity(uint256 _installationId) external view returns (uint256 capacity_);
+
+  function getReservoirStats(uint256 _installationId) external view returns (ReservoirStats memory reservoirStats_);
 }

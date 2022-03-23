@@ -116,7 +116,7 @@ contract AlchemicaFacet is Modifiers {
     address _vrfCoordinator,
     address _linkAddress,
     address[4] calldata _alchemicaAddresses,
-    address _glmrAddress,
+    address _gltrAddress,
     bytes memory _backendPubKey,
     address _gameManager,
     address _tileDiamond
@@ -134,7 +134,7 @@ contract AlchemicaFacet is Modifiers {
     s.alchemicaAddresses = _alchemicaAddresses;
     s.backendPubKey = _backendPubKey;
     s.gameManager = _gameManager;
-    s.glmrAddress = _glmrAddress;
+    s.gltrAddress = _gltrAddress;
     s.tileDiamond = _tileDiamond;
   }
 
@@ -195,7 +195,7 @@ contract AlchemicaFacet is Modifiers {
       //Then get the floating amount
       available += LibAlchemica.alchemicaSinceLastUpdate(_realmId, index);
 
-      uint256 capacity = s.parcels[_realmId].reservoirCapacity[index];
+      uint256 capacity = LibAlchemica.calculateTotalCapacity(_realmId, index);
 
       //ensure that available alchemica is not higher than available reservoir capacity
       if (available > capacity) {
@@ -211,9 +211,23 @@ contract AlchemicaFacet is Modifiers {
     uint256 radius;
   }
 
-  function calculateSpilloverForReservoir(uint256 _realmId, uint256 _alchemicaType) internal view returns (SpilloverIO memory spillover) {
-    uint256 spilloverRate = s.parcels[_realmId].spilloverRate[_alchemicaType] / s.parcels[_realmId].reservoirCount[_alchemicaType];
-    uint256 spilloverRadius = s.parcels[_realmId].spilloverRadius[_alchemicaType] / s.parcels[_realmId].reservoirCount[_alchemicaType];
+  function calculateSpilloverForReservoir(uint256 _realmId, uint256 _alchemicaType) public view returns (SpilloverIO memory spillover_) {
+    uint256 capacityXspillrate;
+    uint256 capacityXspillradius;
+    uint256 totalCapacity;
+    for (uint256 i; i < s.parcels[_realmId].reservoirs[_alchemicaType].length; i++) {
+      InstallationDiamondInterface.ReservoirStats memory reservoirStats = InstallationDiamondInterface(s.installationsDiamond).getReservoirStats(
+        s.parcels[_realmId].reservoirs[_alchemicaType][i]
+      );
+      totalCapacity += reservoirStats.capacity;
+
+      capacityXspillrate += reservoirStats.capacity * reservoirStats.spillRate;
+      capacityXspillradius += reservoirStats.capacity * reservoirStats.spillRadius;
+    }
+    require(totalCapacity > 0, "AlchemicaFacet: no reservoirs equipped");
+
+    uint256 spilloverRate = capacityXspillrate / totalCapacity;
+    uint256 spilloverRadius = capacityXspillradius / totalCapacity;
 
     return SpilloverIO(spilloverRate, spilloverRadius);
   }

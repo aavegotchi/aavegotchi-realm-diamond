@@ -33,10 +33,8 @@ struct Parcel {
   uint256 currentRound; //begins at 0 and increments after surveying has begun
   mapping(uint256 => uint256[]) roundBaseAlchemica; //round alchemica not including boosts
   mapping(uint256 => uint256[]) roundAlchemica; //round alchemica including boosts
-  uint256[4] reservoirCapacity;
-  uint256[4] spilloverRate;
-  uint256[4] spilloverRadius;
-  uint256[4] reservoirCount;
+  // // alchemicaType => array of reservoir id
+  mapping(uint256 => uint256[]) reservoirs;
   uint256[4] alchemicaHarvestRate;
   uint256[4] lastUpdateTimestamp;
   uint256[4] unclaimedAlchemica;
@@ -83,7 +81,7 @@ struct AppStorage {
   mapping(uint256 => uint256) parcelChannelings;
   // altarLevel => cooldown hours in seconds
   mapping(uint256 => uint256) channelingLimits;
-  address glmrAddress;
+  address gltrAddress;
   address tileDiamond;
   bool gameActive;
 }

@@ -4,7 +4,7 @@ import {
   AlchemicaToken,
   ERC1155Facet,
   ERC1155FacetTile,
-  GLMR,
+  GLTR,
   InstallationAdminFacet,
   InstallationFacet,
   RealmFacet,
@@ -157,7 +157,7 @@ export interface TestBeforeVars {
   fomo: AlchemicaToken;
   alpha: AlchemicaToken;
   kek: AlchemicaToken;
-  glmr: GLMR;
+  gltr: GLTR;
   erc1155Facet: ERC1155Facet;
   erc1155FacetTile: ERC1155FacetTile;
   installationOwner: string;
@@ -169,5 +169,5 @@ export interface Alchemica {
   fomo: string;
   alpha: string;
   kek: string;
-  glmr: string;
+  gltr: string;
 }
