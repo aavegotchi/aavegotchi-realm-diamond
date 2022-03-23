@@ -92,6 +92,13 @@ contract ERC1155Facet is Modifiers {
     emit LibERC1155.ApprovalForAll(owner, operator, approved);
   }
 
+  /// @notice Get the URI for a voucher type
+  /// @return URI for token type
+  function uri(uint256 _id) external view returns (string memory) {
+    require(_id < s.installationTypes.length, "InstallationFacet: Item _id not found");
+    return LibStrings.strWithUint(s.baseUri, _id);
+  }
+
   /**
         @notice Set the base url for all voucher types
         @param _value The new base url        

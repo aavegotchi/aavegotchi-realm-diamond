@@ -136,13 +136,6 @@ contract TileFacet is Modifiers {
     }
   }
 
-  /// @notice Get the URI for a voucher type
-  /// @return URI for token type
-  function uri(uint256 _id) external view returns (string memory) {
-    require(_id < s.tileTypes.length, "TileFacet: Item _id not found");
-    return LibStrings.strWithUint(s.baseUri, _id);
-  }
-
   /***********************************|
    |             Write Functions        |
    |__________________________________*/

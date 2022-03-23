@@ -168,13 +168,6 @@ contract InstallationFacet is Modifiers {
     }
   }
 
-  /// @notice Get the URI for a voucher type
-  /// @return URI for token type
-  function uri(uint256 _id) external view returns (string memory) {
-    require(_id < s.installationTypes.length, "InstallationFacet: Item _id not found");
-    return LibStrings.strWithUint(s.baseUri, _id);
-  }
-
   /// @notice Query details about all ongoing craft queues
   /// @param _owner Address to query queue
   /// @return output_ An array of structs, each representing an ongoing craft queue
