@@ -77,7 +77,7 @@ describe("Testing Equip Installation", async function () {
     installationsTypes = await g.installationDiamond.getInstallationTypes([]);
     expect(installationsTypes.length).to.equal(testInstallations().length);
   });
-  it("Craft installations", async function () {
+  it("Craft installations and equip altar", async function () {
     g.installationDiamond = await impersonate(
       testAddress,
       g.installationDiamond,
@@ -117,7 +117,7 @@ describe("Testing Equip Installation", async function () {
 
     let fudPreCraft = await g.fud.balanceOf(maticDiamondAddress);
     let kekPreCraft = await g.kek.balanceOf(maticDiamondAddress);
-    await g.installationDiamond.craftInstallations([1, 2, 2, 2, 2]);
+    await g.installationDiamond.craftInstallations([1, 5, 2, 2, 2, 2]);
     let fudAfterCraft = await g.fud.balanceOf(maticDiamondAddress);
     let kekAfterCraft = await g.kek.balanceOf(maticDiamondAddress);
     expect(Number(ethers.utils.formatUnits(fudAfterCraft))).to.above(
@@ -151,14 +151,10 @@ describe("Testing Equip Installation", async function () {
     );
 
     const balancePre = await erc1155facet.balanceOf(testAddress, 2);
-    await g.installationDiamond.claimInstallations([1, 2, 3, 4]);
+    await g.installationDiamond.claimInstallations([1, 2, 3, 4, 5]);
     const balancePost = await erc1155facet.balanceOf(testAddress, 2);
     expect(balancePost).to.above(balancePre);
-  });
-  it("Survey Parcel", async function () {
-    await g.alchemicaFacet.testingStartSurveying(testParcelId);
-  });
-  it("Equip installations", async function () {
+
     g.realmFacet = await impersonate(
       testAddress,
       g.realmFacet,
@@ -172,12 +168,24 @@ describe("Testing Equip Installation", async function () {
       0,
       await genEquipInstallationSignature(1, 0, 0, testParcelId)
     );
+  });
+  it("Survey Parcel", async function () {
+    await g.alchemicaFacet.testingStartSurveying(testParcelId);
+  });
+  it("Equip installations", async function () {
     await g.realmFacet.equipInstallation(
       testParcelId,
       2,
       3,
       3,
       await genEquipInstallationSignature(2, 3, 3, testParcelId)
+    );
+    await g.realmFacet.equipInstallation(
+      testParcelId,
+      5,
+      15,
+      15,
+      await genEquipInstallationSignature(5, 15, 15, testParcelId)
     );
     let availableAlchemica = await g.alchemicaFacet.getAvailableAlchemica(
       testParcelId
@@ -320,15 +328,15 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
-    const harvester = await g.installationDiamond.getInstallationType(1);
+    const harvester = await g.installationDiamond.getInstallationType(5);
     const harvesterFudCost = harvester.alchemicaCost[0];
     const balancePre = await g.fud.balanceOf(testAddress);
     await g.realmFacet.unequipInstallation(
       testParcelId,
-      1,
-      0,
-      0,
-      await genEquipInstallationSignature(1, 0, 0, testParcelId)
+      5,
+      15,
+      15,
+      await genEquipInstallationSignature(5, 15, 15, testParcelId)
     );
     const balancePost = await g.fud.balanceOf(testAddress);
     expect(Number(ethers.utils.formatUnits(balancePost))).to.equal(

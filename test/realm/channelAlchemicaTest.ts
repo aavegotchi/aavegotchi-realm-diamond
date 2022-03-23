@@ -57,15 +57,6 @@ describe("Testing Equip Installation", async function () {
     installationsTypes = await g.installationDiamond.getInstallationTypes([]);
     expect(installationsTypes.length).to.equal(testInstallations().length);
   });
-  it("Survey Parcel", async function () {
-    g.alchemicaFacet = await impersonate(
-      testAddress,
-      g.alchemicaFacet,
-      ethers,
-      network
-    );
-    await g.alchemicaFacet.testingStartSurveying(testParcelId);
-  });
   it("Craft and equip altar", async function () {
     g.installationDiamond = await impersonate(
       testAddress,
@@ -76,6 +67,12 @@ describe("Testing Equip Installation", async function () {
     g.realmFacet = await impersonate(
       testAddress,
       g.realmFacet,
+      ethers,
+      network
+    );
+    g.alchemicaFacet = await impersonate(
+      testAddress,
+      g.alchemicaFacet,
       ethers,
       network
     );
@@ -96,6 +93,9 @@ describe("Testing Equip Installation", async function () {
       0,
       await genEquipInstallationSignature(4, 0, 0, testParcelId)
     );
+  });
+  it("Survey Parcel", async function () {
+    await g.alchemicaFacet.testingStartSurveying(testParcelId);
   });
   it("Test 1 day cooldown", async function () {
     const lastChanneled = await g.alchemicaFacet.getLastChanneled(testGotchiId);

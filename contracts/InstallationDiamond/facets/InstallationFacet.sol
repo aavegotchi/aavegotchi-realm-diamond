@@ -217,13 +217,13 @@ contract InstallationFacet is Modifiers {
 
   function getReservoirCapacity(uint256 _installationId) external view returns (uint256 capacity_) {
     require(_installationId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
-    require(s.installationTypes[_installationId].installationType == 1, "InstallationFacet: Not Reservoir");
+    require(s.installationTypes[_installationId].installationType == 2, "InstallationFacet: Not Reservoir");
     capacity_ = s.installationTypes[_installationId].capacity;
   }
 
   function getReservoirStats(uint256 _installationId) external view returns (ReservoirStats memory reservoirStats_) {
     require(_installationId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
-    require(s.installationTypes[_installationId].installationType == 1, "InstallationFacet: Not Reservoir");
+    require(s.installationTypes[_installationId].installationType == 2, "InstallationFacet: Not Reservoir");
     reservoirStats_ = ReservoirStats(
       s.installationTypes[_installationId].spillRate,
       s.installationTypes[_installationId].spillRadius,

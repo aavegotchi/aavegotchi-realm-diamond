@@ -174,9 +174,6 @@ describe("Testing Equip Installation", async function () {
     await g.installationDiamond.reduceCraftTime([0], [10000]);
     await g.installationDiamond.claimInstallations([0]);
   });
-  it("Survey Parcel", async function () {
-    await g.alchemicaFacet.testingStartSurveying(testParcelId);
-  });
   it("Equip altar", async function () {
     g.realmFacet = await impersonate(
       testAddress,
@@ -191,6 +188,9 @@ describe("Testing Equip Installation", async function () {
       0,
       await genSignature(4, 0, 0)
     );
+  });
+  it("Survey Parcel", async function () {
+    await g.alchemicaFacet.testingStartSurveying(testParcelId);
   });
   it("Test spillover level 1", async function () {
     const spillrateLevel1 = Number(
