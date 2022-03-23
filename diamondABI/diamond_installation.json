@@ -105,7 +105,7 @@
       {
         "indexed": false,
         "internalType": "address",
-        "name": "_pixelCraft",
+        "name": "_pixelcraft",
         "type": "address"
       },
       {
@@ -267,7 +267,7 @@
       },
       { "internalType": "address", "name": "_realmDiamond", "type": "address" },
       { "internalType": "address", "name": "_gltr", "type": "address" },
-      { "internalType": "address", "name": "_pixelCraft", "type": "address" },
+      { "internalType": "address", "name": "_pixelcraft", "type": "address" },
       { "internalType": "address", "name": "_aavegotchiDAO", "type": "address" }
     ],
     "name": "setAddresses",

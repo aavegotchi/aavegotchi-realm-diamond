@@ -22,7 +22,7 @@ import {
 import {
   maticAavegotchiDiamondAddress,
   maticDiamondAddress,
-  pixelCraftAddress,
+  pixelcraftAddress,
   aavegotchiDAOAddress,
 } from "../helperFunctions";
 import { deployDiamond } from "../installation/deploy";
@@ -522,14 +522,14 @@ export async function beforeTest(
     maticAavegotchiDiamondAddress,
     maticDiamondAddress,
     gltr.address,
-    pixelCraftAddress,
+    pixelcraftAddress,
     aavegotchiDAOAddress
   );
   await tileDiamond.setAddresses(
     maticAavegotchiDiamondAddress,
     realmDiamondAddress,
     gltr.address,
-    pixelCraftAddress,
+    pixelcraftAddress,
     aavegotchiDAOAddress
   );
 

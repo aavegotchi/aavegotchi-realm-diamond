@@ -11,11 +11,11 @@ library LibItems {
     //take the required alchemica and split it
     for (uint256 i = 0; i < _alchemicaCost.length; i++) {
       uint256 greatPortal = (_alchemicaCost[i] * 40) / 100;
-      uint256 pixelCraftPart = (_alchemicaCost[i] * 40) / 100;
+      uint256 pixelcraftPart = (_alchemicaCost[i] * 40) / 100;
       uint256 aavegotchiDAO = (_alchemicaCost[i] * 15) / 100;
       uint256 burn = (_alchemicaCost[i] * 5) / 100;
       LibERC20.transferFrom(_alchemicaAddresses[i], msg.sender, s.realmDiamond, greatPortal);
-      LibERC20.transferFrom(_alchemicaAddresses[i], msg.sender, s.pixelCraft, pixelCraftPart);
+      LibERC20.transferFrom(_alchemicaAddresses[i], msg.sender, s.pixelcraft, pixelcraftPart);
       LibERC20.transferFrom(_alchemicaAddresses[i], msg.sender, s.aavegotchiDAO, aavegotchiDAO);
       IERC20(_alchemicaAddresses[i]).burnFrom(msg.sender, burn);
     }

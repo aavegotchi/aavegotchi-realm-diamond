@@ -285,13 +285,13 @@ contract TileFacet is Modifiers {
     address _aavegotchiDiamond,
     address _realmDiamond,
     address _gltr,
-    address _pixelCraft,
+    address _pixelcraft,
     address _aavegotchiDAO
   ) external onlyOwner {
     s.aavegotchiDiamond = _aavegotchiDiamond;
     s.realmDiamond = _realmDiamond;
     s.gltr = _gltr;
-    s.pixelCraft = _pixelCraft;
+    s.pixelcraft = _pixelcraft;
     s.aavegotchiDAO = _aavegotchiDAO;
     emit AddressesUpdated(_aavegotchiDiamond, _realmDiamond, _gltr);
   }

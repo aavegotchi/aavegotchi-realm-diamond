@@ -3,7 +3,7 @@ import {
   impersonate,
   maticDiamondAddress,
   mineBlocks,
-  pixelCraftAddress,
+  pixelcraftAddress,
 } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
@@ -130,15 +130,15 @@ describe("Testing Tiles", async function () {
     await g.kek.approve(g.tileAddress, ethers.utils.parseUnits("1000000000"));
     let fudPreCraftPortal = await g.fud.balanceOf(maticDiamondAddress);
     let kekPreCraftPortal = await g.kek.balanceOf(maticDiamondAddress);
-    let fudPreCraftPixelCraft = await g.fud.balanceOf(pixelCraftAddress);
-    let kekPreCraftPixelCraft = await g.kek.balanceOf(pixelCraftAddress);
+    let fudPreCraftPixelCraft = await g.fud.balanceOf(pixelcraftAddress);
+    let kekPreCraftPixelCraft = await g.kek.balanceOf(pixelcraftAddress);
     let fudPreCraftDAO = await g.fud.balanceOf(aavegotchiDAOAddress);
     let kekPreCraftDAO = await g.kek.balanceOf(aavegotchiDAOAddress);
     await g.tileDiamond.craftTiles([1, 2, 2, 3]);
     let fudAfterCraftPortal = await g.fud.balanceOf(maticDiamondAddress);
     let kekAfterCraftPortal = await g.kek.balanceOf(maticDiamondAddress);
-    let fudAfterCraftPixelCraft = await g.fud.balanceOf(pixelCraftAddress);
-    let kekAfterCraftPixelCraft = await g.kek.balanceOf(pixelCraftAddress);
+    let fudAfterCraftPixelCraft = await g.fud.balanceOf(pixelcraftAddress);
+    let kekAfterCraftPixelCraft = await g.kek.balanceOf(pixelcraftAddress);
     let fudAfterCraftDAO = await g.fud.balanceOf(aavegotchiDAOAddress);
     let kekAfterCraftDAO = await g.kek.balanceOf(aavegotchiDAOAddress);
     expect(Number(ethers.utils.formatUnits(fudAfterCraftPortal))).to.above(

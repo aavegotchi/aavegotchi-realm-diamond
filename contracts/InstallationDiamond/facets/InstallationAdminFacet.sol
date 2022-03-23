@@ -8,7 +8,7 @@ import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import "hardhat/console.sol";
 
 contract InstallationAdminFacet is Modifiers {
-  event AddressesUpdated(address _aavegotchiDiamond, address _realmDiamond, address _gltr, address _pixelCraft, address _aavegotchiDAO);
+  event AddressesUpdated(address _aavegotchiDiamond, address _realmDiamond, address _gltr, address _pixelcraft, address _aavegotchiDAO);
 
   /// @notice Allow the Diamond owner to deprecate an installation
   /// @dev Deprecated installations cannot be crafted by users
@@ -27,15 +27,15 @@ contract InstallationAdminFacet is Modifiers {
     address _aavegotchiDiamond,
     address _realmDiamond,
     address _gltr,
-    address _pixelCraft,
+    address _pixelcraft,
     address _aavegotchiDAO
   ) external onlyOwner {
     s.aavegotchiDiamond = _aavegotchiDiamond;
     s.realmDiamond = _realmDiamond;
     s.gltr = _gltr;
-    s.pixelCraft = _pixelCraft;
+    s.pixelcraft = _pixelcraft;
     s.aavegotchiDAO = _aavegotchiDAO;
-    emit AddressesUpdated(_aavegotchiDiamond, _realmDiamond, _gltr, _pixelCraft, _aavegotchiDAO);
+    emit AddressesUpdated(_aavegotchiDiamond, _realmDiamond, _gltr, _pixelcraft, _aavegotchiDAO);
   }
 
   /// @notice Allow the diamond owner to add an installation type
