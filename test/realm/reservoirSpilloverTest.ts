@@ -19,6 +19,7 @@ import {
   genClaimAlchemicaSignature,
   genEquipInstallationSignature,
   testInstallations,
+  genUpgradeInstallationSignature,
 } from "../../scripts/realm/realmHelpers";
 
 describe("Testing Equip Installation", async function () {
@@ -255,16 +256,25 @@ describe("Testing Equip Installation", async function () {
     );
 
     //Upgrade to Level 2 Reservoir
+    const coordinateX = 3;
+    const coordinateY = 3;
+    const installationId = 2;
     const upgradeQueue: UpgradeQueue = {
       parcelId: testParcelId,
-      coordinateX: 3,
-      coordinateY: 3,
-      installationId: 2,
+      coordinateX,
+      coordinateY,
+      installationId,
       readyBlock: 0,
       claimed: false,
       owner: testAddress,
     };
-    await g.installationDiamond.upgradeInstallation(upgradeQueue);
+    const signature = await genUpgradeInstallationSignature(
+      testParcelId,
+      coordinateX,
+      coordinateY,
+      installationId
+    );
+    await g.installationDiamond.upgradeInstallation(upgradeQueue, signature);
 
     await mineBlocks(ethers, 20000);
 

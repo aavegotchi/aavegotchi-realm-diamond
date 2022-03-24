@@ -609,12 +609,15 @@ export async function beforeTest(
 
   const tileOwner = await tileOwnershipFacet.owner();
 
+  const backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+
   await installationAdminFacet.setAddresses(
     maticAavegotchiDiamondAddress,
     maticDiamondAddress,
     gltr.address,
     pixelcraftAddress,
-    aavegotchiDAOAddress
+    aavegotchiDAOAddress,
+    ethers.utils.hexDataSlice(backendSigner.publicKey, 1)
   );
   await tileDiamond.setAddresses(
     maticAavegotchiDiamondAddress,
@@ -679,17 +682,16 @@ export const genEquipInstallationSignature = async (
 
 export const genUpgradeInstallationSignature = async (
   realmId: number,
-  prevInstallationId: number,
-  nextInstallationId: number,
   coordinateX: number,
-  coordinateY: number
+  coordinateY: number,
+  installationId: number
 ) => {
   //@ts-ignore
   let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
 
   let messageHash = ethers.utils.solidityKeccak256(
-    ["uint256", "uint256", "uint256", "uint256", "uint256"],
-    [realmId, prevInstallationId, nextInstallationId, coordinateX, coordinateY]
+    ["uint256", "uint256", "uint256", "uint256"],
+    [realmId, coordinateX, coordinateY, installationId]
   );
   let signedMessage = await backendSigner.signMessage(
     ethers.utils.arrayify(messageHash)

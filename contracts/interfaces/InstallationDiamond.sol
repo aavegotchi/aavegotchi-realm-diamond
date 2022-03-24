@@ -76,7 +76,7 @@ interface InstallationDiamondInterface {
 
   function spilloverRatesOfIds(uint256[] calldata _ids) external view returns (uint256[] memory);
 
-  function upgradeInstallation(UpgradeQueue calldata _upgradeQueue) external;
+  function upgradeInstallation(UpgradeQueue calldata _upgradeQueue, bytes memory _signature) external;
 
   function finalizeUpgrade() external;
 

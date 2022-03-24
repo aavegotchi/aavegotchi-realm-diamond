@@ -73,6 +73,7 @@ struct InstallationAppStorage {
   mapping(address => mapping(uint256 => uint256)) ownerInstallationIndexes;
   UpgradeQueue[] upgradeQueue;
   mapping(bytes32 => uint256) upgradeHashes;
+  bytes backendPubKey;
 }
 
 library LibAppStorageInstallation {

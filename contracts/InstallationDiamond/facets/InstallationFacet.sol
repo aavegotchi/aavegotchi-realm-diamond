@@ -11,6 +11,7 @@ import {LibItems} from "../../libraries/LibItems.sol";
 import {IERC721} from "../../interfaces/IERC721.sol";
 import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
+import {LibSignature} from "../../libraries/LibSignature.sol";
 
 import "hardhat/console.sol";
 
@@ -365,7 +366,15 @@ contract InstallationFacet is Modifiers {
   /// @notice Allow a user to upgrade an installation in a parcel
   /// @dev Will throw if the caller is not the owner of the parcel in which the installation is installed
   /// @param _upgradeQueue A struct containing details about the queue which contains the installation to upgrade
-  function upgradeInstallation(UpgradeQueue calldata _upgradeQueue) external {
+  function upgradeInstallation(UpgradeQueue calldata _upgradeQueue, bytes memory _signature) external {
+    require(
+      LibSignature.isValid(
+        keccak256(abi.encodePacked(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId)),
+        _signature,
+        s.backendPubKey
+      ),
+      "InstallationFacet: Invalid signature"
+    );
     // check owner
     address parcelOwner = IERC721(s.realmDiamond).ownerOf(_upgradeQueue.parcelId);
     require(parcelOwner == _upgradeQueue.owner, "InstallationFacet: Not owner");
