@@ -266,6 +266,9 @@ contract AlchemicaFacet is Modifiers {
     uint256 _gotchiId,
     bytes memory _signature
   ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) gameActive {
+    require(block.timestamp > s.lastClaimedAlchemica[_realmId] + 8 hours, "AlchemicaFacet: 8 hours claim cooldown");
+    s.lastClaimedAlchemica[_realmId] = block.timestamp;
+
     uint256[4] memory _availableAlchemica = getAvailableAlchemica(_realmId);
 
     for (uint256 i = 0; i < _alchemicaTypes.length; i++) {

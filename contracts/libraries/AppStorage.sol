@@ -81,6 +81,8 @@ struct AppStorage {
   mapping(uint256 => uint256) parcelChannelings;
   // altarLevel => cooldown hours in seconds
   mapping(uint256 => uint256) channelingLimits;
+  // parcelId => lastClaimedAlchemica
+  mapping(uint256 => uint256) lastClaimedAlchemica;
   address gltrAddress;
   address tileDiamond;
   bool gameActive;

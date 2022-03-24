@@ -278,6 +278,9 @@ describe("Testing Equip Installation", async function () {
 
     await mineBlocks(ethers, 20000);
 
+    await network.provider.send("evm_increaseTime", [3600 * 8]);
+    await network.provider.send("evm_mine");
+
     const alchemicaRemaining = await g.alchemicaFacet.getRealmAlchemica(
       testParcelId
     );
@@ -302,6 +305,10 @@ describe("Testing Equip Installation", async function () {
     expect(Number(ethers.utils.formatUnits(availableAlchemica[0]))).to.equal(
       Number(ethers.utils.formatUnits(parcelCapacity))
     );
+
+    await network.provider.send("evm_increaseTime", [3600 * 8]);
+    await network.provider.send("evm_mine");
+
     const alchemicaRemaining2 = await g.alchemicaFacet.getRealmAlchemica(
       testParcelId
     );
@@ -365,9 +372,28 @@ describe("Testing Equip Installation", async function () {
       "LibAlchemica: Unclaimed alchemica greater than reservoir capacity"
     );
 
-    const alchemicaRemaining = await g.alchemicaFacet.getRealmAlchemica(
+    let alchemicaRemaining = await g.alchemicaFacet.getRealmAlchemica(
       testParcelId
     );
+
+    await network.provider.send("evm_increaseTime", [3600 * 8]);
+    await network.provider.send("evm_mine");
+
+    await g.alchemicaFacet.claimAvailableAlchemica(
+      testParcelId,
+      [0],
+      testGotchiId,
+      await genClaimAlchemicaSignature(
+        testParcelId,
+        testGotchiId,
+        alchemicaRemaining[0]
+      )
+    );
+
+    await network.provider.send("evm_increaseTime", [3600 * 8]);
+    await network.provider.send("evm_mine");
+
+    alchemicaRemaining = await g.alchemicaFacet.getRealmAlchemica(testParcelId);
 
     await g.alchemicaFacet.claimAvailableAlchemica(
       testParcelId,
