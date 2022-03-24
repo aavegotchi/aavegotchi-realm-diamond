@@ -37,8 +37,10 @@ module.exports = {
       forking: {
         url: process.env.MATIC_URL,
         timeout: 2000000,
-        blockNumber: 26015056,
+        blockNumber: 26282527,
+        chainId: 137,
       },
+      chainId: 137,
       blockGasLimit: 20000000,
       timeout: 2000000,
       gas: "auto",

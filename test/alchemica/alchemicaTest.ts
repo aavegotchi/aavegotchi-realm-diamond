@@ -1,12 +1,13 @@
 import * as fs from "fs";
 import * as hre from "hardhat";
 import { ethers } from "hardhat";
-import { Signer, Contract, ContractFactory, BigNumber } from "ethers";
+import { Signer, Contract, ContractFactory, BigNumber, Wallet } from "ethers";
 import { expect } from "chai";
 import {
   deployAlchemicaImplementation,
   deployAndInitializeAlchemicaProxy,
   deployProxyAdmin,
+  permit,
 } from "../../helpers/helpers";
 import { GWEI, ETHER, YEAR, FUD_PARAMS } from "../../helpers/constants";
 import { address } from "../../helpers/utils";
@@ -68,4 +69,15 @@ describe("Alchemica", function () {
     expect(await fud.balanceOf(await signers[4].getAddress())).to.equal(7);
     expect(await fud.balanceOf(await signers[5].getAddress())).to.equal(1);
   });
+
+  it("Should permit", async function () {
+    await permit(
+      fud,
+      owner as Wallet,
+      await owner.getAddress(),
+      BigNumber.from("1000"),
+      await fud.nonces(await owner.getAddress()),
+      BigNumber.from("999999999999999"),
+    );
+  })
 });
