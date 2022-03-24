@@ -8,7 +8,14 @@ import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import "hardhat/console.sol";
 
 contract InstallationAdminFacet is Modifiers {
-  event AddressesUpdated(address _aavegotchiDiamond, address _realmDiamond, address _gltr, address _pixelcraft, address _aavegotchiDAO);
+  event AddressesUpdated(
+    address _aavegotchiDiamond,
+    address _realmDiamond,
+    address _gltr,
+    address _pixelcraft,
+    address _aavegotchiDAO,
+    bytes _backendPubKey
+  );
 
   /// @notice Allow the Diamond owner to deprecate an installation
   /// @dev Deprecated installations cannot be crafted by users
@@ -23,19 +30,24 @@ contract InstallationAdminFacet is Modifiers {
   /// @param _aavegotchiDiamond The aavegotchi diamond address
   /// @param _realmDiamond The Realm diamond address
   /// @param _gltr The $GLTR token address
+  /// @param _pixelcraft Pixelcraft address
+  /// @param _aavegotchiDAO The Aavegotchi DAO address
+  /// @param _backendPubKey The Backend Key
   function setAddresses(
     address _aavegotchiDiamond,
     address _realmDiamond,
     address _gltr,
     address _pixelcraft,
-    address _aavegotchiDAO
+    address _aavegotchiDAO,
+    bytes calldata _backendPubKey
   ) external onlyOwner {
     s.aavegotchiDiamond = _aavegotchiDiamond;
     s.realmDiamond = _realmDiamond;
     s.gltr = _gltr;
     s.pixelcraft = _pixelcraft;
     s.aavegotchiDAO = _aavegotchiDAO;
-    emit AddressesUpdated(_aavegotchiDiamond, _realmDiamond, _gltr, _pixelcraft, _aavegotchiDAO);
+    s.backendPubKey = _backendPubKey;
+    emit AddressesUpdated(_aavegotchiDiamond, _realmDiamond, _gltr, _pixelcraft, _aavegotchiDAO, _backendPubKey);
   }
 
   /// @notice Allow the diamond owner to add an installation type

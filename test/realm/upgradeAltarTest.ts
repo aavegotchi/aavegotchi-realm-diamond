@@ -19,6 +19,7 @@ import {
   genEquipInstallationSignature,
   testInstallations,
   testnetAltar,
+  genUpgradeInstallationSignature,
 } from "../../scripts/realm/realmHelpers";
 
 describe("Testing Equip Installation", async function () {
@@ -115,6 +116,9 @@ describe("Testing Equip Installation", async function () {
   });
 
   it("Test upgrade queue", async function () {
+    const coordinateX = 0;
+    const coordinateY = 0;
+    const installationId = 1;
     const upgradeQueue: UpgradeQueue = {
       parcelId: testParcelId,
       coordinateX: 0,
@@ -133,7 +137,13 @@ describe("Testing Equip Installation", async function () {
     //   claimed: false,
     //   owner: testAddress,
     // };
-    await g.installationDiamond.upgradeInstallation(upgradeQueue);
+    const signature = await genUpgradeInstallationSignature(
+      testParcelId,
+      coordinateX,
+      coordinateY,
+      installationId
+    );
+    await g.installationDiamond.upgradeInstallation(upgradeQueue, signature);
     // await expect(
     //   g.installationDiamond.upgradeInstallation(upgradeQueue)
     // ).to.be.revertedWith("InstallationFacet: UpgradeQueue full");

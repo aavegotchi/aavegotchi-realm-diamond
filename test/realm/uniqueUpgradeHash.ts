@@ -17,6 +17,8 @@ import {
   beforeTest,
   faucetAlchemica,
   testInstallations,
+  genEquipInstallationSignature,
+  genUpgradeInstallationSignature,
 } from "../../scripts/realm/realmHelpers";
 
 describe("Testing Equip Installation", async function () {
@@ -104,17 +106,20 @@ describe("Testing Equip Installation", async function () {
       2,
       0,
       0,
-      await genSignature(2, 0, 0)
+      await genEquipInstallationSignature(2, 0, 0, testParcelId)
     );
     await g.realmFacet.equipInstallation(
       testParcelId,
       6,
       3,
       3,
-      await genSignature(6, 3, 3)
+      await genEquipInstallationSignature(6, 3, 3, testParcelId)
     );
   });
   it("Test upgrade unique", async function () {
+    const coordinateX = 0;
+    const coordinateY = 0;
+    const installationId = 2;
     const upgradeQueue: UpgradeQueue = {
       parcelId: testParcelId,
       coordinateX: 0,
@@ -124,9 +129,15 @@ describe("Testing Equip Installation", async function () {
       claimed: false,
       owner: testAddress,
     };
-    await g.installationDiamond.upgradeInstallation(upgradeQueue);
+    const signature = await genUpgradeInstallationSignature(
+      testParcelId,
+      coordinateX,
+      coordinateY,
+      installationId
+    );
+    await g.installationDiamond.upgradeInstallation(upgradeQueue, signature);
     await expect(
-      g.installationDiamond.upgradeInstallation(upgradeQueue)
+      g.installationDiamond.upgradeInstallation(upgradeQueue, signature)
     ).to.be.revertedWith("InstallationFacet: Upgrade hash not unique");
     await mineBlocks(ethers, 20000);
 

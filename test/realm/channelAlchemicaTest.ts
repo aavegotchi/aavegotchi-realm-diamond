@@ -15,6 +15,7 @@ import {
   genEquipInstallationSignature,
   genChannelAlchemicaSignature,
   testInstallations,
+  genUpgradeInstallationSignature,
 } from "../../scripts/realm/realmHelpers";
 
 describe("Testing Equip Installation", async function () {
@@ -156,16 +157,28 @@ describe("Testing Equip Installation", async function () {
       lastChanneled,
       signature
     );
+    const coordinateX = 0;
+    const coordinateY = 0;
+    const installationId = 4;
     const upgradeQueue: UpgradeQueue = {
       parcelId: testParcelId,
-      coordinateX: 0,
-      coordinateY: 0,
-      installationId: 4,
+      coordinateX,
+      coordinateY,
+      installationId,
       readyBlock: 0,
       claimed: false,
       owner: testAddress,
     };
-    await g.installationDiamond.upgradeInstallation(upgradeQueue);
+    const signatureUpgrade = await genUpgradeInstallationSignature(
+      testParcelId,
+      coordinateX,
+      coordinateY,
+      installationId
+    );
+    await g.installationDiamond.upgradeInstallation(
+      upgradeQueue,
+      signatureUpgrade
+    );
     await mineBlocks(ethers, 11000);
     await g.installationDiamond.finalizeUpgrade();
 

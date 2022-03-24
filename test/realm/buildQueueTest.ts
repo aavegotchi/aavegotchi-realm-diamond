@@ -122,31 +122,51 @@ describe("Testing Equip Installation", async function () {
     );
   });
   it("Test upgrade queue", async function () {
+    const coordinateX = 0;
+    const coordinateY = 0;
+    const installationId = 2;
     const upgradeQueue: UpgradeQueue = {
       parcelId: testParcelId,
-      coordinateX: 0,
-      coordinateY: 0,
-      installationId: 2,
+      coordinateX,
+      coordinateY,
+      installationId,
       readyBlock: 0,
       claimed: false,
       owner: testAddress,
     };
+    const coordinateX2 = 3;
+    const coordinateY2 = 3;
+    const installationId2 = 2;
     const upgradeQueue2: UpgradeQueue = {
       parcelId: testParcelId,
-      coordinateX: 3,
-      coordinateY: 3,
-      installationId: 2,
+      coordinateX: coordinateX2,
+      coordinateY: coordinateY2,
+      installationId: installationId2,
       readyBlock: 0,
       claimed: false,
       owner: testAddress,
     };
 
-    await g.installationDiamond.upgradeInstallation(upgradeQueue);
+    const signature = await genUpgradeInstallationSignature(
+      testParcelId,
+      coordinateX,
+      coordinateY,
+      installationId
+    );
+
+    const signature2 = await genUpgradeInstallationSignature(
+      testParcelId,
+      coordinateX2,
+      coordinateY2,
+      installationId2
+    );
+
+    await g.installationDiamond.upgradeInstallation(upgradeQueue, signature);
     await expect(
-      g.installationDiamond.upgradeInstallation(upgradeQueue)
+      g.installationDiamond.upgradeInstallation(upgradeQueue, signature)
     ).to.be.revertedWith("InstallationFacet: UpgradeQueue full");
     await expect(
-      g.installationDiamond.upgradeInstallation(upgradeQueue2)
+      g.installationDiamond.upgradeInstallation(upgradeQueue2, signature2)
     ).to.be.revertedWith("InstallationFacet: UpgradeQueue full");
     await g.realmFacet.equipInstallation(
       testParcelId,
@@ -155,6 +175,6 @@ describe("Testing Equip Installation", async function () {
       6,
       await genEquipInstallationSignature(6, 6, 6, testParcelId)
     );
-    await g.installationDiamond.upgradeInstallation(upgradeQueue2);
+    await g.installationDiamond.upgradeInstallation(upgradeQueue2, signature2);
   });
 });

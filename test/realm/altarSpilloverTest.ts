@@ -16,8 +16,8 @@ import {
   beforeTest,
   testInstallations,
   genChannelAlchemicaSignature,
+  genUpgradeInstallationSignature,
 } from "../../scripts/realm/realmHelpers";
-import { isFunctionDeclaration } from "typescript";
 
 describe("Testing Equip Installation", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
@@ -226,16 +226,27 @@ describe("Testing Equip Installation", async function () {
     expect(channeledFud).to.equal((fudChannelAmount * playerShare) / 100);
   });
   it("Upgrade altar", async function () {
+    const coordinateX = 0;
+    const coordinateY = 0;
+    const installationId = 4;
     const upgradeQueue: UpgradeQueue = {
       parcelId: testParcelId,
-      coordinateX: 0,
-      coordinateY: 0,
-      installationId: 4,
+      coordinateX,
+      coordinateY,
+      installationId,
       readyBlock: 0,
       claimed: false,
       owner: testAddress,
     };
-    await g.installationDiamond.upgradeInstallation(upgradeQueue);
+
+    const signature = await genUpgradeInstallationSignature(
+      testParcelId,
+      coordinateX,
+      coordinateY,
+      installationId
+    );
+
+    await g.installationDiamond.upgradeInstallation(upgradeQueue, signature);
 
     await mineBlocks(ethers, 21000);
     await g.installationDiamond.finalizeUpgrade();
