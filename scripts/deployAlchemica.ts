@@ -17,7 +17,7 @@ import {
 import {VerifyParams} from "../helpers/types";
 import {sleep, address, currentTimestamp} from "../helpers/utils";
 import {
-  ECOSYSTEM_VESTING_BENEFICIARY,\
+  ECOSYSTEM_VESTING_BENEFICIARY,
   FUD_PARAMS,
   FOMO_PARAMS,
   ALPHA_PARAMS,
