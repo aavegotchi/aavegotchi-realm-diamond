@@ -29,6 +29,8 @@ import {
   QUICKSWAP_ROUTER_ADDRESS,
   GHST_ADDRESS,
   VESTING_START_TIME,
+  ECOSYSTEM_VESTING_DECAY,
+  GAMEPLAY_VESTING_DECAY,
 } from "./constants";
 
 import {
@@ -262,7 +264,7 @@ export async function deployVestingContracts(
     await address(owner),
     proxyAdmin,
     VESTING_START_TIME,
-    ETHER.div(10), // 10% decay per year
+    ECOSYSTEM_VESTING_DECAY, // 10% decay per year
     true,
   );
   console.log("Ecosystem Vesting: " + ecosystemVestingProxy.contract.address);
@@ -273,7 +275,7 @@ export async function deployVestingContracts(
     await address(owner),
     proxyAdmin,
     VESTING_START_TIME,
-    ETHER.div(10), // 10% decay per year
+    GAMEPLAY_VESTING_DECAY, // 10% decay per year
     true,
   )
   console.log("Gameplay Vesting: " + gameplayVestingProxy.contract.address);
