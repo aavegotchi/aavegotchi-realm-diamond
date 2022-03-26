@@ -21,15 +21,22 @@ import {
   genChannelAlchemicaSignature,
   testInstallations,
 } from "../../scripts/realm/realmHelpers";
+import {
+  VRFCoordinatorV2Mock
+} from "../../typechain";
 
 describe("Testing Binomial Randomization", async function () {
 
   let g: TestBeforeVars;
+  let VRFMock: VRFCoordinatorV2Mock;
 
   before(async function () {
     this.timeout(20000000);
 
     g = await beforeTest(ethers, realmDiamondAddress(network.name));
+    const VRFCoordinatorV2Mock = await ethers.getContractFactory("VRFCoordinatorV2Mock");
+    VRFMock = (await VRFCoordinatorV2Mock.deploy(0, 0)) as VRFCoordinatorV2Mock;
+    await VRFMock.deployed();
 
     g.alchemicaFacet = await impersonate(
       g.ownerAddress,
@@ -73,6 +80,7 @@ describe("Testing Binomial Randomization", async function () {
 
     for(let i = 0; i < 5; i++) {
       console.log(await g.realmFacet.getParcelInfo(i));
+      await g.alchemicaFacet.startSurveying(i);
     }
 
     await g.alchemicaFacet.setVars(
@@ -81,7 +89,7 @@ describe("Testing Binomial Randomization", async function () {
       boostMultipliers,
       greatPortalCapacity,
       g.installationDiamond.address,
-      g.ownerAddress,
+      VRFMock.address,
       g.ownerAddress, //junk data
       [
         g.fud.address,
@@ -113,8 +121,7 @@ describe("Testing Binomial Randomization", async function () {
     expect(installationsTypes.length).to.equal(testInstallations().length);
   });
 
-  it("Test", async function () {
-    console.log(await g.alchemicaFacet.getTotalAlchemicas());
+  it("Test binomial distribution", async function () {
 
     for(let size = 0; size < 5; size++) {
       let results: [BigNumber, BigNumber, BigNumber, BigNumber,] = [
@@ -124,15 +131,14 @@ describe("Testing Binomial Randomization", async function () {
         BigNumber.from(0),
       ];
       for(let i = 0; i < 100; i++ ) {
-        await g.vrfFacet.testRawFulfillRandomWords(
+        await g.vrfFacet.rawFulfillRandomWords(
           size, 
           [
             BigNumber.from(ethers.utils.keccak256(ethers.utils.hexlify(size * 400 + i * 4 + 42069))),
             BigNumber.from(ethers.utils.keccak256(ethers.utils.hexlify(size * 400 + i * 4 + 1 + 42069))),
             BigNumber.from(ethers.utils.keccak256(ethers.utils.hexlify(size * 400 + i * 4 + 2 + 42069))),
             BigNumber.from(ethers.utils.keccak256(ethers.utils.hexlify(size * 400 + i * 4 + 3 + 42069))),
-          ], 
-          0
+          ]
         );
         let roundAlchemica = await g.alchemicaFacet.getRoundAlchemica(size, 0);
         for(let i = 0; i < 4; i++) {
@@ -141,7 +147,7 @@ describe("Testing Binomial Randomization", async function () {
         //console.log(roundAlchemica.map(a => a.toString()));
       }
       for(let i = 0; i < 4; i++) {
-        results[i] = results[i].div(25);
+        results[i] = results[i].mul(4);
       }
       console.log("Average");
       console.log(results.map(a => a.toString()));
