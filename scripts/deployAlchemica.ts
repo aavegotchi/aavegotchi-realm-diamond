@@ -1,40 +1,14 @@
-import * as hre from 'hardhat';
-import {ethers} from 'hardhat';
-import { 
-  BigNumber,
-  Signer,
-  Contract,
-  Wallet,
-} from 'ethers';
+import * as hre from "hardhat";
+
 import {
-  deployProxyAdmin, 
-  deployVestingImplementation, 
-  deployAndInitializeVestingProxy, 
-  deployAlchemicaImplementation,
-  deployAndInitializeAlchemicaProxy,
+  deployProxyAdmin,
   verify,
   deployVestingContracts,
   deployAlchemica,
 } from "../helpers/helpers";
-import {VerifyParams} from "../helpers/types";
-import {sleep, address, currentTimestamp} from "../helpers/utils";
-import {
-  FUD_PARAMS,
-  FOMO_PARAMS,
-  ALPHA_PARAMS,
-  KEK_PARAMS,
-  REALM_DIAMOND,
-  ETHER,
-  QUICKSWAP_ROUTER_ADDRESS,
-  GHST_ADDRESS,
-  INITIAL_ALCHEMICA_SEED,
-} from "../helpers/constants";
-import {
-  IERC20,
-  IUniswapV2Router02,
-  AlchemicaToken,
-  AlchemicaVesting,
-} from "../typechain/";
+import { VerifyParams } from "../helpers/types";
+import { address } from "../helpers/utils";
+import { REALM_DIAMOND } from "../helpers/constants";
 
 async function main() {
   let verifyParams: VerifyParams[] = [];
@@ -45,19 +19,20 @@ async function main() {
   console.log("ProxyAdmin: ", proxyAdmin.contract.address);
   verifyParams.push(proxyAdmin);
 
-  let [vestingImplementation, ecosystemVesting, gameplayVesting] = await deployVestingContracts(owner, proxyAdmin.contract);
+  let [vestingImplementation, ecosystemVesting, gameplayVesting] =
+    await deployVestingContracts(owner, proxyAdmin.contract);
   verifyParams.push(vestingImplementation, ecosystemVesting, gameplayVesting);
-  
+
   let [alchemicaImplementation, fud, fomo, alpha, kek] = await deployAlchemica(
-    owner, 
-    proxyAdmin.contract, 
-    REALM_DIAMOND, 
-    gameplayVesting.contract, 
+    owner,
+    proxyAdmin.contract,
+    REALM_DIAMOND,
+    gameplayVesting.contract,
     ecosystemVesting.contract
   );
   verifyParams.push(alchemicaImplementation, fud, fomo, alpha, kek);
 
-  if(process.env.VERIFY) {
+  if (process.env.VERIFY) {
     await verify(verifyParams);
   }
 }
