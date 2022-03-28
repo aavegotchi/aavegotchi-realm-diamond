@@ -162,6 +162,7 @@ export interface TestBeforeVars {
   erc1155FacetTile: ERC1155FacetTile;
   installationOwner: string;
   tileOwner: string;
+  alchemicaOwner: string;
 }
 
 export interface AlchemicaAddresses {

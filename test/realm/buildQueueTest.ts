@@ -15,7 +15,7 @@ import {
 import {
   approveAlchemica,
   beforeTest,
-  faucetAlchemica,
+  mintAlchemica,
   genEquipInstallationSignature,
   genUpgradeInstallationSignature,
   testInstallations,
@@ -66,7 +66,14 @@ describe("Testing Equip Installation", async function () {
       g.installationDiamond.craftInstallations([2, 2, 2, 5])
     ).to.be.revertedWith("ERC20: insufficient allowance");
 
-    await faucetAlchemica(g.alchemicaFacet, "20000");
+    await mintAlchemica(
+      g,
+      ethers,
+      g.alchemicaOwner,
+      testAddress,
+      network,
+      ethers.utils.parseUnits("20000")
+    );
 
     await approveAlchemica(g, ethers, testAddress, network);
 

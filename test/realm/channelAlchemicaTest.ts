@@ -11,7 +11,7 @@ import { TestBeforeVars, UpgradeQueue } from "../../types";
 import {
   approveAlchemica,
   beforeTest,
-  faucetAlchemica,
+  mintAlchemica,
   genEquipInstallationSignature,
   genChannelAlchemicaSignature,
   testInstallations,
@@ -78,7 +78,14 @@ describe("Testing Equip Installation", async function () {
       network
     );
 
-    await faucetAlchemica(g.alchemicaFacet, "20000");
+    await mintAlchemica(
+      g,
+      ethers,
+      g.alchemicaOwner,
+      testAddress,
+      network,
+      ethers.utils.parseUnits("20000")
+    );
     g = await approveAlchemica(g, ethers, testAddress, network);
 
     g.fud.transfer(maticDiamondAddress, ethers.utils.parseUnits("10000"));
@@ -282,12 +289,12 @@ describe("Testing Equip Installation", async function () {
   it("Test transfer on channeling", async function () {
     const ownerShare = 0.8;
     const fudChannelAmount = 100;
-    await g.alchemicaFacet.testingAlchemicaFaucet(
-      0,
-      ethers.utils.parseUnits("1350000000")
-    );
-    await g.fud.transfer(
+    await mintAlchemica(
+      g,
+      ethers,
+      g.alchemicaOwner,
       maticDiamondAddress,
+      network,
       ethers.utils.parseUnits("1350000000")
     );
 

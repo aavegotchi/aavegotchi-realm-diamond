@@ -15,7 +15,7 @@ import {
 import {
   approveAlchemica,
   beforeTest,
-  faucetAlchemica,
+  mintAlchemica,
   testInstallations,
   genEquipInstallationSignature,
   genUpgradeInstallationSignature,
@@ -63,18 +63,31 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
+    g.realmFacet = await impersonate(
+      testAddress,
+      g.realmFacet,
+      ethers,
+      network
+    );
     await expect(
       g.installationDiamond.craftInstallations([2, 2, 2, 6])
     ).to.be.revertedWith("ERC20: insufficient allowance");
 
-    await faucetAlchemica(g.alchemicaFacet, "50000");
+    await mintAlchemica(
+      g,
+      ethers,
+      g.alchemicaOwner,
+      testAddress,
+      network,
+      ethers.utils.parseUnits("50000")
+    );
     g.fud.transfer(maticDiamondAddress, ethers.utils.parseUnits("10000"));
 
-    approveAlchemica(g, ethers, testAddress, network);
+    await approveAlchemica(g, ethers, testAddress, network);
 
     let fudPreCraft = await g.fud.balanceOf(maticDiamondAddress);
     let kekPreCraft = await g.kek.balanceOf(maticDiamondAddress);
-    await g.installationDiamond.craftInstallations([2, 2, 2, 6]);
+    await g.installationDiamond.craftInstallations([1, 2, 2, 2, 6]);
     let fudAfterCraft = await g.fud.balanceOf(maticDiamondAddress);
     let kekAfterCraft = await g.kek.balanceOf(maticDiamondAddress);
     expect(Number(ethers.utils.formatUnits(fudAfterCraft))).to.above(
@@ -89,18 +102,20 @@ describe("Testing Equip Installation", async function () {
 
     await mineBlocks(ethers, 21000);
 
-    await g.installationDiamond.claimInstallations([1, 2, 3]);
+    await g.installationDiamond.claimInstallations([0, 1, 2, 3, 4]);
+
+    await g.realmFacet.equipInstallation(
+      testParcelId,
+      1,
+      15,
+      15,
+      await genEquipInstallationSignature(1, 15, 15, testParcelId)
+    );
   });
   it("Survey Parcel", async function () {
     await g.alchemicaFacet.testingStartSurveying(testParcelId);
   });
   it("Equip installations", async function () {
-    g.realmFacet = await impersonate(
-      testAddress,
-      g.realmFacet,
-      ethers,
-      network
-    );
     await g.realmFacet.equipInstallation(
       testParcelId,
       2,

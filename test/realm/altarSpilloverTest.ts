@@ -17,6 +17,8 @@ import {
   testInstallations,
   genChannelAlchemicaSignature,
   genUpgradeInstallationSignature,
+  mintAlchemica,
+  approveAlchemica,
 } from "../../scripts/realm/realmHelpers";
 
 describe("Testing Equip Installation", async function () {
@@ -106,46 +108,17 @@ describe("Testing Equip Installation", async function () {
       network
     );
 
-    await expect(
-      g.installationDiamond.craftInstallations([4])
-    ).to.be.revertedWith("ERC20: insufficient allowance");
-    await g.alchemicaFacet.testingAlchemicaFaucet(
-      0,
+    await mintAlchemica(
+      g,
+      ethers,
+      g.alchemicaOwner,
+      testAddress,
+      network,
       ethers.utils.parseUnits("20000")
     );
-    await g.alchemicaFacet.testingAlchemicaFaucet(
-      1,
-      ethers.utils.parseUnits("300")
-    );
-    await g.alchemicaFacet.testingAlchemicaFaucet(
-      2,
-      ethers.utils.parseUnits("300")
-    );
-    await g.alchemicaFacet.testingAlchemicaFaucet(
-      3,
-      ethers.utils.parseUnits("300")
-    );
-    g.fud = await impersonate(testAddress, g.fud, ethers, network);
-    g.fomo = await impersonate(testAddress, g.fomo, ethers, network);
-    g.alpha = await impersonate(testAddress, g.alpha, ethers, network);
-    g.kek = await impersonate(testAddress, g.kek, ethers, network);
-    g.fud.transfer(maticDiamondAddress, ethers.utils.parseUnits("10000"));
-    await g.fud.approve(
-      g.installationsAddress,
-      ethers.utils.parseUnits("1000000000")
-    );
-    await g.fomo.approve(
-      g.installationsAddress,
-      ethers.utils.parseUnits("1000000000")
-    );
-    await g.alpha.approve(
-      g.installationsAddress,
-      ethers.utils.parseUnits("1000000000")
-    );
-    await g.kek.approve(
-      g.installationsAddress,
-      ethers.utils.parseUnits("1000000000")
-    );
+
+    await approveAlchemica(g, ethers, testAddress, network);
+
     let fudPreCraft = await g.fud.balanceOf(maticDiamondAddress);
     let kekPreCraft = await g.kek.balanceOf(maticDiamondAddress);
     await g.installationDiamond.craftInstallations([4]);

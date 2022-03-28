@@ -47,6 +47,7 @@ export async function upgrade(
         "function batchTransferAlchemicaToGotchis(uint256[] calldata _gotchiIds, uint256[4][] calldata _amounts) external",
         "function batchTransferTokensToGotchis(uint256[] calldata _gotchiIds, address[] calldata _tokenAddresses, uint256[][] calldata _amounts) external",
         `function calculateSpilloverForReservoir(uint256 _realmId, uint256 _alchemicaType) public view returns (${spilloverIO} memory spillover)`,
+        "function testingStartSurveying(uint256 _realmId) external",
       ],
       removeSelectors: [],
     },

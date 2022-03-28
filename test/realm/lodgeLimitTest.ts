@@ -15,7 +15,7 @@ import {
 import {
   approveAlchemica,
   beforeTest,
-  faucetAlchemica,
+  mintAlchemica,
   genEquipInstallationSignature,
   testInstallations,
 } from "../../scripts/realm/realmHelpers";
@@ -61,30 +61,45 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
-    await expect(
-      g.installationDiamond.craftInstallations([8, 8])
-    ).to.be.revertedWith("ERC20: insufficient allowance");
-
-    await faucetAlchemica(g.alchemicaFacet, "20000");
-
-    await approveAlchemica(g, ethers, testAddress, network);
-
-    await g.installationDiamond.craftInstallations([8, 8]);
-
-    await mineBlocks(ethers, 11000);
-
-    await g.installationDiamond.claimInstallations([0, 1]);
-  });
-  it("Survey Parcel", async function () {
-    await g.alchemicaFacet.testingStartSurveying(testParcelId);
-  });
-  it("Test Lodge Limit", async function () {
     g.realmFacet = await impersonate(
       testAddress,
       g.realmFacet,
       ethers,
       network
     );
+    await expect(
+      g.installationDiamond.craftInstallations([8, 8])
+    ).to.be.revertedWith("ERC20: insufficient allowance");
+
+    await mintAlchemica(
+      g,
+      ethers,
+      g.alchemicaOwner,
+      testAddress,
+      network,
+      ethers.utils.parseUnits("20000")
+    );
+
+    await approveAlchemica(g, ethers, testAddress, network);
+
+    await g.installationDiamond.craftInstallations([1, 8, 8]);
+
+    await mineBlocks(ethers, 11000);
+
+    await g.installationDiamond.claimInstallations([0, 1, 2]);
+
+    await g.realmFacet.equipInstallation(
+      testParcelId,
+      1,
+      15,
+      15,
+      await genEquipInstallationSignature(1, 15, 15, testParcelId)
+    );
+  });
+  it("Survey Parcel", async function () {
+    await g.alchemicaFacet.testingStartSurveying(testParcelId);
+  });
+  it("Test Lodge Limit", async function () {
     await g.realmFacet.equipInstallation(
       testParcelId,
       8,

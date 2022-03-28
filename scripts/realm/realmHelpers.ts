@@ -609,6 +609,8 @@ export async function beforeTest(
 
   const tileOwner = await tileOwnershipFacet.owner();
 
+  const alchemicaOwner = await fud.owner();
+
   const backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
 
   await installationAdminFacet.setAddresses(
@@ -654,6 +656,7 @@ export async function beforeTest(
     tileDiamond,
     tileAddress,
     tileOwner,
+    alchemicaOwner,
   };
 }
 
@@ -776,6 +779,27 @@ export async function approveAlchemica(
     g.installationsAddress,
     ethers.utils.parseUnits("1000000000")
   );
+
+  return g;
+}
+
+export async function mintAlchemica(
+  g: TestBeforeVars,
+  ethers: any,
+  owner: string,
+  to: string,
+  network: Network,
+  amount: BigNumber
+) {
+  g.fud = await impersonate(owner, g.fud, ethers, network);
+  g.fomo = await impersonate(owner, g.fomo, ethers, network);
+  g.alpha = await impersonate(owner, g.alpha, ethers, network);
+  g.kek = await impersonate(owner, g.kek, ethers, network);
+
+  await g.fud.mint(to, amount);
+  await g.fomo.mint(to, amount);
+  await g.alpha.mint(to, amount);
+  await g.kek.mint(to, amount);
 
   return g;
 }

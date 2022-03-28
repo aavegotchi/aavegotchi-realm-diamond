@@ -15,7 +15,7 @@ import {
 import {
   approveAlchemica,
   beforeTest,
-  faucetAlchemica,
+  mintAlchemica,
   genEquipInstallationSignature,
   testInstallations,
   testnetAltar,
@@ -69,7 +69,14 @@ describe("Testing Equip Installation", async function () {
       g.installationDiamond.craftInstallations([1])
     ).to.be.revertedWith("ERC20: insufficient allowance");
 
-    await faucetAlchemica(g.alchemicaFacet, "20000");
+    await mintAlchemica(
+      g,
+      ethers,
+      g.alchemicaOwner,
+      testAddress,
+      network,
+      ethers.utils.parseUnits("50000")
+    );
 
     await approveAlchemica(g, ethers, testAddress, network);
 
@@ -86,13 +93,6 @@ describe("Testing Equip Installation", async function () {
     expect(Number(ethers.utils.formatUnits(kekAfterCraft))).to.above(
       Number(ethers.utils.formatUnits(kekPreCraft))
     );
-    await expect(
-      g.installationDiamond.claimInstallations([0])
-    ).to.be.revertedWith("InstallationFacet: installation not ready");
-
-    await mineBlocks(ethers, 21000);
-
-    await g.installationDiamond.claimInstallations([0]);
   });
 
   it("Equip installations", async function () {

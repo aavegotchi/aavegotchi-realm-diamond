@@ -19,7 +19,7 @@ import { BigNumber } from "ethers";
 import {
   approveAlchemica,
   beforeTest,
-  faucetAlchemica,
+  mintAlchemica,
   genEquipInstallationSignature,
   testInstallations,
 } from "../../scripts/realm/realmHelpers";
@@ -62,7 +62,14 @@ describe("Testing Equip Installation", async function () {
       network
     );
 
-    await faucetAlchemica(g.alchemicaFacet, "10000");
+    await mintAlchemica(
+      g,
+      ethers,
+      g.alchemicaOwner,
+      testAddress,
+      network,
+      ethers.utils.parseUnits("20000")
+    );
     await approveAlchemica(g, ethers, testAddress, network);
 
     await g.installationDiamond.craftInstallations([1, 1, 1]);
