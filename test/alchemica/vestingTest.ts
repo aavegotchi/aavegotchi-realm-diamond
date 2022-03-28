@@ -29,6 +29,7 @@ describe("Vesting", function () {
   let vestingImplementation: Contract;
 
   before(async function () {
+    this.timeout(200000000);
     signers = await ethers.getSigners();
     owner = signers[0];
     beneficiary = signers[1];
