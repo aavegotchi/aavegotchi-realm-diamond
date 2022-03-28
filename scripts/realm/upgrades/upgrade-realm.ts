@@ -4,19 +4,22 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
-import { AlchemicaFacet__factory } from "../../../typechain";
+import { AlchemicaFacet__factory, AlchemicaToken } from "../../../typechain";
 import { AlchemicaFacetInterface } from "../../../typechain/AlchemicaFacet";
-import { Alchemica, AlchemicaAddresses } from "../../../types";
+import { Alchemica } from "../../../types";
 import { maticDiamondAddress } from "../../helperFunctions";
+import { gasPrice } from "../../installation/helperFunctions";
 import {
   alchemicaTotals,
   boostMultipliers,
   greatPortalCapacity,
 } from "../../setVars";
 
-export async function upgrade(
+export async function upgradeRealm(
   installationDiamond: string,
-  alchemica: AlchemicaAddresses
+  tileDiamond: string,
+  alchemica: Alchemica,
+  gameManager: string
 ) {
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
 
@@ -24,6 +27,10 @@ export async function upgrade(
     "(uint64 subId, uint32 callbackGasLimit, uint16 requestConfirmations, uint32 numWords, bytes32 keyHash)";
 
   const spilloverIO = "(uint256 rate, uint256 radius)";
+
+  //chainlink docs: https://deploy-preview-249--dreamy-villani-0e9e5c.netlify.app/docs/vrf-deployments/
+  const vrfCoordinator = "0xAE975071Be8F8eE67addBC1A82488F1C24858067"; //matic specific
+  const linkAddress = "0xb0897686c545045afc77cf20ec7a532e3120e0f1";
 
   const facets: FacetsAndAddSelectors[] = [
     {
@@ -97,20 +104,24 @@ export async function upgrade(
   const calldata = iface.encodeFunctionData(
     //@ts-ignore
     "setVars",
+    //@ts-ignore
     [
       alchemicaTotals(),
       boostMultipliers,
       greatPortalCapacity,
-      installationDiamond
-        ? installationDiamond
-        : "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
-      "0x0000000000000000000000000000000000000000",
-      "0x0000000000000000000000000000000000000000",
-      [alchemica.fud, alchemica.fomo, alchemica.alpha, alchemica.kek],
-      alchemica.gltr,
+      installationDiamond,
+      vrfCoordinator,
+      linkAddress,
+      [
+        alchemica.fud.address,
+        alchemica.fomo.address,
+        alchemica.alpha.address,
+        alchemica.kek.address,
+      ],
+      alchemica.gltr.address,
       ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
-      "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
-      "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
+      gameManager, //gameManager
+      tileDiamond,
     ]
   );
 
@@ -125,20 +136,4 @@ export async function upgrade(
   };
 
   await run("deployUpgrade", args);
-}
-
-if (require.main === module) {
-  upgrade("0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5", {
-    fud: "",
-    fomo: "",
-    alpha: "",
-    kek: "",
-    gltr: "",
-  })
-    .then(() => process.exit(0))
-    // .then(() => console.log('upgrade completed') /* process.exit(0) */)
-    .catch((error) => {
-      console.error(error);
-      process.exit(1);
-    });
 }

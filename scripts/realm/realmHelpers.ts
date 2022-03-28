@@ -743,10 +743,10 @@ export async function faucetAlchemica(
   amount: string
 ) {
   const parsed = ethers.utils.parseUnits(amount);
-  for (let index = 0; index < 4; index++) {
-    const tx = await alchemicaFacet.testingAlchemicaFaucet(index, parsed);
-    await tx.wait();
-  }
+  // for (let index = 0; index < 4; index++) {
+  //   const tx = await alchemicaFacet.testingAlchemicaFaucet(index, parsed);
+  //   await tx.wait();
+  // }
 }
 
 export async function approveAlchemica(

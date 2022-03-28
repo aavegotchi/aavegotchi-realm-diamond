@@ -164,10 +164,18 @@ export interface TestBeforeVars {
   tileOwner: string;
 }
 
-export interface Alchemica {
+export interface AlchemicaAddresses {
   fud: string;
   fomo: string;
   alpha: string;
   kek: string;
   gltr: string;
+}
+
+export interface Alchemica {
+  fud: AlchemicaToken;
+  fomo: AlchemicaToken;
+  alpha: AlchemicaToken;
+  kek: AlchemicaToken;
+  gltr: GLTR;
 }
