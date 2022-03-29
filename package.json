@@ -1,8 +1,8 @@
 {
   "scripts": {
-    "deploy:alchemica:matic": "VERIFY=true TS_NODE_TRANSPILE_ONLY=1 npx hardhat run scripts/deployAlchemica.ts --network matic",
-    "deploy:alchemica:mumbai": "VERIFY=true TS_NODE_TRANSPILE_ONLY=1 npx hardhat run scripts/deployAlchemica.ts --network mumbai",
-    "deploy:alchemica:local": "npx hardhat run scripts/deployAlchemica.ts --network hardhat"
+    "deploy:alchemica:matic": "VERIFY=true TS_NODE_TRANSPILE_ONLY=1 npx hardhat run scripts/alchemica/deployAlchemica.ts --network matic",
+    "deploy:alchemica:mumbai": "VERIFY=true TS_NODE_TRANSPILE_ONLY=1 npx hardhat run scripts/alchemica/deployAlchemica.ts --network mumbai",
+    "deploy:alchemica:local": "npx hardhat run scripts/alchemica/deployAlchemica.ts --network hardhat"
   },
   "dependencies": {
     "@chainlink/contracts": "^0.4.0",

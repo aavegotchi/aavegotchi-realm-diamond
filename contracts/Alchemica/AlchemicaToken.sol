@@ -4,9 +4,10 @@ pragma solidity 0.8.13;
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20CappedUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-ERC20PermitUpgradeable.sol";
-import "../interfaces/RemoteApprovable.sol";
 
-contract AlchemicaToken is OwnableUpgradeable, ERC20CappedUpgradeable, ERC20PermitUpgradeable, RemoteApprovable {
+contract AlchemicaToken is OwnableUpgradeable, ERC20CappedUpgradeable, ERC20PermitUpgradeable {
+  address public realmDiamond;
+
   function initialize(
     string calldata _name,
     string calldata _symbol,
@@ -21,14 +22,24 @@ contract AlchemicaToken is OwnableUpgradeable, ERC20CappedUpgradeable, ERC20Perm
     __ERC20Capped_init_unchained(_maxSupply);
     __ERC20Permit_init(_name);
     transferOwnership(_realmDiamond);
+    realmDiamond = _realmDiamond;
     _mint(_gameplayVestingContract, _maxSupply / 10);
     _mint(_ecosystemVestingContract, _maxSupply / 10);
   }
 
+  modifier onlyRealmDiamond() {
+    require(msg.sender == realmDiamond, "Only RealmDiamond");
+    _;
+  }
+
   /// @notice Mint _value tokens for msg.sender
   /// @param _value Amount of tokens to mint
-  function mint(address _to, uint256 _value) public onlyOwner {
+  function mint(address _to, uint256 _value) public onlyRealmDiamond {
     _mint(_to, _value);
+  }
+
+  function updateRealmDiamond(address _newRealmDiamond) external onlyOwner {
+    realmDiamond = _newRealmDiamond;
   }
 
   /// @notice Sends tokens mistakenly sent to this contract to the Aavegotchi DAO treasury
@@ -38,21 +49,5 @@ contract AlchemicaToken is OwnableUpgradeable, ERC20CappedUpgradeable, ERC20Perm
 
   function _mint(address _to, uint256 _value) internal virtual override(ERC20CappedUpgradeable, ERC20Upgradeable) {
     ERC20CappedUpgradeable._mint(_to, _value);
-  }
-
-  /// @notice Allows the owner (realm diamond) to have full approval rights.
-  /// Helps for batch approvals.
-  function approveRemote(
-    address _owner,
-    address _spender,
-    uint256 _value
-  ) external onlyOwner {
-    ERC20Upgradeable._approve(_owner, _spender, _value);
-  }
-
-  function batchTransfer(address[] calldata _to, uint256[] calldata _value) public {
-    for (uint256 i = 0; i < _to.length; i++) {
-      _transfer(_msgSender(), _to[i], _value[i]);
-    }
   }
 }

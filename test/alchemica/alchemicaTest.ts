@@ -51,23 +51,26 @@ describe("Alchemica", function () {
   });
 
   it("Realm diamond should have access to minting", async function () {
+    let otherSigner = signers[2];
+
+    await expect(
+      fud.connect(otherSigner).mint(await owner.getAddress(), ETHER)
+    ).to.be.revertedWith("Only RealmDiamond");
+
     await fud.connect(realmDiamond).mint(await owner.getAddress(), ETHER);
     expect(await fud.balanceOf(await owner.getAddress())).to.equal(ETHER);
   });
 
-  it("Should batch transfer", async function () {
+  it("Only owner can update RealmDiamond", async function () {
+    let otherSigner = signers[2];
+
+    await expect(
+      fud.connect(otherSigner).updateRealmDiamond(await owner.getAddress())
+    ).to.be.revertedWith("Ownable: caller is not the owner");
+
     await fud
-      .connect(owner)
-      .batchTransfer(
-        [
-          await signers[4].getAddress(),
-          await signers[5].getAddress(),
-          await signers[4].getAddress(),
-        ],
-        [2, 1, 5]
-      );
-    expect(await fud.balanceOf(await signers[4].getAddress())).to.equal(7);
-    expect(await fud.balanceOf(await signers[5].getAddress())).to.equal(1);
+      .connect(realmDiamond)
+      .updateRealmDiamond(await owner.getAddress());
   });
 
   it("Should permit", async function () {
@@ -77,7 +80,7 @@ describe("Alchemica", function () {
       await owner.getAddress(),
       BigNumber.from("1000"),
       await fud.nonces(await owner.getAddress()),
-      BigNumber.from("999999999999999"),
+      BigNumber.from("999999999999999")
     );
-  })
+  });
 });

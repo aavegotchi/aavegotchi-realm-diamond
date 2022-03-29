@@ -5,10 +5,10 @@ import {
   verify,
   deployVestingContracts,
   deployAlchemica,
-} from "../helpers/helpers";
-import { VerifyParams } from "../helpers/types";
-import { address } from "../helpers/utils";
-import { REALM_DIAMOND } from "../helpers/constants";
+} from "../../helpers/helpers";
+import { VerifyParams } from "../../helpers/types";
+import { address } from "../../helpers/utils";
+import { REALM_DIAMOND } from "../../helpers/constants";
 
 async function main() {
   let verifyParams: VerifyParams[] = [];
