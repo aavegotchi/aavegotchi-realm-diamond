@@ -28,14 +28,6 @@ struct Parcel {
   uint256[64][64] buildGrid; //x, then y array of positions
   uint256[64][64] tileGrid; //x, then y array of positions
   uint256[4] alchemicaBoost; //fud, fomo, alpha, kek
-
-  /* will probably be converted into arrays
-  mapping(uint256 => uint256) alchemicaRemaining;
-  mapping(uint256 => uint256) alchemicaCapacity;
-  mapping(uint256 => uint256) alchemicaHarvestRate;
-  mapping(uint256 => uint256) timeSinceLastClaim;
-  mapping(uint256 => uint256) unclaimedAlchemica;
-  */
 }
 
 struct AppStorage {
@@ -46,7 +38,7 @@ struct AppStorage {
   mapping(address => mapping(address => bool)) operators;
   mapping(uint256 => address) approved;
   address aavegotchiDiamond;
-  address[4] alchemicaAddresses;
+  address[4] alchemicaAddresses; //fud, fomo, alpha, kek
 }
 
 library LibAppStorage {
