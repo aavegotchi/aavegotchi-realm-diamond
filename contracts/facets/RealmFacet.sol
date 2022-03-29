@@ -8,6 +8,8 @@ import "../libraries/LibMeta.sol";
 import "../libraries/LibERC721.sol";
 import {InstallationDiamond} from "../interfaces/InstallationDiamond.sol";
 import "../interfaces/IERC721.sol";
+import "../interfaces/IERC20Mintable.sol";
+import "../interfaces/AavegotchiDiamond.sol";
 
 contract RealmFacet is Modifiers {
   uint256 constant MAX_SUPPLY = 420069;
@@ -73,12 +75,12 @@ contract RealmFacet is Modifiers {
     }
   }
 
-  /**
-  @dev Used to set diamond address for Baazaar
-  */
-  function setAavegotchiDiamond(address _diamondAddress) external onlyOwner {
-    require(_diamondAddress != address(0), "RealmFacet: Cannot set diamond to zero address");
-    s.aavegotchiDiamond = _diamondAddress;
+  /// @notice Allow the diamond owner to set some important diamond state variables
+  /// @param _aavegotchiDiamond The address of the aavegotchi diamond
+  /// @param _alchemicaAddresses The four alchemica token addresses
+  function setVars(address _aavegotchiDiamond, address[4] calldata _alchemicaAddresses) external onlyOwner {
+    s.aavegotchiDiamond = _aavegotchiDiamond;
+    s.alchemicaAddresses = _alchemicaAddresses;
   }
 
   function getParcelInfo(uint256 _tokenId) external view returns (ParcelOutput memory output_) {
@@ -93,9 +95,50 @@ contract RealmFacet is Modifiers {
     output_.boost = parcel.alchemicaBoost;
   }
 
-  function addERC721Interface() external onlyOwner {
-    LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
-    //add erc721 interface id
-    ds.supportedInterfaces[type(IERC721).interfaceId] = true;
+  function batchTransferTokensToGotchis(
+    uint256[] calldata _gotchiIds,
+    address[] calldata _tokenAddresses,
+    uint256[][] calldata _amounts
+  ) external {
+    require(_gotchiIds.length == _amounts.length, "RealmFacet: Mismatched array lengths");
+    require(_tokenAddresses.length == _amounts.length, "RealmFacet: Mismatched array lengths");
+
+    for (uint256 i = 0; i < _gotchiIds.length; i++) {
+      for (uint256 j = 0; j < _amounts[i].length; j++) {
+        uint256 amount = _amounts[i][j];
+        if (amount > 0) {
+          IERC20(_tokenAddresses[j]).transferFrom(msg.sender, alchemicaRecipient(_gotchiIds[i]), amount);
+        }
+      }
+    }
+  }
+
+  /// @notice Helper function to batch transfer alchemica
+  /// @param _targets Array of target addresses
+  /// @param _amounts Nested array of amounts to transfer.
+  /// @dev The inner array element order for _amounts is FUD, FOMO, ALPHA, KEK
+  function batchTransferAlchemica(address[] calldata _targets, uint256[4][] calldata _amounts) external {
+    require(_targets.length == _amounts.length, "AlchemicaFacet: Mismatched array lengths");
+
+    IERC20Mintable[4] memory alchemicas = [
+      IERC20Mintable(s.alchemicaAddresses[0]),
+      IERC20Mintable(s.alchemicaAddresses[1]),
+      IERC20Mintable(s.alchemicaAddresses[2]),
+      IERC20Mintable(s.alchemicaAddresses[3])
+    ];
+
+    for (uint256 i = 0; i < _targets.length; i++) {
+      for (uint256 j = 0; j < _amounts[i].length; j++) {
+        if (_amounts[i][j] > 0) {
+          alchemicas[j].transferFrom(msg.sender, _targets[i], _amounts[i][j]);
+        }
+      }
+    }
+  }
+
+  function alchemicaRecipient(uint256 _gotchiId) internal view returns (address) {
+    AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
+
+    return diamond.ownerOf(_gotchiId);
   }
 }

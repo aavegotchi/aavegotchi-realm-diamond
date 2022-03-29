@@ -46,7 +46,7 @@ struct AppStorage {
   mapping(address => mapping(address => bool)) operators;
   mapping(uint256 => address) approved;
   address aavegotchiDiamond;
-  //  address installationContract;
+  address[4] alchemicaAddresses;
 }
 
 library LibAppStorage {
