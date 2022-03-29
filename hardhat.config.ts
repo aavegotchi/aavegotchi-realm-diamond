@@ -5,12 +5,15 @@ import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-etherscan";
 import "hardhat-contract-sizer";
 import "@nomiclabs/hardhat-etherscan";
+import "hardhat-gas-reporter";
 import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname + "/.env" });
 require("./tasks/generateDiamondABI_realm.js");
 require("./tasks/generateDiamondABI_installation.js");
 require("./tasks/verifyFacet.js");
 require("./tasks/mintParcels.ts");
+
+const GWEI = 1000 * 1000 * 1000;
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:
@@ -25,11 +28,20 @@ module.exports = {
   },
   networks: {
     hardhat: {
+      /*
+      accounts: [
+        {
+          privateKey: process.env.SECRET,
+          balance: "1000000000000000000000000",
+        },
+       ],*/
       forking: {
         url: process.env.MATIC_URL,
-        timeout: 20000000,
-        // blockNumber: 23571000,
+        timeout: 2000000,
+        blockNumber: 26282527,
+        chainId: 137,
       },
+      chainId: 137,
       blockGasLimit: 20000000,
       timeout: 2000000,
       gas: "auto",
@@ -41,8 +53,8 @@ module.exports = {
       url: process.env.MATIC_URL,
       accounts: [process.env.SECRET],
       // blockGasLimit: 20000000,
-      blockGasLimit: 20000000,
-      gasPrice: 10000000000,
+      maxFeePerGas: 50 * GWEI,
+      maxPriorityFeePerGas: 1 * GWEI,
       //   timeout: 90000
     },
     mumbai: {
@@ -75,6 +87,15 @@ module.exports = {
   // This is a sample solc configuration that specifies which version of solc to use
   solidity: {
     compilers: [
+      {
+        version: "0.8.13",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
       {
         version: "0.8.9",
         settings: {

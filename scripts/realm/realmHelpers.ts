@@ -496,33 +496,45 @@ export function testnetAltar() {
 
 export async function deployAlchemica(ethers: any, diamondAddress: string) {
   const Fud = await ethers.getContractFactory("AlchemicaToken");
-  let fud = (await Fud.deploy(
+  let fud = (await Fud.deploy()) as AlchemicaToken;
+  const Fomo = await ethers.getContractFactory("AlchemicaToken");
+  let fomo = (await Fomo.deploy()) as AlchemicaToken;
+  const Alpha = await ethers.getContractFactory("AlchemicaToken");
+  let alpha = (await Alpha.deploy()) as AlchemicaToken;
+  const Kek = await ethers.getContractFactory("AlchemicaToken");
+  let kek = (await Kek.deploy()) as AlchemicaToken;
+  await fud.initialize(
     "FUD",
     "FUD",
     ethers.utils.parseUnits("1000000000000"),
-    diamondAddress
-  )) as AlchemicaToken;
-  const Fomo = await ethers.getContractFactory("AlchemicaToken");
-  let fomo = (await Fomo.deploy(
+    diamondAddress,
+    diamondAddress,
+    diamondAddress,
+  );
+  await fomo.initialize(
     "FOMO",
     "FOMO",
     ethers.utils.parseUnits("250000000000"),
-    diamondAddress
-  )) as AlchemicaToken;
-  const Alpha = await ethers.getContractFactory("AlchemicaToken");
-  let alpha = (await Alpha.deploy(
+    diamondAddress,
+    diamondAddress,
+    diamondAddress,
+  );
+  await alpha.initialize(
     "ALPHA",
     "ALPHA",
     ethers.utils.parseUnits("125000000000"),
-    diamondAddress
-  )) as AlchemicaToken;
-  const Kek = await ethers.getContractFactory("AlchemicaToken");
-  let kek = (await Kek.deploy(
+    diamondAddress,
+    diamondAddress,
+    diamondAddress,
+  );
+  await kek.initialize(
     "KEK",
     "KEK",
     ethers.utils.parseUnits("100000000000"),
-    diamondAddress
-  )) as AlchemicaToken;
+    diamondAddress,
+    diamondAddress,
+    diamondAddress,
+  );
 
   const Glmr = await ethers.getContractFactory("GLTR");
   let gltr = (await Glmr.deploy()) as GLTR;
