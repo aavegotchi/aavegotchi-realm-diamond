@@ -104,10 +104,12 @@ contract RealmFacet is Modifiers {
     require(_tokenAddresses.length == _amounts.length, "RealmFacet: Mismatched array lengths");
 
     for (uint256 i = 0; i < _gotchiIds.length; i++) {
+      address recipient = alchemicaRecipient(_gotchiIds[i]);
+
       for (uint256 j = 0; j < _amounts[i].length; j++) {
         uint256 amount = _amounts[i][j];
         if (amount > 0) {
-          IERC20(_tokenAddresses[j]).transferFrom(msg.sender, alchemicaRecipient(_gotchiIds[i]), amount);
+          IERC20(_tokenAddresses[j]).transferFrom(msg.sender, recipient, amount);
         }
       }
     }

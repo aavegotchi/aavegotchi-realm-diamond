@@ -30,10 +30,10 @@ export async function upgrade() {
     RealmFacet__factory.abi
   ) as RealmFacetInterface;
 
-  const fud = "0x0000000000000000000000000000000000000000";
-  const fomo = "0x0000000000000000000000000000000000000000";
-  const alpha = "0x0000000000000000000000000000000000000000";
-  const kek = "0x0000000000000000000000000000000000000000";
+  const fud = "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f";
+  const fomo = "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8";
+  const alpha = "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2";
+  const kek = "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C";
 
   const maticAavegotchiDiamond = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   const calldata = iface.encodeFunctionData("setVars", [
