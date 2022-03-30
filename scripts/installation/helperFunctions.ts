@@ -1,15 +1,19 @@
 import { Signer } from "@ethersproject/abstract-signer";
 import { Contract } from "@ethersproject/contracts";
-import { HardhatRuntimeEnvironment, Network } from "hardhat/types";
-import { DiamondLoupeFacet, OwnershipFacet } from "../typechain";
+import {
+  DiamondLoupeFacet,
+  OwnershipFacet,
+  AlchemicaToken,
+} from "../../typechain";
+import { network } from "hardhat";
 
-export const gasPrice = 75000000000;
+export const gasPrice = 100000000000;
 
 export async function impersonate(
   address: string,
   contract: any,
   ethers: any,
-  network: Network
+  network: any
 ) {
   await network.provider.request({
     method: "hardhat_impersonateAccount",
@@ -59,13 +63,20 @@ export function getSelector(func: string, ethers: any) {
 }
 
 export const kovanDiamondAddress = "0xa37D0c085121B6b7190A34514Ca28fC15Bb4dc22";
-export const maticDiamondAddress = "0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11";
-export const maticAavegotchiDiamondAddress =
-  "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
-export const aavegotchiDAOAddress =
-  "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
-export const pixelcraftAddress = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
+export const maticDiamondAddress = "";
+export const mumbaiDiamondAddress =
+  "0xb012732d259df648B8B3876b9794Fcb631262447";
 
+export const maticRealmDiamondAddress =
+  "0x1d0360bac7299c86ec8e99d0c1c9a95fefaf2a11";
+
+export const maticAavegotchiDiamondAddress =
+  "0x86935f11c86623dec8a25696e1c19a8659cbf95d";
+
+export const mumbaiInstallationDiamondAddress =
+  "0x4638B8127D1FC1bb69732c8D82Ea0Ab487A79e23";
+
+export const maticGhstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
 export async function diamondOwner(address: string, ethers: any) {
   return await (await ethers.getContractAt("OwnershipFacet", address)).owner();
 }
@@ -108,8 +119,47 @@ export async function getDiamondSigner(
   }
 }
 
-export async function mineBlocks(ethers: any, count: number) {
-  //convert to hex and handle invalid leading 0 problem
-  const number = ethers.utils.hexlify(count).replace("0x0", "0x");
-  await ethers.provider.send("hardhat_mine", [number]);
+export async function approveRealAlchemica(
+  address: string,
+  installationAddress: string,
+  ethers: any
+) {
+  const alchemica = [
+    "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f",
+    "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8",
+    "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2",
+    "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C",
+  ];
+
+  for (let i = 0; i < alchemica.length; i++) {
+    const alchemicaToken = alchemica[i];
+    let token = (await ethers.getContractAt(
+      "AlchemicaToken",
+      alchemicaToken
+    )) as AlchemicaToken;
+    token = await impersonate(address, token, ethers, network);
+    await token.approve(
+      installationAddress,
+      ethers.utils.parseUnits("1000000000")
+    );
+  }
+}
+
+export async function faucetRealAlchemica(receiver: string, ethers: any) {
+  const alchemica = [
+    "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f",
+    "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8",
+    "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2",
+    "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C",
+  ];
+
+  for (let i = 0; i < alchemica.length; i++) {
+    const alchemicaToken = alchemica[i];
+    let token = (await ethers.getContractAt(
+      "AlchemicaToken",
+      alchemicaToken
+    )) as AlchemicaToken;
+    token = await impersonate(await token.owner(), token, ethers, network);
+    await token.mint(receiver, ethers.utils.parseEther("10000"));
+  }
 }

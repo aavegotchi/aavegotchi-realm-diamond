@@ -6,7 +6,7 @@ import "../libraries/LibDiamond.sol";
 import "../libraries/LibStrings.sol";
 import "../libraries/LibMeta.sol";
 import "../libraries/LibERC721.sol";
-import {InstallationDiamond} from "../interfaces/InstallationDiamond.sol";
+import {InstallationDiamondInterface} from "../interfaces/InstallationDiamondInterface.sol";
 import "../interfaces/IERC721.sol";
 import "../interfaces/IERC20Mintable.sol";
 import "../interfaces/AavegotchiDiamond.sol";

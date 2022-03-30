@@ -36,3 +36,26 @@ export interface ParcelArray {
   2: number;
   3: "H" | "V";
 }
+
+export type Level = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+export type Width = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type Height = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export interface InstallationTypeInput {
+  id?: number;
+  deprecated: boolean;
+  installationType: number;
+  level: Level;
+  width: Width;
+  height: Height;
+  alchemicaType: 0 | 1 | 2 | 3;
+  alchemicaCost: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+  harvestRate: BigNumberish;
+  capacity: BigNumberish;
+  spillRadius: BigNumberish;
+  spillRate: BigNumberish;
+  upgradeQueueBoost: BigNumberish;
+  craftTime: number;
+  nextLevelId: number;
+  prerequisites: number[];
+  name: string;
+}
