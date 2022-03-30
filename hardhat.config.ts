@@ -45,6 +45,15 @@ module.exports = {
       gasPrice: 10000000000,
       //   timeout: 90000
     },
+    mumbai: {
+      url: process.env.MUMBAI_URL,
+      // url: 'https://rpc-mainnet.maticvigil.com/',
+      accounts: [process.env.SECRET],
+      // blockGasLimit: 20000000,
+      blockGasLimit: 20000000,
+      gasPrice: 10000000000,
+      //   timeout: 90000
+    },
     kovan: {
       url: process.env.KOVAN_URL,
       // url: 'https://rpc-mainnet.maticvigil.com/',
@@ -68,6 +77,15 @@ module.exports = {
   // This is a sample solc configuration that specifies which version of solc to use
   solidity: {
     compilers: [
+      {
+        version: "0.8.13",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
       {
         version: "0.8.9",
         settings: {
