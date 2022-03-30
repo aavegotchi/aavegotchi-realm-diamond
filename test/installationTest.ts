@@ -10,6 +10,7 @@ import {
   ERC1155Facet,
   IERC20,
   InstallationAdminFacet,
+  AlchemicaToken,
 } from "../typechain";
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
@@ -87,10 +88,10 @@ describe("Installations tests", async function () {
       height: 4,
       alchemicaType: 0,
       alchemicaCost: [
-        BigNumber.from(1),
-        BigNumber.from(2),
-        BigNumber.from(0),
-        BigNumber.from(3),
+        ethers.utils.parseEther("100"),
+        ethers.utils.parseEther("100"),
+        ethers.utils.parseEther("100"),
+        ethers.utils.parseEther("100"),
       ],
       harvestRate: 2,
       capacity: 0,
@@ -172,17 +173,40 @@ describe("Installations tests", async function () {
       installationFacet.address,
       ethers.utils.parseUnits("1000000000")
     );
+
+    const fud = "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f";
+
+    const fudToken = (await ethers.getContractAt(
+      "AlchemicaToken",
+      fud
+    )) as AlchemicaToken;
+    let fudBalanceBefore = await fudToken.balanceOf(testAddress);
+
     await installationFacet.craftInstallations([0, 0, 0, 0, 0]);
     await expect(installationFacet.claimInstallations([0])).to.be.revertedWith(
       "InstallationFacet: Installation not ready"
     );
 
+    let fudBalanceAfter = await fudToken.balanceOf(testAddress);
+    //five installations were crafted, each 100
+    expect(fudBalanceAfter).to.equal(
+      fudBalanceBefore.sub(ethers.utils.parseEther("500"))
+    );
+
+    //30% of 500 is 150 for Pixelcraft
+    const pixelcraftFudBalance = await fudToken.balanceOf(pixelcraftAddress);
+    expect(pixelcraftFudBalance).to.equal(ethers.utils.parseEther("150"));
+
+    //30% of 500 is 150 for DAO
+    const daoBalance = await fudToken.balanceOf(aavegotchiDAOAddress);
+    expect(daoBalance).to.equal(ethers.utils.parseEther("150"));
+
     await mineBlocks(ethers, 11000);
 
-    const balancePre = await erc1155Facet.balanceOf(testAddress, 0);
+    //Claimed five installations
     await installationFacet.claimInstallations([0, 1, 2, 3, 4]);
     const balancePost = await erc1155Facet.balanceOf(testAddress, 0);
-    expect(balancePost).to.gt(balancePre);
+    expect(balancePost).to.eq(5);
   });
   it("Transfer ID=0 installation from Test address to Test Address 2", async function () {
     erc1155Facet = await impersonate(
@@ -267,7 +291,26 @@ describe("Installations tests", async function () {
     );
   });
 
-  it("Owner can deprecate installation", async function () {
+  it("Only owner can deprecate installation", async function () {
+    installationAdminFacet = await impersonate(
+      testAddress,
+      installationAdminFacet,
+      ethers,
+      network
+    );
+    await expect(
+      installationAdminFacet.deprecateInstallations(["1"])
+    ).to.be.revertedWith("LibDiamond: Must be contract owner");
+
+    installationAdminFacet = await impersonate(
+      await accounts[0].getAddress(),
+      installationAdminFacet,
+      ethers,
+      network
+    );
+
+    await installationAdminFacet.deprecateInstallations(["1"]);
+
     installationFacet = await impersonate(
       await accounts[0].getAddress(),
       installationFacet,
@@ -275,7 +318,6 @@ describe("Installations tests", async function () {
       network
     );
 
-    await installationAdminFacet.deprecateInstallations(["1"]);
     await expect(
       installationFacet.craftInstallations(["1"])
     ).to.be.revertedWith("InstallationFacet: Installation has been deprecated");
