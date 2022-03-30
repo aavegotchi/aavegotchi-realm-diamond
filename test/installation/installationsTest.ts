@@ -22,9 +22,10 @@ import {
 import {
   approveAlchemica,
   approveRealAlchemica,
+  faucetRealAlchemica,
   genUpgradeInstallationSignature,
 } from "../../scripts/realm/realmHelpers";
-import { InstallationTypeInput } from "../../types";
+import { InstallationTypeInput, UpgradeQueue } from "../../types";
 
 describe("Installations tests", async function () {
   const testAddress = "0xf3678737dC45092dBb3fc1f49D89e3950Abb866d";
@@ -66,13 +67,16 @@ describe("Installations tests", async function () {
   });
 
   it("Set Diamond Addresses", async function () {
+    //@ts-ignore
+    const backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+
     await installationAdminFacet.setAddresses(
       maticAavegotchiDiamondAddress,
       maticRealmDiamondAddress,
       ethers.constants.AddressZero, //replace
       pixelcraftAddress,
       aavegotchiDAOAddress,
-      maticGhstAddress
+      ethers.utils.hexDataSlice(backendSigner.publicKey, 1)
     );
   });
 
@@ -164,6 +168,8 @@ describe("Installations tests", async function () {
       ethers,
       network
     );
+
+    await faucetRealAlchemica(testAddress, ethers);
 
     await approveRealAlchemica(testAddress, diamondAddress, ethers);
 
@@ -308,18 +314,23 @@ describe("Installations tests", async function () {
       network
     );
 
-    await installationFacet.upgradeInstallation(
-      {
-        parcelId: testParcelId,
-        coordinateX: 0,
-        coordinateY: 0,
-        installationId: "0",
-        readyBlock: "0", //readyBlock can be 0
-        claimed: false,
-        owner: parcelOwner,
-      },
-      await genUpgradeInstallationSignature(Number(testParcelId), 0, 0, 0)
+    const upgradeQueue: UpgradeQueue = {
+      parcelId: testParcelId,
+      coordinateX: 0,
+      coordinateY: 0,
+      installationId: 0,
+      readyBlock: 0,
+      claimed: false,
+      owner: parcelOwner,
+    };
+
+    const signature = await genUpgradeInstallationSignature(
+      Number(testParcelId),
+      0,
+      0,
+      0
     );
+    await installationFacet.upgradeInstallation(upgradeQueue, signature);
   });
 
   it("Finalize upgrade", async function () {

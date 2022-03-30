@@ -701,14 +701,11 @@ export const genUpgradeInstallationSignature = async (
   coordinateY: number,
   installationId: number
 ) => {
-  //@ts-ignore
-  let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
-
   let messageHash = ethers.utils.solidityKeccak256(
     ["uint256", "uint256", "uint256", "uint256"],
     [realmId, coordinateX, coordinateY, installationId]
   );
-  let signedMessage = await backendSigner.signMessage(
+  let signedMessage = await backendSigner().signMessage(
     ethers.utils.arrayify(messageHash)
   );
   let signature = ethers.utils.arrayify(signedMessage);
@@ -737,8 +734,6 @@ export const genChannelAlchemicaSignature = async (
   gotchiId: number,
   lastChanneled: BigNumber
 ) => {
-  //@ts-ignore
-
   let messageHash = ethers.utils.solidityKeccak256(
     ["uint256", "uint256", "uint256"],
     [parcelId, gotchiId, lastChanneled]
@@ -753,15 +748,23 @@ export const genChannelAlchemicaSignature = async (
   // signedMessage = await backendSigner.signMessage(messageHash);
 };
 
-export async function faucetAlchemica(
-  alchemicaFacet: AlchemicaFacet,
-  amount: string
-) {
-  const parsed = ethers.utils.parseUnits(amount);
-  // for (let index = 0; index < 4; index++) {
-  //   const tx = await alchemicaFacet.testingAlchemicaFaucet(index, parsed);
-  //   await tx.wait();
-  // }
+export async function faucetRealAlchemica(receiver: string, ethers: any) {
+  const alchemica = [
+    "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f",
+    "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8",
+    "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2",
+    "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C",
+  ];
+
+  for (let i = 0; i < alchemica.length; i++) {
+    const alchemicaToken = alchemica[i];
+    let token = (await ethers.getContractAt(
+      "AlchemicaToken",
+      alchemicaToken
+    )) as AlchemicaToken;
+    token = await impersonate(await token.owner(), token, ethers, network);
+    await token.mint(receiver, ethers.utils.parseEther("10000"));
+  }
 }
 
 export async function approveRealAlchemica(
