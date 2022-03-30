@@ -243,11 +243,11 @@ contract InstallationFacet is Modifiers {
       if (installationType.craftTime == 0) {
         LibERC1155._safeMint(msg.sender, _installationTypes[i], 0);
       } else {
-        uint256 readyBlock = block.number + installationType.craftTime;
+        uint40 readyBlock = uint40(block.number) + installationType.craftTime;
 
         //put the installation into a queue
         //each wearable needs a unique queue id
-        s.craftQueue.push(QueueItem(_installationTypes[i], _nextCraftId, readyBlock, false, msg.sender));
+        s.craftQueue.push(QueueItem(_installationTypes[i], false, readyBlock, _nextCraftId, msg.sender));
 
         emit AddedToQueue(_nextCraftId, _installationTypes[i], readyBlock, msg.sender);
         _nextCraftId++;
@@ -263,7 +263,7 @@ contract InstallationFacet is Modifiers {
   /// @dev amount expressed in block numbers
   /// @param _queueIds An array containing the identifiers of queues to speed up
   /// @param _amounts An array containing the corresponding amounts of $GLTR tokens to pay for each queue speedup
-  function reduceCraftTime(uint256[] calldata _queueIds, uint256[] calldata _amounts) external {
+  function reduceCraftTime(uint256[] calldata _queueIds, uint40[] calldata _amounts) external {
     require(_queueIds.length == _amounts.length, "InstallationFacet: Mismatched arrays");
     for (uint256 i; i < _queueIds.length; i++) {
       uint256 queueId = _queueIds[i];
@@ -274,8 +274,8 @@ contract InstallationFacet is Modifiers {
 
       IERC20 gltr = IERC20(s.gltr);
 
-      uint256 blockLeft = queueItem.readyBlock - block.number;
-      uint256 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
+      uint40 blockLeft = queueItem.readyBlock - uint40(block.number);
+      uint40 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
       gltr.burnFrom(msg.sender, removeBlocks * 10**18);
       queueItem.readyBlock -= removeBlocks;
       emit CraftTimeReduced(queueId, removeBlocks);
@@ -414,14 +414,14 @@ contract InstallationFacet is Modifiers {
     require(prevInstallation.alchemicaType == nextInstallation.alchemicaType, "InstallationFacet: Wrong alchemicaType");
     require(prevInstallation.level == nextInstallation.level - 1, "InstallationFacet: Wrong installation level");
 
-    uint256 readyBlock = block.number + nextInstallation.craftTime;
+    uint40 readyBlock = uint40(block.number) + nextInstallation.craftTime;
     UpgradeQueue memory upgrade = UpgradeQueue(
       _upgradeQueue.coordinateX,
       _upgradeQueue.coordinateY,
-      _upgradeQueue.parcelId,
-      _upgradeQueue.installationId,
       readyBlock,
       false,
+      _upgradeQueue.parcelId,
+      _upgradeQueue.installationId,
       _upgradeQueue.owner
     );
     s.upgradeQueue.push(upgrade);
@@ -435,8 +435,8 @@ contract InstallationFacet is Modifiers {
   /// @notice Allow a user to reduce the upgrade time of an ongoing queue
   /// @dev Will throw if the caller is not the owner of the queue
   /// @param _queueId The identifier of the queue whose upgrade time is to be reduced
-  /// @param _amount The correct amount of $GLTR token to be paid
-  function reduceUpgradeTime(uint256 _queueId, uint256 _amount) external {
+  /// @param _amount The number of $GLTR token to be paid, in blocks
+  function reduceUpgradeTime(uint256 _queueId, uint40 _amount) external {
     UpgradeQueue storage upgradeQueue = s.upgradeQueue[_queueId];
     require(msg.sender == upgradeQueue.owner, "InstallationFacet: Not owner");
 
@@ -444,8 +444,8 @@ contract InstallationFacet is Modifiers {
 
     IERC20 gltr = IERC20(s.gltr);
 
-    uint256 blockLeft = upgradeQueue.readyBlock - block.number;
-    uint256 removeBlocks = _amount <= blockLeft ? _amount : blockLeft;
+    uint40 blockLeft = upgradeQueue.readyBlock - uint40(block.number);
+    uint40 removeBlocks = _amount <= blockLeft ? _amount : blockLeft;
     gltr.burnFrom(msg.sender, removeBlocks * 10**18);
     upgradeQueue.readyBlock -= removeBlocks;
     emit UpgradeTimeReduced(_queueId, upgradeQueue.parcelId, upgradeQueue.coordinateX, upgradeQueue.coordinateY, removeBlocks);

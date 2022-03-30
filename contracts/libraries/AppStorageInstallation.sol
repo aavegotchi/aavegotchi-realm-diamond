@@ -5,17 +5,17 @@ import "hardhat/console.sol";
 
 struct InstallationType {
   //slot 1
-  uint8 width; //uint8 = 8 bytes
+  uint8 width;
   uint8 height;
   uint16 installationType; //0 = altar, 1 = harvester, 2 = reservoir, 3 = gotchi lodge, 4 = wall, 5 = NFT display, 6 = buildqueue booster
   uint8 level; //max level 9
   uint8 alchemicaType; //0 = none 1 = fud, 2 = fomo, 3 = alpha, 4 = kek
-  uint32 spillRadius; //uint32
-  uint16 spillRate; //uint16
-  uint8 upgradeQueueBoost; //uint8
-  uint32 craftTime; // in blocks //uint32
-  uint32 nextLevelId; //the ID of the next level of this installation. Used for upgrades. //uint32
-  bool deprecated; //bool = 1 byte
+  uint32 spillRadius;
+  uint16 spillRate;
+  uint8 upgradeQueueBoost;
+  uint32 craftTime; // in blocks
+  uint32 nextLevelId; //the ID of the next level of this installation. Used for upgrades.
+  bool deprecated; //bool
   //slot 2
   uint256[4] alchemicaCost; // [fud, fomo, alpha, kek]
   //slot 3
@@ -28,32 +28,21 @@ struct InstallationType {
   string name;
 }
 
-//Prerequisites:
-/*
-Altar : none
-Harvester: Altar Lvl 1
-Reservoir: Altar Lvl 1
-Wall: Altar Lvl 1
-Lodge: Altar Lvl 4
-Lodge Lvl 4: Lodge Lvl 3 + Altar Level 6
-Lodge Lvl 7: Lodge Lvl 6 + Altar Lvl 9
-*/
-
 struct QueueItem {
   uint16 installationType;
-  uint256 id;
-  uint256 readyBlock;
   bool claimed;
+  uint40 readyBlock;
+  uint256 id;
   address owner;
 }
 
 struct UpgradeQueue {
   uint16 coordinateX;
   uint16 coordinateY;
+  uint40 readyBlock;
+  bool claimed;
   uint256 parcelId;
   uint256 installationId;
-  uint256 readyBlock;
-  bool claimed;
   address owner;
 }
 
