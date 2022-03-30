@@ -1,8 +1,13 @@
-import { BigNumber } from "ethers";
-import { ethers } from "hardhat";
+import { BigNumber, Signer } from "ethers";
+import { ethers, network } from "hardhat";
 import { installationTypes } from "../../data/installations/installationTypes";
-import { InstallationAdminFacet, InstallationFacet } from "../../typechain";
+import {
+  InstallationAdminFacet,
+  InstallationFacet,
+  OwnershipFacet,
+} from "../../typechain";
 import { InstallationTypeInput, InstallationTypeOutput } from "../../types";
+import { impersonate } from "../helperFunctions";
 
 function outputInstallation(
   installation: InstallationTypeInput
@@ -29,8 +34,8 @@ function outputInstallation(
     ],
     harvestRate: ethers.utils.parseEther(installation.harvestRate.toString()),
     capacity: ethers.utils.parseEther(installation.capacity.toString()),
-    spillRadius: ethers.utils.parseEther(installation.spillRadius.toString()),
-    spillRate: ethers.utils.parseEther(installation.spillRate.toString()),
+    spillRadius: installation.spillRadius.toString(),
+    spillRate: (installation.spillRate * 1000).toString(), //add on 3 zeroes for precision
     upgradeQueueBoost: installation.upgradeQueueBoost,
     craftTime: installation.craftTime,
     nextLevelId: installation.nextLevelId,
@@ -42,11 +47,31 @@ function outputInstallation(
 }
 
 export async function setAddresses() {
+  const accounts: Signer[] = await ethers.getSigners();
+  const deployer = accounts[0];
+
   const diamondAddress = "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
-  const installationAdminFacet = (await ethers.getContractAt(
+
+  const ownershipFacet = (await ethers.getContractAt(
+    "OwnershipFacet",
+    diamondAddress
+  )) as OwnershipFacet;
+  const owner = await ownershipFacet.owner();
+  console.log("owner:", owner);
+
+  let installationAdminFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
     diamondAddress
   )) as InstallationAdminFacet;
+
+  installationAdminFacet = await impersonate(
+    owner,
+    installationAdminFacet,
+    ethers,
+    network
+  );
+
+  console.log("deployer:", await deployer.getAddress());
 
   const installationFacet = (await ethers.getContractAt(
     "InstallationFacet",

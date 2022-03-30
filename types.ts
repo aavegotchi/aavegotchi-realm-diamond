@@ -48,14 +48,33 @@ export interface InstallationTypeInput {
   width: Width;
   height: Height;
   alchemicaType: 0 | 1 | 2 | 3;
+  alchemicaCost: [number, number, number, number];
+  harvestRate: number;
+  capacity: number;
+  spillRadius: number;
+  spillRate: number;
+  upgradeQueueBoost: number;
+  craftTime: number;
+  nextLevelId: number;
+  prerequisites: number[];
+  name: string;
+}
+
+export interface InstallationTypeOutput {
+  deprecated: boolean;
+  installationType: BigNumberish;
+  level: Level;
+  width: Width;
+  height: Height;
+  alchemicaType: BigNumberish;
   alchemicaCost: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
   harvestRate: BigNumberish;
   capacity: BigNumberish;
   spillRadius: BigNumberish;
   spillRate: BigNumberish;
   upgradeQueueBoost: BigNumberish;
-  craftTime: number;
-  nextLevelId: number;
-  prerequisites: number[];
+  craftTime: BigNumberish;
+  nextLevelId: BigNumberish;
+  prerequisites: BigNumberish[];
   name: string;
 }
