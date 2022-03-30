@@ -95,6 +95,10 @@ contract RealmFacet is Modifiers {
     output_.boost = parcel.alchemicaBoost;
   }
 
+  /// @notice Helper function to batch transfer alchemica to Aavegotchis
+  /// @param _gotchiIds Array of Gotchi IDs
+  /// @param _tokenAddresses Array of tokens to transfer
+  /// @param _amounts Nested array of amounts to transfer.
   function batchTransferTokensToGotchis(
     uint256[] calldata _gotchiIds,
     address[] calldata _tokenAddresses,
