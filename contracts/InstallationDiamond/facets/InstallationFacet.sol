@@ -13,8 +13,6 @@ import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
 import {LibSignature} from "../../libraries/LibSignature.sol";
 
-import "hardhat/console.sol";
-
 contract InstallationFacet is Modifiers {
   event AddedToQueue(uint256 indexed _queueId, uint256 indexed _installationId, uint256 _readyBlock, address _sender);
 
