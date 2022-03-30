@@ -37,6 +37,10 @@ export function outputInstallation(
   if (installation.width > 64) throw new Error("Width too much");
   if (installation.height > 64) throw new Error("Height too much");
 
+  const alchemica = installation.alchemicaCost.map((val) =>
+    ethers.utils.parseEther(val.toString())
+  );
+
   let output: InstallationTypeOutput = {
     deprecated: installation.deprecated,
     installationType: installation.installationType,
@@ -44,9 +48,12 @@ export function outputInstallation(
     width: installation.width,
     height: installation.height,
     alchemicaType: installation.alchemicaType,
-    alchemicaCost: installation.alchemicaCost.map((val) =>
-      ethers.utils.parseEther(val.toString())
-    ),
+    alchemicaCost: [
+      BigNumber.from(alchemica[0]),
+      BigNumber.from(alchemica[1]),
+      BigNumber.from(alchemica[2]),
+      BigNumber.from(alchemica[3]),
+    ],
     harvestRate: ethers.utils.parseEther(installation.harvestRate.toString()),
     capacity: ethers.utils.parseEther(installation.capacity.toString()),
     spillRadius: ethers.utils.parseEther(installation.spillRadius.toString()),
@@ -509,7 +516,7 @@ export async function deployAlchemica(ethers: any, diamondAddress: string) {
     ethers.utils.parseUnits("1000000000000"),
     diamondAddress,
     diamondAddress,
-    diamondAddress,
+    diamondAddress
   );
   await fomo.initialize(
     "FOMO",
@@ -517,7 +524,7 @@ export async function deployAlchemica(ethers: any, diamondAddress: string) {
     ethers.utils.parseUnits("250000000000"),
     diamondAddress,
     diamondAddress,
-    diamondAddress,
+    diamondAddress
   );
   await alpha.initialize(
     "ALPHA",
@@ -525,7 +532,7 @@ export async function deployAlchemica(ethers: any, diamondAddress: string) {
     ethers.utils.parseUnits("125000000000"),
     diamondAddress,
     diamondAddress,
-    diamondAddress,
+    diamondAddress
   );
   await kek.initialize(
     "KEK",
@@ -533,7 +540,7 @@ export async function deployAlchemica(ethers: any, diamondAddress: string) {
     ethers.utils.parseUnits("100000000000"),
     diamondAddress,
     diamondAddress,
-    diamondAddress,
+    diamondAddress
   );
 
   const Glmr = await ethers.getContractFactory("GLTR");

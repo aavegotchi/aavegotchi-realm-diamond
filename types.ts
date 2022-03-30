@@ -78,6 +78,7 @@ export interface InstallationType {
 }
 
 export interface InstallationTypeInput {
+  id?: number;
   deprecated: boolean;
   installationType: number;
   level: Level;
@@ -116,7 +117,7 @@ export interface InstallationTypeOutput {
   width: Width;
   height: Height;
   alchemicaType: BigNumberish;
-  alchemicaCost: BigNumberish[];
+  alchemicaCost: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
   harvestRate: BigNumberish;
   capacity: BigNumberish;
   spillRadius: BigNumberish;
