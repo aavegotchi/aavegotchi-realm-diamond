@@ -247,7 +247,7 @@ contract InstallationFacet is Modifiers {
 
         //put the installation into a queue
         //each wearable needs a unique queue id
-        s.craftQueue.push(QueueItem(_installationTypes[i], false, readyBlock, _nextCraftId, msg.sender));
+        s.craftQueue.push(QueueItem(msg.sender, _installationTypes[i], false, readyBlock, _nextCraftId));
 
         emit AddedToQueue(_nextCraftId, _installationTypes[i], readyBlock, msg.sender);
         _nextCraftId++;
@@ -416,13 +416,13 @@ contract InstallationFacet is Modifiers {
 
     uint40 readyBlock = uint40(block.number) + nextInstallation.craftTime;
     UpgradeQueue memory upgrade = UpgradeQueue(
+      _upgradeQueue.owner,
       _upgradeQueue.coordinateX,
       _upgradeQueue.coordinateY,
       readyBlock,
       false,
       _upgradeQueue.parcelId,
-      _upgradeQueue.installationId,
-      _upgradeQueue.owner
+      _upgradeQueue.installationId
     );
     s.upgradeQueue.push(upgrade);
 

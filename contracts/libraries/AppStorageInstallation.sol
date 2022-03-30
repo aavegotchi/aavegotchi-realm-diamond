@@ -29,21 +29,21 @@ struct InstallationType {
 }
 
 struct QueueItem {
+  address owner;
   uint16 installationType;
   bool claimed;
   uint40 readyBlock;
   uint256 id;
-  address owner;
 }
 
 struct UpgradeQueue {
+  address owner;
   uint16 coordinateX;
   uint16 coordinateY;
   uint40 readyBlock;
   bool claimed;
   uint256 parcelId;
   uint256 installationId;
-  address owner;
 }
 
 struct InstallationAppStorage {
