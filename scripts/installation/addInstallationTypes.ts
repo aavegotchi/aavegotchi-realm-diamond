@@ -75,16 +75,17 @@ export async function setAddresses() {
 
   const installationFacet = (await ethers.getContractAt(
     "InstallationFacet",
-    diamondAddress
+    diamondAddress,
+    deployer
   )) as InstallationFacet;
 
   const goldenAaltar = installationTypes.map((val) => outputInstallation(val));
 
   await installationAdminFacet.addInstallationTypes(goldenAaltar);
 
-  const installations = await installationFacet.getInstallationTypes([]);
+  await installationFacet.craftInstallations([1]);
 
-  console.log("instsllations:", installations);
+  //const installations = await installationFacet.getInstallationTypes([]);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
