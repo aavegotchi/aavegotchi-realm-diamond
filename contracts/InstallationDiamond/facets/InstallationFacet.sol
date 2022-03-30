@@ -226,7 +226,7 @@ contract InstallationFacet is Modifiers {
   /// @dev Will throw even if one of the installationTypes is deprecated
   /// @dev Puts the installation into a queue
   /// @param _installationTypes An array containing the identifiers of the installationTypes to craft
-  function craftInstallations(uint256[] calldata _installationTypes) external {
+  function craftInstallations(uint16[] calldata _installationTypes) external {
     address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
 
     uint256 _installationTypesLength = s.installationTypes.length;
@@ -249,7 +249,7 @@ contract InstallationFacet is Modifiers {
 
         //put the installation into a queue
         //each wearable needs a unique queue id
-        s.craftQueue.push(QueueItem(_nextCraftId, readyBlock, _installationTypes[i], false, msg.sender));
+        s.craftQueue.push(QueueItem(_installationTypes[i], _nextCraftId, readyBlock, false, msg.sender));
 
         emit AddedToQueue(_nextCraftId, _installationTypes[i], readyBlock, msg.sender);
         _nextCraftId++;
@@ -418,9 +418,9 @@ contract InstallationFacet is Modifiers {
 
     uint256 readyBlock = block.number + nextInstallation.craftTime;
     UpgradeQueue memory upgrade = UpgradeQueue(
-      _upgradeQueue.parcelId,
       _upgradeQueue.coordinateX,
       _upgradeQueue.coordinateY,
+      _upgradeQueue.parcelId,
       _upgradeQueue.installationId,
       readyBlock,
       false,

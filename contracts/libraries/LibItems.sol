@@ -6,7 +6,7 @@ import {IERC20} from "../interfaces/IERC20.sol";
 import {LibAppStorageInstallation, InstallationAppStorage} from "../libraries/AppStorageInstallation.sol";
 
 library LibItems {
-  function _splitAlchemica(uint256[] memory _alchemicaCost, address[4] memory _alchemicaAddresses) internal {
+  function _splitAlchemica(uint256[4] memory _alchemicaCost, address[4] memory _alchemicaAddresses) internal {
     InstallationAppStorage storage s = LibAppStorageInstallation.diamondStorage();
     //take the required alchemica and split it
     for (uint256 i = 0; i < _alchemicaCost.length; i++) {

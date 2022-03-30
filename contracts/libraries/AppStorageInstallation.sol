@@ -4,21 +4,27 @@ import {LibDiamond} from "./LibDiamond.sol";
 import "hardhat/console.sol";
 
 struct InstallationType {
-  uint256 width;
-  uint256 height;
-  bool deprecated;
+  //slot 1
+  uint8 width; //uint8 = 8 bytes
+  uint8 height;
   uint16 installationType; //0 = altar, 1 = harvester, 2 = reservoir, 3 = gotchi lodge, 4 = wall, 5 = NFT display, 6 = buildqueue booster
-  uint16 level;
-  uint16 alchemicaType; //0 = none 1 = fud, 2 = fomo, 3 = alpha, 4 = kek
-  uint256[] alchemicaCost; // [fud, fomo, alpha, kek]
+  uint8 level; //max level 9
+  uint8 alchemicaType; //0 = none 1 = fud, 2 = fomo, 3 = alpha, 4 = kek
+  uint32 spillRadius; //uint32
+  uint16 spillRate; //uint16
+  uint8 upgradeQueueBoost; //uint8
+  uint32 craftTime; // in blocks //uint32
+  uint32 nextLevelId; //the ID of the next level of this installation. Used for upgrades. //uint32
+  bool deprecated; //bool = 1 byte
+  //slot 2
+  uint256[4] alchemicaCost; // [fud, fomo, alpha, kek]
+  //slot 3
   uint256 harvestRate;
+  //slot 4
   uint256 capacity;
-  uint256 spillRadius;
-  uint256 spillRate;
-  uint256 upgradeQueueBoost;
-  uint256 craftTime; // in blocks
-  uint256 nextLevelId; //the ID of the next level of this installation. Used for upgrades.
+  //slot 5
   uint256[] prerequisites; //IDs of installations that must be present before this installation can be added
+  //slot 6
   string name;
 }
 
@@ -34,17 +40,17 @@ Lodge Lvl 7: Lodge Lvl 6 + Altar Lvl 9
 */
 
 struct QueueItem {
+  uint16 installationType;
   uint256 id;
   uint256 readyBlock;
-  uint256 installationType;
   bool claimed;
   address owner;
 }
 
 struct UpgradeQueue {
+  uint16 coordinateX;
+  uint16 coordinateY;
   uint256 parcelId;
-  uint256 coordinateX;
-  uint256 coordinateY;
   uint256 installationId;
   uint256 readyBlock;
   bool claimed;

@@ -58,18 +58,18 @@ contract InstallationAdminFacet is Modifiers {
         InstallationType(
           _installationTypes[i].width,
           _installationTypes[i].height,
-          _installationTypes[i].deprecated,
           _installationTypes[i].installationType,
           _installationTypes[i].level,
           _installationTypes[i].alchemicaType,
-          _installationTypes[i].alchemicaCost,
-          _installationTypes[i].harvestRate,
-          _installationTypes[i].capacity,
           _installationTypes[i].spillRadius,
           _installationTypes[i].spillRate,
           _installationTypes[i].upgradeQueueBoost,
           _installationTypes[i].craftTime,
           _installationTypes[i].nextLevelId,
+          _installationTypes[i].deprecated,
+          _installationTypes[i].alchemicaCost,
+          _installationTypes[i].harvestRate,
+          _installationTypes[i].capacity,
           _installationTypes[i].prerequisites,
           _installationTypes[i].name
         )
