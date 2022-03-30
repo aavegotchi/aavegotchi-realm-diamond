@@ -338,19 +338,19 @@ describe("Installations tests", async function () {
     let upgradeQueue = await installationFacet.getUpgradeQueue(parcelOwner);
     expect(upgradeQueue.length).to.equal(1);
 
-    await expect(installationFacet.finalizeUpgrade()).to.be.revertedWith(
+    await expect(installationAdminFacet.finalizeUpgrade()).to.be.revertedWith(
       "InstallationFacet: No upgrades ready"
     );
 
     //Complete upgrade
     await mineBlocks(ethers, 10001);
 
-    await installationFacet.finalizeUpgrade();
+    await installationAdminFacet.finalizeUpgrade();
 
     upgradeQueue = await installationFacet.getUpgradeQueue(parcelOwner);
     expect(upgradeQueue.length).to.equal(0);
 
-    await expect(installationFacet.finalizeUpgrade()).to.be.revertedWith(
+    await expect(installationAdminFacet.finalizeUpgrade()).to.be.revertedWith(
       "InstallationFacet: No upgrades"
     );
 
