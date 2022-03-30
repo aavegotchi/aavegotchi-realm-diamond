@@ -7,7 +7,11 @@ import {
   OwnershipFacet,
 } from "../../typechain";
 import { InstallationTypeInput, InstallationTypeOutput } from "../../types";
-import { impersonate } from "../helperFunctions";
+import {
+  approveRealAlchemica,
+  faucetRealAlchemica,
+  impersonate,
+} from "../helperFunctions";
 
 function outputInstallation(
   installation: InstallationTypeInput
@@ -82,6 +86,15 @@ export async function setAddresses() {
   const goldenAaltar = installationTypes.map((val) => outputInstallation(val));
 
   await installationAdminFacet.addInstallationTypes(goldenAaltar);
+
+  await approveRealAlchemica(
+    await deployer.getAddress(),
+    diamondAddress,
+    ethers,
+    network
+  );
+
+  await faucetRealAlchemica(await deployer.getAddress(), ethers, network);
 
   await installationFacet.craftInstallations([1]);
 

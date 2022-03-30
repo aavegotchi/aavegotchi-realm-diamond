@@ -1,7 +1,11 @@
 import { Signer } from "@ethersproject/abstract-signer";
 import { Contract } from "@ethersproject/contracts";
-import { HardhatRuntimeEnvironment, Network } from "hardhat/types";
-import { DiamondLoupeFacet, OwnershipFacet } from "../typechain";
+import { Network } from "hardhat/types";
+import {
+  AlchemicaToken,
+  DiamondLoupeFacet,
+  OwnershipFacet,
+} from "../typechain";
 
 export const gasPrice = 75000000000;
 
@@ -112,4 +116,54 @@ export async function mineBlocks(ethers: any, count: number) {
   //convert to hex and handle invalid leading 0 problem
   const number = ethers.utils.hexlify(count).replace("0x0", "0x");
   await ethers.provider.send("hardhat_mine", [number]);
+}
+
+export async function faucetRealAlchemica(
+  receiver: string,
+  ethers: any,
+  network: Network
+) {
+  const alchemica = [
+    "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f",
+    "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8",
+    "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2",
+    "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C",
+  ];
+
+  for (let i = 0; i < alchemica.length; i++) {
+    const alchemicaToken = alchemica[i];
+    let token = (await ethers.getContractAt(
+      "AlchemicaToken",
+      alchemicaToken
+    )) as AlchemicaToken;
+    token = await impersonate(await token.owner(), token, ethers, network);
+    await token.mint(receiver, ethers.utils.parseEther("10000"));
+  }
+}
+
+export async function approveRealAlchemica(
+  address: string,
+  installationAddress: string,
+  ethers: any,
+  network: Network
+) {
+  const alchemica = [
+    "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f",
+    "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8",
+    "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2",
+    "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C",
+  ];
+
+  for (let i = 0; i < alchemica.length; i++) {
+    const alchemicaToken = alchemica[i];
+    let token = (await ethers.getContractAt(
+      "AlchemicaToken",
+      alchemicaToken
+    )) as AlchemicaToken;
+    token = await impersonate(address, token, ethers, network);
+    await token.approve(
+      installationAddress,
+      ethers.utils.parseUnits("1000000000")
+    );
+  }
 }
