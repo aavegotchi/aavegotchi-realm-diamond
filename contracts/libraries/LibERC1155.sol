@@ -131,7 +131,7 @@ library LibERC1155 {
     if (size > 0) {
       require(
         ERC1155_ACCEPTED == IERC1155TokenReceiver(_to).onERC1155Received(_operator, _from, _id, _value, _data),
-        "Wearables: Transfer rejected/failed by _to"
+        "LibERC1155: Transfer rejected/failed by _to"
       );
     }
   }
@@ -151,7 +151,7 @@ library LibERC1155 {
     if (size > 0) {
       require(
         ERC1155_BATCH_ACCEPTED == IERC1155TokenReceiver(_to).onERC1155BatchReceived(_operator, _from, _ids, _values, _data),
-        "Wearables: Transfer rejected/failed by _to"
+        "LibERC1155: Transfer rejected/failed by _to"
       );
     }
   }
