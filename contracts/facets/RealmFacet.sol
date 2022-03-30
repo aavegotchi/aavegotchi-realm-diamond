@@ -83,6 +83,10 @@ contract RealmFacet is Modifiers {
     s.alchemicaAddresses = _alchemicaAddresses;
   }
 
+  function getAlchemicaAddresses() external view returns (address[4] memory) {
+    return s.alchemicaAddresses;
+  }
+
   function getParcelInfo(uint256 _tokenId) external view returns (ParcelOutput memory output_) {
     Parcel storage parcel = s.parcels[_tokenId];
     output_.parcelId = parcel.parcelId;
