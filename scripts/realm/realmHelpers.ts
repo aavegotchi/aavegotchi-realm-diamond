@@ -509,7 +509,7 @@ export async function deployAlchemica(ethers: any, diamondAddress: string) {
     ethers.utils.parseUnits("1000000000000"),
     diamondAddress,
     diamondAddress,
-    diamondAddress,
+    diamondAddress
   );
   await fomo.initialize(
     "FOMO",
@@ -517,7 +517,7 @@ export async function deployAlchemica(ethers: any, diamondAddress: string) {
     ethers.utils.parseUnits("250000000000"),
     diamondAddress,
     diamondAddress,
-    diamondAddress,
+    diamondAddress
   );
   await alpha.initialize(
     "ALPHA",
@@ -525,7 +525,7 @@ export async function deployAlchemica(ethers: any, diamondAddress: string) {
     ethers.utils.parseUnits("125000000000"),
     diamondAddress,
     diamondAddress,
-    diamondAddress,
+    diamondAddress
   );
   await kek.initialize(
     "KEK",
@@ -533,7 +533,7 @@ export async function deployAlchemica(ethers: any, diamondAddress: string) {
     ethers.utils.parseUnits("100000000000"),
     diamondAddress,
     diamondAddress,
-    diamondAddress,
+    diamondAddress
   );
 
   const Glmr = await ethers.getContractFactory("GLTR");
@@ -762,6 +762,32 @@ export async function faucetAlchemica(
   //   const tx = await alchemicaFacet.testingAlchemicaFaucet(index, parsed);
   //   await tx.wait();
   // }
+}
+
+export async function approveRealAlchemica(
+  address: string,
+  installationAddress: string,
+  ethers: any
+) {
+  const alchemica = [
+    "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f",
+    "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8",
+    "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2",
+    "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C",
+  ];
+
+  for (let i = 0; i < alchemica.length; i++) {
+    const alchemicaToken = alchemica[i];
+    let token = (await ethers.getContractAt(
+      "AlchemicaToken",
+      alchemicaToken
+    )) as AlchemicaToken;
+    token = await impersonate(address, token, ethers, network);
+    await token.approve(
+      installationAddress,
+      ethers.utils.parseUnits("1000000000")
+    );
+  }
 }
 
 export async function approveAlchemica(

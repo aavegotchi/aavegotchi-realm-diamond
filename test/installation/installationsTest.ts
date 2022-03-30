@@ -1,7 +1,9 @@
 import {
+  aavegotchiDAOAddress,
   impersonate,
   maticAavegotchiDiamondAddress,
   mineBlocks,
+  pixelcraftAddress,
 } from "../../scripts/helperFunctions";
 import {
   InstallationFacet,
@@ -17,7 +19,11 @@ import {
   maticGhstAddress,
   maticRealmDiamondAddress,
 } from "../../scripts/installation/helperFunctions";
-import { genUpgradeInstallationSignature } from "../../scripts/realm/realmHelpers";
+import {
+  approveAlchemica,
+  approveRealAlchemica,
+  genUpgradeInstallationSignature,
+} from "../../scripts/realm/realmHelpers";
 import { InstallationTypeInput } from "../../types";
 
 describe("Installations tests", async function () {
@@ -64,8 +70,8 @@ describe("Installations tests", async function () {
       maticAavegotchiDiamondAddress,
       maticRealmDiamondAddress,
       ethers.constants.AddressZero, //replace
-      ethers.constants.AddressZero, //replace
-      ethers.constants.AddressZero, //replace
+      pixelcraftAddress,
+      aavegotchiDAOAddress,
       maticGhstAddress
     );
   });
@@ -158,6 +164,9 @@ describe("Installations tests", async function () {
       ethers,
       network
     );
+
+    await approveRealAlchemica(testAddress, diamondAddress, ethers);
+
     await ghst.approve(
       installationFacet.address,
       ethers.utils.parseUnits("1000000000")
