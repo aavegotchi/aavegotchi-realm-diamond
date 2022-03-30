@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-import {InstallationType, Modifiers} from "../../libraries/AppStorageInstallation.sol";
+import {InstallationType, Modifiers, UpgradeQueue} from "../../libraries/AppStorageInstallation.sol";
 import {LibStrings} from "../../libraries/LibStrings.sol";
 import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
+import {LibInstallation} from "../../libraries/LibInstallation.sol";
+import {LibERC1155} from "../../libraries/LibERC1155.sol";
 
 import "hardhat/console.sol";
 
@@ -16,6 +18,8 @@ contract InstallationAdminFacet is Modifiers {
     address _aavegotchiDAO,
     bytes _backendPubKey
   );
+
+  event UpgradeFinalized(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY);
 
   /// @notice Allow the Diamond owner to deprecate an installation
   /// @dev Deprecated installations cannot be crafted by users
@@ -58,18 +62,18 @@ contract InstallationAdminFacet is Modifiers {
         InstallationType(
           _installationTypes[i].width,
           _installationTypes[i].height,
-          _installationTypes[i].deprecated,
           _installationTypes[i].installationType,
           _installationTypes[i].level,
           _installationTypes[i].alchemicaType,
-          _installationTypes[i].alchemicaCost,
-          _installationTypes[i].harvestRate,
-          _installationTypes[i].capacity,
           _installationTypes[i].spillRadius,
           _installationTypes[i].spillRate,
           _installationTypes[i].upgradeQueueBoost,
           _installationTypes[i].craftTime,
           _installationTypes[i].nextLevelId,
+          _installationTypes[i].deprecated,
+          _installationTypes[i].alchemicaCost,
+          _installationTypes[i].harvestRate,
+          _installationTypes[i].capacity,
           _installationTypes[i].prerequisites,
           _installationTypes[i].name
         )
@@ -82,5 +86,55 @@ contract InstallationAdminFacet is Modifiers {
   /// @param _installationType A struct containing the new properties of the installationType being edited
   function editInstallationType(uint256 _typeId, InstallationType calldata _installationType) external onlyOwner {
     s.installationTypes[_typeId] = _installationType;
+  }
+
+  /// @notice Allow anyone to finalize any existing queue upgrade
+  /// @dev Only three queue upgrades can be finalized in one transaction
+  function finalizeUpgrade() public {
+    require(s.upgradeQueue.length > 0, "InstallationFacet: No upgrades");
+    //can only process 3 upgrades per tx
+    uint256 counter = 3;
+    uint256 offset;
+    uint256 _upgradeQueueLength = s.upgradeQueue.length;
+    for (uint256 index; index < _upgradeQueueLength; index++) {
+      UpgradeQueue memory queueUpgrade = s.upgradeQueue[index - offset];
+      // check that upgrade is ready
+      if (block.number >= queueUpgrade.readyBlock) {
+        // burn old installation
+        LibInstallation._unequipInstallation(queueUpgrade.parcelId, queueUpgrade.installationId);
+        // mint new installation
+        uint256 nextLevelId = s.installationTypes[queueUpgrade.installationId].nextLevelId;
+        LibERC1155._safeMint(queueUpgrade.owner, nextLevelId, index);
+        // equip new installation
+        LibInstallation._equipInstallation(queueUpgrade.owner, queueUpgrade.parcelId, nextLevelId);
+
+        RealmDiamond realm = RealmDiamond(s.realmDiamond);
+        realm.upgradeInstallation(
+          queueUpgrade.parcelId,
+          queueUpgrade.installationId,
+          nextLevelId,
+          queueUpgrade.coordinateX,
+          queueUpgrade.coordinateY
+        );
+
+        // update updateQueueLength
+        realm.subUpgradeQueueLength(queueUpgrade.parcelId);
+
+        // clean unique hash
+        bytes32 uniqueHash = keccak256(
+          abi.encodePacked(queueUpgrade.parcelId, queueUpgrade.coordinateX, queueUpgrade.coordinateY, queueUpgrade.installationId)
+        );
+        s.upgradeHashes[uniqueHash] = 0;
+
+        // pop upgrade from array
+        s.upgradeQueue[index] = s.upgradeQueue[s.upgradeQueue.length - 1];
+        s.upgradeQueue.pop();
+        counter--;
+        offset++;
+        emit UpgradeFinalized(queueUpgrade.parcelId, queueUpgrade.coordinateX, queueUpgrade.coordinateY);
+      }
+      if (counter == 0) break;
+      if (counter == 3) revert("InstallationFacet: No upgrades ready");
+    }
   }
 }

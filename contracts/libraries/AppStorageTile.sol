@@ -8,7 +8,7 @@ struct TileType {
   uint256 height;
   bool deprecated;
   uint16 tileType;
-  uint256[] alchemicaCost; // [fud, fomo, alpha, kek]
+  uint256[4] alchemicaCost; // [fud, fomo, alpha, kek]
   uint256 craftTime; // in blocks
   string name;
 }
