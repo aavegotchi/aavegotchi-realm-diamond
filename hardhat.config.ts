@@ -42,7 +42,7 @@ module.exports = {
       accounts: [process.env.SECRET],
       // blockGasLimit: 20000000,
       blockGasLimit: 20000000,
-      gasPrice: 10000000000,
+      gasPrice: 100000000000,
       //   timeout: 90000
     },
     mumbai: {

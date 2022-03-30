@@ -1,5 +1,5 @@
 import { BigNumber, Signer } from "ethers";
-import { ethers, network } from "hardhat";
+import { ethers } from "hardhat";
 import { installationTypes } from "../../data/installations/installationTypes";
 import {
   InstallationAdminFacet,
@@ -8,9 +8,11 @@ import {
 } from "../../typechain";
 import { InstallationTypeInput, InstallationTypeOutput } from "../../types";
 import {
-  approveRealAlchemica,
-  faucetRealAlchemica,
-  impersonate,
+  aavegotchiDAOAddress,
+  gasPrice,
+  maticAavegotchiDiamondAddress,
+  maticDiamondAddress,
+  pixelcraftAddress,
 } from "../helperFunctions";
 
 function outputInstallation(
@@ -65,15 +67,9 @@ export async function setAddresses() {
 
   let installationAdminFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
-    diamondAddress
+    diamondAddress,
+    deployer
   )) as InstallationAdminFacet;
-
-  installationAdminFacet = await impersonate(
-    owner,
-    installationAdminFacet,
-    ethers,
-    network
-  );
 
   console.log("deployer:", await deployer.getAddress());
 
@@ -85,20 +81,21 @@ export async function setAddresses() {
 
   const goldenAaltar = installationTypes.map((val) => outputInstallation(val));
 
-  await installationAdminFacet.addInstallationTypes(goldenAaltar);
+  await installationAdminFacet.addInstallationTypes(goldenAaltar, {
+    gasPrice: gasPrice,
+  });
 
-  await approveRealAlchemica(
-    await deployer.getAddress(),
-    diamondAddress,
-    ethers,
-    network
+  await installationAdminFacet.setAddresses(
+    maticAavegotchiDiamondAddress,
+    maticDiamondAddress,
+    ethers.constants.AddressZero,
+    pixelcraftAddress,
+    aavegotchiDAOAddress,
+    { gasPrice: gasPrice }
   );
 
-  await faucetRealAlchemica(await deployer.getAddress(), ethers, network);
-
-  await installationFacet.craftInstallations([1]);
-
-  //const installations = await installationFacet.getInstallationTypes([]);
+  const installations = await installationFacet.getInstallationTypes([]);
+  console.log("installations:", installations);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
