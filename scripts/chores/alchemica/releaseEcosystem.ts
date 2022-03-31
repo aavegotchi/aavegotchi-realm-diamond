@@ -6,9 +6,9 @@ import {
   ecosystemVesting,
   gameplayVesting,
   impersonate,
-} from "../helperFunctions";
-import { AlchemicaVesting } from "../../typechain/AlchemicaVesting";
-import { AlchemicaToken } from "../../typechain";
+} from "../../helperFunctions";
+import { AlchemicaVesting } from "../../../typechain/AlchemicaVesting";
+import { AlchemicaToken } from "../../../typechain";
 
 export async function setAddresses() {
   const accounts: Signer[] = await ethers.getSigners();

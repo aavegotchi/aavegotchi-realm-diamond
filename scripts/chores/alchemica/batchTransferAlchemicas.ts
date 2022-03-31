@@ -1,8 +1,12 @@
 import { BigNumber, BigNumberish, Signer } from "ethers";
 import { ethers, network } from "hardhat";
 
-import { AlchemicaToken, RealmFacet } from "../typechain";
-import { alchemica, impersonate, maticDiamondAddress } from "./helperFunctions";
+import { AlchemicaToken, RealmFacet } from "../../../typechain";
+import {
+  alchemica,
+  impersonate,
+  maticDiamondAddress,
+} from "../../helperFunctions";
 // import { upgrade } from "../scripts/upgrades/upgrade-fixDiamond";
 
 export async function setAddresses() {

@@ -1,8 +1,8 @@
 import { Signer } from "ethers";
 import { ethers, network } from "hardhat";
 
-import { RealmFacet } from "../typechain";
-import { impersonate, maticDiamondAddress } from "./helperFunctions";
+import { RealmFacet } from "../../../typechain";
+import { impersonate, maticDiamondAddress } from "../../helperFunctions";
 // import { upgrade } from "../scripts/upgrades/upgrade-fixDiamond";
 
 export async function setAddresses() {

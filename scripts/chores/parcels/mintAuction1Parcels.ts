@@ -1,8 +1,8 @@
 //@ts-ignore
 import { run, ethers } from "hardhat";
-import { MintParcelsTaskArgs } from "../../tasks/mintParcels";
-import { auction1 } from "../../data/auction1";
-import { maticDiamondAddress } from "../helperFunctions";
+import { MintParcelsTaskArgs } from "../../../tasks/mintParcels";
+import { auction1 } from "../../../data/auction1";
+import { maticDiamondAddress } from "../../helperFunctions";
 
 export async function mintParcels() {
   const maxProcess = 50;
