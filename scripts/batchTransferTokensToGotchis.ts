@@ -15,8 +15,6 @@ export async function setAddresses() {
     deployer
   )) as RealmFacet;
 
-  await upgrade();
-
   const mauvis = "0x619dfbec3273ceeef52839d78069294ce1c4ce7b";
 
   realmFacet = await impersonate(mauvis, realmFacet, ethers, network);
