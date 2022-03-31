@@ -6,7 +6,7 @@ import "hardhat-contract-sizer";
 import "@nomiclabs/hardhat-etherscan";
 import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname + "/.env" });
-require("./tasks/generateDiamondABI.js");
+require("./tasks/generateDiamondABI_realm.js");
 require("./tasks/generateDiamondABI_installation.js");
 require("./tasks/verifyFacet.js");
 require("./tasks/mintParcels.ts");
