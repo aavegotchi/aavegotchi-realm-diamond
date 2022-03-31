@@ -1,12 +1,14 @@
 import { Signer } from "ethers";
 import { ethers, network } from "hardhat";
 
-import { RealmFacet } from "../typechain";
 import {
-  ecosystemVesting,
+  alchemica,
   ecosystemVesting,
   gameplayVesting,
+  impersonate,
 } from "../helperFunctions";
+import { AlchemicaVesting } from "../../typechain/AlchemicaVesting";
+import { AlchemicaToken } from "../../typechain";
 
 export async function setAddresses() {
   const accounts: Signer[] = await ethers.getSigners();
@@ -16,28 +18,41 @@ export async function setAddresses() {
     "AlchemicaVesting",
     ecosystemVesting,
     deployer
-  )) as RealmFacet;
+  )) as AlchemicaVesting;
 
-  const mauvis = "0x619dfbec3273ceeef52839d78069294ce1c4ce7b";
-
-  //   realmFacet = await impersonate(mauvis, realmFacet, ethers, network);
-
-  const amounts = [
-    ethers.utils.parseEther("10"),
-    ethers.utils.parseEther("10"),
-    ethers.utils.parseEther("10"),
-    ethers.utils.parseEther("10"),
+  const amountToRelease = [
+    ethers.utils.parseEther("4196056"),
+    ethers.utils.parseEther("2098028"),
+    ethers.utils.parseEther("1049014"),
+    ethers.utils.parseEther("419605"),
   ];
-  await realmFacet.batchTransferTokensToGotchis(
-    [20284],
-    [
-      "0x660dA6FC1D04F9eCFcbe475418325137a1fD3042", //fake fud
-      "0x077Ab14B3b355a052670a9ec12677B155AA12D05", //fake fomo
-      "0x97c1e625D0B1CEB2C0D09e5F1b2A4b296C8Ec6ea", //fake alpha
-      "0xF3D31c7CF172c622b2140D4424cFdE20751407d9", //fake kek
-    ],
-    [amounts]
-  );
+
+  const beneficiary = await ecosystemVestingContract.beneficiary();
+  console.log("beneficiary is:", beneficiary);
+
+  for (let i = 0; i < alchemica.length; i++) {
+    const element = alchemica[i];
+
+    let releasableamount = await ecosystemVestingContract.releasableAmount(
+      element
+    );
+    console.log("amount before:", ethers.utils.formatEther(releasableamount));
+    const tx = await ecosystemVestingContract.partialRelease(
+      element,
+      amountToRelease[i]
+    );
+    await tx.wait();
+
+    releasableamount = await ecosystemVestingContract.releasableAmount(element);
+    console.log("amount after:", ethers.utils.formatEther(releasableamount));
+
+    const token = (await ethers.getContractAt(
+      "AlchemicaToken",
+      element
+    )) as AlchemicaToken;
+    const bal = await token.balanceOf(beneficiary);
+    console.log("balance is now:", ethers.utils.formatEther(bal));
+  }
 }
 
 // We recommend this pattern to be able to use async/await everywhere
