@@ -70,6 +70,16 @@ export const aavegotchiDAOAddress =
   "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
 export const pixelcraftAddress = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
 
+export const alchemica = [
+  "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f",
+  "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8",
+  "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2",
+  "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C",
+];
+
+export const ecosystemVesting = "0x7e07313B4FF259743C0c84eA3d5e741D2b0d07c3";
+export const gameplayVesting = "0x3fB6C2A83d2FfFe94e0b912b612fB100047cc176";
+
 export async function diamondOwner(address: string, ethers: any) {
   return await (await ethers.getContractAt("OwnershipFacet", address)).owner();
 }
@@ -123,13 +133,6 @@ export async function faucetRealAlchemica(
   ethers: any,
   network: Network
 ) {
-  const alchemica = [
-    "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f",
-    "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8",
-    "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2",
-    "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C",
-  ];
-
   for (let i = 0; i < alchemica.length; i++) {
     const alchemicaToken = alchemica[i];
     let token = (await ethers.getContractAt(
@@ -147,13 +150,6 @@ export async function approveRealAlchemica(
   ethers: any,
   network: Network
 ) {
-  const alchemica = [
-    "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f",
-    "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8",
-    "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2",
-    "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C",
-  ];
-
   for (let i = 0; i < alchemica.length; i++) {
     const alchemicaToken = alchemica[i];
     let token = (await ethers.getContractAt(

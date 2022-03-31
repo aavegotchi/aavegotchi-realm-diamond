@@ -2,22 +2,25 @@ import { Signer } from "ethers";
 import { ethers, network } from "hardhat";
 
 import { RealmFacet } from "../typechain";
-import { impersonate, maticDiamondAddress } from "./helperFunctions";
-// import { upgrade } from "../scripts/upgrades/upgrade-fixDiamond";
+import {
+  ecosystemVesting,
+  ecosystemVesting,
+  gameplayVesting,
+} from "../helperFunctions";
 
 export async function setAddresses() {
   const accounts: Signer[] = await ethers.getSigners();
   const deployer = accounts[0];
 
-  let realmFacet = (await ethers.getContractAt(
-    "RealmFacet",
-    maticDiamondAddress,
+  let ecosystemVestingContract = (await ethers.getContractAt(
+    "AlchemicaVesting",
+    ecosystemVesting,
     deployer
   )) as RealmFacet;
 
   const mauvis = "0x619dfbec3273ceeef52839d78069294ce1c4ce7b";
 
-  realmFacet = await impersonate(mauvis, realmFacet, ethers, network);
+  //   realmFacet = await impersonate(mauvis, realmFacet, ethers, network);
 
   const amounts = [
     ethers.utils.parseEther("10"),
