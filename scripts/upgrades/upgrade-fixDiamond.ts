@@ -4,8 +4,7 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../tasks/deployUpgrade";
-import { RealmFacet__factory } from "../../typechain";
-import { RealmFacetInterface } from "../../typechain/RealmFacet";
+
 import { maticDiamondAddress } from "../helperFunctions";
 
 export async function upgrade() {
