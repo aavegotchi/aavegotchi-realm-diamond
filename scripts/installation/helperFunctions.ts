@@ -76,6 +76,9 @@ export const maticAavegotchiDiamondAddress =
 export const mumbaiInstallationDiamondAddress =
   "0x4638B8127D1FC1bb69732c8D82Ea0Ab487A79e23";
 
+export const maticInstallationDiamondAddress =
+  "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
+
 export const maticGhstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
 export async function diamondOwner(address: string, ethers: any) {
   return await (await ethers.getContractAt("OwnershipFacet", address)).owner();

@@ -6,5 +6,5 @@ interface AavegotchiDiamond {
 
   function gotchiEscrow(uint256 _tokenId) external view returns (address);
 
-  function isAavegotchiLent(uint256 _erc721TokenId) external view returns (bool);
+  function isAavegotchiLent(uint32 _erc721TokenId) external view returns (bool);
 }

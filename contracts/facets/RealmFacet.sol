@@ -149,7 +149,7 @@ contract RealmFacet is Modifiers {
   function alchemicaRecipient(uint256 _gotchiId) internal view returns (address) {
     AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
 
-    if (diamond.isAavegotchiLent(_gotchiId)) {
+    if (diamond.isAavegotchiLent(uint32(_gotchiId))) {
       return diamond.gotchiEscrow(_gotchiId);
     } else {
       return diamond.ownerOf(_gotchiId);
