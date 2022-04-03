@@ -19,12 +19,12 @@ export async function setAddresses() {
     deployer
   )) as RealmFacet;
 
-  const wallet = "0x2C1a288353e136b9E4b467AADb307133ffFeaB25";
+  const wallet = "0xa0f32863AC0e82d36Df959A95FeDb661C1d32A6f";
 
   const amounts: [BigNumberish, BigNumberish, BigNumberish, BigNumberish] = [
-    ethers.utils.parseEther("500000"),
-    ethers.utils.parseEther("250000"),
-    ethers.utils.parseEther("125000"),
+    ethers.utils.parseEther("400000"),
+    ethers.utils.parseEther("200000"),
+    ethers.utils.parseEther("100000"),
     ethers.utils.parseEther("50000"),
   ];
 
@@ -45,16 +45,19 @@ export async function setAddresses() {
       token = await impersonate(owner, token, ethers, network);
     }
 
-    const allowance = await token.allowance(owner, maticDiamondAddress);
-    console.log("Allowance:", ethers.utils.formatEther(allowance));
+    // console.log("owner:", owner);
 
-    const bal = await token.balanceOf(wallet);
-    console.log("Before balance:", ethers.utils.formatEther(bal));
+    // const allowance = await token.allowance(owner, maticDiamondAddress);
+    // console.log("Allowance:", ethers.utils.formatEther(allowance));
+
+    // const bal = await token.balanceOf(wallet);
+    // console.log("Before balance:", ethers.utils.formatEther(bal));
   }
 
   console.log("Batch transferring tokens to!", wallet);
 
   if (testing) {
+    console.log("impersonate:");
     realmFacet = await impersonate(owner, realmFacet, ethers, network);
   }
   //transfer
@@ -67,6 +70,11 @@ export async function setAddresses() {
       "AlchemicaToken",
       alc
     )) as AlchemicaToken;
+
+    // await token.approve(
+    //   maticDiamondAddress,
+    //   ethers.utils.parseEther("10000000000")
+    // );
 
     const bal = await token.balanceOf(wallet);
     console.log("After balance:", ethers.utils.formatEther(bal));

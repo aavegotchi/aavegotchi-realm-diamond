@@ -19,7 +19,7 @@ export async function setAddresses() {
     ethers.utils.parseEther("500000"),
     ethers.utils.parseEther("250000"),
     ethers.utils.parseEther("125000"),
-    ethers.utils.parseEther("50000"),
+    ethers.utils.parseEther("0"),
   ];
 
   const beneficiary = await ecosystemVestingContract.beneficiary();
@@ -31,6 +31,12 @@ export async function setAddresses() {
     let releasableamount = await ecosystemVestingContract.releasableAmount(
       element
     );
+
+    if (amountToRelease[i].eq(0)) {
+      console.log("skip:", element);
+      continue;
+    }
+
     console.log("amount before:", ethers.utils.formatEther(releasableamount));
     const tx = await ecosystemVestingContract.partialRelease(
       element,
@@ -40,6 +46,8 @@ export async function setAddresses() {
 
     releasableamount = await ecosystemVestingContract.releasableAmount(element);
     console.log("amount after:", ethers.utils.formatEther(releasableamount));
+
+    console.log("element:", element);
 
     const token = (await ethers.getContractAt(
       "AlchemicaToken",
