@@ -13,3 +13,5 @@ cache
 cache/
 logs
 typechain
+yarn.lock
+package-lock.json
