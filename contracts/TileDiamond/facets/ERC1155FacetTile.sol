@@ -82,14 +82,11 @@ contract ERC1155FacetTile is Modifiers {
     LibERC1155Tile.onERC1155BatchReceived(sender, _from, _to, _ids, _values, _data);
   }
 
-  function setApprovalForAll(
-    address owner,
-    address operator,
-    bool approved
-  ) external {
-    require(owner != operator, "ERC1155Facet: setting approval status for self");
-    s.operators[owner][operator] = approved;
-    emit LibERC1155Tile.ApprovalForAll(owner, operator, approved);
+  function setApprovalForAll(address _operator, bool _approved) external {
+    address sender = LibMeta.msgSender();
+    require(sender != _operator, "ERC1155Facet: setting approval status for self");
+    s.operators[sender][_operator] = _approved;
+    emit LibERC1155Tile.ApprovalForAll(sender, _operator, _approved);
   }
 
   /// @notice Get the URI for a voucher type
