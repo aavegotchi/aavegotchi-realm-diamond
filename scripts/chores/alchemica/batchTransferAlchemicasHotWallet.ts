@@ -58,7 +58,8 @@ export async function setAddresses() {
     realmFacet = await impersonate(owner, realmFacet, ethers, network);
   }
   //transfer
-  await realmFacet.batchTransferAlchemica([wallet], [amounts]);
+  const tx = await realmFacet.batchTransferAlchemica([wallet], [amounts]);
+  await tx.wait();
 
   for (let i = 0; i < alchemica.length; i++) {
     const alc = alchemica[i];
