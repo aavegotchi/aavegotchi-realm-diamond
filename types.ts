@@ -48,7 +48,7 @@ export interface InstallationTypeInput {
   width: Width;
   height: Height;
   alchemicaType: 0 | 1 | 2 | 3;
-  alchemicaCost: [number, number, number, number];
+  alchemicaCost: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
   harvestRate: number;
   capacity: number;
   spillRadius: number;
@@ -76,5 +76,25 @@ export interface InstallationTypeOutput {
   craftTime: BigNumberish;
   nextLevelId: BigNumberish;
   prerequisites: BigNumberish[];
+  name: string;
+}
+
+export interface TileTypeInput {
+  deprecated: boolean;
+  tileType: number;
+  width: Width;
+  height: Height;
+  alchemicaCost: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+  craftTime: number;
+  name: string;
+}
+
+export interface TileTypeOutput {
+  deprecated: boolean;
+  tileType: BigNumberish;
+  width: Width;
+  height: Height;
+  alchemicaCost: BigNumberish[];
+  craftTime: BigNumberish;
   name: string;
 }
