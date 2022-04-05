@@ -73,7 +73,7 @@ export async function setAddresses() {
   );
 
   const tiles = await tileFacet.getTileTypes([]);
-  console.log("installations:", tiles);
+  console.log("tiles:", tiles);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

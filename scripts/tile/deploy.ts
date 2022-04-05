@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import {
   DiamondCutFacet,
   DiamondInit__factory,
-  InstallationDiamond__factory,
+  TileDiamond__factory,
   OwnershipFacet,
 } from "../../typechain";
 import { gasPrice, maticRealmDiamondAddress } from "./helperFunctions";
@@ -29,8 +29,8 @@ export async function deployDiamond() {
 
   // deploy Diamond
   const Diamond = (await ethers.getContractFactory(
-    "InstallationDiamond"
-  )) as InstallationDiamond__factory;
+    "TileDiamond"
+  )) as TileDiamond__factory;
   const diamond = await Diamond.deploy(
     deployerAddress,
     diamondCutFacet.address,

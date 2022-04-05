@@ -2,7 +2,7 @@ import { BigNumber, Signer } from "ethers";
 import { ethers, network } from "hardhat";
 import { installationTypes } from "../../data/installations/installationTypes";
 import { OwnershipFacet, TileFacet } from "../../typechain";
-import { InstallationTypeInput, InstallationTypeOutput } from "../../types";
+import { TileTypeInput, TileTypeOutput } from "../../types";
 import {
   aavegotchiDAOAddress,
   approveRealAlchemica,
