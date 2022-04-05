@@ -80,6 +80,7 @@ export interface InstallationTypeOutput {
 }
 
 export interface TileTypeInput {
+  id?: number;
   deprecated: boolean;
   tileType: number;
   width: Width;
@@ -94,7 +95,7 @@ export interface TileTypeOutput {
   tileType: BigNumberish;
   width: Width;
   height: Height;
-  alchemicaCost: BigNumberish[];
+  alchemicaCost: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
   craftTime: BigNumberish;
   name: string;
 }

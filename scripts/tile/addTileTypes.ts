@@ -1,5 +1,6 @@
 import { BigNumber, Signer } from "ethers";
 import { ethers } from "hardhat";
+import { tileTypes } from "../../data/tiles/tileTypes";
 import { TileFacet, OwnershipFacet } from "../../typechain";
 import { TileTypeInput, TileTypeOutput } from "../../types";
 import {
@@ -19,17 +20,17 @@ function outputTile(tile: TileTypeInput): TileTypeOutput {
   );
 
   let output: TileTypeOutput = {
-    deprecated: tile.deprecated,
-    tileType: tile.tileType,
     width: tile.width,
     height: tile.height,
+    deprecated: tile.deprecated,
+    tileType: tile.tileType,
+    craftTime: tile.craftTime,
     alchemicaCost: [
       BigNumber.from(alchemica[0]),
       BigNumber.from(alchemica[1]),
       BigNumber.from(alchemica[2]),
       BigNumber.from(alchemica[3]),
     ],
-    craftTime: tile.craftTime,
     name: tile.name,
   };
 
@@ -57,9 +58,10 @@ export async function setAddresses() {
     deployer
   )) as TileFacet;
 
-  // add tile data
+  // add real data
+  const goldenTiles = tileTypes.map((val) => outputTile(val));
 
-  await tileFacet.addTileTypes([], {
+  await tileFacet.addTileTypes(goldenTiles, {
     gasPrice: gasPrice,
   });
 
