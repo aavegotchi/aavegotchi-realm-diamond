@@ -1,61 +1,19 @@
 import { Signer } from "ethers";
-import { ethers, network } from "hardhat";
-
-import { alchemica, gameplayVesting } from "../../helperFunctions";
-import { AlchemicaVesting } from "../../../typechain/AlchemicaVesting";
-import { AlchemicaToken } from "../../../typechain";
+import { ethers, run } from "hardhat";
 
 export async function setAddresses() {
-  const accounts: Signer[] = await ethers.getSigners();
-  const deployer = accounts[0];
-
-  let ecosystemVestingContract = (await ethers.getContractAt(
-    "AlchemicaVesting",
-    gameplayVesting,
-    deployer
-  )) as AlchemicaVesting;
-
-  const amountToRelease = [
+  const amounts = [
     ethers.utils.parseEther("500000"),
     ethers.utils.parseEther("250000"),
     ethers.utils.parseEther("125000"),
     ethers.utils.parseEther("0"),
-  ];
+  ].join(",");
 
-  const beneficiary = await ecosystemVestingContract.beneficiary();
-  console.log("beneficiary is:", beneficiary);
+  console.log("amounts:", amounts);
 
-  for (let i = 0; i < alchemica.length; i++) {
-    const element = alchemica[i];
-
-    let releasableamount = await ecosystemVestingContract.releasableAmount(
-      element
-    );
-
-    if (amountToRelease[i].eq(0)) {
-      console.log("skip:", element);
-      continue;
-    }
-
-    console.log("amount before:", ethers.utils.formatEther(releasableamount));
-    const tx = await ecosystemVestingContract.partialRelease(
-      element,
-      amountToRelease[i]
-    );
-    await tx.wait();
-
-    releasableamount = await ecosystemVestingContract.releasableAmount(element);
-    console.log("amount after:", ethers.utils.formatEther(releasableamount));
-
-    console.log("element:", element);
-
-    const token = (await ethers.getContractAt(
-      "AlchemicaToken",
-      element
-    )) as AlchemicaToken;
-    const bal = await token.balanceOf(beneficiary);
-    console.log("beneficiary balance is now:", ethers.utils.formatEther(bal));
-  }
+  await run("releaseGameplay", {
+    amounts: amounts,
+  });
 }
 
 // We recommend this pattern to be able to use async/await everywhere

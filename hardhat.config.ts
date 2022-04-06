@@ -10,6 +10,8 @@ require("./tasks/generateDiamondABI_realm.js");
 require("./tasks/generateDiamondABI_installation.js");
 require("./tasks/verifyFacet.js");
 require("./tasks/mintParcels.ts");
+require("./tasks/releaseGameplay");
+require("./tasks/batchTransferAlchemica");
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:

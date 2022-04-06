@@ -1,77 +1,19 @@
-import { BigNumber, BigNumberish, Signer } from "ethers";
-import { ethers, network } from "hardhat";
-
-import { AlchemicaToken, RealmFacet } from "../../../typechain";
-import {
-  alchemica,
-  impersonate,
-  maticDiamondAddress,
-} from "../../helperFunctions";
-// import { upgrade } from "../scripts/upgrades/upgrade-fixDiamond";
+import { ethers, network, run } from "hardhat";
 
 export async function setAddresses() {
-  const accounts: Signer[] = await ethers.getSigners();
-  const deployer = accounts[0];
-
-  let realmFacet = (await ethers.getContractAt(
-    "RealmFacet",
-    maticDiamondAddress,
-    deployer
-  )) as RealmFacet;
-
-  const wallet = "0x2C1a288353e136b9E4b467AADb307133ffFeaB25";
-
-  const amounts: [BigNumberish, BigNumberish, BigNumberish, BigNumberish] = [
+  const amounts = [
     ethers.utils.parseEther("500000"),
     ethers.utils.parseEther("250000"),
     ethers.utils.parseEther("125000"),
-    ethers.utils.parseEther("50000"),
-  ];
+    ethers.utils.parseEther("0"),
+  ].join(",");
 
-  const owner = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
+  const hotWallet1 = "0x2c1a288353e136b9e4b467aadb307133fffeab25";
 
-  const testing = ["hardhat"].includes(network.name);
-
-  //Approve
-  for (let i = 0; i < alchemica.length; i++) {
-    const alc = alchemica[i];
-
-    let token = (await ethers.getContractAt(
-      "AlchemicaToken",
-      alc
-    )) as AlchemicaToken;
-
-    if (testing) {
-      token = await impersonate(owner, token, ethers, network);
-    }
-
-    const allowance = await token.allowance(owner, maticDiamondAddress);
-    console.log("Allowance:", ethers.utils.formatEther(allowance));
-
-    const bal = await token.balanceOf(wallet);
-    console.log("Before balance:", ethers.utils.formatEther(bal));
-  }
-
-  console.log("Batch transferring tokens to!", wallet);
-
-  if (testing) {
-    realmFacet = await impersonate(owner, realmFacet, ethers, network);
-  }
-  //transfer
-  const tx = await realmFacet.batchTransferAlchemica([wallet], [amounts]);
-  await tx.wait();
-
-  for (let i = 0; i < alchemica.length; i++) {
-    const alc = alchemica[i];
-
-    const token = (await ethers.getContractAt(
-      "AlchemicaToken",
-      alc
-    )) as AlchemicaToken;
-
-    const bal = await token.balanceOf(wallet);
-    console.log("After balance:", ethers.utils.formatEther(bal));
-  }
+  await run("batchTransferAlchemica", {
+    amounts: amounts,
+    wallet: hotWallet1,
+  });
 }
 
 // We recommend this pattern to be able to use async/await everywhere
