@@ -3,7 +3,11 @@
 import { BigNumber, Signer } from "ethers";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { alchemica, gameplayVesting } from "../scripts/helperFunctions";
+import {
+  alchemica,
+  gameplayVesting,
+  gasPrice,
+} from "../scripts/helperFunctions";
 import { AlchemicaToken, AlchemicaVesting } from "../typechain";
 import { NonceManager } from "@ethersproject/experimental";
 
@@ -58,7 +62,8 @@ task(
         );
         const tx = await ecosystemVestingContract.partialRelease(
           element,
-          amounts[i]
+          amounts[i],
+          { gasPrice: gasPrice }
         );
         await tx.wait();
 

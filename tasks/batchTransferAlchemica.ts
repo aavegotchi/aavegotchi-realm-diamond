@@ -5,6 +5,7 @@ import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import {
   alchemica,
+  gasPrice,
   impersonate,
   maticDiamondAddress,
 } from "../scripts/helperFunctions";
@@ -77,7 +78,9 @@ task("batchTransferAlchemica", "batch transfers alchemica to address")
         );
       }
       //transfer
-      const tx = await realmFacet.batchTransferAlchemica([wallet], [amounts]);
+      const tx = await realmFacet.batchTransferAlchemica([wallet], [amounts], {
+        gasPrice: gasPrice,
+      });
       await tx.wait();
 
       for (let i = 0; i < alchemica.length; i++) {
