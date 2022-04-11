@@ -6,6 +6,7 @@ import "@nomiclabs/hardhat-etherscan";
 import "hardhat-contract-sizer";
 import "@nomiclabs/hardhat-etherscan";
 import "hardhat-gas-reporter";
+import "@openzeppelin/hardhat-upgrades";
 import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname + "/.env" });
 require("./tasks/generateDiamondABI_realm.js");

@@ -1,5 +1,5 @@
 import * as hre from "hardhat";
-import { ethers } from "hardhat";
+import { ethers, upgrades } from "hardhat";
 import { BigNumber, Signer } from "ethers";
 
 import { address } from "../../helpers/utils";
@@ -12,6 +12,8 @@ import {
 } from "../../helpers/constants";
 
 async function main() {
+  const Vesting = await ethers.getContractFactory("AlchemicaVesting");
+
   // Set up signer and proxy admin
   const signers: Signer[] = await ethers.getSigners();
   const ProxyAdmin = await ethers.getContractFactory("ProxyAdmin");
@@ -28,7 +30,6 @@ async function main() {
   console.log("ProxyAdmin owner:", owner);
 
   // Deploy new vesting contract
-  const Vesting = await ethers.getContractFactory("AlchemicaVesting");
   const vesting = await Vesting.connect(owner).deploy();
   await vesting.deployed();
   console.log(`Vesting deployed at ${vesting.address}`);
