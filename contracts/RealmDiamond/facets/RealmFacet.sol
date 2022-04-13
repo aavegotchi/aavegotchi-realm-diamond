@@ -11,6 +11,7 @@ import "../../libraries/LibRealm.sol";
 import "../../libraries/LibAlchemica.sol";
 import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamond.sol";
 import "../../libraries/LibSignature.sol";
+import "./ERC721Facet.sol";
 
 contract RealmFacet is Modifiers {
   uint256 constant MAX_SUPPLY = 420069;
@@ -343,6 +344,32 @@ contract RealmFacet is Modifiers {
     } else if (_gridType == 1) {
       output_ = s.parcels[_parcelId].tileGrid;
     }
+  }
+
+  struct ParcelCoordinates {
+    uint256[64][64] coords;
+  }
+
+  function batchGetBuildGrid(uint256[] calldata _parcelIds) external view returns (ParcelCoordinates[] memory) {
+    ParcelCoordinates[] memory parcels = new ParcelCoordinates[](_parcelIds.length);
+    for (uint256 i; i < _parcelIds.length; i++) {
+      parcels[i] = ParcelCoordinates(s.parcels[_parcelIds[i]].buildGrid);
+    }
+    return parcels;
+  }
+
+  function batchGetDistrictParcels(address _owner, uint256 _district) external view returns (uint256[] memory) {
+    uint256 totalSupply = ERC721Facet(address(this)).totalSupply();
+    uint256 balance = ERC721Facet(address(this)).balanceOf(_owner);
+    uint256[] memory output_ = new uint256[](balance);
+    uint256 counter;
+    for (uint256 i; i < totalSupply; i++) {
+      if (s.parcels[i].district == _district && s.parcels[i].owner == _owner) {
+        output_[counter] = i;
+        counter++;
+      }
+    }
+    return output_;
   }
 
   function getParcelUpgradeQueueLength(uint256 _parcelId) external view returns (uint256) {

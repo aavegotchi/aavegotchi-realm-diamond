@@ -41,10 +41,11 @@ contract AlchemicaFacet is Modifiers {
   /// @dev Will throw if a surveying round has not started
   /// @param _realmId Identifier of the parcel to survey
   function startSurveying(uint256 _realmId) external onlyParcelOwner(_realmId) gameActive {
-    require(s.parcels[_realmId].currentRound <= s.surveyingRound, "AlchemicaFacet: Round not released");
     require(s.parcels[_realmId].altarId > 0, "AlchemicaFacet: Must equip Altar");
-    s.parcels[_realmId].currentRound++;
-    drawRandomNumbers(_realmId, s.parcels[_realmId].currentRound - 1);
+    require(!s.parcels[_realmId].surveying, "AlchemicaFacet: Parcel already surveying");
+    s.parcels[_realmId].surveying = true;
+    // do we need to cancel the listing?
+    drawRandomNumbers(_realmId, s.parcels[_realmId].currentRound);
   }
 
   function drawRandomNumbers(uint256 _realmId, uint256 _surveyingRound) internal {
@@ -154,36 +155,36 @@ contract AlchemicaFacet is Modifiers {
   }
 
   /// @dev This function will be removed in production.
-  // function testingMintParcel(
-  //   address _to,
-  //   uint256[] calldata _tokenIds,
-  //   RealmFacet.MintParcelInput[] memory _metadata
-  // ) external {
-  //   for (uint256 index = 0; index < _tokenIds.length; index++) {
-  //     require(s.tokenIds.length < 420069, "AlchemicaFacet: Cannot mint more than 420,069 parcels");
-  //     uint256 tokenId = _tokenIds[index];
-  //     RealmFacet.MintParcelInput memory metadata = _metadata[index];
-  //     require(_tokenIds.length == _metadata.length, "Inputs must be same length");
+  function testingMintParcel(
+    address _to,
+    uint256[] calldata _tokenIds,
+    RealmFacet.MintParcelInput[] memory _metadata
+  ) external {
+    for (uint256 index = 0; index < _tokenIds.length; index++) {
+      require(s.tokenIds.length < 420069, "AlchemicaFacet: Cannot mint more than 420,069 parcels");
+      uint256 tokenId = _tokenIds[index];
+      RealmFacet.MintParcelInput memory metadata = _metadata[index];
+      require(_tokenIds.length == _metadata.length, "Inputs must be same length");
 
-  //     Parcel storage parcel = s.parcels[tokenId];
-  //     parcel.coordinateX = metadata.coordinateX;
-  //     parcel.coordinateY = metadata.coordinateY;
-  //     parcel.parcelId = metadata.parcelId;
-  //     parcel.size = metadata.size;
-  //     parcel.district = metadata.district;
-  //     parcel.parcelAddress = metadata.parcelAddress;
+      Parcel storage parcel = s.parcels[tokenId];
+      parcel.coordinateX = metadata.coordinateX;
+      parcel.coordinateY = metadata.coordinateY;
+      parcel.parcelId = metadata.parcelId;
+      parcel.size = metadata.size;
+      parcel.district = metadata.district;
+      parcel.parcelAddress = metadata.parcelAddress;
 
-  //     parcel.alchemicaBoost = metadata.boost;
+      parcel.alchemicaBoost = metadata.boost;
 
-  //     LibERC721.safeMint(_to, tokenId);
-  //   }
-  // }
+      LibERC721.safeMint(_to, tokenId);
+    }
+  }
 
-  // /// @dev This function will be removed in production.
-  // function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external {
-  //   IERC20Mintable alchemica = IERC20Mintable(s.alchemicaAddresses[_alchemicaType]);
-  //   alchemica.mint(msg.sender, _amount);
-  // }
+  /// @dev This function will be removed in production.
+  function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external {
+    IERC20Mintable alchemica = IERC20Mintable(s.alchemicaAddresses[_alchemicaType]);
+    alchemica.mint(msg.sender, _amount);
+  }
 
   /// @notice Query the available alchemica in a parcel
   /// @param _realmId identifier of parcel to query

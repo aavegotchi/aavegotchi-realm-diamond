@@ -19,6 +19,8 @@ async function main() {
   console.log("ProxyAdmin: ", proxyAdmin.contract.address);
   verifyParams.push(proxyAdmin);
 
+  const myRealmDiamond = "0x6bb645178AEd185980e9a9BAB92aA96eB405D7A4";
+
   let [vestingImplementation, ecosystemVesting, gameplayVesting] =
     await deployVestingContracts(owner, proxyAdmin.contract);
   verifyParams.push(vestingImplementation, ecosystemVesting, gameplayVesting);
@@ -26,7 +28,7 @@ async function main() {
   let [alchemicaImplementation, fud, fomo, alpha, kek] = await deployAlchemica(
     owner,
     proxyAdmin.contract,
-    REALM_DIAMOND,
+    myRealmDiamond,
     gameplayVesting.contract,
     ecosystemVesting.contract
   );

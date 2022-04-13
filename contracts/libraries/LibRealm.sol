@@ -115,6 +115,10 @@ library LibRealm {
     uint256 _round
   ) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
+    require(s.parcels[_tokenId].currentRound <= s.surveyingRound, "AlchemicaFacet: Round not released");
+    s.parcels[_tokenId].currentRound++;
+    s.parcels[_tokenId].surveying = false;
+
     uint256[] memory alchemicas = new uint256[](4);
     uint256[] memory roundAmounts = new uint256[](4);
     for (uint256 i; i < 4; i++) {

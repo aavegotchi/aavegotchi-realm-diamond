@@ -685,13 +685,13 @@ const backendSigner = () => {
 };
 
 export const genEquipInstallationSignature = async (
+  parcelId: number,
   tileId: number,
   x: number,
-  y: number,
-  parcelId: number
+  y: number
 ) => {
   let messageHash1 = ethers.utils.solidityKeccak256(
-    ["uint256", "uint256", "uint8", "uint8"],
+    ["uint256", "uint256", "uint256", "uint256"],
     [parcelId, tileId, x, y]
   );
   let signedMessage1 = await backendSigner().signMessage(

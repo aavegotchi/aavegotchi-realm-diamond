@@ -222,7 +222,7 @@ describe("Testing Equip Installation", async function () {
     await g.installationDiamond.upgradeInstallation(upgradeQueue, signature);
 
     await mineBlocks(ethers, 21000);
-    await g.installationDiamond.finalizeUpgrade();
+    await g.installationAdminFacet.finalizeUpgrade();
   });
   it("Test spillover level 2", async function () {
     await mineBlocks(ethers, 71000);
