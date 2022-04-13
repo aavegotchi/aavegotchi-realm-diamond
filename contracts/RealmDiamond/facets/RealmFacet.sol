@@ -89,9 +89,6 @@ contract RealmFacet is Modifiers {
     InstallationDiamondInterface.InstallationType memory installation = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(
       _installationId
     );
-    if (installation.installationType != 0) {
-      require(s.parcels[_realmId].altarId > 0, "RealmFacet: Must equip Altar");
-    }
     if (installation.installationType == 1 || installation.installationType == 2) {
       require(s.parcels[_realmId].currentRound >= 1, "RealmFacet: Must survey before equipping");
     }
@@ -99,6 +96,27 @@ contract RealmFacet is Modifiers {
       require(s.parcels[_realmId].lodgeId == 0, "RealmFacet: Lodge already equipped");
       s.parcels[_realmId].lodgeId = _installationId;
     }
+
+    uint256 altarPrerequisite = installation.prerequisites[0];
+    uint256 lodgePrerequisite = installation.prerequisites[1];
+
+    // check altar requirement
+    uint256 equippedAltarId = s.parcels[_realmId].altarId;
+    uint256 equippedAltarLevel = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(equippedAltarId).level;
+    require(equippedAltarLevel >= altarPrerequisite);
+
+    // check lodge requirement
+    if (lodgePrerequisite > 0) {
+      uint256 equippedLodgeId = s.parcels[_realmId].lodgeId;
+      uint256 equippedLodgeLevel = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(equippedLodgeId).level;
+      require(equippedLodgeLevel >= lodgePrerequisite);
+    }
+
+    // check harvester requirement
+    if (installation.installationType == 1) {
+      require(s.parcels[_realmId].reservoirs[installation.alchemicaType].length > 0, "RealmFacet: Must equip reservoir of type");
+    }
+
     LibRealm.placeInstallation(_realmId, _installationId, _x, _y);
     InstallationDiamondInterface(s.installationsDiamond).equipInstallation(msg.sender, _realmId, _installationId);
 

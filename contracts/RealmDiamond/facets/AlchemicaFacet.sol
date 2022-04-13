@@ -110,7 +110,6 @@ contract AlchemicaFacet is Modifiers {
   /// @param _alchemicaAddresses The four alchemica token addresses
   /// @param _backendPubKey The Realm(gotchiverse) backend public key
   /// @param _gameManager The address of the game manager
-
   function setVars(
     uint256[4][5] calldata _alchemicas,
     uint256[4] calldata _boostMultipliers,
@@ -143,42 +142,40 @@ contract AlchemicaFacet is Modifiers {
 
   /// todo @dev This function will be removed in production.
   function testingStartSurveying(uint256 _realmId) external onlyParcelOwner(_realmId) {
-    require(s.parcels[_realmId].currentRound <= s.surveyingRound, "AlchemicaFacet: Round not released");
     require(s.parcels[_realmId].altarId > 0, "AlchemicaFacet: Must equip Altar");
-    s.parcels[_realmId].currentRound++;
     uint256[] memory alchemicas = new uint256[](4);
     for (uint256 i; i < 4; i++) {
       alchemicas[i] = uint256(keccak256(abi.encodePacked(msg.sender, uint256(1))));
     }
 
-    LibRealm.updateRemainingAlchemica(_realmId, alchemicas, s.parcels[_realmId].currentRound - 1);
+    LibRealm.updateRemainingAlchemica(_realmId, alchemicas, s.parcels[_realmId].currentRound);
   }
 
-  /// @dev This function will be removed in production.
-  function testingMintParcel(
-    address _to,
-    uint256[] calldata _tokenIds,
-    RealmFacet.MintParcelInput[] memory _metadata
-  ) external {
-    for (uint256 index = 0; index < _tokenIds.length; index++) {
-      require(s.tokenIds.length < 420069, "AlchemicaFacet: Cannot mint more than 420,069 parcels");
-      uint256 tokenId = _tokenIds[index];
-      RealmFacet.MintParcelInput memory metadata = _metadata[index];
-      require(_tokenIds.length == _metadata.length, "Inputs must be same length");
+  // // /// @dev This function will be removed in production.
+  // // function testingMintParcel(
+  // //   address _to,
+  // //   uint256[] calldata _tokenIds,
+  // //   RealmFacet.MintParcelInput[] memory _metadata
+  // // ) external {
+  // //   for (uint256 index = 0; index < _tokenIds.length; index++) {
+  // //     require(s.tokenIds.length < 420069, "AlchemicaFacet: Cannot mint more than 420,069 parcels");
+  // //     uint256 tokenId = _tokenIds[index];
+  // //     RealmFacet.MintParcelInput memory metadata = _metadata[index];
+  // //     require(_tokenIds.length == _metadata.length, "Inputs must be same length");
 
-      Parcel storage parcel = s.parcels[tokenId];
-      parcel.coordinateX = metadata.coordinateX;
-      parcel.coordinateY = metadata.coordinateY;
-      parcel.parcelId = metadata.parcelId;
-      parcel.size = metadata.size;
-      parcel.district = metadata.district;
-      parcel.parcelAddress = metadata.parcelAddress;
+  // //     Parcel storage parcel = s.parcels[tokenId];
+  // //     parcel.coordinateX = metadata.coordinateX;
+  // //     parcel.coordinateY = metadata.coordinateY;
+  // //     parcel.parcelId = metadata.parcelId;
+  // //     parcel.size = metadata.size;
+  // //     parcel.district = metadata.district;
+  // //     parcel.parcelAddress = metadata.parcelAddress;
 
-      parcel.alchemicaBoost = metadata.boost;
+  // //     parcel.alchemicaBoost = metadata.boost;
 
-      LibERC721.safeMint(_to, tokenId);
-    }
-  }
+  // //     LibERC721.safeMint(_to, tokenId);
+  // //   }
+  // // }
 
   /// @dev This function will be removed in production.
   function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external {
@@ -262,7 +259,6 @@ contract AlchemicaFacet is Modifiers {
   /// @param _alchemicaTypes Alchemica types to claim
   /// @param _gotchiId Identifier of Aavegotchi to use for alchemica collecction/claiming
   /// @param _signature Message signature used for backend validation
-
   function claimAvailableAlchemica(
     uint256 _realmId,
     uint256[] calldata _alchemicaTypes,

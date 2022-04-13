@@ -25,6 +25,8 @@ export async function upgrade(
 
   const spilloverIO = "(uint256 rate, uint256 radius)";
 
+  const parcelCoordinates = "(uint256[] coords)";
+
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "AlchemicaFacet",
@@ -48,6 +50,8 @@ export async function upgrade(
         "function batchTransferTokensToGotchis(uint256[] calldata _gotchiIds, address[] calldata _tokenAddresses, uint256[][] calldata _amounts) external",
         `function calculateSpilloverForReservoir(uint256 _realmId, uint256 _alchemicaType) public view returns (${spilloverIO} memory spillover)`,
         "function testingStartSurveying(uint256 _realmId) external",
+        "function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external",
+        "function batchApproveAlchemica(address _spender, uint256[4] calldata _amounts) external",
       ],
       removeSelectors: [],
     },
@@ -81,6 +85,8 @@ export async function upgrade(
         "function getParcelUpgradeQueueCapacity(uint256 _parcelId) external view returns (uint256)",
         "function getParcelUpgradeQueueLength(uint256 _parcelId) external view returns (uint256)",
         "function setGameActive(bool _gameActive) external",
+        `function batchGetBuildGrid(uint256[] calldata _parcelIds) external view returns (${parcelCoordinates}[] memory)`,
+        "function batchGetDistrictParcels(address _owner, uint256 _district) external view returns (uint256[] memory)",
       ],
       removeSelectors: [],
     },
@@ -95,6 +101,7 @@ export async function upgrade(
   //@ts-ignore
   const backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
 
+  //@ts-ignore
   const calldata = iface.encodeFunctionData(
     //@ts-ignore
     "setVars",

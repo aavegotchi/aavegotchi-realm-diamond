@@ -56,8 +56,8 @@ export function outputInstallation(
     ],
     harvestRate: ethers.utils.parseEther(installation.harvestRate.toString()),
     capacity: ethers.utils.parseEther(installation.capacity.toString()),
-    spillRadius: ethers.utils.parseEther(installation.spillRadius.toString()),
-    spillRate: ethers.utils.parseEther(installation.spillRate.toString()),
+    spillRadius: installation.spillRadius,
+    spillRate: installation.spillRate,
     upgradeQueueBoost: installation.upgradeQueueBoost,
     craftTime: installation.craftTime,
     nextLevelId: installation.nextLevelId,
@@ -125,7 +125,7 @@ export function testInstallations() {
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 7,
-      prerequisites: [],
+      prerequisites: [0, 0],
       name: "Altar level 1",
     })
   );
@@ -145,7 +145,7 @@ export function testInstallations() {
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 3,
-      prerequisites: [],
+      prerequisites: [1, 0],
       name: "FUD Reservoir level 1",
     })
   );
@@ -165,7 +165,7 @@ export function testInstallations() {
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 0,
-      prerequisites: [],
+      prerequisites: [2, 0],
       name: "FUD Reservoir level 2",
     })
   );
@@ -185,7 +185,7 @@ export function testInstallations() {
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 7,
-      prerequisites: [],
+      prerequisites: [0, 0],
       name: "Altar level 1",
     })
   );
@@ -205,7 +205,7 @@ export function testInstallations() {
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 0,
-      prerequisites: [],
+      prerequisites: [1, 0],
       name: "FUD Harvester level 1",
     })
   );
@@ -225,7 +225,7 @@ export function testInstallations() {
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 0,
-      prerequisites: [],
+      prerequisites: [0, 0],
       name: "BuildQueue level 1",
     })
   );
@@ -245,7 +245,7 @@ export function testInstallations() {
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 0,
-      prerequisites: [],
+      prerequisites: [1, 0],
       name: "Altar level 2",
     })
   );
@@ -265,7 +265,7 @@ export function testInstallations() {
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 0,
-      prerequisites: [],
+      prerequisites: [3, 0],
       name: "Gotchi Lodge level 1",
     })
   );

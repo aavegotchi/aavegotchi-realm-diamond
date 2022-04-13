@@ -274,7 +274,8 @@ contract InstallationFacet is Modifiers {
 
       uint40 blockLeft = queueItem.readyBlock - uint40(block.number);
       uint40 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
-      gltr.burnFrom(msg.sender, removeBlocks * 10**18);
+      uint256 burnAmount = uint256(removeBlocks) * 10**18;
+      gltr.burnFrom(msg.sender, burnAmount);
       queueItem.readyBlock -= removeBlocks;
       emit CraftTimeReduced(queueId, removeBlocks);
     }
@@ -313,22 +314,7 @@ contract InstallationFacet is Modifiers {
     uint256 _realmId,
     uint256 _installationId
   ) external onlyRealmDiamond {
-    uint256[] memory prerequisites = s.installationTypes[_installationId].prerequisites;
-
-    bool techTreePasses = true;
-    for (uint256 i = 0; i < prerequisites.length; i++) {
-      //ensure that this installation already has at least one required installation on it before adding
-      uint256 prerequisiteId = prerequisites[i];
-      uint256 equippedBalance = balanceOfToken(s.realmDiamond, _realmId, prerequisiteId);
-      if (equippedBalance == 0) {
-        techTreePasses = false;
-        break;
-      }
-    }
-
-    if (techTreePasses) {
-      LibInstallation._equipInstallation(_owner, _realmId, _installationId);
-    } else revert("InstallationFacet: Tech Tree reqs not met");
+    LibInstallation._equipInstallation(_owner, _realmId, _installationId);
   }
 
   /// @notice Allow a user to unequip an installation from a parcel
