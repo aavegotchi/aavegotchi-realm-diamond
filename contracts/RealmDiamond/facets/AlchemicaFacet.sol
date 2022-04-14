@@ -238,8 +238,8 @@ contract AlchemicaFacet is Modifiers {
   }
 
   function calculateTransferAmounts(uint256 _amount, uint256 _spilloverRate) internal pure returns (TransferAmounts memory) {
-    uint256 owner = (_amount * (bp - _spilloverRate)) / bp;
-    uint256 spill = (_amount * _spilloverRate) / bp;
+    uint256 owner = (_amount * (bp - (_spilloverRate * 10**15))) / bp;
+    uint256 spill = (_amount * (_spilloverRate * 10**15)) / bp;
     return TransferAmounts(owner, spill);
   }
 

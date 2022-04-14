@@ -81,6 +81,8 @@ interface InstallationDiamondInterface {
     uint256[] calldata _ids
   ) external view returns (uint256[] memory);
 
+  function installationBalancesOfToken(address _tokenContract, uint256 _tokenId) external view returns (InstallationIdIO[] memory bals_);
+
   function spilloverRatesOfIds(uint256[] calldata _ids) external view returns (uint256[] memory);
 
   function upgradeInstallation(UpgradeQueue calldata _upgradeQueue, bytes memory _signature) external;

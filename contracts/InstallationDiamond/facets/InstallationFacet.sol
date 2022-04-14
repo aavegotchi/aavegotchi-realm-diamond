@@ -13,6 +13,8 @@ import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
 import {LibSignature} from "../../libraries/LibSignature.sol";
 
+import "hardhat/console.sol";
+
 contract InstallationFacet is Modifiers {
   event AddedToQueue(uint256 indexed _queueId, uint256 indexed _installationId, uint256 _readyBlock, address _sender);
 
@@ -322,26 +324,6 @@ contract InstallationFacet is Modifiers {
   /// @param _realmId The identifier of the parcel to unequip the installation from
   /// @param _installationId Identifier of the installation to unequip
   function unequipInstallation(uint256 _realmId, uint256 _installationId) external onlyRealmDiamond {
-    InstallationIdIO[] memory installationBalances = installationBalancesOfToken(s.realmDiamond, _realmId);
-
-    uint256 removeInstallationBalance = balanceOfToken(s.realmDiamond, _realmId, _installationId);
-
-    //Iterate through all equipped installationTypes to check if installation to be unequipped is a prerequisite of any
-    for (uint256 i = 0; i < installationBalances.length; i++) {
-      uint256 installationId = installationBalances[i].installationId;
-
-      uint256[] memory prerequisites = s.installationTypes[installationId].prerequisites;
-
-      for (uint256 j = 0; j < prerequisites.length; j++) {
-        //Check that this installation is not the prequisite for any other currently equipped installations
-        uint256 prerequisiteId = prerequisites[j];
-
-        if (prerequisiteId == installationId && removeInstallationBalance < 2) {
-          revert("InstallationFacet: Tech Tree Reqs not met");
-        }
-      }
-    }
-
     LibInstallation._unequipInstallation(_realmId, _installationId);
   }
 

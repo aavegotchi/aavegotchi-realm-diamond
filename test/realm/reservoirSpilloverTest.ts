@@ -262,26 +262,58 @@ describe("Testing Equip Installation", async function () {
       await genEquipInstallationSignature(testParcelId, 2, 10, 10)
     );
 
-    //Upgrade to Level 2 Reservoir
-    const coordinateX = 3;
-    const coordinateY = 3;
-    const installationId = 2;
-    const upgradeQueue: UpgradeQueue = {
+    //Upgrade to Level 2 Altar
+    const coordinateXAlt = 0;
+    const coordinateYAlt = 0;
+    const installationIdAlt = 1;
+    const upgradeQueueAlt: UpgradeQueue = {
       parcelId: testParcelId,
-      coordinateX,
-      coordinateY,
-      installationId,
+      coordinateX: coordinateXAlt,
+      coordinateY: coordinateYAlt,
+      installationId: installationIdAlt,
       readyBlock: 0,
       claimed: false,
       owner: testAddress,
     };
-    const signature = await genUpgradeInstallationSignature(
+    const signatureAlt = await genUpgradeInstallationSignature(
       testParcelId,
-      coordinateX,
-      coordinateY,
-      installationId
+      coordinateXAlt,
+      coordinateYAlt,
+      installationIdAlt
     );
-    await g.installationDiamond.upgradeInstallation(upgradeQueue, signature);
+    await g.installationDiamond.upgradeInstallation(
+      upgradeQueueAlt,
+      signatureAlt
+    );
+
+    await mineBlocks(ethers, 20000);
+
+    await g.installationAdminFacet.finalizeUpgrade();
+
+    //Upgrade to Level 2 Reservoir
+    const coordinateXRes = 3;
+    const coordinateYRes = 3;
+    const installationIdRes = 2;
+    const upgradeQueueRes: UpgradeQueue = {
+      parcelId: testParcelId,
+      coordinateX: coordinateXRes,
+      coordinateY: coordinateYRes,
+      installationId: installationIdRes,
+      readyBlock: 0,
+      claimed: false,
+      owner: testAddress,
+    };
+    const signatureRes = await genUpgradeInstallationSignature(
+      testParcelId,
+      coordinateXRes,
+      coordinateYRes,
+      installationIdRes
+    );
+
+    await g.installationDiamond.upgradeInstallation(
+      upgradeQueueRes,
+      signatureRes
+    );
 
     await mineBlocks(ethers, 20000);
 
@@ -301,6 +333,25 @@ describe("Testing Equip Installation", async function () {
         alchemicaRemaining[0]
       )
     );
+
+    await network.provider.send("evm_increaseTime", [3600 * 8]);
+    await network.provider.send("evm_mine");
+
+    const alchemicaRemainingX = await g.alchemicaFacet.getRealmAlchemica(
+      testParcelId
+    );
+
+    await g.alchemicaFacet.claimAvailableAlchemica(
+      testParcelId,
+      [0],
+      testGotchiId,
+      await genClaimAlchemicaSignature(
+        testParcelId,
+        testGotchiId,
+        alchemicaRemainingX[0]
+      )
+    );
+
     let startBalance = await g.fud.balanceOf(testAddress);
     await g.installationAdminFacet.finalizeUpgrade();
     await mineBlocks(ethers, 60000);
