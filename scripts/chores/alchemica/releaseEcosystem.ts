@@ -1,12 +1,7 @@
 import { Signer } from "ethers";
 import { ethers, network } from "hardhat";
 
-import {
-  alchemica,
-  ecosystemVesting,
-  gameplayVesting,
-  impersonate,
-} from "../../helperFunctions";
+import { alchemica, ecosystemVesting } from "../../helperFunctions";
 import { AlchemicaVesting } from "../../../typechain/AlchemicaVesting";
 import { AlchemicaToken } from "../../../typechain";
 
@@ -21,10 +16,10 @@ export async function setAddresses() {
   )) as AlchemicaVesting;
 
   const amountToRelease = [
-    ethers.utils.parseEther("4196056"),
-    ethers.utils.parseEther("2098028"),
-    ethers.utils.parseEther("1049014"),
-    ethers.utils.parseEther("419605"),
+    ethers.utils.parseEther("1519810"),
+    ethers.utils.parseEther("777463"),
+    ethers.utils.parseEther("113252"),
+    ethers.utils.parseEther("31035"),
   ];
 
   const beneficiary = await ecosystemVestingContract.beneficiary();
@@ -51,7 +46,7 @@ export async function setAddresses() {
       element
     )) as AlchemicaToken;
     const bal = await token.balanceOf(beneficiary);
-    console.log("balance is now:", ethers.utils.formatEther(bal));
+    console.log("Beneficiary balance is now:", ethers.utils.formatEther(bal));
   }
 }
 

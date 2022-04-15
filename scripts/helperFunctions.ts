@@ -7,7 +7,7 @@ import {
   OwnershipFacet,
 } from "../typechain";
 
-export const gasPrice = 100000000000;
+export const gasPrice = 110000000000;
 
 export async function impersonate(
   address: string,

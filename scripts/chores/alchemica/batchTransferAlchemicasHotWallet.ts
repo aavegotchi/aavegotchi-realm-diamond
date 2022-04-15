@@ -4,8 +4,8 @@ export async function setAddresses() {
   const amounts = [
     ethers.utils.parseEther("500000"),
     ethers.utils.parseEther("250000"),
-    ethers.utils.parseEther("0"),
-    ethers.utils.parseEther("0"),
+    ethers.utils.parseEther("125000"),
+    ethers.utils.parseEther("50000"),
   ].join(",");
 
   const hotWallet1 = "0x2c1a288353e136b9e4b467aadb307133fffeab25";
