@@ -41,7 +41,8 @@ export async function setAddresses() {
   const accounts: Signer[] = await ethers.getSigners();
   const deployer = accounts[0];
 
-  const diamondAddress = "";
+  //mumbai address
+  const diamondAddress = "0x0aB1547B21D81eB3af1712c0BD8ac21c0c1219a9";
 
   const ownershipFacet = (await ethers.getContractAt(
     "OwnershipFacet",
@@ -50,7 +51,7 @@ export async function setAddresses() {
   const owner = await ownershipFacet.owner();
   console.log("owner:", owner);
 
-  console.log("deployer:", await deployer.getAddress());
+  // console.log("deployer:", await deployer.getAddress());
 
   const tileFacet = (await ethers.getContractAt(
     "TileFacet",
@@ -58,21 +59,21 @@ export async function setAddresses() {
     deployer
   )) as TileFacet;
 
-  // add real data
-  const goldenTiles = tileTypes.map((val) => outputTile(val));
+  // // add real data
+  // const goldenTiles = tileTypes.map((val) => outputTile(val));
 
-  await tileFacet.addTileTypes(goldenTiles, {
-    gasPrice: gasPrice,
-  });
+  // await tileFacet.addTileTypes(goldenTiles, {
+  //   gasPrice: gasPrice,
+  // });
 
-  await tileFacet.setAddresses(
-    maticAavegotchiDiamondAddress,
-    maticDiamondAddress,
-    ethers.constants.AddressZero,
-    pixelcraftAddress,
-    aavegotchiDAOAddress,
-    { gasPrice: gasPrice }
-  );
+  // await tileFacet.setAddresses(
+  //   maticAavegotchiDiamondAddress,
+  //   maticDiamondAddress,
+  //   ethers.constants.AddressZero,
+  //   pixelcraftAddress,
+  //   aavegotchiDAOAddress,
+  //   { gasPrice: gasPrice }
+  // );
 
   const tiles = await tileFacet.getTileTypes([]);
   console.log("tiles:", tiles);

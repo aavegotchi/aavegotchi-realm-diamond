@@ -18,7 +18,7 @@ export const tileTypes: TileTypeInput[] = [
     height: 2,
     deprecated: false,
     tileType: 0,
-    alchemicaCost: [0, 0, 0, 0],
+    alchemicaCost: [25, 25, 75, 25],
     craftTime: 0,
   },
   {
@@ -28,7 +28,7 @@ export const tileTypes: TileTypeInput[] = [
     height: 2,
     deprecated: false,
     tileType: 0,
-    alchemicaCost: [0, 0, 0, 0],
+    alchemicaCost: [25, 25, 75, 25],
     craftTime: 0,
   },
   {
@@ -38,7 +38,7 @@ export const tileTypes: TileTypeInput[] = [
     height: 2,
     deprecated: false,
     tileType: 0,
-    alchemicaCost: [0, 0, 0, 0],
+    alchemicaCost: [25, 25, 75, 25],
     craftTime: 0,
   },
 ];
