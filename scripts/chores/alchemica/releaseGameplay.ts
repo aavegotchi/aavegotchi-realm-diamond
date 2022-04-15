@@ -1,5 +1,6 @@
 import { Signer } from "ethers";
 import { ethers, run } from "hardhat";
+import { gameplayVesting } from "../../helperFunctions";
 
 export async function setAddresses() {
   const amounts = [
@@ -11,7 +12,8 @@ export async function setAddresses() {
 
   console.log("amounts:", amounts);
 
-  await run("releaseGameplay", {
+  await run("releaseVesting", {
+    address: gameplayVesting,
     amounts: amounts,
   });
 }

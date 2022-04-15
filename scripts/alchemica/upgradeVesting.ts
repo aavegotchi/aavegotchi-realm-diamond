@@ -30,20 +30,20 @@ async function main() {
   console.log("ProxyAdmin owner:", owner);
 
   // Deploy new vesting contract
-  const vesting = await Vesting.connect(owner).deploy();
-  await vesting.deployed();
-  console.log(`Vesting deployed at ${vesting.address}`);
+  // const vesting = await Vesting.connect(owner).deploy();
+  // await vesting.deployed();
+  // console.log(`Vesting deployed at ${vesting.address}`);
+
+  const vesting = "0x99d643a1109bC0D3c06Ca38FfC33DA0Fe33A8C9E";
 
   // Call upgrade on proxy admin to new implementations
   let tx = await proxyAdmin
     .connect(owner)
-    .upgrade(ECOSYSTEM_VESTING_ADDRESS, vesting.address);
+    .upgrade(ECOSYSTEM_VESTING_ADDRESS, vesting);
   await tx.wait();
   console.log("Ecosystem Vesting upgraded");
 
-  await proxyAdmin
-    .connect(owner)
-    .upgrade(GAMEPLAY_VESTING_ADDRESS, vesting.address);
+  await proxyAdmin.connect(owner).upgrade(GAMEPLAY_VESTING_ADDRESS, vesting);
   await tx.wait();
   console.log("Gameplay Vesting upgraded");
 }

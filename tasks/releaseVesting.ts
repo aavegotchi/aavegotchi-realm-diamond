@@ -7,6 +7,7 @@ import {
   alchemica,
   gameplayVesting,
   gasPrice,
+  impersonate,
 } from "../scripts/helperFunctions";
 import { AlchemicaToken, AlchemicaVesting } from "../typechain";
 import { NonceManager } from "@ethersproject/experimental";
@@ -16,9 +17,10 @@ export interface MintParcelsTaskArgs {
 }
 
 task(
-  "releaseGameplay",
+  "releaseVesting",
   "Releases funds from gameplay vesting contract to beneficiary"
 )
+  .addParam("address", "address of the vesting contract")
   .addParam(
     "amounts",
     "amounts of Alchemica to be released (fud, fomo, alpha, kek"
@@ -41,8 +43,23 @@ task(
         manager
       )) as AlchemicaVesting;
 
+      if (hre.network.name === "hardhat") {
+        ecosystemVestingContract = await impersonate(
+          "0x94cb5C277FCC64C274Bd30847f0821077B231022",
+          ecosystemVestingContract,
+          hre.ethers,
+          hre.network
+        );
+      }
+
       const beneficiary = await ecosystemVestingContract.beneficiary();
       console.log("beneficiary is:", beneficiary);
+
+      const tx = await ecosystemVestingContract.batchPartialRelease(
+        alchemica,
+        amounts
+      );
+      await tx.wait();
 
       for (let i = 0; i < alchemica.length; i++) {
         const element = alchemica[i];
@@ -51,31 +68,10 @@ task(
           element
         );
 
-        if (BigNumber.from(amounts[i]).eq(0)) {
-          console.log("skip:", element);
-          continue;
-        }
-
         console.log(
-          "amount before:",
+          "Remaining releasable amount:",
           hre.ethers.utils.formatEther(releasableamount)
         );
-        const tx = await ecosystemVestingContract.partialRelease(
-          element,
-          amounts[i],
-          { gasPrice: gasPrice }
-        );
-        await tx.wait();
-
-        releasableamount = await ecosystemVestingContract.releasableAmount(
-          element
-        );
-        console.log(
-          "amount after:",
-          hre.ethers.utils.formatEther(releasableamount)
-        );
-
-        console.log("element:", element);
 
         const token = (await hre.ethers.getContractAt(
           "AlchemicaToken",
@@ -83,7 +79,7 @@ task(
         )) as AlchemicaToken;
         const bal = await token.balanceOf(beneficiary);
         console.log(
-          "beneficiary balance is now:",
+          "Beneficiary balance is now:",
           hre.ethers.utils.formatEther(bal)
         );
       }
