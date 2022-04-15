@@ -57,7 +57,8 @@ task(
 
       const tx = await ecosystemVestingContract.batchPartialRelease(
         alchemica,
-        amounts
+        amounts,
+        { gasPrice: gasPrice }
       );
       await tx.wait();
 

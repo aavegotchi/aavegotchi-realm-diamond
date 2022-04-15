@@ -1,6 +1,6 @@
 import { Signer } from "ethers";
 import { ethers, run } from "hardhat";
-import { ecosystemVesting, gameplayVesting } from "../../helperFunctions";
+import { ecosystemVesting } from "../../helperFunctions";
 
 export async function setAddresses() {
   const amounts = [
