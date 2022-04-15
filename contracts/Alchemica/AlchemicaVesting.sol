@@ -131,14 +131,10 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
     }
   }
 
-  struct ReleaseParams {
-    IERC20 token;
-    uint256 amount;
-  }
-
-  function batchPartialRelease(ReleaseParams[] memory params) external onlyBeneficiary {
-    for (uint256 i = 0; i < params.length; i++) {
-      _partialRelease(params[i].token, params[i].amount);
+  function batchPartialRelease(IERC20[] calldata _tokens, uint256[] calldata _amounts) external onlyBeneficiary {
+    if (_tokens.length != _amounts.length) revert InvalidAmount();
+    for (uint256 i = 0; i < _tokens.length; i++) {
+      _partialRelease(_tokens[i], _amounts[i]);
     }
   }
 

@@ -106,7 +106,7 @@ describe("Vesting", function () {
       await expect(
         vestingContract
           .connect(owner)
-          .batchPartialRelease([{ token: token.address, amount: 1 }])
+          .batchPartialRelease([token.address], ["1"])
       ).to.be.revertedWith(
         'Unauthorized("' + (await owner.getAddress()) + '")'
       );
