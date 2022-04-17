@@ -1,16 +1,9 @@
-import { BigNumber, Signer } from "ethers";
 import { ethers, network } from "hardhat";
-import { installationTypes } from "../../data/installations/installationTypes";
-import {
-  InstallationAdminFacet,
-  InstallationFacet,
-  OwnershipFacet,
-} from "../../typechain";
-import { InstallationTypeInput, InstallationTypeOutput } from "../../types";
+
+import { InstallationAdminFacet, OwnershipFacet } from "../../typechain";
+
 import {
   aavegotchiDAOAddress,
-  approveRealAlchemica,
-  faucetRealAlchemica,
   impersonate,
   maticAavegotchiDiamondAddress,
   maticDiamondAddress,
@@ -18,9 +11,6 @@ import {
 } from "../helperFunctions";
 
 export async function setAddresses() {
-  const accounts: Signer[] = await ethers.getSigners();
-  const deployer = accounts[0];
-
   const diamondAddress = "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
 
   const ownershipFacet = (await ethers.getContractAt(

@@ -7,9 +7,7 @@ import {
   TileDiamond__factory,
   OwnershipFacet,
 } from "../../typechain";
-import { gasPrice, maticRealmDiamondAddress } from "./helperFunctions";
-
-// import {getSelectors, FacetCutAction} from '../libraries/diamond'
+import { gasPrice, maticRealmDiamondAddress } from "../../constants";
 
 const { getSelectors, FacetCutAction } = require("../libraries/diamond");
 

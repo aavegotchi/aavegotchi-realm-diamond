@@ -2,8 +2,9 @@
 
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { gasPrice } from "../constants";
 import { parcelMetadataFromTokenIds } from "../helpers/metadataHelpers";
-import { gasPrice, impersonate } from "../scripts/helperFunctions";
+import { impersonate } from "../scripts/helperFunctions";
 import { ERC721Facet, OwnershipFacet, RealmFacet } from "../typechain";
 import { MintParcelInput } from "../types";
 
