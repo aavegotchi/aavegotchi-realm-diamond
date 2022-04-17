@@ -1,9 +1,12 @@
+import { BigNumber, Signer } from "ethers";
 import { ethers, network } from "hardhat";
-
-import { InstallationAdminFacet, OwnershipFacet } from "../../typechain";
-
+import { installationTypes } from "../../data/installations/installationTypes";
+import { OwnershipFacet, TileFacet } from "../../typechain";
+import { TileTypeInput, TileTypeOutput } from "../../types";
 import {
   aavegotchiDAOAddress,
+  approveRealAlchemica,
+  faucetRealAlchemica,
   impersonate,
   maticAavegotchiDiamondAddress,
   maticDiamondAddress,
@@ -11,7 +14,10 @@ import {
 } from "../helperFunctions";
 
 export async function setAddresses() {
-  const diamondAddress = "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
+  const accounts: Signer[] = await ethers.getSigners();
+  const deployer = accounts[0];
+
+  const diamondAddress = "";
 
   const ownershipFacet = (await ethers.getContractAt(
     "OwnershipFacet",
@@ -20,19 +26,14 @@ export async function setAddresses() {
   const owner = await ownershipFacet.owner();
   console.log("owner:", owner);
 
-  let installationAdminFacet = (await ethers.getContractAt(
-    "InstallationAdminFacet",
+  let tileFacet = (await ethers.getContractAt(
+    "TileFacet",
     diamondAddress
-  )) as InstallationAdminFacet;
+  )) as TileFacet;
 
-  installationAdminFacet = await impersonate(
-    owner,
-    installationAdminFacet,
-    ethers,
-    network
-  );
+  tileFacet = await impersonate(owner, tileFacet, ethers, network);
 
-  await installationAdminFacet.setAddresses(
+  await tileFacet.setAddresses(
     maticAavegotchiDiamondAddress,
     maticDiamondAddress,
     ethers.constants.AddressZero,
