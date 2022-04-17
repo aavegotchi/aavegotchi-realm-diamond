@@ -3,17 +3,14 @@
 import { BigNumber, Signer } from "ethers";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import {
-  alchemica,
-  gameplayVesting,
-  gasPrice,
-  impersonate,
-} from "../scripts/helperFunctions";
+import { impersonate } from "../scripts/helperFunctions";
 import { AlchemicaToken, AlchemicaVesting } from "../typechain";
 import { NonceManager } from "@ethersproject/experimental";
+import { alchemica, gasPrice } from "../constants";
 
 export interface MintParcelsTaskArgs {
   amounts: string;
+  address: string;
 }
 
 task(
@@ -34,12 +31,13 @@ task(
 
       const accounts: Signer[] = await hre.ethers.getSigners();
       const deployer = accounts[0];
+      const address = taskArgs.address;
 
       const manager = new NonceManager(deployer);
 
       let ecosystemVestingContract = (await hre.ethers.getContractAt(
         "AlchemicaVesting",
-        gameplayVesting,
+        address,
         manager
       )) as AlchemicaVesting;
 
