@@ -2,7 +2,7 @@
 /* eslint prefer-const: "off" */
 
 import { RealmFacet } from "../../typechain";
-import { maticDiamondAddress } from "../helperFunctions";
+import { maticDiamondAddress } from "../../constants";
 
 //@ts-ignore
 // import hardhat, { run, ethers } from "hardhat";
