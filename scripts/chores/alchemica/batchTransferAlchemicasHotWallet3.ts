@@ -1,20 +1,18 @@
-import { Signer } from "ethers";
 import { ethers, run } from "hardhat";
-import { gameplayVesting } from "../../../constants";
 
 export async function setAddresses() {
   const amounts = [
-    ethers.utils.parseEther("500000"),
-    ethers.utils.parseEther("250000"),
-    ethers.utils.parseEther("125000"),
     ethers.utils.parseEther("50000"),
+    ethers.utils.parseEther("25000"),
+    ethers.utils.parseEther("12500"),
+    ethers.utils.parseEther("5000"),
   ].join(",");
 
-  console.log("amounts:", amounts);
+  const hotWallet3 = "0xc57Feb6d8d5EdfcCe4027C243DCEb2B51b0E318B";
 
-  await run("releaseVesting", {
-    address: gameplayVesting,
+  await run("batchTransferAlchemica", {
     amounts: amounts,
+    wallet: hotWallet3,
   });
 }
 
