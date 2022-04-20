@@ -5,9 +5,10 @@
     "deploy:alchemica:local": "npx hardhat run scripts/alchemica/deployAlchemica.ts --network hardhat"
   },
   "dependencies": {
+    "@anders-t/ethers-ledger": "^1.0.4",
     "@chainlink/contracts": "^0.4.0",
     "@ethersproject/experimental": "^5.4.0",
-    "@ethersproject/hardware-wallets": "^5.4.0",
+    "@ethersproject/hardware-wallets": "^5.6.0",
     "@nomiclabs/hardhat-etherscan": "^2.1.8",
     "@nomiclabs/hardhat-truffle5": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
