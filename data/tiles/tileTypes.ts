@@ -23,7 +23,7 @@ export const tileTypes: TileTypeInput[] = [
   },
   // {
   //   id: 2,
-  //   name: "LE Golden Tile - Gotchi",
+  //   name: "LE Golden Tile - Portal",
   //   width: 2,
   //   height: 2,
   //   deprecated: false,
@@ -33,7 +33,7 @@ export const tileTypes: TileTypeInput[] = [
   // },
   // {
   //   id: 3,
-  //   name: "LE Golden Tile - Portal",
+  //   name: "LE Golden Tile - Gotchi",
   //   width: 2,
   //   height: 2,
   //   deprecated: false,
