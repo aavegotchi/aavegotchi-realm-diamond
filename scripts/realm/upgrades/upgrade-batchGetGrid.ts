@@ -15,8 +15,8 @@ export async function upgrade() {
     {
       facetName: "RealmFacet",
       addSelectors: [
-        "function batchGetBuildGrid(uint256[] calldata _parcelIds) external view returns (ParcelCoordinates[] memory)",
-        "function batchGetDistrictParcels(address _owner, uint256 _district) external view returns (uint256[] memory) ",
+        // "function batchGetBuildGrid(uint256[] calldata _parcelIds) external view returns (ParcelCoordinates[] memory)",
+        // "function batchGetDistrictParcels(address _owner, uint256 _district) external view returns (uint256[] memory) ",
       ],
       removeSelectors: [],
     },

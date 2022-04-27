@@ -284,9 +284,9 @@ contract RealmFacet is Modifiers {
     for (uint256 i; i < 8; i++) {
       for (uint256 j; j < 8; j++) {
         if (_gridType == 0) {
-          output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
         } else if (_gridType == 1) {
-          output_[i][j] = s.parcels[_parcelId].tileGrid[i][j];
+          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
         }
       }
     }
@@ -297,9 +297,9 @@ contract RealmFacet is Modifiers {
     for (uint256 i; i < 16; i++) {
       for (uint256 j; j < 16; j++) {
         if (_gridType == 0) {
-          output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
         } else if (_gridType == 1) {
-          output_[i][j] = s.parcels[_parcelId].tileGrid[i][j];
+          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
         }
       }
     }
@@ -310,9 +310,9 @@ contract RealmFacet is Modifiers {
     for (uint256 i; i < 64; i++) {
       for (uint256 j; j < 32; j++) {
         if (_gridType == 0) {
-          output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
         } else if (_gridType == 1) {
-          output_[i][j] = s.parcels[_parcelId].tileGrid[i][j];
+          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
         }
       }
     }
@@ -323,9 +323,9 @@ contract RealmFacet is Modifiers {
     for (uint256 i; i < 32; i++) {
       for (uint256 j; j < 64; j++) {
         if (_gridType == 0) {
-          output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
         } else if (_gridType == 1) {
-          output_[i][j] = s.parcels[_parcelId].tileGrid[i][j];
+          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
         }
       }
     }
@@ -333,10 +333,14 @@ contract RealmFacet is Modifiers {
 
   function getPaartnerGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[64][64] memory output_) {
     require(s.parcels[_parcelId].size == 4, "RealmFacet: Not paartner");
-    if (_gridType == 0) {
-      output_ = s.parcels[_parcelId].buildGrid;
-    } else if (_gridType == 1) {
-      output_ = s.parcels[_parcelId].tileGrid;
+    for (uint256 i; i < 64; i++) {
+      for (uint256 j; j < 64; j++) {
+        if (_gridType == 0) {
+          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
+        } else if (_gridType == 1) {
+          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
+        }
+      }
     }
   }
 
@@ -346,8 +350,12 @@ contract RealmFacet is Modifiers {
 
   function batchGetBuildGrid(uint256[] calldata _parcelIds) external view returns (ParcelCoordinates[] memory) {
     ParcelCoordinates[] memory parcels = new ParcelCoordinates[](_parcelIds.length);
-    for (uint256 i; i < _parcelIds.length; i++) {
-      parcels[i] = ParcelCoordinates(s.parcels[_parcelIds[i]].buildGrid);
+    for (uint256 k; k < _parcelIds.length; k++) {
+      for (uint256 i; i < 64; i++) {
+        for (uint256 j; j < 64; j++) {
+          parcels[k].coords[i][j] = s.parcels[_parcelIds[k]].buildGrid[j][i];
+        }
+      }
     }
     return parcels;
   }
