@@ -14,8 +14,8 @@ export const tileTypes: TileTypeInput[] = [
   {
     id: 1,
     name: "LE Golden Tile - Gotchiverse",
-    width: 2,
-    height: 2,
+    width: 8,
+    height: 8,
     deprecated: false,
     tileType: 0,
     alchemicaCost: [25, 25, 75, 25],

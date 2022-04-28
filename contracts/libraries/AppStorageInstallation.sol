@@ -25,6 +25,7 @@ struct InstallationType {
   uint256[] prerequisites; //IDs of installations that must be present before this installation can be added
   //slot 6
   string name;
+  uint40 deprecateTime; //epoch timestamp
 }
 
 struct QueueItem {

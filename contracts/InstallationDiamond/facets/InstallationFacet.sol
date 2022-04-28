@@ -101,6 +101,11 @@ contract InstallationFacet is Modifiers {
       InstallationType memory installationType = s.installationTypes[_installationTypes[i]];
       //level check
       require(installationType.level == 1, "InstallationFacet: can only craft level 1");
+
+      //The preset deprecation time has elapsed
+      if (installationType.deprecateTime > 0) {
+        require(block.timestamp < installationType.deprecateTime, "InstallationFacet: Installation has been deprecated");
+      }
       require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
 
       //take the required alchemica

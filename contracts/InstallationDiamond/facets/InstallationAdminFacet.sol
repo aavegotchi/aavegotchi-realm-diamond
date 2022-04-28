@@ -59,16 +59,14 @@ contract InstallationAdminFacet is Modifiers {
           _installationTypes[i].harvestRate,
           _installationTypes[i].capacity,
           _installationTypes[i].prerequisites,
-          _installationTypes[i].name
+          _installationTypes[i].name,
+          _installationTypes[i].deprecateTime
         )
       );
     }
   }
 
-  /// @notice Allow the diamond owner to edit an installationType
-  /// @param _typeId Identifier of the installationType to edit
-  /// @param _installationType A struct containing the new properties of the installationType being edited
-  function editInstallationType(uint256 _typeId, InstallationType calldata _installationType) external onlyOwner {
-    s.installationTypes[_typeId] = _installationType;
+  function editDeprecateTime(uint256 _typeId, uint40 _deprecateTime) external onlyOwner {
+    s.installationTypes[_typeId].deprecateTime = _deprecateTime;
   }
 }

@@ -1,4 +1,6 @@
-import { InstallationTypeInput } from "../../types";
+import { BigNumber } from "ethers";
+import { ethers } from "hardhat";
+import { InstallationTypeInput, InstallationTypeOutput } from "../../types";
 
 export const installationTypes: InstallationTypeInput[] = [
   {
@@ -19,6 +21,7 @@ export const installationTypes: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    deprecateTime: 0,
   },
   {
     id: 1,
@@ -38,6 +41,7 @@ export const installationTypes: InstallationTypeInput[] = [
     spillRate: 50,
     upgradeQueueBoost: 1,
     craftTime: 0,
+    deprecateTime: 0,
   },
   {
     id: 2,
@@ -57,6 +61,7 @@ export const installationTypes: InstallationTypeInput[] = [
     spillRate: 45,
     upgradeQueueBoost: 1,
     craftTime: 65000,
+    deprecateTime: 0,
   },
   {
     id: 3,
@@ -76,6 +81,7 @@ export const installationTypes: InstallationTypeInput[] = [
     spillRate: 40,
     upgradeQueueBoost: 1,
     craftTime: 160000,
+    deprecateTime: 0,
   },
   {
     id: 4,
@@ -95,6 +101,7 @@ export const installationTypes: InstallationTypeInput[] = [
     spillRate: 35,
     upgradeQueueBoost: 1,
     craftTime: 320000,
+    deprecateTime: 0,
   },
   {
     id: 5,
@@ -114,6 +121,7 @@ export const installationTypes: InstallationTypeInput[] = [
     spillRate: 30,
     upgradeQueueBoost: 1,
     craftTime: 475000,
+    deprecateTime: 0,
   },
   {
     id: 6,
@@ -133,6 +141,7 @@ export const installationTypes: InstallationTypeInput[] = [
     spillRate: 25,
     upgradeQueueBoost: 1,
     craftTime: 630000,
+    deprecateTime: 0,
   },
   {
     id: 7,
@@ -152,6 +161,7 @@ export const installationTypes: InstallationTypeInput[] = [
     spillRate: 20,
     upgradeQueueBoost: 1,
     craftTime: 1250000,
+    deprecateTime: 0,
   },
   {
     id: 8,
@@ -171,6 +181,7 @@ export const installationTypes: InstallationTypeInput[] = [
     spillRate: 15,
     upgradeQueueBoost: 1,
     craftTime: 1900000,
+    deprecateTime: 0,
   },
   {
     id: 9,
@@ -190,5 +201,44 @@ export const installationTypes: InstallationTypeInput[] = [
     spillRate: 10,
     upgradeQueueBoost: 1,
     craftTime: 3200000,
+    deprecateTime: 0,
   },
 ];
+
+export function outputInstallation(
+  installation: InstallationTypeInput
+): InstallationTypeOutput {
+  if (installation.width > 64) throw new Error("Width too much");
+  if (installation.height > 64) throw new Error("Height too much");
+
+  const alchemica = installation.alchemicaCost.map((val) =>
+    ethers.utils.parseEther(val.toString())
+  );
+
+  let output: InstallationTypeOutput = {
+    deprecated: installation.deprecated,
+    installationType: installation.installationType,
+    level: installation.level,
+    width: installation.width,
+    height: installation.height,
+    alchemicaType: installation.alchemicaType,
+    alchemicaCost: [
+      BigNumber.from(alchemica[0]),
+      BigNumber.from(alchemica[1]),
+      BigNumber.from(alchemica[2]),
+      BigNumber.from(alchemica[3]),
+    ],
+    harvestRate: ethers.utils.parseEther(installation.harvestRate.toString()),
+    capacity: ethers.utils.parseEther(installation.capacity.toString()),
+    spillRadius: installation.spillRadius.toString(),
+    spillRate: (installation.spillRate * 1000).toString(), //add on 3 zeroes for precision
+    upgradeQueueBoost: installation.upgradeQueueBoost,
+    craftTime: installation.craftTime,
+    nextLevelId: installation.nextLevelId,
+    prerequisites: installation.prerequisites,
+    name: installation.name,
+    deprecateTime: installation.deprecateTime,
+  };
+
+  return output;
+}
