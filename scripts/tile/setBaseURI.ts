@@ -1,13 +1,15 @@
-import { BigNumber, Signer } from "ethers";
 import { ethers, network } from "hardhat";
 
 import { ERC1155TileFacet, OwnershipFacet } from "../../typechain";
 import { impersonate } from "../helperFunctions";
 
-export async function setAddresses() {
-  const accounts: Signer[] = await ethers.getSigners();
+import { LedgerSigner } from "@anders-t/ethers-ledger";
+import { gasPrice } from "../../constants";
 
-  const diamondAddress = "";
+export async function setAddresses() {
+  const diamondAddress = "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
+
+  let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
 
   const testing = ["hardhat"].includes(network.name);
 
@@ -20,7 +22,8 @@ export async function setAddresses() {
 
   let erc1155TileFacet = (await ethers.getContractAt(
     "ERC1155TileFacet",
-    diamondAddress
+    diamondAddress,
+    signer
   )) as ERC1155TileFacet;
 
   if (testing) {
@@ -35,13 +38,16 @@ export async function setAddresses() {
   let baseUri = await erc1155TileFacet.uri("1");
   console.log("base uri:", baseUri);
 
-  //   const tx = await erc1155facet.setBaseURI(
-  //     "https://app.aavegotchi.com/metadata/installation/"
-  //   );
-  //   await tx.wait();
+  const tx = await erc1155TileFacet.setBaseURI(
+    "https://app.aavegotchi.com/metadata/tile/",
+    {
+      gasPrice: gasPrice,
+    }
+  );
+  await tx.wait();
 
-  //   baseUri = await erc1155facet.uri("1");
-  //   console.log("base uri:", baseUri);
+  baseUri = await erc1155TileFacet.uri("1");
+  console.log("base uri:", baseUri);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

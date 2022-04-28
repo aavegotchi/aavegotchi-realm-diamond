@@ -47,18 +47,20 @@ export async function setAddresses() {
   // add real data
   const goldenTiles = tileTypes.map((val) => outputTile(val, ethers));
 
-  await tileFacet.addTileTypes(goldenTiles, {
-    gasPrice: gasPrice,
-  });
+  // await tileFacet.editTileType("1", goldenTiles[1], { gasPrice: gasPrice });
 
-  await tileFacet.setAddresses(
-    maticAavegotchiDiamondAddress,
-    maticDiamondAddress,
-    ethers.constants.AddressZero,
-    pixelcraftAddress,
-    aavegotchiDAOAddress,
-    { gasPrice: gasPrice }
-  );
+  // await tileFacet.addTileTypes(goldenTiles, {
+  //   gasPrice: gasPrice,
+  // });
+
+  // await tileFacet.setAddresses(
+  //   maticAavegotchiDiamondAddress,
+  //   maticDiamondAddress,
+  //   ethers.constants.AddressZero,
+  //   pixelcraftAddress,
+  //   aavegotchiDAOAddress,
+  //   { gasPrice: gasPrice }
+  // );
 
   const tiles = await tileFacet.getTileTypes([]);
   console.log("tiles:", tiles);

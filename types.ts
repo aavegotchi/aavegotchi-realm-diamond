@@ -58,6 +58,7 @@ export interface InstallationTypeInput {
   nextLevelId: number;
   prerequisites: number[];
   name: string;
+  deprecateTime: number;
 }
 
 export interface InstallationTypeOutput {
@@ -77,6 +78,7 @@ export interface InstallationTypeOutput {
   nextLevelId: BigNumberish;
   prerequisites: BigNumberish[];
   name: string;
+  deprecateTime: BigNumberish;
 }
 
 export interface TileTypeInput {

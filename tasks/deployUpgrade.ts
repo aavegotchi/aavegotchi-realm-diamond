@@ -12,13 +12,11 @@ import { Signer } from "@ethersproject/abstract-signer";
 
 import { OwnershipFacet } from "../typechain/OwnershipFacet";
 import { IDiamondCut } from "../typechain/IDiamondCut";
-import {
-  gasPrice,
-  getSelectors,
-  getSighashes,
-} from "../scripts/helperFunctions";
+import { getSelectors, getSighashes } from "../scripts/helperFunctions";
 
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { LedgerSigner } from "@anders-t/ethers-ledger";
+import { gasPrice } from "../constants";
 
 export interface FacetsAndAddSelectors {
   facetName: string;
@@ -133,9 +131,6 @@ task(
         signer = await hre.ethers.getSigner(owner);
       } else if (hre.network.name === "matic") {
         if (useLedger) {
-          const {
-            LedgerSigner,
-          } = require("../../aavegotchi-contracts/node_modules/@ethersproject/hardware-wallets");
           signer = new LedgerSigner(hre.ethers.provider);
         } else signer = (await hre.ethers.getSigners())[0];
       } else {
