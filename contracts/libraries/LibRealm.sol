@@ -27,8 +27,8 @@ library LibRealm {
     Parcel storage parcel = s.parcels[_realmId];
 
     //Check if these slots are available onchain
-    require(_x <= widths[parcel.size] - installation.width - 1, "LibRealm: x exceeding width");
-    require(_y <= heights[parcel.size] - installation.height - 1, "LibRealm: y exceeding height");
+    require(_x <= widths[parcel.size] - installation.width, "LibRealm: x exceeding width");
+    require(_y <= heights[parcel.size] - installation.height, "LibRealm: y exceeding height");
     for (uint256 indexW = _x; indexW < _x + installation.width; indexW++) {
       for (uint256 indexH = _y; indexH < _y + installation.height; indexH++) {
         require(parcel.buildGrid[indexW][indexH] == 0, "LibRealm: Invalid spot");
