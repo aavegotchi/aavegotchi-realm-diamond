@@ -65,7 +65,11 @@ contract InstallationFacet is Modifiers {
   /// @return installationType A struct containing details about the item type of an item with identifier `_itemId`
   function getInstallationType(uint256 _installationTypeId) external view returns (InstallationType memory installationType) {
     require(_installationTypeId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
+
+    bool deprecated = block.timestamp > s.deprecateTime[_installationTypeId];
+
     installationType = s.installationTypes[_installationTypeId];
+    installationType.deprecated = deprecated;
   }
 
   /// @notice Query the item type of multiple installation types
@@ -77,7 +81,9 @@ contract InstallationFacet is Modifiers {
     } else {
       installationTypes_ = new InstallationType[](_installationTypeIds.length);
       for (uint256 i; i < _installationTypeIds.length; i++) {
+        bool deprecated = block.timestamp > s.deprecateTime[_installationTypeIds[i]];
         installationTypes_[i] = s.installationTypes[_installationTypeIds[i]];
+        installationTypes_[i].deprecated = deprecated;
       }
     }
   }
