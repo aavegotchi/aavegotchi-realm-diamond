@@ -57,7 +57,7 @@ export async function upgrade() {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: maticInstallationDiamondAddress,
     facetsAndAddSelectors: joined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
     initAddress: maticInstallationDiamondAddress,
     initCalldata: calldata,
@@ -71,10 +71,10 @@ export async function upgrade() {
   let inst = await ifacet.getInstallationTypes(["1"]);
   console.log("inst:", inst);
 
-  await run("deployUpgrade", args);
+  // await run("deployUpgrade", args);
 
-  inst = await ifacet.getInstallationTypes(["1"]);
-  console.log("inst:", inst);
+  // inst = await ifacet.getInstallationTypes(["1"]);
+  // console.log("inst:", inst);
 }
 
 if (require.main === module) {
