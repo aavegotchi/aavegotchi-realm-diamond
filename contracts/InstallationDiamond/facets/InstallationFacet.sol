@@ -66,7 +66,8 @@ contract InstallationFacet is Modifiers {
   function getInstallationType(uint256 _installationTypeId) external view returns (InstallationType memory installationType) {
     require(_installationTypeId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
 
-    bool deprecated = block.timestamp > s.deprecateTime[_installationTypeId];
+    //If a deprecate time has been set, refer to that. Otherwise, use the manual deprecate.
+    bool deprecated = s.deprecateTime[_installationTypeId] > 0 ? block.timestamp > s.deprecateTime[_installationTypeId] : installationType.deprecated;
 
     installationType = s.installationTypes[_installationTypeId];
     installationType.deprecated = deprecated;
@@ -81,7 +82,10 @@ contract InstallationFacet is Modifiers {
     } else {
       installationTypes_ = new InstallationType[](_installationTypeIds.length);
       for (uint256 i; i < _installationTypeIds.length; i++) {
-        bool deprecated = block.timestamp > s.deprecateTime[_installationTypeIds[i]];
+        //If a deprecate time has been set, refer to that. Otherwise, use the manual deprecate.
+        bool deprecated = s.deprecateTime[_installationTypeIds[i]] > 0
+          ? block.timestamp > s.deprecateTime[_installationTypeIds[i]]
+          : s.installationTypes[_installationTypeIds[i]].deprecated;
         installationTypes_[i] = s.installationTypes[_installationTypeIds[i]];
         installationTypes_[i].deprecated = deprecated;
       }
