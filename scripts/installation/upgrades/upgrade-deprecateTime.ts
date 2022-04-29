@@ -46,7 +46,10 @@ export async function upgrade() {
   const owner = await ownership.owner();
   console.log("owner:", owner);
 
-  const calldata = iface.encodeFunctionData("editDeprecateTime", ["1", 10000]);
+  const calldata = iface.encodeFunctionData("editDeprecateTime", [
+    "1",
+    1651363200,
+  ]);
 
   const joined = convertFacetAndSelectorsToString(facets);
 
