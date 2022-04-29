@@ -58,6 +58,7 @@ export interface InstallationTypeInput {
   nextLevelId: number;
   prerequisites: number[];
   name: string;
+  deprecateTime: number;
 }
 
 export interface InstallationTypeOutput {
@@ -76,5 +77,27 @@ export interface InstallationTypeOutput {
   craftTime: BigNumberish;
   nextLevelId: BigNumberish;
   prerequisites: BigNumberish[];
+  name: string;
+  deprecateTime: BigNumberish;
+}
+
+export interface TileTypeInput {
+  id?: number;
+  deprecated: boolean;
+  tileType: number;
+  width: Width;
+  height: Height;
+  alchemicaCost: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+  craftTime: number;
+  name: string;
+}
+
+export interface TileTypeOutput {
+  deprecated: boolean;
+  tileType: BigNumberish;
+  width: Width;
+  height: Height;
+  alchemicaCost: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+  craftTime: BigNumberish;
   name: string;
 }

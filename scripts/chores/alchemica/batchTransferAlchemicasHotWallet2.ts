@@ -2,10 +2,10 @@ import { ethers, run } from "hardhat";
 
 export async function setAddresses() {
   const amounts = [
-    ethers.utils.parseEther("500000"),
     ethers.utils.parseEther("250000"),
     ethers.utils.parseEther("125000"),
-    ethers.utils.parseEther("0"),
+    ethers.utils.parseEther("67500"),
+    ethers.utils.parseEther("25000"),
   ].join(",");
 
   const hotWallet2 = "0xa0f32863AC0e82d36Df959A95FeDb661C1d32A6f";

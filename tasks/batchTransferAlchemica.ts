@@ -3,12 +3,8 @@
 import { BigNumber, BigNumberish, Signer } from "ethers";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import {
-  alchemica,
-  gasPrice,
-  impersonate,
-  maticDiamondAddress,
-} from "../scripts/helperFunctions";
+import { alchemica, gasPrice, maticDiamondAddress } from "../constants";
+import { impersonate } from "../scripts/helperFunctions";
 import { AlchemicaToken, RealmFacet } from "../typechain";
 
 export interface MintParcelsTaskArgs {

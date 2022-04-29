@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/utils/Context.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -40,8 +38,12 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
   mapping(address => uint256) private _released;
   mapping(address => bool) private _revoked;
 
-  function replaceBeneficiary(address newBeneficiary_) external {
+  modifier onlyBeneficiary() {
     if (msg.sender != _beneficiary) revert Unauthorized(msg.sender);
+    _;
+  }
+
+  function replaceBeneficiary(address newBeneficiary_) external onlyBeneficiary {
     _beneficiary = newBeneficiary_;
   }
 
@@ -115,11 +117,32 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
     return _revoked[token];
   }
 
+  function release(IERC20 token) external onlyBeneficiary {
+    _release(token);
+  }
+
+  function partialRelease(IERC20 token, uint256 value) external onlyBeneficiary {
+    _partialRelease(token, value);
+  }
+
+  function batchRelease(address[] calldata tokens) external onlyBeneficiary {
+    for (uint256 i = 0; i < tokens.length; i++) {
+      _release(IERC20(tokens[i]));
+    }
+  }
+
+  function batchPartialRelease(IERC20[] calldata _tokens, uint256[] calldata _amounts) external onlyBeneficiary {
+    if (_tokens.length != _amounts.length) revert InvalidAmount();
+    for (uint256 i = 0; i < _tokens.length; i++) {
+      _partialRelease(_tokens[i], _amounts[i]);
+    }
+  }
+
   /**
    * @notice Transfers vested tokens to beneficiary.
    * @param token ERC20 token which is being vested
    */
-  function release(IERC20 token) public {
+  function _release(IERC20 token) internal {
     uint256 unreleased = releasableAmount(token);
 
     if (unreleased == 0) revert NoTokensDue();
@@ -131,13 +154,7 @@ contract AlchemicaVesting is Initializable, OwnableUpgradeable {
     emit TokensReleased(address(token), unreleased);
   }
 
-  function batchRelease(address[] calldata tokens) external {
-    for (uint256 i = 0; i < tokens.length; i++) {
-      release(IERC20(tokens[i]));
-    }
-  }
-
-  function partialRelease(IERC20 token, uint256 value) public {
+  function _partialRelease(IERC20 token, uint256 value) internal {
     uint256 unreleased = releasableAmount(token);
 
     if (unreleased == 0) revert NoTokensDue();
