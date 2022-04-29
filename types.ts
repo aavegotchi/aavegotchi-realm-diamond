@@ -48,7 +48,7 @@ export interface InstallationTypeInput {
   width: Width;
   height: Height;
   alchemicaType: 0 | 1 | 2 | 3;
-  alchemicaCost: [number, number, number, number];
+  alchemicaCost: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
   harvestRate: number;
   capacity: number;
   spillRadius: number;

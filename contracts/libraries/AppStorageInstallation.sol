@@ -66,6 +66,8 @@ struct InstallationAppStorage {
   mapping(address => uint256[]) ownerInstallations;
   mapping(address => mapping(uint256 => uint256)) ownerInstallationIndexes;
   UpgradeQueue[] upgradeQueue;
+  // installationId => deprecateTime
+  mapping(uint256 => uint256) deprecateTime;
 }
 
 library LibAppStorageInstallation {

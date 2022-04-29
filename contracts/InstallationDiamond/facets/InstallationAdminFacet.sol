@@ -65,10 +65,7 @@ contract InstallationAdminFacet is Modifiers {
     }
   }
 
-  /// @notice Allow the diamond owner to edit an installationType
-  /// @param _typeId Identifier of the installationType to edit
-  /// @param _installationType A struct containing the new properties of the installationType being edited
-  function editInstallationType(uint256 _typeId, InstallationType calldata _installationType) external onlyOwner {
-    s.installationTypes[_typeId] = _installationType;
+  function editDeprecateTime(uint256 _typeId, uint40 _deprecateTime) external onlyOwner {
+    s.deprecateTime[_typeId] = _deprecateTime;
   }
 }
