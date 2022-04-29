@@ -12,7 +12,7 @@ import { ethers } from "hardhat";
 import {
   approveRealAlchemica,
   faucetRealAlchemica,
-} from "../scripts/installation/helperFunctions";
+} from "../scripts/helperFunctions";
 import { upgrade } from "../scripts/installation/upgrades/upgrade-deprecateTime";
 
 let diamondAddress: string;
@@ -75,9 +75,14 @@ describe("Realm Upgrade tests", async function () {
     expect(maxSupply).to.equal(420069);
   });
   it("Test editDeprecateTime", async function () {
-    await faucetRealAlchemica(testAddress, ethers);
+    await faucetRealAlchemica(testAddress, ethers, network);
 
-    await approveRealAlchemica(testAddress, installationAddress, ethers);
+    await approveRealAlchemica(
+      testAddress,
+      installationAddress,
+      ethers,
+      network
+    );
 
     installationFacet = await impersonate(
       testAddress,
