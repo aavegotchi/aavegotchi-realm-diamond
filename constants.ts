@@ -27,5 +27,8 @@ export const mumbaiInstallationDiamondAddress =
 export const maticInstallationDiamondAddress =
   "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
 
+export const maticTileDiamondAddress =
+  "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
+
 export const ecosystemVesting = "0x7e07313B4FF259743C0c84eA3d5e741D2b0d07c3";
 export const gameplayVesting = "0x3fB6C2A83d2FfFe94e0b912b612fB100047cc176";

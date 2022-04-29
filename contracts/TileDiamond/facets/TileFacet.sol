@@ -125,6 +125,10 @@ contract TileFacet is Modifiers {
 
       TileType memory tileType = s.tileTypes[_tileTypes[i]];
 
+      //The preset deprecation time has elapsed
+      if (s.deprecateTime[_tileTypes[i]] > 0) {
+        require(block.timestamp < s.deprecateTime[_tileTypes[i]], "TileFacet: Tile has been deprecated");
+      }
       require(!tileType.deprecated, "TileFacet: Tile has been deprecated");
 
       //take the required alchemica
@@ -218,10 +222,7 @@ contract TileFacet is Modifiers {
     }
   }
 
-  /// @notice Allow the diamond owner to edit a tileType
-  /// @param _typeId Identifier of the tileType to edit
-  /// @param _tileType A struct containing the new properties of the tileType being edited
-  function editTileType(uint256 _typeId, TileType calldata _tileType) external onlyOwner {
-    s.tileTypes[_typeId] = _tileType;
+  function editDeprecateTime(uint256 _typeId, uint40 _deprecateTime) external onlyOwner {
+    s.deprecateTime[_typeId] = _deprecateTime;
   }
 }

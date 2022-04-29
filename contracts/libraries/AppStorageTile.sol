@@ -46,6 +46,8 @@ struct TileAppStorage {
   mapping(address => mapping(uint256 => uint256)) ownerTileBalances;
   mapping(address => uint256[]) ownerTiles;
   mapping(address => mapping(uint256 => uint256)) ownerTileIndexes;
+  // installationId => deprecateTime
+  mapping(uint256 => uint256) deprecateTime;
 }
 
 library LibAppStorageTile {
