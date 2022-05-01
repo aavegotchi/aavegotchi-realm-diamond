@@ -7,7 +7,7 @@ import {
 } from "../../../tasks/deployUpgrade";
 import {
   TileFacet__factory,
-  InstallationFacet,
+  TileFacet,
   OwnershipFacet,
 } from "../../../typechain";
 import { TileFacetInterface } from "../../../typechain/TileFacet";
@@ -43,7 +43,7 @@ export async function upgrade() {
 
   const calldata = iface.encodeFunctionData("editDeprecateTime", [
     "1",
-    1651363200,
+    1651672800,
   ]);
 
   const joined = convertFacetAndSelectorsToString(facets);
@@ -54,19 +54,22 @@ export async function upgrade() {
     facetsAndAddSelectors: joined,
     useLedger: false,
     useMultisig: false,
-    initAddress: ethers.constants.AddressZero,
-    initCalldata: "0x",
+    initAddress: maticTileDiamondAddress,
+    initCalldata: calldata,
   };
 
-  // const ifacet = (await ethers.getContractAt(
-  //   "InstallationFacet",
-  //   maticTileDiamondAddress
-  // )) as InstallationFacet;
-
-  // let inst = await ifacet.getInstallationTypes(["1"]);
-  // console.log("inst:", inst);
+  const ifacet = (await ethers.getContractAt(
+    "TileFacet",
+    maticTileDiamondAddress
+  )) as TileFacet;
 
   await run("deployUpgrade", args);
+
+  const inst = await ifacet.getTileTypes([]);
+  console.log("tile types:", inst);
+
+  // const type = await ifacet.getTileType("1");
+  // console.log("tile type:", inst);
 
   // inst = await ifacet.getInstallationTypes(["1"]);
   // console.log("inst:", inst);
