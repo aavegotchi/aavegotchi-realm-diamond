@@ -52,7 +52,7 @@ export async function upgrade() {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: maticTileDiamondAddress,
     facetsAndAddSelectors: joined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
     initAddress: maticTileDiamondAddress,
     initCalldata: calldata,
