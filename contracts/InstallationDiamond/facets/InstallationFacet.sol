@@ -79,6 +79,10 @@ contract InstallationFacet is Modifiers {
   function getInstallationTypes(uint256[] calldata _installationTypeIds) external view returns (InstallationType[] memory installationTypes_) {
     if (_installationTypeIds.length == 0) {
       installationTypes_ = s.installationTypes;
+
+      for (uint256 i = 0; i < s.installationTypes.length; i++) {
+        installationTypes_[i].deprecated = s.deprecateTime[i] == 0 ? s.installationTypes[i].deprecated : block.timestamp > s.deprecateTime[i];
+      }
     } else {
       installationTypes_ = new InstallationType[](_installationTypeIds.length);
       for (uint256 i; i < _installationTypeIds.length; i++) {

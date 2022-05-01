@@ -74,6 +74,7 @@ contract TileFacet is Modifiers {
   function getTileType(uint256 _tileTypeId) external view returns (TileType memory tileType) {
     require(_tileTypeId < s.tileTypes.length, "TileFacet: Item type doesn't exist");
     tileType = s.tileTypes[_tileTypeId];
+    tileType.deprecated = s.deprecateTime[_tileTypeId] > 0 ? block.timestamp > s.deprecateTime[_tileTypeId] : s.tileTypes[_tileTypeId].deprecated;
   }
 
   /// @notice Query the item type of multiple tile types
@@ -82,10 +83,15 @@ contract TileFacet is Modifiers {
   function getTileTypes(uint256[] calldata _tileTypeIds) external view returns (TileType[] memory tileTypes_) {
     if (_tileTypeIds.length == 0) {
       tileTypes_ = s.tileTypes;
+      for (uint256 i = 0; i < s.tileTypes.length; i++) {
+        tileTypes_[i].deprecated = s.deprecateTime[i] == 0 ? s.tileTypes[i].deprecated : block.timestamp > s.deprecateTime[i];
+      }
     } else {
       tileTypes_ = new TileType[](_tileTypeIds.length);
       for (uint256 i; i < _tileTypeIds.length; i++) {
+        uint256 tileId = _tileTypeIds[i];
         tileTypes_[i] = s.tileTypes[_tileTypeIds[i]];
+        tileTypes_[i].deprecated = s.deprecateTime[tileId] > 0 ? block.timestamp > s.deprecateTime[tileId] : s.tileTypes[tileId].deprecated;
       }
     }
   }
@@ -125,6 +131,10 @@ contract TileFacet is Modifiers {
 
       TileType memory tileType = s.tileTypes[_tileTypes[i]];
 
+      //The preset deprecation time has elapsed
+      if (s.deprecateTime[_tileTypes[i]] > 0) {
+        require(block.timestamp < s.deprecateTime[_tileTypes[i]], "TileFacet: Tile has been deprecated");
+      }
       require(!tileType.deprecated, "TileFacet: Tile has been deprecated");
 
       //take the required alchemica
@@ -218,10 +228,7 @@ contract TileFacet is Modifiers {
     }
   }
 
-  /// @notice Allow the diamond owner to edit a tileType
-  /// @param _typeId Identifier of the tileType to edit
-  /// @param _tileType A struct containing the new properties of the tileType being edited
-  function editTileType(uint256 _typeId, TileType calldata _tileType) external onlyOwner {
-    s.tileTypes[_typeId] = _tileType;
+  function editDeprecateTime(uint256 _typeId, uint40 _deprecateTime) external onlyOwner {
+    s.deprecateTime[_typeId] = _deprecateTime;
   }
 }

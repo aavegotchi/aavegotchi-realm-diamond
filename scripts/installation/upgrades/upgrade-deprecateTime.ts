@@ -24,15 +24,6 @@ export async function upgrade() {
       addSelectors: [],
       removeSelectors: [],
     },
-    {
-      facetName: "InstallationAdminFacet",
-      addSelectors: [
-        `function editDeprecateTime(uint256 _typeId, uint40 _deprecateTime) external`,
-      ],
-      removeSelectors: [
-        `function editInstallationType(uint256 _typeId, ${oldInstallationTypeTuple} calldata _installationType) external`,
-      ],
-    },
   ];
 
   let iface: InstallationAdminFacetInterface = new ethers.utils.Interface(
@@ -69,12 +60,12 @@ export async function upgrade() {
   )) as InstallationFacet;
 
   let inst = await ifacet.getInstallationTypes(["1"]);
-  console.log("inst:", inst);
+  // console.log("inst:", inst);
 
   // await run("deployUpgrade", args);
 
-  // inst = await ifacet.getInstallationTypes(["1"]);
-  // console.log("inst:", inst);
+  inst = await ifacet.getInstallationTypes([]);
+  console.log("inst:", inst);
 }
 
 if (require.main === module) {
