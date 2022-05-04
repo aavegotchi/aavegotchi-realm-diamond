@@ -202,7 +202,7 @@ export async function deployMumbai() {
     alchemica.gltr.address,
     pixelcraft,
     dao,
-    ""
+    ethers.utils.hexDataSlice(backendSigner.publicKey, 1)
   );
   await tx.wait();
 

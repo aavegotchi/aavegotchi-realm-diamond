@@ -20,13 +20,13 @@ import { alchemicaTotals, boostMultipliers } from "../../setVars";
 import { genEquipInstallationSignature } from "../realmHelpers";
 
 export async function setAddresses() {
-  const diamondAddress = "0x6bb645178AEd185980e9a9BAB92aA96eB405D7A4";
-  const installationDiamond = "0xbFFF3364Cd77Bf69048244b535F3435ff69e63DB";
+  const diamondAddress = "0x1cefe47444e5597368fF81D083dCDd8C4FECeBdE";
+  const installationDiamond = "0x7bC1d8C927a61c43c359E350333Ac5343a3Ef0F5";
   const owner = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
-  const fudAddress = "0x75482FcFDF88df0A1c7Afc66411d27db2388C4b5";
-  const fomoAddress = "0xf9b19fe41Ab12A7Ab858D4b83212FbC51C970c13";
-  const alphaAddress = "0xCA9a214788DD68BB2468794073A24003C975DDbD";
-  const kekAddress = "0x3d8D786edE779113938e75BD44B5c8d02Ab0Cf28";
+  const fudAddress = "0x447fd7d4F6D7efab9a10786e5804192c4Acbd32F";
+  const fomoAddress = "0xEb156a435CF453F0F2D0b7144C8a2D0224F7D73A";
+  const alphaAddress = "0x79F80B48543F4213fbFaB158bE9EF7f89C9fFC74";
+  const kekAddress = "0xEdA7e5A9674a70f57C09D6037c8Ac789a18b9410";
   const maticAavegotchiDiamondAddress =
     "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
 
@@ -102,30 +102,30 @@ export async function setAddresses() {
 
   // await mintTx.wait();
 
-  // const theVoid: any = {
-  //   name: "The Void",
-  //   level: 1,
-  //   nextLevelId: 0,
-  //   prerequisites: [],
-  //   width: 1,
-  //   height: 1,
-  //   deprecated: true,
-  //   installationType: 0,
-  //   alchemicaType: 0,
-  //   alchemicaCost: [0, 0, 0, 0],
-  //   harvestRate: 0,
-  //   capacity: 0,
-  //   spillRadius: 0,
-  //   spillRate: 0,
-  //   upgradeQueueBoost: 0,
-  //   craftTime: 0,
-  // };
+  const theVoid: any = {
+    name: "The Void",
+    level: 1,
+    nextLevelId: 0,
+    prerequisites: [0, 0],
+    width: 1,
+    height: 1,
+    deprecated: true,
+    installationType: 0,
+    alchemicaType: 0,
+    alchemicaCost: [0, 0, 0, 0],
+    harvestRate: 0,
+    capacity: 0,
+    spillRadius: 0,
+    spillRate: 0,
+    upgradeQueueBoost: 0,
+    craftTime: 0,
+  };
 
   const altar: any = {
     name: "Altar",
     level: 1,
     nextLevelId: 2,
-    prerequisites: [],
+    prerequisites: [0, 0],
     width: 2,
     height: 2,
     deprecated: false,
@@ -149,7 +149,7 @@ export async function setAddresses() {
     name: "FUD Harvester level 1",
     level: 1,
     nextLevelId: 0,
-    prerequisites: [],
+    prerequisites: [1, 0],
     width: 2,
     height: 2,
     deprecated: false,
@@ -173,7 +173,7 @@ export async function setAddresses() {
     name: "FUD Reservoir level 1",
     level: 1,
     nextLevelId: 0,
-    prerequisites: [],
+    prerequisites: [1, 0],
     width: 2,
     height: 2,
     deprecated: false,
@@ -193,13 +193,31 @@ export async function setAddresses() {
     craftTime: 0,
   };
 
-  // console.log("get installation types");
-  const addTx = await installationAdminFacet.addInstallationTypes([
-    harvester,
-    reservoir,
-  ]);
+  // console.log("set installation types");
+  // const addTx = await installationAdminFacet.addInstallationTypes([
+  //   theVoid,
+  //   altar,
+  //   harvester,
+  //   reservoir,
+  // ]);
 
-  await addTx.wait();
+  // await addTx.wait();
+
+  console.log("set installation types");
+  const edit1Tx = await installationAdminFacet.editInstallationType(1, altar);
+  await edit1Tx.wait();
+
+  const edit2Tx = await installationAdminFacet.editInstallationType(
+    2,
+    harvester
+  );
+  await edit2Tx.wait();
+
+  const edit3Tx = await installationAdminFacet.editInstallationType(
+    3,
+    reservoir
+  );
+  await edit3Tx.wait();
   // const altar = await installationFacet.getInstallationTypes([1]);
   // console.log(altar);
 

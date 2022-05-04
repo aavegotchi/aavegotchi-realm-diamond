@@ -151,31 +151,31 @@ contract AlchemicaFacet is Modifiers {
     LibRealm.updateRemainingAlchemica(_realmId, alchemicas, s.parcels[_realmId].currentRound);
   }
 
-  // // /// @dev This function will be removed in production.
-  // // function testingMintParcel(
-  // //   address _to,
-  // //   uint256[] calldata _tokenIds,
-  // //   RealmFacet.MintParcelInput[] memory _metadata
-  // // ) external {
-  // //   for (uint256 index = 0; index < _tokenIds.length; index++) {
-  // //     require(s.tokenIds.length < 420069, "AlchemicaFacet: Cannot mint more than 420,069 parcels");
-  // //     uint256 tokenId = _tokenIds[index];
-  // //     RealmFacet.MintParcelInput memory metadata = _metadata[index];
-  // //     require(_tokenIds.length == _metadata.length, "Inputs must be same length");
+  /// @dev This function will be removed in production.
+  function testingMintParcel(
+    address _to,
+    uint256[] calldata _tokenIds,
+    RealmFacet.MintParcelInput[] memory _metadata
+  ) external {
+    for (uint256 index = 0; index < _tokenIds.length; index++) {
+      require(s.tokenIds.length < 420069, "AlchemicaFacet: Cannot mint more than 420,069 parcels");
+      uint256 tokenId = _tokenIds[index];
+      RealmFacet.MintParcelInput memory metadata = _metadata[index];
+      require(_tokenIds.length == _metadata.length, "Inputs must be same length");
 
-  // //     Parcel storage parcel = s.parcels[tokenId];
-  // //     parcel.coordinateX = metadata.coordinateX;
-  // //     parcel.coordinateY = metadata.coordinateY;
-  // //     parcel.parcelId = metadata.parcelId;
-  // //     parcel.size = metadata.size;
-  // //     parcel.district = metadata.district;
-  // //     parcel.parcelAddress = metadata.parcelAddress;
+      Parcel storage parcel = s.parcels[tokenId];
+      parcel.coordinateX = metadata.coordinateX;
+      parcel.coordinateY = metadata.coordinateY;
+      parcel.parcelId = metadata.parcelId;
+      parcel.size = metadata.size;
+      parcel.district = metadata.district;
+      parcel.parcelAddress = metadata.parcelAddress;
 
-  // //     parcel.alchemicaBoost = metadata.boost;
+      parcel.alchemicaBoost = metadata.boost;
 
-  // //     LibERC721.safeMint(_to, tokenId);
-  // //   }
-  // // }
+      LibERC721.safeMint(_to, tokenId);
+    }
+  }
 
   /// @dev This function will be removed in production.
   function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external {

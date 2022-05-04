@@ -31,8 +31,8 @@ describe("Testing Equip Installation", async function () {
   const testAddress = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
   const testParcelId = 1;
 
-  const diamondAddress = "0x6bb645178AEd185980e9a9BAB92aA96eB405D7A4";
-  const installationDiamond = "0xbFFF3364Cd77Bf69048244b535F3435ff69e63DB";
+  const diamondAddress = "0x1cefe47444e5597368fF81D083dCDd8C4FECeBdE";
+  const installationDiamond = "0x7bC1d8C927a61c43c359E350333Ac5343a3Ef0F5";
   const owner = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
 
   let realmFacet: RealmFacet;
@@ -97,9 +97,9 @@ describe("Testing Equip Installation", async function () {
   });
   it("Equip altar", async function () {
     realmFacet = await impersonate(testAddress, realmFacet, ethers, network);
-    await realmFacet.equipInstallation(0, 1, 4, 4, await genSignature(1, 4, 4));
+    await realmFacet.equipInstallation(0, 1, 0, 0, await genSignature(1, 0, 0));
   });
-  it("Survey Parcel", async function () {
+  xit("Survey Parcel", async function () {
     await alchemicaFacet.testingStartSurveying(0);
   });
 });
