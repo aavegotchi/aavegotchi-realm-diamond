@@ -1,12 +1,9 @@
 import { BigNumber, BigNumberish, Signer } from "ethers";
 import { ethers, network } from "hardhat";
+import { maticDiamondAddress } from "../../../constants";
 
-import { AlchemicaToken, RealmFacet } from "../../../typechain";
-import {
-  alchemica,
-  impersonate,
-  maticDiamondAddress,
-} from "../../helperFunctions";
+import { RealmFacet } from "../../../typechain";
+import { impersonate } from "../../helperFunctions";
 
 export async function setAddresses() {
   const accounts: Signer[] = await ethers.getSigners();
@@ -19,22 +16,29 @@ export async function setAddresses() {
   )) as RealmFacet;
 
   const addressPayload: string[] = [
-    "0xCa8DD95F9fBc083D6566EC141d3a76d94aC2C7c6",
-    "0xE12637aF9F355f8328E34776D8a656162c18b2a7",
-    "0x6bC3D34e1E5979D396F1C835dd5c9CdBC461Bdd6",
-    "0x26548dBe21b8E960e7178868eB94068A4B4FA8b8",
-    "0xf2B3696Cc3a7B1C1BDEEF89D811552F88B703A69",
-    "0x78122B02940683b2218F88c1624f4a0997700cD3",
-    "0x43a27d07392af4099953fd88466C94cB7D08D51c",
-    "0x6A6d42e342ce7b1aA368CA2f5E919043715F023F",
+    "0xccc959bbd2c8f1b0a8f32f3976d9bb78848206b0",
+    "0x0a62b995486764b911c25474d0f96d25f4b81500",
+    "0x5e0cb2d27431a8f411a48cd4d6b1532cbfaf1612",
+    "0xa204e00c8ae770b474d29eadb8591daec85feb49",
+    "0x366d31258f2987e90f64a1dd56b90a7e7c7df027",
   ];
 
-  const amounts: [BigNumberish, BigNumberish, BigNumberish, BigNumberish] = [
-    ethers.utils.parseEther("50"),
-    ethers.utils.parseEther("50"),
-    ethers.utils.parseEther("50"),
-    ethers.utils.parseEther("50"),
-  ];
+  const amountsPayload: BigNumber[][] = [
+    [2, 1.5, 0, 0.2],
+    [1.5, 0.5, 0.3, 0.3],
+    [58.5, 25, 11.4, 3.2],
+    [2, 1.1, 45.4, 1.8],
+    [3.2, 0.6, 27.4, 0.7],
+  ].map((vals) => vals.map((val) => ethers.utils.parseEther(val.toString())));
+
+  console.log("amts:", amountsPayload);
+
+  // const amounts: [BigNumberish, BigNumberish, BigNumberish, BigNumberish] = [
+  //   ethers.utils.parseEther("50"),
+  //   ethers.utils.parseEther("50"),
+  //   ethers.utils.parseEther("50"),
+  //   ethers.utils.parseEther("50"),
+  // ];
 
   const owner = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
 
@@ -44,20 +48,22 @@ export async function setAddresses() {
     realmFacet = await impersonate(owner, realmFacet, ethers, network);
   }
 
-  const alchemicaPayload: [
-    BigNumberish,
-    BigNumberish,
-    BigNumberish,
-    BigNumberish
-  ][] = [];
+  // const alchemicaPayload: [
+  //   BigNumberish,
+  //   BigNumberish,
+  //   BigNumberish,
+  //   BigNumberish
+  // ][] = [];
 
-  addressPayload.forEach((address) => {
-    alchemicaPayload.push(amounts);
-  });
+  // addressPayload.forEach((address) => {
+  //   //@ts-ignore
+  //   alchemicaPayload.push(amounts);
+  // });
 
   console.log("Batch transferring!");
   //transfer
-  await realmFacet.batchTransferAlchemica(addressPayload, alchemicaPayload);
+  //@ts-ignore
+  await realmFacet.batchTransferAlchemica(addressPayload, amountsPayload);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

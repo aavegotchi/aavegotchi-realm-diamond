@@ -1,4 +1,3 @@
-import { Signer } from "ethers";
 import { ethers, network } from "hardhat";
 import { tileTypes } from "../../data/tiles/tileTypes";
 import { TileFacet, OwnershipFacet } from "../../typechain";
@@ -6,23 +5,13 @@ import { impersonate } from "../helperFunctions";
 
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 
-import {
-  aavegotchiDAOAddress,
-  gasPrice,
-  maticAavegotchiDiamondAddress,
-  maticDiamondAddress,
-  pixelcraftAddress,
-} from "../../constants";
 import { outputTile } from "./helperFunctions";
+import { gasPrice } from "../../constants";
 
 export async function setAddresses() {
-  const accounts: Signer[] = await ethers.getSigners();
-
   let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
 
-  // const deployer = accounts[0];
-
-  //mumbai address
+  //matic address
   const diamondAddress = "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
 
   const ownershipFacet = (await ethers.getContractAt(
@@ -31,8 +20,6 @@ export async function setAddresses() {
   )) as OwnershipFacet;
   const owner = await ownershipFacet.owner();
   console.log("owner:", owner);
-
-  // console.log("deployer:", await deployer.getAddress());
 
   let tileFacet = (await ethers.getContractAt(
     "TileFacet",
@@ -45,13 +32,11 @@ export async function setAddresses() {
   }
 
   // add real data
-  const goldenTiles = tileTypes.map((val) => outputTile(val, ethers));
+  const tile = outputTile(tileTypes[2], ethers);
 
-  // await tileFacet.editTileType("1", goldenTiles[1], { gasPrice: gasPrice });
-
-  // await tileFacet.addTileTypes(goldenTiles, {
-  //   gasPrice: gasPrice,
-  // });
+  await tileFacet.addTileTypes([tile], {
+    gasPrice: gasPrice,
+  });
 
   // await tileFacet.setAddresses(
   //   maticAavegotchiDiamondAddress,
