@@ -265,6 +265,20 @@ contract AlchemicaFacet is Modifiers {
     uint256 _gotchiId,
     bytes memory _signature
   ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) gameActive {
+    // //Check access rights
+    // AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
+    // if (s.accessRights[_realmId][1] == 0) {
+    //   require(LibMeta.msgSender() == s.parcels[_realmId].owner, "AlchemicaFacet: Only Parcel owner can call");
+    // } else if (s.accessRights[_realmId][1] == 1) {
+    //   try diamond.getGotchiLendingFromToken(uint32(_gotchiId)) returns (AavegotchiDiamond.GotchiLending memory listing) {
+    //     require(
+    //       LibMeta.msgSender() == s.parcels[_realmId].owner ||
+    //         (LibMeta.msgSender() == listing.borrower && listing.lender == s.parcels[_realmId].owner),
+    //       "AlchemicaFacet: Only Parcel owner/borrower can call"
+    //     );
+    //   } catch (bytes memory) {}
+    // }
+
     require(block.timestamp > s.lastClaimedAlchemica[_realmId] + 8 hours, "AlchemicaFacet: 8 hours claim cooldown");
     s.lastClaimedAlchemica[_realmId] = block.timestamp;
 
@@ -319,7 +333,21 @@ contract AlchemicaFacet is Modifiers {
     uint256 _gotchiId,
     uint256 _lastChanneled,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) gameActive {
+  ) external gameActive {
+    //Check access rights
+    AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
+    if (s.accessRights[_realmId][0] == 0) {
+      require(LibMeta.msgSender() == s.parcels[_realmId].owner, "AlchemicaFacet: Only Parcel owner can call");
+    } else if (s.accessRights[_realmId][0] == 1) {
+      try diamond.getGotchiLendingFromToken(uint32(_gotchiId)) returns (AavegotchiDiamond.GotchiLending memory listing) {
+        require(
+          LibMeta.msgSender() == s.parcels[_realmId].owner ||
+            (LibMeta.msgSender() == listing.borrower && listing.lender == s.parcels[_realmId].owner),
+          "AlchemicaFacet: Only Parcel owner/borrower can call"
+        );
+      } catch (bytes memory) {}
+    }
+
     require(_lastChanneled == s.gotchiChannelings[_gotchiId], "AlchemicaFacet: Incorrect last duration");
 
     //Gotchis can only channel every 24 hrs
