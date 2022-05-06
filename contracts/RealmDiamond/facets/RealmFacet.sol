@@ -192,8 +192,8 @@ contract RealmFacet is Modifiers {
 
   function setParcelsAccessRights(
     uint256[] calldata _realmIds,
-    uint256[] calldata _accessRights,
-    uint256[] calldata _actionRights
+    uint256[] calldata _actionRights,
+    uint256[] calldata _accessRights
   ) external gameActive {
     require(_realmIds.length == _accessRights.length && _realmIds.length == _actionRights.length, "RealmFacet: Mismatched arrays");
     for (uint256 i; i < _realmIds.length; i++) {
@@ -222,16 +222,6 @@ contract RealmFacet is Modifiers {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
       emit ResyncParcel(_tokenIds[index]);
     }
-  }
-
-  /**
-  @dev Used to set diamond address for Baazaar
-  @param _diamondAddress New diamond address for the baazar
-  */
-  function setAavegotchiDiamond(address _diamondAddress) external onlyOwner {
-    require(_diamondAddress != address(0), "RealmFacet: Cannot set diamond to zero address");
-    s.aavegotchiDiamond = _diamondAddress;
-    emit AavegotchiDiamondUpdated(_diamondAddress);
   }
 
   function setGameActive(bool _gameActive) external onlyOwner {

@@ -121,7 +121,8 @@ contract AlchemicaFacet is Modifiers {
     address _gltrAddress,
     bytes memory _backendPubKey,
     address _gameManager,
-    address _tileDiamond
+    address _tileDiamond,
+    address _aavegotchiDiamond
   ) external onlyOwner {
     for (uint256 i; i < _alchemicas.length; i++) {
       for (uint256 j; j < _alchemicas[i].length; j++) {
@@ -138,6 +139,7 @@ contract AlchemicaFacet is Modifiers {
     s.gameManager = _gameManager;
     s.gltrAddress = _gltrAddress;
     s.tileDiamond = _tileDiamond;
+    s.aavegotchiDiamond = _aavegotchiDiamond;
   }
 
   /// todo @dev This function will be removed in production.
@@ -238,8 +240,8 @@ contract AlchemicaFacet is Modifiers {
   }
 
   function calculateTransferAmounts(uint256 _amount, uint256 _spilloverRate) internal pure returns (TransferAmounts memory) {
-    uint256 owner = (_amount * (bp - (_spilloverRate * 10**15))) / bp;
-    uint256 spill = (_amount * (_spilloverRate * 10**15)) / bp;
+    uint256 owner = (_amount * (bp - (_spilloverRate * 10**16))) / bp;
+    uint256 spill = (_amount * (_spilloverRate * 10**16)) / bp;
     return TransferAmounts(owner, spill);
   }
 

@@ -3,6 +3,7 @@ import {
   maticDiamondAddress,
   mineBlocks,
   realmDiamondAddress,
+  maticAavegotchiDiamondAddress,
 } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
@@ -55,7 +56,8 @@ describe("Testing Equip Installation", async function () {
       g.gltr.address,
       ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
       g.ownerAddress,
-      g.tileAddress
+      g.tileAddress,
+      maticAavegotchiDiamondAddress
     );
     await network.provider.send("hardhat_setBalance", [
       maticDiamondAddress,

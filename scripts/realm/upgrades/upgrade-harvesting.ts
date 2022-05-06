@@ -70,6 +70,7 @@ export async function upgrade(
         "function getAlchemicaAddresses() external view returns (address[4] memory)",
         "function batchTransferTokensToGotchis(uint256[] calldata _gotchiIds, address[] calldata _tokenAddresses, uint256[][] calldata _amounts) external",
         "function batchTransferAlchemica(address[] calldata _targets, uint256[4][] calldata _amounts) external",
+        "function setVars(address _aavegotchiDiamond, address[4] calldata _alchemicaAddresses) external",
       ],
     },
     {
@@ -79,7 +80,7 @@ export async function upgrade(
         "function getTotalAlchemicas() external view returns (uint256[4][5] memory)",
         "function getRealmAlchemica(uint256 _realmId) external view returns (uint256[4] memory)",
         "function progressSurveyingRound() external",
-        "function setVars(uint256[4][5] calldata _alchemicas, uint256[4] calldata _boostMultipliers, uint256[4] calldata _greatPortalCapacity, address _installationsDiamond, address _vrfCoordinator, address _linkAddress, address[4] calldata _alchemicaAddresses, address _gltrAddress, bytes memory _backendPubKey, address _gameManager, address _tileDiamond) external",
+        "function setVars(uint256[4][5] calldata _alchemicas, uint256[4] calldata _boostMultipliers, uint256[4] calldata _greatPortalCapacity, address _installationsDiamond, address _vrfCoordinator, address _linkAddress, address[4] calldata _alchemicaAddresses, address _gltrAddress, bytes memory _backendPubKey, address _gameManager, address _tileDiamond, address _aavegotchiDiamond) external",
         "function getAvailableAlchemica(uint256 _realmId) public view returns (uint256[4] memory _availableAlchemica)",
         "function claimAvailableAlchemica(uint256 _realmId, uint256[] calldata _alchemicaTypes, uint256 _gotchiId, bytes memory _signature) external",
         "function channelAlchemica(uint256 _realmId, uint256 _gotchiId, uint256 _lastChanneled, bytes memory _signature) external",
@@ -127,6 +128,7 @@ export async function upgrade(
       [alchemica.fud, alchemica.fomo, alchemica.alpha, alchemica.kek],
       alchemica.gltr,
       ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
+      "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
       "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
       "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
     ]
