@@ -20,24 +20,30 @@ import {
   genClaimAlchemicaSignature,
   genEquipInstallationSignature,
   testInstallations,
-  genUpgradeInstallationSignature,
   genChannelAlchemicaSignature,
 } from "../../scripts/realm/realmHelpers";
-import { RealmFacet } from "../../typechain";
+import { AavegotchiDiamond } from "../../typechain";
 
 describe("Access rights test", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
   const testAddress2 = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
   const testParcelId = 2893;
   const testGotchiId = 22306;
+  const testGotchiId2 = 4189;
   const notOwnedGotchi = 19095;
 
   let g: TestBeforeVars;
+  let aavegotchiDiamond;
 
   before(async function () {
     this.timeout(20000000);
 
     g = await beforeTest(ethers, realmDiamondAddress("mainnet"));
+
+    aavegotchiDiamond = (await ethers.getContractAt(
+      "AavegotchiDiamond",
+      maticAavegotchiDiamondAddress
+    )) as AavegotchiDiamond;
   });
   it("Deploy alchemica ERC20s", async function () {
     g.alchemicaFacet = await impersonate(
@@ -240,7 +246,7 @@ describe("Access rights test", async function () {
         lastChanneled,
         signature
       )
-    ).to.be.revertedWith("AlchemicaFacet: Only Parcel owner can call");
+    ).to.be.revertedWith("AlchemicaFacet: Only Parcel owner can channel");
 
     await g.realmFacet.setParcelsAccessRights([testParcelId], [0], [2]);
 
@@ -259,23 +265,34 @@ describe("Access rights test", async function () {
       signature
     );
   });
-  xit("Claim Alchemica", async function () {
-    const preBalance = await g.fud.balanceOf(testAddress);
-    //@ts-ignore
-    let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+  it("Claim Alchemica any gotchi", async function () {
+    g.alchemicaFacet = await impersonate(
+      testAddress2,
+      g.alchemicaFacet,
+      ethers,
+      network
+    );
+
     const alchemicaRemaining = await g.alchemicaFacet.getRealmAlchemica(
       testParcelId
     );
-    let messageHash = ethers.utils.solidityKeccak256(
-      ["uint256", "uint256", "uint256", "uint256"],
-      [0, testParcelId, testGotchiId, alchemicaRemaining[0]]
-    );
-    let signedMessage = await backendSigner.signMessage(
-      ethers.utils.arrayify(messageHash)
-    );
-    let signature = ethers.utils.arrayify(signedMessage);
 
-    signedMessage = await backendSigner.signMessage(messageHash);
+    let signature = await genClaimAlchemicaSignature(
+      testParcelId,
+      notOwnedGotchi,
+      alchemicaRemaining[0]
+    );
+
+    await expect(
+      g.alchemicaFacet.claimAvailableAlchemica(
+        testParcelId,
+        [0],
+        notOwnedGotchi,
+        signature
+      )
+    ).to.be.revertedWith("AlchemicaFacet: Only Parcel owner can claim");
+
+    await g.realmFacet.setParcelsAccessRights([testParcelId], [1], [2]);
 
     await g.alchemicaFacet.claimAvailableAlchemica(
       testParcelId,
@@ -283,21 +300,156 @@ describe("Access rights test", async function () {
       notOwnedGotchi,
       signature
     );
-    let availableAlchemica = await g.alchemicaFacet.getAvailableAlchemica(
+  });
+  it("Channel alchemica borrowed gotchi", async function () {
+    await network.provider.send("evm_increaseTime", [86400]);
+
+    g.alchemicaFacet = await impersonate(
+      testAddress2,
+      g.alchemicaFacet,
+      ethers,
+      network
+    );
+
+    aavegotchiDiamond = await impersonate(
+      testAddress,
+      aavegotchiDiamond,
+      ethers,
+      network
+    );
+
+    await g.realmFacet.setParcelsAccessRights([testParcelId], [0], [1]);
+
+    let lastChanneled = await g.alchemicaFacet.getLastChanneled(testGotchiId);
+
+    let signature = await genChannelAlchemicaSignature(
+      testParcelId,
+      testGotchiId,
+      lastChanneled
+    );
+
+    await expect(
+      g.alchemicaFacet.channelAlchemica(
+        testParcelId,
+        testGotchiId,
+        lastChanneled,
+        signature
+      )
+    ).to.be.revertedWith(
+      "AlchemicaFacet: Only Parcel owner/borrower can channel"
+    );
+
+    await aavegotchiDiamond.addGotchiLending(
+      testGotchiId,
+      0,
+      1,
+      [50, 50, 0],
+      testAddress,
+      ethers.constants.AddressZero,
+      0,
+      []
+    );
+
+    aavegotchiDiamond = await impersonate(
+      testAddress2,
+      aavegotchiDiamond,
+      ethers,
+      network
+    );
+
+    const lending = await aavegotchiDiamond.getGotchiLendingFromToken(
+      testGotchiId
+    );
+
+    await aavegotchiDiamond.agreeGotchiLending(
+      lending.listingId,
+      lending.erc721TokenId,
+      lending.initialCost,
+      lending.period,
+      lending.revenueSplit
+    );
+
+    lastChanneled = await g.alchemicaFacet.getLastChanneled(testGotchiId);
+
+    signature = await genChannelAlchemicaSignature(
+      testParcelId,
+      testGotchiId,
+      lastChanneled
+    );
+
+    await g.alchemicaFacet.channelAlchemica(
+      testParcelId,
+      testGotchiId,
+      lastChanneled,
+      signature
+    );
+  });
+  it("Claim alchemica borrowed gotchi", async function () {
+    await g.realmFacet.setParcelsAccessRights([testParcelId], [1], [1]);
+
+    const alchemicaRemaining = await g.alchemicaFacet.getRealmAlchemica(
       testParcelId
     );
 
-    let parcelCapacity = await g.realmFacet.getParcelCapacity(testParcelId, 0);
+    let signature = await genClaimAlchemicaSignature(
+      testParcelId,
+      testGotchiId2,
+      alchemicaRemaining[0]
+    );
 
-    //50% of Alchemica goes directly to wallet, due to spillover
-    const alchemicaMinusSpillover = 0.5;
-    expect(Number(ethers.utils.formatUnits(availableAlchemica[0]))).to.equal(0);
-    let totalAlchemica = await g.fud.balanceOf(testAddress);
-    expect(
-      Number(ethers.utils.formatUnits(totalAlchemica)) -
-        Number(ethers.utils.formatUnits(preBalance))
-    ).to.equal(
-      alchemicaMinusSpillover * Number(ethers.utils.formatUnits(parcelCapacity))
+    await expect(
+      g.alchemicaFacet.claimAvailableAlchemica(
+        testParcelId,
+        [0],
+        testGotchiId2,
+        signature
+      )
+    ).to.be.revertedWith(
+      "AlchemicaFacet: Only Parcel owner/borrower can claim"
+    );
+
+    aavegotchiDiamond = await impersonate(
+      testAddress,
+      aavegotchiDiamond,
+      ethers,
+      network
+    );
+
+    await aavegotchiDiamond.addGotchiLending(
+      testGotchiId2,
+      0,
+      1,
+      [50, 50, 0],
+      testAddress,
+      ethers.constants.AddressZero,
+      0,
+      []
+    );
+
+    aavegotchiDiamond = await impersonate(
+      testAddress2,
+      aavegotchiDiamond,
+      ethers,
+      network
+    );
+
+    const lending = await aavegotchiDiamond.getGotchiLendingFromToken(
+      testGotchiId2
+    );
+
+    await aavegotchiDiamond.agreeGotchiLending(
+      lending.listingId,
+      lending.erc721TokenId,
+      lending.initialCost,
+      lending.period,
+      lending.revenueSplit
+    );
+
+    await g.alchemicaFacet.claimAvailableAlchemica(
+      testParcelId,
+      [0],
+      testGotchiId2,
+      signature
     );
   });
 });

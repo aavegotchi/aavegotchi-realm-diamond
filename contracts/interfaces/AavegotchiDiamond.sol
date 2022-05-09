@@ -33,4 +33,23 @@ interface AavegotchiDiamond {
   function isAavegotchiLent(uint256 _erc721TokenId) external view returns (bool);
 
   function getGotchiLendingFromToken(uint32 _erc721TokenId) external view returns (GotchiLending memory listing_);
+
+  function addGotchiLending(
+    uint32 _erc721TokenId,
+    uint96 _initialCost,
+    uint32 _period,
+    uint8[3] calldata _revenueSplit,
+    address _originalOwner,
+    address _thirdParty,
+    uint32 _whitelistId,
+    address[] calldata _revenueTokens
+  ) external;
+
+  function agreeGotchiLending(
+    uint32 _listingId,
+    uint32 _erc721TokenId,
+    uint96 _initialCost,
+    uint32 _period,
+    uint8[3] calldata _revenueSplit
+  ) external;
 }
