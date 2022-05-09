@@ -358,7 +358,8 @@ contract AlchemicaFacet is Modifiers {
     require(_lastChanneled == s.gotchiChannelings[_gotchiId], "AlchemicaFacet: Incorrect last duration");
 
     //Gotchis can only channel every 24 hrs
-    require(block.timestamp - _lastChanneled >= 1 days, "AlchemicaFacet: Gotchi can't channel yet");
+    if (s.lastChanneledDay[_gotchiId] == block.timestamp / (60 * 60 * 24)) revert("AlchemicaFacet: Gotchi can't channel yet");
+    s.lastChanneledDay[_gotchiId] = block.timestamp / (60 * 60 * 24);
 
     uint256 altarLevel = InstallationDiamondInterface(s.installationsDiamond).getAltarLevel(s.parcels[_realmId].altarId);
 

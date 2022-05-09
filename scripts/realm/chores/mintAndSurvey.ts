@@ -7,6 +7,7 @@ import {
   InstallationAdminFacet,
   InstallationFacet,
   AlchemicaToken,
+  TileFacet,
 } from "../../../typechain";
 import {
   aavegotchiDAOAddress,
@@ -22,6 +23,7 @@ import { genEquipInstallationSignature } from "../realmHelpers";
 export async function setAddresses() {
   const diamondAddress = "0x1cefe47444e5597368fF81D083dCDd8C4FECeBdE";
   const installationDiamond = "0x7bC1d8C927a61c43c359E350333Ac5343a3Ef0F5";
+  const tileDiamond = "0xEb4dF3a989ef3a03c8eb7232d3D7Ae069B1Ec577";
   const owner = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
   const fudAddress = "0x447fd7d4F6D7efab9a10786e5804192c4Acbd32F";
   const fomoAddress = "0xEb156a435CF453F0F2D0b7144C8a2D0224F7D73A";
@@ -70,6 +72,11 @@ export async function setAddresses() {
     installationDiamond
   )) as InstallationAdminFacet;
 
+  let tileFacet = (await ethers.getContractAt(
+    "TileFacet",
+    tileDiamond
+  )) as TileFacet;
+
   // console.log("set game active");
   // const setGameTx = await realmFacet.setGameActive(true);
 
@@ -102,96 +109,96 @@ export async function setAddresses() {
 
   // await mintTx.wait();
 
-  const theVoid: any = {
-    name: "The Void",
-    level: 1,
-    nextLevelId: 0,
-    prerequisites: [0, 0],
-    width: 1,
-    height: 1,
-    deprecated: true,
-    installationType: 0,
-    alchemicaType: 0,
-    alchemicaCost: [0, 0, 0, 0],
-    harvestRate: 0,
-    capacity: 0,
-    spillRadius: 0,
-    spillRate: 0,
-    upgradeQueueBoost: 0,
-    craftTime: 0,
-  };
+  // const theVoid: any = {
+  //   name: "The Void",
+  //   level: 1,
+  //   nextLevelId: 0,
+  //   prerequisites: [0, 0],
+  //   width: 1,
+  //   height: 1,
+  //   deprecated: true,
+  //   installationType: 0,
+  //   alchemicaType: 0,
+  //   alchemicaCost: [0, 0, 0, 0],
+  //   harvestRate: 0,
+  //   capacity: 0,
+  //   spillRadius: 0,
+  //   spillRate: 0,
+  //   upgradeQueueBoost: 0,
+  //   craftTime: 0,
+  // };
 
-  const altar: any = {
-    name: "Altar",
-    level: 1,
-    nextLevelId: 2,
-    prerequisites: [0, 0],
-    width: 2,
-    height: 2,
-    deprecated: false,
-    installationType: 0,
-    alchemicaType: 0,
-    alchemicaCost: [
-      ethers.utils.parseUnits("100"),
-      ethers.utils.parseUnits("100"),
-      ethers.utils.parseUnits("100"),
-      ethers.utils.parseUnits("100"),
-    ],
-    harvestRate: 0,
-    capacity: 0,
-    spillRadius: 9000,
-    spillRate: 50,
-    upgradeQueueBoost: 1,
-    craftTime: 0,
-  };
+  // const altar: any = {
+  //   name: "Altar",
+  //   level: 1,
+  //   nextLevelId: 2,
+  //   prerequisites: [0, 0],
+  //   width: 2,
+  //   height: 2,
+  //   deprecated: false,
+  //   installationType: 0,
+  //   alchemicaType: 0,
+  //   alchemicaCost: [
+  //     ethers.utils.parseUnits("100"),
+  //     ethers.utils.parseUnits("100"),
+  //     ethers.utils.parseUnits("100"),
+  //     ethers.utils.parseUnits("100"),
+  //   ],
+  //   harvestRate: 0,
+  //   capacity: 0,
+  //   spillRadius: 9000,
+  //   spillRate: 50,
+  //   upgradeQueueBoost: 1,
+  //   craftTime: 0,
+  // };
 
-  const harvester: any = {
-    name: "FUD Harvester level 1",
-    level: 1,
-    nextLevelId: 0,
-    prerequisites: [1, 0],
-    width: 2,
-    height: 2,
-    deprecated: false,
-    installationType: 1,
-    alchemicaType: 1,
-    alchemicaCost: [
-      ethers.utils.parseUnits("120"),
-      ethers.utils.parseUnits("60"),
-      0,
-      0,
-    ],
-    harvestRate: ethers.utils.parseUnits("14"),
-    capacity: 0,
-    spillRadius: 0,
-    spillRate: 0,
-    upgradeQueueBoost: 0,
-    craftTime: 0,
-  };
+  // const harvester: any = {
+  //   name: "FUD Harvester level 1",
+  //   level: 1,
+  //   nextLevelId: 0,
+  //   prerequisites: [1, 0],
+  //   width: 2,
+  //   height: 2,
+  //   deprecated: false,
+  //   installationType: 1,
+  //   alchemicaType: 1,
+  //   alchemicaCost: [
+  //     ethers.utils.parseUnits("120"),
+  //     ethers.utils.parseUnits("60"),
+  //     0,
+  //     0,
+  //   ],
+  //   harvestRate: ethers.utils.parseUnits("14"),
+  //   capacity: 0,
+  //   spillRadius: 0,
+  //   spillRate: 0,
+  //   upgradeQueueBoost: 0,
+  //   craftTime: 0,
+  // };
 
-  const reservoir: any = {
-    name: "FUD Reservoir level 1",
-    level: 1,
-    nextLevelId: 0,
-    prerequisites: [1, 0],
-    width: 2,
-    height: 2,
-    deprecated: false,
-    installationType: 2,
-    alchemicaType: 1,
-    alchemicaCost: [
-      ethers.utils.parseUnits("290"),
-      ethers.utils.parseUnits("100"),
-      0,
-      0,
-    ],
-    harvestRate: 0,
-    capacity: ethers.utils.parseUnits("5"),
-    spillRadius: 0,
-    spillRate: 50,
-    upgradeQueueBoost: 0,
-    craftTime: 0,
-  };
+  // const reservoir: any = {
+  //   name: "FUD Reservoir level 1",
+  //   level: 1,
+  //   nextLevelId: 0,
+  //   prerequisites: [1, 0],
+  //   width: 2,
+  //   height: 2,
+  //   deprecated: false,
+  //   installationType: 2,
+  //   alchemicaType: 1,
+  //   alchemicaCost: [
+  //     ethers.utils.parseUnits("290"),
+  //     ethers.utils.parseUnits("100"),
+  //     0,
+  //     0,
+  //   ],
+  //   harvestRate: 0,
+  //   capacity: ethers.utils.parseUnits("5"),
+  //   spillRadius: 0,
+  //   spillRate: 50,
+  //   upgradeQueueBoost: 0,
+  //   craftTime: 0,
+  // };
 
   // console.log("set installation types");
   // const addTx = await installationAdminFacet.addInstallationTypes([
@@ -203,21 +210,21 @@ export async function setAddresses() {
 
   // await addTx.wait();
 
-  console.log("set installation types");
-  const edit1Tx = await installationAdminFacet.editInstallationType(1, altar);
-  await edit1Tx.wait();
+  // console.log("set installation types");
+  // const edit1Tx = await installationAdminFacet.editInstallationType(1, altar);
+  // await edit1Tx.wait();
 
-  const edit2Tx = await installationAdminFacet.editInstallationType(
-    2,
-    harvester
-  );
-  await edit2Tx.wait();
+  // const edit2Tx = await installationAdminFacet.editInstallationType(
+  //   2,
+  //   harvester
+  // );
+  // await edit2Tx.wait();
 
-  const edit3Tx = await installationAdminFacet.editInstallationType(
-    3,
-    reservoir
-  );
-  await edit3Tx.wait();
+  // const edit3Tx = await installationAdminFacet.editInstallationType(
+  //   3,
+  //   reservoir
+  // );
+  // await edit3Tx.wait();
   // const altar = await installationFacet.getInstallationTypes([1]);
   // console.log(altar);
 
@@ -285,6 +292,14 @@ export async function setAddresses() {
   // console.log("fomo", ethers.utils.formatUnits(balance[1]));
   // console.log("alpha", ethers.utils.formatUnits(balance[2]));
   // console.log("kek", ethers.utils.formatUnits(balance[3]));
+
+  // await tileFacet.setAddresses(
+  //   maticAavegotchiDiamondAddress,
+  //   diamondAddress,
+  //   diamondAddress,
+  //   diamondAddress,
+  //   diamondAddress
+  // );
 }
 
 // We recommend this pattern to be able to use async/await everywhere
