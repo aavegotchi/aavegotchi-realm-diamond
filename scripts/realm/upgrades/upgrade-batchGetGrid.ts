@@ -18,7 +18,7 @@ export async function upgrade() {
     {
       facetName: "AlchemicaFacet",
       addSelectors: [
-        `function testingMintParcel(address _to, uint256[] calldata _tokenIds, ${mintParcelInput}[] memory _metadata) external`,
+        // `function testingMintParcel(address _to, uint256[] calldata _tokenIds, ${mintParcelInput}[] memory _metadata) external`,
       ],
       removeSelectors: [],
     },

@@ -121,7 +121,8 @@ contract AlchemicaFacet is Modifiers {
     address _gltrAddress,
     bytes memory _backendPubKey,
     address _gameManager,
-    address _tileDiamond
+    address _tileDiamond,
+    address _aavegotchiDiamond
   ) external onlyOwner {
     for (uint256 i; i < _alchemicas.length; i++) {
       for (uint256 j; j < _alchemicas[i].length; j++) {
@@ -138,6 +139,7 @@ contract AlchemicaFacet is Modifiers {
     s.gameManager = _gameManager;
     s.gltrAddress = _gltrAddress;
     s.tileDiamond = _tileDiamond;
+    s.aavegotchiDiamond = _aavegotchiDiamond;
   }
 
   /// todo @dev This function will be removed in production.
@@ -238,8 +240,8 @@ contract AlchemicaFacet is Modifiers {
   }
 
   function calculateTransferAmounts(uint256 _amount, uint256 _spilloverRate) internal pure returns (TransferAmounts memory) {
-    uint256 owner = (_amount * (bp - (_spilloverRate * 10**15))) / bp;
-    uint256 spill = (_amount * (_spilloverRate * 10**15)) / bp;
+    uint256 owner = (_amount * (bp - (_spilloverRate * 10**16))) / bp;
+    uint256 spill = (_amount * (_spilloverRate * 10**16)) / bp;
     return TransferAmounts(owner, spill);
   }
 
@@ -264,7 +266,24 @@ contract AlchemicaFacet is Modifiers {
     uint256[] calldata _alchemicaTypes,
     uint256 _gotchiId,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) gameActive {
+  ) external gameActive {
+    //Check access rights
+    if (s.accessRights[_realmId][1] == 0) {
+      require(LibMeta.msgSender() == s.parcels[_realmId].owner, "AlchemicaFacet: Only Parcel owner can claim");
+    } else if (s.accessRights[_realmId][1] == 1) {
+      try AavegotchiDiamond(s.aavegotchiDiamond).getGotchiLendingFromToken(uint32(_gotchiId)) returns (
+        AavegotchiDiamond.GotchiLending memory listing
+      ) {
+        require(
+          LibMeta.msgSender() == s.parcels[_realmId].owner ||
+            (LibMeta.msgSender() == listing.borrower && listing.lender == s.parcels[_realmId].owner),
+          "AlchemicaFacet: Only Parcel owner/borrower can claim"
+        );
+      } catch (bytes memory) {
+        revert("AlchemicaFacet: Only Parcel owner/borrower can claim");
+      }
+    }
+
     require(block.timestamp > s.lastClaimedAlchemica[_realmId] + 8 hours, "AlchemicaFacet: 8 hours claim cooldown");
     s.lastClaimedAlchemica[_realmId] = block.timestamp;
 
@@ -319,7 +338,23 @@ contract AlchemicaFacet is Modifiers {
     uint256 _gotchiId,
     uint256 _lastChanneled,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) gameActive {
+  ) external gameActive {
+    //Check access rights
+    AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
+    if (s.accessRights[_realmId][0] == 0) {
+      require(LibMeta.msgSender() == s.parcels[_realmId].owner, "AlchemicaFacet: Only Parcel owner can channel");
+    } else if (s.accessRights[_realmId][0] == 1) {
+      try diamond.getGotchiLendingFromToken(uint32(_gotchiId)) returns (AavegotchiDiamond.GotchiLending memory listing) {
+        require(
+          LibMeta.msgSender() == s.parcels[_realmId].owner ||
+            (LibMeta.msgSender() == listing.borrower && listing.lender == s.parcels[_realmId].owner),
+          "AlchemicaFacet: Only Parcel owner/borrower can channel"
+        );
+      } catch (bytes memory) {
+        revert("AlchemicaFacet: Only Parcel owner/borrower can channel");
+      }
+    }
+
     require(_lastChanneled == s.gotchiChannelings[_gotchiId], "AlchemicaFacet: Incorrect last duration");
 
     //Gotchis can only channel every 24 hrs

@@ -190,6 +190,18 @@ contract RealmFacet is Modifiers {
     emit UnequipTile(_realmId, _tileId, _x, _y);
   }
 
+  function setParcelsAccessRights(
+    uint256[] calldata _realmIds,
+    uint256[] calldata _actionRights,
+    uint256[] calldata _accessRights
+  ) external gameActive {
+    require(_realmIds.length == _accessRights.length && _realmIds.length == _actionRights.length, "RealmFacet: Mismatched arrays");
+    for (uint256 i; i < _realmIds.length; i++) {
+      require(LibMeta.msgSender() == s.parcels[_realmIds[i]].owner, "RealmFacet: Only Parcel owner can call");
+      s.accessRights[_realmIds[i]][_actionRights[i]] = _accessRights[i];
+    }
+  }
+
   struct ParcelOutput {
     string parcelId;
     string parcelAddress;
@@ -210,16 +222,6 @@ contract RealmFacet is Modifiers {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
       emit ResyncParcel(_tokenIds[index]);
     }
-  }
-
-  /**
-  @dev Used to set diamond address for Baazaar
-  @param _diamondAddress New diamond address for the baazar
-  */
-  function setAavegotchiDiamond(address _diamondAddress) external onlyOwner {
-    require(_diamondAddress != address(0), "RealmFacet: Cannot set diamond to zero address");
-    s.aavegotchiDiamond = _diamondAddress;
-    emit AavegotchiDiamondUpdated(_diamondAddress);
   }
 
   function setGameActive(bool _gameActive) external onlyOwner {
@@ -380,5 +382,12 @@ contract RealmFacet is Modifiers {
 
   function getParcelUpgradeQueueCapacity(uint256 _parcelId) external view returns (uint256) {
     return s.parcels[_parcelId].upgradeQueueCapacity;
+  }
+
+  function getParcelsAccessRights(uint256[] calldata _parcelIds, uint256[] calldata _actionRights) external view returns (uint256[] memory output_) {
+    require(_parcelIds.length == _actionRights.length, "RealmFacet: Mismatched arrays");
+    for (uint256 i; i < _parcelIds.length; i++) {
+      output_[i] = s.accessRights[_parcelIds[i]][_actionRights[i]];
+    }
   }
 }

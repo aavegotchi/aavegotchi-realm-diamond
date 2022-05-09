@@ -87,6 +87,8 @@ struct AppStorage {
   address gltrAddress;
   address tileDiamond;
   bool gameActive;
+  // parcelId => action: 0 Alchemical Channeling, 1 Emptying Reservoirs => permission: 0 Owner only, 1 Owner + Borrowed Gotchis, 2 Any Gotchi
+  mapping(uint256 => mapping(uint256 => uint256)) accessRights;
 }
 
 library LibAppStorage {
