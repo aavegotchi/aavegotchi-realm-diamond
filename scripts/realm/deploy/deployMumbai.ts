@@ -11,6 +11,7 @@ import {
   AlchemicaToken,
   InstallationAdminFacet,
   InstallationFacet,
+  TileFacet,
 } from "../../../typechain";
 import { gasPrice, maticAavegotchiDiamondAddress } from "../../helperFunctions";
 import { deployAlchemica, goldenAaltar, testnetAltar } from "../realmHelpers";
@@ -182,6 +183,7 @@ export async function deployMumbai() {
     ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
     deployerAddress,
     tileDiamond,
+    tileDiamond,
     { gasPrice: gasPrice }
   );
 
@@ -238,6 +240,22 @@ export async function deployMumbai() {
   const balance = await fudToken.balanceOf(currentAccount);
 
   console.log("balance:", balance.toString());
+
+  console.log("set tile diamond vars");
+  const tileFacet = (await ethers.getContractAt(
+    "TileFacet",
+    tileDiamond
+  )) as TileFacet;
+
+  const tileSetVarsTx = await tileFacet.setAddresses(
+    ethers.constants.AddressZero,
+    realmDiamond.address,
+    ethers.constants.AddressZero,
+    ethers.constants.AddressZero,
+    ethers.constants.AddressZero
+  );
+
+  await tileSetVarsTx.wait();
 
   // const installationAdminFacet = (await ethers.getContractAt(
   //   "InstallationAdminFacet",

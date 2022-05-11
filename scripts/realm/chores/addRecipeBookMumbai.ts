@@ -29,9 +29,9 @@ import {
 } from "../../../types";
 
 export async function setAddresses() {
-  const diamondAddress = "0x1cefe47444e5597368fF81D083dCDd8C4FECeBdE";
-  const installationDiamond = "0x7bC1d8C927a61c43c359E350333Ac5343a3Ef0F5";
-  const tileDiamond = "0xEb4dF3a989ef3a03c8eb7232d3D7Ae069B1Ec577";
+  const diamondAddress = "0x9351e6705590756BAc83f591aDE9f61De5998a84";
+  const installationDiamond = "0x6F8cFe6757F716039498dE53696b1aB5C66Ab428";
+  const tileDiamond = "0xf65848AF98015463F256877b6A4FaD03e71f6cD1";
   const owner = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
   const fudAddress = "0x447fd7d4F6D7efab9a10786e5804192c4Acbd32F";
   const fomoAddress = "0xEb156a435CF453F0F2D0b7144C8a2D0224F7D73A";
@@ -85,27 +85,33 @@ export async function setAddresses() {
     tileDiamond
   )) as TileFacet;
 
-  // let batch1: any = recipeBook.slice(4, 34);
-  // let batch2: any = recipeBook.slice(34, 64);
-  // let batch3: any = recipeBook.slice(64, 94);
-  // let batch4: any = recipeBook.slice(94, 124);
-  // let batch5: any = recipeBook.slice(124, 140);
+  let batch1: any = recipeBook.slice(0, 34);
+  let batch2: any = recipeBook.slice(34, 64);
+  let batch3: any = recipeBook.slice(64, 94);
+  let batch4: any = recipeBook.slice(94, 124);
+  let batch5: any = recipeBook.slice(124, 140);
 
-  // const converted1: InstallationTypeInput[] = batch1.map((inst) =>
-  //   outputInstallation(inst)
-  // );
-  // const converted2: InstallationTypeInput[] = batch2.map((inst) =>
-  //   outputInstallation(inst)
-  // );
-  // const converted3: InstallationTypeInput[] = batch3.map((inst) =>
-  //   outputInstallation(inst)
-  // );
-  // const converted4: InstallationTypeInput[] = batch4.map((inst) =>
-  //   outputInstallation(inst)
-  // );
-  // const converted5: InstallationTypeInput[] = batch5.map((inst) =>
-  //   outputInstallation(inst)
-  // );
+  // console.log(batch1.length);
+  // console.log(batch2.length);
+  // console.log(batch3.length);
+  // console.log(batch4.length);
+  // console.log(batch5.length);
+
+  const converted1: InstallationTypeInput[] = batch1.map((inst) =>
+    outputInstallation(inst)
+  );
+  const converted2: InstallationTypeInput[] = batch2.map((inst) =>
+    outputInstallation(inst)
+  );
+  const converted3: InstallationTypeInput[] = batch3.map((inst) =>
+    outputInstallation(inst)
+  );
+  const converted4: InstallationTypeInput[] = batch4.map((inst) =>
+    outputInstallation(inst)
+  );
+  const converted5: InstallationTypeInput[] = batch5.map((inst) =>
+    outputInstallation(inst)
+  );
 
   // console.log("edit installation types");
   // const id1 = outputInstallation({
@@ -527,19 +533,29 @@ export async function setAddresses() {
   // await tx18.wait();
 
   // console.log("add installation types");
-  // const addTx = await installationAdminFacet.addInstallationTypes(converted1);
+  // const addTx = await installationAdminFacet.addInstallationTypes(converted1, {
+  //   gasPrice: 500000000000,
+  // });
   // await addTx.wait();
   // console.log("tx2");
-  // const addTx2 = await installationAdminFacet.addInstallationTypes(converted2);
+  // const addTx2 = await installationAdminFacet.addInstallationTypes(converted2, {
+  //   gasPrice: 500000000000,
+  // });
   // await addTx2.wait();
   // console.log("tx3");
-  // const addTx3 = await installationAdminFacet.addInstallationTypes(converted3);
+  // const addTx3 = await installationAdminFacet.addInstallationTypes(converted3, {
+  //   gasPrice: 500000000000,
+  // });
   // await addTx3.wait();
   // console.log("tx4");
-  // const addTx4 = await installationAdminFacet.addInstallationTypes(converted4);
+  // const addTx4 = await installationAdminFacet.addInstallationTypes(converted4, {
+  //   gasPrice: 500000000000,
+  // });
   // await addTx4.wait();
   // console.log("tx5");
-  // const addTx5 = await installationAdminFacet.addInstallationTypes(converted5);
+  // const addTx5 = await installationAdminFacet.addInstallationTypes(converted5, {
+  //   gasPrice: 500000000000,
+  // });
   // await addTx5.wait();
 
   // console.log("add tiles types");
@@ -586,10 +602,12 @@ export async function setAddresses() {
   //   },
   // ];
   // const outputTiles: any = tileTypes.map((tile) => outputTile(tile));
-  // const tx = await tileFacet.addTileTypes(outputTiles);
+  // const tx = await tileFacet.addTileTypes(outputTiles, {
+  //   gasPrice: 500000000000,
+  // });
   // await tx.wait();
 
-  const tiles = await tileFacet.getTileTypes([0, 1, 2, 3]);
+  const tiles = await tileFacet.getTileTypes([0]);
   console.log(tiles);
 }
 

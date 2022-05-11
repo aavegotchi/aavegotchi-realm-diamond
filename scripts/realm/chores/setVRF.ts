@@ -13,7 +13,7 @@ import {
 import { alchemicaTotals, boostMultipliers } from "../../setVars";
 
 export async function setAddresses() {
-  const diamondAddress = "0x1cefe47444e5597368fF81D083dCDd8C4FECeBdE";
+  const diamondAddress = "0x9351e6705590756BAc83f591aDE9f61De5998a84";
 
   let vrfFacet = (await ethers.getContractAt(
     "VRFFacet",
@@ -21,12 +21,19 @@ export async function setAddresses() {
   )) as VRFFacet;
 
   console.log("subscribe");
-  const subTx = await vrfFacet.subscribe();
+  const subTx = await vrfFacet.subscribe({
+    gasPrice: 500000000000,
+  });
 
   await subTx.wait();
 
   console.log("topup");
-  const topTx = await vrfFacet.topUpSubscription(ethers.utils.parseUnits("1"));
+  const topTx = await vrfFacet.topUpSubscription(
+    ethers.utils.parseUnits("0.1"),
+    {
+      gasPrice: 500000000000,
+    }
+  );
 
   await topTx.wait();
 
@@ -41,7 +48,9 @@ export async function setAddresses() {
       "0x4b09e658ed251bcafeebbc69400383d49f344ace09b9576fe248bb02c003fe9f",
   };
 
-  let tx = await vrfFacet.setConfig(requestConfig);
+  let tx = await vrfFacet.setConfig(requestConfig, {
+    gasPrice: 500000000000,
+  });
 
   await tx.wait();
 }

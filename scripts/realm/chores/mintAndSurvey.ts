@@ -21,9 +21,9 @@ import { alchemicaTotals, boostMultipliers } from "../../setVars";
 import { genEquipInstallationSignature } from "../realmHelpers";
 
 export async function setAddresses() {
-  const diamondAddress = "0x1cefe47444e5597368fF81D083dCDd8C4FECeBdE";
-  const installationDiamond = "0x7bC1d8C927a61c43c359E350333Ac5343a3Ef0F5";
-  const tileDiamond = "0xEb4dF3a989ef3a03c8eb7232d3D7Ae069B1Ec577";
+  const diamondAddress = "0x9351e6705590756BAc83f591aDE9f61De5998a84";
+  const installationDiamond = "0x6F8cFe6757F716039498dE53696b1aB5C66Ab428";
+  const tileDiamond = "0xf65848AF98015463F256877b6A4FaD03e71f6cD1";
   const owner = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
   const fudAddress = "0x447fd7d4F6D7efab9a10786e5804192c4Acbd32F";
   const fomoAddress = "0xEb156a435CF453F0F2D0b7144C8a2D0224F7D73A";
@@ -78,7 +78,9 @@ export async function setAddresses() {
   )) as TileFacet;
 
   // console.log("set game active");
-  // const setGameTx = await realmFacet.setGameActive(true);
+  // const setGameTx = await realmFacet.setGameActive(true, {
+  //   gasPrice: 500000000000,
+  // });
 
   // await setGameTx.wait();
 
@@ -293,13 +295,14 @@ export async function setAddresses() {
   // console.log("alpha", ethers.utils.formatUnits(balance[2]));
   // console.log("kek", ethers.utils.formatUnits(balance[3]));
 
-  // await tileFacet.setAddresses(
-  //   maticAavegotchiDiamondAddress,
-  //   diamondAddress,
-  //   diamondAddress,
-  //   diamondAddress,
-  //   diamondAddress
-  // );
+  const setTx = await tileFacet.setAddresses(
+    maticAavegotchiDiamondAddress,
+    diamondAddress,
+    diamondAddress,
+    diamondAddress,
+    diamondAddress
+  );
+  await setTx.wait();
 }
 
 // We recommend this pattern to be able to use async/await everywhere

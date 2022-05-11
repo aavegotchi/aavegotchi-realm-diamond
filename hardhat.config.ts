@@ -10,6 +10,7 @@ import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname + "/.env" });
 require("./tasks/generateDiamondABI_realm.js");
 require("./tasks/generateDiamondABI_installation.js");
+require("./tasks/generateDiamondABI_tile.js");
 require("./tasks/verifyFacet.js");
 require("./tasks/mintParcels.ts");
 
@@ -36,7 +37,7 @@ module.exports = {
         },
        ],*/
       forking: {
-        url: process.env.MATIC_URL,
+        url: process.env.MUMBAI_MORALIS,
         timeout: 2000000,
         // blockNumber: 25459076,
         // chainId: 137,
