@@ -4,19 +4,24 @@ import {LibDiamond} from "./LibDiamond.sol";
 import "hardhat/console.sol";
 
 struct TileType {
-  uint256 width;
-  uint256 height;
+  //slot 1
+  uint8 width;
+  uint8 height;
   bool deprecated;
   uint16 tileType;
+  uint32 craftTime; // in blocks
+  //slot 2
   uint256[4] alchemicaCost; // [fud, fomo, alpha, kek]
-  uint256 craftTime; // in blocks
+  //slot 3
   string name;
 }
 
 struct QueueItem {
+  //slot 1
   uint256 id;
-  uint256 readyBlock;
-  uint256 tileType;
+  //slot 2
+  uint40 readyBlock;
+  uint16 tileType;
   bool claimed;
   address owner;
 }
@@ -52,6 +57,8 @@ struct TileAppStorage {
   mapping(address => uint256[]) ownerTiles;
   mapping(address => mapping(uint256 => uint256)) ownerTileIndexes;
   UpgradeQueue[] upgradeQueue;
+  // installationId => deprecateTime
+  mapping(uint256 => uint256) deprecateTime;
 }
 
 library LibAppStorageTile {
