@@ -178,7 +178,7 @@ contract InstallationFacet is Modifiers {
     output_ = new UpgradeQueue[](length);
     uint256 counter;
     for (uint256 i; i < length; i++) {
-      if (s.craftQueue[i].owner == _owner) {
+      if (s.upgradeQueue[i].owner == _owner) {
         output_[counter] = s.upgradeQueue[i];
         counter++;
       }

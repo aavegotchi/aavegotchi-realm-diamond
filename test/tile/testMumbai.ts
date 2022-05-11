@@ -28,6 +28,7 @@ import {
   InstallationFacet,
   RealmFacet,
   TileFacet,
+  ERC721Facet,
 } from "../../typechain";
 import { upgrade } from "../../scripts/realm/upgrades/upgrade-batchGetGrid";
 
@@ -45,6 +46,7 @@ describe("Testing Equip Installation", async function () {
   let installationFacet: InstallationFacet;
   let installationAdminFacet: InstallationAdminFacet;
   let tileFacet: TileFacet;
+  let erc721Facet: ERC721Facet;
 
   const genSignature = async (tileId: number, x: number, y: number) => {
     //@ts-ignore
@@ -65,7 +67,7 @@ describe("Testing Equip Installation", async function () {
   before(async function () {
     this.timeout(20000000);
 
-    await upgrade();
+    // await upgrade();
 
     realmFacet = (await ethers.getContractAt(
       "RealmFacet",
@@ -90,15 +92,14 @@ describe("Testing Equip Installation", async function () {
       "TileFacet",
       tileDiamond
     )) as TileFacet;
+    erc721Facet = (await ethers.getContractAt(
+      "ERC721Facet",
+      diamondAddress
+    )) as ERC721Facet;
   });
-  it("Craft tiles", async function () {
-    tileFacet = await impersonate(testAddress, tileFacet, ethers, network);
+  it("get queue", async function () {
+    const queue = await installationFacet.getUpgradeQueue(owner);
 
-    await tileFacet.craftTiles([1]);
-  });
-  it("Equip tile", async function () {
-    realmFacet = await impersonate(testAddress, realmFacet, ethers, network);
-    const signature = await genSignature(1, 0, 0);
-    await realmFacet.equipTile(0, 1, 0, 0, signature);
+    console.log(queue);
   });
 });
