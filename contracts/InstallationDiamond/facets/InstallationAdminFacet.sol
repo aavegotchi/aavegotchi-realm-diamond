@@ -19,7 +19,7 @@ contract InstallationAdminFacet is Modifiers {
     bytes _backendPubKey
   );
 
-  event UpgradeFinalized(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY);
+  event UpgradeFinalized(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _newInstallationId);
 
   /// @notice Allow the Diamond owner to deprecate an installation
   /// @dev Deprecated installations cannot be crafted by users
@@ -131,7 +131,7 @@ contract InstallationAdminFacet is Modifiers {
         s.upgradeQueue.pop();
         counter--;
         offset++;
-        emit UpgradeFinalized(queueUpgrade.parcelId, queueUpgrade.coordinateX, queueUpgrade.coordinateY);
+        emit UpgradeFinalized(queueUpgrade.parcelId, queueUpgrade.coordinateX, queueUpgrade.coordinateY, nextLevelId);
       }
       if (counter == 0) break;
       if (counter == 3) revert("InstallationFacet: No upgrades ready");

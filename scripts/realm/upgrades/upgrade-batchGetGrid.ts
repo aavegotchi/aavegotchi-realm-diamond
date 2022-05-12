@@ -21,7 +21,7 @@ export async function upgrade() {
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "InstallationFacet",
+      facetName: "InstallationAdminFacet",
       addSelectors: [
         // `function getUserUpgradeQueue(address _owner) external view returns (${upgradeQueue}[] memory output_)`,
         // `function getAllUpgradeQueue() external view returns (${upgradeQueue}[] memory)`,
