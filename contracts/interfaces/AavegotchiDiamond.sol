@@ -52,4 +52,6 @@ interface AavegotchiDiamond {
     uint32 _period,
     uint8[3] calldata _revenueSplit
   ) external;
+
+  function kinship(uint256 _tokenId) external view returns (uint256 score_);
 }

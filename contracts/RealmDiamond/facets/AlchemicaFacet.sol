@@ -374,7 +374,13 @@ contract AlchemicaFacet is Modifiers {
 
     (uint256 rate, uint256 radius) = InstallationDiamondInterface(s.installationsDiamond).spilloverRateAndRadiusOfId(s.parcels[_realmId].altarId);
 
-    uint256[4] memory channelAmounts = [uint256(100e18), uint256(50e18), uint256(25e18), uint256(10e18)];
+    uint256[4] memory channelAmounts = [uint256(20e18), uint256(10e18), uint256(5e18), uint256(2e18)];
+    // apply kinship modifier
+    uint256 kinship = diamond.kinship(_gotchiId) * 10000;
+    for (uint256 i; i < 4; i++) {
+      uint256 kinshipModifier = floorSqrt(kinship / 50);
+      channelAmounts[i] = (channelAmounts[i] * kinshipModifier) / 100;
+    }
 
     for (uint256 i; i < channelAmounts.length; i++) {
       IERC20Mintable alchemica = IERC20Mintable(s.alchemicaAddresses[i]);
@@ -514,6 +520,21 @@ contract AlchemicaFacet is Modifiers {
     require(_altarLevel.length == _limits.length, "AlchemicaFacet: array mismatch");
     for (uint256 i; i < _limits.length; i++) {
       s.channelingLimits[_altarLevel[i]] = _limits[i];
+    }
+  }
+
+  function floorSqrt(uint256 n) internal pure returns (uint256) {
+    unchecked {
+      if (n > 0) {
+        uint256 x = n / 2 + 1;
+        uint256 y = (x + n / x) / 2;
+        while (x > y) {
+          x = y;
+          y = (x + n / x) / 2;
+        }
+        return x;
+      }
+      return 0;
     }
   }
 }
