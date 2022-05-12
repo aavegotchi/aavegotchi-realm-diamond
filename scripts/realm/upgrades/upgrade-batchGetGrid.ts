@@ -23,12 +23,12 @@ export async function upgrade() {
     {
       facetName: "InstallationFacet",
       addSelectors: [
-        `function getUserUpgradeQueue(address _owner) external view returns (${upgradeQueue}[] memory output_)`,
-        `function getAllUpgradeQueue() external view returns (${upgradeQueue}[] memory)`,
-        `function getUpgradeQueueId(uint256 _queueId) external view returns (${upgradeQueue} memory)`,
+        // `function getUserUpgradeQueue(address _owner) external view returns (${upgradeQueue}[] memory output_)`,
+        // `function getAllUpgradeQueue() external view returns (${upgradeQueue}[] memory)`,
+        // `function getUpgradeQueueId(uint256 _queueId) external view returns (${upgradeQueue} memory)`,
       ],
       removeSelectors: [
-        `function getUpgradeQueue(address _owner) external view returns (${upgradeQueue}[] memory output_)`,
+        // `function getUpgradeQueue(address _owner) external view returns (${upgradeQueue}[] memory output_)`,
       ],
     },
     // {

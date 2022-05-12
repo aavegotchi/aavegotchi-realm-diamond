@@ -24,7 +24,14 @@ contract InstallationFacet is Modifiers {
 
   event UpgradeTimeReduced(uint256 indexed _queueId, uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _blocksReduced);
 
-  event UpgradeInitiated(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 blockInitiated, uint256 readyBlock);
+  event UpgradeInitiated(
+    uint256 indexed _realmId,
+    uint256 _coordinateX,
+    uint256 _coordinateY,
+    uint256 blockInitiated,
+    uint256 readyBlock,
+    uint256 installationId
+  );
 
   /***********************************|
    |             Read Functions         |
@@ -356,11 +363,10 @@ contract InstallationFacet is Modifiers {
     RealmDiamond realm = RealmDiamond(s.realmDiamond);
 
     //check upgradeQueueCapacity
-    uint256 upgradeQueueCapacity = realm.getParcelUpgradeQueueCapacity(_upgradeQueue.parcelId);
-
-    uint256 upgradeQueueLength = realm.getParcelUpgradeQueueLength(_upgradeQueue.parcelId);
-
-    require(upgradeQueueCapacity > upgradeQueueLength, "InstallationFacet: UpgradeQueue full");
+    require(
+      realm.getParcelUpgradeQueueCapacity(_upgradeQueue.parcelId) > realm.getParcelUpgradeQueueLength(_upgradeQueue.parcelId),
+      "InstallationFacet: UpgradeQueue full"
+    );
 
     realm.checkCoordinates(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId);
 
@@ -390,12 +396,11 @@ contract InstallationFacet is Modifiers {
     require(prevInstallation.alchemicaType == nextInstallation.alchemicaType, "InstallationFacet: Wrong alchemicaType");
     require(prevInstallation.level == nextInstallation.level - 1, "InstallationFacet: Wrong installation level");
 
-    uint40 readyBlock = uint40(block.number) + nextInstallation.craftTime;
     UpgradeQueue memory upgrade = UpgradeQueue(
       _upgradeQueue.owner,
       _upgradeQueue.coordinateX,
       _upgradeQueue.coordinateY,
-      readyBlock,
+      uint40(block.number) + nextInstallation.craftTime, // readyBlock
       false,
       _upgradeQueue.parcelId,
       _upgradeQueue.installationId
@@ -404,8 +409,16 @@ contract InstallationFacet is Modifiers {
 
     // update upgradeQueueLength
     realm.addUpgradeQueueLength(_upgradeQueue.parcelId);
-
-    emit UpgradeInitiated(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, block.number, readyBlock);
+    {
+      emit UpgradeInitiated(
+        _upgradeQueue.parcelId,
+        _upgradeQueue.coordinateX,
+        _upgradeQueue.coordinateY,
+        block.number,
+        uint40(block.number) + nextInstallation.craftTime, // readyBlock
+        _upgradeQueue.installationId
+      );
+    }
   }
 
   /// @notice Allow a user to reduce the upgrade time of an ongoing queue
