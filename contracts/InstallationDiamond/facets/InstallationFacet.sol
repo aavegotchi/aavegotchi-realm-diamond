@@ -171,9 +171,9 @@ contract InstallationFacet is Modifiers {
     }
   }
 
-  /// @notice Query details about all ongoing upgrade queues
+  /// @notice Query details about a specific user ongoing upgrade queues
   /// @return output_ An array of structs, each representing an ongoing upgrade queue
-  function getUpgradeQueue(address _owner) external view returns (UpgradeQueue[] memory output_) {
+  function getUserUpgradeQueue(address _owner) external view returns (UpgradeQueue[] memory output_) {
     uint256 length = s.upgradeQueue.length;
     output_ = new UpgradeQueue[](length);
     uint256 counter;
@@ -186,6 +186,16 @@ contract InstallationFacet is Modifiers {
     assembly {
       mstore(output_, counter)
     }
+  }
+
+  /// @notice Query details about all ongoing upgrade queues
+  /// @return output_ An array of structs, each representing an ongoing upgrade queue
+  function getAllUpgradeQueue() external view returns (UpgradeQueue[] memory) {
+    return s.upgradeQueue;
+  }
+
+  function getUpgradeQueueId(uint256 _queueId) external view returns (UpgradeQueue memory) {
+    return s.upgradeQueue[_queueId];
   }
 
   function getAltarLevel(uint256 _altarId) external view returns (uint256 altarLevel_) {
