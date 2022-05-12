@@ -350,12 +350,16 @@ contract RealmFacet is Modifiers {
     uint256[64][64] coords;
   }
 
-  function batchGetBuildGrid(uint256[] calldata _parcelIds) external view returns (ParcelCoordinates[] memory) {
+  function batchGetGrid(uint256[] calldata _parcelIds, uint256 _gridType) external view returns (ParcelCoordinates[] memory) {
     ParcelCoordinates[] memory parcels = new ParcelCoordinates[](_parcelIds.length);
     for (uint256 k; k < _parcelIds.length; k++) {
       for (uint256 i; i < 64; i++) {
         for (uint256 j; j < 64; j++) {
-          parcels[k].coords[i][j] = s.parcels[_parcelIds[k]].buildGrid[j][i];
+          if (_gridType == 0) {
+            parcels[k].coords[i][j] = s.parcels[_parcelIds[k]].buildGrid[j][i];
+          } else if (_gridType == 1) {
+            parcels[k].coords[i][j] = s.parcels[_parcelIds[k]].tileGrid[j][i];
+          }
         }
       }
     }
