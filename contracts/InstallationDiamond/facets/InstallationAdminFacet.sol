@@ -91,7 +91,6 @@ contract InstallationAdminFacet is Modifiers {
   /// @notice Allow anyone to finalize any existing queue upgrade
   /// @dev Only three queue upgrades can be finalized in one transaction
   function finalizeUpgrade() public {
-    console.log("UPPPPPPPPPPPP");
     require(s.upgradeQueue.length > 0, "InstallationFacet: No upgrades");
     //can only process 3 upgrades per tx
     uint256 counter = 3;
@@ -100,8 +99,6 @@ contract InstallationAdminFacet is Modifiers {
     for (uint256 index; index < _upgradeQueueLength; index++) {
       UpgradeQueue memory queueUpgrade = s.upgradeQueue[index - offset];
       // check that upgrade is ready
-      console.log("block.number", block.number);
-      console.log("readyBlock", queueUpgrade.readyBlock);
       if (block.number >= queueUpgrade.readyBlock) {
         // burn old installation
         LibInstallation._unequipInstallation(queueUpgrade.parcelId, queueUpgrade.installationId);
@@ -132,9 +129,7 @@ contract InstallationAdminFacet is Modifiers {
         // pop upgrade from array
         s.upgradeQueue[index] = s.upgradeQueue[s.upgradeQueue.length - 1];
         s.upgradeQueue.pop();
-        console.log("counterPre", counter);
         counter--;
-        console.log("counterPost", counter);
         offset++;
         emit UpgradeFinalized(queueUpgrade.parcelId, queueUpgrade.coordinateX, queueUpgrade.coordinateY, nextLevelId);
       }
