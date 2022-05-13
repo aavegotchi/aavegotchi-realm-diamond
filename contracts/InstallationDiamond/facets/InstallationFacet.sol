@@ -241,7 +241,8 @@ contract InstallationFacet is Modifiers {
   /// @dev Will throw even if one of the installationTypes is deprecated
   /// @dev Puts the installation into a queue
   /// @param _installationTypes An array containing the identifiers of the installationTypes to craft
-  function craftInstallations(uint16[] calldata _installationTypes) external {
+  /// @param _gltr Array of GLTR to spend on each crafting
+  function craftInstallations(uint16[] calldata _installationTypes, uint40[] calldata _gltr) external {
     address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
 
     uint256 _installationTypesLength = s.installationTypes.length;
@@ -257,7 +258,11 @@ contract InstallationFacet is Modifiers {
       //take the required alchemica
       LibItems._splitAlchemica(installationType.alchemicaCost, alchemicaAddresses);
 
-      if (installationType.craftTime == 0) {
+      uint40 gltr = _gltr[i];
+
+      if (gltr > installationType.craftTime) revert("InstallationFacet: Too much GLTR");
+
+      if (installationType.craftTime - gltr == 0) {
         LibERC1155._safeMint(msg.sender, _installationTypes[i], 0);
       } else {
         uint40 readyBlock = uint40(block.number) + installationType.craftTime;
