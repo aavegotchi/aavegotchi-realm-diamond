@@ -67,7 +67,7 @@ describe("Testing Equip Installation", async function () {
   before(async function () {
     this.timeout(20000000);
 
-    // await upgrade();
+    await upgrade();
 
     realmFacet = (await ethers.getContractAt(
       "RealmFacet",
@@ -97,8 +97,10 @@ describe("Testing Equip Installation", async function () {
       diamondAddress
     )) as ERC721Facet;
   });
-  it("get queue", async function () {
-    const queue = await installationFacet.getUpgradeQueue(owner);
+  it("finalize upgrade", async function () {
+    await installationAdminFacet.finalizeUpgrade();
+
+    const queue = await installationFacet.getAllUpgradeQueue();
 
     console.log(queue);
   });

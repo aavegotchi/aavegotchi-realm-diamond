@@ -295,14 +295,22 @@ export async function setAddresses() {
   // console.log("alpha", ethers.utils.formatUnits(balance[2]));
   // console.log("kek", ethers.utils.formatUnits(balance[3]));
 
-  const setTx = await tileFacet.setAddresses(
-    maticAavegotchiDiamondAddress,
-    diamondAddress,
-    diamondAddress,
-    diamondAddress,
-    diamondAddress
-  );
-  await setTx.wait();
+  // const setTx = await tileFacet.setAddresses(
+  //   maticAavegotchiDiamondAddress,
+  //   diamondAddress,
+  //   diamondAddress,
+  //   diamondAddress,
+  //   diamondAddress
+  // );
+  // await setTx.wait();
+
+  const list = await installationFacet.getAllUpgradeQueue();
+
+  console.log(list);
+
+  // const tx = await installationAdminFacet.finalizeUpgrade();
+
+  // await tx.wait();
 }
 
 // We recommend this pattern to be able to use async/await everywhere
