@@ -9,7 +9,7 @@ import { InstallationTypeInput } from "../../../types";
 import { installationDiamondAddress } from "../../helperFunctions";
 import { goldenAaltar, testInstallations } from "../realmHelpers";
 
-const gasPrice = 20000000000;
+const gasPrice = 100000000000;
 
 async function addInstallations() {
   const accounts = await ethers.getSigners();

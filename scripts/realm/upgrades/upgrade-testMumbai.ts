@@ -9,7 +9,7 @@ import { RealmFacetInterface } from "../../../typechain/RealmFacet";
 
 export async function upgrade() {
   const diamondUpgrader = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
-  const diamondAddress = "0x9351e6705590756BAc83f591aDE9f61De5998a84";
+  const diamondAddress = "0x6F8cFe6757F716039498dE53696b1aB5C66Ab428";
   const realmDiamond = "0x9351e6705590756BAc83f591aDE9f61De5998a84";
   const installationDiamond = "0x6F8cFe6757F716039498dE53696b1aB5C66Ab428";
 
@@ -22,27 +22,39 @@ export async function upgrade() {
     "(address owner, uint16 coordinateX, uint16 coordinateY, uint40 readyBlock, bool claimed, uint256 parcelId, uint256 installationId)";
 
   const facets: FacetsAndAddSelectors[] = [
-    // {
-    //   facetName: "InstallationAdminFacet",
-    //   addSelectors: [
-    //     // `function getUserUpgradeQueue(address _owner) external view returns (${upgradeQueue}[] memory output_)`,
-    //     // `function getAllUpgradeQueue() external view returns (${upgradeQueue}[] memory)`,
-    //     // `function getUpgradeQueueId(uint256 _queueId) external view returns (${upgradeQueue} memory)`,
-    //   ],
-    //   removeSelectors: [
-    //     // `function getUpgradeQueue(address _owner) external view returns (${upgradeQueue}[] memory output_)`,
-    //   ],
-    // },
     {
-      facetName: "RealmFacet",
+      facetName: "InstallationFacet",
       addSelectors: [
-        // `function batchGetGrid(uint256[] calldata _parcelIds, uint256 _gridType) external view returns (${parcelCoordinates}[] memory)`,
-        // "function batchGetDistrictParcels(address _owner, uint256 _district) external view returns (uint256[] memory) ",
+        // `function getUserUpgradeQueue(address _owner) external view returns (${upgradeQueue}[] memory output_)`,
+        // `function getAllUpgradeQueue() external view returns (${upgradeQueue}[] memory)`,
+        // `function getUpgradeQueueId(uint256 _queueId) external view returns (${upgradeQueue} memory)`,
       ],
       removeSelectors: [
-        // `function batchGetBuildGrid(uint256[] calldata _parcelIds) external view returns (${parcelCoordinates}[] memory)`,
+        // `function getUpgradeQueue(address _owner) external view returns (${upgradeQueue}[] memory output_)`,
       ],
     },
+    {
+      facetName: "InstallationAdminFacet",
+      addSelectors: [
+        // `function getUserUpgradeQueue(address _owner) external view returns (${upgradeQueue}[] memory output_)`,
+        // `function getAllUpgradeQueue() external view returns (${upgradeQueue}[] memory)`,
+        // `function getUpgradeQueueId(uint256 _queueId) external view returns (${upgradeQueue} memory)`,
+        // "function clean() external",
+      ],
+      removeSelectors: [
+        // `function getUpgradeQueue(address _owner) external view returns (${upgradeQueue}[] memory output_)`,
+      ],
+    },
+    // {
+    //   facetName: "RealmFacet",
+    //   addSelectors: [
+    //     // `function batchGetGrid(uint256[] calldata _parcelIds, uint256 _gridType) external view returns (${parcelCoordinates}[] memory)`,
+    //     // "function batchGetDistrictParcels(address _owner, uint256 _district) external view returns (uint256[] memory) ",
+    //   ],
+    //   removeSelectors: [
+    //     // `function batchGetBuildGrid(uint256[] calldata _parcelIds) external view returns (${parcelCoordinates}[] memory)`,
+    //   ],
+    // },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);

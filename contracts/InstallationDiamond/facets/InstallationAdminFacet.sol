@@ -104,7 +104,7 @@ contract InstallationAdminFacet is Modifiers {
         LibInstallation._unequipInstallation(queueUpgrade.parcelId, queueUpgrade.installationId);
         // mint new installation
         uint256 nextLevelId = s.installationTypes[queueUpgrade.installationId].nextLevelId;
-        LibERC1155._safeMint(queueUpgrade.owner, nextLevelId, index);
+        LibERC1155._safeMint(queueUpgrade.owner, nextLevelId, index - offset);
         // equip new installation
         LibInstallation._equipInstallation(queueUpgrade.owner, queueUpgrade.parcelId, nextLevelId);
 
@@ -127,7 +127,7 @@ contract InstallationAdminFacet is Modifiers {
         s.upgradeHashes[uniqueHash] = 0;
 
         // pop upgrade from array
-        s.upgradeQueue[index] = s.upgradeQueue[s.upgradeQueue.length - 1];
+        s.upgradeQueue[index - offset] = s.upgradeQueue[s.upgradeQueue.length - 1];
         s.upgradeQueue.pop();
         counter--;
         offset++;

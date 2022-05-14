@@ -1,7 +1,7 @@
 //@ts-ignore
 import hardhat, { run, ethers } from "hardhat";
 
-const gasPrice = 20000000000;
+const gasPrice = 100000000000;
 
 async function transferOwner() {
   const accounts = await ethers.getSigners();

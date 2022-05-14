@@ -380,18 +380,17 @@ contract InstallationFacet is Modifiers {
 
     s.upgradeHashes[uniqueHash] = _upgradeQueue.parcelId;
 
-    //take the required alchemica
-    address[4] memory alchemicaAddresses = realm.getAlchemicaAddresses();
-    InstallationType memory installationType = s.installationTypes[_upgradeQueue.installationId];
-    LibItems._splitAlchemica(installationType.alchemicaCost, alchemicaAddresses);
-
     //current installation
     InstallationType memory prevInstallation = s.installationTypes[_upgradeQueue.installationId];
 
-    require(prevInstallation.nextLevelId > 0, "InstallationFacet: Maximum upgrade reached");
-
     //next level
     InstallationType memory nextInstallation = s.installationTypes[prevInstallation.nextLevelId];
+
+    //take the required alchemica
+    address[4] memory alchemicaAddresses = realm.getAlchemicaAddresses();
+    LibItems._splitAlchemica(nextInstallation.alchemicaCost, alchemicaAddresses);
+
+    require(prevInstallation.nextLevelId > 0, "InstallationFacet: Maximum upgrade reached");
     require(prevInstallation.installationType == nextInstallation.installationType, "InstallationFacet: Wrong installation type");
     require(prevInstallation.alchemicaType == nextInstallation.alchemicaType, "InstallationFacet: Wrong alchemicaType");
     require(prevInstallation.level == nextInstallation.level - 1, "InstallationFacet: Wrong installation level");

@@ -49,6 +49,10 @@ library LibAlchemica {
     // check altar requirement
     uint256 equippedAltarId = s.parcels[_realmId].altarId;
     uint256 equippedAltarLevel = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(equippedAltarId).level;
+    console.log("installationId", _installationId);
+    console.log("equippedAltarId", equippedAltarId);
+    console.log("equippedAltarLevel", equippedAltarLevel);
+    console.log("altarPrerequisite", altarPrerequisite);
     require(equippedAltarLevel >= altarPrerequisite, "RealmFacet: Altar Tech Tree Reqs not met");
 
     // check lodge requirement
@@ -80,8 +84,11 @@ library LibAlchemica {
 
     //Altar
     if (installationType.installationType == 0) {
+      console.log("increasingAltar");
       require(s.parcels[_realmId].altarId == 0, "LibAlchemica: Cannot equip two altars");
+      console.log("s.parcels[_realmId].altarId PRE", s.parcels[_realmId].altarId);
       s.parcels[_realmId].altarId = _installationId;
+      console.log("s.parcels[_realmId].altarId post", s.parcels[_realmId].altarId);
     }
 
     // upgradeQueueBoost
@@ -162,6 +169,62 @@ library LibAlchemica {
     // upgradeQueueBoost
     if (installationType.upgradeQueueBoost > 0) {
       s.parcels[_realmId].upgradeQueueCapacity -= installationType.upgradeQueueBoost;
+    }
+  }
+
+  function upgradeTraits(uint256 _realmId, uint256 _installationId) internal {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+
+    //First save the current harvested amount
+    InstallationDiamondInterface.InstallationType memory installationType = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(
+      _installationId
+    );
+
+    uint256 altarPrerequisite = installationType.prerequisites[0];
+    uint256 lodgePrerequisite = installationType.prerequisites[1];
+
+    // check altar requirement
+    uint256 equippedAltarId = s.parcels[_realmId].altarId;
+    uint256 equippedAltarLevel = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(equippedAltarId).level;
+    require(equippedAltarLevel >= altarPrerequisite, "RealmFacet: Altar Tech Tree Reqs not met");
+
+    // check lodge requirement
+    if (lodgePrerequisite > 0) {
+      uint256 equippedLodgeId = s.parcels[_realmId].lodgeId;
+      uint256 equippedLodgeLevel = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(equippedLodgeId).level;
+      require(equippedLodgeLevel >= lodgePrerequisite, "RealmFacet: Lodge Tech Tree Reqs not met");
+    }
+
+    // check harvester requirement
+    if (installationType.installationType == 1) {
+      require(s.parcels[_realmId].reservoirs[installationType.alchemicaType].length > 0, "RealmFacet: Must equip reservoir of type");
+    }
+
+    uint256 alchemicaType = installationType.alchemicaType;
+
+    //unclaimed alchemica must be settled before mutating harvestRate and capacity
+    if (installationType.harvestRate > 0 || installationType.capacity > 0) {
+      settleUnclaimedAlchemica(_realmId, alchemicaType);
+    }
+
+    //handle harvester
+    if (installationType.harvestRate > 0) {
+      s.parcels[_realmId].alchemicaHarvestRate[alchemicaType] += installationType.harvestRate;
+    }
+
+    //reservoir
+    if (installationType.capacity > 0) {
+      s.parcels[_realmId].reservoirs[alchemicaType].push(_installationId);
+    }
+
+    //Altar
+    if (installationType.installationType == 0) {
+      s.parcels[_realmId].altarId = _installationId;
+    }
+
+    // upgradeQueueBoost
+    if (installationType.upgradeQueueBoost > 0) {
+      s.parcels[_realmId].upgradeQueueCapacity += installationType.upgradeQueueBoost;
     }
   }
 
