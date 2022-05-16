@@ -241,7 +241,8 @@ contract InstallationFacet is Modifiers {
   /// @dev Will throw even if one of the installationTypes is deprecated
   /// @dev Puts the installation into a queue
   /// @param _installationTypes An array containing the identifiers of the installationTypes to craft
-  function craftInstallations(uint16[] calldata _installationTypes) external {
+  /// @param _gltr Array of GLTR to spend on each crafting
+  function craftInstallations(uint16[] calldata _installationTypes, uint40[] calldata _gltr) external {
     address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
 
     uint256 _installationTypesLength = s.installationTypes.length;
@@ -257,7 +258,11 @@ contract InstallationFacet is Modifiers {
       //take the required alchemica
       LibItems._splitAlchemica(installationType.alchemicaCost, alchemicaAddresses);
 
-      if (installationType.craftTime == 0) {
+      uint40 gltr = _gltr[i];
+
+      if (gltr > installationType.craftTime) revert("InstallationFacet: Too much GLTR");
+
+      if (installationType.craftTime - gltr == 0) {
         LibERC1155._safeMint(msg.sender, _installationTypes[i], 0);
       } else {
         uint40 readyBlock = uint40(block.number) + installationType.craftTime;
@@ -347,7 +352,13 @@ contract InstallationFacet is Modifiers {
   /// @notice Allow a user to upgrade an installation in a parcel
   /// @dev Will throw if the caller is not the owner of the parcel in which the installation is installed
   /// @param _upgradeQueue A struct containing details about the queue which contains the installation to upgrade
-  function upgradeInstallation(UpgradeQueue calldata _upgradeQueue, bytes memory _signature) external {
+  ///@param _signature API signature
+  ///@param _gltr Amount of GLTR to use, can be 0
+  function upgradeInstallation(
+    UpgradeQueue calldata _upgradeQueue,
+    bytes memory _signature,
+    uint40 _gltr
+  ) external {
     require(
       LibSignature.isValid(
         keccak256(abi.encodePacked(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId)),
@@ -395,26 +406,43 @@ contract InstallationFacet is Modifiers {
     require(prevInstallation.alchemicaType == nextInstallation.alchemicaType, "InstallationFacet: Wrong alchemicaType");
     require(prevInstallation.level == nextInstallation.level - 1, "InstallationFacet: Wrong installation level");
 
-    UpgradeQueue memory upgrade = UpgradeQueue(
-      _upgradeQueue.owner,
-      _upgradeQueue.coordinateX,
-      _upgradeQueue.coordinateY,
-      uint40(block.number) + nextInstallation.craftTime, // readyBlock
-      false,
-      _upgradeQueue.parcelId,
-      _upgradeQueue.installationId
-    );
-    s.upgradeQueue.push(upgrade);
+    IERC20 gltr = IERC20(s.gltr);
+    gltr.burnFrom(msg.sender, _gltr * 10**18); //should revert if user doesnt have enough GLTR
 
-    // update upgradeQueueLength
-    realm.addUpgradeQueueLength(_upgradeQueue.parcelId);
-    {
+    //prevent underflow if user sends too much GLTR
+    if (_gltr > nextInstallation.craftTime) revert("InstallationFacet: Too much GLTR");
+    uint40 readyBlock = uint40(block.number) + nextInstallation.craftTime - _gltr;
+
+    //Confirm upgrade immediately
+    if (nextInstallation.craftTime - _gltr == 0) {
+      realm.upgradeInstallation(
+        _upgradeQueue.parcelId,
+        _upgradeQueue.installationId,
+        prevInstallation.nextLevelId,
+        _upgradeQueue.coordinateX,
+        _upgradeQueue.coordinateY
+      );
+    } else {
+      UpgradeQueue memory upgrade = UpgradeQueue(
+        _upgradeQueue.owner,
+        _upgradeQueue.coordinateX,
+        _upgradeQueue.coordinateY,
+        readyBlock,
+        false,
+        _upgradeQueue.parcelId,
+        _upgradeQueue.installationId
+      );
+      s.upgradeQueue.push(upgrade);
+
+      // update upgradeQueueLength
+      realm.addUpgradeQueueLength(_upgradeQueue.parcelId);
+
       emit UpgradeInitiated(
         _upgradeQueue.parcelId,
         _upgradeQueue.coordinateX,
         _upgradeQueue.coordinateY,
         block.number,
-        uint40(block.number) + nextInstallation.craftTime, // readyBlock
+        readyBlock,
         _upgradeQueue.installationId
       );
     }
