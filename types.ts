@@ -109,7 +109,7 @@ export interface TileTypeInput {
   name: string;
 }
 
-export type Level = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+export type Level = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 export type Width = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type Height = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export interface InstallationTypeOutput {

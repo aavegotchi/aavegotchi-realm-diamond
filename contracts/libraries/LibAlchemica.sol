@@ -35,7 +35,11 @@ library LibAlchemica {
     return amount;
   }
 
-  function increaseTraits(uint256 _realmId, uint256 _installationId) internal {
+  function increaseTraits(
+    uint256 _realmId,
+    uint256 _installationId,
+    bool isUpgrade
+  ) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
     //First save the current harvested amount
@@ -85,7 +89,7 @@ library LibAlchemica {
     //Altar
     if (installationType.installationType == 0) {
       console.log("increasingAltar");
-      require(s.parcels[_realmId].altarId == 0, "LibAlchemica: Cannot equip two altars");
+      require(!isUpgrade || s.parcels[_realmId].altarId == 0, "LibAlchemica: Cannot equip two altars");
       console.log("s.parcels[_realmId].altarId PRE", s.parcels[_realmId].altarId);
       s.parcels[_realmId].altarId = _installationId;
       console.log("s.parcels[_realmId].altarId post", s.parcels[_realmId].altarId);
@@ -97,7 +101,11 @@ library LibAlchemica {
     }
   }
 
-  function reduceTraits(uint256 _realmId, uint256 _installationId) internal {
+  function reduceTraits(
+    uint256 _realmId,
+    uint256 _installationId,
+    bool isUpgrade
+  ) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
     InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
@@ -140,7 +148,7 @@ library LibAlchemica {
     }
 
     //Altar
-    if (installationType.installationType == 0) {
+    if (installationType.installationType == 0 && !isUpgrade) {
       //@question: do we need any special exceptions for the Altar? Should be handled by tech tree
       s.parcels[_realmId].altarId = 0;
     }

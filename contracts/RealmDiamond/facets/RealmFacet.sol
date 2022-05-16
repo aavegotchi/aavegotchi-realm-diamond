@@ -100,7 +100,7 @@ contract RealmFacet is Modifiers {
     LibRealm.placeInstallation(_realmId, _installationId, _x, _y);
     InstallationDiamondInterface(s.installationsDiamond).equipInstallation(msg.sender, _realmId, _installationId);
 
-    LibAlchemica.increaseTraits(_realmId, _installationId);
+    LibAlchemica.increaseTraits(_realmId, _installationId, false);
 
     emit EquipInstallation(_realmId, _installationId, _x, _y);
   }
@@ -138,7 +138,7 @@ contract RealmFacet is Modifiers {
     }
     InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(_realmId, _installationId);
 
-    LibAlchemica.reduceTraits(_realmId, _installationId);
+    LibAlchemica.reduceTraits(_realmId, _installationId, false);
 
     emit UnequipInstallation(_realmId, _installationId, _x, _y);
   }
@@ -263,7 +263,9 @@ contract RealmFacet is Modifiers {
   ) external onlyInstallationDiamond {
     LibRealm.removeInstallation(_realmId, _prevInstallationId, _coordinateX, _coordinateY);
     LibRealm.placeInstallation(_realmId, _nextInstallationId, _coordinateX, _coordinateY);
-    LibAlchemica.upgradeTraits(_realmId, _nextInstallationId);
+    LibAlchemica.reduceTraits(_realmId, _prevInstallationId, true);
+    LibAlchemica.increaseTraits(_realmId, _prevInstallationId, true);
+    // LibAlchemica.upgradeTraits(_realmId, _nextInstallationId);
     emit InstallationUpgraded(_realmId, _prevInstallationId, _nextInstallationId, _coordinateX, _coordinateY);
   }
 
