@@ -11,6 +11,7 @@ import "../../libraries/LibRealm.sol";
 import "../../libraries/LibAlchemica.sol";
 import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamond.sol";
 import "../../libraries/LibSignature.sol";
+import "./ERC721Facet.sol";
 
 contract RealmFacet is Modifiers {
   uint256 constant MAX_SUPPLY = 420069;
@@ -88,9 +89,6 @@ contract RealmFacet is Modifiers {
     InstallationDiamondInterface.InstallationType memory installation = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(
       _installationId
     );
-    if (installation.installationType != 0) {
-      require(s.parcels[_realmId].altarId > 0, "RealmFacet: Must equip Altar");
-    }
     if (installation.installationType == 1 || installation.installationType == 2) {
       require(s.parcels[_realmId].currentRound >= 1, "RealmFacet: Must survey before equipping");
     }
@@ -98,10 +96,11 @@ contract RealmFacet is Modifiers {
       require(s.parcels[_realmId].lodgeId == 0, "RealmFacet: Lodge already equipped");
       s.parcels[_realmId].lodgeId = _installationId;
     }
+
     LibRealm.placeInstallation(_realmId, _installationId, _x, _y);
     InstallationDiamondInterface(s.installationsDiamond).equipInstallation(msg.sender, _realmId, _installationId);
 
-    LibAlchemica.increaseTraits(_realmId, _installationId);
+    LibAlchemica.increaseTraits(_realmId, _installationId, false);
 
     emit EquipInstallation(_realmId, _installationId, _x, _y);
   }
@@ -127,10 +126,6 @@ contract RealmFacet is Modifiers {
     InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
     InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
 
-    if (installation.installationType == 3) {
-      s.parcels[_realmId].lodgeId = 0;
-    }
-
     LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
 
     for (uint256 i; i < installation.alchemicaCost.length; i++) {
@@ -143,7 +138,7 @@ contract RealmFacet is Modifiers {
     }
     InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(_realmId, _installationId);
 
-    LibAlchemica.reduceTraits(_realmId, _installationId);
+    LibAlchemica.reduceTraits(_realmId, _installationId, false);
 
     emit UnequipInstallation(_realmId, _installationId, _x, _y);
   }
@@ -195,6 +190,18 @@ contract RealmFacet is Modifiers {
     emit UnequipTile(_realmId, _tileId, _x, _y);
   }
 
+  function setParcelsAccessRights(
+    uint256[] calldata _realmIds,
+    uint256[] calldata _actionRights,
+    uint256[] calldata _accessRights
+  ) external gameActive {
+    require(_realmIds.length == _accessRights.length && _realmIds.length == _actionRights.length, "RealmFacet: Mismatched arrays");
+    for (uint256 i; i < _realmIds.length; i++) {
+      require(LibMeta.msgSender() == s.parcels[_realmIds[i]].owner, "RealmFacet: Only Parcel owner can call");
+      s.accessRights[_realmIds[i]][_actionRights[i]] = _accessRights[i];
+    }
+  }
+
   struct ParcelOutput {
     string parcelId;
     string parcelAddress;
@@ -215,16 +222,6 @@ contract RealmFacet is Modifiers {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
       emit ResyncParcel(_tokenIds[index]);
     }
-  }
-
-  /**
-  @dev Used to set diamond address for Baazaar
-  @param _diamondAddress New diamond address for the baazar
-  */
-  function setAavegotchiDiamond(address _diamondAddress) external onlyOwner {
-    require(_diamondAddress != address(0), "RealmFacet: Cannot set diamond to zero address");
-    s.aavegotchiDiamond = _diamondAddress;
-    emit AavegotchiDiamondUpdated(_diamondAddress);
   }
 
   function setGameActive(bool _gameActive) external onlyOwner {
@@ -266,8 +263,8 @@ contract RealmFacet is Modifiers {
   ) external onlyInstallationDiamond {
     LibRealm.removeInstallation(_realmId, _prevInstallationId, _coordinateX, _coordinateY);
     LibRealm.placeInstallation(_realmId, _nextInstallationId, _coordinateX, _coordinateY);
-    LibAlchemica.reduceTraits(_realmId, _prevInstallationId);
-    LibAlchemica.increaseTraits(_realmId, _nextInstallationId);
+    LibAlchemica.reduceTraits(_realmId, _prevInstallationId, true);
+    LibAlchemica.increaseTraits(_realmId, _prevInstallationId, true);
     emit InstallationUpgraded(_realmId, _prevInstallationId, _nextInstallationId, _coordinateX, _coordinateY);
   }
 
@@ -289,9 +286,9 @@ contract RealmFacet is Modifiers {
     for (uint256 i; i < 8; i++) {
       for (uint256 j; j < 8; j++) {
         if (_gridType == 0) {
-          output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
         } else if (_gridType == 1) {
-          output_[i][j] = s.parcels[_parcelId].tileGrid[i][j];
+          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
         }
       }
     }
@@ -302,9 +299,9 @@ contract RealmFacet is Modifiers {
     for (uint256 i; i < 16; i++) {
       for (uint256 j; j < 16; j++) {
         if (_gridType == 0) {
-          output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
         } else if (_gridType == 1) {
-          output_[i][j] = s.parcels[_parcelId].tileGrid[i][j];
+          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
         }
       }
     }
@@ -315,9 +312,9 @@ contract RealmFacet is Modifiers {
     for (uint256 i; i < 64; i++) {
       for (uint256 j; j < 32; j++) {
         if (_gridType == 0) {
-          output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
         } else if (_gridType == 1) {
-          output_[i][j] = s.parcels[_parcelId].tileGrid[i][j];
+          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
         }
       }
     }
@@ -328,9 +325,9 @@ contract RealmFacet is Modifiers {
     for (uint256 i; i < 32; i++) {
       for (uint256 j; j < 64; j++) {
         if (_gridType == 0) {
-          output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
         } else if (_gridType == 1) {
-          output_[i][j] = s.parcels[_parcelId].tileGrid[i][j];
+          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
         }
       }
     }
@@ -338,11 +335,49 @@ contract RealmFacet is Modifiers {
 
   function getPaartnerGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[64][64] memory output_) {
     require(s.parcels[_parcelId].size == 4, "RealmFacet: Not paartner");
-    if (_gridType == 0) {
-      output_ = s.parcels[_parcelId].buildGrid;
-    } else if (_gridType == 1) {
-      output_ = s.parcels[_parcelId].tileGrid;
+    for (uint256 i; i < 64; i++) {
+      for (uint256 j; j < 64; j++) {
+        if (_gridType == 0) {
+          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
+        } else if (_gridType == 1) {
+          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
+        }
+      }
     }
+  }
+
+  struct ParcelCoordinates {
+    uint256[64][64] coords;
+  }
+
+  function batchGetGrid(uint256[] calldata _parcelIds, uint256 _gridType) external view returns (ParcelCoordinates[] memory) {
+    ParcelCoordinates[] memory parcels = new ParcelCoordinates[](_parcelIds.length);
+    for (uint256 k; k < _parcelIds.length; k++) {
+      for (uint256 i; i < 64; i++) {
+        for (uint256 j; j < 64; j++) {
+          if (_gridType == 0) {
+            parcels[k].coords[i][j] = s.parcels[_parcelIds[k]].buildGrid[j][i];
+          } else if (_gridType == 1) {
+            parcels[k].coords[i][j] = s.parcels[_parcelIds[k]].tileGrid[j][i];
+          }
+        }
+      }
+    }
+    return parcels;
+  }
+
+  function batchGetDistrictParcels(address _owner, uint256 _district) external view returns (uint256[] memory) {
+    uint256 totalSupply = ERC721Facet(address(this)).totalSupply();
+    uint256 balance = ERC721Facet(address(this)).balanceOf(_owner);
+    uint256[] memory output_ = new uint256[](balance);
+    uint256 counter;
+    for (uint256 i; i < totalSupply; i++) {
+      if (s.parcels[i].district == _district && s.parcels[i].owner == _owner) {
+        output_[counter] = i;
+        counter++;
+      }
+    }
+    return output_;
   }
 
   function getParcelUpgradeQueueLength(uint256 _parcelId) external view returns (uint256) {
@@ -351,5 +386,12 @@ contract RealmFacet is Modifiers {
 
   function getParcelUpgradeQueueCapacity(uint256 _parcelId) external view returns (uint256) {
     return s.parcels[_parcelId].upgradeQueueCapacity;
+  }
+
+  function getParcelsAccessRights(uint256[] calldata _parcelIds, uint256[] calldata _actionRights) external view returns (uint256[] memory output_) {
+    require(_parcelIds.length == _actionRights.length, "RealmFacet: Mismatched arrays");
+    for (uint256 i; i < _parcelIds.length; i++) {
+      output_[i] = s.accessRights[_parcelIds[i]][_actionRights[i]];
+    }
   }
 }

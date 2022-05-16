@@ -13,6 +13,8 @@ import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
 import {LibSignature} from "../../libraries/LibSignature.sol";
 
+import "hardhat/console.sol";
+
 contract InstallationFacet is Modifiers {
   event AddedToQueue(uint256 indexed _queueId, uint256 indexed _installationId, uint256 _readyBlock, address _sender);
 
@@ -22,7 +24,14 @@ contract InstallationFacet is Modifiers {
 
   event UpgradeTimeReduced(uint256 indexed _queueId, uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _blocksReduced);
 
-  event UpgradeInitiated(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 blockInitiated, uint256 readyBlock);
+  event UpgradeInitiated(
+    uint256 indexed _realmId,
+    uint256 _coordinateX,
+    uint256 _coordinateY,
+    uint256 blockInitiated,
+    uint256 readyBlock,
+    uint256 installationId
+  );
 
   /***********************************|
    |             Read Functions         |
@@ -169,14 +178,14 @@ contract InstallationFacet is Modifiers {
     }
   }
 
-  /// @notice Query details about all ongoing upgrade queues
+  /// @notice Query details about a specific user ongoing upgrade queues
   /// @return output_ An array of structs, each representing an ongoing upgrade queue
-  function getUpgradeQueue(address _owner) external view returns (UpgradeQueue[] memory output_) {
+  function getUserUpgradeQueue(address _owner) external view returns (UpgradeQueue[] memory output_) {
     uint256 length = s.upgradeQueue.length;
     output_ = new UpgradeQueue[](length);
     uint256 counter;
     for (uint256 i; i < length; i++) {
-      if (s.craftQueue[i].owner == _owner) {
+      if (s.upgradeQueue[i].owner == _owner) {
         output_[counter] = s.upgradeQueue[i];
         counter++;
       }
@@ -184,6 +193,16 @@ contract InstallationFacet is Modifiers {
     assembly {
       mstore(output_, counter)
     }
+  }
+
+  /// @notice Query details about all ongoing upgrade queues
+  /// @return output_ An array of structs, each representing an ongoing upgrade queue
+  function getAllUpgradeQueue() external view returns (UpgradeQueue[] memory) {
+    return s.upgradeQueue;
+  }
+
+  function getUpgradeQueueId(uint256 _queueId) external view returns (UpgradeQueue memory) {
+    return s.upgradeQueue[_queueId];
   }
 
   function getAltarLevel(uint256 _altarId) external view returns (uint256 altarLevel_) {
@@ -274,7 +293,8 @@ contract InstallationFacet is Modifiers {
 
       uint40 blockLeft = queueItem.readyBlock - uint40(block.number);
       uint40 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
-      gltr.burnFrom(msg.sender, removeBlocks * 10**18);
+      uint256 burnAmount = uint256(removeBlocks) * 10**18;
+      gltr.burnFrom(msg.sender, burnAmount);
       queueItem.readyBlock -= removeBlocks;
       emit CraftTimeReduced(queueId, removeBlocks);
     }
@@ -313,22 +333,7 @@ contract InstallationFacet is Modifiers {
     uint256 _realmId,
     uint256 _installationId
   ) external onlyRealmDiamond {
-    uint256[] memory prerequisites = s.installationTypes[_installationId].prerequisites;
-
-    bool techTreePasses = true;
-    for (uint256 i = 0; i < prerequisites.length; i++) {
-      //ensure that this installation already has at least one required installation on it before adding
-      uint256 prerequisiteId = prerequisites[i];
-      uint256 equippedBalance = balanceOfToken(s.realmDiamond, _realmId, prerequisiteId);
-      if (equippedBalance == 0) {
-        techTreePasses = false;
-        break;
-      }
-    }
-
-    if (techTreePasses) {
-      LibInstallation._equipInstallation(_owner, _realmId, _installationId);
-    } else revert("InstallationFacet: Tech Tree reqs not met");
+    LibInstallation._equipInstallation(_owner, _realmId, _installationId);
   }
 
   /// @notice Allow a user to unequip an installation from a parcel
@@ -336,26 +341,6 @@ contract InstallationFacet is Modifiers {
   /// @param _realmId The identifier of the parcel to unequip the installation from
   /// @param _installationId Identifier of the installation to unequip
   function unequipInstallation(uint256 _realmId, uint256 _installationId) external onlyRealmDiamond {
-    InstallationIdIO[] memory installationBalances = installationBalancesOfToken(s.realmDiamond, _realmId);
-
-    uint256 removeInstallationBalance = balanceOfToken(s.realmDiamond, _realmId, _installationId);
-
-    //Iterate through all equipped installationTypes to check if installation to be unequipped is a prerequisite of any
-    for (uint256 i = 0; i < installationBalances.length; i++) {
-      uint256 installationId = installationBalances[i].installationId;
-
-      uint256[] memory prerequisites = s.installationTypes[installationId].prerequisites;
-
-      for (uint256 j = 0; j < prerequisites.length; j++) {
-        //Check that this installation is not the prequisite for any other currently equipped installations
-        uint256 prerequisiteId = prerequisites[j];
-
-        if (prerequisiteId == installationId && removeInstallationBalance < 2) {
-          revert("InstallationFacet: Tech Tree Reqs not met");
-        }
-      }
-    }
-
     LibInstallation._unequipInstallation(_realmId, _installationId);
   }
 
@@ -378,11 +363,10 @@ contract InstallationFacet is Modifiers {
     RealmDiamond realm = RealmDiamond(s.realmDiamond);
 
     //check upgradeQueueCapacity
-    uint256 upgradeQueueCapacity = realm.getParcelUpgradeQueueCapacity(_upgradeQueue.parcelId);
-
-    uint256 upgradeQueueLength = realm.getParcelUpgradeQueueLength(_upgradeQueue.parcelId);
-
-    require(upgradeQueueCapacity > upgradeQueueLength, "InstallationFacet: UpgradeQueue full");
+    require(
+      realm.getParcelUpgradeQueueCapacity(_upgradeQueue.parcelId) > realm.getParcelUpgradeQueueLength(_upgradeQueue.parcelId),
+      "InstallationFacet: UpgradeQueue full"
+    );
 
     realm.checkCoordinates(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId);
 
@@ -396,28 +380,26 @@ contract InstallationFacet is Modifiers {
 
     s.upgradeHashes[uniqueHash] = _upgradeQueue.parcelId;
 
-    //take the required alchemica
-    address[4] memory alchemicaAddresses = realm.getAlchemicaAddresses();
-    InstallationType memory installationType = s.installationTypes[_upgradeQueue.installationId];
-    LibItems._splitAlchemica(installationType.alchemicaCost, alchemicaAddresses);
-
     //current installation
     InstallationType memory prevInstallation = s.installationTypes[_upgradeQueue.installationId];
 
-    require(prevInstallation.nextLevelId > 0, "InstallationFacet: Maximum upgrade reached");
-
     //next level
     InstallationType memory nextInstallation = s.installationTypes[prevInstallation.nextLevelId];
+
+    //take the required alchemica
+    address[4] memory alchemicaAddresses = realm.getAlchemicaAddresses();
+    LibItems._splitAlchemica(nextInstallation.alchemicaCost, alchemicaAddresses);
+
+    require(prevInstallation.nextLevelId > 0, "InstallationFacet: Maximum upgrade reached");
     require(prevInstallation.installationType == nextInstallation.installationType, "InstallationFacet: Wrong installation type");
     require(prevInstallation.alchemicaType == nextInstallation.alchemicaType, "InstallationFacet: Wrong alchemicaType");
     require(prevInstallation.level == nextInstallation.level - 1, "InstallationFacet: Wrong installation level");
 
-    uint40 readyBlock = uint40(block.number) + nextInstallation.craftTime;
     UpgradeQueue memory upgrade = UpgradeQueue(
       _upgradeQueue.owner,
       _upgradeQueue.coordinateX,
       _upgradeQueue.coordinateY,
-      readyBlock,
+      uint40(block.number) + nextInstallation.craftTime, // readyBlock
       false,
       _upgradeQueue.parcelId,
       _upgradeQueue.installationId
@@ -426,8 +408,16 @@ contract InstallationFacet is Modifiers {
 
     // update upgradeQueueLength
     realm.addUpgradeQueueLength(_upgradeQueue.parcelId);
-
-    emit UpgradeInitiated(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, block.number, readyBlock);
+    {
+      emit UpgradeInitiated(
+        _upgradeQueue.parcelId,
+        _upgradeQueue.coordinateX,
+        _upgradeQueue.coordinateY,
+        block.number,
+        uint40(block.number) + nextInstallation.craftTime, // readyBlock
+        _upgradeQueue.installationId
+      );
+    }
   }
 
   /// @notice Allow a user to reduce the upgrade time of an ongoing queue

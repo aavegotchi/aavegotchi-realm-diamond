@@ -143,7 +143,7 @@ contract TileFacet is Modifiers {
   /// @notice Allow a user to craft tiles
   /// @dev Puts the tile into a queue
   /// @param _tileTypes An array containing the identifiers of the tileTypes to craft
-  function craftTiles(uint256[] calldata _tileTypes) external {
+  function craftTiles(uint16[] calldata _tileTypes) external {
     address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
 
     uint256 _tileTypesLength = s.tileTypes.length;
@@ -153,13 +153,19 @@ contract TileFacet is Modifiers {
 
       TileType memory tileType = s.tileTypes[_tileTypes[i]];
 
+      //The preset deprecation time has elapsed
+      if (s.deprecateTime[_tileTypes[i]] > 0) {
+        require(block.timestamp < s.deprecateTime[_tileTypes[i]], "TileFacet: Tile has been deprecated");
+      }
+      require(!tileType.deprecated, "TileFacet: Tile has been deprecated");
+
       //take the required alchemica
       LibItems._splitAlchemica(tileType.alchemicaCost, alchemicaAddresses);
 
       if (tileType.craftTime == 0) {
         LibERC1155Tile._safeMint(msg.sender, _tileTypes[i], 0);
       } else {
-        uint256 readyBlock = block.number + tileType.craftTime;
+        uint40 readyBlock = uint40(block.number) + tileType.craftTime;
 
         //put the tile into a queue
         //each tile needs a unique queue id
@@ -179,7 +185,7 @@ contract TileFacet is Modifiers {
   /// @dev amount expressed in block numbers
   /// @param _queueIds An array containing the identifiers of queues to speed up
   /// @param _amounts An array containing the corresponding amounts of $GLTR tokens to pay for each queue speedup
-  function reduceCraftTime(uint256[] calldata _queueIds, uint256[] calldata _amounts) external {
+  function reduceCraftTime(uint256[] calldata _queueIds, uint40[] calldata _amounts) external {
     require(_queueIds.length == _amounts.length, "TileFacet: Mismatched arrays");
     for (uint256 i; i < _queueIds.length; i++) {
       uint256 queueId = _queueIds[i];
@@ -190,8 +196,8 @@ contract TileFacet is Modifiers {
 
       IERC20 gltr = IERC20(s.gltr);
 
-      uint256 blockLeft = queueItem.readyBlock - block.number;
-      uint256 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
+      uint40 blockLeft = queueItem.readyBlock - uint40(block.number);
+      uint40 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
       gltr.burnFrom(msg.sender, removeBlocks * 10**18);
       queueItem.readyBlock -= removeBlocks;
       emit CraftTimeReduced(queueId, removeBlocks);
@@ -305,8 +311,8 @@ contract TileFacet is Modifiers {
           _tileTypes[i].height,
           _tileTypes[i].deprecated,
           _tileTypes[i].tileType,
-          _tileTypes[i].alchemicaCost,
           _tileTypes[i].craftTime,
+          _tileTypes[i].alchemicaCost,
           _tileTypes[i].name
         )
       );

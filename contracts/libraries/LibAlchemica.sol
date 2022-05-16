@@ -35,13 +35,37 @@ library LibAlchemica {
     return amount;
   }
 
-  function increaseTraits(uint256 _realmId, uint256 _installationId) internal {
+  function increaseTraits(
+    uint256 _realmId,
+    uint256 _installationId,
+    bool isUpgrade
+  ) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
     //First save the current harvested amount
     InstallationDiamondInterface.InstallationType memory installationType = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(
       _installationId
     );
+
+    uint256 altarPrerequisite = installationType.prerequisites[0];
+    uint256 lodgePrerequisite = installationType.prerequisites[1];
+
+    // check altar requirement
+    uint256 equippedAltarId = s.parcels[_realmId].altarId;
+    uint256 equippedAltarLevel = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(equippedAltarId).level;
+    require(equippedAltarLevel >= altarPrerequisite, "RealmFacet: Altar Tech Tree Reqs not met");
+
+    // check lodge requirement
+    if (lodgePrerequisite > 0) {
+      uint256 equippedLodgeId = s.parcels[_realmId].lodgeId;
+      uint256 equippedLodgeLevel = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(equippedLodgeId).level;
+      require(equippedLodgeLevel >= lodgePrerequisite, "RealmFacet: Lodge Tech Tree Reqs not met");
+    }
+
+    // check harvester requirement
+    if (installationType.installationType == 1) {
+      require(s.parcels[_realmId].reservoirs[installationType.alchemicaType].length > 0, "RealmFacet: Must equip reservoir of type");
+    }
 
     uint256 alchemicaType = installationType.alchemicaType;
 
@@ -60,7 +84,7 @@ library LibAlchemica {
 
     //Altar
     if (installationType.installationType == 0) {
-      require(s.parcels[_realmId].altarId == 0, "LibAlchemica: Cannot equip two altars");
+      require(isUpgrade || s.parcels[_realmId].altarId == 0, "LibAlchemica: Cannot equip two altars");
       s.parcels[_realmId].altarId = _installationId;
     }
 
@@ -70,12 +94,41 @@ library LibAlchemica {
     }
   }
 
-  function reduceTraits(uint256 _realmId, uint256 _installationId) internal {
+  function reduceTraits(
+    uint256 _realmId,
+    uint256 _installationId,
+    bool isUpgrade
+  ) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
+    InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
     InstallationDiamondInterface.InstallationType memory installationType = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(
       _installationId
     );
+    InstallationDiamondInterface.InstallationIdIO[] memory installationBalances = installationsDiamond.installationBalancesOfToken(
+      address(this),
+      _realmId
+    );
+
+    for (uint256 i; i < installationBalances.length; i++) {
+      InstallationDiamondInterface.InstallationType memory equippedInstallaion = installationsDiamond.getInstallationType(_installationId);
+
+      // check altar requirement
+      require(
+        InstallationDiamondInterface(s.installationsDiamond).getInstallationType(s.parcels[_realmId].altarId).level >=
+          equippedInstallaion.prerequisites[0],
+        "RealmFacet: Altar Tech Tree Reqs not met"
+      );
+
+      // check lodge requirement
+      if (equippedInstallaion.prerequisites[1] > 0) {
+        require(
+          InstallationDiamondInterface(s.installationsDiamond).getInstallationType(s.parcels[_realmId].lodgeId).level >=
+            equippedInstallaion.prerequisites[1],
+          "RealmFacet: Lodge Tech Tree Reqs not met"
+        );
+      }
+    }
 
     uint256 alchemicaType = installationType.alchemicaType;
 
@@ -88,9 +141,14 @@ library LibAlchemica {
     }
 
     //Altar
-    if (installationType.installationType == 0) {
+    if (installationType.installationType == 0 && !isUpgrade) {
       //@question: do we need any special exceptions for the Altar? Should be handled by tech tree
       s.parcels[_realmId].altarId = 0;
+    }
+
+    // Lodge
+    if (installationType.installationType == 3) {
+      s.parcels[_realmId].lodgeId = 0;
     }
 
     //Decrement reservoir variables

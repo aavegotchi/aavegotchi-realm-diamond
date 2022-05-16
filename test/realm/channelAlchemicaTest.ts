@@ -99,7 +99,7 @@ describe("Testing Equip Installation", async function () {
       4,
       0,
       0,
-      await genEquipInstallationSignature(4, 0, 0, testParcelId)
+      await genEquipInstallationSignature(testParcelId, 4, 0, 0)
     );
   });
   it("Survey Parcel", async function () {
@@ -187,7 +187,7 @@ describe("Testing Equip Installation", async function () {
       signatureUpgrade
     );
     await mineBlocks(ethers, 11000);
-    await g.installationDiamond.finalizeUpgrade();
+    await g.installationAdminFacet.finalizeUpgrade();
 
     await network.provider.send("evm_increaseTime", [86400]);
     await network.provider.send("evm_mine");

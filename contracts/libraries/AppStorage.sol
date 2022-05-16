@@ -42,6 +42,7 @@ struct Parcel {
   uint256 upgradeQueueCapacity;
   uint256 upgradeQueueLength;
   uint256 lodgeId;
+  bool surveying;
 }
 
 struct RequestConfig {
@@ -86,6 +87,10 @@ struct AppStorage {
   address gltrAddress;
   address tileDiamond;
   bool gameActive;
+  // parcelId => action: 0 Alchemical Channeling, 1 Emptying Reservoirs => permission: 0 Owner only, 1 Owner + Borrowed Gotchis, 2 Any Gotchi
+  mapping(uint256 => mapping(uint256 => uint256)) accessRights;
+  // gotchiId => lastChanneledDay
+  mapping(uint256 => uint256) lastChanneledDay;
 }
 
 library LibAppStorage {

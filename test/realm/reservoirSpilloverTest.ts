@@ -3,6 +3,7 @@ import {
   maticDiamondAddress,
   mineBlocks,
   realmDiamondAddress,
+  maticAavegotchiDiamondAddress,
 } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
@@ -55,7 +56,8 @@ describe("Testing Equip Installation", async function () {
       g.gltr.address,
       ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
       g.ownerAddress,
-      g.tileAddress
+      g.tileAddress,
+      maticAavegotchiDiamondAddress
     );
     await network.provider.send("hardhat_setBalance", [
       maticDiamondAddress,
@@ -174,7 +176,7 @@ describe("Testing Equip Installation", async function () {
       1,
       0,
       0,
-      await genEquipInstallationSignature(1, 0, 0, testParcelId)
+      await genEquipInstallationSignature(testParcelId, 1, 0, 0)
     );
   });
   it("Survey Parcel", async function () {
@@ -186,14 +188,14 @@ describe("Testing Equip Installation", async function () {
       2,
       3,
       3,
-      await genEquipInstallationSignature(2, 3, 3, testParcelId)
+      await genEquipInstallationSignature(testParcelId, 2, 3, 3)
     );
     await g.realmFacet.equipInstallation(
       testParcelId,
       5,
       15,
       15,
-      await genEquipInstallationSignature(5, 15, 15, testParcelId)
+      await genEquipInstallationSignature(testParcelId, 5, 15, 15)
     );
     let availableAlchemica = await g.alchemicaFacet.getAvailableAlchemica(
       testParcelId
@@ -259,29 +261,61 @@ describe("Testing Equip Installation", async function () {
       2,
       10,
       10,
-      await genEquipInstallationSignature(2, 10, 10, testParcelId)
+      await genEquipInstallationSignature(testParcelId, 2, 10, 10)
     );
 
-    //Upgrade to Level 2 Reservoir
-    const coordinateX = 3;
-    const coordinateY = 3;
-    const installationId = 2;
-    const upgradeQueue: UpgradeQueue = {
+    //Upgrade to Level 2 Altar
+    const coordinateXAlt = 0;
+    const coordinateYAlt = 0;
+    const installationIdAlt = 1;
+    const upgradeQueueAlt: UpgradeQueue = {
       parcelId: testParcelId,
-      coordinateX,
-      coordinateY,
-      installationId,
+      coordinateX: coordinateXAlt,
+      coordinateY: coordinateYAlt,
+      installationId: installationIdAlt,
       readyBlock: 0,
       claimed: false,
       owner: testAddress,
     };
-    const signature = await genUpgradeInstallationSignature(
+    const signatureAlt = await genUpgradeInstallationSignature(
       testParcelId,
-      coordinateX,
-      coordinateY,
-      installationId
+      coordinateXAlt,
+      coordinateYAlt,
+      installationIdAlt
     );
-    await g.installationDiamond.upgradeInstallation(upgradeQueue, signature);
+    await g.installationDiamond.upgradeInstallation(
+      upgradeQueueAlt,
+      signatureAlt
+    );
+
+    await mineBlocks(ethers, 20000);
+
+    await g.installationAdminFacet.finalizeUpgrade();
+
+    //Upgrade to Level 2 Reservoir
+    const coordinateXRes = 3;
+    const coordinateYRes = 3;
+    const installationIdRes = 2;
+    const upgradeQueueRes: UpgradeQueue = {
+      parcelId: testParcelId,
+      coordinateX: coordinateXRes,
+      coordinateY: coordinateYRes,
+      installationId: installationIdRes,
+      readyBlock: 0,
+      claimed: false,
+      owner: testAddress,
+    };
+    const signatureRes = await genUpgradeInstallationSignature(
+      testParcelId,
+      coordinateXRes,
+      coordinateYRes,
+      installationIdRes
+    );
+
+    await g.installationDiamond.upgradeInstallation(
+      upgradeQueueRes,
+      signatureRes
+    );
 
     await mineBlocks(ethers, 20000);
 
@@ -301,8 +335,27 @@ describe("Testing Equip Installation", async function () {
         alchemicaRemaining[0]
       )
     );
+
+    await network.provider.send("evm_increaseTime", [3600 * 8]);
+    await network.provider.send("evm_mine");
+
+    const alchemicaRemainingX = await g.alchemicaFacet.getRealmAlchemica(
+      testParcelId
+    );
+
+    await g.alchemicaFacet.claimAvailableAlchemica(
+      testParcelId,
+      [0],
+      testGotchiId,
+      await genClaimAlchemicaSignature(
+        testParcelId,
+        testGotchiId,
+        alchemicaRemainingX[0]
+      )
+    );
+
     let startBalance = await g.fud.balanceOf(testAddress);
-    await g.installationDiamond.finalizeUpgrade();
+    await g.installationAdminFacet.finalizeUpgrade();
     await mineBlocks(ethers, 60000);
 
     let availableAlchemica = await g.alchemicaFacet.getAvailableAlchemica(
@@ -360,7 +413,7 @@ describe("Testing Equip Installation", async function () {
       5,
       15,
       15,
-      await genEquipInstallationSignature(5, 15, 15, testParcelId)
+      await genEquipInstallationSignature(testParcelId, 5, 15, 15)
     );
     const balancePost = await g.fud.balanceOf(testAddress);
     expect(Number(ethers.utils.formatUnits(balancePost))).to.equal(
@@ -373,7 +426,7 @@ describe("Testing Equip Installation", async function () {
         2,
         10,
         10,
-        await genEquipInstallationSignature(2, 10, 10, testParcelId)
+        await genEquipInstallationSignature(testParcelId, 2, 10, 10)
       )
     ).to.be.revertedWith(
       "LibAlchemica: Unclaimed alchemica greater than reservoir capacity"
@@ -418,14 +471,14 @@ describe("Testing Equip Installation", async function () {
       3,
       3,
       3,
-      await genEquipInstallationSignature(3, 3, 3, testParcelId)
+      await genEquipInstallationSignature(testParcelId, 3, 3, 3)
     );
     await g.realmFacet.unequipInstallation(
       testParcelId,
       2,
       10,
       10,
-      await genEquipInstallationSignature(2, 10, 10, testParcelId)
+      await genEquipInstallationSignature(testParcelId, 2, 10, 10)
     );
   });
   it("Test unequipping reduceTraits loop", async function () {
@@ -440,7 +493,7 @@ describe("Testing Equip Installation", async function () {
       2,
       3,
       3,
-      await genEquipInstallationSignature(2, 3, 3, testParcelId)
+      await genEquipInstallationSignature(testParcelId, 2, 3, 3)
     );
     const capacityPreOneReservoir = await g.realmFacet.getParcelCapacity(
       testParcelId,
@@ -454,7 +507,7 @@ describe("Testing Equip Installation", async function () {
       2,
       6,
       6,
-      await genEquipInstallationSignature(2, 6, 6, testParcelId)
+      await genEquipInstallationSignature(testParcelId, 2, 6, 6)
     );
     const capacityPreTwoReservoir = await g.realmFacet.getParcelCapacity(
       testParcelId,
@@ -468,7 +521,7 @@ describe("Testing Equip Installation", async function () {
       2,
       3,
       3,
-      await genEquipInstallationSignature(2, 3, 3, testParcelId)
+      await genEquipInstallationSignature(testParcelId, 2, 3, 3)
     );
     const capacityPostOneReservoir = await g.realmFacet.getParcelCapacity(
       testParcelId,
@@ -482,7 +535,7 @@ describe("Testing Equip Installation", async function () {
       2,
       6,
       6,
-      await genEquipInstallationSignature(2, 6, 6, testParcelId)
+      await genEquipInstallationSignature(testParcelId, 2, 6, 6)
     );
     const capacityPost = await g.realmFacet.getParcelCapacity(testParcelId, 0);
     expect(Number(ethers.utils.formatUnits(capacityPost))).to.equal(0);

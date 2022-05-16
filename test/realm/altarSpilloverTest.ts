@@ -1,5 +1,6 @@
 import {
   impersonate,
+  maticAavegotchiDiamondAddress,
   maticDiamondAddress,
   mineBlocks,
   realmDiamondAddress,
@@ -25,7 +26,7 @@ describe("Testing Equip Installation", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
   const testParcelId = 2893;
   const testGotchiId = 22306;
-  const fudChannelAmount = 100;
+  const fudChannelAmount = 20;
 
   let g: TestBeforeVars;
 
@@ -71,7 +72,8 @@ describe("Testing Equip Installation", async function () {
       g.gltr.address,
       ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
       g.ownerAddress,
-      g.tileAddress
+      g.tileAddress,
+      maticAavegotchiDiamondAddress
     );
     await network.provider.send("hardhat_setBalance", [
       maticDiamondAddress,
@@ -169,10 +171,15 @@ describe("Testing Equip Installation", async function () {
     const spilloverLevel1 =
       await g.installationDiamond.spilloverRateAndRadiusOfId(4);
 
+    console.log("spilloverLevel1", spilloverLevel1);
+
     const spillrateLevel1 = Number(
-      ethers.utils.formatUnits(spilloverLevel1[0])
+      ethers.utils.formatUnits(spilloverLevel1[0], 2)
     );
+    console.log("spillrateLevel1", spillrateLevel1);
     const playerShare = 100 - spillrateLevel1;
+
+    console.log("playerShare", playerShare);
 
     const lastChanneled = await g.alchemicaFacet.getLastChanneled(testGotchiId);
 
@@ -184,6 +191,8 @@ describe("Testing Equip Installation", async function () {
 
     const balancePreFud = await g.fud.balanceOf(testAddress);
 
+    console.log("balancePreFud", balancePreFud);
+
     await g.alchemicaFacet.channelAlchemica(
       testParcelId,
       testGotchiId,
@@ -193,9 +202,14 @@ describe("Testing Equip Installation", async function () {
 
     const balancePostFud = await g.fud.balanceOf(testAddress);
 
+    console.log("balancePostFud", balancePostFud);
+
     const channeledFud =
       Number(ethers.utils.formatUnits(balancePostFud)) -
       Number(ethers.utils.formatUnits(balancePreFud));
+
+    console.log("channeledFud", channeledFud);
+    console.log("expcted", (fudChannelAmount * playerShare) / 100);
     expect(channeledFud).to.equal((fudChannelAmount * playerShare) / 100);
   });
   it("Upgrade altar", async function () {
@@ -222,7 +236,7 @@ describe("Testing Equip Installation", async function () {
     await g.installationDiamond.upgradeInstallation(upgradeQueue, signature);
 
     await mineBlocks(ethers, 21000);
-    await g.installationDiamond.finalizeUpgrade();
+    await g.installationAdminFacet.finalizeUpgrade();
   });
   it("Test spillover level 2", async function () {
     await mineBlocks(ethers, 71000);

@@ -11,6 +11,7 @@ import {
   AlchemicaToken,
   InstallationAdminFacet,
   InstallationFacet,
+  TileFacet,
 } from "../../../typechain";
 import { gasPrice, maticAavegotchiDiamondAddress } from "../../helperFunctions";
 import { deployAlchemica, goldenAaltar, testnetAltar } from "../realmHelpers";
@@ -157,7 +158,7 @@ export async function deployMumbai() {
   )) as AlchemicaFacet;
 
   //Mumbai-specific
-  const vrfCoordinator = "0xb96A95d11cE0B8E3AEdf332c9Df17fC31D379651";
+  const vrfCoordinator = "0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed";
   const linkAddress = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB";
   // const installationDiamond = "0x6Ead866C75B485d4d1c123dc51eb6f749a02C797";
   //@ts-ignore
@@ -182,6 +183,7 @@ export async function deployMumbai() {
     ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
     deployerAddress,
     tileDiamond,
+    tileDiamond,
     { gasPrice: gasPrice }
   );
 
@@ -199,9 +201,10 @@ export async function deployMumbai() {
   tx = await adminFacet.setAddresses(
     maticAavegotchiDiamondAddress,
     realmDiamond.address,
-    alchemica.gltr,
+    alchemica.gltr.address,
     pixelcraft,
-    dao
+    dao,
+    ethers.utils.hexDataSlice(backendSigner.publicKey, 1)
   );
   await tx.wait();
 
@@ -238,29 +241,45 @@ export async function deployMumbai() {
 
   console.log("balance:", balance.toString());
 
-  const installationAdminFacet = (await ethers.getContractAt(
-    "InstallationAdminFacet",
-    installationDiamond,
-    signers[0]
-  )) as InstallationAdminFacet;
+  console.log("set tile diamond vars");
+  const tileFacet = (await ethers.getContractAt(
+    "TileFacet",
+    tileDiamond
+  )) as TileFacet;
 
-  const installationFacet = (await ethers.getContractAt(
-    "InstallationFacet",
-    installationDiamond,
-    signers[0]
-  )) as InstallationFacet;
-
-  console.log("Adding Golden Altar");
-  const addTx = await installationAdminFacet.addInstallationTypes(
-    testnetAltar(),
-    {
-      gasPrice: gasPrice,
-    }
+  const tileSetVarsTx = await tileFacet.setAddresses(
+    ethers.constants.AddressZero,
+    realmDiamond.address,
+    ethers.constants.AddressZero,
+    ethers.constants.AddressZero,
+    ethers.constants.AddressZero
   );
-  await addTx.wait();
 
-  const installations = await installationFacet.getInstallationTypes([]);
-  console.log("installations:", installations);
+  await tileSetVarsTx.wait();
+
+  // const installationAdminFacet = (await ethers.getContractAt(
+  //   "InstallationAdminFacet",
+  //   installationDiamond,
+  //   signers[0]
+  // )) as InstallationAdminFacet;
+
+  // const installationFacet = (await ethers.getContractAt(
+  //   "InstallationFacet",
+  //   installationDiamond,
+  //   signers[0]
+  // )) as InstallationFacet;
+
+  // console.log("Adding Golden Altar");
+  // const addTx = await installationAdminFacet.addInstallationTypes(
+  //   testnetAltar(),
+  //   {
+  //     gasPrice: gasPrice,
+  //   }
+  // );
+  // await addTx.wait();
+
+  // const installations = await installationFacet.getInstallationTypes([]);
+  // console.log("installations:", installations);
 
   return realmDiamond.address;
 }

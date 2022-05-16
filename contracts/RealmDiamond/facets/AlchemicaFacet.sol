@@ -41,10 +41,11 @@ contract AlchemicaFacet is Modifiers {
   /// @dev Will throw if a surveying round has not started
   /// @param _realmId Identifier of the parcel to survey
   function startSurveying(uint256 _realmId) external onlyParcelOwner(_realmId) gameActive {
-    require(s.parcels[_realmId].currentRound <= s.surveyingRound, "AlchemicaFacet: Round not released");
     require(s.parcels[_realmId].altarId > 0, "AlchemicaFacet: Must equip Altar");
-    s.parcels[_realmId].currentRound++;
-    drawRandomNumbers(_realmId, s.parcels[_realmId].currentRound - 1);
+    require(!s.parcels[_realmId].surveying, "AlchemicaFacet: Parcel already surveying");
+    s.parcels[_realmId].surveying = true;
+    // do we need to cancel the listing?
+    drawRandomNumbers(_realmId, s.parcels[_realmId].currentRound);
   }
 
   function drawRandomNumbers(uint256 _realmId, uint256 _surveyingRound) internal {
@@ -109,7 +110,6 @@ contract AlchemicaFacet is Modifiers {
   /// @param _alchemicaAddresses The four alchemica token addresses
   /// @param _backendPubKey The Realm(gotchiverse) backend public key
   /// @param _gameManager The address of the game manager
-
   function setVars(
     uint256[4][5] calldata _alchemicas,
     uint256[4] calldata _boostMultipliers,
@@ -121,7 +121,8 @@ contract AlchemicaFacet is Modifiers {
     address _gltrAddress,
     bytes memory _backendPubKey,
     address _gameManager,
-    address _tileDiamond
+    address _tileDiamond,
+    address _aavegotchiDiamond
   ) external onlyOwner {
     for (uint256 i; i < _alchemicas.length; i++) {
       for (uint256 j; j < _alchemicas[i].length; j++) {
@@ -138,52 +139,51 @@ contract AlchemicaFacet is Modifiers {
     s.gameManager = _gameManager;
     s.gltrAddress = _gltrAddress;
     s.tileDiamond = _tileDiamond;
+    s.aavegotchiDiamond = _aavegotchiDiamond;
   }
 
   /// todo @dev This function will be removed in production.
   function testingStartSurveying(uint256 _realmId) external onlyParcelOwner(_realmId) {
-    require(s.parcels[_realmId].currentRound <= s.surveyingRound, "AlchemicaFacet: Round not released");
     require(s.parcels[_realmId].altarId > 0, "AlchemicaFacet: Must equip Altar");
-    s.parcels[_realmId].currentRound++;
     uint256[] memory alchemicas = new uint256[](4);
     for (uint256 i; i < 4; i++) {
       alchemicas[i] = uint256(keccak256(abi.encodePacked(msg.sender, uint256(1))));
     }
 
-    LibRealm.updateRemainingAlchemica(_realmId, alchemicas, s.parcels[_realmId].currentRound - 1);
+    LibRealm.updateRemainingAlchemica(_realmId, alchemicas, s.parcels[_realmId].currentRound);
   }
 
   /// @dev This function will be removed in production.
-  // function testingMintParcel(
-  //   address _to,
-  //   uint256[] calldata _tokenIds,
-  //   RealmFacet.MintParcelInput[] memory _metadata
-  // ) external {
-  //   for (uint256 index = 0; index < _tokenIds.length; index++) {
-  //     require(s.tokenIds.length < 420069, "AlchemicaFacet: Cannot mint more than 420,069 parcels");
-  //     uint256 tokenId = _tokenIds[index];
-  //     RealmFacet.MintParcelInput memory metadata = _metadata[index];
-  //     require(_tokenIds.length == _metadata.length, "Inputs must be same length");
+  function testingMintParcel(
+    address _to,
+    uint256[] calldata _tokenIds,
+    RealmFacet.MintParcelInput[] memory _metadata
+  ) external {
+    for (uint256 index = 0; index < _tokenIds.length; index++) {
+      require(s.tokenIds.length < 420069, "AlchemicaFacet: Cannot mint more than 420,069 parcels");
+      uint256 tokenId = _tokenIds[index];
+      RealmFacet.MintParcelInput memory metadata = _metadata[index];
+      require(_tokenIds.length == _metadata.length, "Inputs must be same length");
 
-  //     Parcel storage parcel = s.parcels[tokenId];
-  //     parcel.coordinateX = metadata.coordinateX;
-  //     parcel.coordinateY = metadata.coordinateY;
-  //     parcel.parcelId = metadata.parcelId;
-  //     parcel.size = metadata.size;
-  //     parcel.district = metadata.district;
-  //     parcel.parcelAddress = metadata.parcelAddress;
+      Parcel storage parcel = s.parcels[tokenId];
+      parcel.coordinateX = metadata.coordinateX;
+      parcel.coordinateY = metadata.coordinateY;
+      parcel.parcelId = metadata.parcelId;
+      parcel.size = metadata.size;
+      parcel.district = metadata.district;
+      parcel.parcelAddress = metadata.parcelAddress;
 
-  //     parcel.alchemicaBoost = metadata.boost;
+      parcel.alchemicaBoost = metadata.boost;
 
-  //     LibERC721.safeMint(_to, tokenId);
-  //   }
-  // }
+      LibERC721.safeMint(_to, tokenId);
+    }
+  }
 
-  // /// @dev This function will be removed in production.
-  // function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external {
-  //   IERC20Mintable alchemica = IERC20Mintable(s.alchemicaAddresses[_alchemicaType]);
-  //   alchemica.mint(msg.sender, _amount);
-  // }
+  /// @dev This function will be removed in production.
+  function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external {
+    IERC20Mintable alchemica = IERC20Mintable(s.alchemicaAddresses[_alchemicaType]);
+    alchemica.mint(msg.sender, _amount);
+  }
 
   /// @notice Query the available alchemica in a parcel
   /// @param _realmId identifier of parcel to query
@@ -240,8 +240,8 @@ contract AlchemicaFacet is Modifiers {
   }
 
   function calculateTransferAmounts(uint256 _amount, uint256 _spilloverRate) internal pure returns (TransferAmounts memory) {
-    uint256 owner = (_amount * (bp - _spilloverRate)) / bp;
-    uint256 spill = (_amount * _spilloverRate) / bp;
+    uint256 owner = (_amount * (bp - (_spilloverRate * 10**16))) / bp;
+    uint256 spill = (_amount * (_spilloverRate * 10**16)) / bp;
     return TransferAmounts(owner, spill);
   }
 
@@ -261,13 +261,29 @@ contract AlchemicaFacet is Modifiers {
   /// @param _alchemicaTypes Alchemica types to claim
   /// @param _gotchiId Identifier of Aavegotchi to use for alchemica collecction/claiming
   /// @param _signature Message signature used for backend validation
-
   function claimAvailableAlchemica(
     uint256 _realmId,
     uint256[] calldata _alchemicaTypes,
     uint256 _gotchiId,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) gameActive {
+  ) external gameActive {
+    //Check access rights
+    if (s.accessRights[_realmId][1] == 0) {
+      require(LibMeta.msgSender() == s.parcels[_realmId].owner, "AlchemicaFacet: Only Parcel owner can claim");
+    } else if (s.accessRights[_realmId][1] == 1) {
+      try AavegotchiDiamond(s.aavegotchiDiamond).getGotchiLendingFromToken(uint32(_gotchiId)) returns (
+        AavegotchiDiamond.GotchiLending memory listing
+      ) {
+        require(
+          LibMeta.msgSender() == s.parcels[_realmId].owner ||
+            (LibMeta.msgSender() == listing.borrower && listing.lender == s.parcels[_realmId].owner),
+          "AlchemicaFacet: Only Parcel owner/borrower can claim"
+        );
+      } catch (bytes memory) {
+        revert("AlchemicaFacet: Only Parcel owner/borrower can claim");
+      }
+    }
+
     require(block.timestamp > s.lastClaimedAlchemica[_realmId] + 8 hours, "AlchemicaFacet: 8 hours claim cooldown");
     s.lastClaimedAlchemica[_realmId] = block.timestamp;
 
@@ -322,11 +338,28 @@ contract AlchemicaFacet is Modifiers {
     uint256 _gotchiId,
     uint256 _lastChanneled,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) onlyGotchiOwner(_gotchiId) gameActive {
+  ) external gameActive {
+    //Check access rights
+    AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
+    if (s.accessRights[_realmId][0] == 0) {
+      require(LibMeta.msgSender() == s.parcels[_realmId].owner, "AlchemicaFacet: Only Parcel owner can channel");
+    } else if (s.accessRights[_realmId][0] == 1) {
+      try diamond.getGotchiLendingFromToken(uint32(_gotchiId)) returns (AavegotchiDiamond.GotchiLending memory listing) {
+        require(
+          LibMeta.msgSender() == s.parcels[_realmId].owner ||
+            (LibMeta.msgSender() == listing.borrower && listing.lender == s.parcels[_realmId].owner),
+          "AlchemicaFacet: Only Parcel owner/borrower can channel"
+        );
+      } catch (bytes memory) {
+        revert("AlchemicaFacet: Only Parcel owner/borrower can channel");
+      }
+    }
+
     require(_lastChanneled == s.gotchiChannelings[_gotchiId], "AlchemicaFacet: Incorrect last duration");
 
     //Gotchis can only channel every 24 hrs
-    require(block.timestamp - _lastChanneled >= 1 days, "AlchemicaFacet: Gotchi can't channel yet");
+    if (s.lastChanneledDay[_gotchiId] == block.timestamp / (60 * 60 * 24)) revert("AlchemicaFacet: Gotchi can't channel yet");
+    s.lastChanneledDay[_gotchiId] = block.timestamp / (60 * 60 * 24);
 
     uint256 altarLevel = InstallationDiamondInterface(s.installationsDiamond).getAltarLevel(s.parcels[_realmId].altarId);
 
@@ -341,7 +374,13 @@ contract AlchemicaFacet is Modifiers {
 
     (uint256 rate, uint256 radius) = InstallationDiamondInterface(s.installationsDiamond).spilloverRateAndRadiusOfId(s.parcels[_realmId].altarId);
 
-    uint256[4] memory channelAmounts = [uint256(100e18), uint256(50e18), uint256(25e18), uint256(10e18)];
+    uint256[4] memory channelAmounts = [uint256(20e18), uint256(10e18), uint256(5e18), uint256(2e18)];
+    // apply kinship modifier
+    uint256 kinship = diamond.kinship(_gotchiId) * 10000;
+    for (uint256 i; i < 4; i++) {
+      uint256 kinshipModifier = floorSqrt(kinship / 50);
+      channelAmounts[i] = (channelAmounts[i] * kinshipModifier) / 100;
+    }
 
     for (uint256 i; i < channelAmounts.length; i++) {
       IERC20Mintable alchemica = IERC20Mintable(s.alchemicaAddresses[i]);
@@ -481,6 +520,21 @@ contract AlchemicaFacet is Modifiers {
     require(_altarLevel.length == _limits.length, "AlchemicaFacet: array mismatch");
     for (uint256 i; i < _limits.length; i++) {
       s.channelingLimits[_altarLevel[i]] = _limits[i];
+    }
+  }
+
+  function floorSqrt(uint256 n) internal pure returns (uint256) {
+    unchecked {
+      if (n > 0) {
+        uint256 x = n / 2 + 1;
+        uint256 y = (x + n / x) / 2;
+        while (x > y) {
+          x = y;
+          y = (x + n / x) / 2;
+        }
+        return x;
+      }
+      return 0;
     }
   }
 }

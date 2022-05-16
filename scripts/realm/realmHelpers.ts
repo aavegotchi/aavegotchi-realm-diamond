@@ -56,8 +56,8 @@ export function outputInstallation(
     ],
     harvestRate: ethers.utils.parseEther(installation.harvestRate.toString()),
     capacity: ethers.utils.parseEther(installation.capacity.toString()),
-    spillRadius: ethers.utils.parseEther(installation.spillRadius.toString()),
-    spillRate: ethers.utils.parseEther(installation.spillRate.toString()),
+    spillRadius: installation.spillRadius,
+    spillRate: ethers.utils.parseUnits(installation.spillRate.toString(), 2),
     upgradeQueueBoost: installation.upgradeQueueBoost,
     craftTime: installation.craftTime,
     nextLevelId: installation.nextLevelId,
@@ -125,7 +125,7 @@ export function testInstallations() {
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 7,
-      prerequisites: [],
+      prerequisites: [0, 0],
       name: "Altar level 1",
     })
   );
@@ -145,7 +145,7 @@ export function testInstallations() {
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 3,
-      prerequisites: [],
+      prerequisites: [1, 0],
       name: "FUD Reservoir level 1",
     })
   );
@@ -165,7 +165,7 @@ export function testInstallations() {
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 0,
-      prerequisites: [],
+      prerequisites: [2, 0],
       name: "FUD Reservoir level 2",
     })
   );
@@ -185,7 +185,7 @@ export function testInstallations() {
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 7,
-      prerequisites: [],
+      prerequisites: [0, 0],
       name: "Altar level 1",
     })
   );
@@ -205,7 +205,7 @@ export function testInstallations() {
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 0,
-      prerequisites: [],
+      prerequisites: [1, 0],
       name: "FUD Harvester level 1",
     })
   );
@@ -225,7 +225,7 @@ export function testInstallations() {
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 0,
-      prerequisites: [],
+      prerequisites: [0, 0],
       name: "BuildQueue level 1",
     })
   );
@@ -237,15 +237,15 @@ export function testInstallations() {
       height: 2,
       alchemicaType: 0,
       alchemicaCost: [100, 20, 0, 30],
-      harvestRate: 2,
+      harvestRate: 0,
       capacity: 0,
       spillRadius: 0,
       spillRate: 20,
-      upgradeQueueBoost: 0,
+      upgradeQueueBoost: 1,
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 0,
-      prerequisites: [],
+      prerequisites: [1, 0],
       name: "Altar level 2",
     })
   );
@@ -265,7 +265,7 @@ export function testInstallations() {
       craftTime: 10000,
       deprecated: false,
       nextLevelId: 0,
-      prerequisites: [],
+      prerequisites: [3, 0],
       name: "Gotchi Lodge level 1",
     })
   );
@@ -685,13 +685,13 @@ const backendSigner = () => {
 };
 
 export const genEquipInstallationSignature = async (
+  parcelId: number,
   tileId: number,
   x: number,
-  y: number,
-  parcelId: number
+  y: number
 ) => {
   let messageHash1 = ethers.utils.solidityKeccak256(
-    ["uint256", "uint256", "uint8", "uint8"],
+    ["uint256", "uint256", "uint256", "uint256"],
     [parcelId, tileId, x, y]
   );
   let signedMessage1 = await backendSigner().signMessage(
