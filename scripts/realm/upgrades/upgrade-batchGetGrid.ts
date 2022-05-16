@@ -22,17 +22,17 @@ export async function upgrade() {
     "(address owner, uint16 coordinateX, uint16 coordinateY, uint40 readyBlock, bool claimed, uint256 parcelId, uint256 installationId)";
 
   const facets: FacetsAndAddSelectors[] = [
-    // {
-    //   facetName: "InstallationAdminFacet",
-    //   addSelectors: [
-    //     // `function getUserUpgradeQueue(address _owner) external view returns (${upgradeQueue}[] memory output_)`,
-    //     // `function getAllUpgradeQueue() external view returns (${upgradeQueue}[] memory)`,
-    //     // `function getUpgradeQueueId(uint256 _queueId) external view returns (${upgradeQueue} memory)`,
-    //   ],
-    //   removeSelectors: [
-    //     // `function getUpgradeQueue(address _owner) external view returns (${upgradeQueue}[] memory output_)`,
-    //   ],
-    // },
+    {
+      facetName: "AlchemicaFacet",
+      addSelectors: [
+        // `function getUserUpgradeQueue(address _owner) external view returns (${upgradeQueue}[] memory output_)`,
+        // `function getAllUpgradeQueue() external view returns (${upgradeQueue}[] memory)`,
+        // `function getUpgradeQueueId(uint256 _queueId) external view returns (${upgradeQueue} memory)`,
+      ],
+      removeSelectors: [
+        // `function getUpgradeQueue(address _owner) external view returns (${upgradeQueue}[] memory output_)`,
+      ],
+    },
     {
       facetName: "RealmFacet",
       addSelectors: [

@@ -58,8 +58,6 @@ export function outputInstallation(
     capacity: ethers.utils.parseEther(installation.capacity.toString()),
     spillRadius: installation.spillRadius,
     spillRate: ethers.utils.parseUnits(installation.spillRate.toString(), 2),
-    // spillRadius: installation.spillRadius,
-    // spillRate: installation.spillRate,
     upgradeQueueBoost: installation.upgradeQueueBoost,
     craftTime: installation.craftTime,
     nextLevelId: installation.nextLevelId,

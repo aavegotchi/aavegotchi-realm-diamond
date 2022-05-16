@@ -37,7 +37,7 @@ module.exports = {
         },
        ],*/
       forking: {
-        url: process.env.MUMBAI_URL,
+        url: process.env.MATIC_URL,
         timeout: 2000000,
         // blockNumber: 25459076,
         // chainId: 137,

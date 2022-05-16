@@ -265,7 +265,6 @@ contract RealmFacet is Modifiers {
     LibRealm.placeInstallation(_realmId, _nextInstallationId, _coordinateX, _coordinateY);
     LibAlchemica.reduceTraits(_realmId, _prevInstallationId, true);
     LibAlchemica.increaseTraits(_realmId, _prevInstallationId, true);
-    // LibAlchemica.upgradeTraits(_realmId, _nextInstallationId);
     emit InstallationUpgraded(_realmId, _prevInstallationId, _nextInstallationId, _coordinateX, _coordinateY);
   }
 

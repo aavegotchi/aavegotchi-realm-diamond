@@ -61,7 +61,7 @@ export async function upgrade(
         "function getParcelUpgradeQueueCapacity(uint256 _parcelId) external view returns (uint256)",
         "function getParcelUpgradeQueueLength(uint256 _parcelId) external view returns (uint256)",
         "function setGameActive(bool _gameActive) external",
-        `function batchGetBuildGrid(uint256[] calldata _parcelIds) external view returns (${parcelCoordinates}[] memory)`,
+        `function batchGetGrid(uint256[] calldata _parcelIds, uint256 _gridType) external view returns (${parcelCoordinates}[] memory)`,
         "function batchGetDistrictParcels(address _owner, uint256 _district) external view returns (uint256[] memory)",
         "function setParcelsAccessRights(uint256[] calldata _realmIds, uint256[] calldata _accessRights, uint256[] calldata _actionRights) external",
         "function getParcelsAccessRights(uint256[] calldata _parcelIds, uint256[] calldata _actionRights) external view returns (uint256[] memory output_)",
