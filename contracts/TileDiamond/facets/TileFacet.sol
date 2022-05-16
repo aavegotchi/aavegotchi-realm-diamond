@@ -204,26 +204,26 @@ contract TileFacet is Modifiers {
     }
   }
 
-  /// @notice Allow a user to claim tiles from ready queues
-  /// @dev Will throw if the caller is not the queue owner
-  /// @dev Will throw if one of the queues is not ready
-  /// @param _queueIds An array containing the identifiers of queues to claim
-  function claimTiles(uint256[] calldata _queueIds) external {
-    for (uint256 i; i < _queueIds.length; i++) {
-      uint256 queueId = _queueIds[i];
+  // /// @notice Allow a user to claim tiles from ready queues
+  // /// @dev Will throw if the caller is not the queue owner
+  // /// @dev Will throw if one of the queues is not ready
+  // /// @param _queueIds An array containing the identifiers of queues to claim
+  // function claimTiles(uint256[] calldata _queueIds) external {
+  //   for (uint256 i; i < _queueIds.length; i++) {
+  //     uint256 queueId = _queueIds[i];
 
-      QueueItem memory queueItem = s.craftQueue[queueId];
+  //     QueueItem memory queueItem = s.craftQueue[queueId];
 
-      require(!queueItem.claimed, "TileFacet: already claimed");
+  //     require(!queueItem.claimed, "TileFacet: already claimed");
 
-      require(block.number >= queueItem.readyBlock, "TileFacet: tile not ready");
+  //     require(block.number >= queueItem.readyBlock, "TileFacet: tile not ready");
 
-      // mint tile
-      LibERC1155Tile._safeMint(queueItem.owner, queueItem.tileType, queueItem.id);
-      s.craftQueue[queueId].claimed = true;
-      emit QueueClaimed(queueId);
-    }
-  }
+  //     // mint tile
+  //     LibERC1155Tile._safeMint(queueItem.owner, queueItem.tileType, queueItem.id);
+  //     s.craftQueue[queueId].claimed = true;
+  //     emit QueueClaimed(queueId);
+  //   }
+  // }
 
   /// @notice Allow a user to equip a tile to a parcel
   /// @dev Will throw if the caller is not the parcel diamond contract

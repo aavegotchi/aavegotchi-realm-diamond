@@ -276,11 +276,6 @@ contract RealmFacet is Modifiers {
     s.parcels[_realmId].upgradeQueueLength--;
   }
 
-  // used for testing atm
-  function getParcelCapacity(uint256 _realmId, uint256 _alchemicaType) external view returns (uint256) {
-    return LibAlchemica.calculateTotalCapacity(_realmId, _alchemicaType);
-  }
-
   function getHumbleGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[8][8] memory output_) {
     require(s.parcels[_parcelId].size == 0, "RealmFacet: Not humble");
     for (uint256 i; i < 8; i++) {

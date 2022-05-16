@@ -33,6 +33,8 @@ contract InstallationFacet is Modifiers {
     uint256 installationId
   );
 
+  event UpgradeFinalized(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _newInstallationId);
+
   /***********************************|
    |             Read Functions         |
    |__________________________________*/
@@ -276,7 +278,8 @@ contract InstallationFacet is Modifiers {
       }
     }
     s.nextCraftId = _nextCraftId;
-    //after queue is over, user can claim installation
+
+    finalizeUpgrade();
   }
 
   /// @notice Allow a user to speed up multiple queues(installation craft time) by paying the correct amount of $GLTR tokens
@@ -302,30 +305,32 @@ contract InstallationFacet is Modifiers {
       gltr.burnFrom(msg.sender, burnAmount);
       queueItem.readyBlock -= removeBlocks;
       emit CraftTimeReduced(queueId, removeBlocks);
+
+      finalizeUpgrade();
     }
   }
 
-  /// @notice Allow a user to claim installations from ready queues
-  /// @dev Will throw if the caller is not the queue owner
-  /// @dev Will throw if one of the queues is not ready
-  /// @param _queueIds An array containing the identifiers of queues to claim
-  function claimInstallations(uint256[] calldata _queueIds) external {
-    for (uint256 i; i < _queueIds.length; i++) {
-      uint256 queueId = _queueIds[i];
+  // /// @notice Allow a user to claim installations from ready queues
+  // /// @dev Will throw if the caller is not the queue owner
+  // /// @dev Will throw if one of the queues is not ready
+  // /// @param _queueIds An array containing the identifiers of queues to claim
+  // function claimInstallations(uint256[] calldata _queueIds) external {
+  //   for (uint256 i; i < _queueIds.length; i++) {
+  //     uint256 queueId = _queueIds[i];
 
-      QueueItem memory queueItem = s.craftQueue[queueId];
+  //     QueueItem memory queueItem = s.craftQueue[queueId];
 
-      require(msg.sender == queueItem.owner, "InstallationFacet: Not owner");
-      require(!queueItem.claimed, "InstallationFacet: already claimed");
+  //     require(msg.sender == queueItem.owner, "InstallationFacet: Not owner");
+  //     require(!queueItem.claimed, "InstallationFacet: already claimed");
 
-      require(block.number >= queueItem.readyBlock, "InstallationFacet: Installation not ready");
+  //     require(block.number >= queueItem.readyBlock, "InstallationFacet: Installation not ready");
 
-      // mint installation
-      LibERC1155._safeMint(msg.sender, queueItem.installationType, queueItem.id);
-      s.craftQueue[queueId].claimed = true;
-      emit QueueClaimed(queueId);
-    }
-  }
+  //     // mint installation
+  //     LibERC1155._safeMint(msg.sender, queueItem.installationType, queueItem.id);
+  //     s.craftQueue[queueId].claimed = true;
+  //     emit QueueClaimed(queueId);
+  //   }
+  // }
 
   /// @notice Allow a user to equip an installation to a parcel
   /// @dev Will throw if the caller is not the parcel diamond contract
@@ -339,6 +344,8 @@ contract InstallationFacet is Modifiers {
     uint256 _installationId
   ) external onlyRealmDiamond {
     LibInstallation._equipInstallation(_owner, _realmId, _installationId);
+
+    finalizeUpgrade();
   }
 
   /// @notice Allow a user to unequip an installation from a parcel
@@ -347,6 +354,8 @@ contract InstallationFacet is Modifiers {
   /// @param _installationId Identifier of the installation to unequip
   function unequipInstallation(uint256 _realmId, uint256 _installationId) external onlyRealmDiamond {
     LibInstallation._unequipInstallation(_realmId, _installationId);
+
+    finalizeUpgrade();
   }
 
   /// @notice Allow a user to upgrade an installation in a parcel
@@ -368,8 +377,7 @@ contract InstallationFacet is Modifiers {
       "InstallationFacet: Invalid signature"
     );
     // check owner
-    address parcelOwner = IERC721(s.realmDiamond).ownerOf(_upgradeQueue.parcelId);
-    require(parcelOwner == _upgradeQueue.owner, "InstallationFacet: Not owner");
+    require(IERC721(s.realmDiamond).ownerOf(_upgradeQueue.parcelId) == _upgradeQueue.owner, "InstallationFacet: Not owner");
     // check coordinates
     RealmDiamond realm = RealmDiamond(s.realmDiamond);
 
@@ -406,12 +414,10 @@ contract InstallationFacet is Modifiers {
     require(prevInstallation.alchemicaType == nextInstallation.alchemicaType, "InstallationFacet: Wrong alchemicaType");
     require(prevInstallation.level == nextInstallation.level - 1, "InstallationFacet: Wrong installation level");
 
-    IERC20 gltr = IERC20(s.gltr);
-    gltr.burnFrom(msg.sender, _gltr * 10**18); //should revert if user doesnt have enough GLTR
+    IERC20(s.gltr).burnFrom(msg.sender, _gltr * 10**18); //should revert if user doesnt have enough GLTR
 
     //prevent underflow if user sends too much GLTR
     if (_gltr > nextInstallation.craftTime) revert("InstallationFacet: Too much GLTR");
-    uint40 readyBlock = uint40(block.number) + nextInstallation.craftTime - _gltr;
 
     //Confirm upgrade immediately
     if (nextInstallation.craftTime - _gltr == 0) {
@@ -427,7 +433,7 @@ contract InstallationFacet is Modifiers {
         _upgradeQueue.owner,
         _upgradeQueue.coordinateX,
         _upgradeQueue.coordinateY,
-        readyBlock,
+        uint40(block.number) + nextInstallation.craftTime - _gltr,
         false,
         _upgradeQueue.parcelId,
         _upgradeQueue.installationId
@@ -442,10 +448,11 @@ contract InstallationFacet is Modifiers {
         _upgradeQueue.coordinateX,
         _upgradeQueue.coordinateY,
         block.number,
-        readyBlock,
+        uint40(block.number) + nextInstallation.craftTime - _gltr,
         _upgradeQueue.installationId
       );
     }
+    finalizeUpgrade();
   }
 
   /// @notice Allow a user to reduce the upgrade time of an ongoing queue
@@ -465,5 +472,57 @@ contract InstallationFacet is Modifiers {
     gltr.burnFrom(msg.sender, removeBlocks * 10**18);
     upgradeQueue.readyBlock -= removeBlocks;
     emit UpgradeTimeReduced(_queueId, upgradeQueue.parcelId, upgradeQueue.coordinateX, upgradeQueue.coordinateY, removeBlocks);
+
+    finalizeUpgrade();
+  }
+
+  /// @notice Allow anyone to finalize any existing queue upgrade
+  /// @dev Only three queue upgrades can be finalized in one transaction
+  function finalizeUpgrade() public {
+    require(s.upgradeQueue.length > 0, "InstallationFacet: No upgrades");
+    //can only process 3 upgrades per tx
+    uint256 counter = 3;
+    uint256 offset;
+    uint256 _upgradeQueueLength = s.upgradeQueue.length;
+    for (uint256 index; index < _upgradeQueueLength; index++) {
+      UpgradeQueue memory queueUpgrade = s.upgradeQueue[index - offset];
+      // check that upgrade is ready
+      if (block.number >= queueUpgrade.readyBlock) {
+        // burn old installation
+        LibInstallation._unequipInstallation(queueUpgrade.parcelId, queueUpgrade.installationId);
+        // mint new installation
+        uint256 nextLevelId = s.installationTypes[queueUpgrade.installationId].nextLevelId;
+        LibERC1155._safeMint(queueUpgrade.owner, nextLevelId, index - offset);
+        // equip new installation
+        LibInstallation._equipInstallation(queueUpgrade.owner, queueUpgrade.parcelId, nextLevelId);
+
+        RealmDiamond realm = RealmDiamond(s.realmDiamond);
+        realm.upgradeInstallation(
+          queueUpgrade.parcelId,
+          queueUpgrade.installationId,
+          nextLevelId,
+          queueUpgrade.coordinateX,
+          queueUpgrade.coordinateY
+        );
+
+        // update updateQueueLength
+        realm.subUpgradeQueueLength(queueUpgrade.parcelId);
+
+        // clean unique hash
+        bytes32 uniqueHash = keccak256(
+          abi.encodePacked(queueUpgrade.parcelId, queueUpgrade.coordinateX, queueUpgrade.coordinateY, queueUpgrade.installationId)
+        );
+        s.upgradeHashes[uniqueHash] = 0;
+
+        // pop upgrade from array
+        s.upgradeQueue[index - offset] = s.upgradeQueue[s.upgradeQueue.length - 1];
+        s.upgradeQueue.pop();
+        counter--;
+        offset++;
+        emit UpgradeFinalized(queueUpgrade.parcelId, queueUpgrade.coordinateX, queueUpgrade.coordinateY, nextLevelId);
+      }
+      if (counter == 0) break;
+    }
+    if (counter == 3) revert("InstallationFacet: No upgrades ready");
   }
 }

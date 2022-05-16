@@ -37,29 +37,29 @@ contract AlchemicaFacet is Modifiers {
 
   event SurveyingRoundProgressed(uint256 indexed _newRound);
 
-  /// @notice Allow the owner of a parcel to start surveying his parcel
-  /// @dev Will throw if a surveying round has not started
-  /// @param _realmId Identifier of the parcel to survey
-  function startSurveying(uint256 _realmId) external onlyParcelOwner(_realmId) gameActive {
-    require(s.parcels[_realmId].altarId > 0, "AlchemicaFacet: Must equip Altar");
-    require(!s.parcels[_realmId].surveying, "AlchemicaFacet: Parcel already surveying");
-    s.parcels[_realmId].surveying = true;
-    // do we need to cancel the listing?
-    drawRandomNumbers(_realmId, s.parcels[_realmId].currentRound);
-  }
+  // /// @notice Allow the owner of a parcel to start surveying his parcel
+  // /// @dev Will throw if a surveying round has not started
+  // /// @param _realmId Identifier of the parcel to survey
+  // function startSurveying(uint256 _realmId) external onlyParcelOwner(_realmId) gameActive {
+  //   require(s.parcels[_realmId].altarId > 0, "AlchemicaFacet: Must equip Altar");
+  //   require(!s.parcels[_realmId].surveying, "AlchemicaFacet: Parcel already surveying");
+  //   s.parcels[_realmId].surveying = true;
+  //   // do we need to cancel the listing?
+  //   drawRandomNumbers(_realmId, s.parcels[_realmId].currentRound);
+  // }
 
-  function drawRandomNumbers(uint256 _realmId, uint256 _surveyingRound) internal {
-    // Will revert if subscription is not set and funded.
-    uint256 requestId = VRFCoordinatorV2Interface(s.vrfCoordinator).requestRandomWords(
-      s.requestConfig.keyHash,
-      s.requestConfig.subId,
-      s.requestConfig.requestConfirmations,
-      s.requestConfig.callbackGasLimit,
-      s.requestConfig.numWords
-    );
-    s.vrfRequestIdToTokenId[requestId] = _realmId;
-    s.vrfRequestIdToSurveyingRound[requestId] = _surveyingRound;
-  }
+  // function drawRandomNumbers(uint256 _realmId, uint256 _surveyingRound) internal {
+  //   // Will revert if subscription is not set and funded.
+  //   uint256 requestId = VRFCoordinatorV2Interface(s.vrfCoordinator).requestRandomWords(
+  //     s.requestConfig.keyHash,
+  //     s.requestConfig.subId,
+  //     s.requestConfig.requestConfirmations,
+  //     s.requestConfig.callbackGasLimit,
+  //     s.requestConfig.numWords
+  //   );
+  //   s.vrfRequestIdToTokenId[requestId] = _realmId;
+  //   s.vrfRequestIdToSurveyingRound[requestId] = _surveyingRound;
+  // }
 
   function getAlchemicaAddresses() external view returns (address[4] memory) {
     return s.alchemicaAddresses;
@@ -78,11 +78,11 @@ contract AlchemicaFacet is Modifiers {
     return s.parcels[_realmId].alchemicaRemaining;
   }
 
-  /// @notice Allow the diamond owner to increment the surveying round
-  function progressSurveyingRound() external onlyOwner {
-    s.surveyingRound++;
-    emit SurveyingRoundProgressed(s.surveyingRound);
-  }
+  // /// @notice Allow the diamond owner to increment the surveying round
+  // function progressSurveyingRound() external onlyOwner {
+  //   s.surveyingRound++;
+  //   emit SurveyingRoundProgressed(s.surveyingRound);
+  // }
 
   /// @notice Query details about all alchemica gathered in a surveying round in a parcel
   /// @param _realmId Identifier of the parcel to query
@@ -140,49 +140,6 @@ contract AlchemicaFacet is Modifiers {
     s.gltrAddress = _gltrAddress;
     s.tileDiamond = _tileDiamond;
     s.aavegotchiDiamond = _aavegotchiDiamond;
-  }
-
-  /// todo @dev This function will be removed in production.
-  function testingStartSurveying(uint256 _realmId) external onlyParcelOwner(_realmId) {
-    require(s.parcels[_realmId].altarId > 0, "AlchemicaFacet: Must equip Altar");
-    uint256[] memory alchemicas = new uint256[](4);
-    for (uint256 i; i < 4; i++) {
-      alchemicas[i] = uint256(keccak256(abi.encodePacked(msg.sender, uint256(1))));
-    }
-
-    LibRealm.updateRemainingAlchemica(_realmId, alchemicas, s.parcels[_realmId].currentRound);
-  }
-
-  /// @dev This function will be removed in production.
-  function testingMintParcel(
-    address _to,
-    uint256[] calldata _tokenIds,
-    RealmFacet.MintParcelInput[] memory _metadata
-  ) external {
-    for (uint256 index = 0; index < _tokenIds.length; index++) {
-      require(s.tokenIds.length < 420069, "AlchemicaFacet: Cannot mint more than 420,069 parcels");
-      uint256 tokenId = _tokenIds[index];
-      RealmFacet.MintParcelInput memory metadata = _metadata[index];
-      require(_tokenIds.length == _metadata.length, "Inputs must be same length");
-
-      Parcel storage parcel = s.parcels[tokenId];
-      parcel.coordinateX = metadata.coordinateX;
-      parcel.coordinateY = metadata.coordinateY;
-      parcel.parcelId = metadata.parcelId;
-      parcel.size = metadata.size;
-      parcel.district = metadata.district;
-      parcel.parcelAddress = metadata.parcelAddress;
-
-      parcel.alchemicaBoost = metadata.boost;
-
-      LibERC721.safeMint(_to, tokenId);
-    }
-  }
-
-  /// @dev This function will be removed in production.
-  function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external {
-    IERC20Mintable alchemica = IERC20Mintable(s.alchemicaAddresses[_alchemicaType]);
-    alchemica.mint(msg.sender, _amount);
   }
 
   /// @notice Query the available alchemica in a parcel
@@ -246,75 +203,69 @@ contract AlchemicaFacet is Modifiers {
   }
 
   function alchemicaRecipient(uint256 _gotchiId) internal view returns (address) {
-    //@note: isAavegotchiLent() function does not yet exist in Aavegotchi Diamond
     AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
-    // if (diamond.isAavegotchiLent(_gotchiId)) {
-    //   return diamond.gotchiEscrow(_gotchiId);
-    // } else {
-    //   return diamond.ownerOf(_gotchiId);
-    // }
     return diamond.ownerOf(_gotchiId);
   }
 
-  /// @notice Allow parcel owner to claim available alchemica with his parent NFT(Aavegotchi)
-  /// @param _realmId Identifier of parcel to claim alchemica from
-  /// @param _alchemicaTypes Alchemica types to claim
-  /// @param _gotchiId Identifier of Aavegotchi to use for alchemica collecction/claiming
-  /// @param _signature Message signature used for backend validation
-  function claimAvailableAlchemica(
-    uint256 _realmId,
-    uint256[] calldata _alchemicaTypes,
-    uint256 _gotchiId,
-    bytes memory _signature
-  ) external gameActive {
-    //Check access rights
-    if (s.accessRights[_realmId][1] == 0) {
-      require(LibMeta.msgSender() == s.parcels[_realmId].owner, "AlchemicaFacet: Only Parcel owner can claim");
-    } else if (s.accessRights[_realmId][1] == 1) {
-      try AavegotchiDiamond(s.aavegotchiDiamond).getGotchiLendingFromToken(uint32(_gotchiId)) returns (
-        AavegotchiDiamond.GotchiLending memory listing
-      ) {
-        require(
-          LibMeta.msgSender() == s.parcels[_realmId].owner ||
-            (LibMeta.msgSender() == listing.borrower && listing.lender == s.parcels[_realmId].owner),
-          "AlchemicaFacet: Only Parcel owner/borrower can claim"
-        );
-      } catch (bytes memory) {
-        revert("AlchemicaFacet: Only Parcel owner/borrower can claim");
-      }
-    }
+  // /// @notice Allow parcel owner to claim available alchemica with his parent NFT(Aavegotchi)
+  // /// @param _realmId Identifier of parcel to claim alchemica from
+  // /// @param _alchemicaTypes Alchemica types to claim
+  // /// @param _gotchiId Identifier of Aavegotchi to use for alchemica collecction/claiming
+  // /// @param _signature Message signature used for backend validation
+  // function claimAvailableAlchemica(
+  //   uint256 _realmId,
+  //   uint256[] calldata _alchemicaTypes,
+  //   uint256 _gotchiId,
+  //   bytes memory _signature
+  // ) external gameActive {
+  //   //Check access rights
+  //   if (s.accessRights[_realmId][1] == 0) {
+  //     require(LibMeta.msgSender() == s.parcels[_realmId].owner, "AlchemicaFacet: Only Parcel owner can claim");
+  //   } else if (s.accessRights[_realmId][1] == 1) {
+  //     try AavegotchiDiamond(s.aavegotchiDiamond).getGotchiLendingFromToken(uint32(_gotchiId)) returns (
+  //       AavegotchiDiamond.GotchiLending memory listing
+  //     ) {
+  //       require(
+  //         LibMeta.msgSender() == s.parcels[_realmId].owner ||
+  //           (LibMeta.msgSender() == listing.borrower && listing.lender == s.parcels[_realmId].owner),
+  //         "AlchemicaFacet: Only Parcel owner/borrower can claim"
+  //       );
+  //     } catch (bytes memory) {
+  //       revert("AlchemicaFacet: Only Parcel owner/borrower can claim");
+  //     }
+  //   }
 
-    require(block.timestamp > s.lastClaimedAlchemica[_realmId] + 8 hours, "AlchemicaFacet: 8 hours claim cooldown");
-    s.lastClaimedAlchemica[_realmId] = block.timestamp;
+  //   require(block.timestamp > s.lastClaimedAlchemica[_realmId] + 8 hours, "AlchemicaFacet: 8 hours claim cooldown");
+  //   s.lastClaimedAlchemica[_realmId] = block.timestamp;
 
-    uint256[4] memory _availableAlchemica = getAvailableAlchemica(_realmId);
+  //   uint256[4] memory _availableAlchemica = getAvailableAlchemica(_realmId);
 
-    for (uint256 i = 0; i < _alchemicaTypes.length; i++) {
-      uint256 remaining = s.parcels[_realmId].alchemicaRemaining[_alchemicaTypes[i]];
+  //   for (uint256 i = 0; i < _alchemicaTypes.length; i++) {
+  //     uint256 remaining = s.parcels[_realmId].alchemicaRemaining[_alchemicaTypes[i]];
 
-      require(
-        LibSignature.isValid(keccak256(abi.encodePacked(_alchemicaTypes[i], _realmId, _gotchiId, remaining)), _signature, s.backendPubKey),
-        "AlchemicaFacet: Invalid signature"
-      );
+  //     require(
+  //       LibSignature.isValid(keccak256(abi.encodePacked(_alchemicaTypes[i], _realmId, _gotchiId, remaining)), _signature, s.backendPubKey),
+  //       "AlchemicaFacet: Invalid signature"
+  //     );
 
-      //@todo (future release): allow claimOperator
+  //     //@todo (future release): allow claimOperator
 
-      uint256 available = _availableAlchemica[_alchemicaTypes[i]];
-      require(remaining >= available, "AlchemicaFacet: Not enough alchemica available");
+  //     uint256 available = _availableAlchemica[_alchemicaTypes[i]];
+  //     require(remaining >= available, "AlchemicaFacet: Not enough alchemica available");
 
-      s.parcels[_realmId].alchemicaRemaining[_alchemicaTypes[i]] -= available;
-      s.parcels[_realmId].unclaimedAlchemica[_alchemicaTypes[i]] = 0;
-      s.parcels[_realmId].lastUpdateTimestamp[_alchemicaTypes[i]] = block.timestamp;
+  //     s.parcels[_realmId].alchemicaRemaining[_alchemicaTypes[i]] -= available;
+  //     s.parcels[_realmId].unclaimedAlchemica[_alchemicaTypes[i]] = 0;
+  //     s.parcels[_realmId].lastUpdateTimestamp[_alchemicaTypes[i]] = block.timestamp;
 
-      SpilloverIO memory spillover = calculateSpilloverForReservoir(_realmId, _alchemicaTypes[i]);
-      TransferAmounts memory amounts = calculateTransferAmounts(available, spillover.rate);
+  //     SpilloverIO memory spillover = calculateSpilloverForReservoir(_realmId, _alchemicaTypes[i]);
+  //     TransferAmounts memory amounts = calculateTransferAmounts(available, spillover.rate);
 
-      //Mint new tokens
-      _mintAvailableAlchemica(_alchemicaTypes[i], _gotchiId, amounts.owner, amounts.spill);
+  //     //Mint new tokens
+  //     _mintAvailableAlchemica(_alchemicaTypes[i], _gotchiId, amounts.owner, amounts.spill);
 
-      emit AlchemicaClaimed(_realmId, _gotchiId, _alchemicaTypes[i], available, spillover.rate, spillover.radius);
-    }
-  }
+  //     emit AlchemicaClaimed(_realmId, _gotchiId, _alchemicaTypes[i], available, spillover.rate, spillover.radius);
+  //   }
+  // }
 
   function _mintAvailableAlchemica(
     uint256 _alchemicaType,
@@ -414,46 +365,6 @@ contract AlchemicaFacet is Modifiers {
     return s.gotchiChannelings[_gotchiId];
   }
 
-  /// @notice Allow the game manager to transfer alchemica to a certain ERC721 parent aavegotchi
-  /// @param _alchemica Identifiers of alchemica tokens to transfer
-  /// @param _gotchiId Identifier of parent ERC721 aavegotchi which alchemica is transferred to
-  /// @param _lastExitTime The last time alchemica was exited/transferred to _gotchiId
-  /// @param _signature Message signature used for backend validation
-  function exitAlchemica(
-    uint256[] calldata _alchemica,
-    uint256 _gotchiId,
-    uint256 _lastExitTime,
-    bytes memory _signature
-  ) external onlyGameManager {
-    require(_alchemica.length == 4, "AlchemicaFacet: Incorrect length");
-
-    require(_lastExitTime == s.lastExitTime[_gotchiId], "AlchemicsFacet: Wrong last exit");
-
-    //lastExitTime ensures hash is unique every time
-    bytes32 messageHash = keccak256(abi.encodePacked(_alchemica[0], _alchemica[1], _alchemica[2], _alchemica[3], _lastExitTime, _gotchiId));
-    require(LibSignature.isValid(messageHash, _signature, s.backendPubKey), "AlchemicaFacet: Invalid signature");
-
-    for (uint256 i = 0; i < _alchemica.length; i++) {
-      IERC20Mintable alchemica = IERC20Mintable(s.alchemicaAddresses[i]);
-      alchemica.transfer(alchemicaRecipient(_gotchiId), _alchemica[i]);
-    }
-
-    emit ExitAlchemica(_gotchiId, _alchemica);
-  }
-
-  /// @notice Helper function to batch approve alchemica
-  /// @param _spender The spender's address
-  /// @param _amounts An array of amounts to approve.
-  /// @dev The element order is FUD, FOMO, ALPHA, KEK
-  /// @dev Uses a special approval function only available in AlchemicaToken
-  /// that gives special approval permissions to this contract
-  function batchApproveAlchemica(address _spender, uint256[4] calldata _amounts) external {
-    for (uint256 i = 0; i < _amounts.length; i++) {
-      RemoteApprovable alchemica = RemoteApprovable(s.alchemicaAddresses[i]);
-      alchemica.approveRemote(LibMeta.msgSender(), _spender, _amounts[i]);
-    }
-  }
-
   /// @notice Helper function to batch transfer alchemica
   /// @param _targets Array of target addresses
   /// @param _amounts Nested array of amounts to transfer.
@@ -477,7 +388,10 @@ contract AlchemicaFacet is Modifiers {
     }
   }
 
-  //todo: add test
+  /// @notice Helper function to batch transfer alchemica to Aavegotchis
+  /// @param _gotchiIds Array of Gotchi IDs
+  /// @param _tokenAddresses Array of tokens to transfer
+  /// @param _amounts Nested array of amounts to transfer.
   function batchTransferTokensToGotchis(
     uint256[] calldata _gotchiIds,
     address[] calldata _tokenAddresses,
@@ -496,26 +410,9 @@ contract AlchemicaFacet is Modifiers {
     }
   }
 
-  function batchTransferAlchemicaToGotchis(uint256[] calldata _gotchiIds, uint256[4][] calldata _amounts) external {
-    require(_gotchiIds.length == _amounts.length, "AlchemicaFacet: Mismatched array lengths");
-
-    IERC20Mintable[4] memory alchemicas = [
-      IERC20Mintable(s.alchemicaAddresses[0]),
-      IERC20Mintable(s.alchemicaAddresses[1]),
-      IERC20Mintable(s.alchemicaAddresses[2]),
-      IERC20Mintable(s.alchemicaAddresses[3])
-    ];
-
-    for (uint256 i = 0; i < _gotchiIds.length; i++) {
-      for (uint256 j = 0; j < _amounts[i].length; j++) {
-        uint256 amount = _amounts[i][j];
-        if (amount > 0) {
-          alchemicas[j].transferFrom(msg.sender, alchemicaRecipient(_gotchiIds[i]), amount);
-        }
-      }
-    }
-  }
-
+  /// @notice Owner function to change the altars channeling limits
+  /// @param _altarLevel Array of altars level
+  /// @param _limits Array of time limits
   function setChannelingLimits(uint256[] calldata _altarLevel, uint256[] calldata _limits) external onlyOwner {
     require(_altarLevel.length == _limits.length, "AlchemicaFacet: array mismatch");
     for (uint256 i; i < _limits.length; i++) {
@@ -523,6 +420,8 @@ contract AlchemicaFacet is Modifiers {
     }
   }
 
+  /// @notice Calculate the floor square root of a number
+  /// @param n Input number
   function floorSqrt(uint256 n) internal pure returns (uint256) {
     unchecked {
       if (n > 0) {
