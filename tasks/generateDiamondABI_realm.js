@@ -2,7 +2,7 @@
 
 const fs = require("fs");
 
-const basePath = "/contracts/facets/";
+const basePath = "/contracts/RealmDiamond/facets/";
 const libraryBasePath = "/contracts/libraries/";
 const sharedLibraryBasePath = "/contracts/libraries/";
 

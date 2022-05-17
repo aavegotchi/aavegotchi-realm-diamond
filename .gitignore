@@ -13,5 +13,6 @@ cache
 cache/
 logs
 typechain
+hardhat.config.ts
 yarn.lock
-package-lock.json
+package.lock.json

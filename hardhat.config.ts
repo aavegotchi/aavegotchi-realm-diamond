@@ -2,9 +2,11 @@
 import "@typechain/hardhat";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
+import "@nomiclabs/hardhat-etherscan";
 import "hardhat-contract-sizer";
 import "@nomiclabs/hardhat-etherscan";
 import "@openzeppelin/hardhat-upgrades";
+import "hardhat-gas-reporter";
 import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname + "/.env" });
 require("./tasks/generateDiamondABI_realm.js");
@@ -14,6 +16,8 @@ require("./tasks/verifyFacet.js");
 require("./tasks/mintParcels.ts");
 require("./tasks/releaseVesting.ts");
 require("./tasks/batchTransferAlchemica");
+
+const GWEI = 1000 * 1000 * 1000;
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:
@@ -28,12 +32,20 @@ module.exports = {
   },
   networks: {
     hardhat: {
+      /*
+      accounts: [
+        {
+          privateKey: process.env.SECRET,
+          balance: "1000000000000000000000000",
+        },
+       ],*/
       forking: {
         url: process.env.MATIC_URL,
         timeout: 2000000,
-        // blockNumber: 12552123
-        // blockNumber: 13024371
+        // blockNumber: 25459076,
+        // chainId: 137,
       },
+      chainId: 137,
       blockGasLimit: 20000000,
       timeout: 2000000,
       gas: "auto",
@@ -43,21 +55,17 @@ module.exports = {
     },
     matic: {
       url: process.env.MATIC_URL,
-      // url: 'https://rpc-mainnet.maticvigil.com/',
       accounts: [process.env.SECRET],
       // blockGasLimit: 20000000,
-      blockGasLimit: 20000000,
-      gasPrice: 100000000000,
+      maxFeePerGas: 50 * GWEI,
+      maxPriorityFeePerGas: 1 * GWEI,
       //   timeout: 90000
     },
     mumbai: {
-      url: process.env.MUMBAI_URL,
-      // url: 'https://rpc-mainnet.maticvigil.com/',
-      accounts: [process.env.SECRET],
-      // blockGasLimit: 20000000,
+      url: process.env.MUMBAI_MORALIS,
+      accounts: [process.env.ITEM_MANAGER],
       blockGasLimit: 20000000,
-      gasPrice: 10000000000,
-      //   timeout: 90000
+      // gasPrice: 1000000000,
     },
     kovan: {
       url: process.env.KOVAN_URL,
@@ -69,6 +77,7 @@ module.exports = {
       //   timeout: 90000
     },
   },
+
   gasReporter: {
     currency: "USD",
     gasPrice: 100,

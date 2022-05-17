@@ -92,31 +92,6 @@ describe("Vesting", function () {
       expect(await token.balanceOf(vestingContract.address)).to.equal(ETHER);
     });
 
-    it("Should not allow anyone but the beneficiary to call releases", async () => {
-      await expect(
-        vestingContract.connect(owner).partialRelease(token.address, 1)
-      ).to.be.revertedWith(
-        'Unauthorized("' + (await owner.getAddress()) + '")'
-      );
-      await expect(
-        vestingContract.connect(owner).release(token.address)
-      ).to.be.revertedWith(
-        'Unauthorized("' + (await owner.getAddress()) + '")'
-      );
-      await expect(
-        vestingContract
-          .connect(owner)
-          .batchPartialRelease([token.address], ["1"])
-      ).to.be.revertedWith(
-        'Unauthorized("' + (await owner.getAddress()) + '")'
-      );
-      await expect(
-        vestingContract.connect(owner).batchRelease([token.address])
-      ).to.be.revertedWith(
-        'Unauthorized("' + (await owner.getAddress()) + '")'
-      );
-    });
-
     it("Should release ~10% of the tokens in the first six months", async () => {
       await increaseTime(YEAR / 2);
       await mine();
@@ -126,7 +101,7 @@ describe("Vesting", function () {
           ETHER.div(10)
         )
       ).to.equal(true);
-      await vestingContract.connect(beneficiary).release(token.address);
+      await vestingContract.release(token.address);
       expect(
         aboutEquals(
           await token.balanceOf(await address(beneficiary)),
@@ -144,7 +119,7 @@ describe("Vesting", function () {
           ETHER.div(10)
         )
       ).to.equal(true);
-      await vestingContract.connect(beneficiary).release(token.address);
+      await vestingContract.release(token.address);
       expect(
         aboutEquals(
           await token.balanceOf(await address(beneficiary)),
@@ -162,7 +137,7 @@ describe("Vesting", function () {
           ETHER.mul(8).div(100)
         )
       ).to.equal(true);
-      await vestingContract.connect(beneficiary).release(token.address);
+      await vestingContract.release(token.address);
       expect(
         aboutEquals(
           await token.balanceOf(await address(beneficiary)),
@@ -180,7 +155,7 @@ describe("Vesting", function () {
           ETHER.mul(8).div(100)
         )
       ).to.equal(true);
-      await vestingContract.connect(beneficiary).release(token.address);
+      await vestingContract.release(token.address);
       expect(
         aboutEquals(
           await token.balanceOf(await address(beneficiary)),
@@ -198,7 +173,7 @@ describe("Vesting", function () {
           ETHER.mul(128).div(1000)
         )
       ).to.equal(true);
-      await vestingContract.connect(beneficiary).release(token.address);
+      await vestingContract.release(token.address);
       expect(
         aboutEquals(
           await token.balanceOf(await address(beneficiary)),
@@ -223,14 +198,12 @@ describe("Vesting", function () {
 
     it("Should do a partial release.", async () => {
       await increaseTime(YEAR);
-      await vestingContract
-        .connect(beneficiary)
-        .partialRelease(token.address, GWEI);
+      await vestingContract.partialRelease(token.address, GWEI);
       expect(await token.balanceOf(await address(beneficiary))).to.equal(GWEI);
     });
 
     it("Should release the rest of the tokens", async () => {
-      await vestingContract.connect(beneficiary).release(token.address);
+      await vestingContract.release(token.address);
       expect(await token.balanceOf(await address(beneficiary))).to.be.gt(
         BigNumber.from("0")
       );
@@ -238,7 +211,7 @@ describe("Vesting", function () {
 
     it("Deposit more tokens. More tokens should release.", async () => {
       await token.connect(owner).mint(await address(vestingContract), ETHER);
-      await vestingContract.connect(beneficiary).release(token.address);
+      await vestingContract.release(token.address);
       expect(await token.balanceOf(await address(beneficiary))).to.be.gt(0);
     });
 
@@ -247,9 +220,7 @@ describe("Vesting", function () {
       await anotherToken
         .connect(owner)
         .mint(await address(vestingContract), ETHER);
-      await vestingContract
-        .connect(beneficiary)
-        .batchRelease([token.address, anotherToken.address]);
+      await vestingContract.batchRelease([token.address, anotherToken.address]);
       expect(await token.balanceOf(await address(beneficiary))).to.be.gt(0);
       expect(await anotherToken.balanceOf(await address(beneficiary))).to.be.gt(
         0
@@ -257,22 +228,20 @@ describe("Vesting", function () {
     });
 
     it("Should error when no tokens can be released", async () => {
-      await expect(
-        vestingContract.connect(beneficiary).release(GHST_ADDRESS)
-      ).to.be.revertedWith(`NoTokensDue()`);
+      await expect(vestingContract.release(GHST_ADDRESS)).to.be.revertedWith(
+        `NoTokensDue()`
+      );
     });
 
     it("Should error when no tokens can be released (Partial release)", async () => {
       await expect(
-        vestingContract.connect(beneficiary).partialRelease(GHST_ADDRESS, 0)
+        vestingContract.partialRelease(GHST_ADDRESS, 0)
       ).to.be.revertedWith(`NoTokensDue()`);
     });
 
     it("Should error when too many tokens are released (Partial release)", async () => {
       await expect(
-        vestingContract
-          .connect(beneficiary)
-          .partialRelease(token.address, ETHER.mul(ETHER))
+        vestingContract.partialRelease(token.address, ETHER.mul(ETHER))
       ).to.be.revertedWith(`InvalidAmount()`);
     });
 
@@ -314,7 +283,7 @@ describe("Vesting", function () {
         ETHER
       );
 
-      await vestingContract.connect(beneficiary).release(token.address);
+      await vestingContract.release(token.address);
       expect(await token.balanceOf(vestingContract.address)).to.equal(
         BigNumber.from("0")
       );
@@ -350,7 +319,7 @@ describe("Vesting", function () {
           ETHER.mul(5).div(100)
         )
       ).to.equal(true);
-      await vestingContract.connect(beneficiary).release(await address(token));
+      await vestingContract.release(await address(token));
       expect(
         aboutEquals(
           await token.balanceOf(await address(beneficiary)),
@@ -370,7 +339,7 @@ describe("Vesting", function () {
           ETHER.mul(5).div(100)
         )
       ).to.equal(true);
-      await vestingContract.connect(beneficiary).release(await address(token));
+      await vestingContract.release(await address(token));
       expect(
         aboutEquals(
           await token.balanceOf(await address(beneficiary)),
@@ -391,7 +360,7 @@ describe("Vesting", function () {
           ETHER.mul(171).div(1000)
         )
       ).to.equal(true);
-      await vestingContract.connect(beneficiary).release(await address(token));
+      await vestingContract.release(await address(token));
       expect(
         aboutEquals(
           await token.balanceOf(await address(beneficiary)),
@@ -484,7 +453,7 @@ describe("Vesting", function () {
       expect(await vestingContract.releasableAmount(token.address)).to.be.gt(
         BigNumber.from(0)
       );
-      await vestingContract.connect(beneficiary).release(token.address);
+      await vestingContract.release(token.address);
       expect(await token.balanceOf(vestingContract.address)).to.equal(
         BigNumber.from(0)
       );
@@ -502,7 +471,7 @@ describe("Vesting", function () {
       ).to.be.revertedWith(`AlreadyRevoked()`);
     });
 
-    it("Should deplete the contract", async () => {
+    it("Should not be able to withdraw after revoke", async () => {
       // burn all the beneficiary's tokens
       await token
         .connect(owner)
@@ -522,15 +491,15 @@ describe("Vesting", function () {
       const release = await vestingContract.releasableAmount(token.address);
 
       // first release should succeed and deplete the contract
-      await vestingContract.connect(beneficiary).release(token.address);
+      await vestingContract.release(token.address);
       expect(await token.balanceOf(await beneficiary.getAddress())).to.equal(
         ETHER
       );
 
       // a second release should fail because there are no tokens to release
-      await expect(
-        vestingContract.connect(beneficiary).release(token.address)
-      ).to.be.revertedWith("NoTokensDue()");
+      await expect(vestingContract.release(token.address)).to.be.revertedWith(
+        "NoTokensDue()"
+      );
     });
   });
 });

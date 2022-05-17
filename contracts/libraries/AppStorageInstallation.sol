@@ -68,6 +68,8 @@ struct InstallationAppStorage {
   UpgradeQueue[] upgradeQueue;
   // installationId => deprecateTime
   mapping(uint256 => uint256) deprecateTime;
+  mapping(bytes32 => uint256) upgradeHashes;
+  bytes backendPubKey;
 }
 
 library LibAppStorageInstallation {

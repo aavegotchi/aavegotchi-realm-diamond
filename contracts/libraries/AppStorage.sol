@@ -2,6 +2,7 @@
 pragma solidity 0.8.9;
 import {LibDiamond} from "./LibDiamond.sol";
 import {LibMeta} from "./LibMeta.sol";
+import "../interfaces/AavegotchiDiamond.sol";
 
 uint256 constant HUMBLE_WIDTH = 8;
 uint256 constant HUMBLE_HEIGHT = 8;
@@ -25,9 +26,31 @@ struct Parcel {
   uint256 coordinateY; //y position on the map
   uint256 district;
   uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
-  uint256[64][64] buildGrid; //x, then y array of positions
-  uint256[64][64] tileGrid; //x, then y array of positions
+  uint256[64][64] buildGrid; //x, then y array of positions - for installations
+  uint256[64][64] tileGrid; //x, then y array of positions - for tiles under the installations (floor)
   uint256[4] alchemicaBoost; //fud, fomo, alpha, kek
+  uint256[4] alchemicaRemaining; //fud, fomo, alpha, kek
+  uint256 currentRound; //begins at 0 and increments after surveying has begun
+  mapping(uint256 => uint256[]) roundBaseAlchemica; //round alchemica not including boosts
+  mapping(uint256 => uint256[]) roundAlchemica; //round alchemica including boosts
+  // // alchemicaType => array of reservoir id
+  mapping(uint256 => uint256[]) reservoirs;
+  uint256[4] alchemicaHarvestRate;
+  uint256[4] lastUpdateTimestamp;
+  uint256[4] unclaimedAlchemica;
+  uint256 altarId;
+  uint256 upgradeQueueCapacity;
+  uint256 upgradeQueueLength;
+  uint256 lodgeId;
+  bool surveying;
+}
+
+struct RequestConfig {
+  uint64 subId;
+  uint32 callbackGasLimit;
+  uint16 requestConfirmations;
+  uint32 numWords;
+  bytes32 keyHash;
 }
 
 struct AppStorage {
@@ -39,6 +62,36 @@ struct AppStorage {
   mapping(uint256 => address) approved;
   address aavegotchiDiamond;
   address[4] alchemicaAddresses; //fud, fomo, alpha, kek
+  address installationsDiamond;
+  uint256 surveyingRound;
+  uint256[4][5] totalAlchemicas;
+  uint256[4] boostMultipliers;
+  address[4] alchemicaAddresses;
+  uint256[4] greatPortalCapacity;
+  // VRF
+  address vrfCoordinator;
+  address linkAddress;
+  RequestConfig requestConfig;
+  mapping(uint256 => uint256) vrfRequestIdToTokenId;
+  mapping(uint256 => uint256) vrfRequestIdToSurveyingRound;
+  bytes backendPubKey;
+  address gameManager;
+  mapping(uint256 => uint256) lastExitTime; //for aavegotchis exiting alchemica
+  // gotchiId => lastChanneledGotchi
+  mapping(uint256 => uint256) gotchiChannelings;
+  // parcelId => lastChanneledParcel
+  mapping(uint256 => uint256) parcelChannelings;
+  // altarLevel => cooldown hours in seconds
+  mapping(uint256 => uint256) channelingLimits;
+  // parcelId => lastClaimedAlchemica
+  mapping(uint256 => uint256) lastClaimedAlchemica;
+  address gltrAddress;
+  address tileDiamond;
+  bool gameActive;
+  // parcelId => action: 0 Alchemical Channeling, 1 Emptying Reservoirs => permission: 0 Owner only, 1 Owner + Borrowed Gotchis, 2 Any Gotchi
+  mapping(uint256 => mapping(uint256 => uint256)) accessRights;
+  // gotchiId => lastChanneledDay
+  mapping(uint256 => uint256) lastChanneledDay;
 }
 
 library LibAppStorage {
@@ -59,6 +112,27 @@ contract Modifiers {
 
   modifier onlyOwner() {
     LibDiamond.enforceIsContractOwner();
+    _;
+  }
+
+  modifier onlyGotchiOwner(uint256 _gotchiId) {
+    AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
+    require(LibMeta.msgSender() == diamond.ownerOf(_gotchiId), "AppStorage: Only Gotchi Owner can call");
+    _;
+  }
+
+  modifier onlyGameManager() {
+    require(msg.sender == s.gameManager, "AlchemicaFacet: Only Game Manager");
+    _;
+  }
+
+  modifier onlyInstallationDiamond() {
+    require(LibMeta.msgSender() == s.installationsDiamond, "AppStorage: Only Installation diamond can call");
+    _;
+  }
+
+  modifier gameActive() {
+    require(s.gameActive, "AppStorage: game not active");
     _;
   }
 }

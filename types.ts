@@ -1,4 +1,15 @@
 import { BigNumberish } from "@ethersproject/bignumber";
+import {
+  AlchemicaFacet,
+  AlchemicaToken,
+  ERC1155Facet,
+  ERC1155FacetTile,
+  GLTR,
+  InstallationAdminFacet,
+  InstallationFacet,
+  RealmFacet,
+  TileFacet,
+} from "./typechain";
 
 export interface AxiosMetadataResponse {
   data: ParcelMetadata[];
@@ -37,10 +48,37 @@ export interface ParcelArray {
   3: "H" | "V";
 }
 
-export type Level = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
-export type Width = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
-export type Height = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export interface UpgradeQueue {
+  parcelId: BigNumberish;
+  coordinateX: BigNumberish;
+  coordinateY: BigNumberish;
+  installationId: BigNumberish;
+  readyBlock: BigNumberish;
+  claimed: boolean;
+  owner: string;
+}
+
+export interface InstallationType {
+  deprecated: boolean;
+  installationType: BigNumberish;
+  level: BigNumberish;
+  width: BigNumberish;
+  height: BigNumberish;
+  alchemicaType: BigNumberish;
+  alchemicaCost: BigNumberish[];
+  harvestRate: BigNumberish;
+  capacity: BigNumberish;
+  spillRadius: BigNumberish;
+  spillRate: BigNumberish;
+  upgradeQueueBoost: BigNumberish;
+  craftTime: BigNumberish;
+  nextLevelId: BigNumberish;
+  prerequisites: BigNumberish[];
+  name: string;
+}
+
 export interface InstallationTypeInput {
+  Installation?: string;
   id?: number;
   deprecated: boolean;
   installationType: number;
@@ -49,18 +87,31 @@ export interface InstallationTypeInput {
   height: Height;
   alchemicaType: 0 | 1 | 2 | 3;
   alchemicaCost: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
-  harvestRate: number;
-  capacity: number;
-  spillRadius: number;
-  spillRate: number;
-  upgradeQueueBoost: number;
+  harvestRate: BigNumberish;
+  capacity: BigNumberish;
+  spillRadius: BigNumberish;
+  spillRate: BigNumberish;
+  upgradeQueueBoost: BigNumberish;
   craftTime: number;
   nextLevelId: number;
   prerequisites: number[];
   name: string;
-  deprecateTime: number;
 }
 
+export interface TileTypeInput {
+  id?: number;
+  deprecated: boolean;
+  tileType: number;
+  width: Width;
+  height: Height;
+  alchemicaCost: BigNumberish[];
+  craftTime: number;
+  name: string;
+}
+
+export type Level = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+export type Width = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type Height = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export interface InstallationTypeOutput {
   deprecated: boolean;
   installationType: BigNumberish;
@@ -78,18 +129,6 @@ export interface InstallationTypeOutput {
   nextLevelId: BigNumberish;
   prerequisites: BigNumberish[];
   name: string;
-  deprecateTime: BigNumberish;
-}
-
-export interface TileTypeInput {
-  id?: number;
-  deprecated: boolean;
-  tileType: number;
-  width: Width;
-  height: Height;
-  alchemicaCost: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
-  craftTime: number;
-  name: string;
 }
 
 export interface TileTypeOutput {
@@ -97,7 +136,50 @@ export interface TileTypeOutput {
   tileType: BigNumberish;
   width: Width;
   height: Height;
-  alchemicaCost: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
+  alchemicaCost: BigNumberish[];
   craftTime: BigNumberish;
   name: string;
+}
+
+export type AlchemicaTotals = [
+  [BigNumberish, BigNumberish, BigNumberish, BigNumberish]
+];
+
+//Test
+
+export interface TestBeforeVars {
+  alchemicaFacet: AlchemicaFacet;
+  realmFacet: RealmFacet;
+  installationDiamond: InstallationFacet;
+  installationAdminFacet: InstallationAdminFacet;
+  tileDiamond: TileFacet;
+  ownerAddress: string;
+  installationsAddress: string;
+  tileAddress: string;
+  fud: AlchemicaToken;
+  fomo: AlchemicaToken;
+  alpha: AlchemicaToken;
+  kek: AlchemicaToken;
+  gltr: GLTR;
+  erc1155Facet: ERC1155Facet;
+  erc1155FacetTile: ERC1155FacetTile;
+  installationOwner: string;
+  tileOwner: string;
+  alchemicaOwner: string;
+}
+
+export interface AlchemicaAddresses {
+  fud: string;
+  fomo: string;
+  alpha: string;
+  kek: string;
+  gltr: string;
+}
+
+export interface Alchemica {
+  fud: AlchemicaToken;
+  fomo: AlchemicaToken;
+  alpha: AlchemicaToken;
+  kek: AlchemicaToken;
+  gltr: GLTR;
 }

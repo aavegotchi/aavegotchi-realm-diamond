@@ -65,4 +65,9 @@ contract Modifiers {
     LibDiamond.enforceIsContractOwner();
     _;
   }
+
+  modifier onlyRealmDiamond() {
+    require(msg.sender == s.realmDiamond, "LibDiamond: Must be realm diamond");
+    _;
+  }
 }

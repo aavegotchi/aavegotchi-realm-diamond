@@ -1,12 +1,15 @@
 import { Signer } from "@ethersproject/abstract-signer";
 import { Contract } from "@ethersproject/contracts";
-import { Network } from "hardhat/types";
 import { alchemica, maticDiamondAddress } from "../constants";
+import { AlchemicaToken } from "../typechain";
+import { HardhatRuntimeEnvironment, Network } from "hardhat/types";
+import { DiamondLoupeFacet, OwnershipFacet } from "../typechain";
 import {
-  AlchemicaToken,
-  DiamondLoupeFacet,
-  OwnershipFacet,
-} from "../typechain";
+  mumbaiDiamondAddress,
+  mumbaiInstallationDiamondAddress,
+} from "./installation/helperFunctions";
+
+export const gasPrice = 100000000000;
 
 export async function impersonate(
   address: string,
@@ -61,6 +64,13 @@ export function getSelector(func: string, ethers: any) {
   return abiInterface.getSighash(ethers.utils.Fragment.from(func));
 }
 
+export const kovanDiamondAddress = "0xa37D0c085121B6b7190A34514Ca28fC15Bb4dc22";
+export const maticAavegotchiDiamondAddress =
+  "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
+export const aavegotchiDAOAddress =
+  "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
+export const pixelcraftAddress = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
+
 export async function diamondOwner(address: string, ethers: any) {
   return await (await ethers.getContractAt("OwnershipFacet", address)).owner();
 }
@@ -101,6 +111,17 @@ export async function getDiamondSigner(
   } else {
     throw Error("Incorrect network selected");
   }
+}
+
+export function realmDiamondAddress(network: string) {
+  if (["mumbai", "localhost"].includes(network)) return mumbaiDiamondAddress;
+  return maticDiamondAddress;
+}
+
+export function installationDiamondAddress(network: string) {
+  if (["mumbai", "localhost"].includes(network))
+    return mumbaiInstallationDiamondAddress;
+  return "";
 }
 
 export async function mineBlocks(ethers: any, count: number) {
