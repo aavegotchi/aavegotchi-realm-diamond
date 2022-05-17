@@ -66,7 +66,6 @@ struct AppStorage {
   uint256 surveyingRound;
   uint256[4][5] totalAlchemicas;
   uint256[4] boostMultipliers;
-  address[4] alchemicaAddresses;
   uint256[4] greatPortalCapacity;
   // VRF
   address vrfCoordinator;
