@@ -9,7 +9,7 @@ import "../../libraries/LibMeta.sol";
 import "../../libraries/LibERC721.sol";
 import "../../libraries/LibRealm.sol";
 import "../../libraries/LibAlchemica.sol";
-import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamond.sol";
+import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamondInterface.sol";
 import "../../libraries/LibSignature.sol";
 import "./ERC721Facet.sol";
 
