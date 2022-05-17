@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-import {InstallationDiamondInterface} from "../interfaces/InstallationDiamond.sol";
+import {InstallationDiamondInterface} from "../interfaces/InstallationDiamondInterface.sol";
 import {LibAppStorage, AppStorage, Parcel} from "./AppStorage.sol";
 import "hardhat/console.sol";
 
