@@ -47,12 +47,6 @@ contract InstallationFacet is Modifiers {
     uint256 balance;
   }
 
-  struct ItemTypeIO {
-    uint256 balance;
-    uint256 itemId;
-    InstallationType installationType;
-  }
-  
   struct ReservoirStats {
     uint256 spillRate;
     uint256 spillRadius;
@@ -287,11 +281,9 @@ contract InstallationFacet is Modifiers {
       //take the required alchemica
       LibItems._splitAlchemica(installationType.alchemicaCost, alchemicaAddresses);
 
-         if (gltr > installationType.craftTime) revert("InstallationFacet: Too much GLTR");
-
       uint40 gltr = _gltr[i];
 
-   
+      if (gltr > installationType.craftTime) revert("InstallationFacet: Too much GLTR");
 
       if (installationType.craftTime - gltr == 0) {
         LibERC1155._safeMint(msg.sender, _installationTypes[i], 0);
@@ -331,11 +323,8 @@ contract InstallationFacet is Modifiers {
       emit QueueClaimed(queueId);
     }
 
-      finalizeUpgrade();
+    finalizeUpgrade();
   }
-
-  
-  
 
   /// @notice Allow a user to speed up multiple queues(installation craft time) by paying the correct amount of $GLTR tokens
   /// @dev Will throw if the caller is not the queue owner
