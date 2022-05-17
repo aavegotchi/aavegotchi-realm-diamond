@@ -6,7 +6,7 @@ import {LibERC1155Tile} from "../../libraries/LibERC1155Tile.sol";
 import {LibItems} from "../../libraries/LibItems.sol";
 import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {LibERC998Tile, ItemTypeIO} from "../../libraries/LibERC998Tile.sol";
-import {LibAppStorageTile, TileType, QueueItem, UpgradeQueue, Modifiers} from "../../libraries/AppStorageTile.sol";
+import {LibAppStorageTile, TileType, QueueItem, Modifiers} from "../../libraries/AppStorageTile.sol";
 import {LibStrings} from "../../libraries/LibStrings.sol";
 import {LibMeta} from "../../libraries/LibMeta.sol";
 import {LibERC1155Tile} from "../../libraries/LibERC1155Tile.sol";
@@ -33,12 +33,6 @@ contract TileFacet is Modifiers {
   struct TileIdIO {
     uint256 tileId;
     uint256 balance;
-  }
-
-  struct ItemTypeIO {
-    uint256 balance;
-    uint256 itemId;
-    TileType tileType;
   }
 
   /// @notice Returns balance for each tile that exists for an account
@@ -152,24 +146,6 @@ contract TileFacet is Modifiers {
     }
   }
 
-  /// @notice Query details about all ongoing craft queues
-  /// @param _owner Address to query queue
-  /// @return output_ An array of structs, each representing an ongoing craft queue
-  function getCraftQueue(address _owner) external view returns (QueueItem[] memory output_) {
-    uint256 length = s.craftQueue.length;
-    output_ = new QueueItem[](length);
-    uint256 counter;
-    for (uint256 i; i < length; i++) {
-      if (s.craftQueue[i].owner == _owner) {
-        output_[counter] = s.craftQueue[i];
-        counter++;
-      }
-    }
-    assembly {
-      mstore(output_, counter)
-    }
-  }
-
   /***********************************|
    |             Write Functions        |
    |__________________________________*/
@@ -233,6 +209,7 @@ contract TileFacet is Modifiers {
       emit QueueClaimed(queueId);
     }
   }
+
   /// @notice Allow a user to speed up multiple queues(tile craft time) by paying the correct amount of $GLTR tokens
   /// @dev Will throw if the caller is not the queue owner
   /// @dev $GLTR tokens are burnt upon usage
