@@ -203,7 +203,11 @@ contract AlchemicaFacet is Modifiers {
 
   function alchemicaRecipient(uint256 _gotchiId) internal view returns (address) {
     AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
-    return diamond.ownerOf(_gotchiId);
+    if (diamond.isAavegotchiLent(_gotchiId)) {
+      return diamond.gotchiEscrow(_gotchiId);
+    } else {
+      return diamond.ownerOf(_gotchiId);
+    }
   }
 
   // /// @notice Allow parcel owner to claim available alchemica with his parent NFT(Aavegotchi)
