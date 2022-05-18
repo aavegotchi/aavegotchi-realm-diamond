@@ -104,7 +104,7 @@ export async function upgrade() {
   ) as AlchemicaFacetInterface;
 
   //@ts-ignore
-  const backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+  const backendSigner = new ethers.Wallet(process.env.PROD_PK); // PK should start with '0x'
 
   // gotchiVerse
   const fud = "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f";
@@ -124,7 +124,7 @@ export async function upgrade() {
       "0x0000000000000000000000000000000000000000", //vrf
       "0x0000000000000000000000000000000000000000", //link address
       [fud, fomo, alpha, kek],
-      "0x0000000000000000000000000000000000000000", //gltr
+      "0x3801C3B3B5c98F88a9c9005966AA96aa440B9Afc", //gltr
       ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
       "0x0000000000000000000000000000000000000000", //game manager
       "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355", //tile diamond
@@ -138,7 +138,7 @@ export async function upgrade() {
     facetsAndAddSelectors: joined,
     initAddress: maticDiamondAddress,
     initCalldata: calldata,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
   };
 

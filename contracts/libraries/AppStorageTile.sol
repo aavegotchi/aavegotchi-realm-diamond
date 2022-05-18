@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 import {LibDiamond} from "./LibDiamond.sol";
-import "hardhat/console.sol";
 
 struct TileType {
   //slot 1

@@ -5,12 +5,9 @@ import {
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
 import { maticTileDiamondAddress } from "../../../constants";
-import { upgrade as diamondUpgrade } from "./upgrade-fixDiamond";
 
 export async function upgrade() {
-  const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
-
-  await diamondUpgrade(maticTileDiamondAddress);
+  const diamondUpgrader = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
 
   const facets: FacetsAndAddSelectors[] = [
     {
@@ -35,7 +32,7 @@ export async function upgrade() {
     facetsAndAddSelectors: joined,
     initAddress: ethers.constants.AddressZero,
     initCalldata: "0x",
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
   };
 
