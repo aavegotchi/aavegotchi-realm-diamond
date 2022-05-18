@@ -1,21 +1,32 @@
 import { ethers } from "hardhat";
+import { maticInstallationDiamondAddress } from "../../constants";
 import { installationTypes } from "../../data/installations/altars";
-import { InstallationAdminFacet } from "../../typechain";
+import { InstallationAdminFacet, InstallationFacet } from "../../typechain";
 
+import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { outputInstallation } from "../realm/realmHelpers";
+import { gasPrice } from "./helperFunctions";
 
 export async function setAddresses() {
-  const diamondAddress = "0xe927518d25ef44EA33b12AFF524AC236e064C35c";
+  const signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
+
   const installationFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
-    diamondAddress
+    maticInstallationDiamondAddress,
+    signer
   )) as InstallationAdminFacet;
 
   const altars = installationTypes.map((val) => outputInstallation(val));
 
-  console.log("altars:", altars);
+  await installationFacet.addInstallationTypes(altars, { gasPrice: gasPrice });
 
-  await installationFacet.addInstallationTypes(altars);
+  const installationfacet = (await ethers.getContractAt(
+    "InstallationFacet",
+    maticInstallationDiamondAddress
+  )) as InstallationFacet;
+
+  const insts = await installationfacet.getInstallationTypes([]);
+  console.log("insts:", insts);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
