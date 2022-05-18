@@ -1,6 +1,7 @@
 import { BigNumber, ethers } from "ethers";
 import { network } from "hardhat";
 import { Network } from "hardhat/types";
+import { maticDiamondAddress } from "../../constants";
 import {
   AlchemicaFacet,
   AlchemicaToken,
@@ -22,7 +23,6 @@ import {
 } from "../../types";
 import {
   maticAavegotchiDiamondAddress,
-  maticDiamondAddress,
   pixelcraftAddress,
   aavegotchiDAOAddress,
 } from "../helperFunctions";

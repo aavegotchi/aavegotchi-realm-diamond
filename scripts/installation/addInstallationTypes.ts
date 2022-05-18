@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { installationTypes } from "../../data/installations/installationTypes";
+import { installationTypes } from "../../data/installations/altars";
 import { InstallationAdminFacet } from "../../typechain";
 
 import { outputInstallation } from "../realm/realmHelpers";
@@ -11,9 +11,11 @@ export async function setAddresses() {
     diamondAddress
   )) as InstallationAdminFacet;
 
-  const goldenAaltar = installationTypes.map((val) => outputInstallation(val));
+  const altars = installationTypes.map((val) => outputInstallation(val));
 
-  await installationFacet.addInstallationTypes(goldenAaltar);
+  console.log("altars:", altars);
+
+  await installationFacet.addInstallationTypes(altars);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -2,7 +2,7 @@ import { Signer } from "@ethersproject/abstract-signer";
 import { Contract } from "@ethersproject/contracts";
 import { alchemica, maticDiamondAddress } from "../constants";
 import { AlchemicaToken } from "../typechain";
-import { HardhatRuntimeEnvironment, Network } from "hardhat/types";
+import { Network } from "hardhat/types";
 import { DiamondLoupeFacet, OwnershipFacet } from "../typechain";
 import {
   mumbaiDiamondAddress,
