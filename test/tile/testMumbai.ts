@@ -112,28 +112,52 @@ describe("Testing Equip Installation", async function () {
   //   console.log(queue);
   // });
   it("test upgrade", async function () {
-    installationFacet = await impersonate(
-      testAddress,
-      installationFacet,
+    // const tx = await realmFacet.batchGetGrid()
+    alchemicaFacet = await impersonate(
+      "0x2c1a288353e136b9e4b467aadb307133fffeab25",
+      alchemicaFacet,
       ethers,
       network
     );
-    const upgradeQueue1: UpgradeQueue = {
-      parcelId: 5933,
-      coordinateX: 7,
-      coordinateY: 7,
-      installationId: 10,
-      readyBlock: 0,
-      claimed: false,
-      owner: testAddress,
-    };
-    const signatureAlt1 = await genUpgradeInstallationSignature(5933, 7, 7, 10);
-    await installationFacet.upgradeInstallation(
-      upgradeQueue1,
-      signatureAlt1,
-      0
+    await alchemicaFacet.batchTransferTokensToGotchis(
+      [24186],
+      [
+        "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f",
+        "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8",
+        "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2",
+        "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C",
+      ],
+      [
+        [
+          ethers.utils.parseEther("0.6"),
+          ethers.utils.parseEther("1.1"),
+          ethers.utils.parseEther("4.3"),
+          ethers.utils.parseEther("0.1"),
+        ],
+      ]
     );
-    console.log("upgraded?");
+    // installationFacet = await impersonate(
+    //   testAddress,
+    //   installationFacet,
+    //   ethers,
+    //   network
+    // );
+    // const upgradeQueue1: UpgradeQueue = {
+    //   parcelId: 5933,
+    //   coordinateX: 7,
+    //   coordinateY: 7,
+    //   installationId: 10,
+    //   readyBlock: 0,
+    //   claimed: false,
+    //   owner: testAddress,
+    // };
+    // const signatureAlt1 = await genUpgradeInstallationSignature(5933, 7, 7, 10);
+    // await installationFacet.upgradeInstallation(
+    //   upgradeQueue1,
+    //   signatureAlt1,
+    //   0
+    // );
+    // console.log("upgraded?");
     // const userQueue = await installationFacet.getUserUpgradeQueue(
     //   "0x1091232c61EeE86418DC93a5c895db3490386501"
     // );

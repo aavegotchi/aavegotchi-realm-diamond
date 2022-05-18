@@ -9,7 +9,7 @@ import { RealmFacetInterface } from "../../../typechain/RealmFacet";
 
 export async function upgrade() {
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
-  const diamondAddress = "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
+  const diamondAddress = "0x1d0360bac7299c86ec8e99d0c1c9a95fefaf2a11";
   const realmDiamond = "0x9351e6705590756BAc83f591aDE9f61De5998a84";
   const installationDiamond = "0x6F8cFe6757F716039498dE53696b1aB5C66Ab428";
 
@@ -23,7 +23,7 @@ export async function upgrade() {
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "InstallationFacet",
+      facetName: "AlchemicaFacet",
       addSelectors: [
         // `function getUserUpgradeQueue(address _owner) external view returns (${upgradeQueue}[] memory output_)`,
         // `function getAllUpgradeQueue() external view returns (${upgradeQueue}[] memory)`,

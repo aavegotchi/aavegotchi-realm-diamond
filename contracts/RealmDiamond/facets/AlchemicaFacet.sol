@@ -203,7 +203,7 @@ contract AlchemicaFacet is Modifiers {
 
   function alchemicaRecipient(uint256 _gotchiId) internal view returns (address) {
     AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
-    if (diamond.isAavegotchiLent(_gotchiId)) {
+    if (diamond.isAavegotchiLent(uint32(_gotchiId))) {
       return diamond.gotchiEscrow(_gotchiId);
     } else {
       return diamond.ownerOf(_gotchiId);
@@ -401,10 +401,10 @@ contract AlchemicaFacet is Modifiers {
     uint256[][] calldata _amounts
   ) external {
     require(_gotchiIds.length == _amounts.length, "AlchemicaFacet: Mismatched array lengths");
-    require(_tokenAddresses.length == _amounts.length, "AlchemicaFacet: Mismatched array lengths");
 
     for (uint256 i = 0; i < _gotchiIds.length; i++) {
       for (uint256 j = 0; j < _amounts[i].length; j++) {
+        require(_tokenAddresses.length == _amounts[i].length, "RealmFacet: Mismatched array lengths");
         uint256 amount = _amounts[i][j];
         if (amount > 0) {
           IERC20(_tokenAddresses[j]).transferFrom(msg.sender, alchemicaRecipient(_gotchiIds[i]), amount);
