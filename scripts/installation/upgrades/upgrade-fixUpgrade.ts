@@ -11,7 +11,7 @@ export async function upgrade() {
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "InstallationAdminFacet",
+      facetName: "InstallationFacet",
       addSelectors: [],
       removeSelectors: [],
     },
