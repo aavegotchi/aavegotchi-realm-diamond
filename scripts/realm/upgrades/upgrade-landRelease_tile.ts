@@ -21,6 +21,7 @@ export async function upgrade() {
         "function equipTile(address _owner,uint256 _realmId,uint256 _tileId) external",
         "function unequipTile(address _owner,uint256 _realmId,uint256 _tileId) external",
         "function tileBalancesOfTokenByIds(address _tokenContract, uint256 _tokenId, uint256[] calldata _ids) external view",
+        "function reduceCraftTime(uint256[] calldata _queueIds, uint40[] calldata _amounts) external",
       ],
       removeSelectors: [],
     },

@@ -7,8 +7,6 @@ pragma solidity ^0.8.0;
 /******************************************************************************/
 import {IDiamondCut} from "../interfaces/IDiamondCut.sol";
 
-import "hardhat/console.sol";
-
 library LibDiamond {
   bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
 
@@ -113,8 +111,6 @@ library LibDiamond {
       for (uint256 selectorIndex; selectorIndex < _selectors.length; selectorIndex++) {
         bytes4 selector = _selectors[selectorIndex];
 
-        console.logBytes4(selector);
-
         bytes32 oldFacet = ds.facets[selector];
 
         require(address(bytes20(oldFacet)) == address(0), "LibDiamondCut: Can't add function that already exists");
@@ -136,6 +132,7 @@ library LibDiamond {
         bytes4 selector = _selectors[selectorIndex];
         bytes32 oldFacet = ds.facets[selector];
         address oldFacetAddress = address(bytes20(oldFacet));
+
         // only useful if immutable functions exist
         require(oldFacetAddress != address(this), "LibDiamondCut: Can't replace immutable function");
         require(oldFacetAddress != _newFacetAddress, "LibDiamondCut: Can't replace function with same function");
