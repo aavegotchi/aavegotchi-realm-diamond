@@ -87,50 +87,50 @@ contract InstallationAdminFacet is Modifiers {
   /// @notice Allow anyone to finalize any existing queue upgrade
   /// @dev Only three queue upgrades can be finalized in one transaction
   function finalizeUpgrade() public {
-    require(s.upgradeQueue.length > 0, "InstallationFacet: No upgrades");
-    //can only process 3 upgrades per tx
-    uint256 counter = 3;
-    uint256 offset;
-    uint256 _upgradeQueueLength = s.upgradeQueue.length;
-    for (uint256 index; index < _upgradeQueueLength; index++) {
-      UpgradeQueue memory queueUpgrade = s.upgradeQueue[index - offset];
-      // check that upgrade is ready
-      if (block.number >= queueUpgrade.readyBlock) {
-        // burn old installation
-        LibInstallation._unequipInstallation(queueUpgrade.parcelId, queueUpgrade.installationId);
-        // mint new installation
-        uint256 nextLevelId = s.installationTypes[queueUpgrade.installationId].nextLevelId;
-        LibERC1155._safeMint(queueUpgrade.owner, nextLevelId, index - offset);
-        // equip new installation
-        LibInstallation._equipInstallation(queueUpgrade.owner, queueUpgrade.parcelId, nextLevelId);
+    if (s.upgradeQueue.length > 0) {
+      //can only process 3 upgrades per tx
+      uint256 counter = 3;
+      uint256 offset;
+      uint256 _upgradeQueueLength = s.upgradeQueue.length;
+      for (uint256 index; index < _upgradeQueueLength; index++) {
+        UpgradeQueue memory queueUpgrade = s.upgradeQueue[index - offset];
+        // check that upgrade is ready
+        if (block.number >= queueUpgrade.readyBlock) {
+          // burn old installation
+          LibInstallation._unequipInstallation(queueUpgrade.parcelId, queueUpgrade.installationId);
+          // mint new installation
+          uint256 nextLevelId = s.installationTypes[queueUpgrade.installationId].nextLevelId;
+          LibERC1155._safeMint(queueUpgrade.owner, nextLevelId, index - offset);
+          // equip new installation
+          LibInstallation._equipInstallation(queueUpgrade.owner, queueUpgrade.parcelId, nextLevelId);
 
-        RealmDiamond realm = RealmDiamond(s.realmDiamond);
-        realm.upgradeInstallation(
-          queueUpgrade.parcelId,
-          queueUpgrade.installationId,
-          nextLevelId,
-          queueUpgrade.coordinateX,
-          queueUpgrade.coordinateY
-        );
+          RealmDiamond realm = RealmDiamond(s.realmDiamond);
+          realm.upgradeInstallation(
+            queueUpgrade.parcelId,
+            queueUpgrade.installationId,
+            nextLevelId,
+            queueUpgrade.coordinateX,
+            queueUpgrade.coordinateY
+          );
 
-        // update updateQueueLength
-        realm.subUpgradeQueueLength(queueUpgrade.parcelId);
+          // update updateQueueLength
+          realm.subUpgradeQueueLength(queueUpgrade.parcelId);
 
-        // clean unique hash
-        bytes32 uniqueHash = keccak256(
-          abi.encodePacked(queueUpgrade.parcelId, queueUpgrade.coordinateX, queueUpgrade.coordinateY, queueUpgrade.installationId)
-        );
-        s.upgradeHashes[uniqueHash] = 0;
+          // clean unique hash
+          bytes32 uniqueHash = keccak256(
+            abi.encodePacked(queueUpgrade.parcelId, queueUpgrade.coordinateX, queueUpgrade.coordinateY, queueUpgrade.installationId)
+          );
+          s.upgradeHashes[uniqueHash] = 0;
 
-        // pop upgrade from array
-        s.upgradeQueue[index - offset] = s.upgradeQueue[s.upgradeQueue.length - 1];
-        s.upgradeQueue.pop();
-        counter--;
-        offset++;
-        emit UpgradeFinalized(queueUpgrade.parcelId, queueUpgrade.coordinateX, queueUpgrade.coordinateY, nextLevelId);
+          // pop upgrade from array
+          s.upgradeQueue[index - offset] = s.upgradeQueue[s.upgradeQueue.length - 1];
+          s.upgradeQueue.pop();
+          counter--;
+          offset++;
+          emit UpgradeFinalized(queueUpgrade.parcelId, queueUpgrade.coordinateX, queueUpgrade.coordinateY, nextLevelId);
+        }
+        if (counter == 0) break;
       }
-      if (counter == 0) break;
     }
-    if (counter == 3) revert("InstallationFacet: No upgrades ready");
   }
 }
