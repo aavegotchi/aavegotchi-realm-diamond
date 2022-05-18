@@ -1,6 +1,5 @@
 import {
   impersonate,
-  maticDiamondAddress,
   mineBlocks,
   realmDiamondAddress,
 } from "../../scripts/helperFunctions";
@@ -34,12 +33,12 @@ import { upgrade } from "../../scripts/realm/upgrades/upgrade-batchGetGrid";
 import { upgrade as upgrade2 } from "../../scripts/realm/upgrades/upgrade-testMumbai";
 
 describe("Testing Equip Installation", async function () {
-  const testAddress = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
+  const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
   const testParcelId = 1;
 
-  const diamondAddress = "0x9351e6705590756BAc83f591aDE9f61De5998a84";
-  const installationDiamond = "0x6F8cFe6757F716039498dE53696b1aB5C66Ab428";
-  const tileDiamond = "0xf65848AF98015463F256877b6A4FaD03e71f6cD1";
+  const diamondAddress = "0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11";
+  const installationDiamond = "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
+  const tileDiamond = "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
   const owner = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
 
   let realmFacet: RealmFacet;
@@ -68,7 +67,6 @@ describe("Testing Equip Installation", async function () {
   before(async function () {
     this.timeout(20000000);
 
-    await upgrade();
     await upgrade2();
 
     realmFacet = (await ethers.getContractAt(
@@ -99,6 +97,13 @@ describe("Testing Equip Installation", async function () {
       diamondAddress
     )) as ERC721Facet;
   });
+
+  // const listPre = await installationFacet.getUserUpgradeQueue(owner);
+  // console.log(listPre);
+  // await mineBlocks(ethers, 50);
+  // await installationAdminFacet.finalizeUpgrade();
+  // const listPost = await installationFacet.getUserUpgradeQueue(owner);
+  // console.log(listPost);
   // it("finalize upgrade", async function () {
   //   await installationAdminFacet.finalizeUpgrade();
 
@@ -107,25 +112,41 @@ describe("Testing Equip Installation", async function () {
   //   console.log(queue);
   // });
   it("test upgrade", async function () {
+    installationFacet = await impersonate(
+      testAddress,
+      installationFacet,
+      ethers,
+      network
+    );
+    const upgradeQueue1: UpgradeQueue = {
+      parcelId: 5933,
+      coordinateX: 7,
+      coordinateY: 7,
+      installationId: 10,
+      readyBlock: 0,
+      claimed: false,
+      owner: testAddress,
+    };
+    const signatureAlt1 = await genUpgradeInstallationSignature(5933, 7, 7, 10);
+    await installationFacet.upgradeInstallation(
+      upgradeQueue1,
+      signatureAlt1,
+      0
+    );
+    console.log("upgraded?");
     // const userQueue = await installationFacet.getUserUpgradeQueue(
     //   "0x1091232c61EeE86418DC93a5c895db3490386501"
     // );
-
     // console.log("queue", userQueue);
-
     // installationFacet = await impersonate(
     //   owner,
     //   installationFacet,
     //   ethers,
     //   network
     // );
-
     // await installationAdminFacet.clean();
-
     // const all = await installationFacet.getAllUpgradeQueue();
-
     // console.log(all);
-
     // const upgradeQueue1: UpgradeQueue = {
     //   parcelId: 8,
     //   coordinateX: 0,
@@ -136,21 +157,13 @@ describe("Testing Equip Installation", async function () {
     //   owner: owner,
     // };
     // const signatureAlt1 = await genUpgradeInstallationSignature(8, 0, 0, 10);
-
     // await installationFacet.upgradeInstallation(upgradeQueue1, signatureAlt1);
-
     // const listPre = await installationFacet.getUserUpgradeQueue(owner);
-
     // console.log(listPre);
-
     // await mineBlocks(ethers, 50);
-
-    await installationAdminFacet.finalizeUpgrade();
-
+    // await installationAdminFacet.finalizeUpgrade();
     // const listPost = await installationFacet.getUserUpgradeQueue(owner);
-
     // console.log(listPost);
-
     // const upgradeQueue2: UpgradeQueue = {
     //   parcelId: 8,
     //   coordinateX: 0,
@@ -162,9 +175,7 @@ describe("Testing Equip Installation", async function () {
     // };
     // const signatureAlt2 = await genUpgradeInstallationSignature(8, 0, 0, 11);
     // await installationFacet.upgradeInstallation(upgradeQueue2, signatureAlt2);
-
     // await mineBlocks(ethers, 50);
-
     // await installationAdminFacet.finalizeUpgrade();
   });
 });

@@ -23,7 +23,7 @@ let incMax = 10000;
 let incMin = 1000;
 let bidMultiplier = 11120;
 
-const gasPrice = 100000000000;
+const gasPrice = 300000000000;
 
 const contractAddresses = {
   erc20Currency: ghstAddress,
