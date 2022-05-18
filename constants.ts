@@ -1,4 +1,4 @@
-export const gasPrice = 100000000000;
+export const gasPrice = 955626878362;
 
 export const kovanDiamondAddress = "0xa37D0c085121B6b7190A34514Ca28fC15Bb4dc22";
 export const maticDiamondAddress = "0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11";
