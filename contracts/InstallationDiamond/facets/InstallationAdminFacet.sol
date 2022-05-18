@@ -131,7 +131,6 @@ contract InstallationAdminFacet is Modifiers {
         }
         if (counter == 0) break;
       }
-      if (counter == 3) revert("InstallationFacet: No upgrades ready");
     }
   }
 }
