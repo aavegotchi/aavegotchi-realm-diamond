@@ -5,8 +5,8 @@ import { impersonate } from "../helperFunctions";
 
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 
-import { outputTile } from "./helperFunctions";
 import { gasPrice } from "../../constants";
+import { outputTile } from "../realm/realmHelpers";
 
 export async function setAddresses() {
   let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
@@ -32,20 +32,15 @@ export async function setAddresses() {
   }
 
   // add real data
-  const tile = outputTile(tileTypes[2], ethers);
+  const tile = outputTile(tileTypes[3]);
 
+  console.log("Adding tile:", tile);
   await tileFacet.addTileTypes([tile], {
     gasPrice: gasPrice,
   });
 
-  // await tileFacet.setAddresses(
-  //   maticAavegotchiDiamondAddress,
-  //   maticDiamondAddress,
-  //   ethers.constants.AddressZero,
-  //   pixelcraftAddress,
-  //   aavegotchiDAOAddress,
-  //   { gasPrice: gasPrice }
-  // );
+  console.log("Set deprecate time to:", new Date(1654092000 * 1000));
+  await tileFacet.editDeprecateTime("3", "1654092000", { gasPrice: gasPrice });
 
   const tiles = await tileFacet.getTileTypes([]);
   console.log("tiles:", tiles);

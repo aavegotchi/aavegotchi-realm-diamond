@@ -77,9 +77,12 @@ export function outputTile(tile: TileTypeInput): TileTypeOutput {
     tileType: tile.tileType,
     width: tile.width,
     height: tile.height,
-    alchemicaCost: tile.alchemicaCost.map((val) =>
-      ethers.utils.parseEther(val.toString())
-    ),
+    alchemicaCost: [
+      tile.alchemicaCost[0],
+      tile.alchemicaCost[1],
+      tile.alchemicaCost[2],
+      tile.alchemicaCost[3],
+    ],
     craftTime: tile.craftTime,
     name: tile.name,
   };
