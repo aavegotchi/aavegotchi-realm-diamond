@@ -353,4 +353,8 @@ contract TileFacet is Modifiers {
   function editDeprecateTime(uint256 _typeId, uint40 _deprecateTime) external onlyOwner {
     s.deprecateTime[_typeId] = _deprecateTime;
   }
+
+  function editTileType(uint256 _typeId, TileType calldata _updatedTile) external onlyOwner {
+    s.tileTypes[_typeId] = _updatedTile;
+  }
 }

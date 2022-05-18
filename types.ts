@@ -136,7 +136,7 @@ export interface TileTypeOutput {
   tileType: BigNumberish;
   width: Width;
   height: Height;
-  alchemicaCost: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];;
+  alchemicaCost: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
   craftTime: BigNumberish;
   name: string;
 }
