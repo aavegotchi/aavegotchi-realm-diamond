@@ -9,7 +9,7 @@ import {
   mumbaiInstallationDiamondAddress,
 } from "./installation/helperFunctions";
 
-export const gasPrice = 100000000000;
+export const gasPrice = 900000000000;
 
 export async function impersonate(
   address: string,
