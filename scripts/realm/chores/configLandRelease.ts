@@ -55,7 +55,8 @@ export async function setAddresses() {
 
   let tileFacet = (await ethers.getContractAt(
     "TileFacet",
-    maticTileDiamondAddress
+    maticTileDiamondAddress,
+    signer
   )) as TileFacet;
 
   if (network.name === "localhost" || network.name === "hardhat") {
@@ -93,7 +94,8 @@ export async function setAddresses() {
     ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
     ethers.constants.AddressZero, // gameManager
     maticTileDiamondAddress,
-    maticAavegotchiDiamondAddress
+    maticAavegotchiDiamondAddress,
+    { gasPrice: gasPrice }
   );
   await setRealmVarsTx.wait();
 
@@ -110,7 +112,8 @@ export async function setAddresses() {
       3 * 3600,
       2 * 3600,
       3600,
-    ]
+    ],
+    { gasPrice: gasPrice }
   );
   await setChannelingLimitsTx.wait();
 
@@ -121,7 +124,8 @@ export async function setAddresses() {
     gltr,
     pixelcraftAddress,
     aavegotchiDAOAddress,
-    ethers.utils.hexDataSlice(backendSigner.publicKey, 1)
+    ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
+    { gasPrice: gasPrice }
   );
 
   await setInstallationAddressesTx.wait();
@@ -132,13 +136,16 @@ export async function setAddresses() {
     maticRealmDiamondAddress,
     gltr,
     pixelcraftAddress,
-    aavegotchiDAOAddress
+    aavegotchiDAOAddress,
+    { gasPrice: gasPrice }
   );
 
   await setTileAddressesTx.wait();
 
   console.log("set game active");
-  const setGameTx = await realmFacet.setGameActive(true);
+  const setGameTx = await realmFacet.setGameActive(true, {
+    gasPrice: gasPrice,
+  });
 
   await setGameTx.wait();
 }
