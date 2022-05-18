@@ -256,6 +256,7 @@ contract InstallationFacet is Modifiers {
   /// @param _installationTypes An array containing the identifiers of the installationTypes to craft
   /// @param _gltr Array of GLTR to spend on each crafting
   function craftInstallations(uint16[] calldata _installationTypes, uint40[] calldata _gltr) external {
+    require(_installationTypes.length == _gltr.length, "InstallationFacet: Mismatched arrays");
     address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
 
     uint256 _installationTypesLength = s.installationTypes.length;
