@@ -14,14 +14,11 @@ import {
   greatPortalCapacity,
 } from "../../setVars";
 
-export async function upgrade(
-  installationDiamond: string,
-  alchemica: AlchemicaAddresses
-) {
+export async function upgrade() {
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
-
-  const requestConfig =
-    "(uint64 subId, uint32 callbackGasLimit, uint16 requestConfirmations, uint32 numWords, bytes32 keyHash)";
+  const installationDiamond = "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
+  // const requestConfig =
+  //   "(uint64 subId, uint32 callbackGasLimit, uint16 requestConfirmations, uint32 numWords, bytes32 keyHash)";
 
   const spilloverIO = "(uint256 rate, uint256 radius)";
 
@@ -31,16 +28,16 @@ export async function upgrade(
     "(uint256 coordinateX, uint256 coordinateY, uint256 district, string parcelId, string parcelAdress, uint256 size, uint256[4] boost)";
 
   const facets: FacetsAndAddSelectors[] = [
-    {
-      facetName: "VRFFacet",
-      addSelectors: [
-        "function rawFulfillRandomWords(uint256 requestId, uint256[] memory randomWords) external",
-        `function setConfig(${requestConfig} _requestConfig) external`,
-        "function subscribe() external",
-        "function topUpSubscription(uint256 amount) external",
-      ],
-      removeSelectors: [],
-    },
+    // {
+    //   facetName: "VRFFacet",
+    //   addSelectors: [
+    //     "function rawFulfillRandomWords(uint256 requestId, uint256[] memory randomWords) external",
+    //     `function setConfig(${requestConfig} _requestConfig) external`,
+    //     "function subscribe() external",
+    //     "function topUpSubscription(uint256 amount) external",
+    //   ],
+    //   removeSelectors: [],
+    // },
     {
       facetName: "RealmFacet",
       addSelectors: [
@@ -50,7 +47,7 @@ export async function upgrade(
         "function unequipTile(uint256 _realmId, uint256 _tileId, uint256 _x, uint256 _y, bytes _signature) external",
         "function checkCoordinates(uint256 _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _installationId) public view",
         "function upgradeInstallation(uint256 _realmId, uint256 _prevInstallationId, uint256 _nextInstallationId, uint256 _coordinateX, uint256 _coordinateY) external",
-        "function getParcelCapacity(uint256 _realmId, uint256 _alchemicaType) external view returns (uint256)",
+        // "function getParcelCapacity(uint256 _realmId, uint256 _alchemicaType) external view returns (uint256)",
         "function getHumbleGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[8][8] memory output_)",
         "function getReasonableGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[16][16] memory output_)",
         "function getSpaciousVerticalGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[32][64] memory output_)",
@@ -76,28 +73,28 @@ export async function upgrade(
     {
       facetName: "AlchemicaFacet",
       addSelectors: [
-        "function startSurveying(uint256 _realmId) external",
+        // "function startSurveying(uint256 _realmId) external",
         "function getTotalAlchemicas() external view returns (uint256[4][5] memory)",
         "function getRealmAlchemica(uint256 _realmId) external view returns (uint256[4] memory)",
-        "function progressSurveyingRound() external",
+        // "function progressSurveyingRound() external",
         "function setVars(uint256[4][5] calldata _alchemicas, uint256[4] calldata _boostMultipliers, uint256[4] calldata _greatPortalCapacity, address _installationsDiamond, address _vrfCoordinator, address _linkAddress, address[4] calldata _alchemicaAddresses, address _gltrAddress, bytes memory _backendPubKey, address _gameManager, address _tileDiamond, address _aavegotchiDiamond) external",
         "function getAvailableAlchemica(uint256 _realmId) public view returns (uint256[4] memory _availableAlchemica)",
-        "function claimAvailableAlchemica(uint256 _realmId, uint256[] calldata _alchemicaTypes, uint256 _gotchiId, bytes memory _signature) external",
+        // "function claimAvailableAlchemica(uint256 _realmId, uint256[] calldata _alchemicaTypes, uint256 _gotchiId, bytes memory _signature) external",
         "function channelAlchemica(uint256 _realmId, uint256 _gotchiId, uint256 _lastChanneled, bytes memory _signature) external",
-        "function exitAlchemica(uint256[] calldata _alchemica, uint256 _gotchiId, uint256 _lastExitTime, bytes memory _signature) external",
+        // "function exitAlchemica(uint256[] calldata _alchemica, uint256 _gotchiId, uint256 _lastExitTime, bytes memory _signature) external",
         "function getRoundAlchemica(uint256 _realmId, uint256 _roundId) external view returns (uint256[] memory)",
         "function getRoundBaseAlchemica(uint256 _realmId, uint256 _roundId) external view returns (uint256[] memory)",
         "function getLastChanneled(uint256 _gotchiId) public view returns (uint256)",
         "function getAlchemicaAddresses() external view returns (address[4] memory)",
         "function setChannelingLimits(uint256[] calldata _altarLevel, uint256[] calldata _limits) external",
         "function batchTransferAlchemica(address[] calldata _targets, uint256[4][] calldata _amounts) external",
-        "function batchTransferAlchemicaToGotchis(uint256[] calldata _gotchiIds, uint256[4][] calldata _amounts) external",
+        // "function batchTransferAlchemicaToGotchis(uint256[] calldata _gotchiIds, uint256[4][] calldata _amounts) external",
         "function batchTransferTokensToGotchis(uint256[] calldata _gotchiIds, address[] calldata _tokenAddresses, uint256[][] calldata _amounts) external",
         `function calculateSpilloverForReservoir(uint256 _realmId, uint256 _alchemicaType) public view returns (${spilloverIO} memory spillover)`,
-        "function testingStartSurveying(uint256 _realmId) external",
-        "function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external",
-        "function batchApproveAlchemica(address _spender, uint256[4] calldata _amounts) external",
-        `function testingMintParcel(address _to, uint256[] calldata _tokenIds, ${mintParcelInput}[] memory _metadata) external`,
+        // "function testingStartSurveying(uint256 _realmId) external",
+        // "function testingAlchemicaFaucet(uint256 _alchemicaType, uint256 _amount) external",
+        // "function batchApproveAlchemica(address _spender, uint256[4] calldata _amounts) external",
+        // `function testingMintParcel(address _to, uint256[] calldata _tokenIds, ${mintParcelInput}[] memory _metadata) external`,
       ],
       removeSelectors: [],
     },
@@ -112,6 +109,11 @@ export async function upgrade(
   //@ts-ignore
   const backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
 
+  // gotchiVerse
+  const fud = "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f";
+  const fomo = "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8";
+  const alpha = "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2";
+  const kek = "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C";
   //@ts-ignore
   const calldata = iface.encodeFunctionData(
     //@ts-ignore
@@ -122,14 +124,14 @@ export async function upgrade(
       boostMultipliers,
       greatPortalCapacity,
       installationDiamond,
-      "0x0000000000000000000000000000000000000000",
-      "0x0000000000000000000000000000000000000000",
-      [alchemica.fud, alchemica.fomo, alchemica.alpha, alchemica.kek],
-      alchemica.gltr,
+      "0x0000000000000000000000000000000000000000", //vrf
+      "0x0000000000000000000000000000000000000000", //link address
+      [fud, fomo, alpha, kek],
+      "0x0000000000000000000000000000000000000000", //gltr
       ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
-      "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
-      "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
-      "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
+      "0x0000000000000000000000000000000000000000", //game manager
+      "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355", //tile diamond
+      "0x86935F11C86623deC8a25696E1C19a8659CbF95d", //aavegotchi diamond
     ]
   );
 
@@ -147,13 +149,7 @@ export async function upgrade(
 }
 
 if (require.main === module) {
-  upgrade("0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5", {
-    fud: "",
-    fomo: "",
-    alpha: "",
-    kek: "",
-    gltr: "",
-  })
+  upgrade()
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

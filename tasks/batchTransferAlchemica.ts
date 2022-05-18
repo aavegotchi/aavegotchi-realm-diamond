@@ -5,7 +5,7 @@ import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { alchemica, gasPrice, maticDiamondAddress } from "../constants";
 import { impersonate } from "../scripts/helperFunctions";
-import { AlchemicaToken, RealmFacet } from "../typechain";
+import { AlchemicaFacet, AlchemicaToken, RealmFacet } from "../typechain";
 
 export interface MintParcelsTaskArgs {
   amounts: string;
@@ -31,11 +31,11 @@ task("batchTransferAlchemica", "batch transfers alchemica to address")
       const accounts: Signer[] = await hre.ethers.getSigners();
       const deployer = accounts[0];
 
-      let realmFacet = (await hre.ethers.getContractAt(
-        "RealmFacet",
+      let alchemicaFacet = (await hre.ethers.getContractAt(
+        "AlchemicaFacet",
         maticDiamondAddress,
         deployer
-      )) as RealmFacet;
+      )) as AlchemicaFacet;
 
       const wallet = taskArgs.wallet;
 
@@ -66,17 +66,21 @@ task("batchTransferAlchemica", "batch transfers alchemica to address")
       console.log("Batch transferring tokens to!", wallet);
 
       if (testing) {
-        realmFacet = await impersonate(
+        alchemicaFacet = await impersonate(
           owner,
-          realmFacet,
+          alchemicaFacet,
           hre.ethers,
           hre.network
         );
       }
       //transfer
-      const tx = await realmFacet.batchTransferAlchemica([wallet], [amounts], {
-        gasPrice: gasPrice,
-      });
+      const tx = await alchemicaFacet.batchTransferAlchemica(
+        [wallet],
+        [amounts],
+        {
+          gasPrice: gasPrice,
+        }
+      );
       await tx.wait();
 
       for (let i = 0; i < alchemica.length; i++) {
