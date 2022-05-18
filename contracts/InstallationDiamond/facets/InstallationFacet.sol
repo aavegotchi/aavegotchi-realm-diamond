@@ -7,16 +7,12 @@ import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {LibItems} from "../../libraries/LibItems.sol";
 import {LibERC998, ItemTypeIO} from "../../libraries/LibERC998.sol";
 import {LibStrings} from "../../libraries/LibStrings.sol";
-import {LibERC1155} from "../../libraries/LibERC1155.sol";
 import {LibERC20} from "../../libraries/LibERC20.sol";
 import {LibInstallation} from "../../libraries/LibInstallation.sol";
-import {LibItems} from "../../libraries/LibItems.sol";
 import {IERC721} from "../../interfaces/IERC721.sol";
-import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
 import {LibSignature} from "../../libraries/LibSignature.sol";
-
-import "hardhat/console.sol";
+import {InstallationAdminFacet} from "./InstallationAdminFacet.sol";
 
 contract InstallationFacet is Modifiers {
   event AddedToQueue(uint256 indexed _queueId, uint256 indexed _installationId, uint256 _readyBlock, address _sender);
@@ -35,8 +31,6 @@ contract InstallationFacet is Modifiers {
     uint256 readyBlock,
     uint256 installationId
   );
-
-  event UpgradeFinalized(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _newInstallationId);
 
   /***********************************|
    |             Read Functions         |
@@ -323,7 +317,7 @@ contract InstallationFacet is Modifiers {
       emit QueueClaimed(queueId);
     }
 
-    finalizeUpgrade();
+    InstallationAdminFacet(address(this)).finalizeUpgrade();
   }
 
   /// @notice Allow a user to speed up multiple queues(installation craft time) by paying the correct amount of $GLTR tokens
@@ -350,31 +344,9 @@ contract InstallationFacet is Modifiers {
       queueItem.readyBlock -= removeBlocks;
       emit CraftTimeReduced(queueId, removeBlocks);
 
-      finalizeUpgrade();
+      InstallationAdminFacet(address(this)).finalizeUpgrade();
     }
   }
-
-  // /// @notice Allow a user to claim installations from ready queues
-  // /// @dev Will throw if the caller is not the queue owner
-  // /// @dev Will throw if one of the queues is not ready
-  // /// @param _queueIds An array containing the identifiers of queues to claim
-  // function claimInstallations(uint256[] calldata _queueIds) external {
-  //   for (uint256 i; i < _queueIds.length; i++) {
-  //     uint256 queueId = _queueIds[i];
-
-  //     QueueItem memory queueItem = s.craftQueue[queueId];
-
-  //     require(msg.sender == queueItem.owner, "InstallationFacet: Not owner");
-  //     require(!queueItem.claimed, "InstallationFacet: already claimed");
-
-  //     require(block.number >= queueItem.readyBlock, "InstallationFacet: Installation not ready");
-
-  //     // mint installation
-  //     LibERC1155._safeMint(msg.sender, queueItem.installationType, queueItem.id);
-  //     s.craftQueue[queueId].claimed = true;
-  //     emit QueueClaimed(queueId);
-  //   }
-  // }
 
   /// @notice Allow a user to equip an installation to a parcel
   /// @dev Will throw if the caller is not the parcel diamond contract
@@ -389,7 +361,7 @@ contract InstallationFacet is Modifiers {
   ) external onlyRealmDiamond {
     LibInstallation._equipInstallation(_owner, _realmId, _installationId);
 
-    finalizeUpgrade();
+    InstallationAdminFacet(address(this)).finalizeUpgrade();
   }
 
   /// @notice Allow a user to unequip an installation from a parcel
@@ -399,7 +371,7 @@ contract InstallationFacet is Modifiers {
   function unequipInstallation(uint256 _realmId, uint256 _installationId) external onlyRealmDiamond {
     LibInstallation._unequipInstallation(_realmId, _installationId);
 
-    finalizeUpgrade();
+    InstallationAdminFacet(address(this)).finalizeUpgrade();
   }
 
   /// @notice Allow a user to upgrade an installation in a parcel
@@ -496,7 +468,7 @@ contract InstallationFacet is Modifiers {
         _upgradeQueue.installationId
       );
     }
-    finalizeUpgrade();
+    InstallationAdminFacet(address(this)).finalizeUpgrade();
   }
 
   /// @notice Allow a user to reduce the upgrade time of an ongoing queue
@@ -517,56 +489,6 @@ contract InstallationFacet is Modifiers {
     upgradeQueue.readyBlock -= removeBlocks;
     emit UpgradeTimeReduced(_queueId, upgradeQueue.parcelId, upgradeQueue.coordinateX, upgradeQueue.coordinateY, removeBlocks);
 
-    finalizeUpgrade();
-  }
-
-  /// @notice Allow anyone to finalize any existing queue upgrade
-  /// @dev Only three queue upgrades can be finalized in one transaction
-  function finalizeUpgrade() public {
-    require(s.upgradeQueue.length > 0, "InstallationFacet: No upgrades");
-    //can only process 3 upgrades per tx
-    uint256 counter = 3;
-    uint256 offset;
-    uint256 _upgradeQueueLength = s.upgradeQueue.length;
-    for (uint256 index; index < _upgradeQueueLength; index++) {
-      UpgradeQueue memory queueUpgrade = s.upgradeQueue[index - offset];
-      // check that upgrade is ready
-      if (block.number >= queueUpgrade.readyBlock) {
-        // burn old installation
-        LibInstallation._unequipInstallation(queueUpgrade.parcelId, queueUpgrade.installationId);
-        // mint new installation
-        uint256 nextLevelId = s.installationTypes[queueUpgrade.installationId].nextLevelId;
-        LibERC1155._safeMint(queueUpgrade.owner, nextLevelId, index - offset);
-        // equip new installation
-        LibInstallation._equipInstallation(queueUpgrade.owner, queueUpgrade.parcelId, nextLevelId);
-
-        RealmDiamond realm = RealmDiamond(s.realmDiamond);
-        realm.upgradeInstallation(
-          queueUpgrade.parcelId,
-          queueUpgrade.installationId,
-          nextLevelId,
-          queueUpgrade.coordinateX,
-          queueUpgrade.coordinateY
-        );
-
-        // update updateQueueLength
-        realm.subUpgradeQueueLength(queueUpgrade.parcelId);
-
-        // clean unique hash
-        bytes32 uniqueHash = keccak256(
-          abi.encodePacked(queueUpgrade.parcelId, queueUpgrade.coordinateX, queueUpgrade.coordinateY, queueUpgrade.installationId)
-        );
-        s.upgradeHashes[uniqueHash] = 0;
-
-        // pop upgrade from array
-        s.upgradeQueue[index - offset] = s.upgradeQueue[s.upgradeQueue.length - 1];
-        s.upgradeQueue.pop();
-        counter--;
-        offset++;
-        emit UpgradeFinalized(queueUpgrade.parcelId, queueUpgrade.coordinateX, queueUpgrade.coordinateY, nextLevelId);
-      }
-      if (counter == 0) break;
-    }
-    if (counter == 3) revert("InstallationFacet: No upgrades ready");
+    InstallationAdminFacet(address(this)).finalizeUpgrade();
   }
 }

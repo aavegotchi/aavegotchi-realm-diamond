@@ -6,7 +6,6 @@ import {
 } from "../../../tasks/deployUpgrade";
 import { AlchemicaFacet__factory } from "../../../typechain";
 import { AlchemicaFacetInterface } from "../../../typechain/AlchemicaFacet";
-import { Alchemica, AlchemicaAddresses } from "../../../types";
 import { maticDiamondAddress } from "../../../constants";
 import {
   alchemicaTotals,
@@ -17,15 +16,13 @@ import {
 export async function upgrade() {
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
   const installationDiamond = "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
-  // const requestConfig =
-  //   "(uint64 subId, uint32 callbackGasLimit, uint16 requestConfirmations, uint32 numWords, bytes32 keyHash)";
 
   const spilloverIO = "(uint256 rate, uint256 radius)";
 
   const parcelCoordinates = "(uint256[] coords)";
 
-  const mintParcelInput =
-    "(uint256 coordinateX, uint256 coordinateY, uint256 district, string parcelId, string parcelAdress, uint256 size, uint256[4] boost)";
+  // const mintParcelInput =
+  //   "(uint256 coordinateX, uint256 coordinateY, uint256 district, string parcelId, string parcelAdress, uint256 size, uint256[4] boost)";
 
   const facets: FacetsAndAddSelectors[] = [
     // {

@@ -1,18 +1,17 @@
 import { run, ethers } from "hardhat";
+import { maticDiamondAddress } from "../../../constants";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
-} from "../../tasks/deployUpgrade";
+} from "../../../tasks/deployUpgrade";
 
-import { maticDiamondAddress } from "../helperFunctions";
-
-export async function upgrade() {
+export async function upgrade(diamondAddress: string) {
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "RealmFacet",
+      facetName: "DiamondCutFacet",
       addSelectors: [],
       removeSelectors: [],
     },
@@ -22,7 +21,7 @@ export async function upgrade() {
 
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
-    diamondAddress: maticDiamondAddress,
+    diamondAddress: diamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: false,
     useMultisig: false,
@@ -34,7 +33,7 @@ export async function upgrade() {
 }
 
 if (require.main === module) {
-  upgrade()
+  upgrade(maticDiamondAddress)
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

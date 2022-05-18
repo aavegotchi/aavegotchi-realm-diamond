@@ -164,11 +164,15 @@ task(
         const newSelectors = getSighashes(facet.addSelectors, hre.ethers);
         const removeSelectors = getSighashes(facet.removeSelectors, hre.ethers);
 
+        //debug
         let existingFuncs = getSelectors(deployedFacet);
         for (const selector of newSelectors) {
-          if (!existingFuncs.includes(selector)) {
-            const index = newSelectors.findIndex((val) => val == selector);
+          const index = newSelectors.findIndex((val) => val == selector);
+          console.log(
+            `selector: ${selector}, function: ${facet.addSelectors[index]}`
+          );
 
+          if (!existingFuncs.includes(selector)) {
             throw Error(
               `Selector ${selector} (${facet.addSelectors[index]}) not found`
             );

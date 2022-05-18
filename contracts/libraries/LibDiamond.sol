@@ -7,6 +7,8 @@ pragma solidity ^0.8.0;
 /******************************************************************************/
 import {IDiamondCut} from "../interfaces/IDiamondCut.sol";
 
+import "hardhat/console.sol";
+
 library LibDiamond {
   bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
 
@@ -110,6 +112,8 @@ library LibDiamond {
       enforceHasContractCode(_newFacetAddress, "LibDiamondCut: Add facet has no code");
       for (uint256 selectorIndex; selectorIndex < _selectors.length; selectorIndex++) {
         bytes4 selector = _selectors[selectorIndex];
+
+        console.logBytes4(selector);
 
         bytes32 oldFacet = ds.facets[selector];
 
