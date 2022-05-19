@@ -45,11 +45,14 @@ library LibERC1155 {
     */
   event URI(string _value, uint256 indexed _tokenId);
 
-  event MintInstallation(address indexed _owner, uint256 indexed _installationType, uint256 _installationId);
+  event MintInstallation(address indexed _owner, uint256 indexed _installationId, uint256 _queueId);
+
+  event BatchMintInstallations(address indexed _owner, uint256 indexed _installationId, uint16 _amount);
 
   function _safeMint(
     address _to,
     uint256 _installationId,
+    uint16 _amount,
     uint256 _queueId
   ) internal {
     InstallationAppStorage storage s = LibAppStorageInstallation.diamondStorage();
@@ -66,8 +69,11 @@ library LibERC1155 {
       }
     }
 
-    addToOwner(_to, _installationId, 1);
-    emit MintInstallation(_to, _installationId, _queueId);
+    addToOwner(_to, _installationId, _amount);
+
+    if (_amount == 1) emit MintInstallation(_to, _installationId, _queueId);
+    else emit BatchMintInstallations(_to, _installationId, _amount);
+
     emit LibERC1155.TransferSingle(address(this), address(0), _to, _installationId, 1);
   }
 

@@ -250,6 +250,40 @@ contract InstallationFacet is Modifiers {
    |             Write Functions        |
    |__________________________________*/
 
+  function batchCraftInstallations(uint16[] calldata _installationTypes, uint16[] calldata _amounts) external {
+    require(_installationTypes.length == _amounts.length, "InstallationFacet: Mismatched arrays");
+    address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
+
+    for (uint256 i = 0; i < _installationTypes.length; i++) {
+      require(_installationTypes[i] < s.installationTypes.length, "InstallationFacet: Installation does not exist");
+
+      InstallationType memory installationType = s.installationTypes[_installationTypes[i]];
+      uint16 amount = _amounts[i];
+
+      require(installationType.craftTime == 0, "InstallationFacet: Craft time must be 0");
+      //level check
+      require(installationType.level == 1, "InstallationFacet: can only craft level 1");
+      //The preset deprecation time has elapsed
+      if (s.deprecateTime[_installationTypes[i]] > 0) {
+        require(block.timestamp < s.deprecateTime[_installationTypes[i]], "InstallationFacet: Installation has been deprecated");
+      }
+      require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
+
+      uint256[4] memory alchemicaCost;
+      alchemicaCost[0] = installationType.alchemicaCost[0] * amount;
+      alchemicaCost[1] = installationType.alchemicaCost[1] * amount;
+      alchemicaCost[2] = installationType.alchemicaCost[2] * amount;
+      alchemicaCost[3] = installationType.alchemicaCost[3] * amount;
+
+      //take the required alchemica
+      LibItems._splitAlchemica(alchemicaCost, alchemicaAddresses);
+
+      LibERC1155._safeMint(msg.sender, _installationTypes[i], amount, 0);
+    }
+
+    //after queue is over, user can claim installation
+  }
+
   /// @notice Allow a user to craft installations
   /// @dev Will throw even if one of the installationTypes is deprecated
   /// @dev Puts the installation into a queue
@@ -281,7 +315,7 @@ contract InstallationFacet is Modifiers {
       if (gltr > installationType.craftTime) revert("InstallationFacet: Too much GLTR");
 
       if (installationType.craftTime - gltr == 0) {
-        LibERC1155._safeMint(msg.sender, _installationTypes[i], 0);
+        LibERC1155._safeMint(msg.sender, _installationTypes[i], 1, 0);
       } else {
         uint40 readyBlock = uint40(block.number) + installationType.craftTime;
 
@@ -313,7 +347,7 @@ contract InstallationFacet is Modifiers {
       require(block.number >= queueItem.readyBlock, "InstallationFacet: Installation not ready");
 
       // mint installation
-      LibERC1155._safeMint(msg.sender, queueItem.installationType, queueItem.id);
+      LibERC1155._safeMint(msg.sender, queueItem.installationType, 1, queueItem.id);
       s.craftQueue[queueId].claimed = true;
       emit QueueClaimed(queueId);
     }

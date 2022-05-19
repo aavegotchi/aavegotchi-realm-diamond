@@ -45,8 +45,8 @@ library LibERC1155Tile {
     */
   event URI(string _value, uint256 indexed _tokenId);
 
-  event MintTile(address indexed _owner, uint256 indexed _tileType, uint256 _tileId);
-  event MintTiles(address indexed _owner, uint256 indexed _tileType, uint256 _tileId, uint16 _amount);
+  event MintTile(address indexed _owner, uint256 indexed _tileId, uint256 _queueId);
+  event BatchMintTiles(address indexed _owner, uint256 indexed _tileId, uint16 _amount);
 
   function _safeMint(
     address _to,
@@ -64,7 +64,7 @@ library LibERC1155Tile {
     addToOwner(_to, _tileId, _amount);
 
     if (_amount == 1) emit MintTile(_to, _tileId, _queueId);
-    else emit MintTiles(_to, _tileId, _queueId, _amount);
+    else emit BatchMintTiles(_to, _tileId, _amount);
 
     emit LibERC1155Tile.TransferSingle(address(this), address(0), _to, _tileId, _amount);
   }
