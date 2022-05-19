@@ -150,7 +150,7 @@ contract TileFacet is Modifiers {
    |             Write Functions        |
    |__________________________________*/
 
-  /// @notice Allow a user to craft tiles
+  /// @notice Allow a user to craft tiles one at a time
   /// @dev Puts the tile into a queue
   /// @param _tileTypes An array containing the identifiers of the tileTypes to craft
   function craftTiles(uint16[] calldata _tileTypes) external {
@@ -173,7 +173,7 @@ contract TileFacet is Modifiers {
       LibItems._splitAlchemica(tileType.alchemicaCost, alchemicaAddresses);
 
       if (tileType.craftTime == 0) {
-        LibERC1155Tile._safeMint(msg.sender, _tileTypes[i], 0);
+        LibERC1155Tile._safeMint(msg.sender, _tileTypes[i], 1, 0);
       } else {
         uint40 readyBlock = uint40(block.number) + tileType.craftTime;
 
@@ -187,6 +187,42 @@ contract TileFacet is Modifiers {
     }
     s.nextCraftId = _nextCraftId;
     //after queue is over, user can claim tile
+  }
+
+  /// @notice Allow a user to craft tiles by batch, as long as the craftTime is 0
+  ///@dev If the craftTime is > 0 please use the craftTiles() function for now.
+  /// @param _tileTypes An array containing the identifiers of the tileTypes to craft
+  function batchCraftTiles(uint16[] calldata _tileTypes, uint16[] calldata _amounts) external {
+    address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
+
+    require(_tileTypes.length == _amounts.length, "TileFacet: Incorrect array lengths");
+
+    //Iterate through all given tileTypes
+    for (uint256 i = 0; i < _tileTypes.length; i++) {
+      require(_tileTypes[i] < s.tileTypes.length, "TileFacet: Tile does not exist");
+
+      TileType memory tileType = s.tileTypes[_tileTypes[i]];
+      uint16 amount = _amounts[i];
+
+      //The preset deprecation time has elapsed
+      if (s.deprecateTime[_tileTypes[i]] > 0) {
+        require(block.timestamp < s.deprecateTime[_tileTypes[i]], "TileFacet: Tile has been deprecated");
+      }
+      require(!tileType.deprecated, "TileFacet: Tile has been deprecated");
+
+      require(tileType.craftTime == 0, "TileFacet: Cannot batch mint tiles with craft time");
+
+      uint256[4] memory alchemicaCost;
+      alchemicaCost[0] = tileType.alchemicaCost[0] * amount;
+      alchemicaCost[1] = tileType.alchemicaCost[1] * amount;
+      alchemicaCost[2] = tileType.alchemicaCost[2] * amount;
+      alchemicaCost[3] = tileType.alchemicaCost[3] * amount;
+
+      //take the required alchemica
+      LibItems._splitAlchemica(alchemicaCost, alchemicaAddresses);
+
+      LibERC1155Tile._safeMint(msg.sender, _tileTypes[i], amount, 0);
+    }
   }
 
   /// @notice Allow a user to claim tiles from ready queues
@@ -204,7 +240,7 @@ contract TileFacet is Modifiers {
       require(block.number >= queueItem.readyBlock, "TileFacet: tile not ready");
 
       // mint tile
-      LibERC1155Tile._safeMint(queueItem.owner, queueItem.tileType, queueItem.id);
+      LibERC1155Tile._safeMint(queueItem.owner, queueItem.tileType, 1, queueItem.id);
       s.craftQueue[queueId].claimed = true;
       emit QueueClaimed(queueId);
     }
