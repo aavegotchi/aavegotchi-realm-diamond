@@ -368,6 +368,14 @@ contract AlchemicaFacet is Modifiers {
     return s.gotchiChannelings[_gotchiId];
   }
 
+  /// @notice Return the last timestamp of an altar channeling
+  /// @dev used as a parameter in channelAlchemica
+  /// @param _parcelId Identifier of ERC721 parcel
+  /// @return last channeling timestamp
+  function getParcelLastChanneled(uint256 _parcelId) public view returns (uint256) {
+    return s.parcelChannelings[_parcelId];
+  }
+
   /// @notice Helper function to batch transfer alchemica
   /// @param _targets Array of target addresses
   /// @param _amounts Nested array of amounts to transfer.
