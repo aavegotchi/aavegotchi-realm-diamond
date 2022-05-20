@@ -385,6 +385,7 @@ contract RealmFacet is Modifiers {
 
   function getParcelsAccessRights(uint256[] calldata _parcelIds, uint256[] calldata _actionRights) external view returns (uint256[] memory output_) {
     require(_parcelIds.length == _actionRights.length, "RealmFacet: Mismatched arrays");
+    output_ = new uint256[](_parcelIds.length);
     for (uint256 i; i < _parcelIds.length; i++) {
       output_[i] = s.accessRights[_parcelIds[i]][_actionRights[i]];
     }
