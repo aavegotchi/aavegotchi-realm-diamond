@@ -38,8 +38,10 @@ export async function upgrade() {
 
   await run("deployUpgrade", args);
 
+  console.log("Update golden altar");
   await updateGoldenAltars();
-  console.log("gogogo");
+
+  console.log("Update altar");
   await updateAltars();
 }
 
