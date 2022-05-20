@@ -1,11 +1,11 @@
 import { ethers } from "hardhat";
-import { maticInstallationDiamondAddress } from "../../constants";
-import { installationTypes } from "../../data/installations/altars";
-import { InstallationAdminFacet, InstallationFacet } from "../../typechain";
+import { maticInstallationDiamondAddress } from "../../../constants";
+import { installationTypes } from "../../../data/installations/altars";
+import { InstallationAdminFacet, InstallationFacet } from "../../../typechain";
 
 import { LedgerSigner } from "@anders-t/ethers-ledger";
-import { outputInstallation } from "../realm/realmHelpers";
-import { gasPrice } from "./helperFunctions";
+import { outputInstallation } from "../../realm/realmHelpers";
+import { gasPrice } from "../helperFunctions";
 
 export async function setAddresses() {
   const signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");

@@ -84,6 +84,14 @@ contract InstallationAdminFacet is Modifiers {
     s.deprecateTime[_typeId] = _deprecateTime;
   }
 
+  function editInstallationTypes(uint256[] calldata _ids, InstallationType[] calldata _installationTypes) external onlyOwner {
+    require(_ids.length == _installationTypes.length, "InstallationAdminFacet: Mismatched arrays");
+    for (uint256 i = 0; i < _ids.length; i++) {
+      uint256 id = _ids[i];
+      s.installationTypes[id] = _installationTypes[i];
+    }
+  }
+
   /// @notice Allow anyone to finalize any existing queue upgrade
   /// @dev Only three queue upgrades can be finalized in one transaction
   function finalizeUpgrade() public {
