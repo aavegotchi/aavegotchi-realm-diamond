@@ -1,4 +1,11 @@
+import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { ethers, network } from "hardhat";
+import {
+  maticInstallationDiamondAddress,
+  maticRealmDiamondAddress,
+  maticTileDiamondAddress,
+} from "../../../constants";
+import { GLTR_ADDRESS } from "../../../helpers/constants";
 
 import { InstallationAdminFacet, OwnershipFacet } from "../../../typechain";
 
@@ -6,39 +13,72 @@ import {
   aavegotchiDAOAddress,
   impersonate,
   maticAavegotchiDiamondAddress,
-  maticDiamondAddress,
-  pixelcraftAddress,
 } from "../../helperFunctions";
+import { gasPrice } from "../helperFunctions";
 
 export async function setAddresses() {
-  const diamondAddress = "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
+  const signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
+
+  //@ts-ignore
+  const backendSigner = new ethers.Wallet(process.env.PROD_PK);
+
+  const testing = ["hardhat"].includes(network.name);
 
   const ownershipFacet = (await ethers.getContractAt(
     "OwnershipFacet",
-    diamondAddress
+    maticInstallationDiamondAddress
   )) as OwnershipFacet;
   const owner = await ownershipFacet.owner();
   console.log("owner:", owner);
 
-  let installationAdminFacet = (await ethers.getContractAt(
-    "InstallationAdminFacet",
-    diamondAddress
-  )) as InstallationAdminFacet;
+  // let installationAdminFacet = (await ethers.getContractAt(
+  //   "InstallationAdminFacet",
+  //   maticInstallationDiamondAddress,
+  //   signer
+  // )) as InstallationAdminFacet;
 
-  installationAdminFacet = await impersonate(
-    owner,
-    installationAdminFacet,
-    ethers,
-    network
+  // if (testing)
+  //   installationAdminFacet = await impersonate(
+  //     owner,
+  //     installationAdminFacet,
+  //     ethers,
+  //     network
+  //   );
+
+  const newPixelcraftAddress = "0xcfD39603A5059F966cA490bEB3002a7a57A63233";
+
+  // const tx = await installationAdminFacet.setAddresses(
+  //   maticAavegotchiDiamondAddress,
+  //   maticRealmDiamondAddress,
+  //   GLTR_ADDRESS,
+  //   newPixelcraftAddress, //update
+  //   aavegotchiDAOAddress,
+  //   ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
+  //   { gasPrice: gasPrice }
+  // );
+  // await tx.wait();
+  console.log("Installation Addresses set!");
+
+  let tileFacet = await ethers.getContractAt(
+    "TileFacet",
+    maticTileDiamondAddress,
+    signer
   );
 
-  await installationAdminFacet.setAddresses(
+  if (testing) tileFacet = await impersonate(owner, tileFacet, ethers, network);
+
+  console.log("set tileDiamond addresses");
+  const setTileAddressesTx = await tileFacet.setAddresses(
     maticAavegotchiDiamondAddress,
-    maticDiamondAddress,
-    ethers.constants.AddressZero,
-    pixelcraftAddress,
-    aavegotchiDAOAddress
+    maticRealmDiamondAddress,
+    GLTR_ADDRESS,
+    newPixelcraftAddress,
+    aavegotchiDAOAddress,
+    { gasPrice: gasPrice }
   );
+  await setTileAddressesTx.wait();
+
+  console.log("Tile addresses set");
 }
 
 // We recommend this pattern to be able to use async/await everywhere
