@@ -46,13 +46,15 @@ library LibAlchemica {
       _installationId
     );
 
-    uint256 altarPrerequisite = installationType.prerequisites[0];
+    // uint256 altarPrerequisite = installationType.prerequisites[0];
     uint256 lodgePrerequisite = installationType.prerequisites[1];
 
+    //Temporarily disable Altar check to allow bugged upgrades to be fixed.
     // check altar requirement
-    uint256 equippedAltarId = s.parcels[_realmId].altarId;
-    uint256 equippedAltarLevel = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(equippedAltarId).level;
-    require(equippedAltarLevel >= altarPrerequisite, "RealmFacet: Altar Tech Tree Reqs not met");
+    // uint256 equippedAltarId = s.parcels[_realmId].altarId;
+    // uint256 equippedAltarLevel = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(equippedAltarId).level;
+
+    // require(equippedAltarLevel >= altarPrerequisite, "RealmFacet: Altar Tech Tree Reqs not met");
 
     // check lodge requirement
     if (lodgePrerequisite > 0) {
@@ -69,7 +71,9 @@ library LibAlchemica {
     uint256 alchemicaType = installationType.alchemicaType;
 
     //unclaimed alchemica must be settled before mutating harvestRate and capacity
-    settleUnclaimedAlchemica(_realmId, alchemicaType);
+    if (installationType.harvestRate > 0 || installationType.capacity > 0) {
+      settleUnclaimedAlchemica(_realmId, alchemicaType);
+    }
 
     //handle harvester
     if (installationType.harvestRate > 0) {
@@ -132,7 +136,9 @@ library LibAlchemica {
     uint256 alchemicaType = installationType.alchemicaType;
 
     //unclaimed alchemica must be settled before updating harvestRate and capacity
-    settleUnclaimedAlchemica(_realmId, alchemicaType);
+    if (installationType.harvestRate > 0 || installationType.capacity > 0) {
+      settleUnclaimedAlchemica(_realmId, alchemicaType);
+    }
 
     //Decrement harvest variables
     if (installationType.harvestRate > 0) {
@@ -141,7 +147,6 @@ library LibAlchemica {
 
     //Altar
     if (installationType.installationType == 0 && !isUpgrade) {
-      //@question: do we need any special exceptions for the Altar? Should be handled by tech tree
       s.parcels[_realmId].altarId = 0;
     }
 
