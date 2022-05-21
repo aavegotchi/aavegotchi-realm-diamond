@@ -305,7 +305,8 @@ contract AlchemicaFacet is Modifiers {
           "AlchemicaFacet: Only Parcel owner/borrower can channel"
         );
       } catch (bytes memory) {
-        revert("AlchemicaFacet: Only Parcel owner/borrower can channel");
+        //If the lending check fails, then must be owner
+        require(LibMeta.msgSender() == s.parcels[_realmId].owner, "AlchemicaFacet: Only Parcel owner/borrower can channel");
       }
     }
 
