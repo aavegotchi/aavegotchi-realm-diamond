@@ -146,12 +146,14 @@ contract InstallationAdminFacet is Modifiers {
     uint256 coordinateX;
     uint256 coordinateY;
     if (_user) {
+      //use user queue
       readyBlock = s.userUpgradeQueue[_owner][index].readyBlock;
       parcelId = s.userUpgradeQueue[_owner][index].parcelId;
       installationId = s.userUpgradeQueue[_owner][index].installationId;
       coordinateX = s.userUpgradeQueue[_owner][index].coordinateX;
       coordinateY = s.userUpgradeQueue[_owner][index].coordinateY;
     } else {
+      //use deprecated global queue
       readyBlock = s.upgradeQueue[index].readyBlock;
       parcelId = s.upgradeQueue[index].parcelId;
       installationId = s.upgradeQueue[index].installationId;
@@ -190,7 +192,6 @@ contract InstallationAdminFacet is Modifiers {
 
       emit UpgradeFinalized(parcelId, coordinateX, coordinateY, nextLevelId);
     }
-    // }
   }
 
   function upgradeInstallation(
