@@ -23,15 +23,6 @@ contract InstallationFacet is Modifiers {
 
   event UpgradeTimeReduced(uint256 indexed _queueId, uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _blocksReduced);
 
-  event UpgradeInitiated(
-    uint256 indexed _realmId,
-    uint256 _coordinateX,
-    uint256 _coordinateY,
-    uint256 blockInitiated,
-    uint256 readyBlock,
-    uint256 installationId
-  );
-
   /***********************************|
    |             Read Functions         |
    |__________________________________*/
@@ -318,7 +309,7 @@ contract InstallationFacet is Modifiers {
       emit QueueClaimed(queueId);
     }
 
-    InstallationAdminFacet(address(this)).finalizeUpgrade();
+    LibInstallation.finalizeUpgrade();
   }
 
   /// @notice Allow a user to speed up multiple queues(installation craft time) by paying the correct amount of $GLTR tokens
@@ -345,7 +336,7 @@ contract InstallationFacet is Modifiers {
       queueItem.readyBlock -= removeBlocks;
       emit CraftTimeReduced(queueId, removeBlocks);
 
-      InstallationAdminFacet(address(this)).finalizeUpgrade();
+      LibInstallation.finalizeUpgrade();
     }
   }
 
@@ -362,7 +353,7 @@ contract InstallationFacet is Modifiers {
   ) external onlyRealmDiamond {
     LibInstallation._equipInstallation(_owner, _realmId, _installationId);
 
-    InstallationAdminFacet(address(this)).finalizeUpgrade();
+    LibInstallation.finalizeUpgrade();
   }
 
   /// @notice Allow a user to unequip an installation from a parcel
@@ -372,7 +363,7 @@ contract InstallationFacet is Modifiers {
   function unequipInstallation(uint256 _realmId, uint256 _installationId) external onlyRealmDiamond {
     LibInstallation._unequipInstallation(_realmId, _installationId);
 
-    InstallationAdminFacet(address(this)).finalizeUpgrade();
+    LibInstallation.finalizeUpgrade();
   }
 
   /// @notice Allow a user to upgrade an installation in a parcel
@@ -385,91 +376,7 @@ contract InstallationFacet is Modifiers {
     bytes memory _signature,
     uint40 _gltr
   ) external {
-    require(
-      LibSignature.isValid(
-        keccak256(abi.encodePacked(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId)),
-        _signature,
-        s.backendPubKey
-      ),
-      "InstallationFacet: Invalid signature"
-    );
-    // check owner
-    require(IERC721(s.realmDiamond).ownerOf(_upgradeQueue.parcelId) == _upgradeQueue.owner, "InstallationFacet: Not owner");
-    // check coordinates
-    RealmDiamond realm = RealmDiamond(s.realmDiamond);
-
-    //check upgradeQueueCapacity
-    require(
-      realm.getParcelUpgradeQueueCapacity(_upgradeQueue.parcelId) > realm.getParcelUpgradeQueueLength(_upgradeQueue.parcelId),
-      "InstallationFacet: UpgradeQueue full"
-    );
-
-    realm.checkCoordinates(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId);
-
-    // check unique hash
-    bytes32 uniqueHash = keccak256(
-      abi.encodePacked(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId)
-    );
-
-    //The same upgrade cannot be queued twice
-    require(s.upgradeHashes[uniqueHash] == 0, "InstallationFacet: Upgrade hash not unique");
-
-    s.upgradeHashes[uniqueHash] = _upgradeQueue.parcelId;
-
-    //current installation
-    InstallationType memory prevInstallation = s.installationTypes[_upgradeQueue.installationId];
-
-    //next level
-    InstallationType memory nextInstallation = s.installationTypes[prevInstallation.nextLevelId];
-
-    //take the required alchemica
-    address[4] memory alchemicaAddresses = realm.getAlchemicaAddresses();
-    LibItems._splitAlchemica(nextInstallation.alchemicaCost, alchemicaAddresses);
-
-    require(prevInstallation.nextLevelId > 0, "InstallationFacet: Maximum upgrade reached");
-    require(prevInstallation.installationType == nextInstallation.installationType, "InstallationFacet: Wrong installation type");
-    require(prevInstallation.alchemicaType == nextInstallation.alchemicaType, "InstallationFacet: Wrong alchemicaType");
-    require(prevInstallation.level == nextInstallation.level - 1, "InstallationFacet: Wrong installation level");
-
-    IERC20(s.gltr).transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, _gltr * 10**18); //should revert if user doesnt have enough GLTR
-
-    //prevent underflow if user sends too much GLTR
-    if (_gltr > nextInstallation.craftTime) revert("InstallationFacet: Too much GLTR");
-
-    //Confirm upgrade immediately
-    if (nextInstallation.craftTime - _gltr == 0) {
-      realm.upgradeInstallation(
-        _upgradeQueue.parcelId,
-        _upgradeQueue.installationId,
-        prevInstallation.nextLevelId,
-        _upgradeQueue.coordinateX,
-        _upgradeQueue.coordinateY
-      );
-    } else {
-      //Use the userUpgradeQueue instead of the global queue
-      UserUpgradeQueue memory upgrade = UserUpgradeQueue(
-        _upgradeQueue.coordinateX,
-        _upgradeQueue.coordinateY,
-        uint40(block.number) + nextInstallation.craftTime - _gltr,
-        false,
-        _upgradeQueue.parcelId,
-        _upgradeQueue.installationId
-      );
-      s.userUpgradeQueue[_upgradeQueue.owner].push(upgrade);
-
-      // update upgradeQueueLength
-      realm.addUpgradeQueueLength(_upgradeQueue.parcelId);
-
-      emit UpgradeInitiated(
-        _upgradeQueue.parcelId,
-        _upgradeQueue.coordinateX,
-        _upgradeQueue.coordinateY,
-        block.number,
-        uint40(block.number) + nextInstallation.craftTime - _gltr,
-        _upgradeQueue.installationId
-      );
-    }
-    InstallationAdminFacet(address(this)).finalizeUpgrade();
+    LibInstallation._upgradeInstallation(_upgradeQueue, _gltr, _signature);
   }
 
   /// @notice Allow a user to reduce the upgrade time of an ongoing queue
@@ -490,6 +397,31 @@ contract InstallationFacet is Modifiers {
     upgradeQueue.readyBlock -= removeBlocks;
     emit UpgradeTimeReduced(_queueId, upgradeQueue.parcelId, upgradeQueue.coordinateX, upgradeQueue.coordinateY, removeBlocks);
 
-    InstallationAdminFacet(address(this)).finalizeUpgrade();
+    LibInstallation.finalizeUpgrade();
+  }
+
+  /// @notice Allow a user to reduce the upgrade time of an ongoing queue
+  /// @dev Will throw if the caller is not the owner of the queue
+  /// @param _queueId The identifier of the queue whose upgrade time is to be reduced
+  /// @param _amount The number of $GLTR token to be paid, in blocks
+  function reduceUserUpgradeTime(
+    address _owner,
+    uint256 _queueId,
+    uint40 _amount
+  ) external {
+    UserUpgradeQueue storage upgradeQueue = s.userUpgradeQueue[_owner][_queueId];
+    require(msg.sender == _owner, "InstallationFacet: Not owner");
+
+    require(block.number <= upgradeQueue.readyBlock, "InstallationFacet: Upgrade already done");
+
+    IERC20 gltr = IERC20(s.gltr);
+
+    uint40 blockLeft = upgradeQueue.readyBlock - uint40(block.number);
+    uint40 removeBlocks = _amount <= blockLeft ? _amount : blockLeft;
+    gltr.burnFrom(msg.sender, removeBlocks * 10**18);
+    upgradeQueue.readyBlock -= removeBlocks;
+    emit UpgradeTimeReduced(_queueId, upgradeQueue.parcelId, upgradeQueue.coordinateX, upgradeQueue.coordinateY, removeBlocks);
+
+    LibInstallation.finalizeUpgrade();
   }
 }
