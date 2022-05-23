@@ -318,6 +318,8 @@ contract AlchemicaFacet is Modifiers {
 
     uint256 altarLevel = InstallationDiamondInterface(s.installationsDiamond).getAltarLevel(s.parcels[_realmId].altarId);
 
+    require(altarLevel > 0, "AlchemicaFacet: Must equip Altar");
+
     //How often Altars can channel depends on their level
     require(block.timestamp > s.parcelChannelings[_realmId] + s.channelingLimits[altarLevel], "AlchemicaFacet: Parcel can't channel yet");
 
