@@ -45,6 +45,15 @@ struct UpgradeQueue {
   uint256 installationId;
 }
 
+struct UserUpgradeQueue {
+  uint16 coordinateX;
+  uint16 coordinateY;
+  uint40 readyBlock;
+  bool claimed;
+  uint256 parcelId;
+  uint256 installationId;
+}
+
 struct InstallationAppStorage {
   address realmDiamond;
   address aavegotchiDiamond;
@@ -70,6 +79,7 @@ struct InstallationAppStorage {
   mapping(uint256 => uint256) deprecateTime;
   mapping(bytes32 => uint256) upgradeHashes;
   bytes backendPubKey;
+  mapping(address => UserUpgradeQueue[]) userUpgradeQueue;
 }
 
 library LibAppStorageInstallation {

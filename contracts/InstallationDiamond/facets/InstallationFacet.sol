@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-import {LibAppStorageInstallation, InstallationType, QueueItem, UpgradeQueue, Modifiers} from "../../libraries/AppStorageInstallation.sol";
+import {LibAppStorageInstallation, InstallationType, QueueItem, UpgradeQueue, UserUpgradeQueue, Modifiers} from "../../libraries/AppStorageInstallation.sol";
 import {LibERC1155} from "../../libraries/LibERC1155.sol";
 import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {LibItems} from "../../libraries/LibItems.sol";
@@ -193,13 +193,13 @@ contract InstallationFacet is Modifiers {
 
   /// @notice Query details about a specific user ongoing upgrade queues
   /// @return output_ An array of structs, each representing an ongoing upgrade queue
-  function getUserUpgradeQueue(address _owner) external view returns (UpgradeQueue[] memory output_) {
-    uint256 length = s.upgradeQueue.length;
-    output_ = new UpgradeQueue[](length);
+  function getUserUpgradeQueue(address _owner) external view returns (UserUpgradeQueue[] memory output_) {
+    uint256 length = s.userUpgradeQueue[_owner].length;
+    output_ = new UserUpgradeQueue[](length);
     uint256 counter;
     for (uint256 i; i < length; i++) {
       if (s.upgradeQueue[i].owner == _owner) {
-        output_[counter] = s.upgradeQueue[i];
+        output_[counter] = s.userUpgradeQueue[_owner][i];
         counter++;
       }
     }
@@ -446,8 +446,8 @@ contract InstallationFacet is Modifiers {
         _upgradeQueue.coordinateY
       );
     } else {
-      UpgradeQueue memory upgrade = UpgradeQueue(
-        _upgradeQueue.owner,
+      //Use the userUpgradeQueue instead of the global queue
+      UserUpgradeQueue memory upgrade = UserUpgradeQueue(
         _upgradeQueue.coordinateX,
         _upgradeQueue.coordinateY,
         uint40(block.number) + nextInstallation.craftTime - _gltr,
@@ -455,7 +455,7 @@ contract InstallationFacet is Modifiers {
         _upgradeQueue.parcelId,
         _upgradeQueue.installationId
       );
-      s.upgradeQueue.push(upgrade);
+      s.userUpgradeQueue[_upgradeQueue.owner].push(upgrade);
 
       // update upgradeQueueLength
       realm.addUpgradeQueueLength(_upgradeQueue.parcelId);
