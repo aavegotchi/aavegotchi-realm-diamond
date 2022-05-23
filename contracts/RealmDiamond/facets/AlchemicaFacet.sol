@@ -331,6 +331,8 @@ contract AlchemicaFacet is Modifiers {
 
     (uint256 rate, uint256 radius) = InstallationDiamondInterface(s.installationsDiamond).spilloverRateAndRadiusOfId(s.parcels[_realmId].altarId);
 
+    require(rate > 0, "InstallationFacet: Spillover Rate cannot be 0");
+
     uint256[4] memory channelAmounts = [uint256(20e18), uint256(10e18), uint256(5e18), uint256(2e18)];
     // apply kinship modifier
     uint256 kinship = diamond.kinship(_gotchiId) * 10000;
