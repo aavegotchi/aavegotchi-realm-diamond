@@ -4,8 +4,6 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../tasks/deployUpgrade";
-import { InstallationFacet__factory } from "../../typechain";
-import { InstallationFacetInterface } from "../../typechain/InstallationFacet";
 
 export async function upgrade() {
   const diamondUpgrader = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";

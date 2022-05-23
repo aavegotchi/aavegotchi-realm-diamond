@@ -6,12 +6,8 @@ import {LibERC1155} from "../../libraries/LibERC1155.sol";
 import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {LibItems} from "../../libraries/LibItems.sol";
 import {LibERC998, ItemTypeIO} from "../../libraries/LibERC998.sol";
-import {LibStrings} from "../../libraries/LibStrings.sol";
-import {LibERC20} from "../../libraries/LibERC20.sol";
 import {LibInstallation} from "../../libraries/LibInstallation.sol";
-import {IERC721} from "../../interfaces/IERC721.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
-import {LibSignature} from "../../libraries/LibSignature.sol";
 import {InstallationAdminFacet} from "./InstallationAdminFacet.sol";
 
 contract InstallationFacet is Modifiers {
@@ -309,7 +305,7 @@ contract InstallationFacet is Modifiers {
       emit QueueClaimed(queueId);
     }
 
-    LibInstallation.finalizeUpgrade();
+    InstallationAdminFacet(address(this)).finalizeUpgrade();
   }
 
   /// @notice Allow a user to speed up multiple queues(installation craft time) by paying the correct amount of $GLTR tokens
@@ -336,7 +332,7 @@ contract InstallationFacet is Modifiers {
       queueItem.readyBlock -= removeBlocks;
       emit CraftTimeReduced(queueId, removeBlocks);
 
-      LibInstallation.finalizeUpgrade();
+      InstallationAdminFacet(address(this)).finalizeUpgrade();
     }
   }
 
@@ -353,7 +349,7 @@ contract InstallationFacet is Modifiers {
   ) external onlyRealmDiamond {
     LibInstallation._equipInstallation(_owner, _realmId, _installationId);
 
-    LibInstallation.finalizeUpgrade();
+    InstallationAdminFacet(address(this)).finalizeUpgrade();
   }
 
   /// @notice Allow a user to unequip an installation from a parcel
@@ -363,65 +359,31 @@ contract InstallationFacet is Modifiers {
   function unequipInstallation(uint256 _realmId, uint256 _installationId) external onlyRealmDiamond {
     LibInstallation._unequipInstallation(_realmId, _installationId);
 
-    LibInstallation.finalizeUpgrade();
+    InstallationAdminFacet(address(this)).finalizeUpgrade();
   }
 
-  /// @notice Allow a user to upgrade an installation in a parcel
-  /// @dev Will throw if the caller is not the owner of the parcel in which the installation is installed
-  /// @param _upgradeQueue A struct containing details about the queue which contains the installation to upgrade
-  ///@param _signature API signature
-  ///@param _gltr Amount of GLTR to use, can be 0
-  function upgradeInstallation(
-    UpgradeQueue calldata _upgradeQueue,
-    bytes memory _signature,
-    uint40 _gltr
-  ) external {
-    LibInstallation._upgradeInstallation(_upgradeQueue, _gltr, _signature);
-  }
+  // /// @notice Allow a user to reduce the upgrade time of an ongoing queue
+  // /// @dev Will throw if the caller is not the owner of the queue
+  // /// @param _queueId The identifier of the queue whose upgrade time is to be reduced
+  // /// @param _amount The number of $GLTR token to be paid, in blocks
+  // function reduceUserUpgradeTime(
+  //   address _owner,
+  //   uint256 _queueId,
+  //   uint40 _amount
+  // ) external {
+  //   UserUpgradeQueue storage upgradeQueue = s.userUpgradeQueue[_owner][_queueId];
+  //   require(msg.sender == _owner, "InstallationFacet: Not owner");
 
-  /// @notice Allow a user to reduce the upgrade time of an ongoing queue
-  /// @dev Will throw if the caller is not the owner of the queue
-  /// @param _queueId The identifier of the queue whose upgrade time is to be reduced
-  /// @param _amount The number of $GLTR token to be paid, in blocks
-  function reduceUpgradeTime(uint256 _queueId, uint40 _amount) external {
-    UpgradeQueue storage upgradeQueue = s.upgradeQueue[_queueId];
-    require(msg.sender == upgradeQueue.owner, "InstallationFacet: Not owner");
+  //   require(block.number <= upgradeQueue.readyBlock, "InstallationFacet: Upgrade already done");
 
-    require(block.number <= upgradeQueue.readyBlock, "InstallationFacet: Upgrade already done");
+  //   IERC20 gltr = IERC20(s.gltr);
 
-    IERC20 gltr = IERC20(s.gltr);
+  //   uint40 blockLeft = upgradeQueue.readyBlock - uint40(block.number);
+  //   uint40 removeBlocks = _amount <= blockLeft ? _amount : blockLeft;
+  //   gltr.burnFrom(msg.sender, removeBlocks * 10**18);
+  //   upgradeQueue.readyBlock -= removeBlocks;
+  //   emit UpgradeTimeReduced(_queueId, upgradeQueue.parcelId, upgradeQueue.coordinateX, upgradeQueue.coordinateY, removeBlocks);
 
-    uint40 blockLeft = upgradeQueue.readyBlock - uint40(block.number);
-    uint40 removeBlocks = _amount <= blockLeft ? _amount : blockLeft;
-    gltr.burnFrom(msg.sender, removeBlocks * 10**18);
-    upgradeQueue.readyBlock -= removeBlocks;
-    emit UpgradeTimeReduced(_queueId, upgradeQueue.parcelId, upgradeQueue.coordinateX, upgradeQueue.coordinateY, removeBlocks);
-
-    LibInstallation.finalizeUpgrade();
-  }
-
-  /// @notice Allow a user to reduce the upgrade time of an ongoing queue
-  /// @dev Will throw if the caller is not the owner of the queue
-  /// @param _queueId The identifier of the queue whose upgrade time is to be reduced
-  /// @param _amount The number of $GLTR token to be paid, in blocks
-  function reduceUserUpgradeTime(
-    address _owner,
-    uint256 _queueId,
-    uint40 _amount
-  ) external {
-    UserUpgradeQueue storage upgradeQueue = s.userUpgradeQueue[_owner][_queueId];
-    require(msg.sender == _owner, "InstallationFacet: Not owner");
-
-    require(block.number <= upgradeQueue.readyBlock, "InstallationFacet: Upgrade already done");
-
-    IERC20 gltr = IERC20(s.gltr);
-
-    uint40 blockLeft = upgradeQueue.readyBlock - uint40(block.number);
-    uint40 removeBlocks = _amount <= blockLeft ? _amount : blockLeft;
-    gltr.burnFrom(msg.sender, removeBlocks * 10**18);
-    upgradeQueue.readyBlock -= removeBlocks;
-    emit UpgradeTimeReduced(_queueId, upgradeQueue.parcelId, upgradeQueue.coordinateX, upgradeQueue.coordinateY, removeBlocks);
-
-    LibInstallation.finalizeUpgrade();
-  }
+  //   InstallationAdminFacet(address(this)).finalizeUpgrade();
+  // }
 }
