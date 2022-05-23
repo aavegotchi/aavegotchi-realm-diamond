@@ -3,13 +3,7 @@ pragma solidity 0.8.9;
 
 import {LibERC998} from "../libraries/LibERC998.sol";
 import {LibERC1155} from "../libraries/LibERC1155.sol";
-import {LibERC20} from "../libraries/LibERC20.sol";
 import {LibAppStorageInstallation, InstallationAppStorage, UpgradeQueue, UserUpgradeQueue, InstallationType} from "../libraries/AppStorageInstallation.sol";
-import {LibSignature} from "../libraries/LibSignature.sol";
-import {RealmDiamond} from "../interfaces/RealmDiamond.sol";
-import {IERC721} from "../interfaces/IERC721.sol";
-import {IERC20} from "../interfaces/IERC20.sol";
-import {LibItems} from "../libraries/LibItems.sol";
 
 library LibInstallation {
   function _equipInstallation(
