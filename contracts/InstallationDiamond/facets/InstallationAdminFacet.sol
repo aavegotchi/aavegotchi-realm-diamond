@@ -159,7 +159,6 @@ contract InstallationAdminFacet is Modifiers {
       coordinateY = s.upgradeQueue[index].coordinateY;
     }
 
-    // UserUpgradeQueue memory queueUpgrade = s.userUpgradeQueue[_owner][index];
     // check that upgrade is ready
     if (block.number >= readyBlock) {
       // burn old installation

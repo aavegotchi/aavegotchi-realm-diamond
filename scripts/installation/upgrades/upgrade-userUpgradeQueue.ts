@@ -17,14 +17,14 @@ export async function upgrade() {
       addSelectors: [],
       removeSelectors: [
         "function reduceUpgradeTime(uint256 _queueId, uint40 _amount) external",
-        `function upgradeInstallation(${upgradeQueue} calldata _upgradeQueue, uint40 _gltr, bytes memory _signature) external`,
+        `function upgradeInstallation(${upgradeQueue} calldata _upgradeQueue, bytes memory _signature, uint40 _gltr) external`,
       ],
     },
     {
       facetName: "InstallationAdminFacet",
       addSelectors: [
         "function finalizeUserUpgrades(address _owner) external",
-        `function upgradeInstallation(${upgradeQueue} calldata _upgradeQueue,uint40 _gltr,bytes memory signature) external`,
+        `function upgradeInstallation(${upgradeQueue} calldata _upgradeQueue, uint40 _gltr, bytes memory signature) external`,
       ],
       removeSelectors: [],
     },
