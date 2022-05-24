@@ -390,4 +390,16 @@ contract RealmFacet is Modifiers {
       output_[i] = s.accessRights[_parcelIds[i]][_actionRights[i]];
     }
   }
+
+  function fixAltarLevel(uint256[] memory _parcelIds) external onlyOwner {
+    InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
+    for (uint256 i; i < _parcelIds.length; i++) {
+      Parcel storage parcel = s.parcels[_parcelIds[i]];
+      // Check that the altar is actually supposed to be level 2
+      require(installationsDiamond.balanceOfToken(address(this), _parcelIds[i], 11) == 1, "RealmFacet: Not targeted for a fix"); // token contract, realm parcel ID, level 2 altar identifier
+      require(parcel.altarId == 10, "RealmFacet: Not a bugged level 1 altar");
+
+      parcel.altarId = 11;
+    }
+  }
 }
