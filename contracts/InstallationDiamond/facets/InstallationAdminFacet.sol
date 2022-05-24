@@ -20,12 +20,17 @@ contract InstallationAdminFacet is Modifiers {
 
   event UpgradeFinalized(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _newInstallationId);
 
+  event AddInstallationType(uint256 _installationId);
+  event EditInstallationType(uint256 _installationId);
+  event DeprecateInstallation(uint256 _installationId);
+
   /// @notice Allow the Diamond owner to deprecate an installation
   /// @dev Deprecated installations cannot be crafted by users
   /// @param _installationIds An array containing the identifiers of installations to deprecate
   function deprecateInstallations(uint256[] calldata _installationIds) external onlyOwner {
     for (uint256 i = 0; i < _installationIds.length; i++) {
       s.installationTypes[_installationIds[i]].deprecated = true;
+      emit DeprecateInstallation(_installationIds[i]);
     }
   }
 
@@ -77,6 +82,8 @@ contract InstallationAdminFacet is Modifiers {
           _installationTypes[i].name
         )
       );
+
+      emit AddInstallationType(s.installationTypes.length - 1);
     }
   }
 
@@ -89,6 +96,7 @@ contract InstallationAdminFacet is Modifiers {
     for (uint256 i = 0; i < _ids.length; i++) {
       uint256 id = _ids[i];
       s.installationTypes[id] = _installationTypes[i];
+      emit EditInstallationType(id);
     }
   }
 
