@@ -7,7 +7,7 @@ import {
 } from "../../../tasks/deployUpgrade";
 import { diamondOwner } from "../helperFunctions";
 
-export async function upgrade() {
+export async function upgradeUserQueue() {
   const upgradeQueue =
     "tuple(address owner, uint16 coordinateX, uint16 coordinateY, uint40 readyBlock, bool claimed, uint256 parcelId, uint256 installationId)";
 
@@ -24,7 +24,7 @@ export async function upgrade() {
       facetName: "InstallationAdminFacet",
       addSelectors: [
         "function finalizeUserUpgrades(address _owner) external",
-        `function upgradeInstallation(${upgradeQueue} calldata _upgradeQueue, uint40 _gltr, bytes memory signature) external`,
+        `function upgradeInstallation(${upgradeQueue} calldata _upgradeQueue, bytes memory signature, uint40 _gltr) external`,
       ],
       removeSelectors: [],
     },
@@ -47,7 +47,7 @@ export async function upgrade() {
 }
 
 if (require.main === module) {
-  upgrade()
+  upgradeUserQueue()
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

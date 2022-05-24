@@ -181,18 +181,19 @@ contract InstallationFacet is Modifiers {
   /// @notice Query details about a specific user ongoing upgrade queues
   /// @return output_ An array of structs, each representing an ongoing upgrade queue
   function getUserUpgradeQueue(address _owner) external view returns (UserUpgradeQueue[] memory output_) {
-    uint256 length = s.userUpgradeQueue[_owner].length;
-    output_ = new UserUpgradeQueue[](length);
-    uint256 counter;
-    for (uint256 i; i < length; i++) {
-      if (s.upgradeQueue[i].owner == _owner) {
-        output_[counter] = s.userUpgradeQueue[_owner][i];
-        counter++;
-      }
-    }
-    assembly {
-      mstore(output_, counter)
-    }
+    return s.userUpgradeQueue[_owner];
+    // uint256 length = s.userUpgradeQueue[_owner].length;
+    // output_ = new UserUpgradeQueue[](length);
+    // uint256 counter;
+    // for (uint256 i; i < length; i++) {
+    //   // if (s.userUpgradeQueue[_owner][i].owner == _owner) {
+    //     output_[counter] = s.userUpgradeQueue[_owner][i];
+    //     counter++;
+    //   // }
+    // }
+    // assembly {
+    //   mstore(output_, counter)
+    // }
   }
 
   /// @notice Query details about all ongoing upgrade queues
@@ -268,7 +269,7 @@ contract InstallationFacet is Modifiers {
       if (gltr > installationType.craftTime) revert("InstallationFacet: Too much GLTR");
 
       if (installationType.craftTime - gltr == 0) {
-        LibERC1155._safeMint(msg.sender, _installationTypes[i], 0);
+        LibERC1155._safeMint(msg.sender, _installationTypes[i], 0, false);
       } else {
         uint40 readyBlock = uint40(block.number) + installationType.craftTime;
 
@@ -300,7 +301,7 @@ contract InstallationFacet is Modifiers {
       require(block.number >= queueItem.readyBlock, "InstallationFacet: Installation not ready");
 
       // mint installation
-      LibERC1155._safeMint(msg.sender, queueItem.installationType, queueItem.id);
+      LibERC1155._safeMint(msg.sender, queueItem.installationType, queueItem.id, false);
       s.craftQueue[queueId].claimed = true;
       emit QueueClaimed(queueId);
     }

@@ -167,7 +167,7 @@ contract InstallationAdminFacet is Modifiers {
       LibInstallation._unequipInstallation(parcelId, installationId);
       // mint new installation
       uint256 nextLevelId = s.installationTypes[installationId].nextLevelId;
-      LibERC1155._safeMint(_owner, nextLevelId, index);
+      LibERC1155._safeMint(_owner, nextLevelId, index, _user);
       // equip new installation
       LibInstallation._equipInstallation(_owner, parcelId, nextLevelId);
 
@@ -196,8 +196,8 @@ contract InstallationAdminFacet is Modifiers {
 
   function upgradeInstallation(
     UpgradeQueue calldata _upgradeQueue,
-    uint40 _gltr,
-    bytes memory _signature
+    bytes memory _signature,
+    uint40 _gltr
   ) external {
     require(
       LibSignature.isValid(
@@ -205,7 +205,7 @@ contract InstallationAdminFacet is Modifiers {
         _signature,
         s.backendPubKey
       ),
-      "InstallationFacet: Invalid signature"
+      "InstallationAdminFacet: Invalid signature"
     );
     // check owner
     require(IERC721(s.realmDiamond).ownerOf(_upgradeQueue.parcelId) == _upgradeQueue.owner, "InstallationFacet: Not owner");
