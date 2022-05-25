@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-import {LibAppStorageInstallation, InstallationType, QueueItem, UpgradeQueue, UserUpgradeQueue, Modifiers} from "../../libraries/AppStorageInstallation.sol";
+import {LibAppStorageInstallation, InstallationType, QueueItem, UpgradeQueue, Modifiers} from "../../libraries/AppStorageInstallation.sol";
 import {LibERC1155} from "../../libraries/LibERC1155.sol";
 import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {LibItems} from "../../libraries/LibItems.sol";
@@ -178,24 +178,6 @@ contract InstallationFacet is Modifiers {
     }
   }
 
-  /// @notice Query details about a specific user ongoing upgrade queues
-  /// @return output_ An array of structs, each representing an ongoing upgrade queue
-  function getUserUpgradeQueue(address _owner) external view returns (UserUpgradeQueue[] memory output_) {
-    return s.userUpgradeQueue[_owner];
-    // uint256 length = s.userUpgradeQueue[_owner].length;
-    // output_ = new UserUpgradeQueue[](length);
-    // uint256 counter;
-    // for (uint256 i; i < length; i++) {
-    //   // if (s.userUpgradeQueue[_owner][i].owner == _owner) {
-    //     output_[counter] = s.userUpgradeQueue[_owner][i];
-    //     counter++;
-    //   // }
-    // }
-    // assembly {
-    //   mstore(output_, counter)
-    // }
-  }
-
   /// @notice Query details about all ongoing upgrade queues
   /// @return output_ An array of structs, each representing an ongoing upgrade queue
   function getAllUpgradeQueue() external view returns (UpgradeQueue[] memory) {
@@ -269,7 +251,7 @@ contract InstallationFacet is Modifiers {
       if (gltr > installationType.craftTime) revert("InstallationFacet: Too much GLTR");
 
       if (installationType.craftTime - gltr == 0) {
-        LibERC1155._safeMint(msg.sender, _installationTypes[i], 0, false);
+        LibERC1155._safeMint(msg.sender, _installationTypes[i], 0);
       } else {
         uint40 readyBlock = uint40(block.number) + installationType.craftTime;
 
@@ -301,12 +283,12 @@ contract InstallationFacet is Modifiers {
       require(block.number >= queueItem.readyBlock, "InstallationFacet: Installation not ready");
 
       // mint installation
-      LibERC1155._safeMint(msg.sender, queueItem.installationType, queueItem.id, false);
+      LibERC1155._safeMint(msg.sender, queueItem.installationType, queueItem.id);
       s.craftQueue[queueId].claimed = true;
       emit QueueClaimed(queueId);
     }
 
-    InstallationAdminFacet(address(this)).finalizeUpgrade();
+    // InstallationAdminFacet(address(this)).finalizeUpgrade();
   }
 
   /// @notice Allow a user to speed up multiple queues(installation craft time) by paying the correct amount of $GLTR tokens
@@ -333,7 +315,7 @@ contract InstallationFacet is Modifiers {
       queueItem.readyBlock -= removeBlocks;
       emit CraftTimeReduced(queueId, removeBlocks);
 
-      InstallationAdminFacet(address(this)).finalizeUpgrade();
+      // InstallationAdminFacet(address(this)).finalizeUpgrade();
     }
   }
 
@@ -350,7 +332,7 @@ contract InstallationFacet is Modifiers {
   ) external onlyRealmDiamond {
     LibInstallation._equipInstallation(_owner, _realmId, _installationId);
 
-    InstallationAdminFacet(address(this)).finalizeUpgrade();
+    // InstallationAdminFacet(address(this)).finalizeUpgrade();
   }
 
   /// @notice Allow a user to unequip an installation from a parcel
@@ -360,7 +342,7 @@ contract InstallationFacet is Modifiers {
   function unequipInstallation(uint256 _realmId, uint256 _installationId) external onlyRealmDiamond {
     LibInstallation._unequipInstallation(_realmId, _installationId);
 
-    InstallationAdminFacet(address(this)).finalizeUpgrade();
+    // InstallationAdminFacet(address(this)).finalizeUpgrade();
   }
 
   // /// @notice Allow a user to reduce the upgrade time of an ongoing queue

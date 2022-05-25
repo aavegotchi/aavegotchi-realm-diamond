@@ -45,15 +45,6 @@ struct UpgradeQueue {
   uint256 installationId;
 }
 
-struct UserUpgradeQueue {
-  uint16 coordinateX;
-  uint16 coordinateY;
-  uint40 readyBlock;
-  bool claimed;
-  uint256 parcelId;
-  uint256 installationId;
-}
-
 struct InstallationAppStorage {
   address realmDiamond;
   address aavegotchiDiamond;
@@ -79,11 +70,7 @@ struct InstallationAppStorage {
   mapping(uint256 => uint256) deprecateTime;
   mapping(bytes32 => uint256) upgradeHashes;
   bytes backendPubKey;
-  // Each queue has an index to track the start of the queue. The index is incremented after every upgrade. The length of the queue is array.length - index
-  mapping(address => UserUpgradeQueue[]) userUpgradeQueue;
-  mapping(address => uint256) userUpgradeQueueIndex;
-  // Index for upgradeQueue. Placed here because this is an upgrade.
-  uint256 upgradeQueueIndex;
+  mapping(uint256 => bool) upgradeComplete;
 }
 
 library LibAppStorageInstallation {

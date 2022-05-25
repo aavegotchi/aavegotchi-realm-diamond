@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-import {InstallationType, Modifiers, UpgradeQueue, UserUpgradeQueue} from "../../libraries/AppStorageInstallation.sol";
+import {InstallationType, Modifiers, UpgradeQueue} from "../../libraries/AppStorageInstallation.sol";
 import {LibStrings} from "../../libraries/LibStrings.sol";
 import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {LibInstallation} from "../../libraries/LibInstallation.sol";
@@ -34,6 +34,9 @@ contract InstallationAdminFacet is Modifiers {
   );
 
   event UpgradeFinalized(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _newInstallationId);
+
+  event UpgradeQueued(address indexed _owner, uint256 indexed _realmId, uint256 indexed _queueIndex);
+  event UpgradeQueueFinalized(address indexed _owner, uint256 indexed _realmId, uint256 indexed _queueIndex);
 
   /// @notice Allow the Diamond owner to deprecate an installation
   /// @dev Deprecated installations cannot be crafted by users
@@ -108,55 +111,30 @@ contract InstallationAdminFacet is Modifiers {
   }
 
   /// @notice Allow anyone to finalize any existing queue upgrade
-  /// @dev Only three queue upgrades can be finalized in one transaction
-  function finalizeUpgrade() public {
-    uint256 fullLength = s.upgradeQueue.length;
-    uint256 maxToProcess = 3;
-
-    for (uint256 i = s.upgradeQueueIndex; i < fullLength; i++) {
-      UpgradeQueue storage upgradeQueue = s.upgradeQueue[i];
-      _finalizeUpgrade(upgradeQueue.owner, false, i);
-      s.upgradeQueueIndex++;
-      if (--maxToProcess == 0) break;
+  function finalizeUpgrade(uint256[] memory _upgradeIndexes) public {
+    for (uint256 i; i < _upgradeIndexes.length; i++) {
+      UpgradeQueue storage upgradeQueue = s.upgradeQueue[_upgradeIndexes[i]];
+      _finalizeUpgrade(upgradeQueue.owner, _upgradeIndexes[i]);
     }
   }
 
-  function finalizeUserUpgrades(address _owner) external {
-    uint256 fullLength = s.userUpgradeQueue[_owner].length;
-    uint256 maxToProcess = 3;
+  // function finalizeUserUpgrades(address _owner) external {
+  //   uint256 fullLength = s.userUpgradeQueue[_owner].length;
+  //   uint256 maxToProcess = 3;
 
-    for (uint256 i = s.userUpgradeQueueIndex[_owner]; i < fullLength; i++) {
-      _finalizeUpgrade(_owner, true, i);
-      s.userUpgradeQueueIndex[_owner]++;
-      if (--maxToProcess == 0) break;
-    }
-  }
+  //   for (uint256 i = s.userUpgradeQueueIndex[_owner]; i < fullLength; i++) {
+  //     _finalizeUpgrade(_owner, true, i);
+  //     s.userUpgradeQueueIndex[_owner]++;
+  //     if (--maxToProcess == 0) break;
+  //   }
+  // }
 
-  function _finalizeUpgrade(
-    address _owner,
-    bool _user,
-    uint256 index
-  ) internal {
-    uint40 readyBlock;
-    uint256 parcelId;
-    uint256 installationId;
-    uint256 coordinateX;
-    uint256 coordinateY;
-    if (_user) {
-      //use user queue
-      readyBlock = s.userUpgradeQueue[_owner][index].readyBlock;
-      parcelId = s.userUpgradeQueue[_owner][index].parcelId;
-      installationId = s.userUpgradeQueue[_owner][index].installationId;
-      coordinateX = s.userUpgradeQueue[_owner][index].coordinateX;
-      coordinateY = s.userUpgradeQueue[_owner][index].coordinateY;
-    } else {
-      //use deprecated global queue
-      readyBlock = s.upgradeQueue[index].readyBlock;
-      parcelId = s.upgradeQueue[index].parcelId;
-      installationId = s.upgradeQueue[index].installationId;
-      coordinateX = s.upgradeQueue[index].coordinateX;
-      coordinateY = s.upgradeQueue[index].coordinateY;
-    }
+  function _finalizeUpgrade(address _owner, uint256 index) internal {
+    uint40 readyBlock = s.upgradeQueue[index].readyBlock;
+    uint256 parcelId = s.upgradeQueue[index].parcelId;
+    uint256 installationId = s.upgradeQueue[index].installationId;
+    uint256 coordinateX = s.upgradeQueue[index].coordinateX;
+    uint256 coordinateY = s.upgradeQueue[index].coordinateY;
 
     // check that upgrade is ready
     if (block.number >= readyBlock) {
@@ -164,7 +142,7 @@ contract InstallationAdminFacet is Modifiers {
       LibInstallation._unequipInstallation(parcelId, installationId);
       // mint new installation
       uint256 nextLevelId = s.installationTypes[installationId].nextLevelId;
-      LibERC1155._safeMint(_owner, nextLevelId, index, _user);
+      LibERC1155._safeMint(_owner, nextLevelId, index);
       // equip new installation
       LibInstallation._equipInstallation(_owner, parcelId, nextLevelId);
 
@@ -186,29 +164,11 @@ contract InstallationAdminFacet is Modifiers {
       //   s.upgradeQueue[index] = s.upgradeQueue[s.upgradeQueue.length - 1];
       //   s.upgradeQueue.pop();
       // }
+      s.upgradeComplete[index] = true;
 
       emit UpgradeFinalized(parcelId, coordinateX, coordinateY, nextLevelId);
+      emit UpgradeQueueFinalized(_owner, parcelId, index);
     }
-  }
-
-  // Returns the length left in the upgrade queue
-  function upgradeQueueLength() public view returns (uint256) {
-    return s.upgradeQueue.length - s.upgradeQueueIndex;
-  }
-
-  // Returns the length left in the user upgrade queue
-  function userUpgradeQueueLength(address _owner) public view returns (uint256) {
-    return s.userUpgradeQueue[_owner].length - s.userUpgradeQueueIndex[_owner];
-  }
-
-  // Returns the _index'th upgrade in the upgrade queue
-  function getUpgradeQueue(uint256 _index) public view returns (UpgradeQueue memory) {
-    return s.upgradeQueue[_index + s.upgradeQueueIndex];
-  }
-
-  // Returns the _index'th upgrade in the _owner's user upgrade queue
-  function getUserUpgradeQueue(address _owner, uint256 _index) public view returns (UserUpgradeQueue memory) {
-    return s.userUpgradeQueue[_owner][_index + s.userUpgradeQueueIndex[_owner]];
   }
 
   function upgradeInstallation(
@@ -277,8 +237,8 @@ contract InstallationAdminFacet is Modifiers {
         _upgradeQueue.coordinateY
       );
     } else {
-      //Use the userUpgradeQueue instead of the global queue
-      UserUpgradeQueue memory upgrade = UserUpgradeQueue(
+      UpgradeQueue memory upgrade = UpgradeQueue(
+        _upgradeQueue.owner,
         _upgradeQueue.coordinateX,
         _upgradeQueue.coordinateY,
         uint40(block.number) + nextInstallation.craftTime - _gltr,
@@ -286,7 +246,7 @@ contract InstallationAdminFacet is Modifiers {
         _upgradeQueue.parcelId,
         _upgradeQueue.installationId
       );
-      s.userUpgradeQueue[_upgradeQueue.owner].push(upgrade);
+      s.upgradeQueue.push(upgrade);
 
       // update upgradeQueueLength
       realm.addUpgradeQueueLength(_upgradeQueue.parcelId);
@@ -299,7 +259,8 @@ contract InstallationAdminFacet is Modifiers {
         uint40(block.number) + nextInstallation.craftTime - _gltr,
         _upgradeQueue.installationId
       );
+      emit UpgradeQueued(_upgradeQueue.owner, _upgradeQueue.parcelId, s.upgradeQueue.length - 1);
     }
-    finalizeUpgrade();
+    // finalizeUpgrade();
   }
 }
