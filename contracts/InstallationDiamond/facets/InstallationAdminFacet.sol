@@ -130,6 +130,7 @@ contract InstallationAdminFacet is Modifiers {
   // }
 
   function _finalizeUpgrade(address _owner, uint256 index) internal {
+    require(!s.upgradeComplete[index], "Already finalized");
     uint40 readyBlock = s.upgradeQueue[index].readyBlock;
     uint256 parcelId = s.upgradeQueue[index].parcelId;
     uint256 installationId = s.upgradeQueue[index].installationId;
