@@ -110,28 +110,25 @@ contract InstallationAdminFacet is Modifiers {
   /// @notice Allow anyone to finalize any existing queue upgrade
   /// @dev Only three queue upgrades can be finalized in one transaction
   function finalizeUpgrade() public {
-    if (s.upgradeQueue.length > 0) {
-      //can only process 3 upgrades per tx
-      uint256 counter = 3;
-      uint256 offset;
-      uint256 _upgradeQueueLength = s.upgradeQueue.length;
-      for (uint256 index; index < _upgradeQueueLength; index++) {
-        UpgradeQueue memory queueUpgrade = s.upgradeQueue[index - offset];
-        _finalizeUpgrade(queueUpgrade.owner, false, index - offset);
+    uint256 fullLength = s.upgradeQueue.length;
+    uint256 maxToProcess = 3;
 
-        counter--;
-        offset++;
-
-        if (counter == 0) break;
-      }
+    for (uint256 i = s.upgradeQueueIndex; i < fullLength; i++) {
+      UpgradeQueue storage upgradeQueue = s.upgradeQueue[i];
+      _finalizeUpgrade(upgradeQueue.owner, false, i);
+      s.upgradeQueueIndex++;
+      if (--maxToProcess == 0) break;
     }
   }
 
   function finalizeUserUpgrades(address _owner) external {
-    if (s.userUpgradeQueue[_owner].length > 0) {
-      for (uint256 index; index < s.userUpgradeQueue[_owner].length; index++) {
-        _finalizeUpgrade(_owner, true, index);
-      }
+    uint256 fullLength = s.userUpgradeQueue[_owner].length;
+    uint256 maxToProcess = 3;
+
+    for (uint256 i = s.userUpgradeQueueIndex[_owner]; i < fullLength; i++) {
+      _finalizeUpgrade(_owner, true, i);
+      s.userUpgradeQueueIndex[_owner]++;
+      if (--maxToProcess == 0) break;
     }
   }
 
@@ -181,17 +178,37 @@ contract InstallationAdminFacet is Modifiers {
       bytes32 uniqueHash = keccak256(abi.encodePacked(parcelId, coordinateX, coordinateY, installationId));
       s.upgradeHashes[uniqueHash] = 0;
 
-      // pop upgrade from array
-      if (_user) {
-        s.userUpgradeQueue[_owner][index] = s.userUpgradeQueue[_owner][s.userUpgradeQueue[_owner].length - 1];
-        s.userUpgradeQueue[_owner].pop();
-      } else {
-        s.upgradeQueue[index] = s.upgradeQueue[s.upgradeQueue.length - 1];
-        s.upgradeQueue.pop();
-      }
+      // // pop upgrade from array
+      // if (_user) {
+      //   s.userUpgradeQueue[_owner][index] = s.userUpgradeQueue[_owner][s.userUpgradeQueue[_owner].length - 1];
+      //   s.userUpgradeQueue[_owner].pop();
+      // } else {
+      //   s.upgradeQueue[index] = s.upgradeQueue[s.upgradeQueue.length - 1];
+      //   s.upgradeQueue.pop();
+      // }
 
       emit UpgradeFinalized(parcelId, coordinateX, coordinateY, nextLevelId);
     }
+  }
+
+  // Returns the length left in the upgrade queue
+  function upgradeQueueLength() public view returns (uint256) {
+    return s.upgradeQueue.length - s.upgradeQueueIndex;
+  }
+
+  // Returns the length left in the user upgrade queue
+  function userUpgradeQueueLength(address _owner) public view returns (uint256) {
+    return s.userUpgradeQueue[_owner].length - s.userUpgradeQueueIndex[_owner];
+  }
+
+  // Returns the _index'th upgrade in the upgrade queue
+  function getUpgradeQueue(uint256 _index) public view returns (UpgradeQueue memory) {
+    return s.upgradeQueue[_index + s.upgradeQueueIndex];
+  }
+
+  // Returns the _index'th upgrade in the _owner's user upgrade queue
+  function getUserUpgradeQueue(address _owner, uint256 _index) public view returns (UserUpgradeQueue memory) {
+    return s.userUpgradeQueue[_owner][_index + s.userUpgradeQueueIndex[_owner]];
   }
 
   function upgradeInstallation(
