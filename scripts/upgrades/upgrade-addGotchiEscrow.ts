@@ -13,7 +13,7 @@ export async function upgrade() {
     {
       facetName: "RealmFacet",
       addSelectors: [
-        "function fixAltarLevel(uint256[] memory _parcelIds) external",
+        // "function fixAltarLevel(uint256[] memory _parcelIds) external",
       ],
       removeSelectors: [],
     },
