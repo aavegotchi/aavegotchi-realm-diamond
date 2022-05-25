@@ -2,6 +2,7 @@
 pragma solidity 0.8.9;
 
 import {InstallationType, Modifiers, UpgradeQueue} from "../../libraries/AppStorageInstallation.sol";
+import {TempUpgradeFixStorage} from "../../libraries/TempUpgradeFixStorage.sol";
 import {LibStrings} from "../../libraries/LibStrings.sol";
 import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {LibInstallation} from "../../libraries/LibInstallation.sol";
@@ -110,6 +111,16 @@ contract InstallationAdminFacet is Modifiers {
     }
   }
 
+  function finalizeUpgrade() external {
+    TempUpgradeFixStorage.Layout storage tempStorage = TempUpgradeFixStorage.layout();
+    uint256 start = tempStorage.index;
+    for (uint256 i = tempStorage.index; i < s.upgradeQueue.length && i < start + 3; i++) {
+      UpgradeQueue storage upgradeQueue = s.upgradeQueue[i];
+      if (_finalizeUpgrade(upgradeQueue.owner, i)) tempStorage.index++;
+      else return;
+    }
+  }
+
   /// @notice Allow anyone to finalize any existing queue upgrade
   function finalizeUpgrade(uint256[] memory _upgradeIndexes) public {
     for (uint256 i; i < _upgradeIndexes.length; i++) {
@@ -118,19 +129,8 @@ contract InstallationAdminFacet is Modifiers {
     }
   }
 
-  // function finalizeUserUpgrades(address _owner) external {
-  //   uint256 fullLength = s.userUpgradeQueue[_owner].length;
-  //   uint256 maxToProcess = 3;
-
-  //   for (uint256 i = s.userUpgradeQueueIndex[_owner]; i < fullLength; i++) {
-  //     _finalizeUpgrade(_owner, true, i);
-  //     s.userUpgradeQueueIndex[_owner]++;
-  //     if (--maxToProcess == 0) break;
-  //   }
-  // }
-
-  function _finalizeUpgrade(address _owner, uint256 index) internal {
-    require(!s.upgradeComplete[index], "Already finalized");
+  function _finalizeUpgrade(address _owner, uint256 index) internal returns (bool) {
+    if (s.upgradeComplete[index]) return false;
     uint40 readyBlock = s.upgradeQueue[index].readyBlock;
     uint256 parcelId = s.upgradeQueue[index].parcelId;
     uint256 installationId = s.upgradeQueue[index].installationId;
@@ -169,7 +169,9 @@ contract InstallationAdminFacet is Modifiers {
 
       emit UpgradeFinalized(parcelId, coordinateX, coordinateY, nextLevelId);
       emit UpgradeQueueFinalized(_owner, parcelId, index);
+      return true;
     }
+    return false;
   }
 
   function upgradeInstallation(
