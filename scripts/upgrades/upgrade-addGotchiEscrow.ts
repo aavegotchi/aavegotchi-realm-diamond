@@ -26,7 +26,7 @@ export async function upgrade() {
     diamondAddress: realmDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: true,
-    useMultisig: true,
+    useMultisig: false,
   };
 
   await run("deployUpgrade", args);
