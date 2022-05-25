@@ -130,7 +130,7 @@ contract InstallationAdminFacet is Modifiers {
   }
 
   function _finalizeUpgrade(address _owner, uint256 index) internal returns (bool) {
-    if (s.upgradeComplete[index]) return false;
+    if (s.upgradeComplete[index]) return true;
     uint40 readyBlock = s.upgradeQueue[index].readyBlock;
     uint256 parcelId = s.upgradeQueue[index].parcelId;
     uint256 installationId = s.upgradeQueue[index].installationId;
