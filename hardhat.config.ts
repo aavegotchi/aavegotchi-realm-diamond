@@ -11,11 +11,11 @@ import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname + "/.env" });
 require("./tasks/generateDiamondABI_realm.js");
 require("./tasks/generateDiamondABI_installation.js");
-require("./tasks/generateDiamondABI_tile.js");
-require("./tasks/verifyFacet.js");
-require("./tasks/mintParcels.ts");
-require("./tasks/releaseVesting.ts");
-require("./tasks/batchTransferAlchemica");
+// require("./tasks/generateDiamondABI_tile.js");
+// require("./tasks/verifyFacet.js");
+// //require("./tasks/mintParcels.ts");
+// //require("./tasks/releaseVesting.ts");
+// require("./tasks/batchTransferAlchemica");
 
 const GWEI = 1000 * 1000 * 1000;
 
@@ -63,7 +63,7 @@ module.exports = {
     },
     mumbai: {
       url: process.env.MUMBAI_MORALIS,
-      accounts: [process.env.ITEM_MANAGER],
+      //accounts: [process.env.ITEM_MANAGER],
       blockGasLimit: 20000000,
       // gasPrice: 1000000000,
     },

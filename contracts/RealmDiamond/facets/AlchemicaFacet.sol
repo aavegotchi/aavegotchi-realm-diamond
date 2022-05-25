@@ -361,7 +361,8 @@ contract AlchemicaFacet is Modifiers {
     //update latest channeling
     s.gotchiChannelings[_gotchiId] = block.timestamp;
     s.parcelChannelings[_realmId] = block.timestamp;
-
+    //finally interact
+    AavegotchiDiamond(s.aavegotchiDiamond).realmInteract(_gotchiId);
     emit ChannelAlchemica(_realmId, _gotchiId, channelAmounts, rate, radius);
   }
 
