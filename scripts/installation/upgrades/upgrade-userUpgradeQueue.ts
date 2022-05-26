@@ -14,7 +14,7 @@ export async function upgradeUserQueue() {
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "InstallationFacet",
-      addSelectors: [],
+      addSelectors: [""],
       removeSelectors: [
         "function reduceUpgradeTime(uint256 _queueId, uint40 _amount) external",
         `function upgradeInstallation(${upgradeQueue} calldata _upgradeQueue, bytes memory _signature, uint40 _gltr) external`,
@@ -23,10 +23,15 @@ export async function upgradeUserQueue() {
     {
       facetName: "InstallationAdminFacet",
       addSelectors: [
-        "function finalizeUserUpgrades(address _owner) external",
+        // "function finalizeUpgrade() external",
+
+        // "function finalizeUserUpgrades(address _owner) external",
         `function upgradeInstallation(${upgradeQueue} calldata _upgradeQueue, bytes memory signature, uint40 _gltr) external`,
       ],
-      removeSelectors: [],
+      removeSelectors: [
+        "function finalizeUpgrade() public",
+        // "function finalizeUserUpgrades(address _owner) external",
+      ],
     },
   ];
 

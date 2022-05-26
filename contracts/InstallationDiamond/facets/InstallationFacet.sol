@@ -184,6 +184,24 @@ contract InstallationFacet is Modifiers {
     return s.upgradeQueue;
   }
 
+  /// @notice Query details about all ongoing craft queues
+  /// @param _owner Address to query queue
+  /// @return output_ An array of structs, each representing an ongoing craft queue
+  function getUserUpgradeQueue(address _owner) external view returns (UpgradeQueue[] memory output_) {
+    uint256 length = s.upgradeQueue.length;
+    output_ = new UpgradeQueue[](length);
+    uint256 counter;
+    for (uint256 i; i < length; i++) {
+      if (s.upgradeQueue[i].owner == _owner && s.upgradeComplete[i]) {
+        output_[counter] = s.upgradeQueue[i];
+        counter++;
+      }
+    }
+    assembly {
+      mstore(output_, counter)
+    }
+  }
+
   function getUpgradeQueueId(uint256 _queueId) external view returns (UpgradeQueue memory) {
     return s.upgradeQueue[_queueId];
   }
