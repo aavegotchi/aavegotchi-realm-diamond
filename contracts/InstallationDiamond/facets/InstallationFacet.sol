@@ -10,6 +10,8 @@ import {LibInstallation} from "../../libraries/LibInstallation.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
 import {InstallationAdminFacet} from "./InstallationAdminFacet.sol";
 
+import "hardhat/console.sol";
+
 contract InstallationFacet is Modifiers {
   event AddedToQueue(uint256 indexed _queueId, uint256 indexed _installationId, uint256 _readyBlock, address _sender);
 
@@ -187,13 +189,15 @@ contract InstallationFacet is Modifiers {
   /// @notice Query details about all ongoing craft queues
   /// @param _owner Address to query queue
   /// @return output_ An array of structs, each representing an ongoing craft queue
-  function getUserUpgradeQueue(address _owner) external view returns (UpgradeQueue[] memory output_) {
+  function getUserUpgradeQueue(address _owner) external view returns (uint256[] memory output_) {
     uint256 length = s.upgradeQueue.length;
-    output_ = new UpgradeQueue[](length);
+    console.log("length:", length);
+    output_ = new uint256[](length);
     uint256 counter;
     for (uint256 i; i < length; i++) {
+      console.log("hello!");
       if (s.upgradeQueue[i].owner == _owner && s.upgradeComplete[i]) {
-        output_[counter] = s.upgradeQueue[i];
+        output_[counter] = i;
         counter++;
       }
     }

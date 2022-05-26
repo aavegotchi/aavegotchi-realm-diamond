@@ -21,6 +21,7 @@ import {
 import { UpgradeQueue } from "../../types";
 import { maticInstallationDiamondAddress } from "../../constants";
 import { upgradeUserQueue } from "../../scripts/installation/upgrades/upgrade-userUpgradeQueue";
+import { upgrade } from "../../scripts/installation/upgrades/upgrade-fixInterface";
 
 describe("Installations tests", async function () {
   const testAddress = "0xf3678737dC45092dBb3fc1f49D89e3950Abb866d";
@@ -152,29 +153,41 @@ describe("Installations tests", async function () {
   });
 
   it("Finalize upgrade", async function () {
+    console.log("Finalize upgrade!");
     const parcelOwner = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
-    let upgradeQueue = await installationFacet.getUserUpgradeQueue(parcelOwner);
-    expect(upgradeQueue.length).to.equal(1);
+    // let upgradeQueue = await installationFacet.getUserUpgradeQueue(parcelOwner);
+    // expect(upgradeQueue.length).to.equal(1);
 
+    //
     //Complete upgrade
     await mineBlocks(ethers, 10001);
 
-    const pendingUpgrades = await installationFacet.getUserUpgradeQueue(
-      parcelOwner
+    const filter = installationAdminFacet.filters[
+      "UpgradeQueued(address,uint256,uint256)"
+    ](parcelOwner, ethers.utils.hexlify(Number(testParcelId)));
+    const upgradeIndexHex = (await installationFacet.queryFilter(filter))[0]
+      .topics[3];
+    const upgradeIndex = parseInt(upgradeIndexHex);
+    console.log("upgrade index:", upgradeIndex);
+
+    let balances = await installationFacet.installationBalancesOfToken(
+      maticRealmDiamondAddress,
+      testParcelId
     );
-    console.log("pending:", pendingUpgrades);
 
-    // await installationAdminFacet.finalizeUpgrade(parcelOwner);
+    //Altar lvl 1 is still equipped
+    expect(balances[0].installationId).to.equal(10); //lvl 2 altar
 
-    // upgradeQueue = await installationFacet.getUserUpgradeQueue(parcelOwner);
-    // expect(upgradeQueue.length).to.equal(0);
+    await installationAdminFacet["finalizeUpgrade(uint256[])"]([upgradeIndex]);
 
-    // const balances = await installationFacet.installationBalancesOfToken(
-    //   maticRealmDiamondAddress,
-    //   testParcelId
-    // );
-    // expect(balances.length).to.above(0);
-    // expect(balances[0].installationId).to.equal(11); //lvl 2 altar
-    // expect(balances[0].balance).to.equal(1);
+    balances = await installationFacet.installationBalancesOfToken(
+      maticRealmDiamondAddress,
+      testParcelId
+    );
+
+    //Altar lvl 2 is now equipped
+    expect(balances.length).to.above(0);
+    expect(balances[0].installationId).to.equal(11); //lvl 2 altar
+    expect(balances[0].balance).to.equal(1);
   });
 });
