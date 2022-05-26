@@ -15,7 +15,6 @@ import {LibItems} from "../../libraries/LibItems.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
 
 contract InstallationAdminFacet is Modifiers {
-  event AddressesUpdated(address _aavegotchiDiamond, address _realmDiamond, address _gltr, address _pixelcraft, address _aavegotchiDAO);
   event AddressesUpdated(
     address _aavegotchiDiamond,
     address _realmDiamond,
@@ -70,6 +69,21 @@ contract InstallationAdminFacet is Modifiers {
     s.aavegotchiDAO = _aavegotchiDAO;
     s.backendPubKey = _backendPubKey;
     emit AddressesUpdated(_aavegotchiDiamond, _realmDiamond, _gltr, _pixelcraft, _aavegotchiDAO, _backendPubKey);
+  }
+
+  function getAddresses()
+    external
+    view
+    returns (
+      address _aavegotchiDiamond,
+      address _realmDiamond,
+      address _gltr,
+      address _pixelcraft,
+      address _aavegotchiDAO,
+      bytes memory _backendPubKey
+    )
+  {
+    return (s.aavegotchiDiamond, s.realmDiamond, s.gltr, s.pixelcraft, s.aavegotchiDAO, s.backendPubKey);
   }
 
   /// @notice Allow the diamond owner to add an installation type
