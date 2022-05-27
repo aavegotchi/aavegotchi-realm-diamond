@@ -21,7 +21,6 @@ import {
 import { UpgradeQueue } from "../../types";
 import { maticInstallationDiamondAddress } from "../../constants";
 import { upgradeUserQueue } from "../../scripts/installation/upgrades/upgrade-userUpgradeQueue";
-import { upgrade } from "../../scripts/installation/upgrades/upgrade-fixInterface";
 
 describe("Installations tests", async function () {
   const testAddress = "0xf3678737dC45092dBb3fc1f49D89e3950Abb866d";
@@ -153,12 +152,8 @@ describe("Installations tests", async function () {
   });
 
   it("Finalize upgrade", async function () {
-    console.log("Finalize upgrade!");
     const parcelOwner = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
-    // let upgradeQueue = await installationFacet.getUserUpgradeQueue(parcelOwner);
-    // expect(upgradeQueue.length).to.equal(1);
 
-    //
     //Complete upgrade
     await mineBlocks(ethers, 10001);
 
@@ -178,7 +173,7 @@ describe("Installations tests", async function () {
     //Altar lvl 1 is still equipped
     expect(balances[0].installationId).to.equal(10); //lvl 2 altar
 
-    await installationAdminFacet["finalizeUpgrade(uint256[])"]([upgradeIndex]);
+    await installationAdminFacet.finalizeUpgrades([upgradeIndex]);
 
     balances = await installationFacet.installationBalancesOfToken(
       maticRealmDiamondAddress,

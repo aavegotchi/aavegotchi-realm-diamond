@@ -10,8 +10,6 @@ import {LibInstallation} from "../../libraries/LibInstallation.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
 import {InstallationAdminFacet} from "./InstallationAdminFacet.sol";
 
-import "hardhat/console.sol";
-
 contract InstallationFacet is Modifiers {
   event AddedToQueue(uint256 indexed _queueId, uint256 indexed _installationId, uint256 _readyBlock, address _sender);
 
@@ -189,20 +187,23 @@ contract InstallationFacet is Modifiers {
   /// @notice Query details about all ongoing craft queues
   /// @param _owner Address to query queue
   /// @return output_ An array of structs, each representing an ongoing craft queue
-  function getUserUpgradeQueue(address _owner) external view returns (uint256[] memory output_) {
+  /// @return indexes_ An array of IDs, to be used in the new finalizeUpgrades() function
+  function getUserUpgradeQueue(address _owner) external view returns (UpgradeQueue[] memory output_, uint256[] memory indexes_) {
     uint256 length = s.upgradeQueue.length;
-    console.log("length:", length);
-    output_ = new uint256[](length);
+    output_ = new UpgradeQueue[](length);
+    indexes_ = new uint256[](length);
+
     uint256 counter;
     for (uint256 i; i < length; i++) {
-      console.log("hello!");
       if (s.upgradeQueue[i].owner == _owner && s.upgradeComplete[i]) {
-        output_[counter] = i;
+        output_[counter] = s.upgradeQueue[i];
+        indexes_[counter] = i;
         counter++;
       }
     }
     assembly {
       mstore(output_, counter)
+      mstore(indexes_, counter)
     }
   }
 
@@ -336,8 +337,6 @@ contract InstallationFacet is Modifiers {
       gltr.burnFrom(msg.sender, burnAmount);
       queueItem.readyBlock -= removeBlocks;
       emit CraftTimeReduced(queueId, removeBlocks);
-
-      // InstallationAdminFacet(address(this)).finalizeUpgrade();
     }
   }
 
@@ -353,8 +352,6 @@ contract InstallationFacet is Modifiers {
     uint256 _installationId
   ) external onlyRealmDiamond {
     LibInstallation._equipInstallation(_owner, _realmId, _installationId);
-
-    // InstallationAdminFacet(address(this)).finalizeUpgrade();
   }
 
   /// @notice Allow a user to unequip an installation from a parcel
@@ -363,8 +360,6 @@ contract InstallationFacet is Modifiers {
   /// @param _installationId Identifier of the installation to unequip
   function unequipInstallation(uint256 _realmId, uint256 _installationId) external onlyRealmDiamond {
     LibInstallation._unequipInstallation(_realmId, _installationId);
-
-    // InstallationAdminFacet(address(this)).finalizeUpgrade();
   }
 
   // /// @notice Allow a user to reduce the upgrade time of an ongoing queue
@@ -389,6 +384,5 @@ contract InstallationFacet is Modifiers {
   //   upgradeQueue.readyBlock -= removeBlocks;
   //   emit UpgradeTimeReduced(_queueId, upgradeQueue.parcelId, upgradeQueue.coordinateX, upgradeQueue.coordinateY, removeBlocks);
 
-  //   InstallationAdminFacet(address(this)).finalizeUpgrade();
   // }
 }

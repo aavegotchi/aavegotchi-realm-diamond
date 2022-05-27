@@ -2,7 +2,6 @@
 pragma solidity 0.8.9;
 
 import {InstallationType, Modifiers, UpgradeQueue} from "../../libraries/AppStorageInstallation.sol";
-import {TempUpgradeFixStorage} from "../../libraries/TempUpgradeFixStorage.sol";
 import {LibStrings} from "../../libraries/LibStrings.sol";
 import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {LibInstallation} from "../../libraries/LibInstallation.sol";
@@ -125,18 +124,8 @@ contract InstallationAdminFacet is Modifiers {
     }
   }
 
-  function finalizeUpgrade() external {
-    TempUpgradeFixStorage.Layout storage tempStorage = TempUpgradeFixStorage.layout();
-    uint256 start = tempStorage.index;
-    for (uint256 i = tempStorage.index; i < s.upgradeQueue.length && i < start + 3; i++) {
-      UpgradeQueue storage upgradeQueue = s.upgradeQueue[i];
-      if (_finalizeUpgrade(upgradeQueue.owner, i)) tempStorage.index++;
-      else return;
-    }
-  }
-
   /// @notice Allow anyone to finalize any existing queue upgrade
-  function finalizeUpgrade(uint256[] memory _upgradeIndexes) public {
+  function finalizeUpgrades(uint256[] memory _upgradeIndexes) public {
     for (uint256 i; i < _upgradeIndexes.length; i++) {
       UpgradeQueue storage upgradeQueue = s.upgradeQueue[_upgradeIndexes[i]];
       _finalizeUpgrade(upgradeQueue.owner, _upgradeIndexes[i]);

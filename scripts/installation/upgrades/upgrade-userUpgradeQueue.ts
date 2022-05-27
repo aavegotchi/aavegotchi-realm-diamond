@@ -24,7 +24,7 @@ export async function upgradeUserQueue() {
       facetName: "InstallationAdminFacet",
       addSelectors: [
         "function getAddresses() external view returns (address _aavegotchiDiamond, address _realmDiamond, address _gltr, address _pixelcraft, address _aavegotchiDAO, bytes memory _backendPubKey)",
-        "function finalizeUpgrade(uint256[] memory _upgradeIndexes) public",
+        "function finalizeUpgrades(uint256[] memory _upgradeIndexes) public",
         `function upgradeInstallation(${upgradeQueue} calldata _upgradeQueue, bytes memory signature, uint40 _gltr) external`,
       ],
       removeSelectors: ["function finalizeUpgrade() public"],
