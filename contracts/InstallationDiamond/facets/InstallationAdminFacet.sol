@@ -2,14 +2,11 @@
 pragma solidity 0.8.9;
 
 import {InstallationType, Modifiers, UpgradeQueue} from "../../libraries/AppStorageInstallation.sol";
-import {LibStrings} from "../../libraries/LibStrings.sol";
 import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {LibInstallation} from "../../libraries/LibInstallation.sol";
-
 import {LibERC1155} from "../../libraries/LibERC1155.sol";
 import {LibSignature} from "../../libraries/LibSignature.sol";
 import {IERC721} from "../../interfaces/IERC721.sol";
-
 import {LibItems} from "../../libraries/LibItems.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
 
@@ -267,6 +264,5 @@ contract InstallationAdminFacet is Modifiers {
       );
       emit UpgradeQueued(_upgradeQueue.owner, _upgradeQueue.parcelId, s.upgradeQueue.length - 1);
     }
-    // finalizeUpgrade();
   }
 }

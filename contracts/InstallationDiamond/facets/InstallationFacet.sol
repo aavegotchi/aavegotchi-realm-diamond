@@ -8,7 +8,6 @@ import {LibItems} from "../../libraries/LibItems.sol";
 import {LibERC998, ItemTypeIO} from "../../libraries/LibERC998.sol";
 import {LibInstallation} from "../../libraries/LibInstallation.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
-import {InstallationAdminFacet} from "./InstallationAdminFacet.sol";
 
 contract InstallationFacet is Modifiers {
   event AddedToQueue(uint256 indexed _queueId, uint256 indexed _installationId, uint256 _readyBlock, address _sender);
@@ -184,9 +183,9 @@ contract InstallationFacet is Modifiers {
     return s.upgradeQueue;
   }
 
-  /// @notice Query details about all ongoing craft queues
+  /// @notice Query details about all pending craft queues
   /// @param _owner Address to query queue
-  /// @return output_ An array of structs, each representing an ongoing craft queue
+  /// @return output_ An array of structs, each representing a pending craft queue
   /// @return indexes_ An array of IDs, to be used in the new finalizeUpgrades() function
   function getUserUpgradeQueue(address _owner) external view returns (UpgradeQueue[] memory output_, uint256[] memory indexes_) {
     uint256 length = s.upgradeQueue.length;
@@ -195,7 +194,7 @@ contract InstallationFacet is Modifiers {
 
     uint256 counter;
     for (uint256 i; i < length; i++) {
-      if (s.upgradeQueue[i].owner == _owner && s.upgradeComplete[i]) {
+      if (s.upgradeQueue[i].owner == _owner && !s.upgradeComplete[i]) {
         output_[counter] = s.upgradeQueue[i];
         indexes_[counter] = i;
         counter++;
