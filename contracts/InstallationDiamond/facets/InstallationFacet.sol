@@ -362,6 +362,10 @@ contract InstallationFacet is Modifiers {
     LibInstallation._unequipInstallation(_realmId, _installationId);
   }
 
+  function upgradeComplete(uint256 _queueId) external view returns (bool) {
+    return s.upgradeComplete[_queueId];
+  }
+
   // /// @notice Allow a user to reduce the upgrade time of an ongoing queue
   // /// @dev Will throw if the caller is not the owner of the queue
   // /// @param _queueId The identifier of the queue whose upgrade time is to be reduced
