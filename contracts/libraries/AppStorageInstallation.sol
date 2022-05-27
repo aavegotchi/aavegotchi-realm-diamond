@@ -22,7 +22,7 @@ struct InstallationType {
   //slot 4
   uint256 capacity;
   //slot 5
-  uint256[] prerequisites; //IDs of installations that must be present before this installation can be added
+  uint256[] prerequisites; //[0,0] altar level, lodge level
   //slot 6
   string name;
 }

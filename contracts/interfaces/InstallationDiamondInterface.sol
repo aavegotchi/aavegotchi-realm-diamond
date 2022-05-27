@@ -75,6 +75,12 @@ interface InstallationDiamondInterface {
 
   function balanceOf(address _owner, uint256 _id) external view returns (uint256 bal_);
 
+  function balanceOfToken(
+    address _tokenContract,
+    uint256 _tokenId,
+    uint256 _id
+  ) external view returns (uint256 value);
+
   function installationBalancesOfTokenByIds(
     address _tokenContract,
     uint256 _tokenId,

@@ -390,4 +390,16 @@ contract RealmFacet is Modifiers {
       output_[i] = s.accessRights[_parcelIds[i]][_actionRights[i]];
     }
   }
+
+  function fixAltarLevel(uint256[] memory _parcelIds) external onlyOwner {
+    InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
+    for (uint256 i; i < _parcelIds.length; i++) {
+      uint256 parcelId = _parcelIds[i];
+      Parcel storage parcel = s.parcels[parcelId];
+      // Check that the altar is actually supposed to be level 2
+      if (installationsDiamond.balanceOfToken(address(this), parcelId, 11) >= 1 && parcel.altarId == 10) {
+        parcel.altarId = 11;
+      }
+    }
+  }
 }
