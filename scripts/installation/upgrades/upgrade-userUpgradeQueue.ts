@@ -40,7 +40,7 @@ export async function upgradeUserQueue() {
     ),
     diamondAddress: maticInstallationDiamondAddress,
     facetsAndAddSelectors: joined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
   };
 
