@@ -8,6 +8,8 @@ library LibAlchemica {
   function settleUnclaimedAlchemica(uint256 _tokenId, uint256 _alchemicaType) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
+    //todo: only do this every 8 hrs
+
     // uint256 capacity = s.parcels[_tokenId].reservoirCapacity[_alchemicaType];
     uint256 capacity = calculateTotalCapacity(_tokenId, _alchemicaType);
 
