@@ -33,6 +33,7 @@ contract RealmFacet is Modifiers {
   event UnequipTile(uint256 _realmId, uint256 _tileId, uint256 _x, uint256 _y);
   event AavegotchiDiamondUpdated(address _aavegotchiDiamond);
   event InstallationUpgraded(uint256 _realmId, uint256 _prevInstallationId, uint256 _nextInstallationId, uint256 _coordinateX, uint256 _coordinateY);
+  event ParcelAccessRightSet(uint256 _realmId, uint256 _actionRight, uint256 _accessRight);
 
   /// @notice Return the maximum realm supply
   /// @return The max realm token supply
@@ -200,6 +201,7 @@ contract RealmFacet is Modifiers {
       require(LibMeta.msgSender() == s.parcels[_realmIds[i]].owner, "RealmFacet: Only Parcel owner can call");
       require(LibRealm.isAccessRightValid(_actionRights[i], _accessRights[i]), "RealmFacet: Invalid access rights");
       s.accessRights[_realmIds[i]][_actionRights[i]] = _accessRights[i];
+      emit ParcelAccessRightSet(_realmIds[i], _actionRights[i], _accessRights[i]);
     }
   }
 
