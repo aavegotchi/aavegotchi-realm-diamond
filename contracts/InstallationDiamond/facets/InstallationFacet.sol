@@ -358,6 +358,7 @@ contract InstallationFacet is Modifiers {
   /// @param _realmId The identifier of the parcel to unequip the installation from
   /// @param _installationId Identifier of the installation to unequip
   function unequipInstallation(uint256 _realmId, uint256 _installationId) external onlyRealmDiamond {
+    require(!s.installationTypes[_installationId].unequippable, "InstallationFacet: installation is unequippable");
     LibInstallation._unequipInstallation(_realmId, _installationId);
   }
 

@@ -15,6 +15,7 @@ struct InstallationType {
   uint32 craftTime; // in blocks
   uint32 nextLevelId; //the ID of the next level of this installation. Used for upgrades.
   bool deprecated; //bool
+  bool unequippable;
   //slot 2
   uint256[4] alchemicaCost; // [fud, fomo, alpha, kek]
   //slot 3
