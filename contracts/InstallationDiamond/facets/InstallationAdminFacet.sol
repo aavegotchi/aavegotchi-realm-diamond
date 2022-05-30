@@ -232,7 +232,8 @@ contract InstallationAdminFacet is Modifiers {
     require(prevInstallation.alchemicaType == nextInstallation.alchemicaType, "InstallationFacet: Wrong alchemicaType");
     require(prevInstallation.level == nextInstallation.level - 1, "InstallationFacet: Wrong installation level");
 
-    IERC20(s.gltr).transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, _gltr * 10**18); //should revert if user doesnt have enough GLTR
+    uint256 gltrAmount = uint256(_gltr) * 1e18;
+    IERC20(s.gltr).transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, gltrAmount); //should revert if user doesnt have enough GLTR
 
     //prevent underflow if user sends too much GLTR
     if (_gltr > nextInstallation.craftTime) revert("InstallationFacet: Too much GLTR");
