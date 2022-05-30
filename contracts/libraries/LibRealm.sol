@@ -158,4 +158,16 @@ library LibRealm {
     ];
     return heights;
   }
+
+  function isAccessRightValid(uint256 actionRight, uint256 accessRight) internal pure returns (bool) {
+    // Channeling
+    if (actionRight == 0) {
+      return accessRight <= 2;
+    }
+    // Empty Reservoir
+    else if (actionRight == 1) {
+      return accessRight <= 2;
+    }
+    return false;
+  }
 }
