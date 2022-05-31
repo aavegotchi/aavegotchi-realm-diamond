@@ -313,6 +313,29 @@ contract InstallationFacet is Modifiers {
     // InstallationAdminFacet(address(this)).finalizeUpgrade();
   }
 
+  /// @notice Allow the owner to mint installations
+  /// @dev Will throw even if one of the installationTypes is deprecated
+  /// @dev Puts the installation into a queue
+  /// @param _installationTypes An array containing the identifiers of the installationTypes to mint
+  /// @param _toAddress Address to mint installations
+  function mintInstallations(uint16[] calldata _installationTypes, address _toAddress) external onlyOwner {
+    uint256 _installationTypesLength = s.installationTypes.length;
+    for (uint256 i = 0; i < _installationTypes.length; i++) {
+      require(_installationTypes[i] < _installationTypesLength, "InstallationFacet: Installation does not exist");
+
+      InstallationType memory installationType = s.installationTypes[_installationTypes[i]];
+      //level check
+      require(installationType.level == 1, "InstallationFacet: can only craft level 1");
+      //The preset deprecation time has elapsed
+      if (s.deprecateTime[_installationTypes[i]] > 0) {
+        require(block.timestamp < s.deprecateTime[_installationTypes[i]], "InstallationFacet: Installation has been deprecated");
+      }
+      require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
+
+      LibERC1155._safeMint(_toAddress, _installationTypes[i], 0);
+    }
+  }
+
   /// @notice Allow a user to speed up multiple queues(installation craft time) by paying the correct amount of $GLTR tokens
   /// @dev Will throw if the caller is not the queue owner
   /// @dev $GLTR tokens are burnt upon usage
