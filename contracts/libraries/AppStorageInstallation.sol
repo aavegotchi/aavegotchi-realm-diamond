@@ -22,7 +22,7 @@ struct InstallationType {
   //slot 4
   uint256 capacity;
   //slot 5
-  uint256[] prerequisites; //IDs of installations that must be present before this installation can be added
+  uint256[] prerequisites; //[0,0] altar level, lodge level
   //slot 6
   string name;
 }
@@ -70,6 +70,7 @@ struct InstallationAppStorage {
   mapping(uint256 => uint256) deprecateTime;
   mapping(bytes32 => uint256) upgradeHashes;
   bytes backendPubKey;
+  mapping(uint256 => bool) upgradeComplete;
 }
 
 library LibAppStorageInstallation {

@@ -264,7 +264,7 @@ contract RealmFacet is Modifiers {
     LibRealm.removeInstallation(_realmId, _prevInstallationId, _coordinateX, _coordinateY);
     LibRealm.placeInstallation(_realmId, _nextInstallationId, _coordinateX, _coordinateY);
     LibAlchemica.reduceTraits(_realmId, _prevInstallationId, true);
-    LibAlchemica.increaseTraits(_realmId, _prevInstallationId, true);
+    LibAlchemica.increaseTraits(_realmId, _nextInstallationId, true);
     emit InstallationUpgraded(_realmId, _prevInstallationId, _nextInstallationId, _coordinateX, _coordinateY);
   }
 
@@ -385,8 +385,21 @@ contract RealmFacet is Modifiers {
 
   function getParcelsAccessRights(uint256[] calldata _parcelIds, uint256[] calldata _actionRights) external view returns (uint256[] memory output_) {
     require(_parcelIds.length == _actionRights.length, "RealmFacet: Mismatched arrays");
+    output_ = new uint256[](_parcelIds.length);
     for (uint256 i; i < _parcelIds.length; i++) {
       output_[i] = s.accessRights[_parcelIds[i]][_actionRights[i]];
+    }
+  }
+
+  function fixAltarLevel(uint256[] memory _parcelIds) external onlyOwner {
+    InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
+    for (uint256 i; i < _parcelIds.length; i++) {
+      uint256 parcelId = _parcelIds[i];
+      Parcel storage parcel = s.parcels[parcelId];
+      // Check that the altar is actually supposed to be level 2
+      if (installationsDiamond.balanceOfToken(address(this), parcelId, 11) >= 1 && parcel.altarId == 10) {
+        parcel.altarId = 11;
+      }
     }
   }
 }

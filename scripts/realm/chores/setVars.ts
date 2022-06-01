@@ -2,14 +2,7 @@ import { Signer } from "ethers";
 import { BigNumberish } from "@ethersproject/bignumber";
 import { ethers, network } from "hardhat";
 import { AlchemicaFacet, VRFFacet, OwnershipFacet } from "../../../typechain";
-import {
-  aavegotchiDAOAddress,
-  impersonate,
-  maticAavegotchiDiamondAddress,
-  maticDiamondAddress,
-  pixelcraftAddress,
-  gasPrice,
-} from "../../helperFunctions";
+import { gasPrice } from "../../helperFunctions";
 import { alchemicaTotals, boostMultipliers } from "../../setVars";
 
 export async function setAddresses() {

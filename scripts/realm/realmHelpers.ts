@@ -684,7 +684,7 @@ export async function beforeTest(
 
 const backendSigner = () => {
   //@ts-ignore
-  return new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+  return new ethers.Wallet(process.env.PROD_PK); // PK should start with '0x'
 };
 
 export const genEquipInstallationSignature = async (

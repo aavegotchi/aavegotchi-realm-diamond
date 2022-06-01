@@ -1,18 +1,20 @@
-import { run, ethers } from "hardhat";
+import { ethers, run } from "hardhat";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
-} from "../../../tasks/deployUpgrade";
+} from "../../tasks/deployUpgrade";
+import { RealmFacet } from "../../typechain";
 
 export async function upgrade() {
-  const diamondUpgrader = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
-  const diamondAddress = "0x1d0360bac7299c86ec8e99d0c1c9a95fefaf2a11";
-
+  const realmDiamondAddress = "0x1d0360bac7299c86ec8e99d0c1c9a95fefaf2a11";
+  const realmDiamondUpgrader = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "AlchemicaFacet",
-      addSelectors: [],
+      facetName: "RealmFacet",
+      addSelectors: [
+        // "function fixAltarLevel(uint256[] memory _parcelIds) external",
+      ],
       removeSelectors: [],
     },
   ];
@@ -20,13 +22,11 @@ export async function upgrade() {
   const joined = convertFacetAndSelectorsToString(facets);
 
   const args: DeployUpgradeTaskArgs = {
-    diamondUpgrader: diamondUpgrader,
-    diamondAddress: diamondAddress,
+    diamondUpgrader: realmDiamondUpgrader,
+    diamondAddress: realmDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,
-    initAddress: ethers.constants.AddressZero,
-    initCalldata: "0x",
   };
 
   await run("deployUpgrade", args);
