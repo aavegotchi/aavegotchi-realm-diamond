@@ -87,7 +87,7 @@ export async function upgrade() {
   };
 
   await run("deployUpgrade", args1); //upgrades to installation diamond
-  //await run("deployUpgrade", args2); //upgrades to tile diamond
+  await run("deployUpgrade", args2); //upgrades to tile diamond
   //await resetChain(ethers);
 }
 
