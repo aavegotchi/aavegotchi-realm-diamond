@@ -7,6 +7,7 @@ import {LibSignature} from "../../libraries/LibSignature.sol";
 import {IERC721} from "../../interfaces/IERC721.sol";
 import {LibItems} from "../../libraries/LibItems.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
+import {LibERC1155} from "../../libraries/LibERC1155.sol";
 
 contract InstallationAdminFacet is Modifiers {
   event AddressesUpdated(
@@ -110,6 +111,31 @@ contract InstallationAdminFacet is Modifiers {
       uint256 id = _ids[i];
       s.installationTypes[id] = _installationTypes[i];
       emit EditInstallationType(id);
+    }
+  }
+
+  /// @notice Allow the owner to mint installations
+  /// @dev Will throw even if one of the installationTypes is deprecated
+  /// @dev Puts the installation into a queue
+  /// @param _installationTypes An array containing the identifiers of the installationTypes to mint
+  /// @param _amounts An array containing the amounts of the installationTypes to mint
+  /// @param _toAddress Address to mint installations
+  function mintInstallations(uint16[] calldata _installationTypes, uint16[] calldata _amounts, address _toAddress) external onlyOwner {
+    require(_installationTypes.length == _amounts.length, "InstallationFacet: Mismatched arrays");
+    uint256 _installationTypesLength = s.installationTypes.length;
+    for (uint256 i = 0; i < _installationTypes.length; i++) {
+      require(_installationTypes[i] < _installationTypesLength, "InstallationFacet: Installation does not exist");
+
+      InstallationType memory installationType = s.installationTypes[_installationTypes[i]];
+      //level check
+      require(installationType.level == 1, "InstallationFacet: can only craft level 1");
+      //The preset deprecation time has elapsed
+      if (s.deprecateTime[_installationTypes[i]] > 0) {
+        require(block.timestamp < s.deprecateTime[_installationTypes[i]], "InstallationFacet: Installation has been deprecated");
+      }
+      require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
+
+      LibERC1155._safeMint(_toAddress, _installationTypes[i], _amounts[i], 0);
     }
   }
 }
