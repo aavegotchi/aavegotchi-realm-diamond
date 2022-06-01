@@ -194,35 +194,45 @@ contract TileFacet is Modifiers {
   /// @param _tileTypes An array containing the identifiers of the tileTypes to craft
   function batchCraftTiles(uint16[] calldata _tileTypes, uint16[] calldata _amounts) external {
     address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
-
+    //reuse memory array in loops
+    uint256[4] memory alchemicaCost;
     require(_tileTypes.length == _amounts.length, "TileFacet: Incorrect array lengths");
-
+    uint256 _nextCraftId = s.nextCraftId;
     //Iterate through all given tileTypes
     for (uint256 i = 0; i < _tileTypes.length; i++) {
-      require(_tileTypes[i] < s.tileTypes.length, "TileFacet: Tile does not exist");
-
-      TileType memory tileType = s.tileTypes[_tileTypes[i]];
+      //cache inividual element
+      uint16 individualTile = _tileTypes[i];
+      require(individualTile < s.tileTypes.length, "TileFacet: Tile does not exist");
+      TileType memory tileType = s.tileTypes[individualTile];
       uint16 amount = _amounts[i];
-
       //The preset deprecation time has elapsed
-      if (s.deprecateTime[_tileTypes[i]] > 0) {
-        require(block.timestamp < s.deprecateTime[_tileTypes[i]], "TileFacet: Tile has been deprecated");
+      if (s.deprecateTime[individualTile] > 0) {
+        require(block.timestamp < s.deprecateTime[individualTile], "TileFacet: Tile has been deprecated");
       }
       require(!tileType.deprecated, "TileFacet: Tile has been deprecated");
 
-      require(tileType.craftTime == 0, "TileFacet: Cannot batch mint tiles with craft time");
-
-      uint256[4] memory alchemicaCost;
       alchemicaCost[0] = tileType.alchemicaCost[0] * amount;
       alchemicaCost[1] = tileType.alchemicaCost[1] * amount;
       alchemicaCost[2] = tileType.alchemicaCost[2] * amount;
       alchemicaCost[3] = tileType.alchemicaCost[3] * amount;
-
-      //take the required alchemica
+      //distribute alchemica
       LibItems._splitAlchemica(alchemicaCost, alchemicaAddresses);
 
-      LibERC1155Tile._safeMint(msg.sender, _tileTypes[i], amount, 0);
+      //tiles that are crafted immediately
+      if (tileType.craftTime == 0) {
+        LibERC1155Tile._safeMint(msg.sender, individualTile, 1, 0);
+      } else {
+        //tiles that are crafted fter some time
+        uint40 readyBlock = uint40(block.number) + tileType.craftTime;
+        //put the tile into a queue
+        //each tile needs a unique queue id
+        s.craftQueue.push(QueueItem(_nextCraftId, readyBlock, individualTile, false, msg.sender));
+
+        emit AddedToQueue(_nextCraftId, individualTile, readyBlock, msg.sender);
+        _nextCraftId++;
+      }
     }
+    s.nextCraftId = _nextCraftId;
   }
 
   /// @notice Allow a user to claim tiles from ready queues

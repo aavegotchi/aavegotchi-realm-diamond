@@ -177,39 +177,6 @@ contract InstallationFacet is Modifiers {
     }
   }
 
-  /// @notice Query details about all ongoing upgrade queues
-  /// @return output_ An array of structs, each representing an ongoing upgrade queue
-  function getAllUpgradeQueue() external view returns (UpgradeQueue[] memory) {
-    return s.upgradeQueue;
-  }
-
-  /// @notice Query details about all pending craft queues
-  /// @param _owner Address to query queue
-  /// @return output_ An array of structs, each representing a pending craft queue
-  /// @return indexes_ An array of IDs, to be used in the new finalizeUpgrades() function
-  function getUserUpgradeQueue(address _owner) external view returns (UpgradeQueue[] memory output_, uint256[] memory indexes_) {
-    uint256 length = s.upgradeQueue.length;
-    output_ = new UpgradeQueue[](length);
-    indexes_ = new uint256[](length);
-
-    uint256 counter;
-    for (uint256 i; i < length; i++) {
-      if (s.upgradeQueue[i].owner == _owner && !s.upgradeComplete[i]) {
-        output_[counter] = s.upgradeQueue[i];
-        indexes_[counter] = i;
-        counter++;
-      }
-    }
-    assembly {
-      mstore(output_, counter)
-      mstore(indexes_, counter)
-    }
-  }
-
-  function getUpgradeQueueId(uint256 _queueId) external view returns (UpgradeQueue memory) {
-    return s.upgradeQueue[_queueId];
-  }
-
   function getAltarLevel(uint256 _altarId) external view returns (uint256 altarLevel_) {
     require(_altarId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
     require(s.installationTypes[_altarId].installationType == 0, "InstallationFacet: Not Altar");
@@ -242,35 +209,61 @@ contract InstallationFacet is Modifiers {
    |             Write Functions        |
    |__________________________________*/
 
-  function batchCraftInstallations(uint16[] calldata _installationTypes, uint16[] calldata _amounts) external {
+  function batchCraftInstallations(
+    uint16[] calldata _installationTypes,
+    uint16[] calldata _amounts,
+    uint40[] calldata _gltr
+  ) external {
     require(_installationTypes.length == _amounts.length, "InstallationFacet: Mismatched arrays");
     address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
-
+    //reuse memory array in loops
+    uint256[4] memory alchemicaCost;
     for (uint256 i = 0; i < _installationTypes.length; i++) {
-      require(_installationTypes[i] < s.installationTypes.length, "InstallationFacet: Installation does not exist");
+      //cache inividual element
+      uint16 individualInstallation = _installationTypes[i];
+      uint256 _nextCraftId = s.nextCraftId;
+      require(individualInstallation < s.installationTypes.length, "InstallationFacet: Installation does not exist");
 
-      InstallationType memory installationType = s.installationTypes[_installationTypes[i]];
+      InstallationType memory installationType = s.installationTypes[individualInstallation];
       uint16 amount = _amounts[i];
 
-      require(installationType.craftTime == 0, "InstallationFacet: Craft time must be 0");
-      //level check
       require(installationType.level == 1, "InstallationFacet: can only craft level 1");
       //The preset deprecation time has elapsed
-      if (s.deprecateTime[_installationTypes[i]] > 0) {
-        require(block.timestamp < s.deprecateTime[_installationTypes[i]], "InstallationFacet: Installation has been deprecated");
+      if (s.deprecateTime[individualInstallation] > 0) {
+        require(block.timestamp < s.deprecateTime[individualInstallation], "InstallationFacet: Installation has been deprecated");
       }
       require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
 
-      uint256[4] memory alchemicaCost;
+      //get required alchemica
       alchemicaCost[0] = installationType.alchemicaCost[0] * amount;
       alchemicaCost[1] = installationType.alchemicaCost[1] * amount;
       alchemicaCost[2] = installationType.alchemicaCost[2] * amount;
       alchemicaCost[3] = installationType.alchemicaCost[3] * amount;
-
-      //take the required alchemica
+      //distribute alchemica
       LibItems._splitAlchemica(alchemicaCost, alchemicaAddresses);
 
-      LibERC1155._safeMint(msg.sender, _installationTypes[i], amount, 0);
+      //installations that are crafted immediately
+      //no need for gltr
+      if (installationType.craftTime == 0) {
+        //finally mint to user
+        LibERC1155._safeMint(msg.sender, individualInstallation, amount, 0);
+      }
+      //installations crafted after some time
+      else {
+        uint40 gltr = _gltr[i];
+        if (gltr > installationType.craftTime) revert("InstallationFacet: Too much GLTR");
+        if (installationType.craftTime - gltr == 0) {
+          LibERC1155._safeMint(msg.sender, individualInstallation, 1, 0);
+        } else {
+          uint40 readyBlock = uint40(block.number) + installationType.craftTime;
+          //put the installation into a queue
+          //each wearable needs a unique queue id
+          s.craftQueue.push(QueueItem(msg.sender, individualInstallation, false, readyBlock, _nextCraftId));
+          emit AddedToQueue(_nextCraftId, individualInstallation, readyBlock, msg.sender);
+          _nextCraftId++;
+        }
+      }
+      s.nextCraftId = _nextCraftId;
     }
 
     //after queue is over, user can claim installation
