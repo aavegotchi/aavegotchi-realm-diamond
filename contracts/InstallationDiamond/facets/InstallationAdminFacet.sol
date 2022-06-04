@@ -103,12 +103,12 @@ contract InstallationAdminFacet is Modifiers {
           _installationTypes[i].craftTime,
           _installationTypes[i].nextLevelId,
           _installationTypes[i].deprecated,
-          _installationTypes[i].unequippable,
           _installationTypes[i].alchemicaCost,
           _installationTypes[i].harvestRate,
           _installationTypes[i].capacity,
           _installationTypes[i].prerequisites,
-          _installationTypes[i].name
+          _installationTypes[i].name,
+          _installationTypes[i].unequippable
         )
       );
 
