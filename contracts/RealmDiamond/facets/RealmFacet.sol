@@ -131,13 +131,14 @@ contract RealmFacet is Modifiers {
     InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
 
     LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
+    InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(_realmId, _installationId);
+    LibAlchemica.reduceTraits(_realmId, _installationId, false);
 
-    //@todo: For now we can use the ID order to get the cost of previous upgrades. But in the future we'll need to add some data redundancy.
     uint256 currentLevel = installation.level;
-
+    //Give refund
     uint256[] memory alchemicaRefund = new uint256[](4);
-
     //Loop through each level of the installation.
+    //@todo: For now we can use the ID order to get the cost of previous upgrades. But in the future we'll need to add some data redundancy.
     for (uint256 index = 0; index < currentLevel; index++) {
       InstallationDiamondInterface.InstallationType memory prevInstallation = installationsDiamond.getInstallationType(_installationId - index);
 
@@ -155,10 +156,6 @@ contract RealmFacet is Modifiers {
         alchemica.transfer(msg.sender, alchemicaRefund[j]);
       }
     }
-
-    InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(_realmId, _installationId);
-
-    LibAlchemica.reduceTraits(_realmId, _installationId, false);
 
     emit UnequipInstallation(_realmId, _installationId, _x, _y);
   }
