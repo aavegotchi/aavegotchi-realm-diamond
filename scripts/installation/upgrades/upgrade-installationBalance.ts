@@ -1,26 +1,29 @@
-import { run, ethers } from "hardhat";
+import { run } from "hardhat";
+import { maticInstallationDiamondAddress } from "../../../constants";
+
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
-} from "../../tasks/deployUpgrade";
+} from "../../../tasks/deployUpgrade";
 
 export async function upgrade() {
   const diamondUpgrader = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
 
-  const requestConfig =
-    "(uint64 subId, uint32 callbackGasLimit, uint16 requestConfirmations, uint32 numWords, bytes32 keyHash)";
-
-  const UpgradeQueue =
-    "(uint256 parcelId, uint256 coordinateX, uint256 coordinateY, uint256 installationId, uint256 readyBlock, bool claimed, address owner)";
+  const missingAltarStruct =
+    "tuple(uint256 _parcelId, uint256 _oldAltarId, uint256 _newAltarId)";
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "InstallationFacet",
+      facetName: "InstallationAdminFacet",
       addSelectors: [
-        `function upgradeInstallation(${UpgradeQueue} _upgradeQueue) external`,
-        "function finalizeUpgrade() public ",
+        `function fixMissingAltars(${missingAltarStruct}[] memory _altars) external`,
       ],
+      removeSelectors: [],
+    },
+    {
+      facetName: "InstallationFacet",
+      addSelectors: [],
       removeSelectors: [],
     },
   ];
@@ -29,9 +32,9 @@ export async function upgrade() {
 
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
-    diamondAddress: "0x7Cc7B6964d8C49d072422B2e7FbF55C2Ca6FefA5",
+    diamondAddress: maticInstallationDiamondAddress,
     facetsAndAddSelectors: joined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
   };
 
@@ -47,3 +50,15 @@ if (require.main === module) {
       process.exit(1);
     });
 }
+
+/*
+
+
+
+
+
+
+olds: 
+news: 
+
+*/

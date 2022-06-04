@@ -70,6 +70,7 @@ struct InstallationAppStorage {
   mapping(uint256 => uint256) deprecateTime;
   mapping(bytes32 => uint256) upgradeHashes;
   bytes backendPubKey;
+  mapping(uint256 => bool) upgradeComplete;
 }
 
 library LibAppStorageInstallation {

@@ -3,8 +3,7 @@ pragma solidity 0.8.9;
 
 import {LibERC998} from "../libraries/LibERC998.sol";
 import {LibERC1155} from "../libraries/LibERC1155.sol";
-import {LibERC20} from "../libraries/LibERC20.sol";
-import {LibAppStorageInstallation, InstallationAppStorage} from "../libraries/AppStorageInstallation.sol";
+import {LibAppStorageInstallation, InstallationAppStorage, UpgradeQueue, InstallationType} from "../libraries/AppStorageInstallation.sol";
 
 library LibInstallation {
   function _equipInstallation(
