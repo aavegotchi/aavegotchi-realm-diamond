@@ -220,17 +220,17 @@ contract InstallationFacet is Modifiers {
     uint256[4] memory alchemicaCost;
     for (uint256 i = 0; i < _installationTypes.length; i++) {
       //cache inividual element
-      uint16 individualInstallation = _installationTypes[i];
+      uint16 installationId = _installationTypes[i];
       uint256 _nextCraftId = s.nextCraftId;
-      require(individualInstallation < s.installationTypes.length, "InstallationFacet: Installation does not exist");
+      require(installationId < s.installationTypes.length, "InstallationFacet: Installation does not exist");
 
-      InstallationType memory installationType = s.installationTypes[individualInstallation];
+      InstallationType memory installationType = s.installationTypes[installationId];
       uint16 amount = _amounts[i];
 
       require(installationType.level == 1, "InstallationFacet: can only craft level 1");
       //The preset deprecation time has elapsed
-      if (s.deprecateTime[individualInstallation] > 0) {
-        require(block.timestamp < s.deprecateTime[individualInstallation], "InstallationFacet: Installation has been deprecated");
+      if (s.deprecateTime[installationId] > 0) {
+        require(block.timestamp < s.deprecateTime[installationId], "InstallationFacet: Installation has been deprecated");
       }
       require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
 
@@ -246,20 +246,20 @@ contract InstallationFacet is Modifiers {
       //no need for gltr
       if (installationType.craftTime == 0) {
         //finally mint to user
-        LibERC1155._safeMint(msg.sender, individualInstallation, amount, 0);
+        LibERC1155._safeMint(msg.sender, installationId, amount, 0);
       }
       //installations crafted after some time
       else {
         uint40 gltr = _gltr[i];
         if (gltr > installationType.craftTime) revert("InstallationFacet: Too much GLTR");
         if (installationType.craftTime - gltr == 0) {
-          LibERC1155._safeMint(msg.sender, individualInstallation, 1, 0);
+          LibERC1155._safeMint(msg.sender, installationId, 1, 0);
         } else {
           uint40 readyBlock = uint40(block.number) + installationType.craftTime;
           //put the installation into a queue
           //each wearable needs a unique queue id
-          s.craftQueue.push(QueueItem(msg.sender, individualInstallation, false, readyBlock, _nextCraftId));
-          emit AddedToQueue(_nextCraftId, individualInstallation, readyBlock, msg.sender);
+          s.craftQueue.push(QueueItem(msg.sender, installationId, false, readyBlock, _nextCraftId));
+          emit AddedToQueue(_nextCraftId, installationId, readyBlock, msg.sender);
           _nextCraftId++;
         }
       }
