@@ -69,9 +69,6 @@ describe("Testing Installation Refund", async function () {
       });
     });
 
-    console.log("costs:", costs);
-    console.log("refund:", refund);
-
     const sig = genEquipInstallationSignature(testParcelId, 13, 8, 8);
 
     await realmFacet.unequipInstallation(testParcelId, 13, 8, 8, sig);
@@ -83,8 +80,5 @@ describe("Testing Installation Refund", async function () {
 
     expect(Number(fudDiff)).to.equal(refund[0].toNumber());
     expect(Number(fomoDiff)).to.equal(refund[1].toNumber());
-
-    console.log("fud diff:", fudDiff);
-    console.log("fomo diff:", fomoDiff);
   });
 });
