@@ -1,31 +1,13 @@
-import {
-  impersonate,
-  mineBlocks,
-  realmDiamondAddress,
-} from "../../scripts/helperFunctions";
+import { impersonate } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
-import { expect } from "chai";
-import { TestBeforeVars, UpgradeQueue } from "../../types";
-import {
-  alchemicaTotals,
-  boostMultipliers,
-  greatPortalCapacity,
-} from "../../scripts/setVars";
-import {
-  approveAlchemica,
-  mintAlchemica,
-  testInstallations,
-  genEquipInstallationSignature,
-  genUpgradeInstallationSignature,
-} from "../../scripts/realm/realmHelpers";
-import { maticDiamondAddress, alchemica } from "../../constants";
+
+import { genEquipInstallationSignature } from "../../scripts/realm/realmHelpers";
+import { alchemica, maticRealmDiamondAddress } from "../../constants";
 import { upgrade } from "../../scripts/realm/upgrades/upgrade-refund";
 
 describe("Testing Installation Refund", async function () {
-  const testAddress = "0x7E4724C60718A9F87CE51bcF8812Bf90D0b7B9Db";
+  const testAddress = "0xc76b85cd226518daf2027081deff2eac4cc91a00";
   const testParcelId = 6614;
-
-  let g: TestBeforeVars;
 
   before(async function () {
     this.timeout(20000000);
@@ -36,10 +18,7 @@ describe("Testing Installation Refund", async function () {
   it("Setup installation diamond", async function () {
     const realmFacet = await impersonate(
       testAddress,
-      await ethers.getContractAt(
-        "RealmFacet",
-        "0x1d0360bac7299c86ec8e99d0c1c9a95fefaf2a11"
-      ),
+      await ethers.getContractAt("RealmFacet", maticRealmDiamondAddress),
       ethers,
       network
     );
@@ -56,9 +35,9 @@ describe("Testing Installation Refund", async function () {
     console.log(currentFud);
     console.log(currentFomo);
 
-    const sig = genEquipInstallationSignature(testParcelId, 12, 7, 7);
+    const sig = genEquipInstallationSignature(testParcelId, 13, 8, 8);
 
-    await realmFacet.unequipInstallation(testParcelId, 12, 7, 7, sig);
+    await realmFacet.unequipInstallation(testParcelId, 13, 8, 8, sig);
     console.log(await fud.balanceOf(testAddress));
     console.log(await fomo.balanceOf(testAddress));
   });
