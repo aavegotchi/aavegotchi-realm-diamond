@@ -50,10 +50,11 @@ library LibERC1155 {
   function _safeMint(
     address _to,
     uint256 _installationId,
+    bool _requireQueue,
     uint256 _queueId
   ) internal {
     InstallationAppStorage storage s = LibAppStorageInstallation.diamondStorage();
-    if (s.installationTypes[_installationId].craftTime > 0) {
+    if (_requireQueue) {
       //Queue is required
       if (s.installationTypes[_installationId].level == 1) {
         require(!s.craftQueue[_queueId].claimed, "LibERC1155: tokenId already minted");
