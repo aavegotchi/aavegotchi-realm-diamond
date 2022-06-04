@@ -116,31 +116,27 @@ contract InstallationAdminFacet is Modifiers {
   }
 
   /// @notice Allow the owner to mint installations
-  /// @dev Will throw even if one of the installationTypes is deprecated
-  /// @dev Puts the installation into a queue
-  /// @param _installationTypes An array containing the identifiers of the installationTypes to mint
+  /// @dev This function does not check for deprecation because otherwise the installations could be minted by players.
+  /// @dev Make sure that the installation is deprecated when you add it onchain
+  /// @param _installationIds An array containing the identifiers of the installationTypes to mint
   /// @param _amounts An array containing the amounts of the installationTypes to mint
   /// @param _toAddress Address to mint installations
   function mintInstallations(
-    uint16[] calldata _installationTypes,
+    uint16[] calldata _installationIds,
     uint16[] calldata _amounts,
     address _toAddress
   ) external onlyOwner {
-    require(_installationTypes.length == _amounts.length, "InstallationFacet: Mismatched arrays");
-    uint256 _installationTypesLength = s.installationTypes.length;
-    for (uint256 i = 0; i < _installationTypes.length; i++) {
-      require(_installationTypes[i] < _installationTypesLength, "InstallationFacet: Installation does not exist");
+    require(_installationIds.length == _amounts.length, "InstallationFacet: Mismatched arrays");
+    for (uint256 i = 0; i < _installationIds.length; i++) {
+      uint256 installationId = _installationIds[i];
+      require(installationId < s.installationTypes.length, "InstallationFacet: Installation does not exist");
 
-      InstallationType memory installationType = s.installationTypes[_installationTypes[i]];
+      InstallationType memory installationType = s.installationTypes[installationId];
+      require(installationType.deprecated, "InstallationFacet: Not deprecated");
       //level check
       require(installationType.level == 1, "InstallationFacet: can only craft level 1");
-      //The preset deprecation time has elapsed
-      if (s.deprecateTime[_installationTypes[i]] > 0) {
-        require(block.timestamp < s.deprecateTime[_installationTypes[i]], "InstallationFacet: Installation has been deprecated");
-      }
-      require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
 
-      LibERC1155._safeMint(_toAddress, _installationTypes[i], _amounts[i], false, 0);
+      LibERC1155._safeMint(_toAddress, installationId, _amounts[i], false, 0);
     }
   }
 
