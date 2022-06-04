@@ -140,7 +140,7 @@ contract InstallationAdminFacet is Modifiers {
       }
       require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
 
-      LibERC1155._safeMint(_toAddress, _installationTypes[i], _amounts[i], 0);
+      LibERC1155._safeMint(_toAddress, _installationTypes[i], _amounts[i], false, 0);
     }
   }
 
@@ -158,7 +158,7 @@ contract InstallationAdminFacet is Modifiers {
       uint256 newId = altar._newAltarId;
       LibERC998.removeFromParent(s.realmDiamond, parcelId, oldId, 1);
       RealmDiamond realm = RealmDiamond(address(s.realmDiamond));
-      LibERC1155._safeMint(realm.ownerOf(parcelId), newId, false, 0);
+      LibERC1155._safeMint(realm.ownerOf(parcelId), newId, 1, false, 0);
       LibERC1155.removeFromOwner(realm.ownerOf(parcelId), newId, 1);
       LibERC998.addToParent(s.realmDiamond, parcelId, newId, 1);
     }
