@@ -30,6 +30,7 @@ interface InstallationDiamondInterface {
     uint256[] prerequisites; //IDs of installations that must be present before this installation can be added
     //slot 6
     string name;
+    uint8 unequipType;
   }
 
   struct UpgradeQueue {
@@ -63,7 +64,11 @@ interface InstallationDiamondInterface {
     uint256 _installationId
   ) external;
 
-  function unequipInstallation(uint256 _realmId, uint256 _installationId) external;
+  function unequipInstallation(
+    address _owner,
+    uint256 _realmId,
+    uint256 _installationId
+  ) external;
 
   function addInstallationTypes(InstallationType[] calldata _installationTypes) external;
 

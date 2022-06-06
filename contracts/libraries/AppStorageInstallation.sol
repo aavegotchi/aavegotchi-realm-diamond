@@ -26,7 +26,7 @@ struct InstallationType {
   //slot 6
   string name;
   //slot 7
-  bool unequippable;
+  uint8 unequipType;
 }
 
 struct QueueItem {

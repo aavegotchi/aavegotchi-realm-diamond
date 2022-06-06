@@ -131,7 +131,7 @@ contract RealmFacet is Modifiers {
     InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
 
     LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
-    InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(_realmId, _installationId);
+    InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(msg.sender, _realmId, _installationId);
     LibAlchemica.reduceTraits(_realmId, _installationId, false);
 
     uint256 currentLevel = installation.level;
@@ -139,21 +139,24 @@ contract RealmFacet is Modifiers {
     uint256[] memory alchemicaRefund = new uint256[](4);
     //Loop through each level of the installation.
     //@todo: For now we can use the ID order to get the cost of previous upgrades. But in the future we'll need to add some data redundancy.
-    for (uint256 index = 0; index < currentLevel; index++) {
-      InstallationDiamondInterface.InstallationType memory prevInstallation = installationsDiamond.getInstallationType(_installationId - index);
 
-      //Loop through each Alchemica cost
-      for (uint256 i; i < prevInstallation.alchemicaCost.length; i++) {
-        //Only half of the cost is refunded
-        alchemicaRefund[i] += prevInstallation.alchemicaCost[i] / 2;
+    if (installation.unequipType == 0) {
+      for (uint256 index = 0; index < currentLevel; index++) {
+        InstallationDiamondInterface.InstallationType memory prevInstallation = installationsDiamond.getInstallationType(_installationId - index);
+
+        //Loop through each Alchemica cost
+        for (uint256 i; i < prevInstallation.alchemicaCost.length; i++) {
+          //Only half of the cost is refunded
+          alchemicaRefund[i] += prevInstallation.alchemicaCost[i] / 2;
+        }
       }
-    }
 
-    for (uint256 j = 0; j < alchemicaRefund.length; j++) {
-      //don't send 0 refunds
-      if (alchemicaRefund[j] > 0) {
-        IERC20 alchemica = IERC20(s.alchemicaAddresses[j]);
-        alchemica.transfer(msg.sender, alchemicaRefund[j]);
+      for (uint256 j = 0; j < alchemicaRefund.length; j++) {
+        //don't send 0 refunds
+        if (alchemicaRefund[j] > 0) {
+          IERC20 alchemica = IERC20(s.alchemicaAddresses[j]);
+          alchemica.transfer(msg.sender, alchemicaRefund[j]);
+        }
       }
     }
 

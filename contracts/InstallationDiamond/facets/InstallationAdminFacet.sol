@@ -109,7 +109,7 @@ contract InstallationAdminFacet is Modifiers {
           _installationTypes[i].capacity,
           _installationTypes[i].prerequisites,
           _installationTypes[i].name,
-          _installationTypes[i].unequippable
+          _installationTypes[i].unequipType
         )
       );
 
@@ -149,7 +149,7 @@ contract InstallationAdminFacet is Modifiers {
     // check that upgrade is ready
     if (block.number >= readyBlock) {
       // burn old installation
-      LibInstallation._unequipInstallation(parcelId, installationId);
+      LibInstallation._unequipInstallation(_owner, parcelId, installationId);
       // mint new installation
       uint256 nextLevelId = s.installationTypes[installationId].nextLevelId;
 
@@ -245,7 +245,7 @@ contract InstallationAdminFacet is Modifiers {
     //Confirm upgrade immediately
     if (nextInstallation.craftTime - _gltr == 0) {
       // burn old installation
-      LibInstallation._unequipInstallation(_upgradeQueue.parcelId, _upgradeQueue.installationId);
+      LibInstallation._unequipInstallation(_upgradeQueue.owner, _upgradeQueue.parcelId, _upgradeQueue.installationId);
       // mint new installation
       uint256 nextLevelId = s.installationTypes[_upgradeQueue.installationId].nextLevelId;
 

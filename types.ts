@@ -96,6 +96,7 @@ export interface InstallationTypeInput {
   nextLevelId: number;
   prerequisites: number[];
   name: string;
+  unequipType: number;
 }
 
 export interface TileTypeInput {
