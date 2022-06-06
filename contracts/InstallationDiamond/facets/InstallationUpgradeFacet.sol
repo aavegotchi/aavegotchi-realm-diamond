@@ -146,7 +146,7 @@ contract InstallationUpgradeFacet is Modifiers {
       LibInstallation._unequipInstallation(parcelId, installationId);
       // mint new installation
       uint256 nextLevelId = s.installationTypes[installationId].nextLevelId;
-      LibERC1155._safeMint(_owner, nextLevelId, 1, index);
+      LibERC1155._safeMint(_owner, nextLevelId, 1, true, index);
       // equip new installation
       LibInstallation._equipInstallation(_owner, parcelId, nextLevelId);
 
@@ -160,14 +160,6 @@ contract InstallationUpgradeFacet is Modifiers {
       bytes32 uniqueHash = keccak256(abi.encodePacked(parcelId, coordinateX, coordinateY, installationId));
       s.upgradeHashes[uniqueHash] = 0;
 
-      // // pop upgrade from array
-      // if (_user) {
-      //   s.userUpgradeQueue[_owner][index] = s.userUpgradeQueue[_owner][s.userUpgradeQueue[_owner].length - 1];
-      //   s.userUpgradeQueue[_owner].pop();
-      // } else {
-      //   s.upgradeQueue[index] = s.upgradeQueue[s.upgradeQueue.length - 1];
-      //   s.upgradeQueue.pop();
-      // }
       s.upgradeComplete[index] = true;
 
       emit UpgradeFinalized(parcelId, coordinateX, coordinateY, nextLevelId);

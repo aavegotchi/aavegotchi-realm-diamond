@@ -245,7 +245,7 @@ contract TileFacet is Modifiers {
       _batchCraftTiles(_inputs[i]);
     }
   }
-
+  
   /// @notice Allow a user to claim tiles from ready queues
   /// @dev Will throw if the caller is not the queue owner
   /// @dev Will throw if one of the queues is not ready

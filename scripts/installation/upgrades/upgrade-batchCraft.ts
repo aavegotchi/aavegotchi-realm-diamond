@@ -21,30 +21,6 @@ export async function upgrade() {
       addSelectors: [
         "function batchCraftInstallations((uint16 installationID,uint16 amount,uint40 gltr)[] calldata _inputs) external",
       ],
-      removeSelectors: [
-        "function getUserUpgradeQueue(address _owner) external view",
-        "function getAllUpgradeQueue() external view",
-        "function getUpgradeQueueId(uint256 _queueId) external view",
-      ],
-    },
-    {
-      facetName: "InstallationAdminFacet",
-      addSelectors: [],
-      removeSelectors: [
-        `function upgradeInstallation(${UpgradeQueue} calldata _upgradeQueue,bytes memory _signature,uint40 _gltr) external`,
-        "function finalizeUpgrades(uint256[] memory _upgradeIndexes) public",
-      ],
-    },
-    {
-      facetName: "InstallationUpgradeFacet",
-      //populate the new installationUpgrade facer
-      addSelectors: [
-        `function upgradeInstallation(${UpgradeQueue} calldata _upgradeQueue,bytes memory _signature,uint40 _gltr) external`,
-        "function finalizeUpgrades(uint256[] memory _upgradeIndexes) public",
-        "function getUserUpgradeQueue(address _owner) external view",
-        "function getAllUpgradeQueue() external view",
-        "function getUpgradeQueueId(uint256 _queueId) external view",
-      ],
       removeSelectors: [],
     },
   ];

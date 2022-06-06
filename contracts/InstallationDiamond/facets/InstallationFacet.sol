@@ -218,7 +218,7 @@ contract InstallationFacet is Modifiers {
     uint16 installationID = _batchCraftInstallationsInput.installationID;
     uint16 amount = _batchCraftInstallationsInput.amount;
     uint40 gltr = _batchCraftInstallationsInput.gltr;
-
+    
     address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
     uint256[4] memory alchemicaCost;
     uint256 _nextCraftId = s.nextCraftId;
@@ -284,14 +284,15 @@ contract InstallationFacet is Modifiers {
     uint256 _installationTypesLength = s.installationTypes.length;
     uint256 _nextCraftId = s.nextCraftId;
     for (uint256 i = 0; i < _installationTypes.length; i++) {
-      require(_installationTypes[i] < _installationTypesLength, "InstallationFacet: Installation does not exist");
+      uint256 installationId = _installationTypes[i];
+      require(installationId < _installationTypesLength, "InstallationFacet: Installation does not exist");
 
-      InstallationType memory installationType = s.installationTypes[_installationTypes[i]];
+      InstallationType memory installationType = s.installationTypes[installationId];
       //level check
       require(installationType.level == 1, "InstallationFacet: can only craft level 1");
       //The preset deprecation time has elapsed
-      if (s.deprecateTime[_installationTypes[i]] > 0) {
-        require(block.timestamp < s.deprecateTime[_installationTypes[i]], "InstallationFacet: Installation has been deprecated");
+      if (s.deprecateTime[installationId] > 0) {
+        require(block.timestamp < s.deprecateTime[installationId], "InstallationFacet: Installation has been deprecated");
       }
       require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
 
@@ -303,15 +304,16 @@ contract InstallationFacet is Modifiers {
       if (gltr > installationType.craftTime) revert("InstallationFacet: Too much GLTR");
 
       if (installationType.craftTime - gltr == 0) {
-        LibERC1155._safeMint(msg.sender, _installationTypes[i], 1, 0);
+        //doesn't require queue
+        LibERC1155._safeMint(msg.sender, installationId, 1, false, 0);
       } else {
         uint40 readyBlock = uint40(block.number) + installationType.craftTime;
 
         //put the installation into a queue
         //each wearable needs a unique queue id
-        s.craftQueue.push(QueueItem(msg.sender, _installationTypes[i], false, readyBlock, _nextCraftId));
+        s.craftQueue.push(QueueItem(msg.sender, uint16(installationId), false, readyBlock, _nextCraftId));
 
-        emit AddedToQueue(_nextCraftId, _installationTypes[i], readyBlock, msg.sender);
+        emit AddedToQueue(_nextCraftId, installationId, readyBlock, msg.sender);
         _nextCraftId++;
       }
     }
@@ -334,8 +336,8 @@ contract InstallationFacet is Modifiers {
 
       require(block.number >= queueItem.readyBlock, "InstallationFacet: Installation not ready");
 
-      // mint installation
-      LibERC1155._safeMint(msg.sender, queueItem.installationType, 1, queueItem.id);
+      // mint installation from queue
+      LibERC1155._safeMint(msg.sender, queueItem.installationType, 1, true, queueItem.id);
       s.craftQueue[queueId].claimed = true;
       emit QueueClaimed(queueId);
     }

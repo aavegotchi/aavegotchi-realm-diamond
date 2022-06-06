@@ -86,9 +86,13 @@ contract RealmFacet is Modifiers {
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
+
     InstallationDiamondInterface.InstallationType memory installation = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(
       _installationId
     );
+
+    require(installation.level == 1, "RealmFacet: Can only equip lvl 1");
+
     if (installation.installationType == 1 || installation.installationType == 2) {
       require(s.parcels[_realmId].currentRound >= 1, "RealmFacet: Must survey before equipping");
     }
