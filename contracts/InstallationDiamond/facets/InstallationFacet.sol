@@ -209,65 +209,65 @@ contract InstallationFacet is Modifiers {
    |             Write Functions        |
    |__________________________________*/
 
-  function batchCraftInstallations(
-    uint16[] calldata _installationTypes,
-    uint16[] calldata _amounts,
-    uint40[] calldata _gltr
-  ) external {
-    require(_installationTypes.length == _amounts.length, "InstallationFacet: Mismatched arrays");
-    address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
-    //reuse memory array in loops
-    uint256[4] memory alchemicaCost;
-    for (uint256 i = 0; i < _installationTypes.length; i++) {
-      //cache inividual element
-      uint16 installationId = _installationTypes[i];
-      uint256 _nextCraftId = s.nextCraftId;
-      require(installationId < s.installationTypes.length, "InstallationFacet: Installation does not exist");
+  // function batchCraftInstallations(
+  //   uint16[] calldata _installationTypes,
+  //   uint16[] calldata _amounts,
+  //   uint40[] calldata _gltr
+  // ) external {
+  //   require(_installationTypes.length == _amounts.length, "InstallationFacet: Mismatched arrays");
+  //   address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
+  //   //reuse memory array in loops
+  //   uint256[4] memory alchemicaCost;
+  //   for (uint256 i = 0; i < _installationTypes.length; i++) {
+  //     //cache inividual element
+  //     uint16 installationId = _installationTypes[i];
+  //     uint256 _nextCraftId = s.nextCraftId;
+  //     require(installationId < s.installationTypes.length, "InstallationFacet: Installation does not exist");
 
-      InstallationType memory installationType = s.installationTypes[installationId];
-      uint16 amount = _amounts[i];
+  //     InstallationType memory installationType = s.installationTypes[installationId];
+  //     uint16 amount = _amounts[i];
 
-      require(installationType.level == 1, "InstallationFacet: can only craft level 1");
-      //The preset deprecation time has elapsed
-      if (s.deprecateTime[installationId] > 0) {
-        require(block.timestamp < s.deprecateTime[installationId], "InstallationFacet: Installation has been deprecated");
-      }
-      require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
+  //     require(installationType.level == 1, "InstallationFacet: can only craft level 1");
+  //     //The preset deprecation time has elapsed
+  //     if (s.deprecateTime[installationId] > 0) {
+  //       require(block.timestamp < s.deprecateTime[installationId], "InstallationFacet: Installation has been deprecated");
+  //     }
+  //     require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
 
-      //get required alchemica
-      alchemicaCost[0] = installationType.alchemicaCost[0] * amount;
-      alchemicaCost[1] = installationType.alchemicaCost[1] * amount;
-      alchemicaCost[2] = installationType.alchemicaCost[2] * amount;
-      alchemicaCost[3] = installationType.alchemicaCost[3] * amount;
-      //distribute alchemica
-      LibItems._splitAlchemica(alchemicaCost, alchemicaAddresses);
+  //     //get required alchemica
+  //     alchemicaCost[0] = installationType.alchemicaCost[0] * amount;
+  //     alchemicaCost[1] = installationType.alchemicaCost[1] * amount;
+  //     alchemicaCost[2] = installationType.alchemicaCost[2] * amount;
+  //     alchemicaCost[3] = installationType.alchemicaCost[3] * amount;
+  //     //distribute alchemica
+  //     LibItems._splitAlchemica(alchemicaCost, alchemicaAddresses);
 
-      //installations that are crafted immediately
-      //no need for gltr
-      if (installationType.craftTime == 0) {
-        //finally mint to user
-        LibERC1155._safeMint(msg.sender, installationId, amount, false, 0);
-      }
-      //installations crafted after some time
-      else {
-        uint40 gltr = _gltr[i];
-        if (gltr > installationType.craftTime) revert("InstallationFacet: Too much GLTR");
-        if (installationType.craftTime - gltr == 0) {
-          LibERC1155._safeMint(msg.sender, installationId, 1, false, 0);
-        } else {
-          uint40 readyBlock = uint40(block.number) + installationType.craftTime;
-          //put the installation into a queue
-          //each wearable needs a unique queue id
-          s.craftQueue.push(QueueItem(msg.sender, installationId, false, readyBlock, _nextCraftId));
-          emit AddedToQueue(_nextCraftId, installationId, readyBlock, msg.sender);
-          _nextCraftId++;
-        }
-      }
-      s.nextCraftId = _nextCraftId;
-    }
+  //     //installations that are crafted immediately
+  //     //no need for gltr
+  //     if (installationType.craftTime == 0) {
+  //       //finally mint to user
+  //       LibERC1155._safeMint(msg.sender, installationId, amount, false, 0);
+  //     }
+  //     //installations crafted after some time
+  //     else {
+  //       uint40 gltr = _gltr[i];
+  //       if (gltr > installationType.craftTime) revert("InstallationFacet: Too much GLTR");
+  //       if (installationType.craftTime - gltr == 0) {
+  //         LibERC1155._safeMint(msg.sender, installationId, 1, false, 0);
+  //       } else {
+  //         uint40 readyBlock = uint40(block.number) + installationType.craftTime;
+  //         //put the installation into a queue
+  //         //each wearable needs a unique queue id
+  //         s.craftQueue.push(QueueItem(msg.sender, installationId, false, readyBlock, _nextCraftId));
+  //         emit AddedToQueue(_nextCraftId, installationId, readyBlock, msg.sender);
+  //         _nextCraftId++;
+  //       }
+  //     }
+  //     s.nextCraftId = _nextCraftId;
+  //   }
 
-    //after queue is over, user can claim installation
-  }
+  //   //after queue is over, user can claim installation
+  // }
 
   /// @notice Allow a user to craft installations
   /// @dev Will throw even if one of the installationTypes is deprecated

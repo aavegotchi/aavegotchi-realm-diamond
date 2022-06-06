@@ -134,7 +134,7 @@ contract InstallationAdminFacet is Modifiers {
       InstallationType memory installationType = s.installationTypes[installationId];
       require(installationType.deprecated, "InstallationFacet: Not deprecated");
       //level check
-      require(installationType.level == 1, "InstallationFacet: can only craft level 1");
+      require(installationType.level == 1, "InstallationFacet: Can only craft level 1");
 
       LibERC1155._safeMint(_toAddress, installationId, _amounts[i], false, 0);
     }
