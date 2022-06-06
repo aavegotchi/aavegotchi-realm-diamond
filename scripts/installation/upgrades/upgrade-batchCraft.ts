@@ -8,8 +8,7 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
-import { InstallationUpgradeFacet, OwnershipFacet } from "../../../typechain";
-import { getSelectors, resetChain } from "../helperFunctions";
+import { OwnershipFacet } from "../../../typechain";
 
 export async function upgrade() {
   const diamondUpgrader = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
@@ -20,7 +19,7 @@ export async function upgrade() {
     {
       facetName: "InstallationFacet",
       addSelectors: [
-        "function batchCraftInstallations(uint16[] calldata _installationTypes,uint16[] calldata _amounts, uint40[] calldata _gltr) external",
+        "function batchCraftInstallations((uint16 installationID,uint16 amount,uint40 gltr)[] calldata _inputs) external",
       ],
       removeSelectors: [],
     },
@@ -31,7 +30,7 @@ export async function upgrade() {
     {
       facetName: "TileFacet",
       addSelectors: [
-        "function batchCraftTiles(uint16[] calldata _tileTypes, uint16[] calldata _amounts) external",
+        "function batchCraftTiles((uint16 tileID,uint16 amount,uint40 gltr)[] calldata _inputs) external",
       ],
       removeSelectors: [],
     },
@@ -63,7 +62,7 @@ export async function upgrade() {
   };
 
   await run("deployUpgrade", args1); //upgrades to installation diamond
-  //await run("deployUpgrade", args2); //upgrades to tile diamond
+  await run("deployUpgrade", args2); //upgrades to tile diamond
   //await resetChain(ethers);
 }
 
