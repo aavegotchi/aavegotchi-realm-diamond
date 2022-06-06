@@ -208,69 +208,69 @@ contract InstallationFacet is Modifiers {
   /***********************************|
    |             Write Functions        |
    |__________________________________*/
-  struct BatchCraftInstallationsInput {
-    uint16 installationID;
-    uint16 amount;
-    uint40 gltr;
-  }
+  // struct BatchCraftInstallationsInput {
+  //   uint16 installationID;
+  //   uint16 amount;
+  //   uint40 gltr;
+  // }
 
-  function _batchCraftInstallation(BatchCraftInstallationsInput calldata _batchCraftInstallationsInput) internal {
-    uint16 installationID = _batchCraftInstallationsInput.installationID;
-    uint16 amount = _batchCraftInstallationsInput.amount;
-    uint40 gltr = _batchCraftInstallationsInput.gltr;
-    
-    address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
-    uint256[4] memory alchemicaCost;
-    uint256 _nextCraftId = s.nextCraftId;
-    //make sure installation exists
-    require(installationID < s.installationTypes.length, "InstallationFacet: Installation does not exist");
+  // function _batchCraftInstallation(BatchCraftInstallationsInput calldata _batchCraftInstallationsInput) internal {
+  //   uint16 installationID = _batchCraftInstallationsInput.installationID;
+  //   uint16 amount = _batchCraftInstallationsInput.amount;
+  //   uint40 gltr = _batchCraftInstallationsInput.gltr;
 
-    InstallationType memory installationType = s.installationTypes[installationID];
-    require(installationType.level == 1, "InstallationFacet: can only craft level 1");
-    //The preset deprecation time has elapsed
-    if (s.deprecateTime[installationID] > 0) {
-      require(block.timestamp < s.deprecateTime[installationID], "InstallationFacet: Installation has been deprecated");
-    }
-    require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
+  //   address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
+  //   uint256[4] memory alchemicaCost;
+  //   uint256 _nextCraftId = s.nextCraftId;
+  //   //make sure installation exists
+  //   require(installationID < s.installationTypes.length, "InstallationFacet: Installation does not exist");
 
-    //get required alchemica
-    alchemicaCost[0] = installationType.alchemicaCost[0] * amount;
-    alchemicaCost[1] = installationType.alchemicaCost[1] * amount;
-    alchemicaCost[2] = installationType.alchemicaCost[2] * amount;
-    alchemicaCost[3] = installationType.alchemicaCost[3] * amount;
-    //distribute alchemica
-    LibItems._splitAlchemica(alchemicaCost, alchemicaAddresses);
+  //   InstallationType memory installationType = s.installationTypes[installationID];
+  //   require(installationType.level == 1, "InstallationFacet: can only craft level 1");
+  //   //The preset deprecation time has elapsed
+  //   if (s.deprecateTime[installationID] > 0) {
+  //     require(block.timestamp < s.deprecateTime[installationID], "InstallationFacet: Installation has been deprecated");
+  //   }
+  //   require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
 
-    //installations that are crafted immediately
-    //no need for gltr
-    if (installationType.craftTime == 0) {
-      //finally mint to user
-      LibERC1155._safeMint(msg.sender, installationID, amount, 0);
-    } else {
-      //installations crafted after some time
-      //for each installation , push to queue after applying individual gltr subtractions
-      for (uint256 i = 0; i < amount; i++) {
-        if (gltr > installationType.craftTime) revert("InstallationFacet: Too much GLTR");
-        if (installationType.craftTime - gltr == 0) {
-          LibERC1155._safeMint(msg.sender, installationID, 1, 0);
-        } else {
-          uint40 readyBlock = uint40(block.number) + installationType.craftTime;
-          //put the installation into a queue
-          //each wearable needs a unique queue id
-          s.craftQueue.push(QueueItem(msg.sender, installationID, false, readyBlock, _nextCraftId));
-          emit AddedToQueue(_nextCraftId, installationID, readyBlock, msg.sender);
-          s.nextCraftId++;
-        }
-      }
-    }
-    //after queue is over, user can claim installation
-  }
+  //   //get required alchemica
+  //   alchemicaCost[0] = installationType.alchemicaCost[0] * amount;
+  //   alchemicaCost[1] = installationType.alchemicaCost[1] * amount;
+  //   alchemicaCost[2] = installationType.alchemicaCost[2] * amount;
+  //   alchemicaCost[3] = installationType.alchemicaCost[3] * amount;
+  //   //distribute alchemica
+  //   LibItems._splitAlchemica(alchemicaCost, alchemicaAddresses);
 
-  function batchCraftInstallations(BatchCraftInstallationsInput[] calldata _inputs) external {
-    for (uint256 i = 0; i < _inputs.length; i++) {
-      _batchCraftInstallation(_inputs[i]);
-    }
-  }
+  //   //installations that are crafted immediately
+  //   //no need for gltr
+  //   if (installationType.craftTime == 0) {
+  //     //finally mint to user
+  //     LibERC1155._safeMint(msg.sender, installationID, amount, 0);
+  //   } else {
+  //     //installations crafted after some time
+  //     //for each installation , push to queue after applying individual gltr subtractions
+  //     for (uint256 i = 0; i < amount; i++) {
+  //       if (gltr > installationType.craftTime) revert("InstallationFacet: Too much GLTR");
+  //       if (installationType.craftTime - gltr == 0) {
+  //         LibERC1155._safeMint(msg.sender, installationID, 1, 0);
+  //       } else {
+  //         uint40 readyBlock = uint40(block.number) + installationType.craftTime;
+  //         //put the installation into a queue
+  //         //each wearable needs a unique queue id
+  //         s.craftQueue.push(QueueItem(msg.sender, installationID, false, readyBlock, _nextCraftId));
+  //         emit AddedToQueue(_nextCraftId, installationID, readyBlock, msg.sender);
+  //         s.nextCraftId++;
+  //       }
+  //     }
+  //   }
+  //   //after queue is over, user can claim installation
+  // }
+
+  // function batchCraftInstallations(BatchCraftInstallationsInput[] calldata _inputs) external {
+  //   for (uint256 i = 0; i < _inputs.length; i++) {
+  //     _batchCraftInstallation(_inputs[i]);
+  //   }
+  // }
 
   /// @notice Allow a user to craft installations
   /// @dev Will throw even if one of the installationTypes is deprecated
