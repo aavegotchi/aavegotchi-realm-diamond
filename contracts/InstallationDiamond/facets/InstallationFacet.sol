@@ -273,7 +273,8 @@ contract InstallationFacet is Modifiers {
       if (gltr > installationType.craftTime) revert("InstallationFacet: Too much GLTR");
 
       if (installationType.craftTime - gltr == 0) {
-        LibERC1155._safeMint(msg.sender, _installationTypes[i], 0);
+        //doesn't require queue
+        LibERC1155._safeMint(msg.sender, _installationTypes[i], false, 0);
       } else {
         uint40 readyBlock = uint40(block.number) + installationType.craftTime;
 
@@ -304,8 +305,8 @@ contract InstallationFacet is Modifiers {
 
       require(block.number >= queueItem.readyBlock, "InstallationFacet: Installation not ready");
 
-      // mint installation
-      LibERC1155._safeMint(msg.sender, queueItem.installationType, queueItem.id);
+      // mint installation from queue
+      LibERC1155._safeMint(msg.sender, queueItem.installationType, true, queueItem.id);
       s.craftQueue[queueId].claimed = true;
       emit QueueClaimed(queueId);
     }

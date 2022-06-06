@@ -9,6 +9,7 @@ import {LibSignature} from "../../libraries/LibSignature.sol";
 import {IERC721} from "../../interfaces/IERC721.sol";
 import {LibItems} from "../../libraries/LibItems.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
+import {LibERC998} from "../../libraries/LibERC998.sol";
 
 contract InstallationAdminFacet is Modifiers {
   event AddressesUpdated(
@@ -151,7 +152,9 @@ contract InstallationAdminFacet is Modifiers {
       LibInstallation._unequipInstallation(parcelId, installationId);
       // mint new installation
       uint256 nextLevelId = s.installationTypes[installationId].nextLevelId;
-      LibERC1155._safeMint(_owner, nextLevelId, index);
+
+      //mint from queue
+      LibERC1155._safeMint(_owner, nextLevelId, true, index);
       // equip new installation
       LibInstallation._equipInstallation(_owner, parcelId, nextLevelId);
 
@@ -241,6 +244,16 @@ contract InstallationAdminFacet is Modifiers {
 
     //Confirm upgrade immediately
     if (nextInstallation.craftTime - _gltr == 0) {
+      // burn old installation
+      LibInstallation._unequipInstallation(_upgradeQueue.parcelId, _upgradeQueue.installationId);
+      // mint new installation
+      uint256 nextLevelId = s.installationTypes[_upgradeQueue.installationId].nextLevelId;
+
+      //mint without queue
+      LibERC1155._safeMint(_upgradeQueue.owner, nextLevelId, false, 0);
+      // equip new installation
+      LibInstallation._equipInstallation(_upgradeQueue.owner, _upgradeQueue.parcelId, nextLevelId);
+
       realm.upgradeInstallation(
         _upgradeQueue.parcelId,
         _upgradeQueue.installationId,
@@ -272,6 +285,26 @@ contract InstallationAdminFacet is Modifiers {
         _upgradeQueue.installationId
       );
       emit UpgradeQueued(_upgradeQueue.owner, _upgradeQueue.parcelId, s.upgradeQueue.length - 1);
+    }
+  }
+
+  struct MissingAltars {
+    uint256 _parcelId;
+    uint256 _oldAltarId;
+    uint256 _newAltarId;
+  }
+
+  function fixMissingAltars(MissingAltars[] memory _altars) external onlyOwner {
+    for (uint256 i = 0; i < _altars.length; i++) {
+      MissingAltars memory altar = _altars[i];
+      uint256 parcelId = altar._parcelId;
+      uint256 oldId = altar._oldAltarId;
+      uint256 newId = altar._newAltarId;
+      LibERC998.removeFromParent(s.realmDiamond, parcelId, oldId, 1);
+      RealmDiamond realm = RealmDiamond(address(s.realmDiamond));
+      LibERC1155._safeMint(realm.ownerOf(parcelId), newId, false, 0);
+      LibERC1155.removeFromOwner(realm.ownerOf(parcelId), newId, 1);
+      LibERC998.addToParent(s.realmDiamond, parcelId, newId, 1);
     }
   }
 }
