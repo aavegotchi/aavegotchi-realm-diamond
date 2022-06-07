@@ -10,7 +10,6 @@ import "../../libraries/LibAlchemica.sol";
 import "../../libraries/LibSignature.sol";
 import "../../interfaces/AavegotchiDiamond.sol";
 import "../../interfaces/IERC20Mintable.sol";
-import "../../interfaces/RemoteApprovable.sol";
 
 uint256 constant bp = 100 ether;
 
