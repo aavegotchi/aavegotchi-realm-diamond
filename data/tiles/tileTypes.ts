@@ -36,9 +36,29 @@ export const tileTypes: TileTypeInput[] = [
     name: "LE Golden Tile - Gotchi",
     width: 8,
     height: 8,
-    deprecated: false,
+    deprecated: true,
     tileType: 0,
     alchemicaCost: [25, 25, 75, 25],
+    craftTime: 0,
+  },
+  {
+    id: 4,
+    name: "LE Purple Grass",
+    width: 8,
+    height: 8,
+    deprecated: false,
+    tileType: 0,
+    alchemicaCost: [25, 25, 75, 25], // TODO: Check this
+    craftTime: 0,
+  },
+  {
+    id: 5,
+    name: "LE Rug", // TODO: Check this
+    width: 8,
+    height: 8,
+    deprecated: false,
+    tileType: 0,
+    alchemicaCost: [25, 25, 75, 25], // TODO: Check this
     craftTime: 0,
   },
 ];
