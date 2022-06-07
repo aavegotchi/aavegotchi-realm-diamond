@@ -46,9 +46,7 @@ async function deployRealmDiamond(deployerAddress: string) {
   const DiamondCutFacet = await ethers.getContractFactory("DiamondCutFacet");
 
   console.log("Deploying diamond cut facet:");
-  const diamondCutFacet = await DiamondCutFacet.connect(signer).deploy({
-    gasPrice: gasPrice,
-  });
+  const diamondCutFacet = await DiamondCutFacet.connect(signer).deploy();
   await diamondCutFacet.deployed();
   console.log("DiamondCutFacet deployed:", diamondCutFacet.address);
 
@@ -67,9 +65,7 @@ async function deployRealmDiamond(deployerAddress: string) {
   const DiamondInit = (await ethers.getContractFactory(
     "DiamondInit"
   )) as DiamondInit__factory;
-  const diamondInit = await DiamondInit.connect(signer).deploy({
-    gasPrice: gasPrice,
-  });
+  const diamondInit = await DiamondInit.connect(signer).deploy();
   await diamondInit.deployed();
   console.log("DiamondInit deployed:", diamondInit.address);
 
@@ -107,7 +103,7 @@ async function deployRealmDiamond(deployerAddress: string) {
   const functionCall = diamondInit.interface.encodeFunctionData("init");
   const tx = await diamondCut
     .connect(signer)
-    .diamondCut(cut, diamondInit.address, functionCall, { gasPrice: gasPrice });
+    .diamondCut(cut, diamondInit.address, functionCall);
   console.log("Diamond cut tx: ", tx.hash);
   const receipt = await tx.wait();
   if (!receipt.status) {
@@ -189,8 +185,7 @@ export async function deployMumbai() {
     ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
     deployerAddress,
     tileDiamond,
-    tileDiamond,
-    { gasPrice: gasPrice }
+    tileDiamond
   );
 
   await tx.wait();
