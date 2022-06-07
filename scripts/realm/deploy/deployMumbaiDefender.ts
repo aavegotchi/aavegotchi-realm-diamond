@@ -88,9 +88,7 @@ async function deployRealmDiamond(deployerAddress: string) {
   const cut = [];
   for (const FacetName of FacetNames) {
     const Facet = await ethers.getContractFactory(FacetName);
-    const facet = await Facet.connect(signer).deploy({
-      gasPrice: gasPrice,
-    });
+    const facet = await Facet.connect(signer).deploy();
     await facet.deployed();
     console.log(`${FacetName} deployed: ${facet.address}`);
     cut.push({
