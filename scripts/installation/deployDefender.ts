@@ -103,12 +103,6 @@ export async function deployDiamond() {
   const diamondOwner = await ownershipFacet.owner();
   console.log("Diamond owner is:", diamondOwner);
 
-  if (diamondOwner !== deployerAddress) {
-    throw new Error(
-      `Diamond owner ${diamondOwner} is not deployer address ${deployerAddress}!`
-    );
-  }
-
   return diamond.address;
 }
 
