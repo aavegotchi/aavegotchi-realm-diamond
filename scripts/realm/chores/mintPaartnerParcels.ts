@@ -3,7 +3,7 @@ import { run } from "hardhat";
 import { MintParcelsTaskArgs } from "../../../tasks/mintParcels";
 import { maticDiamondAddress } from "../../../constants";
 
-export async function mintParcels() {
+export async function mintPaartnerParcels() {
   interface MintParcelArgs {
     to: string;
     tokenId: number;
@@ -48,21 +48,23 @@ export async function mintParcels() {
     },
   ];
 
-  for (let index = 0; index < mintArgs.length; index++) {
-    const taskArgs: MintParcelsTaskArgs = {
-      //Send directly to voucher conversion contract
-      toAddress: mintArgs[index].to,
-      tokenIds: mintArgs[index].tokenId.toString(),
-      diamondAddress: maticDiamondAddress,
-    };
-    await run("mintParcels", taskArgs);
-  }
+  const toAddresses = mintArgs.map((val) => val.to).join(",");
+  const tokenIds = mintArgs.map((val) => val.tokenId).join(",");
+
+  const taskArgs: MintParcelsTaskArgs = {
+    //Send directly to voucher conversion contract
+    toAddresses: toAddresses,
+    tokenIds: tokenIds,
+    diamondAddress: maticDiamondAddress,
+  };
+
+  await run("mintParcels", taskArgs);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 if (require.main === module) {
-  mintParcels()
+  mintPaartnerParcels()
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);
