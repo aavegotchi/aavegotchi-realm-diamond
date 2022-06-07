@@ -45,15 +45,17 @@ contract RealmFacet is Modifiers {
   /// @param _tokenIds The identifiers of tokens to mint
   /// @param _metadata An array of structs containing the metadata of each parcel being minted
   function mintParcels(
-    address _to,
+    address[] calldata _to,
     uint256[] calldata _tokenIds,
     MintParcelInput[] memory _metadata
   ) external onlyOwner {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
       require(s.tokenIds.length < MAX_SUPPLY, "RealmFacet: Cannot mint more than 420,069 parcels");
       uint256 tokenId = _tokenIds[index];
+      address toAddress = _to[index];
       MintParcelInput memory metadata = _metadata[index];
       require(_tokenIds.length == _metadata.length, "Inputs must be same length");
+      require(_to.length == _tokenIds.length, "Inputs must be same length");
 
       Parcel storage parcel = s.parcels[tokenId];
       parcel.coordinateX = metadata.coordinateX;
@@ -62,10 +64,9 @@ contract RealmFacet is Modifiers {
       parcel.size = metadata.size;
       parcel.district = metadata.district;
       parcel.parcelAddress = metadata.parcelAddress;
-
       parcel.alchemicaBoost = metadata.boost;
 
-      LibERC721.safeMint(_to, tokenId);
+      LibERC721.safeMint(toAddress, tokenId);
     }
   }
 
