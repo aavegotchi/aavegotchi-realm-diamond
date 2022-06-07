@@ -44,8 +44,8 @@ export const tileTypes: TileTypeInput[] = [
   {
     id: 4,
     name: "LE Purple Grass",
-    width: 8,
-    height: 8,
+    width: 4,
+    height: 4,
     deprecated: false,
     tileType: 0,
     alchemicaCost: [25, 25, 75, 25], // TODO: Check this
@@ -54,8 +54,8 @@ export const tileTypes: TileTypeInput[] = [
   {
     id: 5,
     name: "LE Rug", // TODO: Check this
-    width: 8,
-    height: 8,
+    width: 16,
+    height: 4,
     deprecated: false,
     tileType: 0,
     alchemicaCost: [25, 25, 75, 25], // TODO: Check this
