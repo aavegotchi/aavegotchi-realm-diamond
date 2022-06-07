@@ -41,8 +41,6 @@ async function addInstallations() {
 
   console.log("Current owner is:", currentOwner);
 
-  const testing = ["hardhat", "localhost"].includes(hardhat.network.name);
-
   const installationAdminFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
     diamondAddress,
