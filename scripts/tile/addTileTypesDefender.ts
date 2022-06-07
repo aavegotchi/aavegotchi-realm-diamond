@@ -24,7 +24,7 @@ const signer = new DefenderRelaySigner(credentials, provider, {
 
 export async function addTileTypes() {
   //matic address
-  const diamondAddress = "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
+  const diamondAddress = "0xe1dDE8916c6f61429e368606a3E2dC6A02cB5127";
 
   const ownershipFacet = (await ethers.getContractAt(
     "OwnershipFacet",
