@@ -368,18 +368,53 @@ export async function upgrade() {
     maticInstallationDiamondAddress
   )) as InstallationFacet;
 
-  const tokens = await installationsFacet.installationsBalances(
-    maticRealmDiamondAddress
-  );
-  console.log(
-    "tokens:",
-    tokens.map((val) => `${val.installationId}: ${val.balance.toString()}`)
-  );
+  const userAddress = "0xbb73548A0e6F839fb58e9D59969Ba6AEdEcDF5f1";
+  const upgrades = await installationsFacet.getUserUpgradeQueue(userAddress);
+
+  const userUpgrades = upgrades.output_;
+  const indexes = upgrades.indexes_;
+
+  console.log("upgrades:", upgrades);
+  console.log("queue indexes:", upgrades[1]);
+
+  let index = 0;
+  for await (const upg of userUpgrades) {
+    // const balance = await installationsFacet.installationBalancesOfTokenByIds(
+    //   maticRealmDiamondAddress,
+    //   upg.parcelId,
+    //   [upg.installationId]
+    // );
+
+    console.log(
+      `Parcel ${upg.parcelId}, index: ${
+        indexes[index]
+      } installationID: ${upg.installationId.toString()}`
+    );
+    // console.log(`balance of ${upg.installationId.toString()}: ${balance[0]}`);
+
+    index++;
+  }
+
+  const allIndexes = indexes.map((val) => val.toString());
+  console.log(JSON.stringify(allIndexes));
+
+  // const tokens = await installationsFacet.installationsBalances(
+  //   maticRealmDiamondAddress
+  // );
+  // console.log(
+  //   "tokens:",
+  //   tokens.map((val) => `${val.installationId}: ${val.balance.toString()}`)
+  // );
 
   //@ts-ignore
   // await adminFacet.fixMissingAltars(buggedAltars);
 
-  // await adminFacet.finalizeUpgrades(["5445"]);
+  // const adminFacet = (await ethers.getContractAt(
+  //   "InstallationAdminFacet",
+  //   maticInstallationDiamondAddress
+  // )) as InstallationAdminFacet;
+
+  // await adminFacet.finalizeUpgrades(["5408"]);
 }
 
 if (require.main === module) {
