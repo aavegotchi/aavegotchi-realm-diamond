@@ -32,9 +32,7 @@ export async function deployDiamond() {
 
   // deploy DiamondCutFacet
   const DiamondCutFacet = await ethers.getContractFactory("DiamondCutFacet");
-  const diamondCutFacet = await DiamondCutFacet.connect(signer).deploy({
-    gasPrice: gasPrice,
-  });
+  const diamondCutFacet = await DiamondCutFacet.connect(signer).deploy();
   await diamondCutFacet.deployed();
   console.log("DiamondCutFacet deployed:", diamondCutFacet.address);
 
@@ -54,9 +52,7 @@ export async function deployDiamond() {
   const DiamondInit = (await ethers.getContractFactory(
     "DiamondInit"
   )) as DiamondInit__factory;
-  const diamondInit = await DiamondInit.connect(signer).deploy({
-    gasPrice: gasPrice,
-  });
+  const diamondInit = await DiamondInit.connect(signer).deploy();
   await diamondInit.deployed();
   console.log("DiamondInit deployed:", diamondInit.address);
 
@@ -73,7 +69,7 @@ export async function deployDiamond() {
   const cut = [];
   for (const FacetName of FacetNames) {
     const Facet = await ethers.getContractFactory(FacetName);
-    const facet = await Facet.connect(signer).deploy({});
+    const facet = await Facet.connect(signer).deploy();
     await facet.deployed();
     console.log(`${FacetName} deployed: ${facet.address}`);
     cut.push({

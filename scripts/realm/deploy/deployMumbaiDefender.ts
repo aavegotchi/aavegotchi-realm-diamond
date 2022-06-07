@@ -118,12 +118,6 @@ async function deployRealmDiamond(deployerAddress: string) {
   const diamondOwner = await ownershipFacet.owner();
   console.log("Diamond owner is:", deployerAddress);
 
-  if (diamondOwner !== deployerAddress) {
-    throw new Error(
-      `Diamond owner ${diamondOwner} is not deployer address ${deployerAddress}!`
-    );
-  }
-
   return diamond as Diamond;
 }
 
