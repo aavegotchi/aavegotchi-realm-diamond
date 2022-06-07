@@ -14,7 +14,11 @@ import {
   TileFacet,
 } from "../../../typechain";
 import { gasPrice, maticAavegotchiDiamondAddress } from "../../helperFunctions";
-import { deployAlchemica, goldenAaltar, testnetAltar } from "../realmHelpers";
+import {
+  deployAlchemica,
+  goldenAaltar,
+  testnetAltar,
+} from "../realmHelpersDefender";
 import { alchemicaTotals, boostMultipliers } from "../../setVars";
 import { deployDiamond } from "../../installation/deployDefender";
 import { deployDiamondTile } from "../../tile/deployDefender";
@@ -36,7 +40,7 @@ const credentials = {
 };
 const provider = new DefenderRelayProvider(credentials);
 const signer = new DefenderRelaySigner(credentials, provider, {
-  speed: "fast",
+  speed: "fastest",
 });
 
 async function deployRealmDiamond(deployerAddress: string) {

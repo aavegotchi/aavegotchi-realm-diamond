@@ -41,7 +41,7 @@ const credentials = {
 };
 const provider = new DefenderRelayProvider(credentials);
 const signer = new DefenderRelaySigner(credentials, provider, {
-  speed: "fast",
+  speed: "fastest",
 });
 
 export function outputInstallation(
