@@ -63,6 +63,7 @@ export function outputInstallation(
     nextLevelId: installation.nextLevelId,
     prerequisites: installation.prerequisites,
     name: installation.name,
+    unequipType: installation.unequipType,
   };
 
   return output;

@@ -130,6 +130,7 @@ export interface InstallationTypeOutput {
   nextLevelId: BigNumberish;
   prerequisites: BigNumberish[];
   name: string;
+  unequipType: number;
 }
 
 export interface TileTypeOutput {

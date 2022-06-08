@@ -1,13 +1,12 @@
 import { impersonate, maticAavegotchiDiamondAddress } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 
-import { genEquipInstallationSignature, testInstallations } from "../../scripts/realm/realmHelpers";
+import { genEquipInstallationSignature, outputInstallation } from "../../scripts/realm/realmHelpers";
 import {
-  aavegotchiDAOAddress,
   alchemica,
   maticInstallationDiamondAddress,
-  maticRealmDiamondAddress, maticTileDiamondAddress,
-  pixelcraftAddress
+  maticRealmDiamondAddress,
+  maticTileDiamondAddress
 } from "../../constants";
 import { installationTypes } from "../../data/installations/altars";
 
@@ -16,6 +15,7 @@ import { BigNumber } from "ethers";
 import { ERC20, InstallationFacet, OwnershipFacet } from "../../typechain";
 import { expect } from "chai";
 import { alchemicaTotals, boostMultipliers, greatPortalCapacity } from "../../scripts/setVars";
+import { InstallationTypeInput } from "../../types";
 
 describe("Testing unequipType", async function () {
   const testAddress = "0xc76b85cd226518daf2027081deff2eac4cc91a00";
@@ -24,25 +24,25 @@ describe("Testing unequipType", async function () {
   let installationFacet;
   let realmFacet;
   let alchemicaFacet;
-  const testInstallationType =
+  const testInstallationType: InstallationTypeInput =
     {
       id: 19,
       installationType: 0,
-      level: 9,
+      level: 1,
       width: 2,
       height: 2,
       alchemicaType: 0,
-      alchemicaCost: [20000, 30000, 15000, 6000],
+      alchemicaCost: [10, 10, 0, 0],
       harvestRate: 0,
       capacity: 0,
       spillRadius: 400,
       spillRate: 10,
       upgradeQueueBoost: 1,
-      craftTime: 3200000,
+      craftTime: 0,
       deprecated: false,
       nextLevelId: 0,
       prerequisites: [8, 0],
-      name: "Alchemical Aaltar Level Test",
+      name: "Test Alchemical Aaltar",
       unequipType: 0,
     };
 
@@ -113,7 +113,7 @@ describe("Testing unequipType", async function () {
 
   it("Should succeed when add installation types with owner", async function () {
     const receipt = await (
-      await installationAdminFacet.addInstallationTypes([testInstallationType])
+      await installationAdminFacet.addInstallationTypes([outputInstallation(testInstallationType)])
     ).wait();
     const events = receipt!.events!.filter(
       (event) => event.event === "AddInstallationType"
@@ -189,5 +189,44 @@ describe("Testing unequipType", async function () {
 
     expect(Number(fudDiff)).to.equal(refund[0].toNumber());
     expect(Number(fomoDiff)).to.equal(refund[1].toNumber());
+  });
+
+  it("Should add to owner and not refund when unequip unequippable installation", async function () {
+    // craft installation
+    const fud = (await ethers.getContractAt(
+      "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+      alchemica[0]
+    )) as ERC20;
+    const fomo = (await ethers.getContractAt(
+      "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+      alchemica[1]
+    )) as ERC20;
+    const currentFud = await fud.balanceOf(testAddress);
+    const currentFomo = await fomo.balanceOf(testAddress);
+
+    await (await installationFacet.craftInstallations([19], [0])).wait();
+
+    const fudAfterCraft = await fud.balanceOf(testAddress);
+    const fomoAfterCraft = await fomo.balanceOf(testAddress);
+
+    expect(currentFud.sub(fudAfterCraft)).to.equal(ethers.utils.parseUnits(testInstallationType.alchemicaCost[0].toString()));
+    expect(currentFomo.sub(fomoAfterCraft)).to.equal(ethers.utils.parseUnits(testInstallationType.alchemicaCost[1].toString()));
+
+    // equip installation
+    const sig = await genEquipInstallationSignature(testParcelId, 19, 8, 8);
+    await realmFacet.equipInstallation(testParcelId, 19, 8, 8, sig);
+
+    // Unequip
+    const receipt = await (await realmFacet.unequipInstallation(testParcelId, 19, 8, 8, sig)).wait();
+    const event = receipt!.events!.find(
+      (event) => event.event === "UnequipInstallation"
+    );
+    expect(event!.args!._realmId).to.equal(testParcelId);
+
+    const fudAfterUnequip = await fud.balanceOf(testAddress);
+    const fomoAfterUnequip = await fomo.balanceOf(testAddress);
+
+    expect(fudAfterUnequip).to.equal(fudAfterCraft);
+    expect(fomoAfterUnequip).to.equal(fomoAfterCraft);
   });
 });
