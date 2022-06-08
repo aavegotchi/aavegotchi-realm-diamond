@@ -46,13 +46,13 @@ export async function upgrade() {
     ),
     diamondAddress: maticInstallationDiamondAddress,
     facetsAndAddSelectors: joined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
     initAddress: ethers.constants.AddressZero,
     initCalldata: "0x",
   };
 
-  await run("deployUpgrade", args);
+  // await run("deployUpgrade", args);
 
   const facetsRealm: FacetsAndAddSelectors[] = [
     {
@@ -68,7 +68,7 @@ export async function upgrade() {
     diamondUpgrader: await diamondOwner(maticRealmDiamondAddress, ethers),
     diamondAddress: maticRealmDiamondAddress,
     facetsAndAddSelectors: joinedRealm,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
     initAddress: ethers.constants.AddressZero,
     initCalldata: "0x",
