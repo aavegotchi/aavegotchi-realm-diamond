@@ -15,6 +15,9 @@ export async function upgrade() {
   const UpgradeQueue =
     "tuple(address owner,uint16 coordinateX, uint16 coordinateY,uint40 readyBlock,bool claimed,uint256 parcelId,uint256 installationId)";
 
+  const MissingAltars =
+    "tuple(uint256 _parcelId, uint256 _oldAltarId, uint256 _newAltarId)";
+
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "InstallationAdminFacet",
@@ -24,6 +27,7 @@ export async function upgrade() {
       removeSelectors: [
         `function upgradeInstallation(${UpgradeQueue} calldata _upgradeQueue,bytes memory _signature,uint40 _gltr) external`,
         "function finalizeUpgrades(uint256[] memory _upgradeIndexes) public",
+        `function fixMissingAltars(${MissingAltars}[] memory _altars) external`,
       ],
     },
     {

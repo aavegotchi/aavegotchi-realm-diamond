@@ -140,32 +140,32 @@ contract InstallationAdminFacet is Modifiers {
     }
   }
 
-  struct MissingAltars {
-    uint256 _parcelId;
-    uint256 _oldAltarId;
-    uint256 _newAltarId;
-  }
+  // struct MissingAltars {
+  //   uint256 _parcelId;
+  //   uint256 _oldAltarId;
+  //   uint256 _newAltarId;
+  // }
 
-  function fixMissingAltars(MissingAltars[] memory _altars) external onlyOwner {
-    for (uint256 i = 0; i < _altars.length; i++) {
-      MissingAltars memory altar = _altars[i];
-      uint256 parcelId = altar._parcelId;
-      uint256 oldId = altar._oldAltarId;
-      uint256 newId = altar._newAltarId;
+  // function fixMissingAltars(MissingAltars[] memory _altars) external onlyOwner {
+  //   for (uint256 i = 0; i < _altars.length; i++) {
+  //     MissingAltars memory altar = _altars[i];
+  //     uint256 parcelId = altar._parcelId;
+  //     uint256 oldId = altar._oldAltarId;
+  //     uint256 newId = altar._newAltarId;
 
-      // //remove old id
-      // LibERC998.removeFromParent(s.realmDiamond, parcelId, oldId, 1);
-      // RealmDiamond realm = RealmDiamond(address(s.realmDiamond));
+  //     // //remove old id
+  //     // LibERC998.removeFromParent(s.realmDiamond, parcelId, oldId, 1);
+  //     // RealmDiamond realm = RealmDiamond(address(s.realmDiamond));
 
-      // //mint new id to owner
-      // LibERC1155._safeMint(realm.ownerOf(parcelId), newId, false, 0);
+  //     // //mint new id to owner
+  //     // LibERC1155._safeMint(realm.ownerOf(parcelId), newId, false, 0);
 
-      // //remove from owner
-      // LibERC1155.removeFromOwner(realm.ownerOf(parcelId), newId, 1);
-      // LibERC998.addToParent(s.realmDiamond, parcelId, newId, 1);
+  //     // //remove from owner
+  //     // LibERC1155.removeFromOwner(realm.ownerOf(parcelId), newId, 1);
+  //     // LibERC998.addToParent(s.realmDiamond, parcelId, newId, 1);
 
-      //fix
-      LibERC1155.addToOwner(s.realmDiamond, newId, 1);
-    }
-  }
+  //     //fix
+  //     LibERC1155.addToOwner(s.realmDiamond, newId, 1);
+  //   }
+  // }
 }
