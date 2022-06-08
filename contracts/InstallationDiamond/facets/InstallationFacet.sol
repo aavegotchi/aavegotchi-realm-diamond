@@ -130,7 +130,7 @@ contract InstallationFacet is Modifiers {
     require(_installationTypeId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
 
     installationType = convertInstallationTypeForOutput(s.installationTypes[_installationTypeId]);
-    installationType.unequipType = s.unequipTypes[_installationTypeId + 1];
+    installationType.unequipType = s.unequipTypes[_installationTypeId];
     //If a deprecate time has been set, refer to that. Otherwise, use the manual deprecate.
     installationType.deprecated = s.deprecateTime[_installationTypeId] > 0 ? block.timestamp > s.deprecateTime[_installationTypeId] : installationType.deprecated;
   }
@@ -146,7 +146,7 @@ contract InstallationFacet is Modifiers {
       uint256 id = isAll ? i : _installationTypeIds[i];
       installationTypes_[i] = convertInstallationTypeForOutput(s.installationTypes[id]);
       installationTypes_[i].deprecated = s.deprecateTime[id] == 0 ? installationTypes_[i].deprecated : block.timestamp > s.deprecateTime[id];
-      installationTypes_[i].unequipType = s.unequipTypes[id + 1];
+      installationTypes_[i].unequipType = s.unequipTypes[id];
     }
   }
 

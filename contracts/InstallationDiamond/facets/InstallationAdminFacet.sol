@@ -113,7 +113,7 @@ contract InstallationAdminFacet is Modifiers {
           _installationTypes[i].name
         )
       );
-      s.unequipTypes[i + 1] = _installationTypes[i].unequipType;
+      s.unequipTypes[i] = _installationTypes[i].unequipType;
 
       emit AddInstallationType(s.installationTypes.length - 1);
       emit SetInstallationUnequipType(s.installationTypes.length - 1, _installationTypes[i].unequipType);
@@ -137,7 +137,7 @@ contract InstallationAdminFacet is Modifiers {
     require(_ids.length == _unequipTypes.length, "InstallationAdminFacet: Mismatched arrays");
     for (uint256 i = 0; i < _ids.length; i++) {
       uint256 id = _ids[i];
-      s.unequipTypes[id + 1] = _unequipTypes[i];
+      s.unequipTypes[id] = _unequipTypes[i];
       emit EditInstallationUnequipType(id);
     }
   }

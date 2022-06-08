@@ -91,7 +91,7 @@ struct InstallationAppStorage {
   mapping(bytes32 => uint256) upgradeHashes;
   bytes backendPubKey;
   mapping(uint256 => bool) upgradeComplete;
-  mapping(uint256 => uint256) unequipTypes; // installationType.id + 1 => unequipType
+  mapping(uint256 => uint256) unequipTypes; // installationType.id => unequipType
 }
 
 library LibAppStorageInstallation {

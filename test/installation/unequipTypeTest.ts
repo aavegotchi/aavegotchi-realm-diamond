@@ -87,21 +87,21 @@ describe("Testing unequipType", async function () {
       network
     );
 
-    // const backendSigner = new ethers.Wallet(process.env.PROD_PK);
-    // await (await alchemicaFacet.setVars(
-    //   alchemicaTotals(),
-    //   boostMultipliers,
-    //   greatPortalCapacity,
-    //   maticInstallationDiamondAddress,
-    //   "0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed",
-    //   "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
-    //   alchemica,
-    //   ethers.constants.AddressZero,
-    //   ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
-    //   ethers.constants.AddressZero,
-    //   maticTileDiamondAddress,
-    //   maticAavegotchiDiamondAddress
-    // )).wait();
+    const backendSigner = new ethers.Wallet(process.env.PROD_PK);
+    await (await alchemicaFacet.setVars(
+      alchemicaTotals(),
+      boostMultipliers,
+      greatPortalCapacity,
+      maticInstallationDiamondAddress,
+      "0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed",
+      "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
+      alchemica,
+      ethers.constants.AddressZero,
+      ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
+      ethers.constants.AddressZero,
+      maticTileDiamondAddress,
+      maticAavegotchiDiamondAddress
+    )).wait();
   });
 
   it("Should succeed when fetch unequip type of current installation types", async function () {
@@ -137,4 +137,57 @@ describe("Testing unequipType", async function () {
     expect(itemType.unequipType).to.equal(1);
   })
 
+  it("Should burn and refund when unequip normal installation", async function () {
+    const fud = (await ethers.getContractAt(
+      "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+      alchemica[0]
+    )) as ERC20;
+    const fomo = (await ethers.getContractAt(
+      "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+      alchemica[1]
+    )) as ERC20;
+    const currentFud = await fud.balanceOf(testAddress);
+    const currentFomo = await fomo.balanceOf(testAddress);
+
+    const lvl1 = installationTypes[0]; //id 10
+    const lvl2 = installationTypes[1]; //id 11
+    const lvl3 = installationTypes[2]; //id 12
+    const lvl4 = installationTypes[3]; //id 13
+
+    const lvls = [lvl1, lvl2, lvl3, lvl4];
+
+    const costs: BigNumber[] = [
+      BigNumber.from(0),
+      BigNumber.from(0),
+      BigNumber.from(0),
+      BigNumber.from(0),
+    ];
+
+    const refund: BigNumber[] = [
+      BigNumber.from(0),
+      BigNumber.from(0),
+      BigNumber.from(0),
+      BigNumber.from(0),
+    ];
+
+    lvls.forEach((lvl) => {
+      lvl.alchemicaCost.forEach((amt, index) => {
+        costs[index] = costs[index].add(amt);
+
+        const refundAmt = BigNumber.from(amt).div(2);
+        refund[index] = refund[index].add(refundAmt);
+      });
+    });
+
+    const sig = await genEquipInstallationSignature(testParcelId, 13, 8, 8);
+    await (await realmFacet.unequipInstallation(testParcelId, 13, 8, 8, sig)).wait();
+    const fudAfterBal = await fud.balanceOf(testAddress);
+    const fomoAfterBal = await fomo.balanceOf(testAddress);
+
+    const fudDiff = ethers.utils.formatEther(fudAfterBal.sub(currentFud));
+    const fomoDiff = ethers.utils.formatEther(fomoAfterBal.sub(currentFomo));
+
+    expect(Number(fudDiff)).to.equal(refund[0].toNumber());
+    expect(Number(fomoDiff)).to.equal(refund[1].toNumber());
+  });
 });
