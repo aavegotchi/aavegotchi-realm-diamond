@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-import {InstallationType, Modifiers, UpgradeQueue} from "../../libraries/AppStorageInstallation.sol";
+import {InstallationType, InstallationTypeIO, Modifiers, UpgradeQueue} from "../../libraries/AppStorageInstallation.sol";
 import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {LibInstallation} from "../../libraries/LibInstallation.sol";
 import {LibERC1155} from "../../libraries/LibERC1155.sol";
@@ -37,6 +37,7 @@ contract InstallationAdminFacet is Modifiers {
   event AddInstallationType(uint256 _installationId);
   event EditInstallationType(uint256 _installationId);
   event DeprecateInstallation(uint256 _installationId);
+  event EditInstallationUnequipType(uint256 _installationId);
 
   /// @notice Allow the Diamond owner to deprecate an installation
   /// @dev Deprecated installations cannot be crafted by users
@@ -89,7 +90,7 @@ contract InstallationAdminFacet is Modifiers {
 
   /// @notice Allow the diamond owner to add an installation type
   /// @param _installationTypes An array of structs, each struct representing each installationType to be added
-  function addInstallationTypes(InstallationType[] calldata _installationTypes) external onlyOwner {
+  function addInstallationTypes(InstallationTypeIO[] calldata _installationTypes) external onlyOwner {
     for (uint256 i = 0; i < _installationTypes.length; i++) {
       s.installationTypes.push(
         InstallationType(
@@ -108,10 +109,10 @@ contract InstallationAdminFacet is Modifiers {
           _installationTypes[i].harvestRate,
           _installationTypes[i].capacity,
           _installationTypes[i].prerequisites,
-          _installationTypes[i].name,
-          _installationTypes[i].unequipType
+          _installationTypes[i].name
         )
       );
+      s.unequipTypes[i + 1] = _installationTypes[i].unequipType;
 
       emit AddInstallationType(s.installationTypes.length - 1);
     }
@@ -127,6 +128,15 @@ contract InstallationAdminFacet is Modifiers {
       uint256 id = _ids[i];
       s.installationTypes[id] = _installationTypes[i];
       emit EditInstallationType(id);
+    }
+  }
+
+  function editInstallationUnequipTypes(uint256[] calldata _ids, uint256[] calldata _unequipTypes) external onlyOwner {
+    require(_ids.length == _unequipTypes.length, "InstallationAdminFacet: Mismatched arrays");
+    for (uint256 i = 0; i < _ids.length; i++) {
+      uint256 id = _ids[i];
+      s.unequipTypes[id + 1] = _unequipTypes[i];
+      emit EditInstallationUnequipType(id);
     }
   }
 

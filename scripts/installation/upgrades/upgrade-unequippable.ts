@@ -12,18 +12,17 @@ export async function upgrade() {
     "tuple( uint8 width, uint8 height, uint16 installationType, uint8 levell, uint8 alchemicaType, uint32 spillRadius, uint16 spillRate, uint8 upgradeQueueBoost, uint32 craftTime, uint32 nextLevelId, bool deprecated, uint256[4] alchemicaCost, uint256 harvestRate, uint256 capacity, uint256[] prerequisites, string name)";
 
   const newInstallationType =
-    "tuple( uint8 width, uint8 height, uint16 installationType, uint8 levell, uint8 alchemicaType, uint32 spillRadius, uint16 spillRate, uint8 upgradeQueueBoost, uint32 craftTime, uint32 nextLevelId, bool deprecated, uint256[4] alchemicaCost, uint256 harvestRate, uint256 capacity, uint256[] prerequisites, string name, uint8 unequipType)";
+    "tuple( uint8 width, uint8 height, uint16 installationType, uint8 levell, uint8 alchemicaType, uint32 spillRadius, uint16 spillRate, uint8 upgradeQueueBoost, uint32 craftTime, uint32 nextLevelId, bool deprecated, uint256[4] alchemicaCost, uint256 harvestRate, uint256 capacity, uint256[] prerequisites, string name, uint256 unequipType)";
 
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "InstallationAdminFacet",
       addSelectors: [
         `function addInstallationTypes(${newInstallationType}[] calldata _installationTypes) external`,
-        ` function editInstallationTypes(uint256[] calldata _ids, ${newInstallationType}[] calldata _installationTypes) external`,
+        `function editInstallationUnequipTypes(uint256[] calldata _ids, uint256[] calldata _unequipTypes) external`,
       ],
       removeSelectors: [
         `function addInstallationTypes(${oldInstallationType}[] calldata _installationTypes) external`,
-        ` function editInstallationTypes(uint256[] calldata _ids, ${oldInstallationType}[] calldata _installationTypes) external`,
       ],
     },
     {

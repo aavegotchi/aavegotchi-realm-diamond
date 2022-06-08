@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-import {LibAppStorageInstallation, InstallationType, QueueItem, UpgradeQueue, Modifiers} from "../../libraries/AppStorageInstallation.sol";
+import {LibAppStorageInstallation, InstallationType, InstallationTypeIO, QueueItem, UpgradeQueue, Modifiers} from "../../libraries/AppStorageInstallation.sol";
 import {LibERC1155} from "../../libraries/LibERC1155.sol";
 import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {LibItems} from "../../libraries/LibItems.sol";
@@ -126,37 +126,53 @@ contract InstallationFacet is Modifiers {
   /// @notice Query the item type of a particular installation
   /// @param _installationTypeId Item to query
   /// @return installationType A struct containing details about the item type of an item with identifier `_itemId`
-  function getInstallationType(uint256 _installationTypeId) external view returns (InstallationType memory installationType) {
+  function getInstallationType(uint256 _installationTypeId) external view returns (InstallationTypeIO memory installationType) {
     require(_installationTypeId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
 
+    installationType = convertInstallationTypeForOutput(s.installationTypes[_installationTypeId]);
+    installationType.unequipType = s.unequipTypes[_installationTypeId + 1];
     //If a deprecate time has been set, refer to that. Otherwise, use the manual deprecate.
-    bool deprecated = s.deprecateTime[_installationTypeId] > 0 ? block.timestamp > s.deprecateTime[_installationTypeId] : installationType.deprecated;
-
-    installationType = s.installationTypes[_installationTypeId];
-    installationType.deprecated = deprecated;
+    installationType.deprecated = s.deprecateTime[_installationTypeId] > 0 ? block.timestamp > s.deprecateTime[_installationTypeId] : installationType.deprecated;
   }
 
   /// @notice Query the item type of multiple installation types
   /// @param _installationTypeIds An array containing the identifiers of items to query
   /// @return installationTypes_ An array of structs,each struct containing details about the item type of the corresponding item
-  function getInstallationTypes(uint256[] calldata _installationTypeIds) external view returns (InstallationType[] memory installationTypes_) {
-    if (_installationTypeIds.length == 0) {
-      installationTypes_ = s.installationTypes;
-
-      for (uint256 i = 0; i < s.installationTypes.length; i++) {
-        installationTypes_[i].deprecated = s.deprecateTime[i] == 0 ? s.installationTypes[i].deprecated : block.timestamp > s.deprecateTime[i];
-      }
-    } else {
-      installationTypes_ = new InstallationType[](_installationTypeIds.length);
-      for (uint256 i; i < _installationTypeIds.length; i++) {
-        //If a deprecate time has been set, refer to that. Otherwise, use the manual deprecate.
-        bool deprecated = s.deprecateTime[_installationTypeIds[i]] > 0
-          ? block.timestamp > s.deprecateTime[_installationTypeIds[i]]
-          : s.installationTypes[_installationTypeIds[i]].deprecated;
-        installationTypes_[i] = s.installationTypes[_installationTypeIds[i]];
-        installationTypes_[i].deprecated = deprecated;
-      }
+  function getInstallationTypes(uint256[] calldata _installationTypeIds) external view returns (InstallationTypeIO[] memory installationTypes_) {
+    bool isAll = _installationTypeIds.length == 0;
+    uint256 length = isAll ? s.installationTypes.length : _installationTypeIds.length;
+    installationTypes_ = new InstallationTypeIO[](length);
+    for (uint256 i = 0; i < length; i++) {
+      uint256 id = isAll ? i : _installationTypeIds[i];
+      installationTypes_[i] = convertInstallationTypeForOutput(s.installationTypes[id]);
+      installationTypes_[i].deprecated = s.deprecateTime[id] == 0 ? installationTypes_[i].deprecated : block.timestamp > s.deprecateTime[id];
+      installationTypes_[i].unequipType = s.unequipTypes[id + 1];
     }
+  }
+
+  /// @notice Convert InstallationType to InstallationTypeIO
+  /// @param _installationType Item to convert
+  /// @return installationTypeIO
+  function convertInstallationTypeForOutput(InstallationType memory _installationType) internal pure returns (InstallationTypeIO memory) {
+    return InstallationTypeIO(
+      _installationType.width,
+      _installationType.height,
+      _installationType.installationType,
+      _installationType.level,
+      _installationType.alchemicaType,
+      _installationType.spillRadius,
+      _installationType.spillRate,
+      _installationType.upgradeQueueBoost,
+      _installationType.craftTime,
+      _installationType.nextLevelId,
+      _installationType.deprecated,
+      _installationType.alchemicaCost,
+      _installationType.harvestRate,
+      _installationType.capacity,
+      _installationType.prerequisites,
+      _installationType.name,
+      0
+    );
   }
 
   /// @notice Query details about all ongoing craft queues

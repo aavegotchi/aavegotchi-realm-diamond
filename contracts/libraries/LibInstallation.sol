@@ -29,7 +29,7 @@ library LibInstallation {
     emit LibERC1155.TransferFromParent(s.realmDiamond, _realmId, _installationId, 1);
 
     //add to owner for unequipType 1
-    if (s.installationTypes[_installationId].unequipType == 1) {
+    if (s.unequipTypes[_installationId + 1] == 1) {
       LibERC1155.addToOwner(_owner, _installationId, 1);
     } else {
       //default case: burn
