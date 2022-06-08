@@ -45,7 +45,8 @@ library LibERC1155Tile {
     */
   event URI(string _value, uint256 indexed _tokenId);
 
-  event MintTile(address indexed _owner, uint256 indexed _tileId, uint256 _queueId);
+  /// @dev Should actually be _owner, _tileId, _queueId
+  event MintTile(address indexed _owner, uint256 indexed _tileType, uint256 _tileId);
   event MintTiles(address indexed _owner, uint256 indexed _tileId, uint16 _amount);
 
   function _safeMint(
