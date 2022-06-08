@@ -112,6 +112,9 @@ contract InstallationUpgradeFacet is Modifiers {
       // update upgradeQueueLength
       realm.addUpgradeQueueLength(_upgradeQueue.parcelId);
 
+      // Add to indexing helper to help for efficient getter
+      s.parcelIdToUpgradeIds[_upgradeQueue.parcelId].push(s.upgradeQueue.length - 1);
+
       emit UpgradeInitiated(
         _upgradeQueue.parcelId,
         _upgradeQueue.coordinateX,
@@ -162,6 +165,8 @@ contract InstallationUpgradeFacet is Modifiers {
 
       s.upgradeComplete[index] = true;
 
+      LibInstallation._removeFromParcelIdToUpgradeIds(parcelId, index);
+
       emit UpgradeFinalized(parcelId, coordinateX, coordinateY, nextLevelId);
       emit UpgradeQueueFinalized(_owner, parcelId, index);
       return true;
@@ -169,12 +174,14 @@ contract InstallationUpgradeFacet is Modifiers {
     return false;
   }
 
+  /// @dev TO BE DEPRECATED
   /// @notice Query details about all ongoing upgrade queues
   /// @return output_ An array of structs, each representing an ongoing upgrade queue
   function getAllUpgradeQueue() external view returns (UpgradeQueue[] memory) {
     return s.upgradeQueue;
   }
 
+  /// @dev TO BE DEPRECATED
   /// @notice Query details about all pending craft queues
   /// @param _owner Address to query queue
   /// @return output_ An array of structs, each representing a pending craft queue
@@ -200,5 +207,9 @@ contract InstallationUpgradeFacet is Modifiers {
 
   function getUpgradeQueueId(uint256 _queueId) external view returns (UpgradeQueue memory) {
     return s.upgradeQueue[_queueId];
+  }
+
+  function getParcelUpgradeQueue(uint256 _parcelId) external view returns (uint256[] memory) {
+    return s.parcelIdToUpgradeIds[_parcelId];
   }
 }
