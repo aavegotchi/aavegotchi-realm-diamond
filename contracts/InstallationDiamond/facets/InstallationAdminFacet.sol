@@ -37,6 +37,7 @@ contract InstallationAdminFacet is Modifiers {
   event AddInstallationType(uint256 _installationId);
   event EditInstallationType(uint256 _installationId);
   event DeprecateInstallation(uint256 _installationId);
+  event SetInstallationUnequipType(uint256 _installationId, uint256 _unequipType);
   event EditInstallationUnequipType(uint256 _installationId);
 
   /// @notice Allow the Diamond owner to deprecate an installation
@@ -115,6 +116,7 @@ contract InstallationAdminFacet is Modifiers {
       s.unequipTypes[i + 1] = _installationTypes[i].unequipType;
 
       emit AddInstallationType(s.installationTypes.length - 1);
+      emit SetInstallationUnequipType(s.installationTypes.length - 1, _installationTypes[i].unequipType);
     }
   }
 
