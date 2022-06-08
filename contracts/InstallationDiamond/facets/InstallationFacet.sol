@@ -129,33 +129,29 @@ contract InstallationFacet is Modifiers {
   function getInstallationType(uint256 _installationTypeId) external view returns (InstallationType memory installationType) {
     require(_installationTypeId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
 
-    //If a deprecate time has been set, refer to that. Otherwise, use the manual deprecate.
-    bool deprecated = s.deprecateTime[_installationTypeId] > 0 ? block.timestamp > s.deprecateTime[_installationTypeId] : installationType.deprecated;
-
     installationType = s.installationTypes[_installationTypeId];
-    installationType.deprecated = deprecated;
+    //If a deprecate time has been set, refer to that. Otherwise, use the manual deprecate.
+    installationType.deprecated = s.deprecateTime[_installationTypeId] > 0
+      ? block.timestamp > s.deprecateTime[_installationTypeId]
+      : installationType.deprecated;
+  }
+
+  function getInstallationUnequipType(uint256 _installationId) external view returns (uint256) {
+    require(_installationId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
+    return s.unequipTypes[_installationId];
   }
 
   /// @notice Query the item type of multiple installation types
   /// @param _installationTypeIds An array containing the identifiers of items to query
   /// @return installationTypes_ An array of structs,each struct containing details about the item type of the corresponding item
   function getInstallationTypes(uint256[] calldata _installationTypeIds) external view returns (InstallationType[] memory installationTypes_) {
-    if (_installationTypeIds.length == 0) {
-      installationTypes_ = s.installationTypes;
-
-      for (uint256 i = 0; i < s.installationTypes.length; i++) {
-        installationTypes_[i].deprecated = s.deprecateTime[i] == 0 ? s.installationTypes[i].deprecated : block.timestamp > s.deprecateTime[i];
-      }
-    } else {
-      installationTypes_ = new InstallationType[](_installationTypeIds.length);
-      for (uint256 i; i < _installationTypeIds.length; i++) {
-        //If a deprecate time has been set, refer to that. Otherwise, use the manual deprecate.
-        bool deprecated = s.deprecateTime[_installationTypeIds[i]] > 0
-          ? block.timestamp > s.deprecateTime[_installationTypeIds[i]]
-          : s.installationTypes[_installationTypeIds[i]].deprecated;
-        installationTypes_[i] = s.installationTypes[_installationTypeIds[i]];
-        installationTypes_[i].deprecated = deprecated;
-      }
+    bool isAll = _installationTypeIds.length == 0;
+    uint256 length = isAll ? s.installationTypes.length : _installationTypeIds.length;
+    installationTypes_ = new InstallationType[](length);
+    for (uint256 i = 0; i < length; i++) {
+      uint256 id = isAll ? i : _installationTypeIds[i];
+      installationTypes_[i] = s.installationTypes[id];
+      installationTypes_[i].deprecated = s.deprecateTime[id] == 0 ? installationTypes_[i].deprecated : block.timestamp > s.deprecateTime[id];
     }
   }
 
@@ -389,8 +385,12 @@ contract InstallationFacet is Modifiers {
   /// @dev Will throw if the caller is not the parcel diamond contract
   /// @param _realmId The identifier of the parcel to unequip the installation from
   /// @param _installationId Identifier of the installation to unequip
-  function unequipInstallation(uint256 _realmId, uint256 _installationId) external onlyRealmDiamond {
-    LibInstallation._unequipInstallation(_realmId, _installationId);
+  function unequipInstallation(
+    address _owner,
+    uint256 _realmId,
+    uint256 _installationId
+  ) external onlyRealmDiamond {
+    LibInstallation._unequipInstallation(_owner, _realmId, _installationId);
   }
 
   // /// @notice Allow a user to reduce the upgrade time of an ongoing queue

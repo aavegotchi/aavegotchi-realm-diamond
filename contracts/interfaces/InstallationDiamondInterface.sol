@@ -63,11 +63,17 @@ interface InstallationDiamondInterface {
     uint256 _installationId
   ) external;
 
-  function unequipInstallation(uint256 _realmId, uint256 _installationId) external;
+  function unequipInstallation(
+    address _owner,
+    uint256 _realmId,
+    uint256 _installationId
+  ) external;
 
   function addInstallationTypes(InstallationType[] calldata _installationTypes) external;
 
   function getInstallationType(uint256 _itemId) external view returns (InstallationType memory installationType);
+
+  function getInstallationUnequipType(uint256 _installationId) external view returns (uint256);
 
   function getInstallationTypes(uint256[] calldata _itemIds) external view returns (InstallationType[] memory itemTypes_);
 
