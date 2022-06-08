@@ -136,7 +136,7 @@ contract RealmFacet is Modifiers {
     LibAlchemica.reduceTraits(_realmId, _installationId, false);
 
     //Process refund
-    if (installation.unequipType == 0) {
+    if (installationsDiamond.getInstallationUnequipType(_installationId) == 0) {
       //Loop through each level of the installation.
       //@todo: For now we can use the ID order to get the cost of previous upgrades. But in the future we'll need to add some data redundancy.
       uint256 currentLevel = installation.level;

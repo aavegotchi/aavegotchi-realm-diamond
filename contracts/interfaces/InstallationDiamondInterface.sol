@@ -30,7 +30,6 @@ interface InstallationDiamondInterface {
     uint256[] prerequisites; //IDs of installations that must be present before this installation can be added
     //slot 6
     string name;
-    uint8 unequipType;
   }
 
   struct UpgradeQueue {
@@ -73,6 +72,8 @@ interface InstallationDiamondInterface {
   function addInstallationTypes(InstallationType[] calldata _installationTypes) external;
 
   function getInstallationType(uint256 _itemId) external view returns (InstallationType memory installationType);
+
+  function getInstallationUnequipType(uint256 _installationId) external view returns (uint256);
 
   function getInstallationTypes(uint256[] calldata _itemIds) external view returns (InstallationType[] memory itemTypes_);
 

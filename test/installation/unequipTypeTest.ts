@@ -123,8 +123,10 @@ describe("Testing unequipType", async function () {
 
   it("Should succeed when fetch unequip type of current installation types", async function () {
     [0, 5, 9, 10, 17].forEach(async (typeId) => {
-      const itemType = await installationFacet.getInstallationType(typeId);
-      expect(itemType.unequipType).to.equal(0);
+      const itemType = await installationFacet.getInstallationUnequipType(
+        typeId
+      );
+      expect(itemType).to.equal(0);
     });
   });
 
@@ -141,8 +143,11 @@ describe("Testing unequipType", async function () {
     const itemType = await installationFacet.getInstallationType(
       testInstallationType.id
     );
+    const unequipType = await installationFacet.getInstallationUnequipType(
+      testInstallationType.id
+    );
     expect(itemType.name).to.equal(testInstallationType.name);
-    expect(itemType.unequipType).to.equal(testInstallationType.unequipType);
+    expect(unequipType).to.equal(testInstallationType.unequipType);
   });
 
   it("Should succeed when edit installation unequip types with owner", async function () {
@@ -159,8 +164,11 @@ describe("Testing unequipType", async function () {
     const itemType = await installationFacet.getInstallationType(
       testInstallationType.id
     );
+    const unequipType = await installationFacet.getInstallationUnequipType(
+      testInstallationType.id
+    );
     expect(itemType.name).to.equal(testInstallationType.name);
-    expect(itemType.unequipType).to.equal(1);
+    expect(unequipType).to.equal(1);
   });
 
   it("Should burn and refund when unequip normal installation", async function () {
@@ -255,7 +263,6 @@ describe("Testing unequipType", async function () {
         testParcelId,
         [19]
       );
-    console.log("19 before unequip balance:", parcelTokenBalance);
     expect(parcelTokenBalance.toString()).to.equal("1");
 
     // Unequip

@@ -28,6 +28,7 @@ export async function upgrade() {
     {
       facetName: "InstallationFacet",
       addSelectors: [
+        "function getInstallationUnequipType(uint256 _installationId) external view",
         "function unequipInstallation(address _owner, uint256 _realmId, uint256 _installationId) external",
       ],
       removeSelectors: [
