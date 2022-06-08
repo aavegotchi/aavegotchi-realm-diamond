@@ -45,7 +45,8 @@ library LibERC1155 {
     */
   event URI(string _value, uint256 indexed _tokenId);
 
-  event MintInstallation(address indexed _owner, uint256 indexed _installationId, uint256 _queueId);
+  /// @dev Should actually be _owner, _installationId, _queueId
+  event MintInstallation(address indexed _owner, uint256 indexed _installationType, uint256 _installationId);
 
   event BatchMintInstallations(address indexed _owner, uint256 indexed _installationId, uint16 _amount);
 
