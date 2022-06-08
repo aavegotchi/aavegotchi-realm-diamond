@@ -1,12 +1,18 @@
-import { impersonate, maticAavegotchiDiamondAddress } from "../../scripts/helperFunctions";
+import {
+  impersonate,
+  maticAavegotchiDiamondAddress,
+} from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 
-import { genEquipInstallationSignature, outputInstallation } from "../../scripts/realm/realmHelpers";
+import {
+  genEquipInstallationSignature,
+  outputInstallation,
+} from "../../scripts/realm/realmHelpers";
 import {
   alchemica,
   maticInstallationDiamondAddress,
   maticRealmDiamondAddress,
-  maticTileDiamondAddress
+  maticTileDiamondAddress,
 } from "../../constants";
 import { installationTypes } from "../../data/installations/altars";
 
@@ -14,37 +20,40 @@ import { upgrade } from "../../scripts/installation/upgrades/upgrade-unequippabl
 import { BigNumber } from "ethers";
 import { ERC20, InstallationFacet, OwnershipFacet } from "../../typechain";
 import { expect } from "chai";
-import { alchemicaTotals, boostMultipliers, greatPortalCapacity } from "../../scripts/setVars";
+import {
+  alchemicaTotals,
+  boostMultipliers,
+  greatPortalCapacity,
+} from "../../scripts/setVars";
 import { InstallationTypeInput } from "../../types";
 
 describe("Testing unequipType", async function () {
   const testAddress = "0xc76b85cd226518daf2027081deff2eac4cc91a00";
   const testParcelId = 6614;
   let installationAdminFacet;
-  let installationFacet;
+  let installationFacet: InstallationFacet;
   let realmFacet;
   let alchemicaFacet;
-  const testInstallationType: InstallationTypeInput =
-    {
-      id: 19,
-      installationType: 0,
-      level: 1,
-      width: 2,
-      height: 2,
-      alchemicaType: 0,
-      alchemicaCost: [10, 10, 0, 0],
-      harvestRate: 0,
-      capacity: 0,
-      spillRadius: 400,
-      spillRate: 10,
-      upgradeQueueBoost: 1,
-      craftTime: 0,
-      deprecated: false,
-      nextLevelId: 0,
-      prerequisites: [8, 0],
-      name: "Test Alchemical Aaltar",
-      unequipType: 0,
-    };
+  const testInstallationType: InstallationTypeInput = {
+    id: 19,
+    installationType: 0,
+    level: 1,
+    width: 2,
+    height: 2,
+    alchemicaType: 0,
+    alchemicaCost: [10, 10, 0, 0],
+    harvestRate: 0,
+    capacity: 0,
+    spillRadius: 400,
+    spillRate: 10,
+    upgradeQueueBoost: 1,
+    craftTime: 0,
+    deprecated: false,
+    nextLevelId: 0,
+    prerequisites: [8, 0],
+    name: "Test Alchemical Aaltar",
+    unequipType: 0,
+  };
 
   before(async function () {
     this.timeout(20000000);
@@ -58,13 +67,19 @@ describe("Testing unequipType", async function () {
     const installationOwner = await installationOwnershipFacet.owner();
     installationAdminFacet = await impersonate(
       installationOwner,
-      await ethers.getContractAt("InstallationAdminFacet", maticInstallationDiamondAddress),
+      await ethers.getContractAt(
+        "InstallationAdminFacet",
+        maticInstallationDiamondAddress
+      ),
       ethers,
       network
     );
     installationFacet = await impersonate(
       testAddress,
-      await ethers.getContractAt("InstallationFacet", maticInstallationDiamondAddress),
+      await ethers.getContractAt(
+        "InstallationFacet",
+        maticInstallationDiamondAddress
+      ),
       ethers,
       network
     );
@@ -88,54 +103,65 @@ describe("Testing unequipType", async function () {
     );
 
     const backendSigner = new ethers.Wallet(process.env.PROD_PK);
-    await (await alchemicaFacet.setVars(
-      alchemicaTotals(),
-      boostMultipliers,
-      greatPortalCapacity,
-      maticInstallationDiamondAddress,
-      "0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed",
-      "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
-      alchemica,
-      ethers.constants.AddressZero,
-      ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
-      ethers.constants.AddressZero,
-      maticTileDiamondAddress,
-      maticAavegotchiDiamondAddress
-    )).wait();
+    await (
+      await alchemicaFacet.setVars(
+        alchemicaTotals(),
+        boostMultipliers,
+        greatPortalCapacity,
+        maticInstallationDiamondAddress,
+        "0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed",
+        "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
+        alchemica,
+        ethers.constants.AddressZero,
+        ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
+        ethers.constants.AddressZero,
+        maticTileDiamondAddress,
+        maticAavegotchiDiamondAddress
+      )
+    ).wait();
   });
 
   it("Should succeed when fetch unequip type of current installation types", async function () {
     [0, 5, 9, 10, 17].forEach(async (typeId) => {
       const itemType = await installationFacet.getInstallationType(typeId);
       expect(itemType.unequipType).to.equal(0);
-    })
-  })
+    });
+  });
 
   it("Should succeed when add installation types with owner", async function () {
     const receipt = await (
-      await installationAdminFacet.addInstallationTypes([outputInstallation(testInstallationType)])
+      await installationAdminFacet.addInstallationTypes([
+        outputInstallation(testInstallationType),
+      ])
     ).wait();
     const events = receipt!.events!.filter(
       (event) => event.event === "AddInstallationType"
     );
     expect(events.length).to.equal(1);
-    const itemType = await installationFacet.getInstallationType(testInstallationType.id);
+    const itemType = await installationFacet.getInstallationType(
+      testInstallationType.id
+    );
     expect(itemType.name).to.equal(testInstallationType.name);
     expect(itemType.unequipType).to.equal(testInstallationType.unequipType);
-  })
+  });
 
   it("Should succeed when edit installation unequip types with owner", async function () {
     const receipt = await (
-      await installationAdminFacet.editInstallationUnequipTypes([testInstallationType.id], [1])
+      await installationAdminFacet.editInstallationUnequipTypes(
+        [testInstallationType.id],
+        [1]
+      )
     ).wait();
     const events = receipt!.events!.filter(
       (event) => event.event === "EditInstallationUnequipType"
     );
     expect(events.length).to.equal(1);
-    const itemType = await installationFacet.getInstallationType(testInstallationType.id);
+    const itemType = await installationFacet.getInstallationType(
+      testInstallationType.id
+    );
     expect(itemType.name).to.equal(testInstallationType.name);
     expect(itemType.unequipType).to.equal(1);
-  })
+  });
 
   it("Should burn and refund when unequip normal installation", async function () {
     const fud = (await ethers.getContractAt(
@@ -180,7 +206,9 @@ describe("Testing unequipType", async function () {
     });
 
     const sig = await genEquipInstallationSignature(testParcelId, 13, 8, 8);
-    await (await realmFacet.unequipInstallation(testParcelId, 13, 8, 8, sig)).wait();
+    await (
+      await realmFacet.unequipInstallation(testParcelId, 13, 8, 8, sig)
+    ).wait();
     const fudAfterBal = await fud.balanceOf(testAddress);
     const fomoAfterBal = await fomo.balanceOf(testAddress);
 
@@ -209,19 +237,50 @@ describe("Testing unequipType", async function () {
     const fudAfterCraft = await fud.balanceOf(testAddress);
     const fomoAfterCraft = await fomo.balanceOf(testAddress);
 
-    expect(currentFud.sub(fudAfterCraft)).to.equal(ethers.utils.parseUnits(testInstallationType.alchemicaCost[0].toString()));
-    expect(currentFomo.sub(fomoAfterCraft)).to.equal(ethers.utils.parseUnits(testInstallationType.alchemicaCost[1].toString()));
+    expect(currentFud.sub(fudAfterCraft)).to.equal(
+      ethers.utils.parseUnits(testInstallationType.alchemicaCost[0].toString())
+    );
+    expect(currentFomo.sub(fomoAfterCraft)).to.equal(
+      ethers.utils.parseUnits(testInstallationType.alchemicaCost[1].toString())
+    );
 
     // equip installation
     const sig = await genEquipInstallationSignature(testParcelId, 19, 8, 8);
     await realmFacet.equipInstallation(testParcelId, 19, 8, 8, sig);
 
+    // const installationFacet =  await ethers.getContractAt("InstallationFacet", maticInstallationDiamondAddress) as InstallationFacet
+    let parcelTokenBalance =
+      await installationFacet.installationBalancesOfTokenByIds(
+        maticRealmDiamondAddress,
+        testParcelId,
+        [19]
+      );
+    console.log("19 before unequip balance:", parcelTokenBalance);
+    expect(parcelTokenBalance.toString()).to.equal("1");
+
     // Unequip
-    const receipt = await (await realmFacet.unequipInstallation(testParcelId, 19, 8, 8, sig)).wait();
+    const receipt = await (
+      await realmFacet.unequipInstallation(testParcelId, 19, 8, 8, sig)
+    ).wait();
     const event = receipt!.events!.find(
       (event) => event.event === "UnequipInstallation"
     );
     expect(event!.args!._realmId).to.equal(testParcelId);
+
+    parcelTokenBalance =
+      await installationFacet.installationBalancesOfTokenByIds(
+        maticRealmDiamondAddress,
+        testParcelId,
+        [19]
+      );
+
+    expect(parcelTokenBalance.toString()).to.equal("0");
+
+    let ownerAfterBalance = await (
+      await installationFacet.installationsBalances(testAddress)
+    ).find((val) => val.installationId.toString() === "19");
+
+    expect(ownerAfterBalance.balance.toString()).to.equal("1");
 
     const fudAfterUnequip = await fud.balanceOf(testAddress);
     const fomoAfterUnequip = await fomo.balanceOf(testAddress);
