@@ -236,7 +236,7 @@ task(
       } else {
         //Choose to use a multisig or a simple deploy address
         if (useMultisig) {
-          console.log("Diamond cut");
+          console.log("Sending Diamond cut to Multisig");
           const tx: PopulatedTransaction =
             await diamondCut.populateTransaction.diamondCut(
               cut,
@@ -246,6 +246,7 @@ task(
             );
           // await sendToMultisig(diamondUpgrader, signer, tx, hre.ethers);
         } else {
+          console.log("Sending upgrade to Ledger...");
           const tx: ContractTransaction = await diamondCut.diamondCut(
             cut,
             initAddress ? initAddress : hre.ethers.constants.AddressZero,

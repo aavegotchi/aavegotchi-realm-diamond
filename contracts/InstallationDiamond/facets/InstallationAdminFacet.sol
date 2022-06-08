@@ -152,11 +152,20 @@ contract InstallationAdminFacet is Modifiers {
       uint256 parcelId = altar._parcelId;
       uint256 oldId = altar._oldAltarId;
       uint256 newId = altar._newAltarId;
-      LibERC998.removeFromParent(s.realmDiamond, parcelId, oldId, 1);
-      RealmDiamond realm = RealmDiamond(address(s.realmDiamond));
-      LibERC1155._safeMint(realm.ownerOf(parcelId), newId, 1, false, 0);
-      LibERC1155.removeFromOwner(realm.ownerOf(parcelId), newId, 1);
-      LibERC998.addToParent(s.realmDiamond, parcelId, newId, 1);
+
+      // //remove old id
+      // LibERC998.removeFromParent(s.realmDiamond, parcelId, oldId, 1);
+      // RealmDiamond realm = RealmDiamond(address(s.realmDiamond));
+
+      // //mint new id to owner
+      // LibERC1155._safeMint(realm.ownerOf(parcelId), newId, false, 0);
+
+      // //remove from owner
+      // LibERC1155.removeFromOwner(realm.ownerOf(parcelId), newId, 1);
+      // LibERC998.addToParent(s.realmDiamond, parcelId, newId, 1);
+
+      //fix
+      LibERC1155.addToOwner(s.realmDiamond, newId, 1);
     }
   }
 }
