@@ -19,11 +19,23 @@ library LibInstallation {
     emit LibERC1155.TransferToParent(s.realmDiamond, _realmId, _installationId, 1);
   }
 
-  function _unequipInstallation(uint256 _realmId, uint256 _installationId) internal {
+  function _unequipInstallation(
+    address _owner,
+    uint256 _realmId,
+    uint256 _installationId
+  ) internal {
     InstallationAppStorage storage s = LibAppStorageInstallation.diamondStorage();
     LibERC998.removeFromParent(s.realmDiamond, _realmId, _installationId, 1);
     emit LibERC1155.TransferFromParent(s.realmDiamond, _realmId, _installationId, 1);
-    LibERC1155._burn(s.realmDiamond, _installationId, 1);
+
+    //add to owner for unequipType 1
+    if (s.unequipTypes[_installationId] == 1) {
+      LibERC1155.addToOwner(_owner, _installationId, 1);
+      emit LibERC1155.TransferSingle(address(this), s.realmDiamond, _owner, _installationId, 1);
+    } else {
+      //default case: burn
+      LibERC1155._burn(s.realmDiamond, _installationId, 1);
+    }
   }
 
   /// @dev It is not expected for any of these dynamic arrays to have more than a small number of elements, so we use a naive removal approach

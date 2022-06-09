@@ -146,7 +146,7 @@ contract InstallationUpgradeFacet is Modifiers {
     // check that upgrade is ready
     if (block.number >= readyBlock) {
       // burn old installation
-      LibInstallation._unequipInstallation(parcelId, installationId);
+      LibInstallation._unequipInstallation(_owner, parcelId, installationId);
       // mint new installation
       uint256 nextLevelId = s.installationTypes[installationId].nextLevelId;
       LibERC1155._safeMint(_owner, nextLevelId, 1, true, index);
