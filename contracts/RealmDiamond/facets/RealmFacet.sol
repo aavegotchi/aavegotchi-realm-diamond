@@ -411,14 +411,33 @@ contract RealmFacet is Modifiers {
     }
   }
 
-  function fixAltarLevel(uint256[] memory _parcelIds) external onlyOwner {
-    InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
-    for (uint256 i; i < _parcelIds.length; i++) {
-      uint256 parcelId = _parcelIds[i];
-      Parcel storage parcel = s.parcels[parcelId];
-      // Check that the altar is actually supposed to be level 2
-      if (installationsDiamond.balanceOfToken(address(this), parcelId, 11) >= 1 && parcel.altarId == 10) {
-        parcel.altarId = 11;
+  // function fixAltarLevel(uint256[] memory _parcelIds) external onlyOwner {
+  //   InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
+  //   for (uint256 i; i < _parcelIds.length; i++) {
+  //     uint256 parcelId = _parcelIds[i];
+  //     Parcel storage parcel = s.parcels[parcelId];
+  //     // Check that the altar is actually supposed to be level 2
+  //     if (installationsDiamond.balanceOfToken(address(this), parcelId, 11) >= 1 && parcel.altarId == 10) {
+  //       parcel.altarId = 11;
+  //     }
+  //   }
+  // }
+
+  function fixGridStartPositions(
+    uint256[] memory _parcelIds,
+    uint256[] memory _x,
+    uint256[] memory _y,
+    bool _isTile,
+    bool _isTrue
+  ) external onlyOwner {
+    require(_parcelIds.length == _x.length && _parcelIds.length == _y.length, "RealmFacet: Mismatched arrays");
+    if (_isTile) {
+      for (uint256 i; i < _parcelIds.length; i++) {
+        s.parcels[_parcelIds[i]].startPositionTileGrid[_x[i]][_y[i]] = _isTrue;
+      }
+    } else {
+      for (uint256 i; i < _parcelIds.length; i++) {
+        s.parcels[_parcelIds[i]].startPositionBuildGrid[_x[i]][_y[i]] = _isTrue;
       }
     }
   }
