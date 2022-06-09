@@ -14,6 +14,7 @@ export async function upgrade() {
       facetName: "InstallationUpgradeFacet",
       addSelectors: [
         "function getParcelUpgradeQueue(uint256 _parcelId) external view returns (uint256[] memory)",
+        "function getUserUpgradeQueueNew(address _owner) external view",
       ],
       removeSelectors: [],
     },

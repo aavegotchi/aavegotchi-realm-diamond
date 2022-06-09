@@ -181,7 +181,7 @@ contract InstallationUpgradeFacet is Modifiers {
     return s.upgradeQueue;
   }
 
-  /// @dev TO BE DEPRECATED
+  /// @dev TO BE REPLACED BY getUserUpgradeQueueNew after the old queue is cleared out
   /// @notice Query details about all pending craft queues
   /// @param _owner Address to query queue
   /// @return output_ An array of structs, each representing a pending craft queue
@@ -197,6 +197,39 @@ contract InstallationUpgradeFacet is Modifiers {
         output_[counter] = s.upgradeQueue[i];
         indexes_[counter] = i;
         counter++;
+      }
+    }
+    assembly {
+      mstore(output_, counter)
+      mstore(indexes_, counter)
+    }
+  }
+
+  /// @notice Query details about all pending craft queues
+  /// @param _owner Address to query queue
+  /// @return output_ An array of structs, each representing a pending craft queue
+  /// @return indexes_ An array of IDs, to be used in the new finalizeUpgrades() function
+  function getUserUpgradeQueueNew(address _owner) external view returns (UpgradeQueue[] memory output_, uint256[] memory indexes_) {
+    RealmDiamond realm = RealmDiamond(s.realmDiamond);
+    uint256[] memory tokenIds = realm.tokenIdsOfOwner(_owner);
+
+    // Only return up to the first 500 upgrades.
+    output_ = new UpgradeQueue[](500);
+    indexes_ = new uint256[](500);
+
+    uint256 counter;
+    for (uint256 i; i < tokenIds.length; i++) {
+      uint256[] memory parcelUpgradeIds = s.parcelIdToUpgradeIds[tokenIds[i]];
+      for (uint256 j; j < parcelUpgradeIds.length; j++) {
+        output_[counter] = s.upgradeQueue[parcelUpgradeIds[j]];
+        indexes_[counter] = parcelUpgradeIds[j];
+        counter++;
+        if (counter >= 500) {
+          break;
+        }
+      }
+      if (counter >= 500) {
+        break;
       }
     }
     assembly {
