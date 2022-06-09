@@ -45,15 +45,20 @@ library LibERC1155 {
     */
   event URI(string _value, uint256 indexed _tokenId);
 
+  /// @dev Should actually be _owner, _installationId, _queueId
   event MintInstallation(address indexed _owner, uint256 indexed _installationType, uint256 _installationId);
+
+  event MintInstallations(address indexed _owner, uint256 indexed _installationId, uint16 _amount);
 
   function _safeMint(
     address _to,
     uint256 _installationId,
+    uint16 _amount,
+    bool _requireQueue,
     uint256 _queueId
   ) internal {
     InstallationAppStorage storage s = LibAppStorageInstallation.diamondStorage();
-    if (s.installationTypes[_installationId].craftTime > 0) {
+    if (_requireQueue) {
       //Queue is required
       if (s.installationTypes[_installationId].level == 1) {
         require(!s.craftQueue[_queueId].claimed, "LibERC1155: tokenId already minted");
@@ -66,8 +71,11 @@ library LibERC1155 {
       }
     }
 
-    addToOwner(_to, _installationId, 1);
-    emit MintInstallation(_to, _installationId, _queueId);
+    addToOwner(_to, _installationId, _amount);
+
+    if (_amount == 1) emit MintInstallation(_to, _installationId, _queueId);
+    else emit MintInstallations(_to, _installationId, _amount);
+
     emit LibERC1155.TransferSingle(address(this), address(0), _to, _installationId, 1);
   }
 

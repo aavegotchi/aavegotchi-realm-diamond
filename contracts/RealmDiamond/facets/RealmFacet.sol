@@ -46,15 +46,17 @@ contract RealmFacet is Modifiers {
   /// @param _tokenIds The identifiers of tokens to mint
   /// @param _metadata An array of structs containing the metadata of each parcel being minted
   function mintParcels(
-    address _to,
+    address[] calldata _to,
     uint256[] calldata _tokenIds,
     MintParcelInput[] memory _metadata
   ) external onlyOwner {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
       require(s.tokenIds.length < MAX_SUPPLY, "RealmFacet: Cannot mint more than 420,069 parcels");
       uint256 tokenId = _tokenIds[index];
+      address toAddress = _to[index];
       MintParcelInput memory metadata = _metadata[index];
       require(_tokenIds.length == _metadata.length, "Inputs must be same length");
+      require(_to.length == _tokenIds.length, "Inputs must be same length");
 
       Parcel storage parcel = s.parcels[tokenId];
       parcel.coordinateX = metadata.coordinateX;
@@ -63,10 +65,9 @@ contract RealmFacet is Modifiers {
       parcel.size = metadata.size;
       parcel.district = metadata.district;
       parcel.parcelAddress = metadata.parcelAddress;
-
       parcel.alchemicaBoost = metadata.boost;
 
-      LibERC721.safeMint(_to, tokenId);
+      LibERC721.safeMint(toAddress, tokenId);
     }
   }
 
@@ -87,9 +88,13 @@ contract RealmFacet is Modifiers {
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
+
     InstallationDiamondInterface.InstallationType memory installation = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(
       _installationId
     );
+
+    require(installation.level == 1, "RealmFacet: Can only equip lvl 1");
+
     if (installation.installationType == 1 || installation.installationType == 2) {
       require(s.parcels[_realmId].currentRound >= 1, "RealmFacet: Must survey before equipping");
     }
@@ -128,18 +133,33 @@ contract RealmFacet is Modifiers {
     InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
 
     LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
-
-    for (uint256 i; i < installation.alchemicaCost.length; i++) {
-      IERC20 alchemica = IERC20(s.alchemicaAddresses[i]);
-
-      //@question : include upgrades in refund?
-      uint256 alchemicaRefund = installation.alchemicaCost[i] / 2;
-
-      alchemica.transfer(msg.sender, alchemicaRefund);
-    }
-    InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(_realmId, _installationId);
-
+    InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(msg.sender, _realmId, _installationId);
     LibAlchemica.reduceTraits(_realmId, _installationId, false);
+
+    //Process refund
+    if (installationsDiamond.getInstallationUnequipType(_installationId) == 0) {
+      //Loop through each level of the installation.
+      //@todo: For now we can use the ID order to get the cost of previous upgrades. But in the future we'll need to add some data redundancy.
+      uint256 currentLevel = installation.level;
+      uint256[] memory alchemicaRefund = new uint256[](4);
+      for (uint256 index = 0; index < currentLevel; index++) {
+        InstallationDiamondInterface.InstallationType memory prevInstallation = installationsDiamond.getInstallationType(_installationId - index);
+
+        //Loop through each Alchemica cost
+        for (uint256 i; i < prevInstallation.alchemicaCost.length; i++) {
+          //Only half of the cost is refunded
+          alchemicaRefund[i] += prevInstallation.alchemicaCost[i] / 2;
+        }
+      }
+
+      for (uint256 j = 0; j < alchemicaRefund.length; j++) {
+        //don't send 0 refunds
+        if (alchemicaRefund[j] > 0) {
+          IERC20 alchemica = IERC20(s.alchemicaAddresses[j]);
+          alchemica.transfer(msg.sender, alchemicaRefund[j]);
+        }
+      }
+    }
 
     emit UnequipInstallation(_realmId, _installationId, _x, _y);
   }

@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-import {InstallationType, Modifiers, UpgradeQueue} from "../../libraries/AppStorageInstallation.sol";
+import {InstallationType, InstallationTypeIO, Modifiers, UpgradeQueue} from "../../libraries/AppStorageInstallation.sol";
 import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
-import {LibInstallation} from "../../libraries/LibInstallation.sol";
-import {LibERC1155} from "../../libraries/LibERC1155.sol";
 import {LibSignature} from "../../libraries/LibSignature.sol";
 import {IERC721} from "../../interfaces/IERC721.sol";
 import {LibItems} from "../../libraries/LibItems.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
+import {LibERC1155} from "../../libraries/LibERC1155.sol";
+import {LibERC998} from "../../libraries/LibERC998.sol";
 
 contract InstallationAdminFacet is Modifiers {
   event AddressesUpdated(
@@ -20,22 +20,11 @@ contract InstallationAdminFacet is Modifiers {
     bytes _backendPubKey
   );
 
-  event UpgradeInitiated(
-    uint256 indexed _realmId,
-    uint256 _coordinateX,
-    uint256 _coordinateY,
-    uint256 blockInitiated,
-    uint256 readyBlock,
-    uint256 installationId
-  );
-
-  event UpgradeFinalized(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _newInstallationId);
-
-  event UpgradeQueued(address indexed _owner, uint256 indexed _realmId, uint256 indexed _queueIndex);
-  event UpgradeQueueFinalized(address indexed _owner, uint256 indexed _realmId, uint256 indexed _queueIndex);
   event AddInstallationType(uint256 _installationId);
   event EditInstallationType(uint256 _installationId);
   event DeprecateInstallation(uint256 _installationId);
+  event SetInstallationUnequipType(uint256 _installationId, uint256 _unequipType);
+  event EditInstallationUnequipType(uint256 _installationId);
 
   /// @notice Allow the Diamond owner to deprecate an installation
   /// @dev Deprecated installations cannot be crafted by users
@@ -88,7 +77,7 @@ contract InstallationAdminFacet is Modifiers {
 
   /// @notice Allow the diamond owner to add an installation type
   /// @param _installationTypes An array of structs, each struct representing each installationType to be added
-  function addInstallationTypes(InstallationType[] calldata _installationTypes) external onlyOwner {
+  function addInstallationTypes(InstallationTypeIO[] calldata _installationTypes) external onlyOwner {
     for (uint256 i = 0; i < _installationTypes.length; i++) {
       s.installationTypes.push(
         InstallationType(
@@ -110,8 +99,10 @@ contract InstallationAdminFacet is Modifiers {
           _installationTypes[i].name
         )
       );
+      s.unequipTypes[i] = _installationTypes[i].unequipType;
 
       emit AddInstallationType(s.installationTypes.length - 1);
+      emit SetInstallationUnequipType(s.installationTypes.length - 1, _installationTypes[i].unequipType);
     }
   }
 
@@ -128,149 +119,66 @@ contract InstallationAdminFacet is Modifiers {
     }
   }
 
-  /// @notice Allow anyone to finalize any existing queue upgrade
-  function finalizeUpgrades(uint256[] memory _upgradeIndexes) public {
-    for (uint256 i; i < _upgradeIndexes.length; i++) {
-      UpgradeQueue storage upgradeQueue = s.upgradeQueue[_upgradeIndexes[i]];
-      _finalizeUpgrade(upgradeQueue.owner, _upgradeIndexes[i]);
+  function editInstallationUnequipTypes(uint256[] calldata _ids, uint256[] calldata _unequipTypes) external onlyOwner {
+    require(_ids.length == _unequipTypes.length, "InstallationAdminFacet: Mismatched arrays");
+    for (uint256 i = 0; i < _ids.length; i++) {
+      uint256 id = _ids[i];
+      s.unequipTypes[id] = _unequipTypes[i];
+      emit EditInstallationUnequipType(id);
     }
   }
 
-  function _finalizeUpgrade(address _owner, uint256 index) internal returns (bool) {
-    if (s.upgradeComplete[index]) return true;
-    uint40 readyBlock = s.upgradeQueue[index].readyBlock;
-    uint256 parcelId = s.upgradeQueue[index].parcelId;
-    uint256 installationId = s.upgradeQueue[index].installationId;
-    uint256 coordinateX = s.upgradeQueue[index].coordinateX;
-    uint256 coordinateY = s.upgradeQueue[index].coordinateY;
+  /// @notice Allow the owner to mint installations
+  /// @dev This function does not check for deprecation because otherwise the installations could be minted by players.
+  /// @dev Make sure that the installation is deprecated when you add it onchain
+  /// @param _installationIds An array containing the identifiers of the installationTypes to mint
+  /// @param _amounts An array containing the amounts of the installationTypes to mint
+  /// @param _toAddress Address to mint installations
+  function mintInstallations(
+    uint16[] calldata _installationIds,
+    uint16[] calldata _amounts,
+    address _toAddress
+  ) external onlyOwner {
+    require(_installationIds.length == _amounts.length, "InstallationFacet: Mismatched arrays");
+    for (uint256 i = 0; i < _installationIds.length; i++) {
+      uint256 installationId = _installationIds[i];
+      require(installationId < s.installationTypes.length, "InstallationFacet: Installation does not exist");
 
-    // check that upgrade is ready
-    if (block.number >= readyBlock) {
-      // burn old installation
-      LibInstallation._unequipInstallation(parcelId, installationId);
-      // mint new installation
-      uint256 nextLevelId = s.installationTypes[installationId].nextLevelId;
-      LibERC1155._safeMint(_owner, nextLevelId, index);
-      // equip new installation
-      LibInstallation._equipInstallation(_owner, parcelId, nextLevelId);
+      InstallationType memory installationType = s.installationTypes[installationId];
+      require(installationType.deprecated, "InstallationFacet: Not deprecated");
+      //level check
+      require(installationType.level == 1, "InstallationFacet: Can only craft level 1");
 
-      RealmDiamond realm = RealmDiamond(s.realmDiamond);
-      realm.upgradeInstallation(parcelId, installationId, nextLevelId, coordinateX, coordinateY);
-
-      // update updateQueueLength
-      realm.subUpgradeQueueLength(parcelId);
-
-      // clean unique hash
-      bytes32 uniqueHash = keccak256(abi.encodePacked(parcelId, coordinateX, coordinateY, installationId));
-      s.upgradeHashes[uniqueHash] = 0;
-
-      // // pop upgrade from array
-      // if (_user) {
-      //   s.userUpgradeQueue[_owner][index] = s.userUpgradeQueue[_owner][s.userUpgradeQueue[_owner].length - 1];
-      //   s.userUpgradeQueue[_owner].pop();
-      // } else {
-      //   s.upgradeQueue[index] = s.upgradeQueue[s.upgradeQueue.length - 1];
-      //   s.upgradeQueue.pop();
-      // }
-      s.upgradeComplete[index] = true;
-
-      emit UpgradeFinalized(parcelId, coordinateX, coordinateY, nextLevelId);
-      emit UpgradeQueueFinalized(_owner, parcelId, index);
-      return true;
-    }
-    return false;
-  }
-
-  function upgradeInstallation(
-    UpgradeQueue calldata _upgradeQueue,
-    bytes memory _signature,
-    uint40 _gltr
-  ) external {
-    require(
-      LibSignature.isValid(
-        keccak256(abi.encodePacked(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId)),
-        _signature,
-        s.backendPubKey
-      ),
-      "InstallationAdminFacet: Invalid signature"
-    );
-    // check owner
-    require(IERC721(s.realmDiamond).ownerOf(_upgradeQueue.parcelId) == _upgradeQueue.owner, "InstallationFacet: Not owner");
-    // check coordinates
-    RealmDiamond realm = RealmDiamond(s.realmDiamond);
-
-    //check upgradeQueueCapacity
-    require(
-      realm.getParcelUpgradeQueueCapacity(_upgradeQueue.parcelId) > realm.getParcelUpgradeQueueLength(_upgradeQueue.parcelId),
-      "InstallationFacet: UpgradeQueue full"
-    );
-
-    realm.checkCoordinates(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId);
-
-    // check unique hash
-    bytes32 uniqueHash = keccak256(
-      abi.encodePacked(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId)
-    );
-
-    //The same upgrade cannot be queued twice
-    require(s.upgradeHashes[uniqueHash] == 0, "InstallationFacet: Upgrade hash not unique");
-
-    s.upgradeHashes[uniqueHash] = _upgradeQueue.parcelId;
-
-    //current installation
-    InstallationType memory prevInstallation = s.installationTypes[_upgradeQueue.installationId];
-
-    //next level
-    InstallationType memory nextInstallation = s.installationTypes[prevInstallation.nextLevelId];
-
-    //take the required alchemica
-    address[4] memory alchemicaAddresses = realm.getAlchemicaAddresses();
-    LibItems._splitAlchemica(nextInstallation.alchemicaCost, alchemicaAddresses);
-
-    require(prevInstallation.nextLevelId > 0, "InstallationFacet: Maximum upgrade reached");
-    require(prevInstallation.installationType == nextInstallation.installationType, "InstallationFacet: Wrong installation type");
-    require(prevInstallation.alchemicaType == nextInstallation.alchemicaType, "InstallationFacet: Wrong alchemicaType");
-    require(prevInstallation.level == nextInstallation.level - 1, "InstallationFacet: Wrong installation level");
-
-    uint256 gltrAmount = uint256(_gltr) * 1e18;
-    IERC20(s.gltr).transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, gltrAmount); //should revert if user doesnt have enough GLTR
-
-    //prevent underflow if user sends too much GLTR
-    if (_gltr > nextInstallation.craftTime) revert("InstallationFacet: Too much GLTR");
-
-    //Confirm upgrade immediately
-    if (nextInstallation.craftTime - _gltr == 0) {
-      realm.upgradeInstallation(
-        _upgradeQueue.parcelId,
-        _upgradeQueue.installationId,
-        prevInstallation.nextLevelId,
-        _upgradeQueue.coordinateX,
-        _upgradeQueue.coordinateY
-      );
-    } else {
-      UpgradeQueue memory upgrade = UpgradeQueue(
-        _upgradeQueue.owner,
-        _upgradeQueue.coordinateX,
-        _upgradeQueue.coordinateY,
-        uint40(block.number) + nextInstallation.craftTime - _gltr,
-        false,
-        _upgradeQueue.parcelId,
-        _upgradeQueue.installationId
-      );
-      s.upgradeQueue.push(upgrade);
-
-      // update upgradeQueueLength
-      realm.addUpgradeQueueLength(_upgradeQueue.parcelId);
-
-      emit UpgradeInitiated(
-        _upgradeQueue.parcelId,
-        _upgradeQueue.coordinateX,
-        _upgradeQueue.coordinateY,
-        block.number,
-        uint40(block.number) + nextInstallation.craftTime - _gltr,
-        _upgradeQueue.installationId
-      );
-      emit UpgradeQueued(_upgradeQueue.owner, _upgradeQueue.parcelId, s.upgradeQueue.length - 1);
+      LibERC1155._safeMint(_toAddress, installationId, _amounts[i], false, 0);
     }
   }
+
+  // struct MissingAltars {
+  //   uint256 _parcelId;
+  //   uint256 _oldAltarId;
+  //   uint256 _newAltarId;
+  // }
+
+  // function fixMissingAltars(MissingAltars[] memory _altars) external onlyOwner {
+  //   for (uint256 i = 0; i < _altars.length; i++) {
+  //     MissingAltars memory altar = _altars[i];
+  //     uint256 parcelId = altar._parcelId;
+  //     uint256 oldId = altar._oldAltarId;
+  //     uint256 newId = altar._newAltarId;
+
+  //     // //remove old id
+  //     // LibERC998.removeFromParent(s.realmDiamond, parcelId, oldId, 1);
+  //     // RealmDiamond realm = RealmDiamond(address(s.realmDiamond));
+
+  //     // //mint new id to owner
+  //     // LibERC1155._safeMint(realm.ownerOf(parcelId), newId, false, 0);
+
+  //     // //remove from owner
+  //     // LibERC1155.removeFromOwner(realm.ownerOf(parcelId), newId, 1);
+  //     // LibERC998.addToParent(s.realmDiamond, parcelId, newId, 1);
+
+  //     //fix
+  //     LibERC1155.addToOwner(s.realmDiamond, newId, 1);
+  //   }
+  // }
 }
