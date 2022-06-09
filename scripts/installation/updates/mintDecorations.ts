@@ -27,13 +27,28 @@ export async function addDecorations() {
     );
   }
 
-  const installationTypes = decorations1.map((val) => outputInstallation(val));
+  const receiveAddress = "0x8d46fd7160940d89da026d59b2e819208e714e82";
 
-  console.log("Adding installation types!");
+  console.log("Minting installation types to !", receiveAddress);
 
-  console.log("types:", installationTypes);
-  let tx = await installationAdminFacet.addInstallationTypes(
-    installationTypes,
+  const amounts = decorations1.map((val) => {
+    if (val.name.includes("Godlike")) return 5;
+    else if (val.name.includes("Mythical")) return 50;
+    else if (val.name.includes("Legendary")) return 100;
+    else if (val.name.includes("Rare")) return 250;
+    else if (val.name.includes("Uncommon")) return 500;
+    else if (val.name.includes("Common")) return 1000;
+  });
+
+  const ids = decorations1.map((val) => val.id);
+
+  console.log("amounts:", amounts.length);
+  console.log("ids:", ids.length);
+
+  let tx = await installationAdminFacet.mintInstallations(
+    ids,
+    amounts,
+    receiveAddress,
     {
       gasPrice: gasPrice,
     }
@@ -47,7 +62,7 @@ export async function addDecorations() {
     maticInstallationDiamondAddress
   )) as InstallationFacet;
 
-  const insts = await installationfacet.getInstallationTypes([]);
+  const insts = await installationfacet.installationsBalances(receiveAddress);
   console.log("insts:", insts);
 }
 

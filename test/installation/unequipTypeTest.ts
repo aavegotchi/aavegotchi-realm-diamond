@@ -58,7 +58,7 @@ describe("Testing unequipType", async function () {
   before(async function () {
     this.timeout(20000000);
 
-    await upgrade();
+    // await upgrade();
 
     const installationOwnershipFacet = (await ethers.getContractAt(
       "OwnershipFacet",

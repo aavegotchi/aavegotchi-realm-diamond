@@ -19,6 +19,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 20,
@@ -38,6 +39,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 21,
@@ -57,6 +59,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 22,
@@ -76,6 +79,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 23,
@@ -95,6 +99,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 24,
@@ -114,6 +119,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 25,
@@ -133,6 +139,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 26,
@@ -152,6 +159,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 27,
@@ -171,6 +179,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 28,
@@ -190,6 +199,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 29,
@@ -209,6 +219,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 30,
@@ -228,6 +239,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 31,
@@ -247,6 +259,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 32,
@@ -266,6 +279,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 33,
@@ -285,6 +299,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 34,
@@ -304,6 +319,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 35,
@@ -323,6 +339,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 36,
@@ -342,6 +359,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 37,
@@ -361,6 +379,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 38,
@@ -380,6 +399,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 39,
@@ -399,6 +419,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 40,
@@ -418,6 +439,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 41,
@@ -437,6 +459,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 42,
@@ -456,6 +479,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 43,
@@ -475,6 +499,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 44,
@@ -494,6 +519,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 45,
@@ -513,6 +539,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 46,
@@ -532,6 +559,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 47,
@@ -551,6 +579,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 48,
@@ -570,6 +599,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 49,
@@ -589,6 +619,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 50,
@@ -608,6 +639,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 51,
@@ -627,6 +659,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 52,
@@ -646,6 +679,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 53,
@@ -665,6 +699,7 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
   {
     id: 54,
@@ -684,5 +719,6 @@ export const decorations1: InstallationTypeInput[] = [
     spillRate: 0,
     upgradeQueueBoost: 0,
     craftTime: 0,
+    unequipType: 1,
   },
 ];
