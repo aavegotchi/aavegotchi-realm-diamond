@@ -10,6 +10,7 @@ import {LibItems} from "../../libraries/LibItems.sol";
 import {InstallationAdminFacet} from "./InstallationAdminFacet.sol";
 import {LibInstallation} from "../../libraries/LibInstallation.sol";
 import {LibERC1155} from "../../libraries/LibERC1155.sol";
+import {LibERC998} from "../../libraries/LibERC998.sol";
 
 contract InstallationUpgradeFacet is Modifiers {
   event UpgradeInitiated(
@@ -25,6 +26,8 @@ contract InstallationUpgradeFacet is Modifiers {
 
   event UpgradeQueued(address indexed _owner, uint256 indexed _realmId, uint256 indexed _queueIndex);
   event UpgradeQueueFinalized(address indexed _owner, uint256 indexed _realmId, uint256 indexed _queueIndex);
+
+  event UpgradeTimeReduced(uint256 indexed _queueId, uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint40 _blocksReduced);
 
   /// @notice Allow a user to upgrade an installation in a parcel
   /// @dev Will throw if the caller is not the owner of the parcel in which the installation is installed
@@ -90,6 +93,14 @@ contract InstallationUpgradeFacet is Modifiers {
 
     //Confirm upgrade immediately
     if (nextInstallation.craftTime - _gltr == 0) {
+      LibInstallation._unequipInstallation(_upgradeQueue.owner, _upgradeQueue.parcelId, _upgradeQueue.installationId);
+      // mint new installation
+      uint256 nextLevelId = s.installationTypes[_upgradeQueue.installationId].nextLevelId;
+      //mint without queue
+      LibERC1155._safeMint(_upgradeQueue.owner, nextLevelId, 1, false, 0);
+      // equip new installation
+      LibInstallation._equipInstallation(_upgradeQueue.owner, _upgradeQueue.parcelId, nextLevelId);
+
       realm.upgradeInstallation(
         _upgradeQueue.parcelId,
         _upgradeQueue.installationId,
@@ -97,6 +108,8 @@ contract InstallationUpgradeFacet is Modifiers {
         _upgradeQueue.coordinateX,
         _upgradeQueue.coordinateY
       );
+
+      emit UpgradeTimeReduced(0, _upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _gltr);
     } else {
       UpgradeQueue memory upgrade = UpgradeQueue(
         _upgradeQueue.owner,
