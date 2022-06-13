@@ -23,13 +23,15 @@ let installationAdminFacet: InstallationAdminFacet;
 let erc721Facet: ERC721Facet;
 let ownershipFacet: OwnershipFacet;
 let ownerAddress: string;
+let period: number;
+let date: number;
 
 describe("Realm Upgrade tests", async function () {
   const testAddress = "0xf3678737dC45092dBb3fc1f49D89e3950Abb866d";
 
   before(async function () {
     this.timeout(20000000);
-    await upgrade();
+    // await upgrade();
     diamondAddress = "0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11";
     installationAddress = "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
 
@@ -91,7 +93,7 @@ describe("Realm Upgrade tests", async function () {
       network
     );
 
-    await installationFacet.craftInstallations(["1"]);
+    await installationFacet.craftInstallations([10], [0]);
 
     installationAdminFacet = await impersonate(
       ownerAddress,
@@ -99,10 +101,15 @@ describe("Realm Upgrade tests", async function () {
       ethers,
       network
     );
-    await installationAdminFacet.editDeprecateTime("1", "1650891972");
+    await installationAdminFacet.editDeprecateTime(10, 1655594972);
+
+    period = 10 * 86400;
+
+    await ethers.provider.send("evm_increaseTime", [period]);
+    await ethers.provider.send("evm_mine", []);
 
     await expect(
-      installationFacet.craftInstallations(["1"])
+      installationFacet.craftInstallations([10], [0])
     ).to.be.revertedWith("InstallationFacet: Installation has been deprecated");
   });
 });
