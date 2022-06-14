@@ -245,4 +245,8 @@ contract InstallationUpgradeFacet is Modifiers {
   function getParcelUpgradeQueue(uint256 _parcelId) external view returns (uint256[] memory) {
     return s.parcelIdToUpgradeIds[_parcelId];
   }
+
+  function getUpgradeQueueLength() external view returns (uint256) {
+    return s.upgradeQueue.length;
+  }
 }

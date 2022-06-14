@@ -15,6 +15,7 @@ export async function upgrade() {
       addSelectors: [
         "function getParcelUpgradeQueue(uint256 _parcelId) external view returns (uint256[] memory)",
         "function getUserUpgradeQueueNew(address _owner) external view",
+        "function getUpgradeQueueLength() external view",
       ],
       removeSelectors: [],
     },

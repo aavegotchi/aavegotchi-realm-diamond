@@ -16,6 +16,7 @@ export async function upgradeTest() {
       facetName: "TestInstallationFacet",
       addSelectors: [
         `function testUpgradeInstallation(${UpgradeQueue} calldata _upgradeQueue,uint40 _gltr) external`,
+        `function testCraftInstallations(uint16[] calldata _installationTypes) external`,
       ],
       removeSelectors: [],
     },

@@ -109,4 +109,14 @@ contract TestInstallationFacet is Modifiers {
       emit UpgradeQueued(_upgradeQueue.owner, _upgradeQueue.parcelId, s.upgradeQueue.length - 1);
     }
   }
+
+  /// @notice Craft installations without checks
+  function testCraftInstallations(uint16[] calldata _installationTypes) external {
+    for (uint256 i; i < _installationTypes.length; i++) {
+      //doesn't require queue
+      uint256 installationId = _installationTypes[i];
+
+      LibERC1155._safeMint(msg.sender, installationId, 1, false, 0);
+    }
+  }
 }

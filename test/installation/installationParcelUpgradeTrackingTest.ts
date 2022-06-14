@@ -12,16 +12,16 @@ import {
   InstallationAdminFacet,
   InstallationUpgradeFacet,
   TestInstallationFacet,
+  TestRealmFacet,
 } from "../../typechain";
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
 import { deployDiamond } from "../../scripts/installation/deploy";
 import { BigNumber, BigNumberish, Signer } from "ethers";
 import {
-  maticGhstAddress,
+  maticInstallationDiamondAddress,
   maticRealmDiamondAddress,
-} from "../../scripts/installation/helperFunctions";
-import { maticInstallationDiamondAddress } from "../../constants";
+} from "../../constants";
 import {
   approveAlchemica,
   approveRealAlchemica,
@@ -31,12 +31,16 @@ import {
 import { InstallationTypeInput, UpgradeQueue } from "../../types";
 import { upgrade } from "../../scripts/installation/upgrades/upgrade-parcelUpgradeTracking";
 import { upgradeTest } from "../../scripts/installation/upgrades/test/upgrade-testInstallationFacet";
+import { upgradeRealmTest } from "../../scripts/realm/upgrades/test/upgrade-realmTest";
+import { upgradeRealm } from "../../scripts/realm/upgrades/upgrade-realm";
 
 describe("Testing Equip Installation", async function () {
   let installationFacet: InstallationFacet;
   let testInstallationFacet: TestInstallationFacet;
   let installationUpgradeFacet: InstallationUpgradeFacet;
-  const owner = "0x8FEebfA4aC7AF314d90a0c17C3F91C800cFdE44B";
+  let testRealmFacet: TestRealmFacet;
+  const owner = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
+  const realmId = 2258;
   let upgradeId;
   before(async function () {
     this.timeout(20000000);
@@ -56,6 +60,11 @@ describe("Testing Equip Installation", async function () {
       maticInstallationDiamondAddress
     )) as InstallationUpgradeFacet;
 
+    testRealmFacet = (await ethers.getContractAt(
+      "TestRealmFacet",
+      maticRealmDiamondAddress
+    )) as TestRealmFacet;
+
     installationFacet = await impersonate(
       owner,
       installationFacet,
@@ -74,35 +83,41 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
+    testRealmFacet = await impersonate(owner, testRealmFacet, ethers, network);
 
     await upgrade();
     await upgradeTest();
+    await upgradeRealmTest();
   });
 
   it("Should initiate an upgrade for an installation and the getter for parcel upgrades should work", async () => {
+    await testInstallationFacet.testCraftInstallations([10]);
+    await testRealmFacet.testEquipInstallation(realmId, 10, 0, 0);
     await testInstallationFacet.testUpgradeInstallation(
       {
         owner: owner,
-        coordinateX: 14,
+        coordinateX: 0,
         coordinateY: 0,
         readyBlock: 0,
         claimed: false,
-        parcelId: 15882,
+        parcelId: realmId,
         installationId: 10,
       },
       0
     );
-    upgradeId = await installationUpgradeFacet.getParcelUpgradeQueue(15882);
-    console.log(upgradeId);
+    const upgradeQueueLength =
+      await installationUpgradeFacet.getUpgradeQueueLength();
+    console.log(upgradeQueueLength);
+    upgradeId = await installationUpgradeFacet.getParcelUpgradeQueue(realmId);
+    expect(upgradeId).to.equal([upgradeQueueLength.sub(1)]);
+    console.log("Complete user upgrade queue from new implementation:");
     console.log(await installationUpgradeFacet.getUserUpgradeQueueNew(owner));
   });
   it("Should finalize an upgrade and the getter should remove the upgrade id", async () => {
-    function delay(ms: number) {
-      return new Promise((resolve) => setTimeout(resolve, ms));
-    }
     await mineBlocks(ethers, 65000);
     const tx = await installationUpgradeFacet.finalizeUpgrades(upgradeId);
-    await delay(10000);
-    console.log(await installationUpgradeFacet.getParcelUpgradeQueue(15882));
+    expect(
+      await installationUpgradeFacet.getParcelUpgradeQueue(realmId)
+    ).to.equal([]);
   });
 });
