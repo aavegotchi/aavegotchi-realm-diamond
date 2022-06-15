@@ -2,14 +2,14 @@
 pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../../../libraries/AppStorage.sol";
-import "../../../libraries/LibDiamond.sol";
-import "../../../libraries/LibStrings.sol";
-import "../../../libraries/LibMeta.sol";
-import "../../../libraries/LibERC721.sol";
-import "../../../libraries/LibRealm.sol";
-import "../../../libraries/LibAlchemica.sol";
-import {InstallationDiamondInterface} from "../../../interfaces/InstallationDiamondInterface.sol";
+import "../../libraries/AppStorage.sol";
+import "../../libraries/LibDiamond.sol";
+import "../../libraries/LibStrings.sol";
+import "../../libraries/LibMeta.sol";
+import "../../libraries/LibERC721.sol";
+import "../../libraries/LibRealm.sol";
+import "../../libraries/LibAlchemica.sol";
+import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamondInterface.sol";
 
 contract TestRealmFacet is Modifiers {
   /// @dev Equip installation without signature or owner checks for testing
