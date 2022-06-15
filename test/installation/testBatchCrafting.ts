@@ -2,6 +2,7 @@ import { impersonate } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import {
   AlchemicaFacet,
+  AlchemicaToken,
   ERC1155Facet,
   ERC1155FacetTile,
   InstallationAdminFacet,
@@ -16,7 +17,13 @@ import {
 import { upgrade } from "../../scripts/installation/upgrades/upgrade-batchCraft";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
-describe("Testing Equip Installation", async function () {
+import {
+  ALPHA_ADDRESS,
+  FOMO_ADDRESS,
+  FUD_ADDRESS,
+  KEK_ADDRESS,
+} from "../../helpers/constants";
+describe("Testing Batch Crafting ", async function () {
   const testAddress = "0x3a79bF3555F33f2adCac02da1c4a0A0163F666ce";
 
   //   let realmFacet: RealmFacet;
@@ -38,6 +45,9 @@ describe("Testing Equip Installation", async function () {
     gltr: BigNumber;
   }
 
+  const alchemica = [FUD_ADDRESS, FOMO_ADDRESS, ALPHA_ADDRESS, KEK_ADDRESS];
+  // let beforeBalances = [];
+  // let afterBalances = [];
   //   const genSignature = async (tileId: number, x: number, y: number) => {
   //     //@ts-ignore
   //     let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
@@ -76,8 +86,10 @@ describe("Testing Equip Installation", async function () {
       "ERC1155FacetTile",
       maticTileDiamondAddress
     )) as ERC1155Facet;
+
     await upgrade();
   });
+
   it("Batch craft both types of installations ", async function () {
     installationFacet = await impersonate(
       testAddress,
@@ -151,7 +163,24 @@ describe("Testing Equip Installation", async function () {
     const aaltarBalanceAfter = await ERC1155.balanceOf(testAddress, 10);
     expect(aaltarBalanceAfter).to.be.equal(aaltarBalanceBefore.add(4));
 
+    tileFacet = await impersonate(testAddress, tileFacet, ethers, network);
+
     //TILES
+
+    async function getBalances(): Promise<BigNumber[]> {
+      const output: BigNumber[] = [];
+      for await (const alch of alchemica) {
+        let token = (await ethers.getContractAt(
+          "AlchemicaToken",
+          alch
+        )) as AlchemicaToken;
+        const balanceOfToken = await token.balanceOf(testAddress);
+        output.push(balanceOfToken);
+      }
+
+      return output;
+    }
+
     const tileBalanceBefore = await tileERC1155.balanceOf(testAddress, 3);
     //should revert while trying to craft a tile that does not exist
     await expect(tileFacet.batchCraftTiles([voidTile])).to.be.revertedWith(
@@ -163,8 +192,39 @@ describe("Testing Equip Installation", async function () {
       tileFacet.batchCraftTiles([deprecatedTile])
     ).to.be.revertedWith("TileFacet: Tile has been deprecated");
 
-    // await tileFacet.batchCraftTiles([3], [1]);
-    // const tileBalanceAfter = await tileERC1155.balanceOf(testAddress, 3);
-    // expect(tileBalanceAfter).to.be.equal(aaltarBalanceBefore.add(1));
+    const craftTile: TileCraft = {
+      tileID: 4,
+      amount: BigNumber.from(1),
+      gltr: BigNumber.from(0),
+    };
+    //get Alchemica balances before crafting
+    const beforeBalances = await getBalances();
+
+    console.log("before:", beforeBalances);
+
+    const tile4BalanceBefore = await tileERC1155.balanceOf(testAddress, 4);
+    await tileFacet.batchCraftTiles([craftTile]);
+    const tile4BalanceAfter = await tileERC1155.balanceOf(testAddress, 4);
+    expect(tile4BalanceAfter).to.be.equal(tile4BalanceBefore.add(1));
+
+    //get balance after crafting
+    const afterBalances = await getBalances();
+    console.log("after:", afterBalances);
+
+    //200fud
+    expect(beforeBalances[0]).to.equal(
+      afterBalances[0].add(ethers.utils.parseEther("200"))
+    );
+
+    //0 fomo
+    expect(beforeBalances[1]).to.equal(afterBalances[1]);
+
+    //0 alpha
+    expect(beforeBalances[2]).to.equal(afterBalances[2]);
+
+    //5 kek
+    expect(beforeBalances[3]).to.equal(
+      afterBalances[3].add(ethers.utils.parseEther("5"))
+    );
   });
 });

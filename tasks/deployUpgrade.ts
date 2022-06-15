@@ -147,6 +147,10 @@ task(
       for (let index = 0; index < facetsAndAddSelectors.length; index++) {
         const facet = facetsAndAddSelectors[index];
 
+        if (hre.network.name === "matic" && facet.facetName.includes("Test")) {
+          throw new Error("STOPPPP");
+        }
+
         console.log("facet:", facet);
         const factory = (await hre.ethers.getContractFactory(
           facet.facetName

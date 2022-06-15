@@ -41,7 +41,7 @@ describe("Testing Equip Installation", async function () {
   let testRealmFacet: TestRealmFacet;
   const owner = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
   const realmId = 2258;
-  let upgradeId;
+  let upgradeId: BigNumber[];
   before(async function () {
     this.timeout(20000000);
 
@@ -109,16 +109,22 @@ describe("Testing Equip Installation", async function () {
       await installationUpgradeFacet.getUpgradeQueueLength();
     console.log(upgradeQueueLength);
     upgradeId = await installationUpgradeFacet.getParcelUpgradeQueue(realmId);
-    expect(upgradeId.length).to.equal(1);
-    expect(upgradeId[0]).to.equal(upgradeQueueLength.sub(1));
-    console.log("Complete user upgrade queue from new implementation:");
-    console.log(await installationUpgradeFacet.getUserUpgradeQueueNew(owner));
+    await installationUpgradeFacet.getUserUpgradeQueueNew(owner);
+
+    expect(userUpgradeQueue.indexes_.length).to.equal(1);
   });
   it("Should finalize an upgrade and the getter should remove the upgrade id", async () => {
     await mineBlocks(ethers, 65000);
     const tx = await installationUpgradeFacet.finalizeUpgrades(upgradeId);
     expect(
-      (await installationUpgradeFacet.getParcelUpgradeQueue(realmId)).length
+      await (
+        await installationUpgradeFacet.getParcelUpgradeQueue(realmId)
+      ).length
     ).to.equal(0);
+
+    const userUpgradeQueue =
+      await installationUpgradeFacet.getUserUpgradeQueueNew(owner);
+
+    expect(userUpgradeQueue.indexes_.length).to.equal(0);
   });
 });
