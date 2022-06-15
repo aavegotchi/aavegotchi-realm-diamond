@@ -12,8 +12,6 @@ import { OwnershipFacet } from "../../../typechain";
 
 export async function upgrade() {
   const diamondUpgrader = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
-  const UpgradeQueue =
-    "(address owner,uint16 coordinateX, uint16 coordinateY,uint40 readyBlock,bool claimed,uint256 parcelId,uint256 installationId)";
 
   const facets: FacetsAndAddSelectors[] = [
     {
