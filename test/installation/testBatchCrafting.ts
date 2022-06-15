@@ -2,6 +2,7 @@ import { impersonate } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import {
   AlchemicaFacet,
+  AlchemicaToken,
   ERC1155Facet,
   ERC1155FacetTile,
   InstallationAdminFacet,
@@ -16,6 +17,13 @@ import {
 import { upgrade } from "../../scripts/installation/upgrades/upgrade-batchCraft";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import {
+  ALPHA_ADDRESS,
+  FOMO_ADDRESS,
+  FUD_ADDRESS,
+  GLTR_ADDRESS,
+  KEK_ADDRESS,
+} from "../../helpers/constants";
 describe("Testing Equip Installation", async function () {
   const testAddress = "0x3a79bF3555F33f2adCac02da1c4a0A0163F666ce";
 
@@ -76,6 +84,32 @@ describe("Testing Equip Installation", async function () {
       "ERC1155FacetTile",
       maticTileDiamondAddress
     )) as ERC1155Facet;
+
+    const alchemica = [
+      FUD_ADDRESS,
+      FOMO_ADDRESS,
+      ALPHA_ADDRESS,
+      KEK_ADDRESS,
+      GLTR_ADDRESS,
+    ];
+
+    for await (const alch of alchemica) {
+      let token = (await ethers.getContractAt(
+        "AlchemicaToken",
+        alch
+      )) as AlchemicaToken;
+      token = await impersonate(testAddress, token, ethers, network);
+      await token.approve(
+        maticTileDiamondAddress,
+        ethers.utils.parseEther("1000")
+      );
+
+      await token.approve(
+        maticInstallationDiamondAddress,
+        ethers.utils.parseEther("1000")
+      );
+    }
+
     await upgrade();
   });
   it("Batch craft both types of installations ", async function () {
@@ -163,8 +197,15 @@ describe("Testing Equip Installation", async function () {
       tileFacet.batchCraftTiles([deprecatedTile])
     ).to.be.revertedWith("TileFacet: Tile has been deprecated");
 
-    // await tileFacet.batchCraftTiles([3], [1]);
-    // const tileBalanceAfter = await tileERC1155.balanceOf(testAddress, 3);
-    // expect(tileBalanceAfter).to.be.equal(aaltarBalanceBefore.add(1));
+    const craftTile: TileCraft = {
+      tileID: 4,
+      amount: BigNumber.from(1),
+      gltr: BigNumber.from(0),
+    };
+
+    const tile4BalanceBefore = await tileERC1155.balanceOf(testAddress, 3);
+    await tileFacet.batchCraftTiles([craftTile]);
+    const tile4BalanceAfter = await tileERC1155.balanceOf(testAddress, 4);
+    expect(tile4BalanceAfter).to.be.equal(tile4BalanceBefore.add(1));
   });
 });
