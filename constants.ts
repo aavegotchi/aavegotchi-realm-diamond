@@ -15,6 +15,7 @@ export const alchemica = [
   "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C", //kek
 ];
 
+export const proxyAdminAddress = "0xB549125b4A2F3c1B4319b798EcDC72b04315dF2D";
 export const mumbaiDiamondAddress =
   "0xb012732d259df648B8B3876b9794Fcb631262447";
 
@@ -32,3 +33,33 @@ export const maticTileDiamondAddress =
 
 export const ecosystemVesting = "0x7e07313B4FF259743C0c84eA3d5e741D2b0d07c3";
 export const gameplayVesting = "0x3fB6C2A83d2FfFe94e0b912b612fB100047cc176";
+
+export const DOMAIN_TYPES = [
+  {
+    name: "name",
+    type: "string",
+  },
+  {
+    name: "version",
+    type: "string",
+  },
+  {
+    name: "chainId",
+    type: "uint256",
+  },
+  {
+    name: "verifyingContract",
+    type: "address",
+  },
+];
+
+export const PERMIT_TYPES = {
+  //EIP712Domain: DOMAIN_TYPES,
+  Permit: [
+    { name: "owner", type: "address" },
+    { name: "spender", type: "address" },
+    { name: "value", type: "uint256" },
+    { name: "nonce", type: "uint256" },
+    { name: "deadline", type: "uint256" },
+  ],
+};
