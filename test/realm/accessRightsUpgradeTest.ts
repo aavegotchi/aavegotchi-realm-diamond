@@ -45,8 +45,8 @@ describe("Access rights test", async function () {
     );
   });
   it("Should allow access right upgrades for valid parameters", async function () {
-    for (let i = 0; i < 2; i++) {
-      for (let j = 0; j < 3; j++) {
+    for (let i = 0; i < 7; i++) {
+      for (let j = 0; j < 5; j++) {
         await realm.setParcelsAccessRights([parcelId], [i], [j]);
         const accessRights = await realm.getParcelsAccessRights(
           [parcelId],
@@ -57,8 +57,8 @@ describe("Access rights test", async function () {
     }
   });
   it("Should not allow access right upgrades for invalid parameters", async function () {
-    expect(
-      await realm.setParcelsAccessRights([parcelId], [3], [3])
+    await expect(
+      realm.setParcelsAccessRights([parcelId], [8], [8])
     ).to.be.revertedWith("RealmFacet: Invalid access rights");
   });
 });

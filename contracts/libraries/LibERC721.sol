@@ -88,11 +88,10 @@ library LibERC721 {
     }
 
     //reset the parcel access rights on transfer to 0
-    if (s.accessRights[_tokenId][0] > 0) {
-      s.accessRights[_tokenId][0] = 0;
-    }
-    if (s.accessRights[_tokenId][1] > 0) {
-      s.accessRights[_tokenId][1] = 0;
+    for (uint256 i; i < 7; ) {
+      if (s.accessRights[_tokenId][i] > 0) {
+        s.accessRights[_tokenId][i] = 0;
+      }
     }
 
     emit LibERC721.Transfer(_from, _to, _tokenId);
