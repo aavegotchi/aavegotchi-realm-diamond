@@ -211,11 +211,11 @@ contract InstallationFacet is Modifiers {
   function _batchCraftInstallation(BatchCraftInstallationsInput calldata _batchCraftInstallationsInput) internal {
     uint16 installationID = _batchCraftInstallationsInput.installationID;
     uint16 amount = _batchCraftInstallationsInput.amount;
-    uint40 gltr = _batchCraftInstallationsInput.gltr;
+    // uint40 gltr = _batchCraftInstallationsInput.gltr;
 
     address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
     uint256[4] memory alchemicaCost;
-    uint256 _nextCraftId = s.nextCraftId;
+    // uint256 _nextCraftId = s.nextCraftId;
     //make sure installation exists
     require(installationID < s.installationTypes.length, "InstallationFacet: Installation does not exist");
 

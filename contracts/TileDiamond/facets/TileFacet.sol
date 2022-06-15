@@ -198,11 +198,11 @@ contract TileFacet is Modifiers {
   function _batchCraftTiles(BatchCraftTilesInput calldata _batchCraftTilesInput) internal {
     address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
     uint256[4] memory alchemicaCost;
-    uint256 _nextCraftId = s.nextCraftId;
+    // uint256 _nextCraftId = s.nextCraftId;
 
     uint16 tileID = _batchCraftTilesInput.tileID;
     uint16 amount = _batchCraftTilesInput.amount;
-    uint40 gltr = _batchCraftTilesInput.gltr;
+    // uint40 gltr = _batchCraftTilesInput.gltr;
 
     require(tileID < s.tileTypes.length, "TileFacet: Tile does not exist");
     TileType memory tileType = s.tileTypes[tileID];
