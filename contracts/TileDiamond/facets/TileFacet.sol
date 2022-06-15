@@ -220,23 +220,24 @@ contract TileFacet is Modifiers {
 
     if (tileType.craftTime == 0) {
       LibERC1155Tile._safeMint(msg.sender, tileID, amount, 0);
-      // } else {
-      //   //tiles that are crafted after some time
-      //   //for each tile , push to queue after applying individual gltr subtractions
-      //   for (uint256 i = 0; i < amount; i++) {
-      //     if (gltr > tileType.craftTime) revert("TileFacet: Too much GLTR");
-      //     if (tileType.craftTime - gltr == 0) {
-      //       LibERC1155Tile._safeMint(msg.sender, tileID, 1, 0);
-      //     } else {
-      //       uint40 readyBlock = uint40(block.number) + tileType.craftTime;
-      //       //put the tile into a queue
-      //       //each tile needs a unique queue id
-      //       s.craftQueue.push(QueueItem(_nextCraftId, readyBlock, tileID, false, msg.sender));
-      //       emit AddedToQueue(_nextCraftId, tileID, readyBlock, msg.sender);
-      //       _nextCraftId++;
-      //     }
-      //   }
     }
+    //@todo: add back GLTR and queueing
+    //  else {
+    //   //tiles that are crafted after some time
+    //   //for each tile , push to queue after applying individual gltr subtractions
+    //   for (uint256 i = 0; i < amount; i++) {
+    //     if (gltr > tileType.craftTime) revert("TileFacet: Too much GLTR");
+    //     if (tileType.craftTime - gltr == 0) {
+    //       LibERC1155Tile._safeMint(msg.sender, tileID, 1, 0);
+    //     } else {
+    //       uint40 readyBlock = uint40(block.number) + tileType.craftTime;
+    //       //put the tile into a queue
+    //       //each tile needs a unique queue id
+    //       s.craftQueue.push(QueueItem(_nextCraftId, readyBlock, tileID, false, msg.sender));
+    //       emit AddedToQueue(_nextCraftId, tileID, readyBlock, msg.sender);
+    //       _nextCraftId++;
+    //     }
+    //   }
   }
 
   /// @notice Allow a user to craft tiles by batch

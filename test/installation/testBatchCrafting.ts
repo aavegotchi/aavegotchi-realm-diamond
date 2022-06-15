@@ -46,8 +46,8 @@ describe("Testing Batch Crafting ", async function () {
   }
 
   const alchemica = [FUD_ADDRESS, FOMO_ADDRESS, ALPHA_ADDRESS, KEK_ADDRESS];
-  let beforeBalances = [];
-  let afterBalances = [];
+  // let beforeBalances = [];
+  // let afterBalances = [];
   //   const genSignature = async (tileId: number, x: number, y: number) => {
   //     //@ts-ignore
   //     let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
@@ -87,7 +87,7 @@ describe("Testing Batch Crafting ", async function () {
       maticTileDiamondAddress
     )) as ERC1155Facet;
 
-    // await upgrade();
+    await upgrade();
   });
 
   it("Batch craft both types of installations ", async function () {
@@ -167,7 +167,8 @@ describe("Testing Batch Crafting ", async function () {
 
     //TILES
 
-    async function getBalances(output: BigNumber[]) {
+    async function getBalances(): Promise<BigNumber[]> {
+      const output: BigNumber[] = [];
       for await (const alch of alchemica) {
         let token = (await ethers.getContractAt(
           "AlchemicaToken",
@@ -176,6 +177,8 @@ describe("Testing Batch Crafting ", async function () {
         const balanceOfToken = await token.balanceOf(testAddress);
         output.push(balanceOfToken);
       }
+
+      return output;
     }
 
     const tileBalanceBefore = await tileERC1155.balanceOf(testAddress, 3);
@@ -195,7 +198,9 @@ describe("Testing Batch Crafting ", async function () {
       gltr: BigNumber.from(0),
     };
     //get Alchemica balances before crafting
-    await getBalances(beforeBalances);
+    const beforeBalances = await getBalances();
+
+    console.log("before:", beforeBalances);
 
     const tile4BalanceBefore = await tileERC1155.balanceOf(testAddress, 4);
     await tileFacet.batchCraftTiles([craftTile]);
@@ -203,7 +208,8 @@ describe("Testing Batch Crafting ", async function () {
     expect(tile4BalanceAfter).to.be.equal(tile4BalanceBefore.add(1));
 
     //get balance after crafting
-    await getBalances(afterBalances);
+    const afterBalances = await getBalances();
+    console.log("after:", afterBalances);
 
     //200fud
     expect(beforeBalances[0]).to.equal(

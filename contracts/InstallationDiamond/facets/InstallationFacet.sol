@@ -237,26 +237,26 @@ contract InstallationFacet is Modifiers {
 
     //only use for installations that are crafted immediately
     if (installationType.craftTime == 0) {
-      //finally mint to user
       LibERC1155._safeMint(msg.sender, installationID, amount, false, 0);
-      // } else {
-      //   //installations crafted after some time
-      //   //for each installation , push to queue after applying individual gltr subtractions
-      //   for (uint256 i = 0; i < amount; i++) {
-      //     if (gltr > installationType.craftTime) revert("InstallationFacet: Too much GLTR");
-      //     if (installationType.craftTime - gltr == 0) {
-      //       LibERC1155._safeMint(msg.sender, installationID, 1, false, 0);
-      //     } else {
-      //       uint40 readyBlock = uint40(block.number) + installationType.craftTime;
-      //       //put the installation into a queue
-      //       //each wearable needs a unique queue id
-      //       s.craftQueue.push(QueueItem(msg.sender, installationID, false, readyBlock, _nextCraftId));
-      //       emit AddedToQueue(_nextCraftId, installationID, readyBlock, msg.sender);
-      //       s.nextCraftId++;
-      //     }
-      //   }
     }
-    //after queue is over, user can claim installation
+
+    //@todo: add back GLTR and queueing
+    //  else {
+    //   //installations crafted after some time
+    //   //for each installation , push to queue after applying individual gltr subtractions
+    //   for (uint256 i = 0; i < amount; i++) {
+    //     if (gltr > installationType.craftTime) revert("InstallationFacet: Too much GLTR");
+    //     if (installationType.craftTime - gltr == 0) {
+    //       LibERC1155._safeMint(msg.sender, installationID, 1, false, 0);
+    //     } else {
+    //       uint40 readyBlock = uint40(block.number) + installationType.craftTime;
+    //       //put the installation into a queue
+    //       //each wearable needs a unique queue id
+    //       s.craftQueue.push(QueueItem(msg.sender, installationID, false, readyBlock, _nextCraftId));
+    //       emit AddedToQueue(_nextCraftId, installationID, readyBlock, msg.sender);
+    //       s.nextCraftId++;
+    //     }
+    //   }
   }
 
   function batchCraftInstallations(BatchCraftInstallationsInput[] calldata _inputs) external {
