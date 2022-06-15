@@ -189,62 +189,63 @@ contract TileFacet is Modifiers {
     //after queue is over, user can claim tile
   }
 
-  // struct BatchCraftTilesInput {
-  //   uint16 tileID;
-  //   uint16 amount;
-  //   uint40 gltr;
-  // }
+  struct BatchCraftTilesInput {
+    uint16 tileID;
+    uint16 amount;
+    uint40 gltr;
+  }
 
-  // function _batchCraftTiles(BatchCraftTilesInput calldata _batchCraftTilesInput) internal {
-  //   address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
-  //   uint256[4] memory alchemicaCost;
-  //   uint256 _nextCraftId = s.nextCraftId;
+  function _batchCraftTiles(BatchCraftTilesInput calldata _batchCraftTilesInput) internal {
+    address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
+    uint256[4] memory alchemicaCost;
+    // uint256 _nextCraftId = s.nextCraftId;
 
-  //   uint16 tileID = _batchCraftTilesInput.tileID;
-  //   uint16 amount = _batchCraftTilesInput.amount;
-  //   uint40 gltr = _batchCraftTilesInput.gltr;
+    uint16 tileID = _batchCraftTilesInput.tileID;
+    uint16 amount = _batchCraftTilesInput.amount;
+    // uint40 gltr = _batchCraftTilesInput.gltr;
 
-  //   require(tileID < s.tileTypes.length, "TileFacet: Tile does not exist");
-  //   TileType memory tileType = s.tileTypes[tileID];
-  //   if (s.deprecateTime[tileID] > 0) {
-  //     require(block.timestamp < s.deprecateTime[tileID], "TileFacet: Tile has been deprecated");
-  //   }
-  //   require(!tileType.deprecated, "TileFacet: Tile has been deprecated");
+    require(tileID < s.tileTypes.length, "TileFacet: Tile does not exist");
+    TileType memory tileType = s.tileTypes[tileID];
+    if (s.deprecateTime[tileID] > 0) {
+      require(block.timestamp < s.deprecateTime[tileID], "TileFacet: Tile has been deprecated");
+    }
+    require(!tileType.deprecated, "TileFacet: Tile has been deprecated");
 
-  //   alchemicaCost[0] = tileType.alchemicaCost[0] * amount;
-  //   alchemicaCost[1] = tileType.alchemicaCost[1] * amount;
-  //   alchemicaCost[2] = tileType.alchemicaCost[2] * amount;
-  //   alchemicaCost[3] = tileType.alchemicaCost[3] * amount;
-  //   //distribute alchemica
-  //   LibItems._splitAlchemica(alchemicaCost, alchemicaAddresses);
+    alchemicaCost[0] = tileType.alchemicaCost[0] * amount;
+    alchemicaCost[1] = tileType.alchemicaCost[1] * amount;
+    alchemicaCost[2] = tileType.alchemicaCost[2] * amount;
+    alchemicaCost[3] = tileType.alchemicaCost[3] * amount;
+    //distribute alchemica
+    LibItems._splitAlchemica(alchemicaCost, alchemicaAddresses);
 
-  //   if (tileType.craftTime == 0) {
-  //     LibERC1155Tile._safeMint(msg.sender, tileID, amount, 0);
-  //   } else {
-  //     //tiles that are crafted after some time
-  //     //for each tile , push to queue after applying individual gltr subtractions
-  //     for (uint256 i = 0; i < amount; i++) {
-  //       if (gltr > tileType.craftTime) revert("TileFacet: Too much GLTR");
-  //       if (tileType.craftTime - gltr == 0) {
-  //         LibERC1155Tile._safeMint(msg.sender, tileID, 1, 0);
-  //       } else {
-  //         uint40 readyBlock = uint40(block.number) + tileType.craftTime;
-  //         //put the tile into a queue
-  //         //each tile needs a unique queue id
-  //         s.craftQueue.push(QueueItem(_nextCraftId, readyBlock, tileID, false, msg.sender));
-  //         emit AddedToQueue(_nextCraftId, tileID, readyBlock, msg.sender);
-  //         _nextCraftId++;
-  //       }
-  //     }
-  //   }
-  // }
+    if (tileType.craftTime == 0) {
+      LibERC1155Tile._safeMint(msg.sender, tileID, amount, 0);
+    }
+    //@todo: add back GLTR and queueing
+    //  else {
+    //   //tiles that are crafted after some time
+    //   //for each tile , push to queue after applying individual gltr subtractions
+    //   for (uint256 i = 0; i < amount; i++) {
+    //     if (gltr > tileType.craftTime) revert("TileFacet: Too much GLTR");
+    //     if (tileType.craftTime - gltr == 0) {
+    //       LibERC1155Tile._safeMint(msg.sender, tileID, 1, 0);
+    //     } else {
+    //       uint40 readyBlock = uint40(block.number) + tileType.craftTime;
+    //       //put the tile into a queue
+    //       //each tile needs a unique queue id
+    //       s.craftQueue.push(QueueItem(_nextCraftId, readyBlock, tileID, false, msg.sender));
+    //       emit AddedToQueue(_nextCraftId, tileID, readyBlock, msg.sender);
+    //       _nextCraftId++;
+    //     }
+    //   }
+  }
 
-  // /// @notice Allow a user to craft tiles by batch
-  // function batchCraftTiles(BatchCraftTilesInput[] calldata _inputs) external {
-  //   for (uint256 i = 0; i < _inputs.length; i++) {
-  //     _batchCraftTiles(_inputs[i]);
-  //   }
-  // }
+  /// @notice Allow a user to craft tiles by batch
+  function batchCraftTiles(BatchCraftTilesInput[] calldata _inputs) external {
+    for (uint256 i = 0; i < _inputs.length; i++) {
+      _batchCraftTiles(_inputs[i]);
+    }
+  }
 
   /// @notice Allow a user to claim tiles from ready queues
   /// @dev Will throw if the caller is not the queue owner
