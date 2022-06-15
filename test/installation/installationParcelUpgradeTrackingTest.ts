@@ -109,8 +109,13 @@ describe("Testing Equip Installation", async function () {
       await installationUpgradeFacet.getUpgradeQueueLength();
     console.log(upgradeQueueLength);
     upgradeId = await installationUpgradeFacet.getParcelUpgradeQueue(realmId);
-    await installationUpgradeFacet.getUserUpgradeQueueNew(owner);
+    expect(upgradeId[0].toString()).to.equal(
+      upgradeQueueLength.sub(1).toString()
+    );
+    console.log("Complete user upgrade queue from new implementation:");
 
+    const userUpgradeQueue =
+      await installationUpgradeFacet.getUserUpgradeQueueNew(owner);
     expect(userUpgradeQueue.indexes_.length).to.equal(1);
   });
   it("Should finalize an upgrade and the getter should remove the upgrade id", async () => {
