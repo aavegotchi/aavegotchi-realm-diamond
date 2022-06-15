@@ -211,6 +211,7 @@ contract InstallationFacet is Modifiers {
   function _batchCraftInstallation(BatchCraftInstallationsInput calldata _batchCraftInstallationsInput) internal {
     uint16 installationID = _batchCraftInstallationsInput.installationID;
     uint16 amount = _batchCraftInstallationsInput.amount;
+    require(amount > 0, "InstallationFacet: Craft amount cannot be zero");
     // uint40 gltr = _batchCraftInstallationsInput.gltr;
 
     address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();

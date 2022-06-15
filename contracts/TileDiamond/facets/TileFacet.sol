@@ -204,6 +204,8 @@ contract TileFacet is Modifiers {
     uint16 amount = _batchCraftTilesInput.amount;
     // uint40 gltr = _batchCraftTilesInput.gltr;
 
+    require(amount > 0, "InstallationFacet: Craft amount cannot be zero");
+
     require(tileID < s.tileTypes.length, "TileFacet: Tile does not exist");
     TileType memory tileType = s.tileTypes[tileID];
     if (s.deprecateTime[tileID] > 0) {
