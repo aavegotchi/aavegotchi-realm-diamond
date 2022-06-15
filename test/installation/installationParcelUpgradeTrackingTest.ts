@@ -113,7 +113,11 @@ describe("Testing Equip Installation", async function () {
       upgradeQueueLength.sub(1).toString()
     );
     console.log("Complete user upgrade queue from new implementation:");
-    console.log(await installationUpgradeFacet.getUserUpgradeQueueNew(owner));
+
+    const userUpgradeQueue =
+      await installationUpgradeFacet.getUserUpgradeQueueNew(owner);
+
+    expect(userUpgradeQueue.indexes_.length).to.equal(1);
   });
   it("Should finalize an upgrade and the getter should remove the upgrade id", async () => {
     await mineBlocks(ethers, 65000);
@@ -123,5 +127,10 @@ describe("Testing Equip Installation", async function () {
         await installationUpgradeFacet.getParcelUpgradeQueue(realmId)
       ).length
     ).to.equal(0);
+
+    const userUpgradeQueue =
+      await installationUpgradeFacet.getUserUpgradeQueueNew(owner);
+
+    expect(userUpgradeQueue.indexes_.length).to.equal(0);
   });
 });
