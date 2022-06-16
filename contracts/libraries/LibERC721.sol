@@ -92,6 +92,9 @@ library LibERC721 {
       if (s.accessRights[_tokenId][i] > 0) {
         s.accessRights[_tokenId][i] = 0;
       }
+      unchecked {
+        ++i;
+      }
     }
 
     emit LibERC721.Transfer(_from, _to, _tokenId);
