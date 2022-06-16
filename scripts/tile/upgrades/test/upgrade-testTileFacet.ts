@@ -1,22 +1,19 @@
-import { run, ethers } from "hardhat";
-import { maticInstallationDiamondAddress } from "../../../../constants";
+import { run } from "hardhat";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../../tasks/deployUpgrade";
+import { maticTileDiamondAddress } from "../../../../constants";
 
-export async function upgradeInstallationTest() {
+export async function upgradeTileTest() {
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
 
-  const UpgradeQueue =
-    "tuple(address owner,uint16 coordinateX, uint16 coordinateY,uint40 readyBlock,bool claimed,uint256 parcelId,uint256 installationId)";
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "TestInstallationFacet",
+      facetName: "TestTileFacet",
       addSelectors: [
-        `function testUpgradeInstallation(${UpgradeQueue} calldata _upgradeQueue,uint40 _gltr) external`,
-        `function testCraftInstallations(uint16[] calldata _installationTypes) external`,
+        "function testCraftTiles(uint16[] calldata _tileTypes) external",
       ],
       removeSelectors: [],
     },
@@ -26,19 +23,17 @@ export async function upgradeInstallationTest() {
 
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
-    diamondAddress: maticInstallationDiamondAddress,
+    diamondAddress: maticTileDiamondAddress,
     facetsAndAddSelectors: joined,
-    useLedger: true,
+    useLedger: false,
     useMultisig: false,
-    initAddress: ethers.constants.AddressZero,
-    initCalldata: "0x",
   };
 
   await run("deployUpgrade", args);
 }
 
 if (require.main === module) {
-  upgradeInstallationTest()
+  upgradeTileTest()
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

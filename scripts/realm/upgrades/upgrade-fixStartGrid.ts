@@ -14,6 +14,7 @@ export async function upgrade() {
       facetName: "RealmFacet",
       addSelectors: [
         "function fixGridStartPositions(uint256[] memory _parcelIds,uint256[] memory _x,uint256[] memory _y,bool _isTile,bool _isTrue) external",
+        "function isGridStartPosition(uint256 _parcelId,uint256 _x,uint256 _y,bool _isTile) external view returns (bool)",
       ],
       removeSelectors: [
         "function fixAltarLevel(uint256[] memory _parcelIds) external",

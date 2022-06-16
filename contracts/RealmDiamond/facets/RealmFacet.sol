@@ -441,4 +441,17 @@ contract RealmFacet is Modifiers {
       }
     }
   }
+
+  function isGridStartPosition(
+    uint256 _parcelId,
+    uint256 _x,
+    uint256 _y,
+    bool _isTile
+  ) external view returns (bool) {
+    if (_isTile) {
+      return s.parcels[_parcelId].startPositionTileGrid[_x][_y];
+    } else {
+      return s.parcels[_parcelId].startPositionBuildGrid[_x][_y];
+    }
+  }
 }
