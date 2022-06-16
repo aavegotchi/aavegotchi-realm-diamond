@@ -14,48 +14,58 @@ export async function setAddresses() {
     signer
   )) as InstallationAdminFacet;
 
+  const types = [
+    "36",
+    "37",
+    "38",
+    "39",
+    "40",
+    "41",
+    "42",
+    "43",
+    "44",
+    "45",
+    "46",
+    "47",
+    "48",
+    "49",
+    "50",
+    "51",
+    "52",
+    "53",
+    "54",
+  ];
+
+  const unequip = [
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+  ];
+
+  console.log("lengths:", types.length, unequip.length);
+
   const tx = await installationAdminFacet.editInstallationUnequipTypes(
-    [
-      "1",
-      "2",
-      "3",
-      "4",
-      "5",
-      "6",
-      "7",
-      "8",
-      "9",
-      "10",
-      "11",
-      "12",
-      "13",
-      "14",
-      "15",
-      "16",
-      "17",
-      "18",
-    ],
-    [
-      "0",
-      "0",
-      "0",
-      "0",
-      "0",
-      "0",
-      "0",
-      "0",
-      "0",
-      "0",
-      "0",
-      "0",
-      "0",
-      "0",
-      "0",
-      "0",
-      "0",
-      "0",
-    ],
-    { gasPrice: gasPrice }
+    types,
+    unequip,
+    {
+      gasPrice: gasPrice,
+    }
   );
 
   await tx.wait();

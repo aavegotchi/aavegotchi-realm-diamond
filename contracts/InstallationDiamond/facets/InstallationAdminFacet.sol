@@ -99,6 +99,7 @@ contract InstallationAdminFacet is Modifiers {
           _installationTypes[i].name
         )
       );
+      //@todo: update to installationTypes.length -1
       s.unequipTypes[i] = _installationTypes[i].unequipType;
 
       emit AddInstallationType(s.installationTypes.length - 1);
