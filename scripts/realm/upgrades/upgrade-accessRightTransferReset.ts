@@ -15,6 +15,11 @@ export async function upgrade() {
       addSelectors: [],
       removeSelectors: [],
     },
+    {
+      facetName: "ERC721Facet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
