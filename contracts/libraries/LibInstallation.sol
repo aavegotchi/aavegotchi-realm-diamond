@@ -44,9 +44,11 @@ library LibInstallation {
     uint256[] storage upgradeIds = s.parcelIdToUpgradeIds[_parcel];
     uint256 index = containsId(_upgradeId, upgradeIds);
 
-    uint256 last = upgradeIds[upgradeIds.length - 1];
-    upgradeIds[index] = last;
-    upgradeIds.pop();
+    if (index != type(uint256).max) {
+      uint256 last = upgradeIds[upgradeIds.length - 1];
+      upgradeIds[index] = last;
+      upgradeIds.pop();
+    }
   }
 
   /// @return index The index of the id in the array
@@ -59,6 +61,6 @@ library LibInstallation {
         ++i;
       }
     }
-    revert("LibInstallation: id not found");
+    return type(uint256).max;
   }
 }
