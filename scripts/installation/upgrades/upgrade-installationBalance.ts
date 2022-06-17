@@ -36,9 +36,61 @@ export async function upgrade() {
   ];
 
   const buggedAltars = [
-    [10132, 1, 2],
+    [183, 11, 12],
+    [468, 10, 11],
+    [638, 2, 3],
+    [644, 11, 12],
+    [817, 10, 11],
+    [893, 11, 12],
+    [1702, 10, 11],
+    [2037, 10, 11],
+    [2638, 12, 13],
+    [3936, 10, 11],
+    [4575, 13, 14],
+    [5015, 13, 14],
     [6200, 1, 2],
+    [6594, 12, 13],
+    [7302, 12, 13],
+    [7332, 10, 11],
+    [7645, 11, 12],
+    [7670, 11, 12],
+    [7723, 11, 12],
+    [7818, 11, 12],
+    [7906, 11, 12],
+    [7986, 10, 11],
+    [8083, 10, 11],
     [8729, 1, 2],
+    [10132, 1, 2],
+    [11053, 10, 11],
+    [12576, 10, 11],
+    [13211, 10, 11],
+    [14377, 10, 11],
+    [14404, 12, 13],
+    [14523, 12, 13],
+    [16799, 10, 11],
+    [17871, 10, 11],
+    [17963, 10, 11],
+    [18162, 10, 11],
+    [18288, 11, 12],
+    [19094, 10, 11],
+    [19349, 10, 11],
+    [19933, 10, 11],
+    [19999, 10, 11],
+    [20107, 11, 12],
+    [20443, 11, 12],
+    [20939, 10, 11],
+    [20993, 10, 11],
+    [21658, 10, 11],
+    [21717, 10, 11],
+    [21773, 10, 11],
+    [24595, 10, 11],
+    [26494, 12, 13],
+    [26804, 11, 12],
+    [28846, 10, 11],
+    [30677, 10, 11],
+    [33497, 11, 12],
+    [46200, 10, 11],
+    [52198, 13, 14],
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
@@ -58,23 +110,19 @@ export async function upgrade() {
     maticInstallationDiamondAddress
   )) as InstallationFacet;
 
-  for await (const buggedAltar of buggedAltars) {
-    const tokenbal = await installationsFacet.installationBalancesOfToken(
-      maticRealmDiamondAddress,
-      buggedAltar[0]
-    );
+  // for await (const buggedAltar of buggedAltars) {
+  //   const tokenbal = await installationsFacet.installationBalancesOfToken(
+  //     maticRealmDiamondAddress,
+  //     buggedAltar[0]
+  //   );
 
-    console.log(`Token balance of ${buggedAltar[0]}: ${tokenbal}`);
-  }
-
-  const installationUpgradeFacet = (await ethers.getContractAt(
-    "InstallationUpgradeFacet",
-    maticInstallationDiamondAddress
-  )) as InstallationUpgradeFacet;
+  //   console.log(`Token balance of ${buggedAltar[0]}: ${tokenbal}`);
+  // }
 
   let installationAdminFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
-    maticInstallationDiamondAddress
+    maticInstallationDiamondAddress,
+    new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0")
   )) as InstallationAdminFacet;
 
   if (network.name === "hardhat") {
@@ -87,16 +135,19 @@ export async function upgrade() {
   }
 
   //@ts-ignore
-  await installationAdminFacet.fixMissingAltars(buggedAltars);
+  const tx = await installationAdminFacet.fixMissingAltars(buggedAltars, {
+    gasPrice: gasPrice,
+  });
+  await tx.wait();
 
-  for await (const buggedAltar of buggedAltars) {
-    const tokenbal = await installationsFacet.installationBalancesOfToken(
-      maticRealmDiamondAddress,
-      buggedAltar[0]
-    );
+  // for await (const buggedAltar of buggedAltars) {
+  //   const tokenbal = await installationsFacet.installationBalancesOfToken(
+  //     maticRealmDiamondAddress,
+  //     buggedAltar[0]
+  //   );
 
-    console.log(`Token balance of ${buggedAltar[0]}: ${tokenbal}`);
-  }
+  //   console.log(`Token balance of ${buggedAltar[0]}: ${tokenbal}`);
+  // }
 
   //26247, 25730, 18707, 18938, 25461, 25964
 
