@@ -163,6 +163,27 @@ contract RealmFacet is Modifiers {
     emit UnequipInstallation(_realmId, _installationId, _x, _y);
   }
 
+  /// @notice Allow a parcel owner to move an installation
+  /// @param _realmId The identifier of the parcel which the installation is being moved on
+  /// @param _installationId The identifier of the installation being moved
+  /// @param _x0 The x(horizontal) coordinate of the installation
+  /// @param _y0 The y(vertical) coordinate of the installation
+  /// @param _x1 The x(horizontal) coordinate of the installation to move to
+  /// @param _y1 The y(vertical) coordinate of the installation to move to
+  function moveInstallation(
+    uint256 _realmId,
+    uint256 _installationId,
+    uint256 _x0,
+    uint256 _y0,
+    uint256 _x1,
+    uint256 _y1
+  ) external onlyParcelOwner(_realmId) gameActive {
+    LibRealm.removeInstallation(_realmId, _installationId, _x0, _y0);
+    emit UnequipInstallation(_realmId, _installationId, _x0, _y0);
+    LibRealm.placeInstallation(_realmId, _installationId, _x1, _y1);
+    emit EquipInstallation(_realmId, _installationId, _x1, _y1);
+  }
+
   /// @notice Allow a parcel owner to equip a tile
   /// @dev The _x and _y denote the starting coordinates of the tile and are used to make sure that slot is available on a parcel
   /// @param _realmId The identifier of the parcel which the tile is being equipped on
@@ -208,6 +229,27 @@ contract RealmFacet is Modifiers {
     TileDiamondInterface(s.tileDiamond).unequipTile(msg.sender, _realmId, _tileId);
 
     emit UnequipTile(_realmId, _tileId, _x, _y);
+  }
+
+  /// @notice Allow a parcel owner to move a tile
+  /// @param _realmId The identifier of the parcel which the tile is being moved on
+  /// @param _tileId The identifier of the tile being moved
+  /// @param _x0 The x(horizontal) coordinate of the tile
+  /// @param _y0 The y(vertical) coordinate of the tile
+  /// @param _x1 The x(horizontal) coordinate of the tile to move to
+  /// @param _y1 The y(vertical) coordinate of the tile to move to
+  function moveTile(
+    uint256 _realmId,
+    uint256 _tileId,
+    uint256 _x0,
+    uint256 _y0,
+    uint256 _x1,
+    uint256 _y1
+  ) external onlyParcelOwner(_realmId) gameActive {
+    LibRealm.removeTile(_realmId, _tileId, _x0, _y0);
+    emit UnequipTile(_realmId, _tileId, _x0, _y0);
+    LibRealm.placeTile(_realmId, _tileId, _x1, _y1);
+    emit EquipTile(_realmId, _tileId, _x1, _y1);
   }
 
   function setParcelsAccessRights(

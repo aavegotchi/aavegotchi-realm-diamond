@@ -46,9 +46,6 @@ contract TestRealmFacet is Modifiers {
     uint256 _x,
     uint256 _y
   ) external {
-    InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
-    InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
-
     LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
     InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(msg.sender, _realmId, _installationId);
     LibAlchemica.reduceTraits(_realmId, _installationId, false);
