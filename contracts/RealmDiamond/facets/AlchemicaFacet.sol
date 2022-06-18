@@ -293,22 +293,25 @@ contract AlchemicaFacet is Modifiers {
     uint256 _lastChanneled,
     bytes memory _signature
   ) external gameActive {
-    //Check access rights
     AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
-    if (s.accessRights[_realmId][0] == 0) {
-      require(LibMeta.msgSender() == s.parcels[_realmId].owner, "AlchemicaFacet: Only Parcel owner can channel");
-    } else if (s.accessRights[_realmId][0] == 1) {
-      try diamond.getGotchiLendingFromToken(uint32(_gotchiId)) returns (AavegotchiDiamond.GotchiLending memory listing) {
-        require(
-          LibMeta.msgSender() == s.parcels[_realmId].owner ||
-            (LibMeta.msgSender() == listing.borrower && listing.lender == s.parcels[_realmId].owner),
-          "AlchemicaFacet: Only Parcel owner/borrower can channel"
-        );
-      } catch (bytes memory) {
-        //If the lending check fails, then must be owner
-        require(LibMeta.msgSender() == s.parcels[_realmId].owner, "AlchemicaFacet: Only Parcel owner/borrower can channel");
-      }
-    }
+
+    //0 - alchemical channeling
+    LibRealm.verifyAccessRight(_realmId, _gotchiId, 0);
+
+    // if (s.accessRights[_realmId][0] == 0) {
+    //   require(LibMeta.msgSender() == s.parcels[_realmId].owner, "AlchemicaFacet: Only Parcel owner can channel");
+    // } else if (s.accessRights[_realmId][0] == 1) {
+    //   try diamond.getGotchiLendingFromToken(uint32(_gotchiId)) returns (AavegotchiDiamond.GotchiLending memory listing) {
+    //     require(
+    //       LibMeta.msgSender() == s.parcels[_realmId].owner ||
+    //         (LibMeta.msgSender() == listing.borrower && listing.lender == s.parcels[_realmId].owner),
+    //       "AlchemicaFacet: Only Parcel owner/borrower can channel"
+    //     );
+    //   } catch (bytes memory) {
+    //     //If the lending check fails, then must be owner
+    //     require(LibMeta.msgSender() == s.parcels[_realmId].owner, "AlchemicaFacet: Only Parcel owner/borrower can channel");
+    //   }
+    // }
 
     require(_lastChanneled == s.gotchiChannelings[_gotchiId], "AlchemicaFacet: Incorrect last duration");
 
