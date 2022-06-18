@@ -8,26 +8,13 @@ import {
 import { diamondOwner } from "../helperFunctions";
 
 export async function upgradeUserQueue() {
-  const upgradeQueue =
-    "tuple(address owner, uint16 coordinateX, uint16 coordinateY, uint40 readyBlock, bool claimed, uint256 parcelId, uint256 installationId)";
-
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "InstallationFacet",
-      addSelectors: [],
-      removeSelectors: [
-        "function reduceUpgradeTime(uint256 _queueId, uint40 _amount) external",
-        `function upgradeInstallation(${upgradeQueue} calldata _upgradeQueue, bytes memory _signature, uint40 _gltr) external`,
-      ],
-    },
-    {
-      facetName: "InstallationAdminFacet",
       addSelectors: [
-        "function getAddresses() external view returns (address _aavegotchiDiamond, address _realmDiamond, address _gltr, address _pixelcraft, address _aavegotchiDAO, bytes memory _backendPubKey)",
-        "function finalizeUpgrades(uint256[] memory _upgradeIndexes) public",
-        `function upgradeInstallation(${upgradeQueue} calldata _upgradeQueue, bytes memory signature, uint40 _gltr) external`,
+        `function upgradeComplete(uint256 _queueId) external view returns (bool)`,
       ],
-      removeSelectors: ["function finalizeUpgrade() public"],
+      removeSelectors: [],
     },
   ];
 
