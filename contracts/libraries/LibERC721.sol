@@ -27,6 +27,8 @@ library LibERC721 {
 
   event MintParcel(address indexed _owner, uint256 indexed _tokenId);
 
+  event ParcelAccessRightSet(uint256 _realmId, uint256 _actionRight, uint256 _accessRight);
+
   function checkOnERC721Received(
     address _operator,
     address _from,
@@ -85,6 +87,17 @@ library LibERC721 {
     if (s.approved[_tokenId] != address(0)) {
       delete s.approved[_tokenId];
       emit LibERC721.Approval(owner, address(0), _tokenId);
+    }
+
+    //reset the parcel access rights on transfer to 0
+    for (uint256 i; i < 7; ) {
+      if (s.accessRights[_tokenId][i] > 0) {
+        s.accessRights[_tokenId][i] = 0;
+        emit ParcelAccessRightSet(_tokenId, i, 0);
+      }
+      unchecked {
+        ++i;
+      }
     }
 
     emit LibERC721.Transfer(_from, _to, _tokenId);

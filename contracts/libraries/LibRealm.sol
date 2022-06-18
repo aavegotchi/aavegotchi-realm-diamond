@@ -158,4 +158,23 @@ library LibRealm {
     ];
     return heights;
   }
+
+  function isAccessRightValid(uint256 actionRight, uint256 accessRight) internal pure returns (bool) {
+    // 0: Channeling
+    // 1: Empty Reservoir
+    // 2: Equip Installations
+    // 3: Equip Tiles
+    // 4: Unequip Installations
+    // 5: Unequip Tiles
+    // 6: Upgrade Installations
+    if (actionRight <= 6) {
+      // 0: Only Owner
+      // 1: Owner + Lent Out
+      // 2: Whitelisted Only
+      // 3: Allow blacklisted
+      // 4: Anyone
+      return accessRight <= 4;
+    }
+    return false;
+  }
 }
