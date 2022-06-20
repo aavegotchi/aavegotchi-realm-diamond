@@ -324,7 +324,7 @@ contract AlchemicaFacet is Modifiers {
     require(altarLevel > 0, "AlchemicaFacet: Must equip Altar");
 
     //How often Altars can channel depends on their level
-    require(block.timestamp > s.parcelChannelings[_realmId] + s.channelingLimits[altarLevel], "AlchemicaFacet: Parcel can't channel yet");
+    require(block.timestamp >= s.parcelChannelings[_realmId] + s.channelingLimits[altarLevel], "AlchemicaFacet: Parcel can't channel yet");
 
     //Use _lastChanneled to ensure that each signature hash is unique
     require(

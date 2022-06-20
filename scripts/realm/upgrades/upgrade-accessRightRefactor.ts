@@ -12,8 +12,14 @@ export async function upgradeRealm() {
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "RealmFacet",
-      addSelectors: [],
-      removeSelectors: [],
+      addSelectors: [
+        `function equipInstallation(uint256 _realmId, uint256 _gotchiId, uint256 _installatßionId, uint256 _x, uint256 _y, bytes memory _signature) external`,
+        `function equipTile(uint256 _realmId,uint256 _gotchiId,uint256 _tileId, uint256 _x,uint256 _y,bytes memory _signature) external`,
+      ],
+      removeSelectors: [
+        `function equipInstallation(uint256 _realmId, uint256 _installatßionId, uint256 _x, uint256 _y, bytes memory _signature) external`,
+        `function equipTile(uint256 _realmId, uint256 _tileId, uint256 _x,uint256 _y,bytes memory _signature) external`,
+      ],
     },
     {
       facetName: "AlchemicaFacet",
@@ -35,4 +41,14 @@ export async function upgradeRealm() {
   };
 
   await run("deployUpgrade", args);
+}
+
+if (require.main === module) {
+  upgradeRealm()
+    .then(() => process.exit(0))
+    // .then(() => console.log('upgrade completed') /* process.exit(0) */)
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
 }
