@@ -1,6 +1,7 @@
 import {
   aavegotchiDAOAddress,
   impersonate,
+  impersonateSigner,
   maticAavegotchiDiamondAddress,
   mineBlocks,
   pixelcraftAddress,
@@ -45,11 +46,15 @@ describe("Testing Equip Installation", async function () {
   let testInstallationFacet: TestInstallationFacet;
   let testRealmFacet: TestRealmFacet;
   let testTileFacet: TestTileFacet;
+  let notOwner: Signer;
   const owner = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
+  const notOwnerAddress = "0x8FEebfA4aC7AF314d90a0c17C3F91C800cFdE44B";
   const realmId = 2258;
 
   before(async function () {
     this.timeout(20000000);
+
+    notOwner = await impersonateSigner(notOwnerAddress, ethers, network);
 
     installationFacet = (await ethers.getContractAt(
       "InstallationFacet",
@@ -111,15 +116,35 @@ describe("Testing Equip Installation", async function () {
   });
 
   it("Should update start position on installation placement", async () => {
-    await testInstallationFacet.testCraftInstallations([19]);
-    await testRealmFacet.testEquipInstallation(realmId, 19, 3, 3);
+    await testInstallationFacet.testCraftInstallations([10]);
+    await testRealmFacet.testEquipInstallation(realmId, 10, 3, 3);
     expect(await realmFacet.isGridStartPosition(realmId, 3, 3, false)).to.equal(
       true
     );
   });
-  it("Should remove start position on installation removal", async () => {
-    await testRealmFacet.testRemoveInstallation(realmId, 19, 3, 3);
+  it("Should fail to move installations if not parcel owner", async () => {
+    await expect(
+      realmFacet.connect(notOwner).moveInstallation(realmId, 10, 3, 3, 4, 4)
+    ).to.be.revertedWith("AppStorage: Only Parcel owner can call");
+  });
+  it("Should not be able to move installations if the start position is not correct", async () => {
+    await expect(
+      realmFacet.moveInstallation(realmId, 10, 3, 4, 4, 4)
+    ).to.be.revertedWith("LibRealm: wrong startPosition");
+  });
+  it("Should be able to move installations", async () => {
+    await realmFacet.moveInstallation(realmId, 10, 3, 3, 2, 2);
+
     expect(await realmFacet.isGridStartPosition(realmId, 3, 3, false)).to.equal(
+      false
+    );
+    expect(await realmFacet.isGridStartPosition(realmId, 2, 2, false)).to.equal(
+      true
+    );
+  });
+  it("Should remove start position on installation removal", async () => {
+    await testRealmFacet.testRemoveInstallation(realmId, 10, 2, 2);
+    expect(await realmFacet.isGridStartPosition(realmId, 2, 2, false)).to.equal(
       false
     );
   });
@@ -130,14 +155,34 @@ describe("Testing Equip Installation", async function () {
       true
     );
   });
+  it("Should fail to move tile if not parcel owner", async () => {
+    await expect(
+      realmFacet.connect(notOwner).moveTile(realmId, 4, 3, 3, 4, 4)
+    ).to.be.revertedWith("AppStorage: Only Parcel owner can call");
+  });
+  it("Should not be able to move tile if the start position is not correct", async () => {
+    await expect(
+      realmFacet.moveTile(realmId, 4, 3, 4, 4, 4)
+    ).to.be.revertedWith("LibRealm: wrong startPosition");
+  });
+  it("Should be able to move tile", async () => {
+    await realmFacet.moveTile(realmId, 4, 3, 3, 2, 2);
+
+    expect(await realmFacet.isGridStartPosition(realmId, 3, 3, true)).to.equal(
+      false
+    );
+    expect(await realmFacet.isGridStartPosition(realmId, 2, 2, true)).to.equal(
+      true
+    );
+  });
   it("Should not allow removal if the start position is not correct", async () => {
     await expect(
       testRealmFacet.testUnequipTile(realmId, 4, 4, 3)
     ).to.be.revertedWith("LibRealm: wrong startPosition");
   });
   it("Should remove start position for tiles on removal", async () => {
-    await testRealmFacet.testUnequipTile(realmId, 4, 3, 3);
-    expect(await realmFacet.isGridStartPosition(realmId, 3, 3, true)).to.equal(
+    await testRealmFacet.testUnequipTile(realmId, 4, 2, 2);
+    expect(await realmFacet.isGridStartPosition(realmId, 2, 2, true)).to.equal(
       false
     );
   });
