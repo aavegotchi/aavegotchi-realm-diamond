@@ -51,14 +51,15 @@ export const tileTypes: TileTypeInput[] = [
     alchemicaCost: [25, 25, 75, 25], // TODO: Check this
     craftTime: 0,
   },
+
   {
     id: 5,
-    name: "LE Rug", // TODO: Check this
+    name: "LE Mythical Rofl Rug",
     width: 16,
-    height: 4,
+    height: 8,
     deprecated: false,
     tileType: 0,
-    alchemicaCost: [25, 25, 75, 25], // TODO: Check this
+    alchemicaCost: [3000, 1000, 5000, 2000],
     craftTime: 0,
   },
 ];

@@ -17,6 +17,8 @@ interface RealmDiamond {
 
   function ownerOf(uint256 _tokenId) external view returns (address owner_);
 
+  function tokenIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_);
+
   function checkCoordinates(
     uint256 _tokenId,
     uint256 _coordinateX,

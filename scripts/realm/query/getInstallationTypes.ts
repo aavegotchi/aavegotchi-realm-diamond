@@ -1,63 +1,20 @@
 //@ts-ignore
 
-import { Signer } from "ethers";
 import { run, ethers, network } from "hardhat";
-import {
-  AlchemicaFacet,
-  AlchemicaToken,
-  InstallationAdminFacet,
-  InstallationFacet,
-  OwnershipFacet,
-} from "../../../typechain";
-
-import {
-  installationDiamondAddress,
-  realmDiamondAddress,
-} from "../../helperFunctions";
-
-const gasPrice = 100000000000;
+import { maticInstallationDiamondAddress } from "../../../constants";
+import { InstallationFacet } from "../../../typechain";
 
 async function addInstallations() {
-  const accounts = await ethers.getSigners();
-
-  const diamondAddress = installationDiamondAddress(network.name);
-
-  console.log("diamond address:", diamondAddress);
-
-  //transfer ownership to multisig
-  const ownershipFacet = (await ethers.getContractAt(
-    "OwnershipFacet",
-    diamondAddress
-  )) as OwnershipFacet;
-
-  let currentOwner = await ownershipFacet.owner();
-
-  console.log("Current owner is:", currentOwner);
-  let signer: Signer;
-
-  const testing = ["hardhat", "localhost"].includes(network.name);
-
-  if (testing) {
-    await network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [currentOwner],
-    });
-    signer = await ethers.provider.getSigner(currentOwner);
-  } else if (network.name === "matic" || network.name === "mumbai") {
-    signer = accounts[0];
-  } else {
-    throw Error("Incorrect network selected");
-  }
-
   const installationFacet = (await ethers.getContractAt(
     "InstallationFacet",
-    diamondAddress,
-    signer
+    maticInstallationDiamondAddress
   )) as InstallationFacet;
 
-  const types = await installationFacet.getInstallationTypes([0]);
-
-  console.log("types:", types);
+  const types = await installationFacet.getInstallationTypes([]);
+  for (let index = 0; index < types.length; index++) {
+    const unequip = await installationFacet.getInstallationUnequipType(index);
+    console.log("unequip:", index, unequip);
+  }
 
   // const account = await signer.getAddress();
 
