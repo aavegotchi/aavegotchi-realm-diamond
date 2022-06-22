@@ -56,17 +56,10 @@ contract TestInstallationFacet is Modifiers {
     //next level
     InstallationType memory nextInstallation = s.installationTypes[prevInstallation.nextLevelId];
 
-    //take the required alchemica
-    address[4] memory alchemicaAddresses = realm.getAlchemicaAddresses();
-    // LibItems._splitAlchemica(nextInstallation.alchemicaCost, alchemicaAddresses);
-
     require(prevInstallation.nextLevelId > 0, "TestInstallationFacet: Maximum upgrade reached");
     require(prevInstallation.installationType == nextInstallation.installationType, "TestInstallationFacet: Wrong installation type");
     require(prevInstallation.alchemicaType == nextInstallation.alchemicaType, "TestInstallationFacet: Wrong alchemicaType");
     require(prevInstallation.level == nextInstallation.level - 1, "TestInstallationFacet: Wrong installation level");
-
-    uint256 gltrAmount = uint256(_gltr) * 1e18;
-    // IERC20(s.gltr).transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, gltrAmount); //should revert if user doesnt have enough GLTR
 
     //prevent underflow if user sends too much GLTR
     if (_gltr > nextInstallation.craftTime) revert("TestInstallationFacet: Too much GLTR");
