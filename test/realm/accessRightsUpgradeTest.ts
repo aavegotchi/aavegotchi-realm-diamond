@@ -266,7 +266,14 @@ describe("Access rights test", async function () {
       0
     );
     await realmFacet.equipInstallation(equipParcelId, 1484, 10, 0, 0, equipSig);
-    await realmFacet.unequipInstallation(equipParcelId, 10, 0, 0, equipSig);
+    await realmFacet.unequipInstallation(
+      equipParcelId,
+      1484,
+      10,
+      0,
+      0,
+      equipSig
+    );
   });
 
   it("Borrowed Gotchi can equip on owners parcel", async () => {

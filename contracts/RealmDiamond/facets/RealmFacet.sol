@@ -124,6 +124,7 @@ contract RealmFacet is Modifiers {
   /// @param _y The y(vertical) coordinate of the installation
   function unequipInstallation(
     uint256 _realmId,
+    uint256 _gotchiId, //will be used soon
     uint256 _installationId,
     uint256 _x,
     uint256 _y,
@@ -203,6 +204,7 @@ contract RealmFacet is Modifiers {
   /// @param _y The y(vertical) coordinate of the tile
   function unequipTile(
     uint256 _realmId,
+    uint256 _gotchiId,
     uint256 _tileId,
     uint256 _x,
     uint256 _y,

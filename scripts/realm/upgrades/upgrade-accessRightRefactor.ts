@@ -15,10 +15,14 @@ export async function upgradeRealm() {
       addSelectors: [
         `function equipInstallation(uint256 _realmId, uint256 _gotchiId, uint256 _installatßionId, uint256 _x, uint256 _y, bytes memory _signature) external`,
         `function equipTile(uint256 _realmId,uint256 _gotchiId,uint256 _tileId, uint256 _x,uint256 _y,bytes memory _signature) external`,
+        `function unequipInstallation(uint256 _realmId, uint256 _gotchiId, uint256 _installationId,uint256 _x, uint256 _y, bytes memory _signature) external`,
+        `function unequipTile(uint256 _realmId, uint256 _gotchiId, uint256 _tileId, uint256 _x, uint256 _y, bytes memory _signature) external`,
       ],
       removeSelectors: [
         `function equipInstallation(uint256 _realmId, uint256 _installatßionId, uint256 _x, uint256 _y, bytes memory _signature) external`,
         `function equipTile(uint256 _realmId, uint256 _tileId, uint256 _x,uint256 _y,bytes memory _signature) external`,
+        `function unequipInstallation(uint256 _realmId, uint256 _installationId,uint256 _x, uint256 _y, bytes memory _signature) external`,
+        `function unequipTile(uint256 _realmId, uint256 _tileId, uint256 _x, uint256 _y, bytes memory _signature) external`,
       ],
     },
     {
