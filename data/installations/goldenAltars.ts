@@ -19,6 +19,7 @@ export const goldenAltars: InstallationTypeInput[] = [
     spillRate: 50,
     upgradeQueueBoost: 1,
     craftTime: 0,
+    unequipType: 0,
   },
   {
     id: 2,
@@ -38,6 +39,7 @@ export const goldenAltars: InstallationTypeInput[] = [
     spillRate: 45,
     upgradeQueueBoost: 1,
     craftTime: 65000,
+    unequipType: 0,
   },
   {
     id: 3,
@@ -57,6 +59,7 @@ export const goldenAltars: InstallationTypeInput[] = [
     spillRate: 40,
     upgradeQueueBoost: 1,
     craftTime: 160000,
+    unequipType: 0,
   },
   {
     id: 4,
@@ -76,6 +79,7 @@ export const goldenAltars: InstallationTypeInput[] = [
     spillRate: 35,
     upgradeQueueBoost: 1,
     craftTime: 320000,
+    unequipType: 0,
   },
   {
     id: 5,
@@ -95,6 +99,7 @@ export const goldenAltars: InstallationTypeInput[] = [
     spillRate: 30,
     upgradeQueueBoost: 1,
     craftTime: 475000,
+    unequipType: 0,
   },
   {
     id: 6,
@@ -114,6 +119,7 @@ export const goldenAltars: InstallationTypeInput[] = [
     spillRate: 25,
     upgradeQueueBoost: 1,
     craftTime: 630000,
+    unequipType: 0,
   },
   {
     id: 7,
@@ -133,6 +139,7 @@ export const goldenAltars: InstallationTypeInput[] = [
     spillRate: 20,
     upgradeQueueBoost: 1,
     craftTime: 1250000,
+    unequipType: 0,
   },
   {
     id: 8,
@@ -152,6 +159,7 @@ export const goldenAltars: InstallationTypeInput[] = [
     spillRate: 15,
     upgradeQueueBoost: 1,
     craftTime: 1900000,
+    unequipType: 0,
   },
   {
     id: 9,
@@ -171,5 +179,6 @@ export const goldenAltars: InstallationTypeInput[] = [
     spillRate: 10,
     upgradeQueueBoost: 1,
     craftTime: 3200000,
+    unequipType: 0,
   },
 ];

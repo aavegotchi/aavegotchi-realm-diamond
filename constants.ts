@@ -15,14 +15,14 @@ export const alchemica = [
   "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C", //kek
 ];
 
-export const mumbaiDiamondAddress =
-  "0xb012732d259df648B8B3876b9794Fcb631262447";
+export const mumbaiRealmDiamondAddress =
+  "0x7F2331C4F9e4E8b5A0fF0b1ecBd9D926371ffC45";
 
 export const maticRealmDiamondAddress =
   "0x1d0360bac7299c86ec8e99d0c1c9a95fefaf2a11";
 
 export const mumbaiInstallationDiamondAddress =
-  "0x4638B8127D1FC1bb69732c8D82Ea0Ab487A79e23";
+  "0xb6557C0307B1009391836DBfBF6490a174dDcd31";
 
 export const maticInstallationDiamondAddress =
   "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";

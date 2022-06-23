@@ -12,7 +12,11 @@ export async function setAddresses() {
   let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
 
   //matic address
-  const diamondAddress = "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
+  let diamondAddress = "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
+
+  if (network.name === "mumbai") {
+    diamondAddress = "0x35805E99E4d088771EcF66A4ba3346469b57eE0D";
+  }
 
   const ownershipFacet = (await ethers.getContractAt(
     "OwnershipFacet",
@@ -29,15 +33,27 @@ export async function setAddresses() {
 
   if (network.name === "hardhat") {
     tileFacet = await impersonate(owner, tileFacet, ethers, network);
+  } else if (network.name === "mumbai") {
+    //mumbai tile
+
+    const mumbaiSigner = (await ethers.getSigners())[0];
+    tileFacet = (await ethers.getContractAt(
+      "TileFacet",
+      diamondAddress,
+      mumbaiSigner
+    )) as TileFacet;
   }
 
   // add real data
   const tile = outputTile(tileTypes[5]);
 
   console.log("Adding tile:", tile);
-  await tileFacet.addTileTypes([tile], {
-    gasPrice: gasPrice,
-  });
+  await tileFacet.addTileTypes(
+    tileTypes.map((val) => outputTile(val)),
+    {
+      gasPrice: gasPrice,
+    }
+  );
 
   //july 15th, 2pm utc
   // const deprecateTime = "1657893600";
