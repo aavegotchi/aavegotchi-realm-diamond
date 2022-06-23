@@ -76,6 +76,7 @@ export function outputInstallation(
     nextLevelId: installation.nextLevelId,
     prerequisites: installation.prerequisites,
     name: installation.name,
+    unequipType: installation.unequipType,
   };
 
   return output;
@@ -123,6 +124,7 @@ export function testInstallations() {
       nextLevelId: 0,
       prerequisites: [],
       name: "The Void",
+      unequipType: 0,
     })
   );
   installations.push(
@@ -143,6 +145,7 @@ export function testInstallations() {
       nextLevelId: 7,
       prerequisites: [0, 0],
       name: "Altar level 1",
+      unequipType: 0,
     })
   );
   installations.push(
@@ -163,6 +166,7 @@ export function testInstallations() {
       nextLevelId: 3,
       prerequisites: [1, 0],
       name: "FUD Reservoir level 1",
+      unequipType: 0,
     })
   );
   installations.push(
@@ -183,6 +187,7 @@ export function testInstallations() {
       nextLevelId: 0,
       prerequisites: [2, 0],
       name: "FUD Reservoir level 2",
+      unequipType: 0,
     })
   );
   installations.push(
@@ -203,6 +208,7 @@ export function testInstallations() {
       nextLevelId: 7,
       prerequisites: [0, 0],
       name: "Altar level 1",
+      unequipType: 0,
     })
   );
   installations.push(
@@ -223,6 +229,7 @@ export function testInstallations() {
       nextLevelId: 0,
       prerequisites: [1, 0],
       name: "FUD Harvester level 1",
+      unequipType: 0,
     })
   );
   installations.push(
@@ -243,6 +250,7 @@ export function testInstallations() {
       nextLevelId: 0,
       prerequisites: [0, 0],
       name: "BuildQueue level 1",
+      unequipType: 0,
     })
   );
   installations.push(
@@ -263,6 +271,7 @@ export function testInstallations() {
       nextLevelId: 0,
       prerequisites: [1, 0],
       name: "Altar level 2",
+      unequipType: 0,
     })
   );
   installations.push(
@@ -283,6 +292,7 @@ export function testInstallations() {
       nextLevelId: 0,
       prerequisites: [3, 0],
       name: "Gotchi Lodge level 1",
+      unequipType: 0,
     })
   );
   return installations;
@@ -359,6 +369,7 @@ export function goldenAaltar() {
       prerequisites: [],
       name: "Golden Aaltar",
       upgradeQueueBoost: 1,
+      unequipType: 0,
     })
   );
 
@@ -381,6 +392,7 @@ export function goldenAaltar() {
       prerequisites: [],
       name: "Golden Aaltar",
       upgradeQueueBoost: 0,
+      unequipType: 0,
     })
   );
   installations.push(
@@ -401,6 +413,7 @@ export function goldenAaltar() {
       prerequisites: [],
       name: "Golden Aaltar",
       upgradeQueueBoost: 0,
+      unequipType: 0,
     })
   );
   installations.push(
@@ -421,6 +434,7 @@ export function goldenAaltar() {
       prerequisites: [],
       name: "Golden Aaltar",
       upgradeQueueBoost: 0,
+      unequipType: 0,
     })
   );
 
@@ -449,6 +463,7 @@ export function testnetAltar() {
       prerequisites: [],
       name: "The Void",
       upgradeQueueBoost: 0,
+      unequipType: 0,
     })
   );
 
@@ -471,6 +486,7 @@ export function testnetAltar() {
       prerequisites: [],
       name: "Alchemical Aaltar (Testnet)",
       upgradeQueueBoost: 1,
+      unequipType: 0,
     })
   );
   installations.push(
@@ -491,6 +507,7 @@ export function testnetAltar() {
       prerequisites: [1],
       name: "Alchemical Aaltar (Testnet)",
       upgradeQueueBoost: 1,
+      unequipType: 0,
     })
   );
   installations.push(
@@ -511,6 +528,7 @@ export function testnetAltar() {
       prerequisites: [2],
       name: "Alchemical Aaltar (Testnet)",
       upgradeQueueBoost: 1,
+      unequipType: 0,
     })
   );
 

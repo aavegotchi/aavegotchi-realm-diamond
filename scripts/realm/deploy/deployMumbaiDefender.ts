@@ -12,6 +12,7 @@ import {
   InstallationAdminFacet,
   InstallationFacet,
   TileFacet,
+  DiamondCutFacet__factory,
 } from "../../../typechain";
 import { gasPrice, maticAavegotchiDiamondAddress } from "../../helperFunctions";
 import {
@@ -47,7 +48,9 @@ async function deployRealmDiamond(deployerAddress: string) {
   console.log("Begin script");
 
   // deploy DiamondCutFacet
-  const DiamondCutFacet = await ethers.getContractFactory("DiamondCutFacet");
+  const DiamondCutFacet = (await ethers.getContractFactory(
+    "DiamondCutFacet"
+  )) as DiamondCutFacet__factory;
 
   console.log("Deploying diamond cut facet:");
   const diamondCutFacet = await DiamondCutFacet.connect(signer).deploy();
@@ -133,9 +136,9 @@ export async function deployMumbai() {
   const realmDiamond = await deployRealmDiamond(deployerAddress);
 
   console.log("Deploying Installation Diamond");
-  const installationDiamond = await deployDiamond();
+  const installationDiamondAddress = await deployDiamond();
 
-  const tileDiamond = await deployDiamondTile();
+  const tileDiamondAddress = await deployDiamondTile();
 
   console.log("Deploying Alchemicas");
   const alchemica = await deployAlchemica(ethers, realmDiamond.address);
@@ -170,7 +173,7 @@ export async function deployMumbai() {
     alchemicaTotals(),
     boostMultipliers,
     greatPortalCapacity,
-    installationDiamond,
+    installationDiamondAddress,
     vrfCoordinator,
     linkAddress,
     [
@@ -182,8 +185,8 @@ export async function deployMumbai() {
     alchemica.gltr.address,
     ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
     deployerAddress,
-    tileDiamond,
-    tileDiamond
+    tileDiamondAddress,
+    tileDiamondAddress
   );
 
   await tx.wait();
@@ -192,10 +195,10 @@ export async function deployMumbai() {
   const dao = deployerAddress;
 
   console.log("Setting Installation addresses");
-  const adminFacet = await ethers.getContractAt(
+  const adminFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
-    installationDiamond
-  );
+    installationDiamondAddress
+  )) as InstallationAdminFacet;
   console.log("Setting addresses");
   tx = await adminFacet
     .connect(signer)
@@ -210,13 +213,13 @@ export async function deployMumbai() {
   await tx.wait();
 
   console.log("RealmDiamond deployed:", realmDiamond.address);
-  console.log("InstallationDiamond deployed:", installationDiamond);
+  console.log("InstallationDiamond deployed:", installationDiamondAddress);
   console.log("FUD deployed:", alchemica.fud.address);
   console.log("FOMO deployed:", alchemica.fomo.address);
   console.log("ALPHA deployed:", alchemica.alpha.address);
   console.log("KEK deployed:", alchemica.kek.address);
   console.log("GLTR deployed:", alchemica.gltr.address);
-  console.log("Tile Diamond deployed:", tileDiamond);
+  console.log("Tile Diamond deployed:", tileDiamondAddress);
 
   const fudToken = (await ethers.getContractAt(
     "AlchemicaToken",
@@ -225,10 +228,10 @@ export async function deployMumbai() {
   const owner = await fudToken.owner();
   console.log("owner:", owner);
 
-  const deployedAlchemicaFacet = (await ethers.getContractAt(
-    "AlchemicaFacet",
-    realmDiamond.address
-  )) as AlchemicaFacet;
+  // const deployedAlchemicaFacet = (await ethers.getContractAt(
+  //   "AlchemicaFacet",
+  //   realmDiamond.address
+  // )) as AlchemicaFacet;
 
   const signers = await ethers.getSigners();
   const currentAccount = signers[0].address;
@@ -240,7 +243,7 @@ export async function deployMumbai() {
   console.log("set tile diamond vars");
   const tileFacet = (await ethers.getContractAt(
     "TileFacet",
-    tileDiamond
+    tileDiamondAddress
   )) as TileFacet;
 
   const tileSetVarsTx = await tileFacet
@@ -254,6 +257,29 @@ export async function deployMumbai() {
     );
 
   await tileSetVarsTx.wait();
+
+  const realmOwnership = (await ethers.getContractAt(
+    "OwnershipFacet",
+    realmDiamond.address
+  )) as OwnershipFacet;
+  const installationOwnership = (await ethers.getContractAt(
+    "OwnershipFacet",
+    installationDiamondAddress
+  )) as OwnershipFacet;
+  const tileOwnership = (await ethers.getContractAt(
+    "OwnershipFacet",
+    tileDiamondAddress
+  )) as OwnershipFacet;
+
+  const newOwner = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
+  tx = await realmOwnership.connect(signer).transferOwnership(newOwner);
+  await tx.wait();
+  tx = await installationOwnership.connect(signer).transferOwnership(newOwner);
+  await tx.wait();
+  tx = await tileOwnership.connect(signer).transferOwnership(newOwner);
+  await tx.wait();
+
+  console.log("Ownership transferred!");
 
   // const installationAdminFacet = (await ethers.getContractAt(
   //   "InstallationAdminFacet",
