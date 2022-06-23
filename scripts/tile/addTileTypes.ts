@@ -32,7 +32,7 @@ export async function setAddresses() {
   }
 
   // add real data
-  const tile = outputTile(tileTypes[4]);
+  const tile = outputTile(tileTypes[5]);
 
   console.log("Adding tile:", tile);
   await tileFacet.addTileTypes([tile], {
@@ -40,9 +40,9 @@ export async function setAddresses() {
   });
 
   //july 15th, 2pm utc
-  const deprecateTime = "1657893600";
-  console.log("Set deprecate time to:", new Date(1657893600 * 1000));
-  await tileFacet.editDeprecateTime("4", deprecateTime, { gasPrice: gasPrice });
+  // const deprecateTime = "1657893600";
+  // console.log("Set deprecate time to:", new Date(1657893600 * 1000));
+  // await tileFacet.editDeprecateTime("5", deprecateTime, { gasPrice: gasPrice });
 
   const tiles = await tileFacet.getTileTypes([]);
   console.log("tiles:", tiles);

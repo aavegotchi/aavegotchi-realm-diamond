@@ -62,4 +62,14 @@ export const tileTypes: TileTypeInput[] = [
     alchemicaCost: [3000, 1000, 5000, 2000],
     craftTime: 0,
   },
+  {
+    id: 5,
+    name: "LE Mythical Rofl Rug",
+    width: 16,
+    height: 8,
+    deprecated: false,
+    tileType: 0,
+    alchemicaCost: [3000, 1000, 5000, 2000],
+    craftTime: 0,
+  },
 ];
