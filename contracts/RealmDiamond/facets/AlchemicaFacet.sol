@@ -218,6 +218,10 @@ contract AlchemicaFacet is Modifiers {
     }
   }
 
+  function lastClaimedAlchemica(uint256 _realmId) external view returns (uint256) {
+    return s.lastClaimedAlchemica[_realmId];
+  }
+
   /// @notice Allow parcel owner to claim available alchemica with his parent NFT(Aavegotchi)
   /// @param _realmId Identifier of parcel to claim alchemica from
   /// @param _alchemicaTypes Alchemica types to claim
@@ -246,15 +250,16 @@ contract AlchemicaFacet is Modifiers {
       }
     }
 
-    require(block.timestamp > s.lastClaimedAlchemica[_realmId] + 8 hours, "AlchemicaFacet: 8 hours claim cooldown");
-    s.lastClaimedAlchemica[_realmId] = block.timestamp;
-
-    uint256[4] memory _availableAlchemica = getAvailableAlchemica(_realmId);
-
+    //Check signature
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, s.lastClaimedAlchemica[_realmId])), _signature, s.backendPubKey),
       "AlchemicaFacet: Invalid signature"
     );
+
+    require(block.timestamp > s.lastClaimedAlchemica[_realmId] + 8 hours, "AlchemicaFacet: 8 hours claim cooldown");
+    s.lastClaimedAlchemica[_realmId] = block.timestamp;
+
+    uint256[4] memory _availableAlchemica = getAvailableAlchemica(_realmId);
 
     for (uint256 i = 0; i < _alchemicaTypes.length; i++) {
       uint256 remaining = s.parcels[_realmId].alchemicaRemaining[_alchemicaTypes[i]];
