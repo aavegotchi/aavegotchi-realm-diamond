@@ -229,7 +229,7 @@ contract AlchemicaFacet is Modifiers {
   /// @param _signature Message signature used for backend validation
   function claimAvailableAlchemica(
     uint256 _realmId,
-    uint256[4] calldata _alchemicaTypes,
+    bool[4] calldata _alchemicaTypes,
     uint256 _gotchiId,
     bytes memory _signature
   ) external gameActive {
@@ -262,24 +262,26 @@ contract AlchemicaFacet is Modifiers {
     uint256[4] memory _availableAlchemica = getAvailableAlchemica(_realmId);
 
     for (uint256 i = 0; i < _alchemicaTypes.length; i++) {
-      uint256 remaining = s.parcels[_realmId].alchemicaRemaining[_alchemicaTypes[i]];
+      if (_alchemicaTypes[i]) {
+        uint256 remaining = s.parcels[_realmId].alchemicaRemaining[i];
 
-      //@todo (future release): allow claimOperator
+        //@todo (future release): allow claimOperator
 
-      uint256 available = _availableAlchemica[_alchemicaTypes[i]];
-      require(remaining >= available, "AlchemicaFacet: Not enough alchemica available");
+        uint256 available = _availableAlchemica[i];
+        require(remaining >= available, "AlchemicaFacet: Not enough alchemica available");
 
-      s.parcels[_realmId].alchemicaRemaining[_alchemicaTypes[i]] -= available;
-      s.parcels[_realmId].unclaimedAlchemica[_alchemicaTypes[i]] = 0;
-      s.parcels[_realmId].lastUpdateTimestamp[_alchemicaTypes[i]] = block.timestamp;
+        s.parcels[_realmId].alchemicaRemaining[i] -= available;
+        s.parcels[_realmId].unclaimedAlchemica[i] = 0;
+        s.parcels[_realmId].lastUpdateTimestamp[i] = block.timestamp;
 
-      SpilloverIO memory spillover = calculateSpilloverForReservoir(_realmId, _alchemicaTypes[i]);
-      TransferAmounts memory amounts = calculateTransferAmounts(available, spillover.rate);
+        SpilloverIO memory spillover = calculateSpilloverForReservoir(_realmId, i);
+        TransferAmounts memory amounts = calculateTransferAmounts(available, spillover.rate);
 
-      //Mint new tokens
-      _mintAvailableAlchemica(_alchemicaTypes[i], _gotchiId, amounts.owner, amounts.spill);
+        //Mint new tokens
+        _mintAvailableAlchemica(i, _gotchiId, amounts.owner, amounts.spill);
 
-      emit AlchemicaClaimed(_realmId, _gotchiId, _alchemicaTypes[i], available, spillover.rate, spillover.radius);
+        emit AlchemicaClaimed(_realmId, _gotchiId, i, available, spillover.rate, spillover.radius);
+      }
     }
   }
 
