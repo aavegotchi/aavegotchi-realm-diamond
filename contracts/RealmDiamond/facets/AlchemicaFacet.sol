@@ -77,11 +77,11 @@ contract AlchemicaFacet is Modifiers {
     return s.parcels[_realmId].alchemicaRemaining;
   }
 
-  // /// @notice Allow the diamond owner to increment the surveying round
-  // function progressSurveyingRound() external onlyOwner {
-  //   s.surveyingRound++;
-  //   emit SurveyingRoundProgressed(s.surveyingRound);
-  // }
+  /// @notice Allow the diamond owner to increment the surveying round
+  function progressSurveyingRound() external onlyOwner {
+    s.surveyingRound++;
+    emit SurveyingRoundProgressed(s.surveyingRound);
+  }
 
   /// @notice Query details about all alchemica gathered in a surveying round in a parcel
   /// @param _realmId Identifier of the parcel to query
@@ -139,6 +139,14 @@ contract AlchemicaFacet is Modifiers {
     s.gltrAddress = _gltrAddress;
     s.tileDiamond = _tileDiamond;
     s.aavegotchiDiamond = _aavegotchiDiamond;
+  }
+
+  function setTotalAlchemicas(uint256[4][5] calldata _totalAlchemicas) external onlyOwner {
+    for (uint256 i; i < _totalAlchemicas.length; i++) {
+      for (uint256 j; j < _totalAlchemicas[i].length; j++) {
+        s.totalAlchemicas[i][j] = _totalAlchemicas[i][j];
+      }
+    }
   }
 
   /// @notice Query the available alchemica in a parcel

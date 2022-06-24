@@ -4,6 +4,7 @@ pragma solidity 0.8.9;
 import {InstallationDiamondInterface} from "../interfaces/InstallationDiamondInterface.sol";
 import {TileDiamondInterface} from "../interfaces/TileDiamond.sol";
 import "./AppStorage.sol";
+import "./BinomialRandomizer.sol";
 
 library LibRealm {
   event SurveyParcel(uint256 _tokenId, uint256[] _alchemicas);
@@ -105,7 +106,7 @@ library LibRealm {
     uint256 i
   ) internal view returns (uint256) {
     AppStorage storage s = LibAppStorage.diamondStorage();
-    return (randomWords[i] % s.totalAlchemicas[s.parcels[_tokenId].size][i]);
+    return BinomialRandomizer.calculateAlchemicaSurveyAmount(randomWords[i], s.totalAlchemicas[s.parcels[_tokenId].size][i]);
   }
 
   function updateRemainingAlchemica(
