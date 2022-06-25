@@ -153,22 +153,8 @@ contract AlchemicaFacet is Modifiers {
   /// @param _realmId identifier of parcel to query
   /// @return _availableAlchemica An array representing the available quantity of alchemicas
   function getAvailableAlchemica(uint256 _realmId) public view returns (uint256[4] memory _availableAlchemica) {
-    //Calculate the # of blocks elapsed since the last
-
-    for (uint256 index = 0; index < 4; index++) {
-      //First get the onchain amount
-      uint256 available = s.parcels[_realmId].unclaimedAlchemica[index];
-      //Then get the floating amount
-      available += LibAlchemica.alchemicaSinceLastUpdate(_realmId, index);
-
-      uint256 capacity = LibAlchemica.calculateTotalCapacity(_realmId, index);
-
-      //ensure that available alchemica is not higher than available reservoir capacity
-      if (available > capacity) {
-        _availableAlchemica[index] = capacity;
-      } else {
-        _availableAlchemica[index] = available;
-      }
+    for (uint256 i; i < 4; i++) {
+      _availableAlchemica[i] = LibAlchemica.getAvailableAlchemica(_realmId, i);
     }
   }
 
@@ -259,15 +245,12 @@ contract AlchemicaFacet is Modifiers {
     require(block.timestamp > s.lastClaimedAlchemica[_realmId] + 8 hours, "AlchemicaFacet: 8 hours claim cooldown");
     s.lastClaimedAlchemica[_realmId] = block.timestamp;
 
-    uint256[4] memory _availableAlchemica = getAvailableAlchemica(_realmId);
-
     for (uint256 i = 0; i < _alchemicaTypes.length; i++) {
       if (_alchemicaTypes[i]) {
-        uint256 remaining = s.parcels[_realmId].alchemicaRemaining[i];
-
         //@todo (future release): allow claimOperator
+        uint256 remaining = s.parcels[_realmId].alchemicaRemaining[i];
+        uint256 available = LibAlchemica.getAvailableAlchemica(_realmId, i);
 
-        uint256 available = _availableAlchemica[i];
         require(remaining >= available, "AlchemicaFacet: Not enough alchemica available");
 
         s.parcels[_realmId].alchemicaRemaining[i] -= available;

@@ -186,6 +186,19 @@ library LibAlchemica {
     }
   }
 
+  function getAvailableAlchemica(uint256 _realmId, uint256 _alchemicaType) internal view returns (uint256) {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+    //First get the onchain amount
+    uint256 available = s.parcels[_realmId].unclaimedAlchemica[_alchemicaType];
+    //Then get the floating amount
+    available += alchemicaSinceLastUpdate(_realmId, _alchemicaType);
+
+    uint256 capacity = calculateTotalCapacity(_realmId, _alchemicaType);
+
+    //ensure that available alchemica is not higher than available reservoir capacity
+    return available > capacity ? capacity : available;
+  }
+
   function popArray(uint256[] storage _array, uint256 _index) internal {
     _array[_index] = _array[_array.length - 1];
     _array.pop();
