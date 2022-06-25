@@ -5,6 +5,7 @@ import {
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
 import { maticDiamondAddress } from "../../../constants";
+import { addHaarvesters } from "../../installation/updates/addHaarvesters";
 
 export async function upgrade() {
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
@@ -52,6 +53,7 @@ export async function upgrade() {
   };
 
   await run("deployUpgrade", args);
+  await addHaarvesters();
 }
 
 if (require.main === module) {

@@ -1,6 +1,6 @@
 import { InstallationTypeInput } from "../../types";
 
-export const installationTypes: InstallationTypeInput[] = [
+export const maaker: InstallationTypeInput[] = [
   {
     Installation: "Maaker",
     id: 118,

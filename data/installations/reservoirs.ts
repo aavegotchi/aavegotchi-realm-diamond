@@ -1,6 +1,6 @@
 import { InstallationTypeInput } from "../../types";
 
-export const installationTypes: InstallationTypeInput[] = [
+export const reservoirs: InstallationTypeInput[] = [
   {
     Installation: "FUD Reservoir",
     id: 55,
