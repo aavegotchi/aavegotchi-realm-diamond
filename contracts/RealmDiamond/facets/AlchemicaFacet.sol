@@ -225,7 +225,7 @@ contract AlchemicaFacet is Modifiers {
   /// @param _signature Message signature used for backend validation
   function claimAvailableAlchemica(
     uint256 _realmId,
-    uint256[] calldata _alchemicaTypes,
+    uint256[4] calldata _alchemicaTypes,
     uint256 _gotchiId,
     bytes memory _signature
   ) external gameActive {
@@ -251,13 +251,13 @@ contract AlchemicaFacet is Modifiers {
 
     uint256[4] memory _availableAlchemica = getAvailableAlchemica(_realmId);
 
+    require(
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, s.lastClaimedAlchemica[_realmId])), _signature, s.backendPubKey),
+      "AlchemicaFacet: Invalid signature"
+    );
+
     for (uint256 i = 0; i < _alchemicaTypes.length; i++) {
       uint256 remaining = s.parcels[_realmId].alchemicaRemaining[_alchemicaTypes[i]];
-
-      require(
-        LibSignature.isValid(keccak256(abi.encodePacked(_alchemicaTypes[i], _realmId, _gotchiId, remaining)), _signature, s.backendPubKey),
-        "AlchemicaFacet: Invalid signature"
-      );
 
       //@todo (future release): allow claimOperator
 
