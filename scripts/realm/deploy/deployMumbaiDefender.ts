@@ -23,7 +23,7 @@ import {
 import { alchemicaTotals, boostMultipliers } from "../../setVars";
 import { deployDiamond } from "../../installation/deployDefender";
 import { deployDiamondTile } from "../../tile/deployDefender";
-import { mumbaiDiamondAddress } from "../../../constants";
+import { mumbaiRealmDiamondAddress } from "../../../constants";
 import {
   DefenderRelaySigner,
   DefenderRelayProvider,
@@ -87,6 +87,7 @@ async function deployRealmDiamond(deployerAddress: string) {
     "AlchemicaFacet",
     "VRFFacet",
     "TestHelpersRealm",
+    "InstallationUpgradeFacet",
   ];
   const cut = [];
   for (const FacetName of FacetNames) {
