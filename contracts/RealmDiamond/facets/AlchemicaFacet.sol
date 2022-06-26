@@ -301,7 +301,9 @@ contract AlchemicaFacet is Modifiers {
       try diamond.getGotchiLendingFromToken(uint32(_gotchiId)) returns (AavegotchiDiamond.GotchiLending memory listing) {
         require(
           LibMeta.msgSender() == s.parcels[_realmId].owner ||
-            (LibMeta.msgSender() == listing.borrower && listing.lender == s.parcels[_realmId].owner),
+            (LibMeta.msgSender() == listing.borrower &&
+              listing.lender == s.parcels[_realmId].owner &&
+              diamond.canChannelOnLending(uint32(_gotchiId))),
           "AlchemicaFacet: Only Parcel owner/borrower can channel"
         );
       } catch (bytes memory) {

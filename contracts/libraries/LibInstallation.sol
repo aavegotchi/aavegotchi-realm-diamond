@@ -51,7 +51,7 @@ library LibInstallation {
     }
   }
 
-  /// @return index The index of the id in the array
+  /// @return index The index of the id in the array. Returns uint256.max if not found
   function containsId(uint256 _id, uint256[] memory _ids) internal pure returns (uint256 index) {
     for (uint256 i; i < _ids.length; ) {
       if (_ids[i] == _id) {
