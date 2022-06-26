@@ -99,6 +99,15 @@ export async function addHaarvesters() {
     signer
   )) as VRFFacet;
 
+  if (testing) {
+    vrfFacet = await impersonate(
+      await diamondOwner(maticInstallationDiamondAddress, ethers),
+      vrfFacet,
+      ethers,
+      network
+    );
+  }
+
   const requestConfig = {
     subId: 114,
     callbackGasLimit: 2000000,
@@ -111,8 +120,14 @@ export async function addHaarvesters() {
   tx = await vrfFacet.setConfig(requestConfig, {
     gasPrice: gasPrice,
   });
-
   await tx.wait();
+  console.log("VRF Config Set!");
+
+  tx = await vrfFacet.setVrfCoordinator(
+    "0xAE975071Be8F8eE67addBC1A82488F1C24858067"
+  );
+  await tx.wait();
+  console.log("VRF Coordinator Set!");
 }
 
 // We recommend this pattern to be able to use async/await everywhere

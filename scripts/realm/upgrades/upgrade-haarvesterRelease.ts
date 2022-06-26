@@ -35,6 +35,7 @@ export async function upgrade() {
       addSelectors: [
         "function rawFulfillRandomWords(uint256 requestId, uint256[] memory randomWords) external",
         `function setConfig(${requestConfig} _requestConfig) external`,
+        "function setVrfCoordinator(address coordinator) external",
         "function subscribe() external",
         "function topUpSubscription(uint256 amount) external",
       ],
@@ -53,7 +54,6 @@ export async function upgrade() {
   };
 
   await run("deployUpgrade", args);
-  await addHaarvesters();
 }
 
 if (require.main === module) {

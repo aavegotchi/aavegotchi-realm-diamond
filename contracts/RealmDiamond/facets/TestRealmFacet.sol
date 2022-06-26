@@ -38,4 +38,26 @@ contract TestRealmFacet is Modifiers {
 
     LibAlchemica.increaseTraits(_realmId, _installationId, false);
   }
+
+  /// @notice Allow the owner of a parcel to start surveying his parcel
+  /// @dev Will throw if a surveying round has not started
+  /// @param _realmId Identifier of the parcel to survey
+  function testStartSurveying(uint256 _realmId) external {
+    require(s.parcels[_realmId].altarId > 0, "AlchemicaFacet: Must equip Altar");
+    require(!s.parcels[_realmId].surveying, "AlchemicaFacet: Parcel already surveying");
+    s.parcels[_realmId].surveying = true;
+  }
+
+  function testRawFulfillRandomWords(
+    uint256 tokenId,
+    uint256 surveyingRound,
+    uint256 seed
+  ) external {
+    uint256[] memory randomWords = new uint256[](4);
+    randomWords[0] = uint256(keccak256(abi.encode(seed)));
+    randomWords[1] = uint256(keccak256(abi.encode(randomWords[0])));
+    randomWords[2] = uint256(keccak256(abi.encode(randomWords[1])));
+    randomWords[3] = uint256(keccak256(abi.encode(randomWords[2])));
+    LibRealm.updateRemainingAlchemica(tokenId, randomWords, surveyingRound);
+  }
 }

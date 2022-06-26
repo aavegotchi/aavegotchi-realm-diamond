@@ -17,6 +17,8 @@ export async function upgradeRealmTest() {
       facetName: "TestRealmFacet",
       addSelectors: [
         `function testEquipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y) external`,
+        `function testStartSurveying(uint256 _realmId) external`,
+        `function testRawFulfillRandomWords(uint256 tokenId, uint256 surveyingRound, uint256 seed) external`,
       ],
       removeSelectors: [],
     },
