@@ -16,7 +16,7 @@ export const alchemica = [
 ];
 
 export const mumbaiDiamondAddress =
-  "0xb012732d259df648B8B3876b9794Fcb631262447";
+  "0x7F2331C4F9e4E8b5A0fF0b1ecBd9D926371ffC45";
 
 export const maticRealmDiamondAddress =
   "0x1d0360bac7299c86ec8e99d0c1c9a95fefaf2a11";
