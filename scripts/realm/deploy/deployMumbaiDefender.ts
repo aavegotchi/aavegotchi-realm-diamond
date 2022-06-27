@@ -13,6 +13,7 @@ import {
   InstallationFacet,
   TileFacet,
   DiamondCutFacet__factory,
+  RealmFacet,
 } from "../../../typechain";
 import { gasPrice, maticAavegotchiDiamondAddress } from "../../helperFunctions";
 import {
@@ -28,6 +29,8 @@ import {
   DefenderRelaySigner,
   DefenderRelayProvider,
 } from "defender-relay-client/lib/ethers";
+import { addAltars } from "../../installation/updates/addAltars";
+import { addDecorations } from "../../installation/updates/addDecorations";
 
 const { getSelectors, FacetCutAction } = require("../../libraries/diamond.js");
 
@@ -229,11 +232,6 @@ export async function deployMumbai() {
   const owner = await fudToken.owner();
   console.log("owner:", owner);
 
-  // const deployedAlchemicaFacet = (await ethers.getContractAt(
-  //   "AlchemicaFacet",
-  //   realmDiamond.address
-  // )) as AlchemicaFacet;
-
   const signers = await ethers.getSigners();
   const currentAccount = signers[0].address;
 
@@ -258,6 +256,18 @@ export async function deployMumbai() {
     );
 
   await tileSetVarsTx.wait();
+
+  //Set game active
+  const realmFacet = (await ethers.getContractAt(
+    "RealmFacet",
+    realmDiamond.address
+  )) as RealmFacet;
+  tx = await realmFacet.connect(signer).setGameActive(true);
+  await tx.wait();
+
+  //Deploy installations
+  await addAltars(installationDiamondAddress, signer);
+  await addDecorations(installationDiamondAddress, signer);
 
   const realmOwnership = (await ethers.getContractAt(
     "OwnershipFacet",

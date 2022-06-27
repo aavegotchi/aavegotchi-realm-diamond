@@ -65,6 +65,7 @@ export async function deployDiamond() {
     "InstallationFacet",
     "InstallationAdminFacet",
     "ERC1155Facet",
+    "InstallationUpgradeFacet",
   ];
   const cut = [];
   for (const FacetName of FacetNames) {

@@ -1,28 +1,13 @@
-import { ethers, network } from "hardhat";
-import {
-  maticInstallationDiamondAddress,
-  mumbaiInstallationDiamondAddress,
-} from "../../../constants";
+import { ethers } from "hardhat";
+import { mumbaiInstallationDiamondAddress } from "../../../constants";
 import { installationTypes } from "../../../data/installations/altars";
 import { InstallationAdminFacet, InstallationFacet } from "../../../typechain";
 
-import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { outputInstallation } from "../../realm/realmHelpers";
 import { gasPrice } from "../helperFunctions";
 import { Signer } from "ethers";
 
-export async function setAddresses() {
-  let signer: LedgerSigner | Signer = new LedgerSigner(
-    ethers.provider,
-    "m/44'/60'/2'/0/0"
-  );
-  let diamondAddress = maticInstallationDiamondAddress;
-
-  if (network.name === "mumbai") {
-    signer = (await ethers.getSigners())[0];
-    diamondAddress = mumbaiInstallationDiamondAddress;
-  }
-
+export async function addAltars(diamondAddress: string, signer?: Signer) {
   const installationFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
     diamondAddress,
@@ -49,7 +34,7 @@ export async function setAddresses() {
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 if (require.main === module) {
-  setAddresses()
+  addAltars(mumbaiInstallationDiamondAddress)
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);

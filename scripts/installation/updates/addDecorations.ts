@@ -1,18 +1,18 @@
 import { ethers, network } from "hardhat";
-import { maticInstallationDiamondAddress } from "../../../constants";
+
 import { decorations1 } from "../../../data/installations/decorations1";
 import { InstallationAdminFacet, InstallationFacet } from "../../../typechain";
 
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { outputInstallation } from "../../realm/realmHelpers";
 import { diamondOwner, gasPrice, impersonate } from "../helperFunctions";
+import { Signer } from "ethers";
+import { mumbaiInstallationDiamondAddress } from "../../../constants";
 
-export async function addDecorations() {
-  const signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
-
+export async function addDecorations(diamondAddress: string, signer?: Signer) {
   let installationAdminFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
-    maticInstallationDiamondAddress,
+    diamondAddress,
     signer
   )) as InstallationAdminFacet;
 
@@ -20,7 +20,7 @@ export async function addDecorations() {
 
   if (testing) {
     installationAdminFacet = await impersonate(
-      await diamondOwner(maticInstallationDiamondAddress, ethers),
+      await diamondOwner(diamondAddress, ethers),
       installationAdminFacet,
       ethers,
       network
@@ -44,7 +44,7 @@ export async function addDecorations() {
 
   const installationfacet = (await ethers.getContractAt(
     "InstallationFacet",
-    maticInstallationDiamondAddress
+    diamondAddress
   )) as InstallationFacet;
 
   const insts = await installationfacet.getInstallationTypes([]);
@@ -54,7 +54,7 @@ export async function addDecorations() {
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 if (require.main === module) {
-  addDecorations()
+  addDecorations(mumbaiInstallationDiamondAddress)
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);
