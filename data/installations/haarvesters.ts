@@ -1,6 +1,6 @@
 import { InstallationTypeInput } from "../../types";
 
-export const installationTypes: InstallationTypeInput[] = [
+export const haarvesters: InstallationTypeInput[] = [
   {
     Installation: "FUD Harvester",
     id: 19,
