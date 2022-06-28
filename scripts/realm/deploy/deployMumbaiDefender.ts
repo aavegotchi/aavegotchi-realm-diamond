@@ -31,6 +31,7 @@ import {
 } from "defender-relay-client/lib/ethers";
 import { addAltars } from "../../installation/updates/addAltars";
 import { addDecorations } from "../../installation/updates/addDecorations";
+import { addTileTypes } from "../../tile/addTileTypes";
 
 const { getSelectors, FacetCutAction } = require("../../libraries/diamond.js");
 
@@ -268,6 +269,7 @@ export async function deployMumbai() {
   //Deploy installations
   await addAltars(installationDiamondAddress, signer);
   await addDecorations(installationDiamondAddress, signer);
+  await addTileTypes();
 
   const realmOwnership = (await ethers.getContractAt(
     "OwnershipFacet",

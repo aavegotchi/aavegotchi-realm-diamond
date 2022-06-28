@@ -5,17 +5,18 @@ import { impersonate } from "../helperFunctions";
 
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 
-import { gasPrice } from "../../constants";
+import { gasPrice, mumbaiTileDiamondAddress } from "../../constants";
 import { outputTile } from "../realm/realmHelpers";
 
-export async function setAddresses() {
+export async function addTileTypes() {
   let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
 
   //matic address
   let diamondAddress = "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
 
   if (network.name === "mumbai") {
-    diamondAddress = "0x35805E99E4d088771EcF66A4ba3346469b57eE0D";
+    diamondAddress = mumbaiTileDiamondAddress;
+    signer = await ethers.getSigners()[0];
   }
 
   const ownershipFacet = (await ethers.getContractAt(
@@ -33,32 +34,16 @@ export async function setAddresses() {
 
   if (network.name === "hardhat") {
     tileFacet = await impersonate(owner, tileFacet, ethers, network);
-  } else if (network.name === "mumbai") {
-    //mumbai tile
-
-    const mumbaiSigner = (await ethers.getSigners())[0];
-    tileFacet = (await ethers.getContractAt(
-      "TileFacet",
-      diamondAddress,
-      mumbaiSigner
-    )) as TileFacet;
   }
 
   // add real data
-  const tile = outputTile(tileTypes[5]);
+  const tilesToAdd = tileTypes.map((val) => outputTile(val));
 
-  console.log("Adding tile:", tile);
-  await tileFacet.addTileTypes(
-    tileTypes.map((val) => outputTile(val)),
-    {
-      gasPrice: gasPrice,
-    }
-  );
-
-  //july 15th, 2pm utc
-  // const deprecateTime = "1657893600";
-  // console.log("Set deprecate time to:", new Date(1657893600 * 1000));
-  // await tileFacet.editDeprecateTime("5", deprecateTime, { gasPrice: gasPrice });
+  console.log("Adding tiles:", tilesToAdd);
+  const tx = await tileFacet.addTileTypes(tilesToAdd, {
+    gasPrice: gasPrice,
+  });
+  await tx.wait();
 
   const tiles = await tileFacet.getTileTypes([]);
   console.log("tiles:", tiles);
@@ -67,7 +52,7 @@ export async function setAddresses() {
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 if (require.main === module) {
-  setAddresses()
+  addTileTypes()
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);
