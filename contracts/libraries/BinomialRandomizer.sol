@@ -11,10 +11,18 @@ library BinomialRandomizer {
   /// @return totalPull A random value calculated by the binomial distribution
   /// @dev Arbitrary fields are chosen to make the distribution meet the average
   /// and provide a desirable distribution curve
+  // prettier-ignore
   function calculateAlchemicaSurveyAmount(uint256 seed, uint256 average) internal pure returns (uint256 totalPull) {
     totalPull =
-      (simulateBinomial(seed, 30, 4, 13, 60_000_000, 73_000_000, 14_000) * average) / // Number of rolls // Reciprocal of the chance to win // The amount of tail to cut off to prevent a heavy tail // The floor is 60% of the average // Arbitrary // Arbitrary
-      100_000_000;
+      (simulateBinomial(
+        seed, 
+        30, // Number of rolls 
+        4, // Reciprocal of the chance to win
+        13, // The amount of tail to cut off to prevent a heavy tail
+        60_000_000, // The floor is 60% of the average 
+        73_000_000, // Arbitrary
+        14_000) //Arbitrary
+        * average) /  100_000_000;
   }
 
   function simulateBinomial(
