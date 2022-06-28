@@ -251,9 +251,9 @@ export async function deployMumbai() {
     .setAddresses(
       ethers.constants.AddressZero,
       realmDiamond.address,
-      ethers.constants.AddressZero,
-      ethers.constants.AddressZero,
-      ethers.constants.AddressZero
+      alchemica.gltr.address,
+      tileDiamondAddress,
+      tileDiamondAddress
     );
 
   await tileSetVarsTx.wait();

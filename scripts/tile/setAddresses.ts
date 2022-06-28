@@ -1,15 +1,15 @@
-import { BigNumber, Signer } from "ethers";
+import { Signer } from "ethers";
 import { ethers, network } from "hardhat";
-import { installationTypes } from "../../data/installations/installationTypes";
+import {
+  maticRealmDiamondAddress,
+  maticTileDiamondAddress,
+  mumbaiTileDiamondAddress,
+} from "../../constants";
 import { OwnershipFacet, TileFacet } from "../../typechain";
-import { TileTypeInput, TileTypeOutput } from "../../types";
 import {
   aavegotchiDAOAddress,
-  approveRealAlchemica,
-  faucetRealAlchemica,
   impersonate,
   maticAavegotchiDiamondAddress,
-  maticDiamondAddress,
   pixelcraftAddress,
 } from "../helperFunctions";
 
@@ -17,7 +17,11 @@ export async function setAddresses() {
   const accounts: Signer[] = await ethers.getSigners();
   const deployer = accounts[0];
 
-  const diamondAddress = "";
+  let diamondAddress = maticTileDiamondAddress;
+
+  if (network.name === "mumbai") {
+    diamondAddress = mumbaiTileDiamondAddress;
+  }
 
   const ownershipFacet = (await ethers.getContractAt(
     "OwnershipFacet",
@@ -31,11 +35,13 @@ export async function setAddresses() {
     diamondAddress
   )) as TileFacet;
 
-  tileFacet = await impersonate(owner, tileFacet, ethers, network);
+  if (network.name === "hardhat") {
+    tileFacet = await impersonate(owner, tileFacet, ethers, network);
+  }
 
   await tileFacet.setAddresses(
     maticAavegotchiDiamondAddress,
-    maticDiamondAddress,
+    diamondAddress,
     ethers.constants.AddressZero,
     pixelcraftAddress,
     aavegotchiDAOAddress

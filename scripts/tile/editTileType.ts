@@ -5,14 +5,18 @@ import { impersonate } from "../helperFunctions";
 
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 
-import { gasPrice } from "../../constants";
-import { outputTile } from "../realm/realmHelpers";
+import { gasPrice, mumbaiTileDiamondAddress } from "../../constants";
+import { outputTile } from "../realm/realmHelpersDefender";
 
 export async function setAddresses() {
-  let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
+  // let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
 
   //matic address
-  const diamondAddress = "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
+  let diamondAddress = "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
+
+  if (network.name === "mumbai") {
+    diamondAddress = mumbaiTileDiamondAddress;
+  }
 
   const ownershipFacet = (await ethers.getContractAt(
     "OwnershipFacet",
@@ -24,33 +28,16 @@ export async function setAddresses() {
   let tileFacet = (await ethers.getContractAt(
     "TileFacet",
     diamondAddress,
-    signer
+    await ethers.getSigners()[0]
   )) as TileFacet;
 
   if (network.name === "hardhat") {
     tileFacet = await impersonate(owner, tileFacet, ethers, network);
   }
 
-  // const tile = outputTile({
-  //   id: 2,
-  //   name: "LE Golden Tile - Portal",
-  //   width: 8,
-  //   height: 8,
-  //   deprecated: true,
-  //   tileType: 0,
-  //   alchemicaCost: [25, 25, 75, 25],
-  //   craftTime: 0,
-  // });
+  const tile = outputTile(tileTypes[6]);
 
-  // console.log("tile:", tile);
-
-  // console.log("Editing tile:", tile);
-  // const tx = await tileFacet.editTileType("2", tile, {
-  //   gasPrice: gasPrice,
-  // });
-
-  console.log("Set deprecate time to:", new Date(1));
-  const tx = await tileFacet.editDeprecateTime("2", "1", {
+  const tx = await tileFacet.editTileType("6", tile, {
     gasPrice: gasPrice,
   });
 

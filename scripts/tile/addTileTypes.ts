@@ -37,7 +37,7 @@ export async function addTileTypes() {
   }
 
   // add real data
-  const tilesToAdd = tileTypes.map((val) => outputTile(val));
+  const tilesToAdd = [outputTile(tileTypes[7])]; //.map((val) => outputTile(val));
 
   console.log("Adding tiles:", tilesToAdd);
   const tx = await tileFacet.addTileTypes(tilesToAdd, {
