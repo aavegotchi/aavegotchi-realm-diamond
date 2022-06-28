@@ -1,4 +1,4 @@
-export const gasPrice = 875000000000;
+export const gasPrice = 75000000000;
 
 export const kovanDiamondAddress = "0xa37D0c085121B6b7190A34514Ca28fC15Bb4dc22";
 export const maticDiamondAddress = "0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11";
@@ -15,18 +15,19 @@ export const alchemica = [
   "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C", //kek
 ];
 
+//Mumbai
 export const mumbaiRealmDiamondAddress =
-  "0x7F2331C4F9e4E8b5A0fF0b1ecBd9D926371ffC45";
+  "0x726F201A9aB38cD56D60ee392165F1434C4F193D";
+export const mumbaiInstallationDiamondAddress =
+  "0x663aeA831087487d2944ce44836F419A35Ee005A";
+export const mumbaiTileDiamondAddress =
+  "0xDd8947D7F6705136e5A12971231D134E80DFC15d";
 
+//Matic
 export const maticRealmDiamondAddress =
   "0x1d0360bac7299c86ec8e99d0c1c9a95fefaf2a11";
-
-export const mumbaiInstallationDiamondAddress =
-  "0xb6557C0307B1009391836DBfBF6490a174dDcd31";
-
 export const maticInstallationDiamondAddress =
   "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
-
 export const maticTileDiamondAddress =
   "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
 
