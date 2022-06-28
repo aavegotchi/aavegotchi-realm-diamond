@@ -414,6 +414,14 @@ contract RealmFacet is Modifiers {
     }
   }
 
+  function getAltarId(uint256 _parcelId) external view returns (uint256) {
+    return s.parcels[_parcelId].altarId;
+  }
+
+  function setAltarId(uint256 _parcelId, uint256 _altarId) external onlyOwner {
+    s.parcels[_parcelId].altarId = _altarId;
+  }
+
   function fixAltarLevel(uint256[] memory _parcelIds) external onlyOwner {
     InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
     for (uint256 i; i < _parcelIds.length; i++) {

@@ -182,30 +182,4 @@ contract InstallationAdminFacet is Modifiers {
       LibERC1155.addToOwner(s.realmDiamond, newId, 1);
     }
   }
-
-  /// @notice Allows the owner to reduce the upgradeQueueLength by 1
-  /// @param _parcelIds An array of parcel IDs to reduce
-
-  function fixUpgradeQueueLength(uint256[] calldata _parcelIds) external onlyOwner {
-    RealmDiamond realm = RealmDiamond(address(s.realmDiamond));
-    for (uint256 i = 0; i < _parcelIds.length; i++) {
-      realm.subUpgradeQueueLength(_parcelIds[i]);
-    }
-  }
-
-  struct WipeHashStruct {
-    uint256 parcelId;
-    uint256 coordinateX;
-    uint256 coordinateY;
-    uint256 installationId;
-  }
-
-  function wipeHashes(WipeHashStruct[] calldata _entries) external onlyOwner {
-    for (uint256 i = 0; i < _entries.length; i++) {
-      WipeHashStruct memory e = _entries[i];
-      // clean unique hash
-      bytes32 uniqueHash = keccak256(abi.encodePacked(e.parcelId, e.coordinateX, e.coordinateY, e.installationId));
-      s.upgradeHashes[uniqueHash] = 0;
-    }
-  }
 }

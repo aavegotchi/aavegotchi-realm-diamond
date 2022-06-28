@@ -1,29 +1,20 @@
-import { LedgerSigner } from "@anders-t/ethers-ledger";
-import { ethers, network, run } from "hardhat";
-import {
-  maticInstallationDiamondAddress,
-  maticRealmDiamondAddress,
-} from "../../../constants";
+import { run } from "hardhat";
+import { maticInstallationDiamondAddress } from "../../../constants";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
-import { InstallationAdminFacet, RealmFacet } from "../../../typechain";
-import { diamondOwner, gasPrice, impersonate } from "../helperFunctions";
 
 export async function upgrade() {
   const diamondUpgrader = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
 
-  const wipeHash =
-    "tuple(uint256 parcelId, uint256 coordinateX,uint256 coordinateY, uint256 installationId)";
+  const WipeHashStruct = `tuple(uint256 parcelId, uint256 coordinateX, uint256 coordinateY, uint256 installationId)`;
 
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "InstallationAdminFacet",
-      addSelectors: [
-        `function wipeHashes(${wipeHash}[] calldata _entries) external`,
-      ],
+      addSelectors: [],
       removeSelectors: [],
     },
   ];
@@ -38,61 +29,35 @@ export async function upgrade() {
     useMultisig: false,
   };
 
+  await run("deployUpgrade", args);
+
   // const buggedParcels = ["49811", "9092"];
 
-  interface WipeHash {
-    parcelId: number;
-    coordinateX: number;
-    coordinateY: number;
-    installationId: number;
-  }
+  // const installationUpgradeFacet = (await ethers.getContractAt(
+  //   "InstallationUpgradeFacet",
+  //   maticInstallationDiamondAddress
+  // )) as InstallationUpgradeFacet;
 
-  const wipeHashes: WipeHash[] = [
-    {
-      parcelId: 49811,
-      coordinateX: 0,
-      coordinateY: 0,
-      installationId: 10,
-    },
-    {
-      parcelId: 9092,
-      coordinateX: 3,
-      coordinateY: 3,
-      installationId: 10,
-    },
-  ];
+  // let adminFacet = (await ethers.getContractAt(
+  //   "InstallationAdminFacet",
+  //   maticInstallationDiamondAddress,
+  //   signer
+  // )) as InstallationAdminFacet;
 
-  // const realmFacet = (await ethers.getContractAt(
-  //   "RealmFacet",
-  //   maticRealmDiamondAddress
-  // )) as RealmFacet;
+  // console.log("add upgrade queue");
+  // await adminFacet.addUpgradeQueueLength(["9092"], { gasPrice: gasPrice });
 
-  // for await (const parcel of buggedParcels) {
-  //   const length = await realmFacet.getParcelUpgradeQueueLength(parcel);
-  //   console.log("length:", length);
-  // }
+  // const queue: UpgradeQueue = {
+  //   parcelId: "49811",
+  //   coordinateX: 0,
+  //   coordinateY: 0,
+  //   installationId: 10,
+  //   readyBlock: 0,
+  //   owner: "0x4331b37a19d68a36b7f7ad6ee50864d6b98ff087",
+  //   claimed: false,
+  // };
 
-  // await run("deployUpgrade", args);
-
-  let installationAdminFacet = (await ethers.getContractAt(
-    "InstallationAdminFacet",
-    maticInstallationDiamondAddress,
-    new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0")
-  )) as InstallationAdminFacet;
-
-  if (network.name === "hardhat") {
-    installationAdminFacet = await impersonate(
-      await diamondOwner(maticInstallationDiamondAddress, ethers),
-      installationAdminFacet,
-      ethers,
-      network
-    );
-  }
-
-  await installationAdminFacet.wipeHashes(wipeHashes, {
-    gasPrice: gasPrice,
-  });
-
+  // await installationUpgradeFacet.finalizeUpgrades(["6788"]);
   // for await (const parcel of buggedParcels) {
   //   const length = await realmFacet.getParcelUpgradeQueueLength(parcel);
   //   console.log("length:", length);
