@@ -90,7 +90,7 @@ contract RealmFacet is Modifiers {
     //2 - Equip Installations
     LibRealm.verifyAccessRight(_realmId, _gotchiId, 2);
     require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _installationId, _x, _y)), _signature, s.backendPubKey),
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
 
@@ -131,7 +131,7 @@ contract RealmFacet is Modifiers {
     bytes memory _signature
   ) external onlyParcelOwner(_realmId) gameActive {
     require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _installationId, _x, _y)), _signature, s.backendPubKey),
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
 
@@ -187,7 +187,7 @@ contract RealmFacet is Modifiers {
     //3 - Equip Tile
     LibRealm.verifyAccessRight(_realmId, _gotchiId, 3);
     require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _tileId, _x, _y)), _signature, s.backendPubKey),
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
     LibRealm.placeTile(_realmId, _tileId, _x, _y);
@@ -211,7 +211,7 @@ contract RealmFacet is Modifiers {
     bytes memory _signature
   ) external onlyParcelOwner(_realmId) gameActive {
     require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _tileId, _x, _y)), _signature, s.backendPubKey),
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
     LibRealm.removeTile(_realmId, _tileId, _x, _y);
