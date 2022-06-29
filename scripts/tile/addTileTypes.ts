@@ -31,8 +31,8 @@ export async function setAddresses() {
     tileFacet = await impersonate(owner, tileFacet, ethers, network);
   }
 
-  // add real data
-  const tile = outputTile(tileTypes[5]);
+  // cyan grass
+  const tile = outputTile(tileTypes[6]);
 
   console.log("Adding tile:", tile);
   await tileFacet.addTileTypes([tile], {
