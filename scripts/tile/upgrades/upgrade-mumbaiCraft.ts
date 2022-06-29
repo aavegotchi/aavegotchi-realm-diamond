@@ -6,16 +6,14 @@ import {
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
 
-export async function upgrade() {
+export async function upgradeMumbaiCraft() {
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
   const diamondAddress = mumbaiTileDiamondAddress;
 
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "TileFacet",
-      addSelectors: [
-        `function craftTiles(uint16[] calldata _tileTypes) external`,
-      ],
+      addSelectors: [],
       removeSelectors: [],
     },
   ];
@@ -36,7 +34,7 @@ export async function upgrade() {
 }
 
 if (require.main === module) {
-  upgrade()
+  upgradeMumbaiCraft()
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

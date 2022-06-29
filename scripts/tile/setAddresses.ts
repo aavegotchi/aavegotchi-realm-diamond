@@ -3,6 +3,7 @@ import { ethers, network } from "hardhat";
 import {
   maticRealmDiamondAddress,
   maticTileDiamondAddress,
+  mumbaiRealmDiamondAddress,
   mumbaiTileDiamondAddress,
 } from "../../constants";
 import { OwnershipFacet, TileFacet } from "../../typechain";
@@ -17,22 +18,24 @@ export async function setAddresses() {
   const accounts: Signer[] = await ethers.getSigners();
   const deployer = accounts[0];
 
-  let diamondAddress = maticTileDiamondAddress;
+  let realmAddress = mumbaiRealmDiamondAddress;
+  let tileAddress = mumbaiTileDiamondAddress;
 
   if (network.name === "mumbai") {
-    diamondAddress = mumbaiTileDiamondAddress;
+    realmAddress = maticRealmDiamondAddress;
+    tileAddress = mumbaiTileDiamondAddress;
   }
 
   const ownershipFacet = (await ethers.getContractAt(
     "OwnershipFacet",
-    diamondAddress
+    tileAddress
   )) as OwnershipFacet;
   const owner = await ownershipFacet.owner();
   console.log("owner:", owner);
 
   let tileFacet = (await ethers.getContractAt(
     "TileFacet",
-    diamondAddress
+    tileAddress
   )) as TileFacet;
 
   if (network.name === "hardhat") {
@@ -41,7 +44,7 @@ export async function setAddresses() {
 
   await tileFacet.setAddresses(
     maticAavegotchiDiamondAddress,
-    diamondAddress,
+    realmAddress,
     ethers.constants.AddressZero,
     pixelcraftAddress,
     aavegotchiDAOAddress

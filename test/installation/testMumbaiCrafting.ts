@@ -1,6 +1,7 @@
 import { impersonate } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { TileFacet } from "../../typechain";
+import { upgradeMumbaiCraft } from "../../scripts/tile/upgrades/upgrade-mumbaiCraft";
 
 describe("Testing Crafting ", async function () {
   const testAddress = "0x3a79bF3555F33f2adCac02da1c4a0A0163F666ce";
@@ -17,6 +18,8 @@ describe("Testing Crafting ", async function () {
       tileAddress,
       await ethers.getSigners()[0]
     )) as TileFacet;
+
+    await upgradeMumbaiCraft();
   });
 
   it("Craft tiles", async function () {
