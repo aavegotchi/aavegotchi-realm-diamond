@@ -16,3 +16,5 @@ typechain
 hardhat.config.ts
 yarn.lock
 package.lock.json
+data/allInstallations.json
+data/allTiles.json
