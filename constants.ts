@@ -32,6 +32,13 @@ export async function varsForNetwork(ethers: HardhatEthersHelpers) {
   return varsByChainId((await ethers.provider.getNetwork()).chainId);
 }
 
+export const alchemica = [
+  "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f",
+  "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8",
+  "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2",
+  "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C",
+];
+
 const kovanVars: Constants = {
   aavegotchiDiamond: "0xa37D0c085121B6b7190A34514Ca28fC15Bb4dc22",
   realmDiamond: "",
