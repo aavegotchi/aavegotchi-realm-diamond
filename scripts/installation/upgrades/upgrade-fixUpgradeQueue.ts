@@ -1,5 +1,5 @@
-import { run } from "hardhat";
-import { maticInstallationDiamondAddress } from "../../../constants";
+import { ethers, run } from "hardhat";
+import { varsForNetwork } from "../../../constants";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
@@ -21,9 +21,11 @@ export async function upgrade() {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
+  const c = await varsForNetwork(ethers);
+
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
-    diamondAddress: maticInstallationDiamondAddress,
+    diamondAddress: c.installationDiamond,
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,
