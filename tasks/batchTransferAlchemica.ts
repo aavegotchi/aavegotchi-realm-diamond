@@ -3,7 +3,7 @@
 import { BigNumber, BigNumberish, Signer } from "ethers";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { alchemica, gasPrice, maticDiamondAddress } from "../constants";
+import { alchemica, gasPrice, varsForNetwork } from "../constants";
 import { impersonate } from "../scripts/helperFunctions";
 import { AlchemicaFacet, AlchemicaToken, RealmFacet } from "../typechain";
 
@@ -21,6 +21,9 @@ task("batchTransferAlchemica", "batch transfers alchemica to address")
 
   .setAction(
     async (taskArgs: MintParcelsTaskArgs, hre: HardhatRuntimeEnvironment) => {
+      const c = await varsForNetwork(hre.ethers);
+      const maticDiamondAddress = c.realmDiamond;
+
       const amounts = taskArgs.amounts.split(",") as [
         BigNumberish,
         BigNumberish,
