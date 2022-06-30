@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { maticInstallationDiamondAddress } from "../../../constants";
+import { varsForNetwork } from "../../../constants";
 import { installationTypes } from "../../../data/installations/altars";
 import { InstallationAdminFacet, InstallationFacet } from "../../../typechain";
 
@@ -10,9 +10,11 @@ import { gasPrice } from "../helperFunctions";
 export async function setAddresses() {
   const signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
 
+  const c = await varsForNetwork(ethers);
+
   const installationFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
-    maticInstallationDiamondAddress,
+    c.installationDiamond,
     signer
   )) as InstallationAdminFacet;
 
@@ -22,7 +24,7 @@ export async function setAddresses() {
 
   const installationfacet = (await ethers.getContractAt(
     "InstallationFacet",
-    maticInstallationDiamondAddress
+    c.installationDiamond
   )) as InstallationFacet;
 
   const insts = await installationfacet.getInstallationTypes([]);
