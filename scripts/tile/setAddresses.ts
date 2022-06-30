@@ -22,7 +22,7 @@ export async function setAddresses() {
   let tileAddress = mumbaiTileDiamondAddress;
 
   if (network.name === "mumbai") {
-    realmAddress = maticRealmDiamondAddress;
+    realmAddress = mumbaiRealmDiamondAddress;
     tileAddress = mumbaiTileDiamondAddress;
   }
 
