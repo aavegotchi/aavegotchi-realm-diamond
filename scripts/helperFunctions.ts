@@ -1,6 +1,7 @@
-import { Signer } from "@ethersproject/abstract-signer";
-import { Contract } from "@ethersproject/contracts";
-import { alchemica, maticDiamondAddress } from "../constants";
+import { BigNumber, Signer, Contract, Wallet, Signature } from "ethers";
+import { ethers } from "ethers";
+
+import { alchemica, maticDiamondAddress, PERMIT_TYPES } from "../constants";
 import { AlchemicaToken } from "../typechain";
 import { Network } from "hardhat/types";
 import { DiamondLoupeFacet, OwnershipFacet } from "../typechain";
@@ -8,6 +9,7 @@ import {
   mumbaiDiamondAddress,
   mumbaiInstallationDiamondAddress,
 } from "./installation/helperFunctions";
+import { Domain } from "../types";
 
 export const gasPrice = 75000000000;
 
@@ -164,4 +166,65 @@ export async function approveRealAlchemica(
       ethers.utils.parseUnits("1000000000")
     );
   }
+}
+
+export async function createDomain(token: Contract): Promise<Domain> {
+  const domain = {
+    name: await token.name(),
+    version: "1",
+    chainId: 137,
+    verifyingContract: token.address,
+  };
+  return domain;
+}
+
+export async function permit(
+  token: Contract,
+  owner: Wallet,
+  spender: string,
+  value: BigNumber,
+  nonce: BigNumber,
+  deadline: BigNumber
+) {
+  const sig = await permitRSV(
+    owner,
+    spender,
+    value,
+    nonce,
+    deadline,
+    await createDomain(token)
+  );
+  return await token
+    .connect(owner)
+    .permit(
+      await owner.getAddress(),
+      spender,
+      value,
+      deadline,
+      sig.v,
+      sig.r,
+      sig.s
+    );
+}
+
+export async function permitRSV(
+  owner: Wallet,
+  spender: string,
+  value: BigNumber,
+  nonce: BigNumber,
+  deadline: BigNumber,
+  domain: Domain
+) {
+  const message = {
+    owner: await owner.getAddress(),
+    spender: spender,
+    value: value,
+    nonce: nonce,
+    deadline: deadline,
+  };
+
+  const result = await owner._signTypedData(domain, PERMIT_TYPES, message);
+  let sig: Signature = ethers.utils.splitSignature(result);
+
+  return sig;
 }
