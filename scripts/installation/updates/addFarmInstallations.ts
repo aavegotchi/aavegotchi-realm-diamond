@@ -1,28 +1,37 @@
-import { ethers } from "hardhat";
-import { maticInstallationDiamondAddress } from "../../../constants";
-import { installationTypes } from "../../../data/installations/altars";
+import { ethers, network } from "hardhat";
+import { installationTypes } from "../../../data/installations/farming";
 import { InstallationAdminFacet, InstallationFacet } from "../../../typechain";
 
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { outputInstallation } from "../../realm/realmHelpers";
 import { gasPrice } from "../helperFunctions";
+import {
+  maticInstallationDiamondAddress,
+  mumbaiInstallationDiamondAddress,
+} from "../../../constants";
 
 export async function setAddresses() {
-  const signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
+  let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
+
+  if (network.name === "mumbai") {
+    signer = await ethers.getSigners()[0];
+  }
 
   const installationFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
-    maticInstallationDiamondAddress,
+    mumbaiInstallationDiamondAddress,
     signer
   )) as InstallationAdminFacet;
 
-  const altars = installationTypes.map((val) => outputInstallation(val));
+  const farming = installationTypes.map((val) => outputInstallation(val));
 
-  await installationFacet.addInstallationTypes(altars, { gasPrice: gasPrice });
+  console.log("farming:", farming);
+
+  // await installationFacet.addInstallationTypes(farming, { gasPrice: gasPrice });
 
   const installationfacet = (await ethers.getContractAt(
     "InstallationFacet",
-    maticInstallationDiamondAddress
+    mumbaiInstallationDiamondAddress
   )) as InstallationFacet;
 
   const insts = await installationfacet.getInstallationTypes([]);

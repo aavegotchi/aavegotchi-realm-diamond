@@ -16,13 +16,13 @@ export const alchemica = [
 ];
 
 export const mumbaiDiamondAddress =
-  "0xb012732d259df648B8B3876b9794Fcb631262447";
+  "0x726F201A9aB38cD56D60ee392165F1434C4F193D";
 
 export const maticRealmDiamondAddress =
   "0x1d0360bac7299c86ec8e99d0c1c9a95fefaf2a11";
 
 export const mumbaiInstallationDiamondAddress =
-  "0x4638B8127D1FC1bb69732c8D82Ea0Ab487A79e23";
+  "0x663aeA831087487d2944ce44836F419A35Ee005A";
 
 export const maticInstallationDiamondAddress =
   "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
