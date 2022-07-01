@@ -11,7 +11,7 @@ import {TestUpgrades} from "@test/upgrade.t.sol";
 import {TestUtils} from "@test/TestUtils.t.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
-contract TestFoundryDiamond is Test, TestUpgrades, TestUtils {
+contract TestFoundryDiamond is Test, TestUpgrades {
   InstallationFacet installationFacet;
   TestInstallationFacet testInstallationFacet;
   RealmFacet realmFacet;
@@ -69,7 +69,7 @@ contract TestFoundryDiamond is Test, TestUpgrades, TestUtils {
     realmCuts[0] = getReplaceFacetSelectorCutFromExistingSelector(realmDiamondAddress(), address(realmFacet), RealmFacet.getParcelInfo.selector);
     logFunctionSelectors(realmCuts);
 
-    vm.prank(getDiamondOwner(realmDiamondAddress()));
+    vm.prank(realmDiamondOwner());
     IDiamondCut(realmDiamondAddress()).diamondCut(realmCuts, address(0), "");
   }
 

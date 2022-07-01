@@ -7,8 +7,9 @@ import {IDiamondCut} from "@interfaces/IDiamondCut.sol";
 import {IDiamondLoupe} from "@interfaces/IDiamondLoupe.sol";
 import {Ownable} from "@interfaces/Ownable.sol";
 import {console2} from "forge-std/console2.sol";
+import {TestUtils} from "@test/TestUtils.t.sol";
 
-contract TestUpgrades {
+contract TestUpgrades is TestUtils {
   function logFunctionSelectors(IDiamondCut.FacetCut[] memory cuts) internal view {
     for (uint256 i; i < cuts.length; i++) {
       if (cuts[i].action == IDiamondCut.FacetCutAction.Replace) {
@@ -28,10 +29,6 @@ contract TestUpgrades {
         }
       }
     }
-  }
-
-  function getDiamondOwner(address diamond) internal view returns (address) {
-    return Ownable(diamond).owner();
   }
 
   /// @dev Intended to be used to get the old facet address for a specific facet to replace all the functions with the ones from a new facet
