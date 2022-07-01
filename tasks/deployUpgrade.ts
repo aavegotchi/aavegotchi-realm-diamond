@@ -129,10 +129,9 @@ task(
           params: [owner],
         });
         signer = await hre.ethers.getSigner(owner);
-      } else if (
-        hre.network.name === "matic" ||
-        hre.network.name === "mumbai"
-      ) {
+      } else if (hre.network.name === "mumbai") {
+        signer = (await hre.ethers.getSigners())[0];
+      } else if (hre.network.name === "matic") {
         if (useLedger) {
           signer = new LedgerSigner(hre.ethers.provider, "m/44'/60'/2'/0/0");
         } else signer = (await hre.ethers.getSigners())[0];

@@ -1,18 +1,20 @@
 import { ethers, network } from "hardhat";
-import { maticInstallationDiamondAddress } from "../../../constants";
 import { decorations1 } from "../../../data/installations/decorations1";
 import { InstallationAdminFacet, InstallationFacet } from "../../../typechain";
 
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { outputInstallation } from "../../realm/realmHelpers";
 import { diamondOwner, gasPrice, impersonate } from "../helperFunctions";
+import { varsForNetwork } from "../../../constants";
 
 export async function addDecorations() {
   const signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
 
+  const c = await varsForNetwork(ethers);
+
   let installationAdminFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
-    maticInstallationDiamondAddress,
+    c.installationDiamond,
     signer
   )) as InstallationAdminFacet;
 
@@ -20,7 +22,7 @@ export async function addDecorations() {
 
   if (testing) {
     installationAdminFacet = await impersonate(
-      await diamondOwner(maticInstallationDiamondAddress, ethers),
+      await diamondOwner(c.installationDiamond, ethers),
       installationAdminFacet,
       ethers,
       network
@@ -44,7 +46,7 @@ export async function addDecorations() {
 
   const installationfacet = (await ethers.getContractAt(
     "InstallationFacet",
-    maticInstallationDiamondAddress
+    c.installationDiamond
   )) as InstallationFacet;
 
   const insts = await installationfacet.getInstallationTypes([]);

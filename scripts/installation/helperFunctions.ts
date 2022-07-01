@@ -1,6 +1,6 @@
-import { Signer } from "@ethersproject/abstract-signer";
 import { Contract } from "@ethersproject/contracts";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { HardhatEthersHelpers } from "hardhat/types";
+import { varsForNetwork } from "../../constants";
 import { DiamondLoupeFacet, OwnershipFacet } from "../../typechain";
 
 export const gasPrice = 80000000000;
@@ -58,29 +58,20 @@ export function getSelector(func: string, ethers: any) {
   return abiInterface.getSighash(ethers.utils.Fragment.from(func));
 }
 
-export const kovanDiamondAddress = "0xa37D0c085121B6b7190A34514Ca28fC15Bb4dc22";
-export const maticDiamondAddress = "";
-export const mumbaiDiamondAddress =
-  "0xb012732d259df648B8B3876b9794Fcb631262447";
-
-export const maticRealmDiamondAddress =
-  "0x1d0360bac7299c86ec8e99d0c1c9a95fefaf2a11";
-
-export const maticAavegotchiDiamondAddress =
-  "0x86935f11c86623dec8a25696e1c19a8659cbf95d";
-
-export const mumbaiInstallationDiamondAddress =
-  "0x4638B8127D1FC1bb69732c8D82Ea0Ab487A79e23";
-
 export const maticGhstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
 export async function diamondOwner(address: string, ethers: any) {
   return await (await ethers.getContractAt("OwnershipFacet", address)).owner();
 }
 
-export async function getFunctionsForFacet(facetAddress: string, ethers: any) {
+export async function getFunctionsForFacet(
+  facetAddress: string,
+  ethers: HardhatEthersHelpers
+) {
+  const c = await varsForNetwork(ethers);
+
   const Loupe = (await ethers.getContractAt(
     "DiamondLoupeFacet",
-    maticDiamondAddress
+    c.realmDiamond
   )) as DiamondLoupeFacet;
   const functions = await Loupe.facetFunctionSelectors(facetAddress);
   return functions;
@@ -92,12 +83,12 @@ export async function getDiamondSigner(
   override?: string,
   useLedger?: boolean
 ) {
-  //Instantiate the Signer
-  let signer: Signer;
+  const c = await varsForNetwork(ethers);
+
   const owner = await (
     (await ethers.getContractAt(
       "OwnershipFacet",
-      maticDiamondAddress
+      c.realmDiamond
     )) as OwnershipFacet
   ).owner();
   const testing = ["hardhat", "localhost"].includes(network.name);

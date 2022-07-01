@@ -12,6 +12,7 @@ import "../../libraries/LibAlchemica.sol";
 import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamondInterface.sol";
 import "../../libraries/LibSignature.sol";
 import "./ERC721Facet.sol";
+import "../../interfaces/IERC1155Marketplace.sol";
 
 contract RealmFacet is Modifiers {
   uint256 constant MAX_SUPPLY = 420069;
@@ -33,6 +34,7 @@ contract RealmFacet is Modifiers {
   event UnequipTile(uint256 _realmId, uint256 _tileId, uint256 _x, uint256 _y);
   event AavegotchiDiamondUpdated(address _aavegotchiDiamond);
   event InstallationUpgraded(uint256 _realmId, uint256 _prevInstallationId, uint256 _nextInstallationId, uint256 _coordinateX, uint256 _coordinateY);
+  event ParcelAccessRightSet(uint256 _realmId, uint256 _actionRight, uint256 _accessRight);
 
   /// @notice Return the maximum realm supply
   /// @return The max realm token supply
@@ -73,18 +75,23 @@ contract RealmFacet is Modifiers {
   /// @notice Allow a parcel owner to equip an installation
   /// @dev The _x and _y denote the starting coordinates of the installation and are used to make sure that slot is available on a parcel
   /// @param _realmId The identifier of the parcel which the installation is being equipped on
+  /// @param _gotchiId The Gotchi ID of the Aavegotchi being played. Must be verified by the backend API.
   /// @param _installationId The identifier of the installation being equipped
   /// @param _x The x(horizontal) coordinate of the installation
   /// @param _y The y(vertical) coordinate of the installation
+
   function equipInstallation(
     uint256 _realmId,
+    uint256 _gotchiId,
     uint256 _installationId,
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) gameActive {
+  ) external gameActive {
+    //2 - Equip Installations
+    LibRealm.verifyAccessRight(_realmId, _gotchiId, 2);
     require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _installationId, _x, _y)), _signature, s.backendPubKey),
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
 
@@ -107,6 +114,8 @@ contract RealmFacet is Modifiers {
 
     LibAlchemica.increaseTraits(_realmId, _installationId, false);
 
+    IERC1155Marketplace(s.aavegotchiDiamond).updateERC1155Listing(s.installationsDiamond, _installationId, msg.sender);
+
     emit EquipInstallation(_realmId, _installationId, _x, _y);
   }
 
@@ -118,13 +127,14 @@ contract RealmFacet is Modifiers {
   /// @param _y The y(vertical) coordinate of the installation
   function unequipInstallation(
     uint256 _realmId,
+    uint256 _gotchiId, //will be used soon
     uint256 _installationId,
     uint256 _x,
     uint256 _y,
     bytes memory _signature
   ) external onlyParcelOwner(_realmId) gameActive {
     require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _installationId, _x, _y)), _signature, s.backendPubKey),
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
 
@@ -192,17 +202,22 @@ contract RealmFacet is Modifiers {
   /// @param _y The y(vertical) coordinate of the tile
   function equipTile(
     uint256 _realmId,
+    uint256 _gotchiId,
     uint256 _tileId,
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) gameActive {
+  ) external gameActive {
+    //3 - Equip Tile
+    LibRealm.verifyAccessRight(_realmId, _gotchiId, 3);
     require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _tileId, _x, _y)), _signature, s.backendPubKey),
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
     LibRealm.placeTile(_realmId, _tileId, _x, _y);
     TileDiamondInterface(s.tileDiamond).equipTile(msg.sender, _realmId, _tileId);
+
+    IERC1155Marketplace(s.aavegotchiDiamond).updateERC1155Listing(s.tileDiamond, _tileId, msg.sender);
 
     emit EquipTile(_realmId, _tileId, _x, _y);
   }
@@ -215,13 +230,14 @@ contract RealmFacet is Modifiers {
   /// @param _y The y(vertical) coordinate of the tile
   function unequipTile(
     uint256 _realmId,
+    uint256 _gotchiId,
     uint256 _tileId,
     uint256 _x,
     uint256 _y,
     bytes memory _signature
   ) external onlyParcelOwner(_realmId) gameActive {
     require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _tileId, _x, _y)), _signature, s.backendPubKey),
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
     LibRealm.removeTile(_realmId, _tileId, _x, _y);
@@ -260,7 +276,9 @@ contract RealmFacet is Modifiers {
     require(_realmIds.length == _accessRights.length && _realmIds.length == _actionRights.length, "RealmFacet: Mismatched arrays");
     for (uint256 i; i < _realmIds.length; i++) {
       require(LibMeta.msgSender() == s.parcels[_realmIds[i]].owner, "RealmFacet: Only Parcel owner can call");
+      require(LibRealm.isAccessRightValid(_actionRights[i], _accessRights[i]), "RealmFacet: Invalid access rights");
       s.accessRights[_realmIds[i]][_actionRights[i]] = _accessRights[i];
+      emit ParcelAccessRightSet(_realmIds[i], _actionRights[i], _accessRights[i]);
     }
   }
 
@@ -338,91 +356,6 @@ contract RealmFacet is Modifiers {
     s.parcels[_realmId].upgradeQueueLength--;
   }
 
-  function getHumbleGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[8][8] memory output_) {
-    require(s.parcels[_parcelId].size == 0, "RealmFacet: Not humble");
-    for (uint256 i; i < 8; i++) {
-      for (uint256 j; j < 8; j++) {
-        if (_gridType == 0) {
-          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
-        } else if (_gridType == 1) {
-          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
-        }
-      }
-    }
-  }
-
-  function getReasonableGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[16][16] memory output_) {
-    require(s.parcels[_parcelId].size == 1, "RealmFacet: Not reasonable");
-    for (uint256 i; i < 16; i++) {
-      for (uint256 j; j < 16; j++) {
-        if (_gridType == 0) {
-          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
-        } else if (_gridType == 1) {
-          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
-        }
-      }
-    }
-  }
-
-  function getSpaciousVerticalGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[32][64] memory output_) {
-    require(s.parcels[_parcelId].size == 2, "RealmFacet: Not spacious vertical");
-    for (uint256 i; i < 64; i++) {
-      for (uint256 j; j < 32; j++) {
-        if (_gridType == 0) {
-          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
-        } else if (_gridType == 1) {
-          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
-        }
-      }
-    }
-  }
-
-  function getSpaciousHorizontalGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[64][32] memory output_) {
-    require(s.parcels[_parcelId].size == 3, "RealmFacet: Not spacious horizontal");
-    for (uint256 i; i < 32; i++) {
-      for (uint256 j; j < 64; j++) {
-        if (_gridType == 0) {
-          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
-        } else if (_gridType == 1) {
-          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
-        }
-      }
-    }
-  }
-
-  function getPaartnerGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[64][64] memory output_) {
-    require(s.parcels[_parcelId].size == 4, "RealmFacet: Not paartner");
-    for (uint256 i; i < 64; i++) {
-      for (uint256 j; j < 64; j++) {
-        if (_gridType == 0) {
-          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
-        } else if (_gridType == 1) {
-          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
-        }
-      }
-    }
-  }
-
-  struct ParcelCoordinates {
-    uint256[64][64] coords;
-  }
-
-  function batchGetGrid(uint256[] calldata _parcelIds, uint256 _gridType) external view returns (ParcelCoordinates[] memory) {
-    ParcelCoordinates[] memory parcels = new ParcelCoordinates[](_parcelIds.length);
-    for (uint256 k; k < _parcelIds.length; k++) {
-      for (uint256 i; i < 64; i++) {
-        for (uint256 j; j < 64; j++) {
-          if (_gridType == 0) {
-            parcels[k].coords[i][j] = s.parcels[_parcelIds[k]].buildGrid[j][i];
-          } else if (_gridType == 1) {
-            parcels[k].coords[i][j] = s.parcels[_parcelIds[k]].tileGrid[j][i];
-          }
-        }
-      }
-    }
-    return parcels;
-  }
-
   function batchGetDistrictParcels(address _owner, uint256 _district) external view returns (uint256[] memory) {
     uint256 totalSupply = ERC721Facet(address(this)).totalSupply();
     uint256 balance = ERC721Facet(address(this)).balanceOf(_owner);
@@ -453,47 +386,23 @@ contract RealmFacet is Modifiers {
     }
   }
 
-  // function fixAltarLevel(uint256[] memory _parcelIds) external onlyOwner {
-  //   InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
-  //   for (uint256 i; i < _parcelIds.length; i++) {
-  //     uint256 parcelId = _parcelIds[i];
-  //     Parcel storage parcel = s.parcels[parcelId];
-  //     // Check that the altar is actually supposed to be level 2
-  //     if (installationsDiamond.balanceOfToken(address(this), parcelId, 11) >= 1 && parcel.altarId == 10) {
-  //       parcel.altarId = 11;
-  //     }
-  //   }
-  // }
-
-  function fixGridStartPositions(
-    uint256[] memory _parcelIds,
-    uint256[] memory _x,
-    uint256[] memory _y,
-    bool _isTile,
-    bool _isTrue
-  ) external onlyOwner {
-    require(_parcelIds.length == _x.length && _parcelIds.length == _y.length, "RealmFacet: Mismatched arrays");
-    if (_isTile) {
-      for (uint256 i; i < _parcelIds.length; i++) {
-        s.parcels[_parcelIds[i]].startPositionTileGrid[_x[i]][_y[i]] = _isTrue;
-      }
-    } else {
-      for (uint256 i; i < _parcelIds.length; i++) {
-        s.parcels[_parcelIds[i]].startPositionBuildGrid[_x[i]][_y[i]] = _isTrue;
-      }
-    }
+  function getAltarId(uint256 _parcelId) external view returns (uint256) {
+    return s.parcels[_parcelId].altarId;
   }
 
-  function isGridStartPosition(
-    uint256 _parcelId,
-    uint256 _x,
-    uint256 _y,
-    bool _isTile
-  ) external view returns (bool) {
-    if (_isTile) {
-      return s.parcels[_parcelId].startPositionTileGrid[_x][_y];
-    } else {
-      return s.parcels[_parcelId].startPositionBuildGrid[_x][_y];
+  function setAltarId(uint256 _parcelId, uint256 _altarId) external onlyOwner {
+    s.parcels[_parcelId].altarId = _altarId;
+  }
+
+  function fixAltarLevel(uint256[] memory _parcelIds) external onlyOwner {
+    InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
+    for (uint256 i; i < _parcelIds.length; i++) {
+      uint256 parcelId = _parcelIds[i];
+      Parcel storage parcel = s.parcels[parcelId];
+      // Check that the altar is actually supposed to be level 2
+      if (installationsDiamond.balanceOfToken(address(this), parcelId, 11) >= 1 && parcel.altarId == 10) {
+        parcel.altarId = 11;
+      }
     }
   }
 }

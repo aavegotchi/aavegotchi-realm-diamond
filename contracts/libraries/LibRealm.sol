@@ -171,4 +171,60 @@ library LibRealm {
     ];
     return heights;
   }
+
+  function isAccessRightValid(uint256 actionRight, uint256 accessRight) internal pure returns (bool) {
+    // 0: Channeling
+    // 1: Empty Reservoir
+    // 2: Equip Installations
+    // 3: Equip Tiles
+    // 4: Unequip Installations
+    // 5: Unequip Tiles
+    // 6: Upgrade Installations
+    if (actionRight <= 6) {
+      // 0: Only Owner
+      // 1: Owner + Lent Out
+      // 2: Whitelisted Only
+      // 3: Allow blacklisted
+      // 4: Anyone
+      return accessRight <= 4;
+    }
+    return false;
+  }
+
+  function verifyAccessRight(
+    uint256 _realmId,
+    uint256 _gotchiId,
+    uint256 _actionRight
+  ) internal view {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+    AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
+
+    uint256 accessRight = s.accessRights[_realmId][_actionRight];
+    address parcelOwner = s.parcels[_realmId].owner;
+
+    //Only owner
+    if (accessRight == 0) {
+      require(LibMeta.msgSender() == parcelOwner, "LibRealm: Access Right - Only Owner");
+    }
+    //Owner or borrowed gotchi
+    else if (accessRight == 1) {
+      if (diamond.isAavegotchiLent(uint32(_gotchiId))) {
+        AavegotchiDiamond.GotchiLending memory listing = diamond.getGotchiLendingFromToken(uint32(_gotchiId));
+        require(
+          LibMeta.msgSender() == parcelOwner || (LibMeta.msgSender() == listing.borrower && listing.lender == parcelOwner),
+          "LibRealm: Access Right - Only Owner/Borrower"
+        );
+      } else {
+        require(LibMeta.msgSender() == parcelOwner, "LibRealm: Access Right - Only Owner");
+      }
+    }
+    // //whitelisted addresses
+    // else if (accessRight == 2) {}
+    // //blacklisted addresses
+    // else if (accessRight == 3) {}
+    //anyone
+    else if (accessRight == 4) {
+      //do nothing! anyone can perform this action
+    }
+  }
 }

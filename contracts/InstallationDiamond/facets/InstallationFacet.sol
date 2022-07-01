@@ -16,6 +16,8 @@ contract InstallationFacet is Modifiers {
 
   event CraftTimeReduced(uint256 indexed _queueId, uint256 _blocksReduced);
 
+  event UpgradeTimeReduced(uint256 indexed _queueId, uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _blocksReduced);
+
   /***********************************|
    |             Read Functions         |
    |__________________________________*/
@@ -389,6 +391,10 @@ contract InstallationFacet is Modifiers {
     uint256 _installationId
   ) external onlyRealmDiamond {
     LibInstallation._unequipInstallation(_owner, _realmId, _installationId);
+  }
+
+  function upgradeComplete(uint256 _queueId) external view returns (bool) {
+    return s.upgradeComplete[_queueId];
   }
 
   // /// @notice Allow a user to reduce the upgrade time of an ongoing queue

@@ -1,21 +1,21 @@
 import { BigNumber, BigNumberish, Signer } from "ethers";
 import { ethers, network } from "hardhat";
+import { alchemica, varsForNetwork } from "../../../constants";
 
 import { AlchemicaToken, RealmFacet } from "../../../typechain";
-import {
-  alchemica,
-  impersonate,
-  maticDiamondAddress,
-} from "../../helperFunctions";
+
 // import { upgrade } from "../scripts/upgrades/upgrade-fixDiamond";
 
 export async function setAddresses() {
   const accounts: Signer[] = await ethers.getSigners();
   const deployer = accounts[0];
 
+  const c = await varsForNetwork(ethers);
+  const maticDiamondAddress = c.realmDiamond;
+
   let realmFacet = (await ethers.getContractAt(
     "RealmFacet",
-    maticDiamondAddress,
+    c.realmDiamond,
     deployer
   )) as RealmFacet;
 
@@ -43,7 +43,7 @@ export async function setAddresses() {
     // token = await impersonate(owner, token, ethers, network);
 
     const tx = await token.approve(
-      maticDiamondAddress,
+      c.realmDiamond,
       ethers.utils.parseEther("10000000000")
     );
     await tx.wait();

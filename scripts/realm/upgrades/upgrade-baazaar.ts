@@ -1,8 +1,5 @@
-import { run, ethers, network } from "hardhat";
-import {
-  maticInstallationDiamondAddress,
-  mumbaiInstallationDiamondAddress,
-} from "../../../constants";
+import { ethers, run } from "hardhat";
+import { varsForNetwork } from "../../../constants";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
@@ -12,9 +9,11 @@ import {
 export async function upgrade() {
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
 
+  const c = await varsForNetwork(ethers);
+
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "InstallationUpgradeFacet",
+      facetName: "RealmFacet",
       addSelectors: [],
       removeSelectors: [],
     },
@@ -22,19 +21,12 @@ export async function upgrade() {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
-  let diamondAddress = maticInstallationDiamondAddress;
-  if (network.name === "mumbai") {
-    diamondAddress = mumbaiInstallationDiamondAddress;
-  }
-
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
-    diamondAddress: diamondAddress,
+    diamondAddress: c.realmDiamond,
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,
-    initAddress: ethers.constants.AddressZero,
-    initCalldata: "0x",
   };
 
   await run("deployUpgrade", args);

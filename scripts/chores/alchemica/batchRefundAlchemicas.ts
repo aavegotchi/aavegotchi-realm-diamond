@@ -1,6 +1,6 @@
 import { BigNumber, BigNumberish, Signer } from "ethers";
 import { ethers, network } from "hardhat";
-import { maticDiamondAddress } from "../../../constants";
+import { varsForNetwork } from "../../../constants";
 
 import { AlchemicaFacet, RealmFacet } from "../../../typechain";
 import { impersonate } from "../../helperFunctions";
@@ -8,6 +8,9 @@ import { impersonate } from "../../helperFunctions";
 export async function setAddresses() {
   const accounts: Signer[] = await ethers.getSigners();
   const deployer = accounts[0];
+
+  const c = await varsForNetwork(ethers);
+  const maticDiamondAddress = c.realmDiamond;
 
   let realmFacet = (await ethers.getContractAt(
     "AlchemicaFacet",

@@ -10,7 +10,14 @@ import {
   RealmFacet,
   TileFacet,
 } from "./typechain";
+import { Contract } from "ethers";
 
+export type Domain = {
+  name: string;
+  version: string;
+  chainId: number;
+  verifyingContract: string;
+};
 export interface AxiosMetadataResponse {
   data: ParcelMetadata[];
 }
@@ -111,7 +118,7 @@ export interface TileTypeInput {
 }
 
 export type Level = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
-export type Width = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type Width = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 16;
 export type Height = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export interface InstallationTypeOutput {
   deprecated: boolean;
