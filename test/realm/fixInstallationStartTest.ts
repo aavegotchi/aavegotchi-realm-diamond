@@ -21,11 +21,7 @@ import { expect } from "chai";
 import { ethers, network } from "hardhat";
 import { deployDiamond } from "../../scripts/installation/deploy";
 import { BigNumber, BigNumberish, Signer } from "ethers";
-import {
-  maticInstallationDiamondAddress,
-  maticRealmDiamondAddress,
-  maticTileDiamondAddress,
-} from "../../constants";
+
 import {
   approveAlchemica,
   approveRealAlchemica,
@@ -37,11 +33,14 @@ import { upgrade } from "../../scripts/realm/upgrades/upgrade-fixStartGrid";
 import { upgradeInstallationTest } from "../../scripts/installation/upgrades/test/upgrade-testInstallationFacet";
 import { upgradeRealmTest } from "../../scripts/realm/upgrades/test/upgrade-realmTest";
 import { upgradeTileTest } from "../../scripts/tile/upgrades/test/upgrade-testTileFacet";
+import { varsForNetwork } from "../../constants";
+import { RealmGridFacet } from "../../typechain/RealmGridFacet";
 
 describe("Testing Equip Installation", async function () {
   let installationFacet: InstallationFacet;
   let installationUpgradeFacet: InstallationUpgradeFacet;
   let realmFacet: RealmFacet;
+  let realmGridFacet: RealmGridFacet;
 
   let testInstallationFacet: TestInstallationFacet;
   let testRealmFacet: TestRealmFacet;
@@ -56,35 +55,44 @@ describe("Testing Equip Installation", async function () {
 
     notOwner = await impersonateSigner(notOwnerAddress, ethers, network);
 
+    const c = await varsForNetwork(ethers);
+
+    console.log("c:", c);
+
     installationFacet = (await ethers.getContractAt(
       "InstallationFacet",
-      maticInstallationDiamondAddress
+      c.installationDiamond
     )) as InstallationFacet;
 
     testInstallationFacet = (await ethers.getContractAt(
       "TestInstallationFacet",
-      maticInstallationDiamondAddress
+      c.installationDiamond
     )) as TestInstallationFacet;
 
     installationUpgradeFacet = (await ethers.getContractAt(
       "InstallationUpgradeFacet",
-      maticInstallationDiamondAddress
+      c.installationDiamond
     )) as InstallationUpgradeFacet;
 
     testRealmFacet = (await ethers.getContractAt(
       "TestRealmFacet",
-      maticRealmDiamondAddress
+      c.realmDiamond
     )) as TestRealmFacet;
 
     testTileFacet = (await ethers.getContractAt(
       "TestTileFacet",
-      maticTileDiamondAddress
+      c.tileDiamond
     )) as TestTileFacet;
 
     realmFacet = (await ethers.getContractAt(
       "RealmFacet",
-      maticRealmDiamondAddress
+      c.realmDiamond
     )) as RealmFacet;
+
+    realmGridFacet = (await ethers.getContractAt(
+      "RealmGridFacet",
+      c.realmDiamond
+    )) as RealmGridFacet;
 
     installationFacet = await impersonate(
       owner,
@@ -118,9 +126,9 @@ describe("Testing Equip Installation", async function () {
   it("Should update start position on installation placement", async () => {
     await testInstallationFacet.testCraftInstallations([10]);
     await testRealmFacet.testEquipInstallation(realmId, 10, 3, 3);
-    expect(await realmFacet.isGridStartPosition(realmId, 3, 3, false)).to.equal(
-      true
-    );
+    expect(
+      await realmGridFacet.isGridStartPosition(realmId, 3, 3, false)
+    ).to.equal(true);
   });
   it("Should fail to move installations if not parcel owner", async () => {
     await expect(
@@ -135,25 +143,25 @@ describe("Testing Equip Installation", async function () {
   it("Should be able to move installations", async () => {
     await realmFacet.moveInstallation(realmId, 10, 3, 3, 2, 2);
 
-    expect(await realmFacet.isGridStartPosition(realmId, 3, 3, false)).to.equal(
-      false
-    );
-    expect(await realmFacet.isGridStartPosition(realmId, 2, 2, false)).to.equal(
-      true
-    );
+    expect(
+      await realmGridFacet.isGridStartPosition(realmId, 3, 3, false)
+    ).to.equal(false);
+    expect(
+      await realmGridFacet.isGridStartPosition(realmId, 2, 2, false)
+    ).to.equal(true);
   });
   it("Should remove start position on installation removal", async () => {
     await testRealmFacet.testRemoveInstallation(realmId, 10, 2, 2);
-    expect(await realmFacet.isGridStartPosition(realmId, 2, 2, false)).to.equal(
-      false
-    );
+    expect(
+      await realmGridFacet.isGridStartPosition(realmId, 2, 2, false)
+    ).to.equal(false);
   });
   it("Should update start position for tiles on placement", async () => {
     await testTileFacet.testCraftTiles([4]);
     await testRealmFacet.testEquipTile(realmId, 4, 3, 3);
-    expect(await realmFacet.isGridStartPosition(realmId, 3, 3, true)).to.equal(
-      true
-    );
+    expect(
+      await realmGridFacet.isGridStartPosition(realmId, 3, 3, true)
+    ).to.equal(true);
   });
   it("Should fail to move tile if not parcel owner", async () => {
     await expect(
@@ -168,12 +176,12 @@ describe("Testing Equip Installation", async function () {
   it("Should be able to move tile", async () => {
     await realmFacet.moveTile(realmId, 4, 3, 3, 2, 2);
 
-    expect(await realmFacet.isGridStartPosition(realmId, 3, 3, true)).to.equal(
-      false
-    );
-    expect(await realmFacet.isGridStartPosition(realmId, 2, 2, true)).to.equal(
-      true
-    );
+    expect(
+      await realmGridFacet.isGridStartPosition(realmId, 3, 3, true)
+    ).to.equal(false);
+    expect(
+      await realmGridFacet.isGridStartPosition(realmId, 2, 2, true)
+    ).to.equal(true);
   });
   it("Should not allow removal if the start position is not correct", async () => {
     await expect(
@@ -182,13 +190,13 @@ describe("Testing Equip Installation", async function () {
   });
   it("Should remove start position for tiles on removal", async () => {
     await testRealmFacet.testUnequipTile(realmId, 4, 2, 2);
-    expect(await realmFacet.isGridStartPosition(realmId, 2, 2, true)).to.equal(
-      false
-    );
+    expect(
+      await realmGridFacet.isGridStartPosition(realmId, 2, 2, true)
+    ).to.equal(false);
   });
   it("Should not be able to manually update start positions by non-owner", async () => {
     await expect(
-      realmFacet.fixGridStartPositions([realmId], [2], [2], true, true)
+      realmGridFacet.fixGridStartPositions([realmId], [2], [2], true, true)
     ).to.be.revertedWith("LibDiamond: Must be contract owner");
   });
   it("Should be able to manually update start positions by owner", async () => {
@@ -205,8 +213,8 @@ describe("Testing Equip Installation", async function () {
       true,
       true
     );
-    expect(await realmFacet.isGridStartPosition(realmId, 1, 1, true)).to.equal(
-      true
-    );
+    expect(
+      await realmGridFacet.isGridStartPosition(realmId, 1, 1, true)
+    ).to.equal(true);
   });
 });

@@ -1,5 +1,5 @@
 import { run, ethers } from "hardhat";
-import { maticInstallationDiamondAddress } from "../../../../constants";
+import { varsForNetwork } from "../../../../constants";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
@@ -8,6 +8,8 @@ import {
 
 export async function upgradeInstallationTest() {
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
+
+  const c = await varsForNetwork(ethers);
 
   const UpgradeQueue =
     "tuple(address owner,uint16 coordinateX, uint16 coordinateY,uint40 readyBlock,bool claimed,uint256 parcelId,uint256 installationId)";
@@ -26,7 +28,7 @@ export async function upgradeInstallationTest() {
 
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
-    diamondAddress: maticInstallationDiamondAddress,
+    diamondAddress: c.installationDiamond,
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,

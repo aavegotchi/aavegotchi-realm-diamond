@@ -1,5 +1,5 @@
 import { run, ethers } from "hardhat";
-import { maticRealmDiamondAddress } from "../../../../constants";
+import { varsForNetwork } from "../../../../constants";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
@@ -27,9 +27,11 @@ export async function upgradeRealmTest() {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
+  const c = await varsForNetwork(ethers);
+
   const args: DeployUpgradeTaskArgs = {
-    diamondUpgrader: await diamondOwner(maticRealmDiamondAddress, ethers),
-    diamondAddress: maticRealmDiamondAddress,
+    diamondUpgrader: await diamondOwner(c.realmDiamond, ethers),
+    diamondAddress: c.realmDiamond,
     facetsAndAddSelectors: joined,
     initAddress: ethers.constants.AddressZero,
     initCalldata: "0x",
