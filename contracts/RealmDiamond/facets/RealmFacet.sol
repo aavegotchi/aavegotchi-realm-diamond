@@ -12,6 +12,7 @@ import "../../libraries/LibAlchemica.sol";
 import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamondInterface.sol";
 import "../../libraries/LibSignature.sol";
 import "./ERC721Facet.sol";
+import "../../interfaces/IERC1155Marketplace.sol";
 
 contract RealmFacet is Modifiers {
   uint256 constant MAX_SUPPLY = 420069;
@@ -113,6 +114,8 @@ contract RealmFacet is Modifiers {
 
     LibAlchemica.increaseTraits(_realmId, _installationId, false);
 
+    IERC1155Marketplace(s.aavegotchiDiamond).updateERC1155Listing(s.installationsDiamond, _installationId, msg.sender);
+
     emit EquipInstallation(_realmId, _installationId, _x, _y);
   }
 
@@ -192,6 +195,8 @@ contract RealmFacet is Modifiers {
     );
     LibRealm.placeTile(_realmId, _tileId, _x, _y);
     TileDiamondInterface(s.tileDiamond).equipTile(msg.sender, _realmId, _tileId);
+
+    IERC1155Marketplace(s.aavegotchiDiamond).updateERC1155Listing(s.tileDiamond, _tileId, msg.sender);
 
     emit EquipTile(_realmId, _tileId, _x, _y);
   }

@@ -1537,7 +1537,7 @@ export async function syncParcels() {
     // "9908",
     // "9970",
     // "9995",
-    "9571",
+    "6630",
   ];
 
   const gasUsed = await realmFacet.fixAltarLevel(altars, {
