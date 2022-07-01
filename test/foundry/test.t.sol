@@ -5,23 +5,26 @@ import "forge-std/Test.sol";
 import {InstallationFacet} from "@installation/facets/InstallationFacet.sol";
 import {TestInstallationFacet} from "@installation/facets/TestInstallationFacet.sol";
 import {RealmFacet} from "@realm/facets/RealmFacet.sol";
-import {TestConstants as C} from "@test/constants.t.sol";
 import {IDiamondCut} from "@interfaces/IDiamondCut.sol";
 import {console2} from "forge-std/console2.sol";
 import {TestUpgrades} from "@test/upgrade.t.sol";
+import {TestUtils} from "@test/TestUtils.t.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
-contract TestFoundryDiamond is Test, TestUpgrades {
+contract TestFoundryDiamond is Test, TestUpgrades, TestUtils {
   InstallationFacet installationFacet;
   TestInstallationFacet testInstallationFacet;
   RealmFacet realmFacet;
 
   function setUp() public {
+    console2.log("Chain ID", block.chainid);
+    console2.log("Block Number", block.number);
     deployFacets();
     cutInstallation();
     cutRealm();
-    installationFacet = InstallationFacet(C.INSTALLATION_DIAMOND_ADDRESS_MATIC);
-    testInstallationFacet = TestInstallationFacet(C.INSTALLATION_DIAMOND_ADDRESS_MATIC);
-    realmFacet = RealmFacet(C.REALM_DIAMOND_ADDRESS_MATIC);
+    installationFacet = InstallationFacet(installationDiamondAddress());
+    testInstallationFacet = TestInstallationFacet(installationDiamondAddress());
+    realmFacet = RealmFacet(realmDiamondAddress());
   }
 
   function deployFacets() internal {
@@ -44,7 +47,7 @@ contract TestFoundryDiamond is Test, TestUpgrades {
     console2.log("Cutting Installation Diamond");
     IDiamondCut.FacetCut[] memory installationCuts = new IDiamondCut.FacetCut[](2);
     installationCuts[0] = getReplaceFacetSelectorCutFromExistingSelector(
-      C.INSTALLATION_DIAMOND_ADDRESS_MATIC,
+      installationDiamondAddress(),
       address(installationFacet),
       InstallationFacet.getInstallationType.selector
     );
@@ -56,25 +59,21 @@ contract TestFoundryDiamond is Test, TestUpgrades {
 
     logFunctionSelectors(installationCuts);
 
-    vm.prank(getDiamondOwner(C.INSTALLATION_DIAMOND_ADDRESS_MATIC));
-    IDiamondCut(C.INSTALLATION_DIAMOND_ADDRESS_MATIC).diamondCut(installationCuts, address(0), "");
+    vm.prank(installationDiamondOwner());
+    IDiamondCut(installationDiamondAddress()).diamondCut(installationCuts, address(0), "");
   }
 
   function cutRealm() internal {
     console2.log("Cutting Realm Diamond");
     IDiamondCut.FacetCut[] memory realmCuts = new IDiamondCut.FacetCut[](1);
-    realmCuts[0] = getReplaceFacetSelectorCutFromExistingSelector(
-      C.REALM_DIAMOND_ADDRESS_MATIC,
-      address(realmFacet),
-      RealmFacet.equipInstallation.selector
-    );
+    realmCuts[0] = getReplaceFacetSelectorCutFromExistingSelector(realmDiamondAddress(), address(realmFacet), RealmFacet.getParcelInfo.selector);
     logFunctionSelectors(realmCuts);
 
-    vm.prank(getDiamondOwner(C.REALM_DIAMOND_ADDRESS_MATIC));
-    IDiamondCut(C.REALM_DIAMOND_ADDRESS_MATIC).diamondCut(realmCuts, address(0), "");
+    vm.prank(getDiamondOwner(realmDiamondAddress()));
+    IDiamondCut(realmDiamondAddress()).diamondCut(realmCuts, address(0), "");
   }
 
-  function test1() public {
+  function test1() public view {
     console2.log(installationFacet.getAltarLevel(12));
   }
 }

@@ -3,14 +3,13 @@ pragma solidity ^0.8.0;
 
 import {InstallationFacet} from "@installation/facets/InstallationFacet.sol";
 import {RealmFacet} from "@realm/facets/RealmFacet.sol";
-import {TestConstants as C} from "@test/constants.t.sol";
 import {IDiamondCut} from "@interfaces/IDiamondCut.sol";
 import {IDiamondLoupe} from "@interfaces/IDiamondLoupe.sol";
 import {Ownable} from "@interfaces/Ownable.sol";
 import {console2} from "forge-std/console2.sol";
 
 contract TestUpgrades {
-  function logFunctionSelectors(IDiamondCut.FacetCut[] memory cuts) internal {
+  function logFunctionSelectors(IDiamondCut.FacetCut[] memory cuts) internal view {
     for (uint256 i; i < cuts.length; i++) {
       if (cuts[i].action == IDiamondCut.FacetCutAction.Replace) {
         console2.log("Replace Facet Selectors:");
