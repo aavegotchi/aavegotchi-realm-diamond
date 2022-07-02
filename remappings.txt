@@ -1,0 +1,9 @@
+@contracts/=contracts/
+@alchemica/=contracts/Alchemica/
+@installation/=contracts/InstallationDiamond/
+@shared/=contracts/shared/
+@libraries/=contracts/libraries/
+@realm/=contracts/RealmDiamond/
+@tile/=contracts/TileDiamond/
+@test/=test/foundry/
+@interfaces/=contracts/interfaces/

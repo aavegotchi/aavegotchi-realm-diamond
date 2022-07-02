@@ -10,7 +10,14 @@ import {
   RealmFacet,
   TileFacet,
 } from "./typechain";
+import { Contract } from "ethers";
 
+export type Domain = {
+  name: string;
+  version: string;
+  chainId: number;
+  verifyingContract: string;
+};
 export interface AxiosMetadataResponse {
   data: ParcelMetadata[];
 }

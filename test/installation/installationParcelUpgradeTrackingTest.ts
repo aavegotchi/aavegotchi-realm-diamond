@@ -116,7 +116,6 @@ describe("Testing Equip Installation", async function () {
 
     const userUpgradeQueue =
       await installationUpgradeFacet.getUserUpgradeQueueNew(owner);
-
     expect(userUpgradeQueue.indexes_.length).to.equal(1);
   });
   it("Should finalize an upgrade and the getter should remove the upgrade id", async () => {

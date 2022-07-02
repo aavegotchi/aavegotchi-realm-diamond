@@ -61,4 +61,14 @@ export const tileTypes: TileTypeInput[] = [
     alchemicaCost: [3000, 1000, 5000, 2000],
     craftTime: 0,
   },
+  {
+    id: 6,
+    name: "LE Cyan Grass",
+    width: 4,
+    height: 4,
+    deprecated: false,
+    tileType: 0,
+    alchemicaCost: [200, 0, 10, 0],
+    craftTime: 0,
+  },
 ];

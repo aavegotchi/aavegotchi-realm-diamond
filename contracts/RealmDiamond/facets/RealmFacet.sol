@@ -12,6 +12,7 @@ import "../../libraries/LibAlchemica.sol";
 import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamondInterface.sol";
 import "../../libraries/LibSignature.sol";
 import "./ERC721Facet.sol";
+import "../../interfaces/IERC1155Marketplace.sol";
 
 contract RealmFacet is Modifiers {
   uint256 constant MAX_SUPPLY = 420069;
@@ -74,18 +75,23 @@ contract RealmFacet is Modifiers {
   /// @notice Allow a parcel owner to equip an installation
   /// @dev The _x and _y denote the starting coordinates of the installation and are used to make sure that slot is available on a parcel
   /// @param _realmId The identifier of the parcel which the installation is being equipped on
+  /// @param _gotchiId The Gotchi ID of the Aavegotchi being played. Must be verified by the backend API.
   /// @param _installationId The identifier of the installation being equipped
   /// @param _x The x(horizontal) coordinate of the installation
   /// @param _y The y(vertical) coordinate of the installation
+
   function equipInstallation(
     uint256 _realmId,
+    uint256 _gotchiId,
     uint256 _installationId,
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) gameActive {
+  ) external gameActive {
+    //2 - Equip Installations
+    LibRealm.verifyAccessRight(_realmId, _gotchiId, 2);
     require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _installationId, _x, _y)), _signature, s.backendPubKey),
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
 
@@ -108,6 +114,8 @@ contract RealmFacet is Modifiers {
 
     LibAlchemica.increaseTraits(_realmId, _installationId, false);
 
+    IERC1155Marketplace(s.aavegotchiDiamond).updateERC1155Listing(s.installationsDiamond, _installationId, msg.sender);
+
     emit EquipInstallation(_realmId, _installationId, _x, _y);
   }
 
@@ -119,13 +127,14 @@ contract RealmFacet is Modifiers {
   /// @param _y The y(vertical) coordinate of the installation
   function unequipInstallation(
     uint256 _realmId,
+    uint256 _gotchiId, //will be used soon
     uint256 _installationId,
     uint256 _x,
     uint256 _y,
     bytes memory _signature
   ) external onlyParcelOwner(_realmId) gameActive {
     require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _installationId, _x, _y)), _signature, s.backendPubKey),
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
 
@@ -172,17 +181,22 @@ contract RealmFacet is Modifiers {
   /// @param _y The y(vertical) coordinate of the tile
   function equipTile(
     uint256 _realmId,
+    uint256 _gotchiId,
     uint256 _tileId,
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) gameActive {
+  ) external gameActive {
+    //3 - Equip Tile
+    LibRealm.verifyAccessRight(_realmId, _gotchiId, 3);
     require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _tileId, _x, _y)), _signature, s.backendPubKey),
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
     LibRealm.placeTile(_realmId, _tileId, _x, _y);
     TileDiamondInterface(s.tileDiamond).equipTile(msg.sender, _realmId, _tileId);
+
+    IERC1155Marketplace(s.aavegotchiDiamond).updateERC1155Listing(s.tileDiamond, _tileId, msg.sender);
 
     emit EquipTile(_realmId, _tileId, _x, _y);
   }
@@ -195,13 +209,14 @@ contract RealmFacet is Modifiers {
   /// @param _y The y(vertical) coordinate of the tile
   function unequipTile(
     uint256 _realmId,
+    uint256 _gotchiId,
     uint256 _tileId,
     uint256 _x,
     uint256 _y,
     bytes memory _signature
   ) external onlyParcelOwner(_realmId) gameActive {
     require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _tileId, _x, _y)), _signature, s.backendPubKey),
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
     LibRealm.removeTile(_realmId, _tileId, _x, _y);
@@ -412,6 +427,14 @@ contract RealmFacet is Modifiers {
     for (uint256 i; i < _parcelIds.length; i++) {
       output_[i] = s.accessRights[_parcelIds[i]][_actionRights[i]];
     }
+  }
+
+  function getAltarId(uint256 _parcelId) external view returns (uint256) {
+    return s.parcels[_parcelId].altarId;
+  }
+
+  function setAltarId(uint256 _parcelId, uint256 _altarId) external onlyOwner {
+    s.parcels[_parcelId].altarId = _altarId;
   }
 
   function fixAltarLevel(uint256[] memory _parcelIds) external onlyOwner {

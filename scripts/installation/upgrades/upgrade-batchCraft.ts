@@ -1,8 +1,6 @@
 import { run, ethers } from "hardhat";
-import {
-  maticInstallationDiamondAddress,
-  maticTileDiamondAddress,
-} from "../../../constants";
+import { varsForNetwork } from "../../../constants";
+
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
@@ -34,9 +32,11 @@ export async function upgrade() {
     },
   ];
 
+  const c = await varsForNetwork(ethers);
+
   const ownership = (await ethers.getContractAt(
     "OwnershipFacet",
-    maticInstallationDiamondAddress
+    c.installationDiamond
   )) as OwnershipFacet;
   const owner = await ownership.owner();
   console.log("owner:", owner);
@@ -45,7 +45,7 @@ export async function upgrade() {
   const joined2 = convertFacetAndSelectorsToString(facets2);
   const args1: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
-    diamondAddress: maticInstallationDiamondAddress,
+    diamondAddress: c.installationDiamond,
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,
@@ -53,7 +53,7 @@ export async function upgrade() {
 
   const args2: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
-    diamondAddress: maticTileDiamondAddress,
+    diamondAddress: c.tileDiamond,
     facetsAndAddSelectors: joined2,
     useLedger: true,
     useMultisig: false,
