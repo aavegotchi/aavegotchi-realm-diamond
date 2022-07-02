@@ -1,10 +1,20 @@
-import { ethers, run } from "hardhat";
+import { ethers, network, run } from "hardhat";
 import { varsForNetwork } from "../../../constants";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
+import { VRFFacet__factory } from "../../../typechain";
+import { VRFFacetInterface } from "../../../typechain/VRFFacet";
+
+export interface VrfConfig {
+  subId: number;
+  callbackGasLimit: number;
+  requestConfirmations: number;
+  numWords: number;
+  keyHash: string;
+}
 
 export async function upgrade() {
   const c = await varsForNetwork(ethers);
@@ -26,7 +36,7 @@ export async function upgrade() {
         "function setTotalAlchemicas(uint256[4][5] calldata _totalAlchemicas) external",
         "function startSurveying(uint256 _realmId) external",
         "function progressSurveyingRound() external",
-        "function claimAvailableAlchemica(uint256 _realmId, bool[4] calldata _alchemicaTypes, uint256 _gotchiId, bytes memory _signature) external",
+        "function claimAvailableAlchemica(uint256 _realmId, uint256 _gotchiId, bytes memory _signature) external",
         "function lastClaimedAlchemica(uint256 _realmId) external view returns (uint256)",
       ],
       removeSelectors: [],
@@ -35,8 +45,7 @@ export async function upgrade() {
       facetName: "VRFFacet",
       addSelectors: [
         "function rawFulfillRandomWords(uint256 requestId, uint256[] memory randomWords) external",
-        `function setConfig(${requestConfig} _requestConfig) external`,
-        "function setVrfCoordinator(address coordinator) external",
+        `function setConfig(${requestConfig} _requestConfig, address _vrfCoordinator) external`,
         "function subscribe() external",
         "function topUpSubscription(uint256 amount) external",
       ],
@@ -46,12 +55,57 @@ export async function upgrade() {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
+  let iface: VRFFacetInterface = new ethers.utils.Interface(
+    VRFFacet__factory.abi
+  ) as VRFFacetInterface;
+
+  let vrfCoordinator: string;
+  let vrfConfig: VrfConfig = {
+    subId: 0,
+    callbackGasLimit: 0,
+    requestConfirmations: 0,
+    numWords: 0,
+    keyHash: "",
+  };
+
+  //mumbai
+  if (network.name === "mumbai") {
+    vrfCoordinator = "0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed";
+    vrfConfig = {
+      subId: 900,
+      callbackGasLimit: 100_000,
+      requestConfirmations: 10,
+      numWords: 4,
+      keyHash:
+        "0x4b09e658ed251bcafeebbc69400383d49f344ace09b9576fe248bb02c003fe9f",
+    };
+
+    //matic
+  } else {
+    vrfCoordinator = "0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed";
+    vrfConfig = {
+      subId: 900,
+      callbackGasLimit: 100_000,
+      requestConfirmations: 10,
+      numWords: 4,
+      keyHash:
+        "0x4b09e658ed251bcafeebbc69400383d49f344ace09b9576fe248bb02c003fe9f",
+    };
+  }
+
+  const calldata = iface.encodeFunctionData("setConfig", [
+    vrfConfig,
+    vrfCoordinator,
+  ]);
+
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: c.realmDiamond,
     facetsAndAddSelectors: joined,
     useLedger: false,
     useMultisig: false,
+    initCalldata: calldata,
+    initAddress: c.realmDiamond,
   };
 
   await run("deployUpgrade", args);

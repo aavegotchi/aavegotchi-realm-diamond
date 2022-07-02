@@ -15,11 +15,8 @@ contract VRFFacet is Modifiers {
     LibRealm.updateRemainingAlchemica(tokenId, randomWords, s.vrfRequestIdToSurveyingRound[requestId]);
   }
 
-  function setVrfCoordinator(address coordinator) external onlyOwner {
-    s.vrfCoordinator = coordinator;
-  }
-
-  function setConfig(RequestConfig calldata _requestConfig) external onlyOwner {
+  function setConfig(RequestConfig calldata _requestConfig, address _vrfCoordinator) external onlyOwner {
+    s.vrfCoordinator = _vrfCoordinator;
     s.requestConfig = RequestConfig(
       _requestConfig.subId,
       _requestConfig.callbackGasLimit,
