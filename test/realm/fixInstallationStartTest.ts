@@ -12,6 +12,7 @@ import {
   IERC20,
   InstallationAdminFacet,
   RealmFacet,
+  RealmGridFacet,
   InstallationUpgradeFacet,
   TestInstallationFacet,
   TestRealmFacet,
@@ -34,7 +35,6 @@ import { upgradeInstallationTest } from "../../scripts/installation/upgrades/tes
 import { upgradeRealmTest } from "../../scripts/realm/upgrades/test/upgrade-realmTest";
 import { upgradeTileTest } from "../../scripts/tile/upgrades/test/upgrade-testTileFacet";
 import { varsForNetwork } from "../../constants";
-import { RealmGridFacet } from "../../typechain/RealmGridFacet";
 
 describe("Testing Equip Installation", async function () {
   let installationFacet: InstallationFacet;
@@ -112,6 +112,12 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
+    realmGridFacet = await impersonate(
+      owner,
+      realmGridFacet,
+      ethers,
+      network
+    )
 
     realmFacet = await impersonate(owner, realmFacet, ethers, network);
     testRealmFacet = await impersonate(owner, testRealmFacet, ethers, network);
@@ -206,7 +212,14 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
-    await realmFacetWithOwner.fixGridStartPositions(
+    realmGridFacet = await impersonate(
+      "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119",
+      realmGridFacet,
+      ethers,
+      network
+    );
+    
+    await realmGridFacet.fixGridStartPositions(
       [realmId],
       [1],
       [1],
