@@ -6,13 +6,8 @@ import {LibERC1155} from "../../libraries/LibERC1155.sol";
 import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {LibItems} from "../../libraries/LibItems.sol";
 import {LibERC998, ItemTypeIO} from "../../libraries/LibERC998.sol";
-import {LibStrings} from "../../libraries/LibStrings.sol";
-import {LibERC20} from "../../libraries/LibERC20.sol";
 import {LibInstallation} from "../../libraries/LibInstallation.sol";
-import {IERC721} from "../../interfaces/IERC721.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
-import {LibSignature} from "../../libraries/LibSignature.sol";
-import {InstallationAdminFacet} from "./InstallationAdminFacet.sol";
 
 contract InstallationFacet is Modifiers {
   event AddedToQueue(uint256 indexed _queueId, uint256 indexed _installationId, uint256 _readyBlock, address _sender);
@@ -22,15 +17,6 @@ contract InstallationFacet is Modifiers {
   event CraftTimeReduced(uint256 indexed _queueId, uint256 _blocksReduced);
 
   event UpgradeTimeReduced(uint256 indexed _queueId, uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _blocksReduced);
-
-  event UpgradeInitiated(
-    uint256 indexed _realmId,
-    uint256 _coordinateX,
-    uint256 _coordinateY,
-    uint256 blockInitiated,
-    uint256 readyBlock,
-    uint256 installationId
-  );
 
   /***********************************|
    |             Read Functions         |
@@ -143,33 +129,29 @@ contract InstallationFacet is Modifiers {
   function getInstallationType(uint256 _installationTypeId) external view returns (InstallationType memory installationType) {
     require(_installationTypeId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
 
-    //If a deprecate time has been set, refer to that. Otherwise, use the manual deprecate.
-    bool deprecated = s.deprecateTime[_installationTypeId] > 0 ? block.timestamp > s.deprecateTime[_installationTypeId] : installationType.deprecated;
-
     installationType = s.installationTypes[_installationTypeId];
-    installationType.deprecated = deprecated;
+    //If a deprecate time has been set, refer to that. Otherwise, use the manual deprecate.
+    installationType.deprecated = s.deprecateTime[_installationTypeId] > 0
+      ? block.timestamp > s.deprecateTime[_installationTypeId]
+      : installationType.deprecated;
+  }
+
+  function getInstallationUnequipType(uint256 _installationId) external view returns (uint256) {
+    require(_installationId < s.installationTypes.length, "InstallationFacet: Item type doesn't exist");
+    return s.unequipTypes[_installationId];
   }
 
   /// @notice Query the item type of multiple installation types
   /// @param _installationTypeIds An array containing the identifiers of items to query
   /// @return installationTypes_ An array of structs,each struct containing details about the item type of the corresponding item
   function getInstallationTypes(uint256[] calldata _installationTypeIds) external view returns (InstallationType[] memory installationTypes_) {
-    if (_installationTypeIds.length == 0) {
-      installationTypes_ = s.installationTypes;
-
-      for (uint256 i = 0; i < s.installationTypes.length; i++) {
-        installationTypes_[i].deprecated = s.deprecateTime[i] == 0 ? s.installationTypes[i].deprecated : block.timestamp > s.deprecateTime[i];
-      }
-    } else {
-      installationTypes_ = new InstallationType[](_installationTypeIds.length);
-      for (uint256 i; i < _installationTypeIds.length; i++) {
-        //If a deprecate time has been set, refer to that. Otherwise, use the manual deprecate.
-        bool deprecated = s.deprecateTime[_installationTypeIds[i]] > 0
-          ? block.timestamp > s.deprecateTime[_installationTypeIds[i]]
-          : s.installationTypes[_installationTypeIds[i]].deprecated;
-        installationTypes_[i] = s.installationTypes[_installationTypeIds[i]];
-        installationTypes_[i].deprecated = deprecated;
-      }
+    bool isAll = _installationTypeIds.length == 0;
+    uint256 length = isAll ? s.installationTypes.length : _installationTypeIds.length;
+    installationTypes_ = new InstallationType[](length);
+    for (uint256 i = 0; i < length; i++) {
+      uint256 id = isAll ? i : _installationTypeIds[i];
+      installationTypes_[i] = s.installationTypes[id];
+      installationTypes_[i].deprecated = s.deprecateTime[id] == 0 ? installationTypes_[i].deprecated : block.timestamp > s.deprecateTime[id];
     }
   }
 
@@ -189,33 +171,6 @@ contract InstallationFacet is Modifiers {
     assembly {
       mstore(output_, counter)
     }
-  }
-
-  /// @notice Query details about a specific user ongoing upgrade queues
-  /// @return output_ An array of structs, each representing an ongoing upgrade queue
-  function getUserUpgradeQueue(address _owner) external view returns (UpgradeQueue[] memory output_) {
-    uint256 length = s.upgradeQueue.length;
-    output_ = new UpgradeQueue[](length);
-    uint256 counter;
-    for (uint256 i; i < length; i++) {
-      if (s.upgradeQueue[i].owner == _owner) {
-        output_[counter] = s.upgradeQueue[i];
-        counter++;
-      }
-    }
-    assembly {
-      mstore(output_, counter)
-    }
-  }
-
-  /// @notice Query details about all ongoing upgrade queues
-  /// @return output_ An array of structs, each representing an ongoing upgrade queue
-  function getAllUpgradeQueue() external view returns (UpgradeQueue[] memory) {
-    return s.upgradeQueue;
-  }
-
-  function getUpgradeQueueId(uint256 _queueId) external view returns (UpgradeQueue memory) {
-    return s.upgradeQueue[_queueId];
   }
 
   function getAltarLevel(uint256 _altarId) external view returns (uint256 altarLevel_) {
@@ -249,6 +204,69 @@ contract InstallationFacet is Modifiers {
   /***********************************|
    |             Write Functions        |
    |__________________________________*/
+  struct BatchCraftInstallationsInput {
+    uint16 installationID;
+    uint16 amount;
+    uint40 gltr;
+  }
+
+  function _batchCraftInstallation(BatchCraftInstallationsInput calldata _batchCraftInstallationsInput) internal {
+    uint16 installationID = _batchCraftInstallationsInput.installationID;
+    uint16 amount = _batchCraftInstallationsInput.amount;
+    require(amount > 0, "InstallationFacet: Craft amount cannot be zero");
+    // uint40 gltr = _batchCraftInstallationsInput.gltr;
+
+    address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
+    uint256[4] memory alchemicaCost;
+    // uint256 _nextCraftId = s.nextCraftId;
+    //make sure installation exists
+    require(installationID < s.installationTypes.length, "InstallationFacet: Installation does not exist");
+
+    InstallationType memory installationType = s.installationTypes[installationID];
+    require(installationType.level == 1, "InstallationFacet: can only craft level 1");
+    //The preset deprecation time has elapsed
+    if (s.deprecateTime[installationID] > 0) {
+      require(block.timestamp < s.deprecateTime[installationID], "InstallationFacet: Installation has been deprecated");
+    }
+    require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
+
+    //get required alchemica
+    alchemicaCost[0] = installationType.alchemicaCost[0] * amount;
+    alchemicaCost[1] = installationType.alchemicaCost[1] * amount;
+    alchemicaCost[2] = installationType.alchemicaCost[2] * amount;
+    alchemicaCost[3] = installationType.alchemicaCost[3] * amount;
+    //distribute alchemica
+    LibItems._splitAlchemica(alchemicaCost, alchemicaAddresses);
+
+    //only use for installations that are crafted immediately
+    if (installationType.craftTime == 0) {
+      LibERC1155._safeMint(msg.sender, installationID, amount, false, 0);
+    }
+
+    //@todo: add back GLTR and queueing
+    //  else {
+    //   //installations crafted after some time
+    //   //for each installation , push to queue after applying individual gltr subtractions
+    //   for (uint256 i = 0; i < amount; i++) {
+    //     if (gltr > installationType.craftTime) revert("InstallationFacet: Too much GLTR");
+    //     if (installationType.craftTime - gltr == 0) {
+    //       LibERC1155._safeMint(msg.sender, installationID, 1, false, 0);
+    //     } else {
+    //       uint40 readyBlock = uint40(block.number) + installationType.craftTime;
+    //       //put the installation into a queue
+    //       //each wearable needs a unique queue id
+    //       s.craftQueue.push(QueueItem(msg.sender, installationID, false, readyBlock, _nextCraftId));
+    //       emit AddedToQueue(_nextCraftId, installationID, readyBlock, msg.sender);
+    //       s.nextCraftId++;
+    //     }
+    //   }
+  }
+
+  function batchCraftInstallations(BatchCraftInstallationsInput[] calldata _inputs) external {
+    for (uint256 i = 0; i < _inputs.length; i++) {
+      _batchCraftInstallation(_inputs[i]);
+    }
+  }
 
   /// @notice Allow a user to craft installations
   /// @dev Will throw even if one of the installationTypes is deprecated
@@ -262,14 +280,15 @@ contract InstallationFacet is Modifiers {
     uint256 _installationTypesLength = s.installationTypes.length;
     uint256 _nextCraftId = s.nextCraftId;
     for (uint256 i = 0; i < _installationTypes.length; i++) {
-      require(_installationTypes[i] < _installationTypesLength, "InstallationFacet: Installation does not exist");
+      uint256 installationId = _installationTypes[i];
+      require(installationId < _installationTypesLength, "InstallationFacet: Installation does not exist");
 
-      InstallationType memory installationType = s.installationTypes[_installationTypes[i]];
+      InstallationType memory installationType = s.installationTypes[installationId];
       //level check
       require(installationType.level == 1, "InstallationFacet: can only craft level 1");
       //The preset deprecation time has elapsed
-      if (s.deprecateTime[_installationTypes[i]] > 0) {
-        require(block.timestamp < s.deprecateTime[_installationTypes[i]], "InstallationFacet: Installation has been deprecated");
+      if (s.deprecateTime[installationId] > 0) {
+        require(block.timestamp < s.deprecateTime[installationId], "InstallationFacet: Installation has been deprecated");
       }
       require(!installationType.deprecated, "InstallationFacet: Installation has been deprecated");
 
@@ -281,15 +300,16 @@ contract InstallationFacet is Modifiers {
       if (gltr > installationType.craftTime) revert("InstallationFacet: Too much GLTR");
 
       if (installationType.craftTime - gltr == 0) {
-        LibERC1155._safeMint(msg.sender, _installationTypes[i], 0);
+        //doesn't require queue
+        LibERC1155._safeMint(msg.sender, installationId, 1, false, 0);
       } else {
         uint40 readyBlock = uint40(block.number) + installationType.craftTime;
 
         //put the installation into a queue
         //each wearable needs a unique queue id
-        s.craftQueue.push(QueueItem(msg.sender, _installationTypes[i], false, readyBlock, _nextCraftId));
+        s.craftQueue.push(QueueItem(msg.sender, uint16(installationId), false, readyBlock, _nextCraftId));
 
-        emit AddedToQueue(_nextCraftId, _installationTypes[i], readyBlock, msg.sender);
+        emit AddedToQueue(_nextCraftId, installationId, readyBlock, msg.sender);
         _nextCraftId++;
       }
     }
@@ -312,13 +332,13 @@ contract InstallationFacet is Modifiers {
 
       require(block.number >= queueItem.readyBlock, "InstallationFacet: Installation not ready");
 
-      // mint installation
-      LibERC1155._safeMint(msg.sender, queueItem.installationType, queueItem.id);
+      // mint installation from queue
+      LibERC1155._safeMint(msg.sender, queueItem.installationType, 1, true, queueItem.id);
       s.craftQueue[queueId].claimed = true;
       emit QueueClaimed(queueId);
     }
 
-    InstallationAdminFacet(address(this)).finalizeUpgrade();
+    // InstallationAdminFacet(address(this)).finalizeUpgrade();
   }
 
   /// @notice Allow a user to speed up multiple queues(installation craft time) by paying the correct amount of $GLTR tokens
@@ -344,8 +364,6 @@ contract InstallationFacet is Modifiers {
       gltr.burnFrom(msg.sender, burnAmount);
       queueItem.readyBlock -= removeBlocks;
       emit CraftTimeReduced(queueId, removeBlocks);
-
-      InstallationAdminFacet(address(this)).finalizeUpgrade();
     }
   }
 
@@ -361,135 +379,45 @@ contract InstallationFacet is Modifiers {
     uint256 _installationId
   ) external onlyRealmDiamond {
     LibInstallation._equipInstallation(_owner, _realmId, _installationId);
-
-    InstallationAdminFacet(address(this)).finalizeUpgrade();
   }
 
   /// @notice Allow a user to unequip an installation from a parcel
   /// @dev Will throw if the caller is not the parcel diamond contract
   /// @param _realmId The identifier of the parcel to unequip the installation from
   /// @param _installationId Identifier of the installation to unequip
-  function unequipInstallation(uint256 _realmId, uint256 _installationId) external onlyRealmDiamond {
-    LibInstallation._unequipInstallation(_realmId, _installationId);
-
-    InstallationAdminFacet(address(this)).finalizeUpgrade();
+  function unequipInstallation(
+    address _owner,
+    uint256 _realmId,
+    uint256 _installationId
+  ) external onlyRealmDiamond {
+    LibInstallation._unequipInstallation(_owner, _realmId, _installationId);
   }
 
-  /// @notice Allow a user to upgrade an installation in a parcel
-  /// @dev Will throw if the caller is not the owner of the parcel in which the installation is installed
-  /// @param _upgradeQueue A struct containing details about the queue which contains the installation to upgrade
-  ///@param _signature API signature
-  ///@param _gltr Amount of GLTR to use, can be 0
-  function upgradeInstallation(
-    UpgradeQueue calldata _upgradeQueue,
-    bytes memory _signature,
-    uint40 _gltr
-  ) external {
-    require(
-      LibSignature.isValid(
-        keccak256(abi.encodePacked(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId)),
-        _signature,
-        s.backendPubKey
-      ),
-      "InstallationFacet: Invalid signature"
-    );
-    // check owner
-    require(IERC721(s.realmDiamond).ownerOf(_upgradeQueue.parcelId) == _upgradeQueue.owner, "InstallationFacet: Not owner");
-    // check coordinates
-    RealmDiamond realm = RealmDiamond(s.realmDiamond);
-
-    //check upgradeQueueCapacity
-    require(
-      realm.getParcelUpgradeQueueCapacity(_upgradeQueue.parcelId) > realm.getParcelUpgradeQueueLength(_upgradeQueue.parcelId),
-      "InstallationFacet: UpgradeQueue full"
-    );
-
-    realm.checkCoordinates(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId);
-
-    // check unique hash
-    bytes32 uniqueHash = keccak256(
-      abi.encodePacked(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId)
-    );
-
-    //The same upgrade cannot be queued twice
-    require(s.upgradeHashes[uniqueHash] == 0, "InstallationFacet: Upgrade hash not unique");
-
-    s.upgradeHashes[uniqueHash] = _upgradeQueue.parcelId;
-
-    //current installation
-    InstallationType memory prevInstallation = s.installationTypes[_upgradeQueue.installationId];
-
-    //next level
-    InstallationType memory nextInstallation = s.installationTypes[prevInstallation.nextLevelId];
-
-    //take the required alchemica
-    address[4] memory alchemicaAddresses = realm.getAlchemicaAddresses();
-    LibItems._splitAlchemica(nextInstallation.alchemicaCost, alchemicaAddresses);
-
-    require(prevInstallation.nextLevelId > 0, "InstallationFacet: Maximum upgrade reached");
-    require(prevInstallation.installationType == nextInstallation.installationType, "InstallationFacet: Wrong installation type");
-    require(prevInstallation.alchemicaType == nextInstallation.alchemicaType, "InstallationFacet: Wrong alchemicaType");
-    require(prevInstallation.level == nextInstallation.level - 1, "InstallationFacet: Wrong installation level");
-
-    IERC20(s.gltr).transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, _gltr * 10**18); //should revert if user doesnt have enough GLTR
-
-    //prevent underflow if user sends too much GLTR
-    if (_gltr > nextInstallation.craftTime) revert("InstallationFacet: Too much GLTR");
-
-    //Confirm upgrade immediately
-    if (nextInstallation.craftTime - _gltr == 0) {
-      realm.upgradeInstallation(
-        _upgradeQueue.parcelId,
-        _upgradeQueue.installationId,
-        prevInstallation.nextLevelId,
-        _upgradeQueue.coordinateX,
-        _upgradeQueue.coordinateY
-      );
-    } else {
-      UpgradeQueue memory upgrade = UpgradeQueue(
-        _upgradeQueue.owner,
-        _upgradeQueue.coordinateX,
-        _upgradeQueue.coordinateY,
-        uint40(block.number) + nextInstallation.craftTime - _gltr,
-        false,
-        _upgradeQueue.parcelId,
-        _upgradeQueue.installationId
-      );
-      s.upgradeQueue.push(upgrade);
-
-      // update upgradeQueueLength
-      realm.addUpgradeQueueLength(_upgradeQueue.parcelId);
-
-      emit UpgradeInitiated(
-        _upgradeQueue.parcelId,
-        _upgradeQueue.coordinateX,
-        _upgradeQueue.coordinateY,
-        block.number,
-        uint40(block.number) + nextInstallation.craftTime - _gltr,
-        _upgradeQueue.installationId
-      );
-    }
-    InstallationAdminFacet(address(this)).finalizeUpgrade();
+  function upgradeComplete(uint256 _queueId) external view returns (bool) {
+    return s.upgradeComplete[_queueId];
   }
 
-  /// @notice Allow a user to reduce the upgrade time of an ongoing queue
-  /// @dev Will throw if the caller is not the owner of the queue
-  /// @param _queueId The identifier of the queue whose upgrade time is to be reduced
-  /// @param _amount The number of $GLTR token to be paid, in blocks
-  function reduceUpgradeTime(uint256 _queueId, uint40 _amount) external {
-    UpgradeQueue storage upgradeQueue = s.upgradeQueue[_queueId];
-    require(msg.sender == upgradeQueue.owner, "InstallationFacet: Not owner");
+  // /// @notice Allow a user to reduce the upgrade time of an ongoing queue
+  // /// @dev Will throw if the caller is not the owner of the queue
+  // /// @param _queueId The identifier of the queue whose upgrade time is to be reduced
+  // /// @param _amount The number of $GLTR token to be paid, in blocks
+  // function reduceUserUpgradeTime(
+  //   address _owner,
+  //   uint256 _queueId,
+  //   uint40 _amount
+  // ) external {
+  //   UserUpgradeQueue storage upgradeQueue = s.userUpgradeQueue[_owner][_queueId];
+  //   require(msg.sender == _owner, "InstallationFacet: Not owner");
 
-    require(block.number <= upgradeQueue.readyBlock, "InstallationFacet: Upgrade already done");
+  //   require(block.number <= upgradeQueue.readyBlock, "InstallationFacet: Upgrade already done");
 
-    IERC20 gltr = IERC20(s.gltr);
+  //   IERC20 gltr = IERC20(s.gltr);
 
-    uint40 blockLeft = upgradeQueue.readyBlock - uint40(block.number);
-    uint40 removeBlocks = _amount <= blockLeft ? _amount : blockLeft;
-    gltr.burnFrom(msg.sender, removeBlocks * 10**18);
-    upgradeQueue.readyBlock -= removeBlocks;
-    emit UpgradeTimeReduced(_queueId, upgradeQueue.parcelId, upgradeQueue.coordinateX, upgradeQueue.coordinateY, removeBlocks);
+  //   uint40 blockLeft = upgradeQueue.readyBlock - uint40(block.number);
+  //   uint40 removeBlocks = _amount <= blockLeft ? _amount : blockLeft;
+  //   gltr.burnFrom(msg.sender, removeBlocks * 10**18);
+  //   upgradeQueue.readyBlock -= removeBlocks;
+  //   emit UpgradeTimeReduced(_queueId, upgradeQueue.parcelId, upgradeQueue.coordinateX, upgradeQueue.coordinateY, removeBlocks);
 
-    InstallationAdminFacet(address(this)).finalizeUpgrade();
-  }
+  // }
 }

@@ -19,6 +19,7 @@ export const installationTypes: InstallationTypeInput[] = [
     nextLevelId: 11,
     prerequisites: [0, 0],
     name: "Alchemical Aaltar Level 1",
+    unequipType: 0,
   },
   {
     id: 11,
@@ -38,6 +39,7 @@ export const installationTypes: InstallationTypeInput[] = [
     nextLevelId: 12,
     prerequisites: [1, 0],
     name: "Alchemical Aaltar Level 2",
+    unequipType: 0,
   },
   {
     id: 12,
@@ -57,6 +59,7 @@ export const installationTypes: InstallationTypeInput[] = [
     nextLevelId: 13,
     prerequisites: [2, 0],
     name: "Alchemical Aaltar Level 3",
+    unequipType: 0,
   },
   {
     id: 13,
@@ -76,6 +79,7 @@ export const installationTypes: InstallationTypeInput[] = [
     nextLevelId: 14,
     prerequisites: [3, 0],
     name: "Alchemical Aaltar Level 4",
+    unequipType: 0,
   },
   {
     id: 14,
@@ -95,6 +99,7 @@ export const installationTypes: InstallationTypeInput[] = [
     nextLevelId: 15,
     prerequisites: [4, 0],
     name: "Alchemical Aaltar Level 5",
+    unequipType: 0,
   },
   {
     id: 15,
@@ -114,6 +119,7 @@ export const installationTypes: InstallationTypeInput[] = [
     nextLevelId: 16,
     prerequisites: [5, 0],
     name: "Alchemical Aaltar Level 6",
+    unequipType: 0,
   },
   {
     id: 16,
@@ -133,6 +139,7 @@ export const installationTypes: InstallationTypeInput[] = [
     nextLevelId: 17,
     prerequisites: [6, 0],
     name: "Alchemical Aaltar Level 7",
+    unequipType: 0,
   },
   {
     id: 17,
@@ -152,6 +159,7 @@ export const installationTypes: InstallationTypeInput[] = [
     nextLevelId: 18,
     prerequisites: [7, 0],
     name: "Alchemical Aaltar Level 8",
+    unequipType: 0,
   },
   {
     id: 18,
@@ -171,5 +179,6 @@ export const installationTypes: InstallationTypeInput[] = [
     nextLevelId: 0,
     prerequisites: [8, 0],
     name: "Alchemical Aaltar Level 9",
+    unequipType: 0,
   },
 ];

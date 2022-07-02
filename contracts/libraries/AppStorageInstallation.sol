@@ -6,7 +6,7 @@ struct InstallationType {
   //slot 1
   uint8 width;
   uint8 height;
-  uint16 installationType; //0 = altar, 1 = harvester, 2 = reservoir, 3 = gotchi lodge, 4 = wall, 5 = NFT display, 6 = buildqueue booster
+  uint16 installationType; //0 = altar, 1 = harvester, 2 = reservoir, 3 = gotchi lodge, 4 = wall, 5 = NFT display, 6 = maaker 7 = decoration
   uint8 level; //max level 9
   uint8 alchemicaType; //0 = none 1 = fud, 2 = fomo, 3 = alpha, 4 = kek
   uint32 spillRadius;
@@ -22,7 +22,7 @@ struct InstallationType {
   //slot 4
   uint256 capacity;
   //slot 5
-  uint256[] prerequisites; //IDs of installations that must be present before this installation can be added
+  uint256[] prerequisites; //[0,0] altar level, lodge level
   //slot 6
   string name;
 }
@@ -43,6 +43,26 @@ struct UpgradeQueue {
   bool claimed;
   uint256 parcelId;
   uint256 installationId;
+}
+
+struct InstallationTypeIO {
+  uint8 width;
+  uint8 height;
+  uint16 installationType; //0 = altar, 1 = harvester, 2 = reservoir, 3 = gotchi lodge, 4 = wall, 5 = NFT display, 6 = buildqueue booster
+  uint8 level; //max level 9
+  uint8 alchemicaType; //0 = none 1 = fud, 2 = fomo, 3 = alpha, 4 = kek
+  uint32 spillRadius;
+  uint16 spillRate;
+  uint8 upgradeQueueBoost;
+  uint32 craftTime; // in blocks
+  uint32 nextLevelId; //the ID of the next level of this installation. Used for upgrades.
+  bool deprecated; //bool
+  uint256[4] alchemicaCost; // [fud, fomo, alpha, kek]
+  uint256 harvestRate;
+  uint256 capacity;
+  uint256[] prerequisites; //[0,0] altar level, lodge level
+  string name;
+  uint256 unequipType;
 }
 
 struct InstallationAppStorage {
@@ -70,6 +90,9 @@ struct InstallationAppStorage {
   mapping(uint256 => uint256) deprecateTime;
   mapping(bytes32 => uint256) upgradeHashes;
   bytes backendPubKey;
+  mapping(uint256 => bool) upgradeComplete;
+  mapping(uint256 => uint256) unequipTypes; // installationType.id => unequipType
+  mapping(uint256 => uint256[]) parcelIdToUpgradeIds; // will not track upgrades before this variable's existence
 }
 
 library LibAppStorageInstallation {

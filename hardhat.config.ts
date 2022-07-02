@@ -63,7 +63,7 @@ module.exports = {
     },
     mumbai: {
       url: process.env.MUMBAI_MORALIS,
-      //accounts: [process.env.ITEM_MANAGER],
+      accounts: [process.env.SECRET],
       blockGasLimit: 20000000,
       // gasPrice: 1000000000,
     },

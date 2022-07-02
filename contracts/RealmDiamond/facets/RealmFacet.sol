@@ -12,6 +12,7 @@ import "../../libraries/LibAlchemica.sol";
 import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamondInterface.sol";
 import "../../libraries/LibSignature.sol";
 import "./ERC721Facet.sol";
+import "../../interfaces/IERC1155Marketplace.sol";
 
 contract RealmFacet is Modifiers {
   uint256 constant MAX_SUPPLY = 420069;
@@ -33,6 +34,7 @@ contract RealmFacet is Modifiers {
   event UnequipTile(uint256 _realmId, uint256 _tileId, uint256 _x, uint256 _y);
   event AavegotchiDiamondUpdated(address _aavegotchiDiamond);
   event InstallationUpgraded(uint256 _realmId, uint256 _prevInstallationId, uint256 _nextInstallationId, uint256 _coordinateX, uint256 _coordinateY);
+  event ParcelAccessRightSet(uint256 _realmId, uint256 _actionRight, uint256 _accessRight);
 
   /// @notice Return the maximum realm supply
   /// @return The max realm token supply
@@ -45,15 +47,17 @@ contract RealmFacet is Modifiers {
   /// @param _tokenIds The identifiers of tokens to mint
   /// @param _metadata An array of structs containing the metadata of each parcel being minted
   function mintParcels(
-    address _to,
+    address[] calldata _to,
     uint256[] calldata _tokenIds,
     MintParcelInput[] memory _metadata
   ) external onlyOwner {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
       require(s.tokenIds.length < MAX_SUPPLY, "RealmFacet: Cannot mint more than 420,069 parcels");
       uint256 tokenId = _tokenIds[index];
+      address toAddress = _to[index];
       MintParcelInput memory metadata = _metadata[index];
       require(_tokenIds.length == _metadata.length, "Inputs must be same length");
+      require(_to.length == _tokenIds.length, "Inputs must be same length");
 
       Parcel storage parcel = s.parcels[tokenId];
       parcel.coordinateX = metadata.coordinateX;
@@ -62,33 +66,41 @@ contract RealmFacet is Modifiers {
       parcel.size = metadata.size;
       parcel.district = metadata.district;
       parcel.parcelAddress = metadata.parcelAddress;
-
       parcel.alchemicaBoost = metadata.boost;
 
-      LibERC721.safeMint(_to, tokenId);
+      LibERC721.safeMint(toAddress, tokenId);
     }
   }
 
   /// @notice Allow a parcel owner to equip an installation
   /// @dev The _x and _y denote the starting coordinates of the installation and are used to make sure that slot is available on a parcel
   /// @param _realmId The identifier of the parcel which the installation is being equipped on
+  /// @param _gotchiId The Gotchi ID of the Aavegotchi being played. Must be verified by the backend API.
   /// @param _installationId The identifier of the installation being equipped
   /// @param _x The x(horizontal) coordinate of the installation
   /// @param _y The y(vertical) coordinate of the installation
+
   function equipInstallation(
     uint256 _realmId,
+    uint256 _gotchiId,
     uint256 _installationId,
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) gameActive {
+  ) external gameActive {
+    //2 - Equip Installations
+    LibRealm.verifyAccessRight(_realmId, _gotchiId, 2);
     require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _installationId, _x, _y)), _signature, s.backendPubKey),
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
+
     InstallationDiamondInterface.InstallationType memory installation = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(
       _installationId
     );
+
+    require(installation.level == 1, "RealmFacet: Can only equip lvl 1");
+
     if (installation.installationType == 1 || installation.installationType == 2) {
       require(s.parcels[_realmId].currentRound >= 1, "RealmFacet: Must survey before equipping");
     }
@@ -102,6 +114,8 @@ contract RealmFacet is Modifiers {
 
     LibAlchemica.increaseTraits(_realmId, _installationId, false);
 
+    IERC1155Marketplace(s.aavegotchiDiamond).updateERC1155Listing(s.installationsDiamond, _installationId, msg.sender);
+
     emit EquipInstallation(_realmId, _installationId, _x, _y);
   }
 
@@ -113,13 +127,14 @@ contract RealmFacet is Modifiers {
   /// @param _y The y(vertical) coordinate of the installation
   function unequipInstallation(
     uint256 _realmId,
+    uint256 _gotchiId, //will be used soon
     uint256 _installationId,
     uint256 _x,
     uint256 _y,
     bytes memory _signature
   ) external onlyParcelOwner(_realmId) gameActive {
     require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _installationId, _x, _y)), _signature, s.backendPubKey),
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
 
@@ -127,18 +142,33 @@ contract RealmFacet is Modifiers {
     InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
 
     LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
-
-    for (uint256 i; i < installation.alchemicaCost.length; i++) {
-      IERC20 alchemica = IERC20(s.alchemicaAddresses[i]);
-
-      //@question : include upgrades in refund?
-      uint256 alchemicaRefund = installation.alchemicaCost[i] / 2;
-
-      alchemica.transfer(msg.sender, alchemicaRefund);
-    }
-    InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(_realmId, _installationId);
-
+    InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(msg.sender, _realmId, _installationId);
     LibAlchemica.reduceTraits(_realmId, _installationId, false);
+
+    //Process refund
+    if (installationsDiamond.getInstallationUnequipType(_installationId) == 0) {
+      //Loop through each level of the installation.
+      //@todo: For now we can use the ID order to get the cost of previous upgrades. But in the future we'll need to add some data redundancy.
+      uint256 currentLevel = installation.level;
+      uint256[] memory alchemicaRefund = new uint256[](4);
+      for (uint256 index = 0; index < currentLevel; index++) {
+        InstallationDiamondInterface.InstallationType memory prevInstallation = installationsDiamond.getInstallationType(_installationId - index);
+
+        //Loop through each Alchemica cost
+        for (uint256 i; i < prevInstallation.alchemicaCost.length; i++) {
+          //Only half of the cost is refunded
+          alchemicaRefund[i] += prevInstallation.alchemicaCost[i] / 2;
+        }
+      }
+
+      for (uint256 j = 0; j < alchemicaRefund.length; j++) {
+        //don't send 0 refunds
+        if (alchemicaRefund[j] > 0) {
+          IERC20 alchemica = IERC20(s.alchemicaAddresses[j]);
+          alchemica.transfer(msg.sender, alchemicaRefund[j]);
+        }
+      }
+    }
 
     emit UnequipInstallation(_realmId, _installationId, _x, _y);
   }
@@ -151,17 +181,22 @@ contract RealmFacet is Modifiers {
   /// @param _y The y(vertical) coordinate of the tile
   function equipTile(
     uint256 _realmId,
+    uint256 _gotchiId,
     uint256 _tileId,
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) gameActive {
+  ) external gameActive {
+    //3 - Equip Tile
+    LibRealm.verifyAccessRight(_realmId, _gotchiId, 3);
     require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _tileId, _x, _y)), _signature, s.backendPubKey),
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
     LibRealm.placeTile(_realmId, _tileId, _x, _y);
     TileDiamondInterface(s.tileDiamond).equipTile(msg.sender, _realmId, _tileId);
+
+    IERC1155Marketplace(s.aavegotchiDiamond).updateERC1155Listing(s.tileDiamond, _tileId, msg.sender);
 
     emit EquipTile(_realmId, _tileId, _x, _y);
   }
@@ -174,13 +209,14 @@ contract RealmFacet is Modifiers {
   /// @param _y The y(vertical) coordinate of the tile
   function unequipTile(
     uint256 _realmId,
+    uint256 _gotchiId,
     uint256 _tileId,
     uint256 _x,
     uint256 _y,
     bytes memory _signature
   ) external onlyParcelOwner(_realmId) gameActive {
     require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _tileId, _x, _y)), _signature, s.backendPubKey),
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
     );
     LibRealm.removeTile(_realmId, _tileId, _x, _y);
@@ -198,7 +234,9 @@ contract RealmFacet is Modifiers {
     require(_realmIds.length == _accessRights.length && _realmIds.length == _actionRights.length, "RealmFacet: Mismatched arrays");
     for (uint256 i; i < _realmIds.length; i++) {
       require(LibMeta.msgSender() == s.parcels[_realmIds[i]].owner, "RealmFacet: Only Parcel owner can call");
+      require(LibRealm.isAccessRightValid(_actionRights[i], _accessRights[i]), "RealmFacet: Invalid access rights");
       s.accessRights[_realmIds[i]][_actionRights[i]] = _accessRights[i];
+      emit ParcelAccessRightSet(_realmIds[i], _actionRights[i], _accessRights[i]);
     }
   }
 
@@ -391,15 +429,23 @@ contract RealmFacet is Modifiers {
     }
   }
 
+  function getAltarId(uint256 _parcelId) external view returns (uint256) {
+    return s.parcels[_parcelId].altarId;
+  }
+
+  function setAltarId(uint256 _parcelId, uint256 _altarId) external onlyOwner {
+    s.parcels[_parcelId].altarId = _altarId;
+  }
+
   function fixAltarLevel(uint256[] memory _parcelIds) external onlyOwner {
     InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
     for (uint256 i; i < _parcelIds.length; i++) {
-      Parcel storage parcel = s.parcels[_parcelIds[i]];
+      uint256 parcelId = _parcelIds[i];
+      Parcel storage parcel = s.parcels[parcelId];
       // Check that the altar is actually supposed to be level 2
-      require(installationsDiamond.balanceOfToken(address(this), _parcelIds[i], 11) == 1, "RealmFacet: Not targeted for a fix"); // token contract, realm parcel ID, level 2 altar identifier
-      require(parcel.altarId == 10, "RealmFacet: Not a bugged level 1 altar");
-
-      parcel.altarId = 11;
+      if (installationsDiamond.balanceOfToken(address(this), parcelId, 11) >= 1 && parcel.altarId == 10) {
+        parcel.altarId = 11;
+      }
     }
   }
 }

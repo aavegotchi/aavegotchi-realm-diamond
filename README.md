@@ -58,3 +58,9 @@
 - 4 = wall
 - 5 = NFT display
 - 6 = buildqueue booster
+
+### Foundry Support
+
+- Install foundry and run foundryup
+- Use command "make update-submodules" to update required submodules
+- See Makefile for all commands

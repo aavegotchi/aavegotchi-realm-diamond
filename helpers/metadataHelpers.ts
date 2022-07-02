@@ -14,6 +14,7 @@ export function sizeNameToId(
   if (orientation === "R") return 1;
   if (orientation === "V") return 2;
   if (orientation === "U") return 3;
+  if (orientation === "P") return 4;
   return 0;
 }
 

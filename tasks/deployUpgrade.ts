@@ -129,10 +129,9 @@ task(
           params: [owner],
         });
         signer = await hre.ethers.getSigner(owner);
-      } else if (
-        hre.network.name === "matic" ||
-        hre.network.name === "mumbai"
-      ) {
+      } else if (hre.network.name === "mumbai") {
+        signer = (await hre.ethers.getSigners())[0];
+      } else if (hre.network.name === "matic") {
         if (useLedger) {
           signer = new LedgerSigner(hre.ethers.provider, "m/44'/60'/2'/0/0");
         } else signer = (await hre.ethers.getSigners())[0];
@@ -146,6 +145,10 @@ task(
 
       for (let index = 0; index < facetsAndAddSelectors.length; index++) {
         const facet = facetsAndAddSelectors[index];
+
+        if (hre.network.name === "matic" && facet.facetName.includes("Test")) {
+          throw new Error("STOPPPP");
+        }
 
         console.log("facet:", facet);
         const factory = (await hre.ethers.getContractFactory(
@@ -236,7 +239,7 @@ task(
       } else {
         //Choose to use a multisig or a simple deploy address
         if (useMultisig) {
-          console.log("Diamond cut");
+          console.log("Sending Diamond cut to Multisig");
           const tx: PopulatedTransaction =
             await diamondCut.populateTransaction.diamondCut(
               cut,
@@ -246,6 +249,7 @@ task(
             );
           // await sendToMultisig(diamondUpgrader, signer, tx, hre.ethers);
         } else {
+          console.log("Sending upgrade to Ledger...");
           const tx: ContractTransaction = await diamondCut.diamondCut(
             cut,
             initAddress ? initAddress : hre.ethers.constants.AddressZero,
