@@ -1,12 +1,14 @@
-import { run } from "hardhat";
+import { ethers, run } from "hardhat";
+import { varsForNetwork } from "../../../constants";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
-import { maticDiamondAddress } from "../../../constants";
 
 export async function upgrade() {
+  const c = await varsForNetwork(ethers);
+
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
 
   const requestConfig =
@@ -46,7 +48,7 @@ export async function upgrade() {
 
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
-    diamondAddress: maticDiamondAddress,
+    diamondAddress: c.realmDiamond,
     facetsAndAddSelectors: joined,
     useLedger: false,
     useMultisig: false,

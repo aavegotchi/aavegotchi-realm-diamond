@@ -210,31 +210,14 @@ contract AlchemicaFacet is Modifiers {
 
   /// @notice Allow parcel owner to claim available alchemica with his parent NFT(Aavegotchi)
   /// @param _realmId Identifier of parcel to claim alchemica from
-  /// @param _alchemicaTypes Alchemica types to claim
   /// @param _gotchiId Identifier of Aavegotchi to use for alchemica collecction/claiming
   /// @param _signature Message signature used for backend validation
   function claimAvailableAlchemica(
     uint256 _realmId,
-    bool[4] calldata _alchemicaTypes,
     uint256 _gotchiId,
     bytes memory _signature
   ) external gameActive {
-    //Check access rights
-    if (s.accessRights[_realmId][1] == 0) {
-      require(LibMeta.msgSender() == s.parcels[_realmId].owner, "AlchemicaFacet: Only Parcel owner can claim");
-    } else if (s.accessRights[_realmId][1] == 1) {
-      try AavegotchiDiamond(s.aavegotchiDiamond).getGotchiLendingFromToken(uint32(_gotchiId)) returns (
-        AavegotchiDiamond.GotchiLending memory listing
-      ) {
-        require(
-          LibMeta.msgSender() == s.parcels[_realmId].owner ||
-            (LibMeta.msgSender() == listing.borrower && listing.lender == s.parcels[_realmId].owner),
-          "AlchemicaFacet: Only Parcel owner/borrower can claim"
-        );
-      } catch (bytes memory) {
-        revert("AlchemicaFacet: Only Parcel owner/borrower can claim");
-      }
-    }
+    LibRealm.verifyAccessRight(_realmId, _gotchiId, 1);
 
     //Check signature
     require(
@@ -245,26 +228,23 @@ contract AlchemicaFacet is Modifiers {
     require(block.timestamp > s.lastClaimedAlchemica[_realmId] + 8 hours, "AlchemicaFacet: 8 hours claim cooldown");
     s.lastClaimedAlchemica[_realmId] = block.timestamp;
 
-    for (uint256 i = 0; i < _alchemicaTypes.length; i++) {
-      if (_alchemicaTypes[i]) {
-        //@todo (future release): allow claimOperator
-        uint256 remaining = s.parcels[_realmId].alchemicaRemaining[i];
-        uint256 available = LibAlchemica.getAvailableAlchemica(_realmId, i);
+    for (uint256 i = 0; i < 4; i++) {
+      uint256 remaining = s.parcels[_realmId].alchemicaRemaining[i];
+      uint256 available = LibAlchemica.getAvailableAlchemica(_realmId, i);
 
-        require(remaining >= available, "AlchemicaFacet: Not enough alchemica available");
+      require(remaining >= available, "AlchemicaFacet: Not enough alchemica available");
 
-        s.parcels[_realmId].alchemicaRemaining[i] -= available;
-        s.parcels[_realmId].unclaimedAlchemica[i] = 0;
-        s.parcels[_realmId].lastUpdateTimestamp[i] = block.timestamp;
+      s.parcels[_realmId].alchemicaRemaining[i] -= available;
+      s.parcels[_realmId].unclaimedAlchemica[i] = 0;
+      s.parcels[_realmId].lastUpdateTimestamp[i] = block.timestamp;
 
-        SpilloverIO memory spillover = calculateSpilloverForReservoir(_realmId, i);
-        TransferAmounts memory amounts = calculateTransferAmounts(available, spillover.rate);
+      SpilloverIO memory spillover = calculateSpilloverForReservoir(_realmId, i);
+      TransferAmounts memory amounts = calculateTransferAmounts(available, spillover.rate);
 
-        //Mint new tokens
-        _mintAvailableAlchemica(i, _gotchiId, amounts.owner, amounts.spill);
+      //Mint new tokens
+      _mintAvailableAlchemica(i, _gotchiId, amounts.owner, amounts.spill);
 
-        emit AlchemicaClaimed(_realmId, _gotchiId, i, available, spillover.rate, spillover.radius);
-      }
+      emit AlchemicaClaimed(_realmId, _gotchiId, i, available, spillover.rate, spillover.radius);
     }
   }
 
