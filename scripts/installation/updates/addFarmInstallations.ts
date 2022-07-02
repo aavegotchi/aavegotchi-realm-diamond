@@ -2,36 +2,35 @@ import { ethers, network } from "hardhat";
 import { installationTypes } from "../../../data/installations/farming";
 import { InstallationAdminFacet, InstallationFacet } from "../../../typechain";
 
-import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { outputInstallation } from "../../realm/realmHelpers";
 import { gasPrice } from "../helperFunctions";
-import {
-  maticInstallationDiamondAddress,
-  mumbaiInstallationDiamondAddress,
-} from "../../../constants";
+import { getDiamondSigner } from "../../helperFunctions";
+import { varsForNetwork } from "../../../constants";
 
-export async function setAddresses() {
-  let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
-
-  if (network.name === "mumbai") {
-    signer = await ethers.getSigners()[0];
-  }
+export async function addFarmInstallations() {
+  const c = await varsForNetwork(ethers);
+  const signer = await getDiamondSigner(
+    c.installationDiamond,
+    ethers,
+    network.name,
+    true
+  );
 
   const installationFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
-    mumbaiInstallationDiamondAddress,
+    c.installationDiamond,
     signer
   )) as InstallationAdminFacet;
 
   const farming = installationTypes.map((val) => outputInstallation(val));
 
-  console.log("farming:", farming);
-
-  // await installationFacet.addInstallationTypes(farming, { gasPrice: gasPrice });
-
+  const tx = await installationFacet.addInstallationTypes(farming, {
+    gasPrice: gasPrice,
+  });
+  await tx.wait();
   const installationfacet = (await ethers.getContractAt(
     "InstallationFacet",
-    mumbaiInstallationDiamondAddress
+    c.installationDiamond
   )) as InstallationFacet;
 
   const insts = await installationfacet.getInstallationTypes([]);
@@ -41,7 +40,7 @@ export async function setAddresses() {
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 if (require.main === module) {
-  setAddresses()
+  addFarmInstallations()
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);

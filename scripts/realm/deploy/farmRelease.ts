@@ -3,6 +3,7 @@ import { ethers, network } from "hardhat";
 import { varsForNetwork } from "../../../constants";
 import { AlchemicaFacet } from "../../../typechain";
 import { getDiamondSigner } from "../../helperFunctions";
+import { addFarmInstallations } from "../../installation/updates/addFarmInstallations";
 import { alchemicaTotals } from "../../setVars";
 import { harvesterUpgrade } from "../upgrades/upgrade-haarvesterRelease";
 
@@ -21,6 +22,11 @@ export async function deployMatic() {
   );
 
   console.log("Deploy upgrade");
+
+  if (["matic", "hardhat"].includes(network.name)) {
+    await addFarmInstallations();
+  }
+
   await harvesterUpgrade();
   const alchemicaFacet = (await ethers.getContractAt(
     "AlchemicaFacet",
