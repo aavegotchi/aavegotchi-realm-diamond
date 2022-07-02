@@ -21,7 +21,7 @@ async function setHaarvesterVars() {
   const testing = ["hardhat", "localhost"].includes(hre.network.name);
   let diamondAddress: string;
 
-  diamondAddress = maticRealmDiamondAddress;
+  diamondAddress = mumbaiDiamondAddress;
 
   //transfer ownership to multisig
   const ownershipFacet = (await ethers.getContractAt(
