@@ -10,7 +10,6 @@ library LibAlchemica {
 
     //todo: only do this every 8 hrs
 
-    // uint256 capacity = s.parcels[_tokenId].reservoirCapacity[_alchemicaType];
     uint256 capacity = calculateTotalCapacity(_tokenId, _alchemicaType);
 
     uint256 alchemicaSinceUpdate = alchemicaSinceLastUpdate(_tokenId, _alchemicaType);
@@ -48,15 +47,14 @@ library LibAlchemica {
       _installationId
     );
 
-    // uint256 altarPrerequisite = installationType.prerequisites[0];
+    uint256 altarPrerequisite = installationType.prerequisites[0];
     uint256 lodgePrerequisite = installationType.prerequisites[1];
 
-    //Temporarily disable Altar check to allow bugged upgrades to be fixed.
     // check altar requirement
-    // uint256 equippedAltarId = s.parcels[_realmId].altarId;
-    // uint256 equippedAltarLevel = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(equippedAltarId).level;
+    uint256 equippedAltarId = s.parcels[_realmId].altarId;
+    uint256 equippedAltarLevel = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(equippedAltarId).level;
 
-    // require(equippedAltarLevel >= altarPrerequisite, "RealmFacet: Altar Tech Tree Reqs not met");
+    require(equippedAltarLevel >= altarPrerequisite, "RealmFacet: Altar Tech Tree Reqs not met");
 
     // check lodge requirement
     if (lodgePrerequisite > 0) {

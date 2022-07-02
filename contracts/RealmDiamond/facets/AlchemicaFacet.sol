@@ -217,6 +217,7 @@ contract AlchemicaFacet is Modifiers {
     uint256 _gotchiId,
     bytes memory _signature
   ) external gameActive {
+    //1 - Empty Reservoir Access Right
     LibRealm.verifyAccessRight(_realmId, _gotchiId, 1);
 
     //Check signature
