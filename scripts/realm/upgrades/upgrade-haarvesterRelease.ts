@@ -16,7 +16,7 @@ export interface VrfConfig {
   keyHash: string;
 }
 
-export async function upgrade() {
+export async function harvesterUpgrade() {
   const c = await varsForNetwork(ethers);
 
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
@@ -112,7 +112,7 @@ export async function upgrade() {
 }
 
 if (require.main === module) {
-  upgrade()
+  harvesterUpgrade()
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

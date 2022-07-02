@@ -2,11 +2,28 @@ import { BigNumber, Signer, Contract, Wallet, Signature } from "ethers";
 import { ethers } from "ethers";
 
 import { Domain, PERMIT_TYPES } from "../constants";
-import { AlchemicaToken } from "../typechain";
-import { Network } from "hardhat/types";
-import { DiamondLoupeFacet, OwnershipFacet } from "../typechain";
+import { HardhatEthersHelpers, Network } from "hardhat/types";
+import { LedgerSigner } from "@anders-t/ethers-ledger";
 
 export const gasPrice = 75000000000;
+
+export async function getDiamondSigner(
+  diamondAddress: string,
+  ethers: HardhatEthersHelpers,
+  network: string,
+  useLedger: boolean
+): Promise<LedgerSigner | Signer> {
+  if (network === "mumbai") {
+    return await ethers.getSigners()[0];
+  } else if (network === "hardhat") {
+    return ethers.provider.getSigner(
+      await diamondOwner(diamondAddress, ethers)
+    );
+  } else {
+    if (useLedger) return new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
+    else return await ethers.getSigners()[0];
+  }
+}
 
 export async function impersonate(
   address: string,
