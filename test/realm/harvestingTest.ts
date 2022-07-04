@@ -1,195 +1,56 @@
-import {
-  impersonate,
-  maticDiamondAddress,
-  mineBlocks,
-} from "../../scripts/helperFunctions";
+import { impersonate, mineBlocks } from "../../scripts/helperFunctions";
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-import {
-  beforeTest,
-  outputInstallation,
-  testInstallations,
-} from "../../scripts/realm/realmHelpers";
+import { outputInstallation } from "../../scripts/realm/realmHelpers";
 import { TestBeforeVars } from "../../types";
-describe("Testing Equip Installation", async function () {
+import { deployFarmRelease } from "../../scripts/realm/deploy/farmRelease";
+import { Constants, varsForNetwork } from "../../constants";
+import { AlchemicaFacet } from "../../typechain";
+describe("Testing Harvester Release", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
 
   let currentAccount: SignerWithAddress;
-  let g: TestBeforeVars;
+  let alchemicaFacet: AlchemicaFacet;
+  let c: Constants;
 
   before(async function () {
+    c = await varsForNetwork(ethers);
+
+    console.log("c:", c);
+
     this.timeout(20000000);
     const accounts = await ethers.getSigners();
     currentAccount = accounts[0];
-    g = await beforeTest(ethers);
-  });
-  it("Deploy alchemica ERC20s", async function () {
-    g.fud = await impersonate(maticDiamondAddress, g.fud, ethers, network);
-    g.fomo = await impersonate(maticDiamondAddress, g.fomo, ethers, network);
-    g.alpha = await impersonate(maticDiamondAddress, g.alpha, ethers, network);
-    g.kek = await impersonate(maticDiamondAddress, g.kek, ethers, network);
 
-    await g.fud.mint(testAddress, ethers.utils.parseEther("10000"));
-    await g.fomo.mint(testAddress, ethers.utils.parseEther("10000"));
-    await g.alpha.mint(testAddress, ethers.utils.parseEther("10000"));
-    await g.kek.mint(testAddress, ethers.utils.parseEther("10000"));
-
-    g.alchemicaFacet = await impersonate(
-      g.ownerAddress,
-      g.alchemicaFacet,
-      ethers,
-      network
-    );
-  });
-
-  it("Alchemica are owned by Realm Diamond", async function () {
-    const alchemicaOwner = await g.fud.owner();
-    expect(alchemicaOwner).to.equal(maticDiamondAddress);
-  });
-
-  it("Setup installation diamond", async function () {
-    g.installationDiamond = await impersonate(
-      currentAccount.address,
-      g.installationDiamond,
-      ethers,
-      network
-    );
-
-    let installationsTypes = await g.installationDiamond.getInstallationTypes(
-      []
-    );
-
-    await g.installationDiamond.addInstallationTypes(testInstallations());
-    installationsTypes = await g.installationDiamond.getInstallationTypes([]);
-    expect(installationsTypes.length).to.equal(testInstallations().length);
-  });
-
-  it("Can craft installations", async function () {
-    g.installationDiamond = await impersonate(
-      testAddress,
-      g.installationDiamond,
-      ethers,
-      network
-    );
-    g.fud = await impersonate(testAddress, g.fud, ethers, network);
-    g.fomo = await impersonate(testAddress, g.fomo, ethers, network);
-    g.alpha = await impersonate(testAddress, g.alpha, ethers, network);
-    g.kek = await impersonate(testAddress, g.kek, ethers, network);
-    await g.fud.approve(
-      g.installationsAddress,
-      ethers.utils.parseUnits("1000000000")
-    );
-    await g.fomo.approve(
-      g.installationsAddress,
-      ethers.utils.parseUnits("1000000000")
-    );
-    await g.alpha.approve(
-      g.installationsAddress,
-      ethers.utils.parseUnits("1000000000")
-    );
-    await g.kek.approve(
-      g.installationsAddress,
-      ethers.utils.parseUnits("1000000000")
-    );
-    await g.installationDiamond.craftInstallations([1, 1, 2, 2]);
-    await expect(
-      g.installationDiamond.claimInstallations([0])
-    ).to.be.revertedWith("InstallationFacet: Installation not ready");
-
-    await mineBlocks(ethers, 21000);
-
-    const balancePre = await g.erc1155Facet.balanceOf(testAddress, 1);
-    await g.installationDiamond.claimInstallations([0, 1, 2, 3]);
-    const balancePost = await g.erc1155Facet.balanceOf(testAddress, 1);
-    expect(balancePost).to.above(balancePre);
-  });
-
-  it("Reverts if installation does not exist", async function () {
-    g.installationDiamond = await impersonate(
-      g.installationOwner,
-      g.installationDiamond,
-      ethers,
-      network
-    );
-    const installation = outputInstallation({
-      installationType: 0,
-      level: 1,
-      width: 2,
-      height: 2,
-      alchemicaType: 0,
-      alchemicaCost: [0, 0, 0, 0],
-      harvestRate: 0,
-      capacity: 0,
-      spillRadius: 0,
-      spillRate: 0,
-      craftTime: 0,
-      deprecated: false,
-      nextLevelId: 1,
-      prerequisites: [],
-    });
-    await g.installationDiamond.addInstallationTypes([installation]);
-
-    await expect(
-      g.installationDiamond.craftInstallations([10])
-    ).to.be.revertedWith("InstallationFacet: Installation does not exist");
-  });
-
-  it("Crafting reverts with insufficient balance", async function () {
-    g.installationDiamond = await impersonate(
-      g.installationOwner,
-      g.installationDiamond,
-      ethers,
-      network
-    );
-    const installation = outputInstallation({
-      installationType: 0,
-      level: 1,
-      width: 2,
-      height: 2,
-      alchemicaType: 0,
-      alchemicaCost: [
-        ethers.utils.parseUnits("1000000"),
-        ethers.utils.parseUnits("1000000"),
-        ethers.utils.parseUnits("1000000"),
-        ethers.utils.parseUnits("1000000"),
-      ],
-      harvestRate: 0,
-      capacity: 0,
-      spillRadius: 0,
-      spillRate: 0,
-      craftTime: 0,
-      deprecated: false,
-      nextLevelId: 1,
-      prerequisites: [],
-    });
-    await g.installationDiamond.addInstallationTypes([installation]);
-
-    await expect(
-      g.installationDiamond.craftInstallations([6])
-    ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
+    const success = await deployFarmRelease();
   });
 
   it("Survey Parcel", async function () {
-    g.alchemicaFacet = await impersonate(
+    alchemicaFacet = (await ethers.getContractAt(
+      "AlchemicaFacet",
+      c.realmDiamond
+    )) as AlchemicaFacet;
+
+    alchemicaFacet = await impersonate(
       testAddress,
-      g.alchemicaFacet,
+      alchemicaFacet,
       ethers,
       network
     );
-    await g.alchemicaFacet.testingStartSurveying(2893);
+    await alchemicaFacet.startSurveying(2893);
   });
-  it("Equip reservoir", async function () {
-    g.realmFacet = await impersonate(
-      testAddress,
-      g.realmFacet,
-      ethers,
-      network
-    );
-    await g.realmFacet.equipInstallation(2893, 2, 9, 9);
-  });
+  // it("Equip reservoir", async function () {
+  //   g.realmFacet = await impersonate(
+  //     testAddress,
+  //     g.realmFacet,
+  //     ethers,
+  //     network
+  //   );
+  //   await g.realmFacet.equipInstallation(2893, 2, 9, 9);
+  // });
   // it("Equip harvester", async function () {
   //   await realmFacet.equipInstallation(2893, 1, 2, 2);
   //   const blockNumBefore = await ethers.provider.getBlockNumber();

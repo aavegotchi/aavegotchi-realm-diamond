@@ -1,6 +1,6 @@
 import { HardhatEthersHelpers } from "hardhat/types";
 
-interface Constants {
+export interface Constants {
   aavegotchiDiamond: string;
   realmDiamond: string;
   installationDiamond: string;

@@ -10,15 +10,20 @@ export const gasPrice = 75000000000;
 export async function getDiamondSigner(
   diamondAddress: string,
   ethers: HardhatEthersHelpers,
-  network: string,
+  network: Network,
   useLedger: boolean
 ): Promise<LedgerSigner | Signer> {
-  if (network === "mumbai") {
+  if (network.name === "mumbai") {
     return await ethers.getSigners()[0];
-  } else if (network === "hardhat") {
-    return ethers.provider.getSigner(
-      await diamondOwner(diamondAddress, ethers)
-    );
+  } else if (network.name === "hardhat") {
+    const owner = await diamondOwner(diamondAddress, ethers);
+
+    await network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [owner],
+    });
+
+    return ethers.provider.getSigner(owner);
   } else {
     if (useLedger) return new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
     else return await ethers.getSigners()[0];
