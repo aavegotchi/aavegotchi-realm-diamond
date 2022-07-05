@@ -14,4 +14,4 @@ test-foundry-diamond:
 
 test-harvesting:
 	@echo Run harvesting tests
-	@forge test -vvvv -c test/foundry/harvesting
+	@forge test -vvv -c test/foundry/harvesting
