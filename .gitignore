@@ -16,3 +16,4 @@ typechain
 hardhat.config.ts
 yarn.lock
 package.lock.json
+out/*
