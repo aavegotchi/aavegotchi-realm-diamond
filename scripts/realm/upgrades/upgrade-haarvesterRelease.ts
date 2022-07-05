@@ -7,6 +7,7 @@ import {
 } from "../../../tasks/deployUpgrade";
 import { VRFFacet__factory } from "../../../typechain";
 import { VRFFacetInterface } from "../../../typechain/VRFFacet";
+import { upgradeDiamondCut } from "./upgrade-diamond";
 
 export interface VrfConfig {
   subId: number;
@@ -19,6 +20,8 @@ export interface VrfConfig {
 export async function harvesterUpgrade() {
   const c = await varsForNetwork(ethers);
 
+  // await upgradeDiamondCut();
+
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
 
   const requestConfig =
@@ -27,7 +30,10 @@ export async function harvesterUpgrade() {
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "RealmFacet",
-      addSelectors: [],
+      addSelectors: [
+        `function getAltarId(uint256 _parcelId)`,
+        `function setAltarId(uint256 _parcelId, uint256 _altarId) external`,
+      ],
       removeSelectors: [],
     },
     {
@@ -44,12 +50,11 @@ export async function harvesterUpgrade() {
     {
       facetName: "VRFFacet",
       addSelectors: [
-        "function rawFulfillRandomWords(uint256 requestId, uint256[] memory randomWords) external",
         `function setConfig(${requestConfig} _requestConfig, address _vrfCoordinator) external`,
-        "function subscribe() external",
-        "function topUpSubscription(uint256 amount) external",
       ],
-      removeSelectors: [],
+      removeSelectors: [
+        `function setConfig(${requestConfig} _requestConfig) external`,
+      ],
     },
   ];
 
@@ -97,6 +102,8 @@ export async function harvesterUpgrade() {
     vrfConfig,
     vrfCoordinator,
   ]);
+
+  console.log("realm diamond:", c.realmDiamond);
 
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
