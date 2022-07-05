@@ -113,6 +113,11 @@ task(
       const initAddress = taskArgs.initAddress;
       const initCalldata = taskArgs.initCalldata;
 
+      const branch = require("git-branch");
+      if (branch.sync() !== "master") {
+        throw new Error("Not master branch!");
+      }
+
       //Instantiate the Signer
       let signer: Signer;
       const owner = await (
