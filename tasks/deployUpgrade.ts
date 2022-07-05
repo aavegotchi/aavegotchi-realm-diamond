@@ -12,7 +12,11 @@ import { Signer } from "@ethersproject/abstract-signer";
 
 import { OwnershipFacet } from "../typechain/OwnershipFacet";
 import { IDiamondCut } from "../typechain/IDiamondCut";
-import { getSelectors, getSighashes } from "../scripts/helperFunctions";
+import {
+  getFunctionNames,
+  getSelectors,
+  getSighashes,
+} from "../scripts/helperFunctions";
 
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
@@ -169,6 +173,8 @@ task(
 
         //debug
         let existingFuncs = getSelectors(deployedFacet);
+        // let existingFuncNames = getFunctionNames(deployedFacet);
+
         for (const selector of newSelectors) {
           const index = newSelectors.findIndex((val) => val == selector);
           console.log(

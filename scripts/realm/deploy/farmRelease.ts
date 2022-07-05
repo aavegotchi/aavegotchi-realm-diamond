@@ -16,12 +16,9 @@ export async function deployFarmRelease() {
 
   let signer = await getDiamondSigner(c.realmDiamond, ethers, network, true);
 
-  if (network.name === "hardhat") {
+  if (network.config.chainId === 137) {
     console.log("Add installations");
     await addFarmInstallations(true);
-  } else if (network.name === "matic") {
-    console.log("Add installations");
-    await addFarmInstallations(false);
   }
 
   console.log("Run upgrade");
