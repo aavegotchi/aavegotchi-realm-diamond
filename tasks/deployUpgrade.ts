@@ -114,7 +114,7 @@ task(
       const initCalldata = taskArgs.initCalldata;
 
       const branch = require("git-branch");
-      if (branch.sync() !== "master") {
+      if (hre.network.name === "matic" && branch.sync() !== "master") {
         throw new Error("Not master branch!");
       }
 
