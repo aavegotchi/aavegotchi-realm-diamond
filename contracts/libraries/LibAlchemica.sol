@@ -3,8 +3,21 @@ pragma solidity 0.8.9;
 
 import {InstallationDiamondInterface} from "../interfaces/InstallationDiamondInterface.sol";
 import {LibAppStorage, AppStorage, Parcel} from "./AppStorage.sol";
+import "../interfaces/IERC20Mintable.sol";
+import "../interfaces/AavegotchiDiamond.sol";
 
 library LibAlchemica {
+  uint256 constant bp = 100 ether;
+
+  event AlchemicaClaimed(
+    uint256 indexed _realmId,
+    uint256 indexed _gotchiId,
+    uint256 indexed _alchemicaType,
+    uint256 _amount,
+    uint256 _spilloverRate,
+    uint256 _spilloverRadius
+  );
+
   function settleUnclaimedAlchemica(uint256 _tokenId, uint256 _alchemicaType) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
@@ -195,6 +208,85 @@ library LibAlchemica {
 
     //ensure that available alchemica is not higher than available reservoir capacity
     return available > capacity ? capacity : available;
+  }
+
+  function calculateTransferAmounts(uint256 _amount, uint256 _spilloverRate) internal pure returns (uint256 owner, uint256 spill) {
+    owner = (_amount * (bp - (_spilloverRate * 10**16))) / bp;
+    spill = (_amount * (_spilloverRate * 10**16)) / bp;
+  }
+
+  function calculateSpilloverForReservoir(uint256 _realmId, uint256 _alchemicaType)
+    internal
+    view
+    returns (uint256 spilloverRate, uint256 spilloverRadius)
+  {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+    uint256 capacityXspillrate;
+    uint256 capacityXspillradius;
+    uint256 totalCapacity;
+    for (uint256 i; i < s.parcels[_realmId].reservoirs[_alchemicaType].length; i++) {
+      InstallationDiamondInterface.ReservoirStats memory reservoirStats = InstallationDiamondInterface(s.installationsDiamond).getReservoirStats(
+        s.parcels[_realmId].reservoirs[_alchemicaType][i]
+      );
+      totalCapacity += reservoirStats.capacity;
+
+      capacityXspillrate += reservoirStats.capacity * reservoirStats.spillRate;
+      capacityXspillradius += reservoirStats.capacity * reservoirStats.spillRadius;
+    }
+    if (totalCapacity == 0) return (0, 0);
+
+    spilloverRate = capacityXspillrate / totalCapacity;
+    spilloverRadius = capacityXspillradius / totalCapacity;
+  }
+
+  function claimAvailableAlchemica(uint256 _realmId, uint256 _gotchiId) internal {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+
+    require(block.timestamp > s.lastClaimedAlchemica[_realmId] + 8 hours, "AlchemicaFacet: 8 hours claim cooldown");
+    s.lastClaimedAlchemica[_realmId] = block.timestamp;
+
+    for (uint256 i = 0; i < 4; i++) {
+      uint256 remaining = s.parcels[_realmId].alchemicaRemaining[i];
+      uint256 available = LibAlchemica.getAvailableAlchemica(_realmId, i);
+
+      require(remaining >= available, "AlchemicaFacet: Not enough alchemica available");
+
+      s.parcels[_realmId].alchemicaRemaining[i] -= available;
+      s.parcels[_realmId].unclaimedAlchemica[i] = 0;
+      s.parcels[_realmId].lastUpdateTimestamp[i] = block.timestamp;
+
+      (uint256 spilloverRate, uint256 spilloverRadius) = calculateSpilloverForReservoir(_realmId, i);
+      (uint256 ownerAmount, uint256 spillAmount) = calculateTransferAmounts(available, spilloverRate);
+
+      //Mint new tokens
+      mintAvailableAlchemica(i, _gotchiId, ownerAmount, spillAmount);
+
+      emit AlchemicaClaimed(_realmId, _gotchiId, i, available, spilloverRate, spilloverRadius);
+    }
+  }
+
+  function mintAvailableAlchemica(
+    uint256 _alchemicaType,
+    uint256 _gotchiId,
+    uint256 _owner,
+    uint256 _spill
+  ) internal {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+
+    IERC20Mintable alchemica = IERC20Mintable(s.alchemicaAddresses[_alchemicaType]);
+    alchemica.mint(alchemicaRecipient(_gotchiId), _owner);
+    alchemica.mint(address(this), _spill);
+  }
+
+  function alchemicaRecipient(uint256 _gotchiId) internal view returns (address) {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+
+    AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
+    if (diamond.isAavegotchiLent(uint32(_gotchiId))) {
+      return diamond.gotchiEscrow(_gotchiId);
+    } else {
+      return diamond.ownerOf(_gotchiId);
+    }
   }
 
   function popArray(uint256[] storage _array, uint256 _index) internal {

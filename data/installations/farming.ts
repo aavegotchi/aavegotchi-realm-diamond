@@ -2,7 +2,7 @@ import { InstallationTypeInput } from "../../types";
 
 export const installationTypes: InstallationTypeInput[] = [
   {
-    id: 19,
+    id: 55,
     installationType: 1,
     level: 1,
     width: 2,
@@ -22,7 +22,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 20,
+    id: 56,
     installationType: 1,
     level: 2,
     width: 2,
@@ -42,7 +42,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 21,
+    id: 57,
     installationType: 1,
     level: 3,
     width: 2,
@@ -62,7 +62,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 22,
+    id: 58,
     installationType: 1,
     level: 4,
     width: 2,
@@ -82,7 +82,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 23,
+    id: 59,
     installationType: 1,
     level: 5,
     width: 2,
@@ -102,7 +102,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 24,
+    id: 60,
     installationType: 1,
     level: 6,
     width: 2,
@@ -122,7 +122,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 25,
+    id: 61,
     installationType: 1,
     level: 7,
     width: 2,
@@ -142,7 +142,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 26,
+    id: 62,
     installationType: 1,
     level: 8,
     width: 2,
@@ -162,7 +162,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 27,
+    id: 63,
     installationType: 1,
     level: 9,
     width: 2,
@@ -182,7 +182,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 28,
+    id: 64,
     installationType: 1,
     level: 1,
     width: 2,
@@ -202,7 +202,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 29,
+    id: 65,
     installationType: 1,
     level: 2,
     width: 2,
@@ -222,7 +222,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 30,
+    id: 66,
     installationType: 1,
     level: 3,
     width: 2,
@@ -242,7 +242,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 31,
+    id: 67,
     installationType: 1,
     level: 4,
     width: 2,
@@ -262,7 +262,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 32,
+    id: 68,
     installationType: 1,
     level: 5,
     width: 2,
@@ -282,7 +282,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 33,
+    id: 69,
     installationType: 1,
     level: 6,
     width: 2,
@@ -302,7 +302,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 34,
+    id: 70,
     installationType: 1,
     level: 7,
     width: 2,
@@ -322,7 +322,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 35,
+    id: 71,
     installationType: 1,
     level: 8,
     width: 2,
@@ -342,7 +342,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 36,
+    id: 72,
     installationType: 1,
     level: 9,
     width: 2,
@@ -362,7 +362,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 37,
+    id: 73,
     installationType: 1,
     level: 1,
     width: 2,
@@ -382,7 +382,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 38,
+    id: 74,
     installationType: 1,
     level: 2,
     width: 2,
@@ -402,7 +402,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 39,
+    id: 75,
     installationType: 1,
     level: 3,
     width: 2,
@@ -422,7 +422,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 40,
+    id: 76,
     installationType: 1,
     level: 4,
     width: 2,
@@ -442,7 +442,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 41,
+    id: 77,
     installationType: 1,
     level: 5,
     width: 2,
@@ -462,7 +462,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 42,
+    id: 78,
     installationType: 1,
     level: 6,
     width: 2,
@@ -482,7 +482,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 43,
+    id: 79,
     installationType: 1,
     level: 7,
     width: 2,
@@ -502,7 +502,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 44,
+    id: 80,
     installationType: 1,
     level: 8,
     width: 2,
@@ -522,7 +522,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 45,
+    id: 81,
     installationType: 1,
     level: 9,
     width: 2,
@@ -542,7 +542,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 46,
+    id: 82,
     installationType: 1,
     level: 1,
     width: 2,
@@ -562,7 +562,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 47,
+    id: 83,
     installationType: 1,
     level: 2,
     width: 2,
@@ -582,7 +582,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 48,
+    id: 84,
     installationType: 1,
     level: 3,
     width: 2,
@@ -602,7 +602,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 49,
+    id: 85,
     installationType: 1,
     level: 4,
     width: 2,
@@ -622,7 +622,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 50,
+    id: 86,
     installationType: 1,
     level: 5,
     width: 2,
@@ -642,7 +642,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 51,
+    id: 87,
     installationType: 1,
     level: 6,
     width: 2,
@@ -662,7 +662,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 52,
+    id: 88,
     installationType: 1,
     level: 7,
     width: 2,
@@ -682,7 +682,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 53,
+    id: 89,
     installationType: 1,
     level: 8,
     width: 2,
@@ -702,7 +702,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 54,
+    id: 90,
     installationType: 1,
     level: 9,
     width: 2,
@@ -722,7 +722,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 55,
+    id: 91,
     installationType: 2,
     level: 1,
     width: 2,
@@ -742,7 +742,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 56,
+    id: 92,
     installationType: 2,
     level: 2,
     width: 2,
@@ -762,7 +762,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 57,
+    id: 93,
     installationType: 2,
     level: 3,
     width: 2,
@@ -782,7 +782,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 58,
+    id: 94,
     installationType: 2,
     level: 4,
     width: 2,
@@ -802,7 +802,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 59,
+    id: 95,
     installationType: 2,
     level: 5,
     width: 2,
@@ -822,7 +822,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 60,
+    id: 96,
     installationType: 2,
     level: 6,
     width: 2,
@@ -842,7 +842,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 61,
+    id: 97,
     installationType: 2,
     level: 7,
     width: 2,
@@ -862,7 +862,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 62,
+    id: 98,
     installationType: 2,
     level: 8,
     width: 2,
@@ -882,7 +882,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 63,
+    id: 99,
     installationType: 2,
     level: 9,
     width: 2,
@@ -902,7 +902,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 64,
+    id: 100,
     installationType: 2,
     level: 1,
     width: 2,
@@ -922,7 +922,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 65,
+    id: 101,
     installationType: 2,
     level: 2,
     width: 2,
@@ -942,7 +942,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 66,
+    id: 102,
     installationType: 2,
     level: 3,
     width: 2,
@@ -962,7 +962,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 67,
+    id: 103,
     installationType: 2,
     level: 4,
     width: 2,
@@ -982,7 +982,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 68,
+    id: 104,
     installationType: 2,
     level: 5,
     width: 2,
@@ -1002,7 +1002,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 69,
+    id: 105,
     installationType: 2,
     level: 6,
     width: 2,
@@ -1022,7 +1022,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 70,
+    id: 106,
     installationType: 2,
     level: 7,
     width: 2,
@@ -1042,7 +1042,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 71,
+    id: 107,
     installationType: 2,
     level: 8,
     width: 2,
@@ -1062,7 +1062,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 72,
+    id: 108,
     installationType: 2,
     level: 9,
     width: 2,
@@ -1082,7 +1082,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 73,
+    id: 109,
     installationType: 2,
     level: 1,
     width: 2,
@@ -1102,7 +1102,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 74,
+    id: 110,
     installationType: 2,
     level: 2,
     width: 2,
@@ -1122,7 +1122,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 75,
+    id: 111,
     installationType: 2,
     level: 3,
     width: 2,
@@ -1142,7 +1142,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 76,
+    id: 112,
     installationType: 2,
     level: 4,
     width: 2,
@@ -1162,7 +1162,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 77,
+    id: 113,
     installationType: 2,
     level: 5,
     width: 2,
@@ -1182,7 +1182,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 78,
+    id: 114,
     installationType: 2,
     level: 6,
     width: 2,
@@ -1202,7 +1202,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 79,
+    id: 115,
     installationType: 2,
     level: 7,
     width: 2,
@@ -1222,7 +1222,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 80,
+    id: 116,
     installationType: 2,
     level: 8,
     width: 2,
@@ -1242,7 +1242,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 81,
+    id: 117,
     installationType: 2,
     level: 9,
     width: 2,
@@ -1262,7 +1262,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 82,
+    id: 118,
     installationType: 2,
     level: 1,
     width: 2,
@@ -1282,7 +1282,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 83,
+    id: 119,
     installationType: 2,
     level: 2,
     width: 2,
@@ -1302,7 +1302,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 84,
+    id: 120,
     installationType: 2,
     level: 3,
     width: 2,
@@ -1322,7 +1322,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 85,
+    id: 121,
     installationType: 2,
     level: 4,
     width: 2,
@@ -1342,7 +1342,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 86,
+    id: 122,
     installationType: 2,
     level: 5,
     width: 2,
@@ -1362,7 +1362,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 87,
+    id: 123,
     installationType: 2,
     level: 6,
     width: 2,
@@ -1382,7 +1382,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 88,
+    id: 124,
     installationType: 2,
     level: 7,
     width: 2,
@@ -1402,7 +1402,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 89,
+    id: 125,
     installationType: 2,
     level: 8,
     width: 2,
@@ -1422,7 +1422,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 90,
+    id: 126,
     installationType: 2,
     level: 9,
     width: 2,
@@ -1442,7 +1442,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 118,
+    id: 127,
     installationType: 6,
     level: 1,
     width: 2,
@@ -1462,7 +1462,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 119,
+    id: 128,
     installationType: 6,
     level: 2,
     width: 2,
@@ -1482,7 +1482,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 120,
+    id: 129,
     installationType: 6,
     level: 3,
     width: 2,
@@ -1502,7 +1502,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 121,
+    id: 130,
     installationType: 6,
     level: 4,
     width: 2,
@@ -1522,7 +1522,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 122,
+    id: 131,
     installationType: 6,
     level: 5,
     width: 2,
@@ -1542,7 +1542,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 123,
+    id: 132,
     installationType: 6,
     level: 6,
     width: 2,
@@ -1562,7 +1562,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 124,
+    id: 133,
     installationType: 6,
     level: 7,
     width: 2,
@@ -1582,7 +1582,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 125,
+    id: 134,
     installationType: 6,
     level: 8,
     width: 2,
@@ -1602,7 +1602,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 126,
+    id: 135,
     installationType: 6,
     level: 9,
     width: 2,

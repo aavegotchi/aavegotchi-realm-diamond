@@ -50,8 +50,8 @@ contract TestFoundryDiamond is Test, TestUpgrades {
     );
 
     bytes4[] memory testInstallationFacetSelectors = new bytes4[](2);
-    testInstallationFacetSelectors[0] = TestInstallationFacet.testCraftInstallations.selector;
-    testInstallationFacetSelectors[1] = TestInstallationFacet.testUpgradeInstallation.selector;
+    testInstallationFacetSelectors[0] = TestInstallationFacet.craftInstallationTest.selector;
+    testInstallationFacetSelectors[1] = TestInstallationFacet.upgradeInstallationTest.selector;
     installationCuts[1] = getAddFacetSelectorCut(address(testInstallationFacet), testInstallationFacetSelectors);
 
     logFunctionSelectors(installationCuts);
@@ -74,7 +74,7 @@ contract TestFoundryDiamond is Test, TestUpgrades {
     IDiamondCut(C.REALM_DIAMOND_ADDRESS_MATIC).diamondCut(realmCuts, address(0), "");
   }
 
-  function test1() public {
+  function test1() public view {
     console2.log(installationFacet.getAltarLevel(12));
   }
 }

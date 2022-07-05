@@ -26,7 +26,7 @@ contract TestInstallationFacet is Modifiers {
   event UpgradeQueued(address indexed _owner, uint256 indexed _realmId, uint256 indexed _queueIndex);
   event UpgradeQueueFinalized(address indexed _owner, uint256 indexed _realmId, uint256 indexed _queueIndex);
 
-  function testUpgradeInstallation(UpgradeQueue calldata _upgradeQueue, uint40 _gltr) external {
+  function upgradeInstallationTest(UpgradeQueue calldata _upgradeQueue, uint40 _gltr) external {
     // check owner
     require(IERC721(s.realmDiamond).ownerOf(_upgradeQueue.parcelId) == _upgradeQueue.owner, "TestInstallationFacet: Not owner");
     // check coordinates
@@ -56,17 +56,10 @@ contract TestInstallationFacet is Modifiers {
     //next level
     InstallationType memory nextInstallation = s.installationTypes[prevInstallation.nextLevelId];
 
-    //take the required alchemica
-    address[4] memory alchemicaAddresses = realm.getAlchemicaAddresses();
-    // LibItems._splitAlchemica(nextInstallation.alchemicaCost, alchemicaAddresses);
-
     require(prevInstallation.nextLevelId > 0, "TestInstallationFacet: Maximum upgrade reached");
     require(prevInstallation.installationType == nextInstallation.installationType, "TestInstallationFacet: Wrong installation type");
     require(prevInstallation.alchemicaType == nextInstallation.alchemicaType, "TestInstallationFacet: Wrong alchemicaType");
     require(prevInstallation.level == nextInstallation.level - 1, "TestInstallationFacet: Wrong installation level");
-
-    uint256 gltrAmount = uint256(_gltr) * 1e18;
-    // IERC20(s.gltr).transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, gltrAmount); //should revert if user doesnt have enough GLTR
 
     //prevent underflow if user sends too much GLTR
     if (_gltr > nextInstallation.craftTime) revert("TestInstallationFacet: Too much GLTR");
@@ -111,12 +104,11 @@ contract TestInstallationFacet is Modifiers {
   }
 
   /// @notice Craft installations without checks
-  function testCraftInstallations(uint16[] calldata _installationTypes) external {
-    for (uint256 i; i < _installationTypes.length; i++) {
-      //doesn't require queue
-      uint256 installationId = _installationTypes[i];
+  function craftInstallationTest(uint16 installationId) external {
+    LibERC1155._safeMint(msg.sender, installationId, 1, false, 0);
+  }
 
-      LibERC1155._safeMint(msg.sender, installationId, 1, false, 0);
-    }
+  function getInstallationsLength() external view returns (uint256) {
+    return s.installationTypes.length;
   }
 }

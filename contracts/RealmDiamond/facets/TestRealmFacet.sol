@@ -13,7 +13,7 @@ import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamond
 
 contract TestRealmFacet is Modifiers {
   /// @dev Equip installation without signature or owner checks for testing
-  function testEquipInstallation(
+  function equipInstallationTest(
     uint256 _realmId,
     uint256 _installationId,
     uint256 _x,
@@ -42,13 +42,13 @@ contract TestRealmFacet is Modifiers {
   /// @notice Allow the owner of a parcel to start surveying his parcel
   /// @dev Will throw if a surveying round has not started
   /// @param _realmId Identifier of the parcel to survey
-  function testStartSurveying(uint256 _realmId) external {
+  function startSurveyingTest(uint256 _realmId) external {
     require(s.parcels[_realmId].altarId > 0, "AlchemicaFacet: Must equip Altar");
     require(!s.parcels[_realmId].surveying, "AlchemicaFacet: Parcel already surveying");
     s.parcels[_realmId].surveying = true;
   }
 
-  function testRawFulfillRandomWords(
+  function rawFulfillRandomWordsTest(
     uint256 tokenId,
     uint256 surveyingRound,
     uint256 seed
@@ -59,5 +59,14 @@ contract TestRealmFacet is Modifiers {
     randomWords[2] = uint256(keccak256(abi.encode(randomWords[1])));
     randomWords[3] = uint256(keccak256(abi.encode(randomWords[2])));
     LibRealm.updateRemainingAlchemica(tokenId, randomWords, surveyingRound);
+  }
+
+  /// @notice Allow parcel owner to claim available alchemica with his parent NFT(Aavegotchi)
+  /// @param _realmId Identifier of parcel to claim alchemica from
+  /// @param _gotchiId Identifier of Aavegotchi to use for alchemica collecction/claiming
+  function claimAvailableAlchemicaTest(uint256 _realmId, uint256 _gotchiId) external {
+    //1 - Empty Reservoir Access Right
+    LibRealm.verifyAccessRight(_realmId, _gotchiId, 1);
+    LibAlchemica.claimAvailableAlchemica(_realmId, _gotchiId);
   }
 }

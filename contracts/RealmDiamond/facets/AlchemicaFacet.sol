@@ -8,22 +8,10 @@ import "../../libraries/LibMeta.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "../../libraries/LibAlchemica.sol";
 import "../../libraries/LibSignature.sol";
-import "../../interfaces/AavegotchiDiamond.sol";
-import "../../interfaces/IERC20Mintable.sol";
-import "../../interfaces/RemoteApprovable.sol";
 
 uint256 constant bp = 100 ether;
 
 contract AlchemicaFacet is Modifiers {
-  event AlchemicaClaimed(
-    uint256 indexed _realmId,
-    uint256 indexed _gotchiId,
-    uint256 indexed _alchemicaType,
-    uint256 _amount,
-    uint256 _spilloverRate,
-    uint256 _spilloverRadius
-  );
-
   event ChannelAlchemica(
     uint256 indexed _realmId,
     uint256 indexed _gotchiId,
@@ -158,32 +146,6 @@ contract AlchemicaFacet is Modifiers {
     }
   }
 
-  struct SpilloverIO {
-    uint256 rate;
-    uint256 radius;
-  }
-
-  function calculateSpilloverForReservoir(uint256 _realmId, uint256 _alchemicaType) public view returns (SpilloverIO memory spillover_) {
-    uint256 capacityXspillrate;
-    uint256 capacityXspillradius;
-    uint256 totalCapacity;
-    for (uint256 i; i < s.parcels[_realmId].reservoirs[_alchemicaType].length; i++) {
-      InstallationDiamondInterface.ReservoirStats memory reservoirStats = InstallationDiamondInterface(s.installationsDiamond).getReservoirStats(
-        s.parcels[_realmId].reservoirs[_alchemicaType][i]
-      );
-      totalCapacity += reservoirStats.capacity;
-
-      capacityXspillrate += reservoirStats.capacity * reservoirStats.spillRate;
-      capacityXspillradius += reservoirStats.capacity * reservoirStats.spillRadius;
-    }
-    require(totalCapacity > 0, "AlchemicaFacet: no reservoirs equipped");
-
-    uint256 spilloverRate = capacityXspillrate / totalCapacity;
-    uint256 spilloverRadius = capacityXspillradius / totalCapacity;
-
-    return SpilloverIO(spilloverRate, spilloverRadius);
-  }
-
   struct TransferAmounts {
     uint256 owner;
     uint256 spill;
@@ -193,15 +155,6 @@ contract AlchemicaFacet is Modifiers {
     uint256 owner = (_amount * (bp - (_spilloverRate * 10**16))) / bp;
     uint256 spill = (_amount * (_spilloverRate * 10**16)) / bp;
     return TransferAmounts(owner, spill);
-  }
-
-  function alchemicaRecipient(uint256 _gotchiId) internal view returns (address) {
-    AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
-    if (diamond.isAavegotchiLent(uint32(_gotchiId))) {
-      return diamond.gotchiEscrow(_gotchiId);
-    } else {
-      return diamond.ownerOf(_gotchiId);
-    }
   }
 
   function lastClaimedAlchemica(uint256 _realmId) external view returns (uint256) {
@@ -217,47 +170,15 @@ contract AlchemicaFacet is Modifiers {
     uint256 _gotchiId,
     bytes memory _signature
   ) external gameActive {
-    //1 - Empty Reservoir Access Right
-    LibRealm.verifyAccessRight(_realmId, _gotchiId, 1);
-
     //Check signature
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, s.lastClaimedAlchemica[_realmId])), _signature, s.backendPubKey),
       "AlchemicaFacet: Invalid signature"
     );
 
-    require(block.timestamp > s.lastClaimedAlchemica[_realmId] + 8 hours, "AlchemicaFacet: 8 hours claim cooldown");
-    s.lastClaimedAlchemica[_realmId] = block.timestamp;
-
-    for (uint256 i = 0; i < 4; i++) {
-      uint256 remaining = s.parcels[_realmId].alchemicaRemaining[i];
-      uint256 available = LibAlchemica.getAvailableAlchemica(_realmId, i);
-
-      require(remaining >= available, "AlchemicaFacet: Not enough alchemica available");
-
-      s.parcels[_realmId].alchemicaRemaining[i] -= available;
-      s.parcels[_realmId].unclaimedAlchemica[i] = 0;
-      s.parcels[_realmId].lastUpdateTimestamp[i] = block.timestamp;
-
-      SpilloverIO memory spillover = calculateSpilloverForReservoir(_realmId, i);
-      TransferAmounts memory amounts = calculateTransferAmounts(available, spillover.rate);
-
-      //Mint new tokens
-      _mintAvailableAlchemica(i, _gotchiId, amounts.owner, amounts.spill);
-
-      emit AlchemicaClaimed(_realmId, _gotchiId, i, available, spillover.rate, spillover.radius);
-    }
-  }
-
-  function _mintAvailableAlchemica(
-    uint256 _alchemicaType,
-    uint256 _gotchiId,
-    uint256 _owner,
-    uint256 _spill
-  ) internal {
-    IERC20Mintable alchemica = IERC20Mintable(s.alchemicaAddresses[_alchemicaType]);
-    alchemica.mint(alchemicaRecipient(_gotchiId), _owner);
-    alchemica.mint(address(this), _spill);
+    //1 - Empty Reservoir Access Right
+    LibRealm.verifyAccessRight(_realmId, _gotchiId, 1);
+    LibAlchemica.claimAvailableAlchemica(_realmId, _gotchiId);
   }
 
   /// @notice Allow a parcel owner to channel alchemica
@@ -316,12 +237,12 @@ contract AlchemicaFacet is Modifiers {
       if (alchemica.balanceOf(address(this)) < s.greatPortalCapacity[i]) {
         TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], rate);
 
-        alchemica.mint(alchemicaRecipient(_gotchiId), amounts.owner);
+        alchemica.mint(LibAlchemica.alchemicaRecipient(_gotchiId), amounts.owner);
         alchemica.mint(address(this), amounts.spill);
       } else {
         TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], rate);
 
-        alchemica.transfer(alchemicaRecipient(_gotchiId), amounts.owner);
+        alchemica.transfer(LibAlchemica.alchemicaRecipient(_gotchiId), amounts.owner);
       }
     }
 
@@ -387,7 +308,7 @@ contract AlchemicaFacet is Modifiers {
         require(_tokenAddresses.length == _amounts[i].length, "RealmFacet: Mismatched array lengths");
         uint256 amount = _amounts[i][j];
         if (amount > 0) {
-          IERC20(_tokenAddresses[j]).transferFrom(msg.sender, alchemicaRecipient(_gotchiIds[i]), amount);
+          IERC20(_tokenAddresses[j]).transferFrom(msg.sender, LibAlchemica.alchemicaRecipient(_gotchiIds[i]), amount);
         }
       }
     }

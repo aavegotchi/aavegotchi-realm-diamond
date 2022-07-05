@@ -1,16 +1,23 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import {InstallationFacet} from "@installation/facets/InstallationFacet.sol";
-import {RealmFacet} from "@realm/facets/RealmFacet.sol";
+import "forge-std/Test.sol";
+
 import {TestConstants as C} from "@test/constants.t.sol";
 import {IDiamondCut} from "@interfaces/IDiamondCut.sol";
 import {IDiamondLoupe} from "@interfaces/IDiamondLoupe.sol";
 import {Ownable} from "@interfaces/Ownable.sol";
 import {console2} from "forge-std/console2.sol";
 
-contract TestUpgrades {
-  function logFunctionSelectors(IDiamondCut.FacetCut[] memory cuts) internal {
+import {InstallationFacet} from "@installation/facets/InstallationFacet.sol";
+import {TestInstallationFacet} from "@installation/facets/TestInstallationFacet.sol";
+import {RealmFacet} from "@realm/facets/RealmFacet.sol";
+import {AlchemicaFacet} from "@realm/facets/AlchemicaFacet.sol";
+import {VRFFacet} from "@realm/facets/VRFFacet.sol";
+import {TestRealmFacet} from "@realm/facets/TestRealmFacet.sol";
+
+contract TestUpgrades is Test {
+  function logFunctionSelectors(IDiamondCut.FacetCut[] memory cuts) internal view {
     for (uint256 i; i < cuts.length; i++) {
       if (cuts[i].action == IDiamondCut.FacetCutAction.Replace) {
         console2.log("Replace Facet Selectors:");
@@ -70,5 +77,142 @@ contract TestUpgrades {
 
   function getRemoveFacetSelectorCut(bytes4[] memory functionSelectors) internal pure returns (IDiamondCut.FacetCut memory cut) {
     cut = IDiamondCut.FacetCut({facetAddress: address(0), action: IDiamondCut.FacetCutAction.Remove, functionSelectors: functionSelectors});
+  }
+
+  function replaceRealmFacetSelectors() internal returns (address) {
+    RealmFacet realmFacet = new RealmFacet();
+    console2.log("New realm facet:");
+    console2.log(address(realmFacet));
+    IDiamondCut.FacetCut[] memory cuts = new IDiamondCut.FacetCut[](1);
+    cuts[0] = getReplaceFacetSelectorCutFromExistingSelector(
+      C.REALM_DIAMOND_ADDRESS_MATIC,
+      address(realmFacet),
+      RealmFacet.equipInstallation.selector
+    );
+    if (cuts[0].functionSelectors.length != 0) {
+      console2.log("Realm Facet Replaced Selectors:");
+      logFunctionSelectors(cuts);
+      vm.prank(getDiamondOwner(C.REALM_DIAMOND_ADDRESS_MATIC));
+      IDiamondCut(C.REALM_DIAMOND_ADDRESS_MATIC).diamondCut(cuts, address(0), "");
+    } else {
+      console2.log("No Realm Facet Replaced Selectors");
+    }
+    return address(realmFacet);
+  }
+
+  function replaceVRFFacetSelectors() internal returns (address) {
+    VRFFacet vrfFacet = new VRFFacet();
+    console2.log("New VRF facet:");
+    console2.log(address(vrfFacet));
+    IDiamondCut.FacetCut[] memory cuts = new IDiamondCut.FacetCut[](1);
+    cuts[0] = getReplaceFacetSelectorCutFromExistingSelector(C.REALM_DIAMOND_ADDRESS_MATIC, address(vrfFacet), VRFFacet.subscribe.selector);
+    if (cuts[0].functionSelectors.length != 0) {
+      console2.log("VRF Facet Replaced Selectors:");
+      logFunctionSelectors(cuts);
+      vm.prank(getDiamondOwner(C.REALM_DIAMOND_ADDRESS_MATIC));
+      IDiamondCut(C.REALM_DIAMOND_ADDRESS_MATIC).diamondCut(cuts, address(0), "");
+    } else {
+      console2.log("No VRF Facet Replaced Selectors");
+    }
+    return address(vrfFacet);
+  }
+
+  function replaceAlchemicaFacetSelectors() internal returns (address) {
+    AlchemicaFacet alchemicaFacet = new AlchemicaFacet();
+    console2.log("New Alchemica facet:");
+    console2.log(address(alchemicaFacet));
+    IDiamondCut.FacetCut[] memory cuts = new IDiamondCut.FacetCut[](1);
+    cuts[0] = getReplaceFacetSelectorCutFromExistingSelector(
+      C.REALM_DIAMOND_ADDRESS_MATIC,
+      address(alchemicaFacet),
+      AlchemicaFacet.channelAlchemica.selector
+    );
+    if (cuts[0].functionSelectors.length != 0) {
+      console2.log("Alchemica Facet Replaced Selectors:");
+      logFunctionSelectors(cuts);
+      vm.prank(getDiamondOwner(C.REALM_DIAMOND_ADDRESS_MATIC));
+      IDiamondCut(C.REALM_DIAMOND_ADDRESS_MATIC).diamondCut(cuts, address(0), "");
+    } else {
+      console2.log("No Alchemica Facet Replaced Selectors");
+    }
+    return address(alchemicaFacet);
+  }
+
+  function addTestRealmFacetSelectors() internal returns (address) {
+    TestRealmFacet testRealmFacet = new TestRealmFacet();
+    console2.log("New Test Realm facet:");
+    console2.log(address(testRealmFacet));
+
+    bytes4[] memory functionSelectors = new bytes4[](4);
+    {
+      uint256 i;
+      functionSelectors[i++] = TestRealmFacet.equipInstallationTest.selector;
+      functionSelectors[i++] = TestRealmFacet.startSurveyingTest.selector;
+      functionSelectors[i++] = TestRealmFacet.rawFulfillRandomWordsTest.selector;
+      functionSelectors[i++] = TestRealmFacet.claimAvailableAlchemicaTest.selector;
+    }
+
+    IDiamondCut.FacetCut[] memory cuts = new IDiamondCut.FacetCut[](1);
+    cuts[0] = getAddFacetSelectorCut(address(testRealmFacet), functionSelectors);
+
+    if (cuts[0].functionSelectors.length != 0) {
+      console2.log("Test Realm Facet Added Selectors:");
+      logFunctionSelectors(cuts);
+      vm.prank(getDiamondOwner(C.REALM_DIAMOND_ADDRESS_MATIC));
+      IDiamondCut(C.REALM_DIAMOND_ADDRESS_MATIC).diamondCut(cuts, address(0), "");
+    } else {
+      console2.log("No Test Realm Facet Added Selectors");
+    }
+    return address(testRealmFacet);
+  }
+
+  function addVRFFacetSelectors(bool replace) internal returns (address) {
+    VRFFacet vrfFacet;
+    if (replace) {
+      vrfFacet = VRFFacet(replaceVRFFacetSelectors());
+    } else {
+      vrfFacet = new VRFFacet();
+      console2.log("New VRF facet:");
+      console2.log(address(vrfFacet));
+    }
+    IDiamondCut.FacetCut[] memory cuts = new IDiamondCut.FacetCut[](1);
+
+    bytes4[] memory functionSelectors = new bytes4[](4);
+    functionSelectors[0] = VRFFacet.subscribe.selector;
+    functionSelectors[1] = VRFFacet.setConfig.selector;
+    functionSelectors[2] = VRFFacet.rawFulfillRandomWords.selector;
+    functionSelectors[3] = VRFFacet.topUpSubscription.selector;
+
+    cuts[0] = getAddFacetSelectorCut(address(vrfFacet), functionSelectors);
+    if (cuts[0].functionSelectors.length != 0) {
+      console2.log("VRF Facet Added Selectors:");
+      logFunctionSelectors(cuts);
+      vm.prank(getDiamondOwner(C.REALM_DIAMOND_ADDRESS_MATIC));
+      IDiamondCut(C.REALM_DIAMOND_ADDRESS_MATIC).diamondCut(cuts, address(0), "");
+    } else {
+      console2.log("No VRF Facet Added Selectors");
+    }
+  }
+
+  function addTestInstallationFacetSelectors() internal {
+    TestInstallationFacet testInstallationFacet = new TestInstallationFacet();
+    console2.log("New Test Installation facet:");
+    console2.log(address(testInstallationFacet));
+    IDiamondCut.FacetCut[] memory cuts = new IDiamondCut.FacetCut[](1);
+
+    bytes4[] memory functionSelectors = new bytes4[](3);
+    functionSelectors[0] = TestInstallationFacet.craftInstallationTest.selector;
+    functionSelectors[1] = TestInstallationFacet.upgradeInstallationTest.selector;
+    functionSelectors[2] = TestInstallationFacet.getInstallationsLength.selector;
+
+    cuts[0] = getAddFacetSelectorCut(address(testInstallationFacet), functionSelectors);
+    if (cuts[0].functionSelectors.length != 0) {
+      console2.log("Test Installation Facet Added Selectors:");
+      logFunctionSelectors(cuts);
+      vm.prank(getDiamondOwner(C.INSTALLATION_DIAMOND_ADDRESS_MATIC));
+      IDiamondCut(C.INSTALLATION_DIAMOND_ADDRESS_MATIC).diamondCut(cuts, address(0), "");
+    } else {
+      console2.log("No Test Installation Facet Added Selectors");
+    }
   }
 }
