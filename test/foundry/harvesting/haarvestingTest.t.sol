@@ -176,7 +176,7 @@ contract HaarvestingTest is Test, TestUpgrades {
   }
 
   function testHaarvesting() public {
-    vm.warp(block.timestamp + 0.1 hours);
+    vm.warp(block.timestamp + 1 days);
     vm.startPrank(parcelOwner);
     uint256 balanceBefore = fud.balanceOf(parcelOwner);
     testRealmFacet.claimAvailableAlchemicaTest(testParcel, 21655);
