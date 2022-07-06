@@ -41,6 +41,8 @@ contract HaarvestingTest is Test, TestUpgrades {
 
   uint256 internal testParcel = 15882;
   address internal parcelOwner = 0x8FEebfA4aC7AF314d90a0c17C3F91C800cFdE44B;
+  uint256 harvestRate = 5 ether;
+  uint256 capacity = 100 ether;
 
   function setUp() public {
     setUpFacets();
@@ -93,7 +95,7 @@ contract HaarvestingTest is Test, TestUpgrades {
       nextLevelId: 100, // Placeholder
       deprecated: false,
       alchemicaCost: alchemicaCosts,
-      harvestRate: 4.2 ether,
+      harvestRate: harvestRate,
       capacity: 0,
       prerequisites: prereqs,
       name: "FUD Harvester Level 1",
@@ -113,7 +115,7 @@ contract HaarvestingTest is Test, TestUpgrades {
       deprecated: false,
       alchemicaCost: alchemicaCosts,
       harvestRate: 0,
-      capacity: 100 ether,
+      capacity: capacity,
       prerequisites: prereqs,
       name: "FUD Reservoir Level 1",
       unequipType: 0
@@ -129,11 +131,11 @@ contract HaarvestingTest is Test, TestUpgrades {
     vm.startPrank(parcelOwner);
     testRealmFacet.startSurveyingTest(testParcel);
     testRealmFacet.rawFulfillRandomWordsTest(testParcel, 0, 0);
-    uint256 installationsLength = testInstallationFacet.getInstallationsLength();
-    testInstallationFacet.craftInstallationTest(56);
-    testInstallationFacet.craftInstallationTest(55);
-    testRealmFacet.equipInstallationTest(testParcel, 56, 2, 0);
-    testRealmFacet.equipInstallationTest(testParcel, 55, 0, 2);
+    uint16 installationsLength = uint16(testInstallationFacet.getInstallationsLength());
+    testInstallationFacet.craftInstallationTest(installationsLength - 1);
+    testInstallationFacet.craftInstallationTest(installationsLength - 2);
+    testRealmFacet.equipInstallationTest(testParcel, installationsLength - 1, 2, 0);
+    testRealmFacet.equipInstallationTest(testParcel, installationsLength - 2, 0, 2);
     vm.warp(block.timestamp + 9 hours);
     testRealmFacet.claimAvailableAlchemicaTest(testParcel, 22003);
     vm.stopPrank();
@@ -197,8 +199,8 @@ contract HaarvestingTest is Test, TestUpgrades {
     console2.log(balanceBefore);
     console2.log("Balance after:");
     console2.log(balanceAfter);
-    uint256 alchemicaExpected = (time * (4.2 ether)) / (1 days);
-    alchemicaExpected = alchemicaExpected < 100 ether ? alchemicaExpected : 100 ether;
+    uint256 alchemicaExpected = (time * harvestRate) / (1 days);
+    alchemicaExpected = alchemicaExpected < capacity ? alchemicaExpected : capacity;
     assertApproxEqAbs(alchemicaGained, alchemicaExpected / 2, 1);
     vm.stopPrank();
   }
