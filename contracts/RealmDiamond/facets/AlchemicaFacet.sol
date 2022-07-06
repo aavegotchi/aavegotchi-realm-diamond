@@ -172,7 +172,7 @@ contract AlchemicaFacet is Modifiers {
   ) external gameActive {
     //Check signature
     require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, s.lastClaimedAlchemica[_realmId])), _signature, s.backendPubKey),
+      LibSignature.isValid(keccak256(abi.encode(_realmId, _gotchiId, s.lastClaimedAlchemica[_realmId])), _signature, s.backendPubKey),
       "AlchemicaFacet: Invalid signature"
     );
 

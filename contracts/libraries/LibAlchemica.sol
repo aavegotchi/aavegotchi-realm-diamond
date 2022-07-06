@@ -42,8 +42,8 @@ library LibAlchemica {
 
   function alchemicaSinceLastUpdate(uint256 _tokenId, uint256 _alchemicaType) internal view returns (uint256) {
     AppStorage storage s = LibAppStorage.diamondStorage();
-    uint256 amount = s.parcels[_tokenId].alchemicaHarvestRate[_alchemicaType] *
-      (block.timestamp - s.parcels[_tokenId].lastUpdateTimestamp[_alchemicaType]);
+    uint256 amount = (s.parcels[_tokenId].alchemicaHarvestRate[_alchemicaType] *
+      (block.timestamp - s.parcels[_tokenId].lastUpdateTimestamp[_alchemicaType])) / (1 days);
 
     return amount;
   }
@@ -247,7 +247,7 @@ library LibAlchemica {
 
     for (uint256 i = 0; i < 4; i++) {
       uint256 remaining = s.parcels[_realmId].alchemicaRemaining[i];
-      uint256 available = LibAlchemica.getAvailableAlchemica(_realmId, i);
+      uint256 available = getAvailableAlchemica(_realmId, i);
 
       require(remaining >= available, "AlchemicaFacet: Not enough alchemica available");
 

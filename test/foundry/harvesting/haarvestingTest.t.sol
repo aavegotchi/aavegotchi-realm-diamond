@@ -113,7 +113,7 @@ contract HaarvestingTest is Test, TestUpgrades {
       deprecated: false,
       alchemicaCost: alchemicaCosts,
       harvestRate: 0,
-      capacity: 5 ether,
+      capacity: 13300 ether,
       prerequisites: prereqs,
       name: "FUD Reservoir Level 1",
       unequipType: 0
@@ -176,7 +176,7 @@ contract HaarvestingTest is Test, TestUpgrades {
   }
 
   function testHaarvesting() public {
-    vm.warp(block.timestamp + 1 hours);
+    vm.warp(block.timestamp + 0.1 hours);
     vm.startPrank(parcelOwner);
     uint256 balanceBefore = fud.balanceOf(parcelOwner);
     testRealmFacet.claimAvailableAlchemicaTest(testParcel, 21655);
