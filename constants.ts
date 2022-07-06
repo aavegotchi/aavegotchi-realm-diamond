@@ -65,14 +65,14 @@ const maticVars: Constants = {
 
 const mumbaiVars: Constants = {
   aavegotchiDiamond: "",
-  realmDiamond: "0x7F2331C4F9e4E8b5A0fF0b1ecBd9D926371ffC45",
-  installationDiamond: "0x4638B8127D1FC1bb69732c8D82Ea0Ab487A79e23",
-  tileDiamond: "",
-  fud: "",
-  fomo: "",
-  alpha: "",
-  kek: "",
-  gltr: "",
+  realmDiamond: "0x726F201A9aB38cD56D60ee392165F1434C4F193D",
+  installationDiamond: "0x663aeA831087487d2944ce44836F419A35Ee005A",
+  tileDiamond: "0xDd8947D7F6705136e5A12971231D134E80DFC15d",
+  fud: "0x8898BEA7EBC534263d891aCE9fdf8B18F0205ddb",
+  fomo: "0x18c2F784B51b04ba6E85bF62D74898Fac5BCC59b",
+  alpha: "0x066F7B9172DE92945dF4e7fB29a0815dc225d45F",
+  kek: "0x1C5714F00cc2e795Cf4F4F7e2A9F3AA04149d423",
+  gltr: "0x3FF9E39009bfFe903C262f6d63161B1f4414d3c8",
 };
 
 const networkToVars: NetworkToConstants = {
