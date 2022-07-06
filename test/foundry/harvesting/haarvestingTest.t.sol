@@ -106,14 +106,14 @@ contract HaarvestingTest is Test, TestUpgrades {
       level: 1,
       alchemicaType: 0,
       spillRadius: 810,
-      spillRate: 665,
+      spillRate: 5000,
       upgradeQueueBoost: 0,
       craftTime: 0,
       nextLevelId: 100, // Placeholder
       deprecated: false,
       alchemicaCost: alchemicaCosts,
       harvestRate: 0,
-      capacity: 13300 ether,
+      capacity: 100 ether,
       prerequisites: prereqs,
       name: "FUD Reservoir Level 1",
       unequipType: 0
@@ -134,6 +134,8 @@ contract HaarvestingTest is Test, TestUpgrades {
     testInstallationFacet.craftInstallationTest(55);
     testRealmFacet.equipInstallationTest(testParcel, 56, 2, 0);
     testRealmFacet.equipInstallationTest(testParcel, 55, 0, 2);
+    vm.warp(block.timestamp + 9 hours);
+    testRealmFacet.claimAvailableAlchemicaTest(testParcel, 22003);
     vm.stopPrank();
   }
 
@@ -175,21 +177,34 @@ contract HaarvestingTest is Test, TestUpgrades {
     alchemicaFacet.setTotalAlchemicas(alchemicaTotals);
   }
 
-  function testHaarvesting() public {
-    vm.warp(block.timestamp + 1 days);
+  function testHaarvesting(uint256 time) public {
+    vm.assume(time > 8 hours);
+    vm.assume(time < 90 days);
+
+    uint256 balanceBefore;
+    uint256 balanceAfter;
+    uint256 alchemicaGained;
+
+    vm.warp(block.timestamp + time);
     vm.startPrank(parcelOwner);
-    uint256 balanceBefore = fud.balanceOf(parcelOwner);
+
+    balanceBefore = fud.balanceOf(parcelOwner);
     testRealmFacet.claimAvailableAlchemicaTest(testParcel, 21655);
-    uint256 balanceAfter = fud.balanceOf(parcelOwner);
+    balanceAfter = fud.balanceOf(parcelOwner);
+    alchemicaGained = balanceAfter - balanceBefore;
+
     console2.log("Balance before:");
     console2.log(balanceBefore);
     console2.log("Balance after:");
     console2.log(balanceAfter);
+    uint256 alchemicaExpected = (time * (4.2 ether)) / (1 days);
+    alchemicaExpected = alchemicaExpected < 100 ether ? alchemicaExpected : 100 ether;
+    assertApproxEqAbs(alchemicaGained, alchemicaExpected / 2, 1);
     vm.stopPrank();
   }
 
   function testHaarvestingRevert() public {
-    vm.warp(block.timestamp + 1 hours);
+    vm.warp(block.timestamp + 9 hours);
     vm.startPrank(parcelOwner);
     testRealmFacet.claimAvailableAlchemicaTest(testParcel, 21655);
     for (uint256 i; i < 8; i++) {
@@ -223,13 +238,5 @@ contract HaarvestingTest is Test, TestUpgrades {
     assertApproxEqAbs(sumFomo, (56_947 ether * 999) / 12, sumFomo / 20);
     assertApproxEqAbs(sumAlpha, (28_473 ether * 999) / 12, sumAlpha / 20);
     assertApproxEqAbs(sumKek, (11_389 ether * 999) / 12, sumKek / 20);
-    console2.log("FUD: ");
-    console2.log(sumFud);
-    console2.log("FOMO: ");
-    console2.log(sumFomo);
-    console2.log("ALPHA: ");
-    console2.log(sumAlpha);
-    console2.log("KEK: ");
-    console2.log(sumKek);
   }
 }

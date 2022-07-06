@@ -207,7 +207,7 @@ library LibAlchemica {
     uint256 capacity = calculateTotalCapacity(_realmId, _alchemicaType);
 
     //ensure that available alchemica is not higher than available reservoir capacity
-    return available > capacity ? capacity : available;
+    return available < capacity ? available : capacity;
   }
 
   function calculateTransferAmounts(uint256 _amount, uint256 _spilloverRate) internal pure returns (uint256 owner, uint256 spill) {
@@ -245,11 +245,10 @@ library LibAlchemica {
     require(block.timestamp > s.lastClaimedAlchemica[_realmId] + 8 hours, "AlchemicaFacet: 8 hours claim cooldown");
     s.lastClaimedAlchemica[_realmId] = block.timestamp;
 
-    for (uint256 i = 0; i < 4; i++) {
+    for (uint256 i; i < 4; i++) {
       uint256 remaining = s.parcels[_realmId].alchemicaRemaining[i];
       uint256 available = getAvailableAlchemica(_realmId, i);
-
-      require(remaining >= available, "AlchemicaFacet: Not enough alchemica available");
+      available = remaining < available ? remaining : available;
 
       s.parcels[_realmId].alchemicaRemaining[i] -= available;
       s.parcels[_realmId].unclaimedAlchemica[i] = 0;
