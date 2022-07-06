@@ -195,10 +195,6 @@ contract HaarvestingTest is Test, TestUpgrades {
     balanceAfter = fud.balanceOf(parcelOwner);
     alchemicaGained = balanceAfter - balanceBefore;
 
-    console2.log("Balance before:");
-    console2.log(balanceBefore);
-    console2.log("Balance after:");
-    console2.log(balanceAfter);
     uint256 alchemicaExpected = (time * harvestRate) / (1 days);
     alchemicaExpected = alchemicaExpected < capacity ? alchemicaExpected : capacity;
     assertApproxEqAbs(alchemicaGained, alchemicaExpected / 2, 1);
