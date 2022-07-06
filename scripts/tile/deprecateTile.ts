@@ -6,7 +6,6 @@ import { impersonate } from "../helperFunctions";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 
 import { gasPrice } from "../../constants";
-import { outputTile } from "../realm/realmHelpers";
 
 export async function setAddresses() {
   let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
@@ -31,9 +30,7 @@ export async function setAddresses() {
     tileFacet = await impersonate(owner, tileFacet, ethers, network);
   }
 
-  const deprecate = ["5"];
-
-  console.log("Deprecating tiles:", deprecate.toString());
+  const deprecate = ["7"];
 
   const tx = await tileFacet.deprecateTiles(deprecate, {
     gasPrice: gasPrice,
