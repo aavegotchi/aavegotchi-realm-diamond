@@ -185,7 +185,7 @@ contract TestUpgrades is Test {
   function addVRFFacetSelectors(bool _log, bool _replace) internal returns (address) {
     VRFFacet vrfFacet;
     if (_replace) {
-      vrfFacet = VRFFacet(replaceVRFFacetSelectors(false));
+      vrfFacet = VRFFacet(replaceVRFFacetSelectors(_log));
     } else {
       vrfFacet = new VRFFacet();
       if (_log) {
@@ -211,6 +211,36 @@ contract TestUpgrades is Test {
       IDiamondCut(C.REALM_DIAMOND_ADDRESS_MATIC).diamondCut(cuts, address(0), "");
     } else {
       if (_log) console2.log("No VRF Facet Added Selectors");
+    }
+  }
+
+  function addAlchemicaFacetSelectors(bool _log, bool _replace) internal returns (address) {
+    AlchemicaFacet alchemicaFacet;
+    if (_replace) {
+      alchemicaFacet = AlchemicaFacet(replaceAlchemicaFacetSelectors(_log));
+    } else {
+      alchemicaFacet = new AlchemicaFacet();
+      if (_log) {
+        console2.log("New Alchemica facet:");
+        console2.log(address(alchemicaFacet));
+      }
+    }
+    IDiamondCut.FacetCut[] memory cuts = new IDiamondCut.FacetCut[](1);
+
+    bytes4[] memory functionSelectors = new bytes4[](2);
+    functionSelectors[0] = AlchemicaFacet.setTotalAlchemicas.selector;
+    functionSelectors[1] = AlchemicaFacet.progressSurveyingRound.selector;
+
+    cuts[0] = getAddFacetSelectorCut(address(alchemicaFacet), functionSelectors);
+    if (cuts[0].functionSelectors.length != 0) {
+      if (_log) {
+        console2.log("Alchemica Facet Added Selectors:");
+        logFunctionSelectors(cuts);
+      }
+      vm.prank(getDiamondOwner(C.REALM_DIAMOND_ADDRESS_MATIC));
+      IDiamondCut(C.REALM_DIAMOND_ADDRESS_MATIC).diamondCut(cuts, address(0), "");
+    } else {
+      if (_log) console2.log("No Alchemica Facet Added Selectors");
     }
   }
 

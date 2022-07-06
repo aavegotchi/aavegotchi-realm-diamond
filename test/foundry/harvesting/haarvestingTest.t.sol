@@ -44,6 +44,7 @@ contract HaarvestingTest is Test, TestUpgrades {
 
   function setUp() public {
     setUpFacets();
+    setAlchemicaTotals();
     addInstallations();
     prepareParcel();
     setTokens();
@@ -51,7 +52,7 @@ contract HaarvestingTest is Test, TestUpgrades {
 
   function setUpFacets() internal {
     replaceRealmFacetSelectors(false);
-    replaceAlchemicaFacetSelectors(false);
+    addAlchemicaFacetSelectors(false, true);
     addVRFFacetSelectors(false, true);
 
     addTestRealmFacetSelectors(false);
@@ -143,6 +144,37 @@ contract HaarvestingTest is Test, TestUpgrades {
     kek = IERC20(C.KEK_MATIC);
   }
 
+  function setAlchemicaTotals() internal {
+    uint256[4][5] memory alchemicaTotals;
+    alchemicaTotals[0][0] = 28_473 ether;
+    alchemicaTotals[0][1] = 14_237 ether;
+    alchemicaTotals[0][2] = 7_118 ether;
+    alchemicaTotals[0][3] = 2_847 ether;
+
+    alchemicaTotals[1][0] = 113_893 ether;
+    alchemicaTotals[1][1] = 56_947 ether;
+    alchemicaTotals[1][2] = 28_473 ether;
+    alchemicaTotals[1][3] = 11_389 ether;
+
+    alchemicaTotals[2][0] = 911_145 ether;
+    alchemicaTotals[2][1] = 455_573 ether;
+    alchemicaTotals[2][2] = 227_786 ether;
+    alchemicaTotals[2][3] = 91_115 ether;
+
+    alchemicaTotals[3][0] = 911_145 ether;
+    alchemicaTotals[3][1] = 455_573 ether;
+    alchemicaTotals[3][2] = 227_786 ether;
+    alchemicaTotals[3][3] = 91_115 ether;
+
+    alchemicaTotals[4][0] = 1_822_290 ether;
+    alchemicaTotals[4][1] = 911_145 ether;
+    alchemicaTotals[4][2] = 455_573 ether;
+    alchemicaTotals[4][3] = 182_229 ether;
+
+    vm.prank(getDiamondOwner(C.REALM_DIAMOND_ADDRESS_MATIC));
+    alchemicaFacet.setTotalAlchemicas(alchemicaTotals);
+  }
+
   function testHaarvesting() public {
     vm.warp(block.timestamp + 1 hours);
     vm.startPrank(parcelOwner);
@@ -171,5 +203,33 @@ contract HaarvestingTest is Test, TestUpgrades {
     vm.stopPrank();
   }
 
-  function testBinomialDistribution() public {}
+  function testBinomialDistribution() public {
+    uint256 sumFud;
+    uint256 sumFomo;
+    uint256 sumAlpha;
+    uint256 sumKek;
+    for (uint256 i = 1; i < 1000; i++) {
+      vm.prank(getDiamondOwner(C.REALM_DIAMOND_ADDRESS_MATIC));
+      alchemicaFacet.progressSurveyingRound();
+      testRealmFacet.startSurveyingTest(testParcel);
+      testRealmFacet.rawFulfillRandomWordsTest(testParcel, i, i);
+      uint256[] memory roundAlchemica = alchemicaFacet.getRoundAlchemica(testParcel, i);
+      sumFud += roundAlchemica[0];
+      sumFomo += roundAlchemica[1];
+      sumAlpha += roundAlchemica[2];
+      sumKek += roundAlchemica[3];
+    }
+    assertApproxEqAbs(sumFud, (113_893 ether * 999) / 12, sumFud / 20);
+    assertApproxEqAbs(sumFomo, (56_947 ether * 999) / 12, sumFomo / 20);
+    assertApproxEqAbs(sumAlpha, (28_473 ether * 999) / 12, sumAlpha / 20);
+    assertApproxEqAbs(sumKek, (11_389 ether * 999) / 12, sumKek / 20);
+    console2.log("FUD: ");
+    console2.log(sumFud);
+    console2.log("FOMO: ");
+    console2.log(sumFomo);
+    console2.log("ALPHA: ");
+    console2.log(sumAlpha);
+    console2.log("KEK: ");
+    console2.log(sumKek);
+  }
 }
