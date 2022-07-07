@@ -24,8 +24,8 @@ export async function harvesterUpgrade() {
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "RealmFacet",
-      addSelectors: [],
+      facetName: "AlchemicaFacet",
+      addSelectors: [`function isSurveying(uint256 _realmId) external view`],
       removeSelectors: [],
     },
     // {
