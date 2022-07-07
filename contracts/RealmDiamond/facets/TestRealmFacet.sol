@@ -90,7 +90,7 @@ contract TestRealmFacet is Modifiers {
     address[] calldata _to,
     uint256[] calldata _tokenIds,
     MintParcelInput[] memory _metadata
-  ) external onlyOwner {
+  ) external {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
       require(s.tokenIds.length < MAX_SUPPLY, "RealmFacet: Cannot mint more than 420,069 parcels");
       uint256 tokenId = _tokenIds[index];
