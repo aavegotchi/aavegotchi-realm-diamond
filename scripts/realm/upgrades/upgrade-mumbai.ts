@@ -1,13 +1,10 @@
-import { ethers, network, run } from "hardhat";
+import { ethers, run } from "hardhat";
 import { varsForNetwork } from "../../../constants";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
-import { VRFFacet__factory } from "../../../typechain";
-import { VRFFacetInterface } from "../../../typechain/VRFFacet";
-import { upgradeDiamondCut } from "./upgrade-diamond";
 
 export interface VrfConfig {
   subId: number;
@@ -24,36 +21,17 @@ export async function harvesterUpgrade() {
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "TestRealmFacet",
-      addSelectors: [],
+      facetName: "AlchemicaFacet",
+      addSelectors: [
+        `function getHarvestRates(uint256 _realmId) external view`,
+        `function getCapacities(uint256 _realmId) external view`,
+        `function getTotalClaimed(uint256 _realmId) external view`,
+      ],
       removeSelectors: [],
     },
-    // {
-    //   facetName: "AlchemicaFacet",
-    //   addSelectors: [],
-    //   removeSelectors: [],
-    // },
-    // {
-    //   facetName: "VRFFacet",
-    //   addSelectors: [],
-    //   removeSelectors: [],
-    // },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
-
-  let iface: VRFFacetInterface = new ethers.utils.Interface(
-    VRFFacet__factory.abi
-  ) as VRFFacetInterface;
-
-  let vrfCoordinator: string;
-  let vrfConfig: VrfConfig = {
-    subId: 0,
-    callbackGasLimit: 0,
-    requestConfirmations: 0,
-    numWords: 0,
-    keyHash: "",
-  };
 
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
