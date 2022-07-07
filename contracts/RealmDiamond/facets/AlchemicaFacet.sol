@@ -181,6 +181,27 @@ contract AlchemicaFacet is Modifiers {
     LibAlchemica.claimAvailableAlchemica(_realmId, _gotchiId);
   }
 
+  function getHarvestRates(uint256 _realmId, uint256[] memory _alchemicaTypes) external view returns (uint256[] memory harvestRates) {
+    harvestRates = new uint256[](_alchemicaTypes.length);
+    for (uint256 i; i < _alchemicaTypes.length; i++) {
+      harvestRates[i] = s.parcels[_realmId].alchemicaHarvestRate[_alchemicaTypes[i]];
+    }
+  }
+
+  function getCapacities(uint256 _realmId, uint256[] memory _alchemicaTypes) external view returns (uint256[] memory capacities) {
+    capacities = new uint256[](_alchemicaTypes.length);
+    for (uint256 i; i < _alchemicaTypes.length; i++) {
+      capacities[i] = LibAlchemica.calculateTotalCapacity(_realmId, _alchemicaTypes[i]);
+    }
+  }
+
+  function getTotalClaimed(uint256 _realmId, uint256[] memory _alchemicaTypes) external view returns (uint256[] memory totalClaimed) {
+    totalClaimed = new uint256[](_alchemicaTypes.length);
+    for (uint256 i; i < _alchemicaTypes.length; i++) {
+      totalClaimed[i] = LibAlchemica.getTotalClaimed(_realmId, _alchemicaTypes[i]);
+    }
+  }
+
   /// @notice Allow a parcel owner to channel alchemica
   /// @dev This transfers alchemica to the parent ERC721 token with id _gotchiId and also to the great portal
   /// @param _realmId Identifier of parcel where alchemica is being channeled from

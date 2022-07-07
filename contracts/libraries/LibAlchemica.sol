@@ -40,14 +40,6 @@ library LibAlchemica {
     s.parcels[_tokenId].lastUpdateTimestamp[_alchemicaType] = block.timestamp;
   }
 
-  function alchemicaSinceLastUpdate(uint256 _tokenId, uint256 _alchemicaType) internal view returns (uint256) {
-    AppStorage storage s = LibAppStorage.diamondStorage();
-    uint256 amount = (s.parcels[_tokenId].alchemicaHarvestRate[_alchemicaType] *
-      (block.timestamp - s.parcels[_tokenId].lastUpdateTimestamp[_alchemicaType])) / (1 days);
-
-    return amount;
-  }
-
   function increaseTraits(
     uint256 _realmId,
     uint256 _installationId,
@@ -190,6 +182,14 @@ library LibAlchemica {
     }
   }
 
+  function alchemicaSinceLastUpdate(uint256 _tokenId, uint256 _alchemicaType) internal view returns (uint256) {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+    uint256 amount = (s.parcels[_tokenId].alchemicaHarvestRate[_alchemicaType] *
+      (block.timestamp - s.parcels[_tokenId].lastUpdateTimestamp[_alchemicaType])) / (1 days);
+
+    return amount;
+  }
+
   function calculateTotalCapacity(uint256 _tokenId, uint256 _alchemicaType) internal view returns (uint256 capacity_) {
     AppStorage storage s = LibAppStorage.diamondStorage();
     for (uint256 i; i < s.parcels[_tokenId].reservoirs[_alchemicaType].length; i++) {
@@ -237,6 +237,18 @@ library LibAlchemica {
 
     spilloverRate = capacityXspillrate / totalCapacity;
     spilloverRadius = capacityXspillradius / totalCapacity;
+  }
+
+  function getAllRoundAlchemica(uint256 _realmId, uint256 _alchemicaType) internal view returns (uint256 alchemica) {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+    for (uint256 i; i < s.parcels[_realmId].currentRound; i++) {
+      alchemica += s.parcels[_realmId].roundAlchemica[i][_alchemicaType];
+    }
+  }
+
+  function getTotalClaimed(uint256 _realmId, uint256 _alchemicaType) internal view returns (uint256 totalClaimed) {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+    totalClaimed = getAllRoundAlchemica(_realmId, _alchemicaType) - s.parcels[_realmId].alchemicaRemaining[_alchemicaType];
   }
 
   function claimAvailableAlchemica(uint256 _realmId, uint256 _gotchiId) internal {

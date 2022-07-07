@@ -38,6 +38,7 @@ contract HaarvestingTest is Test, TestUpgrades {
 
   uint256[] prereqs;
   uint16[] installationIds;
+  uint256[] alchemicaTypes;
 
   uint256 internal testParcel = 15882;
   address internal parcelOwner = 0x8FEebfA4aC7AF314d90a0c17C3F91C800cFdE44B;
@@ -177,6 +178,10 @@ contract HaarvestingTest is Test, TestUpgrades {
 
     vm.prank(getDiamondOwner(C.REALM_DIAMOND_ADDRESS_MATIC));
     alchemicaFacet.setTotalAlchemicas(alchemicaTotals);
+    alchemicaTypes.push(0);
+    alchemicaTypes.push(1);
+    alchemicaTypes.push(2);
+    alchemicaTypes.push(3);
   }
 
   function testHaarvesting(uint256 time) public {
@@ -213,6 +218,20 @@ contract HaarvestingTest is Test, TestUpgrades {
     vm.warp(block.timestamp + 1 hours);
     testRealmFacet.claimAvailableAlchemicaTest(testParcel, 22003);
 
+    vm.stopPrank();
+  }
+
+  function testHaarvestingGetters() public {
+    uint256 time = 10 hours;
+
+    vm.warp(block.timestamp + time);
+    vm.startPrank(parcelOwner);
+
+    testRealmFacet.claimAvailableAlchemicaTest(testParcel, 21655);
+
+    console2.log(alchemicaFacet.getHarvestRates(testParcel, alchemicaTypes)[0]);
+    console2.log(alchemicaFacet.getCapacities(testParcel, alchemicaTypes)[0]);
+    console2.log(alchemicaFacet.getTotalClaimed(testParcel, alchemicaTypes)[0]);
     vm.stopPrank();
   }
 

@@ -212,6 +212,7 @@ contract TestUpgrades is Test {
     } else {
       if (_log) console2.log("No VRF Facet Added Selectors");
     }
+    return address(vrfFacet);
   }
 
   function addAlchemicaFacetSelectors(bool _log, bool _replace) internal returns (address) {
@@ -227,9 +228,12 @@ contract TestUpgrades is Test {
     }
     IDiamondCut.FacetCut[] memory cuts = new IDiamondCut.FacetCut[](1);
 
-    bytes4[] memory functionSelectors = new bytes4[](2);
+    bytes4[] memory functionSelectors = new bytes4[](5);
     functionSelectors[0] = AlchemicaFacet.setTotalAlchemicas.selector;
     functionSelectors[1] = AlchemicaFacet.progressSurveyingRound.selector;
+    functionSelectors[2] = AlchemicaFacet.getHarvestRates.selector;
+    functionSelectors[3] = AlchemicaFacet.getCapacities.selector;
+    functionSelectors[4] = AlchemicaFacet.getTotalClaimed.selector;
 
     cuts[0] = getAddFacetSelectorCut(address(alchemicaFacet), functionSelectors);
     if (cuts[0].functionSelectors.length != 0) {
@@ -242,6 +246,7 @@ contract TestUpgrades is Test {
     } else {
       if (_log) console2.log("No Alchemica Facet Added Selectors");
     }
+    return address(alchemicaFacet);
   }
 
   function addTestInstallationFacetSelectors(bool _log) internal {
