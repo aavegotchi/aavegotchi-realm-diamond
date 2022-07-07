@@ -64,7 +64,7 @@ const maticVars: Constants = {
 };
 
 const mumbaiVars: Constants = {
-  aavegotchiDiamond: "",
+  aavegotchiDiamond: "0x14B55C7862023c9f2aEfCA1EB5a606465dA034B0",
   realmDiamond: "0x726F201A9aB38cD56D60ee392165F1434C4F193D",
   installationDiamond: "0x663aeA831087487d2944ce44836F419A35Ee005A",
   tileDiamond: "0xDd8947D7F6705136e5A12971231D134E80DFC15d",

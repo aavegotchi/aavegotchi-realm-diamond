@@ -1,16 +1,30 @@
 import { ethers, network } from "hardhat";
 import { varsForNetwork } from "../../../constants";
-import { VRFFacet } from "../../../typechain";
+import { AlchemicaFacet, VRFFacet } from "../../../typechain";
+import { impersonate } from "../../helperFunctions";
+import { genChannelAlchemicaSignature } from "../realmHelpers";
 
 export async function setAddresses() {
   const c = await varsForNetwork(ethers);
 
   console.log("c:", c);
 
-  let vrfFacet = (await ethers.getContractAt(
-    "VRFFacet",
+  let alchemicaFacet = (await ethers.getContractAt(
+    "AlchemicaFacet",
     c.realmDiamond
-  )) as VRFFacet;
+  )) as AlchemicaFacet;
+
+  alchemicaFacet = await impersonate(
+    "0x94cb5C277FCC64C274Bd30847f0821077B231022",
+    alchemicaFacet,
+    ethers,
+    network
+  );
+
+  const sig = await genChannelAlchemicaSignature(143, 0, 0);
+
+  const tx = await alchemicaFacet.claimAvailableAlchemica("143", "0", sig);
+  await tx.wait();
 
   // console.log("subscribe");
   // const subTx = await vrfFacet.subscribe({
@@ -28,27 +42,6 @@ export async function setAddresses() {
   // );
 
   // await topTx.wait();
-
-  console.log("Setting vrf");
-
-  const requestConfig = {
-    subId: 900,
-    callbackGasLimit: 500_000,
-    requestConfirmations: 10,
-    numWords: 4,
-    keyHash:
-      "0x4b09e658ed251bcafeebbc69400383d49f344ace09b9576fe248bb02c003fe9f",
-  };
-
-  let tx = await vrfFacet.setConfig(
-    requestConfig,
-    "0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed",
-    {
-      gasPrice: 50000000000,
-    }
-  );
-
-  await tx.wait();
 }
 
 // We recommend this pattern to be able to use async/await everywhere

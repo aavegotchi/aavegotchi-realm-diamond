@@ -24,10 +24,17 @@ contract AlchemicaFacet is Modifiers {
 
   event SurveyingRoundProgressed(uint256 indexed _newRound);
 
+  function isSurveying(uint256 _realmId) external view returns (bool) {
+    return s.parcels[_realmId].surveying;
+  }
+
   // /// @notice Allow the owner of a parcel to start surveying his parcel
   // /// @dev Will throw if a surveying round has not started
   // /// @param _realmId Identifier of the parcel to survey
   function startSurveying(uint256 _realmId) external onlyParcelOwner(_realmId) gameActive {
+    //current round and surveying round both begin at 0.
+    //after calling VRF, currentRound increases
+    require(s.parcels[_realmId].currentRound <= s.surveyingRound, "AlchemicaFacet: Round not released");
     require(s.parcels[_realmId].altarId > 0, "AlchemicaFacet: Must equip Altar");
     require(!s.parcels[_realmId].surveying, "AlchemicaFacet: Parcel already surveying");
     s.parcels[_realmId].surveying = true;
