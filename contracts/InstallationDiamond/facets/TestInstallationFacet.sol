@@ -26,7 +26,7 @@ contract TestInstallationFacet is Modifiers {
   event UpgradeQueued(address indexed _owner, uint256 indexed _realmId, uint256 indexed _queueIndex);
   event UpgradeQueueFinalized(address indexed _owner, uint256 indexed _realmId, uint256 indexed _queueIndex);
 
-  function upgradeInstallationTest(UpgradeQueue calldata _upgradeQueue, uint40 _gltr) external {
+  function mockUpgradeInstallation(UpgradeQueue calldata _upgradeQueue, uint40 _gltr) external {
     // check owner
     require(IERC721(s.realmDiamond).ownerOf(_upgradeQueue.parcelId) == _upgradeQueue.owner, "TestInstallationFacet: Not owner");
     // check coordinates
@@ -104,11 +104,11 @@ contract TestInstallationFacet is Modifiers {
   }
 
   /// @notice Craft installations without checks
-  function craftInstallationTest(uint16 installationId) external {
+  function mockCraftInstallation(uint16 installationId) external {
     LibERC1155._safeMint(msg.sender, installationId, 1, false, 0);
   }
 
-  function getInstallationsLength() external view returns (uint256) {
+  function mockGetInstallationsLength() external view returns (uint256) {
     return s.installationTypes.length;
   }
 }

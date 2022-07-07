@@ -130,15 +130,15 @@ contract HaarvestingTest is Test, TestUpgrades {
 
   function prepareParcel() internal {
     vm.startPrank(parcelOwner);
-    testRealmFacet.startSurveyingTest(testParcel);
-    testRealmFacet.rawFulfillRandomWordsTest(testParcel, 0, 0);
-    uint16 installationsLength = uint16(testInstallationFacet.getInstallationsLength());
-    testInstallationFacet.craftInstallationTest(installationsLength - 1);
-    testInstallationFacet.craftInstallationTest(installationsLength - 2);
-    testRealmFacet.equipInstallationTest(testParcel, installationsLength - 1, 2, 0);
-    testRealmFacet.equipInstallationTest(testParcel, installationsLength - 2, 0, 2);
+    testRealmFacet.mockStartSurveying(testParcel);
+    testRealmFacet.mockRawFulfillRandomWords(testParcel, 0, 0);
+    uint16 installationsLength = uint16(testInstallationFacet.mockGetInstallationsLength());
+    testInstallationFacet.mockCraftInstallation(installationsLength - 1);
+    testInstallationFacet.mockCraftInstallation(installationsLength - 2);
+    testRealmFacet.mockEquipInstallation(testParcel, installationsLength - 1, 2, 0);
+    testRealmFacet.mockEquipInstallation(testParcel, installationsLength - 2, 0, 2);
     vm.warp(block.timestamp + 9 hours);
-    testRealmFacet.claimAvailableAlchemicaTest(testParcel, 22003);
+    testRealmFacet.mockClaimAvailableAlchemica(testParcel, 22003);
     vm.stopPrank();
   }
 
@@ -196,7 +196,7 @@ contract HaarvestingTest is Test, TestUpgrades {
     vm.startPrank(parcelOwner);
 
     balanceBefore = fud.balanceOf(parcelOwner);
-    testRealmFacet.claimAvailableAlchemicaTest(testParcel, 21655);
+    testRealmFacet.mockClaimAvailableAlchemica(testParcel, 21655);
     balanceAfter = fud.balanceOf(parcelOwner);
     alchemicaGained = balanceAfter - balanceBefore;
 
@@ -209,14 +209,14 @@ contract HaarvestingTest is Test, TestUpgrades {
   function testHaarvestingRevert() public {
     vm.warp(block.timestamp + 9 hours);
     vm.startPrank(parcelOwner);
-    testRealmFacet.claimAvailableAlchemicaTest(testParcel, 21655);
+    testRealmFacet.mockClaimAvailableAlchemica(testParcel, 21655);
     for (uint256 i; i < 8; i++) {
       vm.warp(block.timestamp + 1 hours);
       vm.expectRevert("AlchemicaFacet: 8 hours claim cooldown");
-      testRealmFacet.claimAvailableAlchemicaTest(testParcel, 22003);
+      testRealmFacet.mockClaimAvailableAlchemica(testParcel, 22003);
     }
     vm.warp(block.timestamp + 1 hours);
-    testRealmFacet.claimAvailableAlchemicaTest(testParcel, 22003);
+    testRealmFacet.mockClaimAvailableAlchemica(testParcel, 22003);
 
     vm.stopPrank();
   }
@@ -227,11 +227,11 @@ contract HaarvestingTest is Test, TestUpgrades {
     vm.warp(block.timestamp + time);
     vm.startPrank(parcelOwner);
 
-    testRealmFacet.claimAvailableAlchemicaTest(testParcel, 21655);
+    testRealmFacet.mockClaimAvailableAlchemica(testParcel, 21655);
 
-    console2.log(alchemicaFacet.getHarvestRates(testParcel, alchemicaTypes)[0]);
-    console2.log(alchemicaFacet.getCapacities(testParcel, alchemicaTypes)[0]);
-    console2.log(alchemicaFacet.getTotalClaimed(testParcel, alchemicaTypes)[0]);
+    console2.log(alchemicaFacet.getHarvestRates(testParcel)[0]);
+    console2.log(alchemicaFacet.getCapacities(testParcel)[0]);
+    console2.log(alchemicaFacet.getTotalClaimed(testParcel)[0]);
     vm.stopPrank();
   }
 
@@ -243,8 +243,8 @@ contract HaarvestingTest is Test, TestUpgrades {
     for (uint256 i = 1; i < 1000; i++) {
       vm.prank(getDiamondOwner(C.REALM_DIAMOND_ADDRESS_MATIC));
       alchemicaFacet.progressSurveyingRound();
-      testRealmFacet.startSurveyingTest(testParcel);
-      testRealmFacet.rawFulfillRandomWordsTest(testParcel, i, i);
+      testRealmFacet.mockStartSurveying(testParcel);
+      testRealmFacet.mockRawFulfillRandomWords(testParcel, i, i);
       uint256[] memory roundAlchemica = alchemicaFacet.getRoundAlchemica(testParcel, i);
       sumFud += roundAlchemica[0];
       sumFomo += roundAlchemica[1];
