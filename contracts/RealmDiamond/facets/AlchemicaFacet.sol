@@ -188,24 +188,24 @@ contract AlchemicaFacet is Modifiers {
     LibAlchemica.claimAvailableAlchemica(_realmId, _gotchiId);
   }
 
-  function getHarvestRates(uint256 _realmId, uint256[] memory _alchemicaTypes) external view returns (uint256[] memory harvestRates) {
-    harvestRates = new uint256[](_alchemicaTypes.length);
-    for (uint256 i; i < _alchemicaTypes.length; i++) {
-      harvestRates[i] = s.parcels[_realmId].alchemicaHarvestRate[_alchemicaTypes[i]];
+  function getHarvestRates(uint256 _realmId) external view returns (uint256[] memory harvestRates) {
+    harvestRates = new uint256[](4);
+    for (uint256 i; i < 4; i++) {
+      harvestRates[i] = s.parcels[_realmId].alchemicaHarvestRate[i];
     }
   }
 
-  function getCapacities(uint256 _realmId, uint256[] memory _alchemicaTypes) external view returns (uint256[] memory capacities) {
-    capacities = new uint256[](_alchemicaTypes.length);
-    for (uint256 i; i < _alchemicaTypes.length; i++) {
-      capacities[i] = LibAlchemica.calculateTotalCapacity(_realmId, _alchemicaTypes[i]);
+  function getCapacities(uint256 _realmId) external view returns (uint256[] memory capacities) {
+    capacities = new uint256[](4);
+    for (uint256 i; i < 4; i++) {
+      capacities[i] = LibAlchemica.calculateTotalCapacity(_realmId, i);
     }
   }
 
-  function getTotalClaimed(uint256 _realmId, uint256[] memory _alchemicaTypes) external view returns (uint256[] memory totalClaimed) {
-    totalClaimed = new uint256[](_alchemicaTypes.length);
-    for (uint256 i; i < _alchemicaTypes.length; i++) {
-      totalClaimed[i] = LibAlchemica.getTotalClaimed(_realmId, _alchemicaTypes[i]);
+  function getTotalClaimed(uint256 _realmId) external view returns (uint256[] memory totalClaimed) {
+    totalClaimed = new uint256[](4);
+    for (uint256 i; i < 4; i++) {
+      totalClaimed[i] = LibAlchemica.getTotalClaimed(_realmId, i);
     }
   }
 
