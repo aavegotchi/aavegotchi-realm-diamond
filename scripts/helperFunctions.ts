@@ -62,9 +62,6 @@ export function getSelectors(contract: Contract) {
   const signatures = Object.keys(contract.interface.functions);
   const selectors = signatures.reduce((acc: string[], val: string) => {
     if (val !== "init(bytes)") {
-      const hash = contract.interface.getSighash(val);
-      const func = contract.interface.getFunction(val);
-      console.log("hash:", hash, func);
       acc.push(contract.interface.getSighash(val));
     }
     return acc;
