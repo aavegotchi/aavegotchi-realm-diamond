@@ -7,3 +7,5 @@
 @tile/=contracts/TileDiamond/
 @test/=test/foundry/
 @interfaces/=contracts/interfaces/
+@openzeppelin/=node_modules/@openzeppelin
+@chainlink/=node_modules/@chainlink
