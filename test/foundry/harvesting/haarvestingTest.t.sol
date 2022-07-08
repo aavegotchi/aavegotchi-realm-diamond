@@ -240,7 +240,7 @@ contract HaarvestingTest is Test, TestUpgrades {
     uint256 sumFomo;
     uint256 sumAlpha;
     uint256 sumKek;
-    for (uint256 i = 1; i < 1000; i++) {
+    for (uint256 i = 1; i < 100; i++) {
       vm.prank(getDiamondOwner(C.REALM_DIAMOND_ADDRESS_MATIC));
       alchemicaFacet.progressSurveyingRound();
       testRealmFacet.mockStartSurveying(testParcel);
@@ -251,9 +251,9 @@ contract HaarvestingTest is Test, TestUpgrades {
       sumAlpha += roundAlchemica[2];
       sumKek += roundAlchemica[3];
     }
-    assertApproxEqAbs(sumFud, (113_893 ether * 999) / 12, sumFud / 20);
-    assertApproxEqAbs(sumFomo, (56_947 ether * 999) / 12, sumFomo / 20);
-    assertApproxEqAbs(sumAlpha, (28_473 ether * 999) / 12, sumAlpha / 20);
-    assertApproxEqAbs(sumKek, (11_389 ether * 999) / 12, sumKek / 20);
+    assertApproxEqAbs(sumFud, (113_893 ether * 99) / 12, (113_893 ether * 99) / 60);
+    assertApproxEqAbs(sumFomo, (56_947 ether * 99) / 12, (56_947 ether * 99) / 60);
+    assertApproxEqAbs(sumAlpha, (28_473 ether * 99) / 12, (28_473 ether * 99) / 60);
+    assertApproxEqAbs(sumKek, (11_389 ether * 99) / 12, (11_389 ether * 99) / 60);
   }
 }
