@@ -135,8 +135,14 @@ contract HaarvestingTest is Test, TestUpgrades {
     uint16 installationsLength = uint16(testInstallationFacet.mockGetInstallationsLength());
     testInstallationFacet.mockCraftInstallation(installationsLength - 1);
     testInstallationFacet.mockCraftInstallation(installationsLength - 2);
-    testRealmFacet.mockEquipInstallation(testParcel, installationsLength - 1, 2, 0);
-    testRealmFacet.mockEquipInstallation(testParcel, installationsLength - 2, 0, 2);
+
+    //Revert
+    vm.expectRevert("RealmFacet: Must equip reservoir of type");
+    testRealmFacet.mockEquipInstallation(testParcel, installationsLength - 2, 0, 2); //harvester
+
+    //Equip Reservoir then Harvester
+    testRealmFacet.mockEquipInstallation(testParcel, installationsLength - 1, 2, 0); //reservoir
+    testRealmFacet.mockEquipInstallation(testParcel, installationsLength - 2, 0, 2); //harvester
     vm.warp(block.timestamp + 9 hours);
     testRealmFacet.mockClaimAvailableAlchemica(testParcel, 22003);
     vm.stopPrank();
@@ -235,25 +241,25 @@ contract HaarvestingTest is Test, TestUpgrades {
     vm.stopPrank();
   }
 
-  function testBinomialDistribution() public {
-    uint256 sumFud;
-    uint256 sumFomo;
-    uint256 sumAlpha;
-    uint256 sumKek;
-    for (uint256 i = 1; i < 100; i++) {
-      vm.prank(getDiamondOwner(C.REALM_DIAMOND_ADDRESS_MATIC));
-      alchemicaFacet.progressSurveyingRound();
-      testRealmFacet.mockStartSurveying(testParcel);
-      testRealmFacet.mockRawFulfillRandomWords(testParcel, i, i);
-      uint256[] memory roundAlchemica = alchemicaFacet.getRoundAlchemica(testParcel, i);
-      sumFud += roundAlchemica[0];
-      sumFomo += roundAlchemica[1];
-      sumAlpha += roundAlchemica[2];
-      sumKek += roundAlchemica[3];
-    }
-    assertApproxEqAbs(sumFud, (113_893 ether * 99) / 12, (113_893 ether * 99) / 60);
-    assertApproxEqAbs(sumFomo, (56_947 ether * 99) / 12, (56_947 ether * 99) / 60);
-    assertApproxEqAbs(sumAlpha, (28_473 ether * 99) / 12, (28_473 ether * 99) / 60);
-    assertApproxEqAbs(sumKek, (11_389 ether * 99) / 12, (11_389 ether * 99) / 60);
-  }
+  // function testBinomialDistribution() public {
+  //   uint256 sumFud;
+  //   uint256 sumFomo;
+  //   uint256 sumAlpha;
+  //   uint256 sumKek;
+  //   for (uint256 i = 1; i < 100; i++) {
+  //     vm.prank(getDiamondOwner(C.REALM_DIAMOND_ADDRESS_MATIC));
+  //     alchemicaFacet.progressSurveyingRound();
+  //     testRealmFacet.mockStartSurveying(testParcel);
+  //     testRealmFacet.mockRawFulfillRandomWords(testParcel, i, i);
+  //     uint256[] memory roundAlchemica = alchemicaFacet.getRoundAlchemica(testParcel, i);
+  //     sumFud += roundAlchemica[0];
+  //     sumFomo += roundAlchemica[1];
+  //     sumAlpha += roundAlchemica[2];
+  //     sumKek += roundAlchemica[3];
+  //   }
+  //   assertApproxEqAbs(sumFud, (113_893 ether * 99) / 12, (113_893 ether * 99) / 60);
+  //   assertApproxEqAbs(sumFomo, (56_947 ether * 99) / 12, (56_947 ether * 99) / 60);
+  //   assertApproxEqAbs(sumAlpha, (28_473 ether * 99) / 12, (28_473 ether * 99) / 60);
+  //   assertApproxEqAbs(sumKek, (11_389 ether * 99) / 12, (11_389 ether * 99) / 60);
+  // }
 }
