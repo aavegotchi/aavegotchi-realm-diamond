@@ -173,8 +173,8 @@ library LibAlchemica {
       }
     }
 
-    // upgradeQueueBoost
-    if (installationType.upgradeQueueBoost > 0) {
+    // Reduce upgrade queue boost. Handle underflow exception for bugged parcels
+    if (installationType.upgradeQueueBoost > 0 && s.parcels[_realmId].upgradeQueueCapacity >= installationType.upgradeQueueBoost) {
       s.parcels[_realmId].upgradeQueueCapacity -= installationType.upgradeQueueBoost;
     }
   }
