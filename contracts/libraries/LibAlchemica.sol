@@ -59,18 +59,18 @@ library LibAlchemica {
     uint256 equippedAltarId = s.parcels[_realmId].altarId;
     uint256 equippedAltarLevel = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(equippedAltarId).level;
 
-    require(equippedAltarLevel >= altarPrerequisite, "RealmFacet: Altar Tech Tree Reqs not met");
+    require(equippedAltarLevel >= altarPrerequisite, "LibAlchemica: Altar Tech Tree Reqs not met");
 
     // check lodge requirement
     if (lodgePrerequisite > 0) {
       uint256 equippedLodgeId = s.parcels[_realmId].lodgeId;
       uint256 equippedLodgeLevel = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(equippedLodgeId).level;
-      require(equippedLodgeLevel >= lodgePrerequisite, "RealmFacet: Lodge Tech Tree Reqs not met");
+      require(equippedLodgeLevel >= lodgePrerequisite, "LibAlchemica: Lodge Tech Tree Reqs not met");
     }
 
     // check harvester requirement
     if (installationType.installationType == 1) {
-      require(s.parcels[_realmId].reservoirs[installationType.alchemicaType].length > 0, "RealmFacet: Must equip reservoir of type");
+      require(s.parcels[_realmId].reservoirs[installationType.alchemicaType].length > 0, "LibAlchemica: Must equip reservoir of type");
     }
 
     uint256 alchemicaType = installationType.alchemicaType;
@@ -83,6 +83,7 @@ library LibAlchemica {
     //handle harvester
     if (installationType.harvestRate > 0) {
       s.parcels[_realmId].alchemicaHarvestRate[alchemicaType] += installationType.harvestRate;
+      addHarvester(_realmId);
     }
 
     //reservoir
@@ -125,7 +126,7 @@ library LibAlchemica {
       require(
         InstallationDiamondInterface(s.installationsDiamond).getInstallationType(s.parcels[_realmId].altarId).level >=
           equippedInstallaion.prerequisites[0],
-        "RealmFacet: Altar Tech Tree Reqs not met"
+        "LibAlchemica: Altar Tech Tree Reqs not met"
       );
 
       // check lodge requirement
@@ -133,7 +134,7 @@ library LibAlchemica {
         require(
           InstallationDiamondInterface(s.installationsDiamond).getInstallationType(s.parcels[_realmId].lodgeId).level >=
             equippedInstallaion.prerequisites[1],
-          "RealmFacet: Lodge Tech Tree Reqs not met"
+          "LibAlchemica: Lodge Tech Tree Reqs not met"
         );
       }
     }
@@ -148,6 +149,7 @@ library LibAlchemica {
     //Decrement harvest variables
     if (installationType.harvestRate > 0) {
       s.parcels[_realmId].alchemicaHarvestRate[alchemicaType] -= installationType.harvestRate;
+      s.parcels[_realmId].harvesterCount--;
     }
 
     //Altar
@@ -188,6 +190,20 @@ library LibAlchemica {
       (block.timestamp - s.parcels[_tokenId].lastUpdateTimestamp[_alchemicaType])) / (1 days);
 
     return amount;
+  }
+
+  function addHarvester(uint256 _realmId) internal {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+    require(addHarvesterAllowed(s.parcels[_realmId].size, s.parcels[_realmId].harvesterCount), "LibAlchemica: Too many harvesters");
+    s.parcels[_realmId].harvesterCount++;
+  }
+
+  function addHarvesterAllowed(uint256 _realmSize, uint16 _harvesterCount) internal pure returns (bool) {
+    if (_realmSize == 0) return _harvesterCount < 4;
+    else if (_realmSize == 1) return _harvesterCount < 16;
+    else if (_realmSize == 2) return _harvesterCount < 128;
+    else if (_realmSize == 3) return _harvesterCount < 256;
+    else return false;
   }
 
   function calculateTotalCapacity(uint256 _tokenId, uint256 _alchemicaType) internal view returns (uint256 capacity_) {

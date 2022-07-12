@@ -43,6 +43,7 @@ struct Parcel {
   uint256 upgradeQueueLength;
   uint256 lodgeId;
   bool surveying;
+  uint16 harvesterCount;
 }
 
 struct RequestConfig {
