@@ -86,7 +86,12 @@ export interface InstallationType {
 
 export interface InstallationTypeInput {
   Installation?: string;
+  installation?: string;
   id?: number;
+  fud?: number;
+  fomo?: number;
+  alpha?: number;
+  kek?: number;
   deprecated: boolean;
   installationType: number;
   level: Level;
