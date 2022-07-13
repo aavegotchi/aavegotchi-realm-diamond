@@ -149,7 +149,7 @@ library LibAlchemica {
     //Decrement harvest variables
     if (installationType.harvestRate > 0) {
       s.parcels[_realmId].alchemicaHarvestRate[alchemicaType] -= installationType.harvestRate;
-      s.parcels[_realmId].harvesterCount--;
+      if (s.parcels[_realmId].harvesterCount > 0) s.parcels[_realmId].harvesterCount--; // TODO: Remove the check for mainnet deployment
     }
 
     //Altar
