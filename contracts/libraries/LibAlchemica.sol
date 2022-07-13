@@ -170,7 +170,7 @@ library LibAlchemica {
           break;
         }
       }
-      if (s.parcels[_realmId].unclaimedAlchemica[alchemicaType] > calculateTotalCapacity(_realmId, alchemicaType)) {
+      if (!isUpgrade && s.parcels[_realmId].unclaimedAlchemica[alchemicaType] > calculateTotalCapacity(_realmId, alchemicaType)) {
         //step 1 - unequip all harvesters
         //step 2 - claim alchemica balance
         //step 3 - unequip reservoir
