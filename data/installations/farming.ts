@@ -1625,6 +1625,26 @@ export const installationTypes: InstallationTypeInput[] = [
 
 export const installationTypesMatic: InstallationTypeInput[] = [
   {
+    id: 55,
+    name: "Graand Fountain",
+    level: 1,
+    nextLevelId: 0,
+    prerequisites: [0, 0],
+    width: 4,
+    height: 4,
+    deprecated: true,
+    installationType: 7,
+    alchemicaType: 0,
+    alchemicaCost: [10000, 0, 6008.2, 0],
+    harvestRate: 0,
+    capacity: 0,
+    spillRadius: 0,
+    spillRate: 0,
+    upgradeQueueBoost: 0,
+    craftTime: 0,
+    unequipType: 1,
+  },
+  {
     id: 56,
     installation: "FUD Harvester",
     name: "FUD Harvester Level 1",
