@@ -23,9 +23,12 @@ export async function harvesterUpgrade() {
     {
       facetName: "AlchemicaFacet",
       addSelectors: [
-        `function getHarvestRates(uint256 _realmId) external view`,
-        `function getCapacities(uint256 _realmId) external view`,
-        `function getTotalClaimed(uint256 _realmId) external view`,
+      ],
+      removeSelectors: [],
+    },
+    {
+      facetName: "RealmFacet",
+      addSelectors: [
       ],
       removeSelectors: [],
     },
