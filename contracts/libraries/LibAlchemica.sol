@@ -149,7 +149,7 @@ library LibAlchemica {
     //Decrement harvest variables
     if (installationType.harvestRate > 0) {
       s.parcels[_realmId].alchemicaHarvestRate[alchemicaType] -= installationType.harvestRate;
-      s.parcels[_realmId].harvesterCount--;
+      if (s.parcels[_realmId].harvesterCount > 0) s.parcels[_realmId].harvesterCount--; // TODO: Remove the check for mainnet deployment
     }
 
     //Altar
@@ -270,7 +270,7 @@ library LibAlchemica {
   function claimAvailableAlchemica(uint256 _realmId, uint256 _gotchiId) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
-    require(block.timestamp > s.lastClaimedAlchemica[_realmId] + 8 hours, "AlchemicaFacet: 8 hours claim cooldown");
+    require(block.timestamp > s.lastClaimedAlchemica[_realmId] + 60 seconds, "AlchemicaFacet: 8 hours claim cooldown");
     s.lastClaimedAlchemica[_realmId] = block.timestamp;
 
     for (uint256 i; i < 4; i++) {
