@@ -427,6 +427,7 @@ contract RealmFacet is Modifiers {
     for (uint256 i; i < _parcelIds.length; i++) {
       output_[i] = s.accessRights[_parcelIds[i]][_actionRights[i]];
     }
+    return output_;
   }
 
   function getAltarId(uint256 _parcelId) external view returns (uint256) {

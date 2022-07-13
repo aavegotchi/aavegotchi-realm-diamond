@@ -1,18 +1,20 @@
 import { ethers, network } from "hardhat";
-import { maticInstallationDiamondAddress } from "../../../constants";
-import { installationTypes } from "../../../data/installations/altars";
+import { installationTypes } from "../../../data/installations/graandFountain";
 import { InstallationAdminFacet, InstallationFacet } from "../../../typechain";
 
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { outputInstallation } from "../../realm/realmHelpers";
 import { gasPrice, impersonate } from "../helperFunctions";
+import { varsForNetwork } from "../../../constants";
 
 export async function editInstallationTypes() {
   const signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
 
+  const c = await varsForNetwork(ethers);
+
   let installationFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
-    maticInstallationDiamondAddress,
+    c.installationDiamond,
     signer
   )) as InstallationAdminFacet;
 
@@ -27,22 +29,32 @@ export async function editInstallationTypes() {
 
   const altars = installationTypes.map((val) => outputInstallation(val));
 
-  const ids = ["10", "11", "12", "13", "14", "15", "16", "17", "18"];
+  const ids = ["55"];
 
   if (ids.length !== altars.length) {
     throw new Error("Incorrect length");
   }
 
-  await installationFacet.editInstallationTypes(ids, altars, {
-    gasPrice: gasPrice,
-  });
+  const tx = await installationFacet.editInstallationUnequipTypes(
+    ["55"],
+    ["1"],
+    {
+      gasPrice: gasPrice,
+    }
+  );
+  await tx.wait();
+
+  // console.log("Updating ");
+  // await installationFacet.editInstallationTypes(ids, altars, {
+  //   gasPrice: gasPrice,
+  // });
 
   const installationfacet = (await ethers.getContractAt(
     "InstallationFacet",
-    maticInstallationDiamondAddress
+    c.installationDiamond
   )) as InstallationFacet;
 
-  const insts = await installationfacet.getInstallationTypes([]);
+  const insts = await installationfacet.getInstallationTypes([55]);
   console.log("insts:", insts);
 }
 

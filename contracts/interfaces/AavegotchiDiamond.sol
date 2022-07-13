@@ -54,4 +54,6 @@ interface AavegotchiDiamond {
   ) external;
 
   function kinship(uint256 _tokenId) external view returns (uint256 score_);
+
+  function realmInteract(uint256 _tokenId) external;
 }
