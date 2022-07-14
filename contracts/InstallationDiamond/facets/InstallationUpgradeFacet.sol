@@ -76,6 +76,16 @@ contract InstallationUpgradeFacet is Modifiers {
     //next level
     InstallationType memory nextInstallation = s.installationTypes[prevInstallation.nextLevelId];
 
+    // check altar requirement
+    //altar prereq is 0
+    if (nextInstallation.prerequisites[0] > 0) {
+      uint256 equippedAltarId = RealmDiamond(s.realmDiamond).getAltarId(_upgradeQueue.parcelId);
+      uint256 equippedAltarLevel = s.installationTypes[equippedAltarId].level;
+      require(equippedAltarLevel >= nextInstallation.prerequisites[0], "LibAlchemica: Altar Tech Tree Reqs not met");
+    }
+
+    //@todo: check for lodge prereq once lodges are implemented
+
     //take the required alchemica
     address[4] memory alchemicaAddresses = realm.getAlchemicaAddresses();
     LibItems._splitAlchemica(nextInstallation.alchemicaCost, alchemicaAddresses);
