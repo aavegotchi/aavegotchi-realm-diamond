@@ -138,6 +138,8 @@ contract RealmFacet is Modifiers {
       "RealmFacet: Invalid signature"
     );
 
+    //@todo: Prevent unequipping if an upgrade is active for this installationId on the parcel
+
     InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
     InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
 
