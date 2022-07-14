@@ -33,13 +33,13 @@ interface InstallationDiamondInterface {
   }
 
   struct UpgradeQueue {
-    uint256 parcelId;
-    uint256 coordinateX;
-    uint256 coordinateY;
-    uint256 installationId;
-    uint256 readyBlock;
-    bool claimed;
     address owner;
+    uint16 coordinateX;
+    uint16 coordinateY;
+    uint40 readyBlock;
+    bool claimed;
+    uint256 parcelId;
+    uint256 installationId;
   }
 
   struct InstallationIdIO {
@@ -112,4 +112,8 @@ interface InstallationDiamondInterface {
   function getReservoirCapacity(uint256 _installationId) external view returns (uint256 capacity_);
 
   function getReservoirStats(uint256 _installationId) external view returns (ReservoirStats memory reservoirStats_);
+
+  function parcelQueueEmpty(uint256 _parcelId) external view returns (bool);
+
+  function getParcelUpgradeQueue(uint256 _parcelId) external view returns (UpgradeQueue[] memory output_, uint256[] memory indexes_);
 }

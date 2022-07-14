@@ -263,6 +263,11 @@ contract InstallationUpgradeFacet is Modifiers {
     }
   }
 
+  /// @notice For realm to validate whether a parcel has an upgrade queueing before removing an installation
+  function parcelQueueEmpty(uint256 _parcelId) external view returns (bool) {
+    return s.parcelIdToUpgradeIds[_parcelId].length == 0;
+  }
+
   function getUpgradeQueueLength() external view returns (uint256) {
     return s.upgradeQueue.length;
   }

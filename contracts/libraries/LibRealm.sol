@@ -9,6 +9,8 @@ import "./BinomialRandomizer.sol";
 library LibRealm {
   event SurveyParcel(uint256 _tokenId, uint256[] _alchemicas);
 
+  uint256 constant MAX_SUPPLY = 420069;
+
   //Place installation
   function placeInstallation(
     uint256 _realmId,
@@ -214,5 +216,29 @@ library LibRealm {
     else if (accessRight == 4) {
       //do nothing! anyone can perform this action
     }
+  }
+
+  function installationInUpgradeQueue(
+    uint256 _realmId,
+    uint256 _installationId,
+    uint256 _x,
+    uint256 _y
+  ) internal view returns (bool) {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+
+    InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
+
+    (InstallationDiamondInterface.UpgradeQueue[] memory parcelUpgrades, ) = installationsDiamond.getParcelUpgradeQueue(_realmId);
+    for (uint256 i; i < parcelUpgrades.length; i++) {
+      // Checking whether x and y match is sufficient when start positions are checked in a separate check
+      if (
+        parcelUpgrades[i].installationId == _installationId &&
+        parcelUpgrades[i].coordinateX == uint16(_x) &&
+        parcelUpgrades[i].coordinateY == uint16(_y)
+      ) {
+        return true;
+      }
+    }
+    return false;
   }
 }
