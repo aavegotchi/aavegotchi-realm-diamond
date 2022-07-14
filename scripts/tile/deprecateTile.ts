@@ -5,24 +5,24 @@ import { impersonate } from "../helperFunctions";
 
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 
-import { gasPrice } from "../../constants";
+import { gasPrice, varsForNetwork } from "../../constants";
 
 export async function setAddresses() {
   let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
 
   //matic address
-  const diamondAddress = "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
+  const c = await varsForNetwork(ethers);
 
   const ownershipFacet = (await ethers.getContractAt(
     "OwnershipFacet",
-    diamondAddress
+    c.tileDiamond
   )) as OwnershipFacet;
   const owner = await ownershipFacet.owner();
   console.log("owner:", owner);
 
   let tileFacet = (await ethers.getContractAt(
     "TileFacet",
-    diamondAddress,
+    c.tileDiamond,
     signer
   )) as TileFacet;
 
@@ -30,11 +30,13 @@ export async function setAddresses() {
     tileFacet = await impersonate(owner, tileFacet, ethers, network);
   }
 
-  const deprecate = ["7"];
-
-  const tx = await tileFacet.deprecateTiles(deprecate, {
+  const tx = await tileFacet.editDeprecateTime("4", "1657727836", {
     gasPrice: gasPrice,
   });
+
+  // const tx = await tileFacet.deprecateTiles(deprecate, {
+  //   gasPrice: gasPrice,
+  // });
 
   await tx.wait();
   const tiles = await tileFacet.getTileTypes([]);
