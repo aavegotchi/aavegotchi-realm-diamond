@@ -120,22 +120,24 @@ library LibAlchemica {
     );
 
     for (uint256 i; i < installationBalances.length; i++) {
-      InstallationDiamondInterface.InstallationType memory equippedInstallaion = installationsDiamond.getInstallationType(_installationId);
+      // tech tree requirements are checked at the beginning of the upgradeInstallation function, so we can skip them during an upgrade
+      if (!isUpgrade) {
+        InstallationDiamondInterface.InstallationType memory equippedInstallaion = installationsDiamond.getInstallationType(_installationId);
 
-      // check altar requirement
-      require(
-        InstallationDiamondInterface(s.installationsDiamond).getInstallationType(s.parcels[_realmId].altarId).level >=
-          equippedInstallaion.prerequisites[0],
-        "LibAlchemica: Altar Tech Tree Reqs not met"
-      );
-
-      // check lodge requirement
-      if (equippedInstallaion.prerequisites[1] > 0) {
         require(
-          InstallationDiamondInterface(s.installationsDiamond).getInstallationType(s.parcels[_realmId].lodgeId).level >=
-            equippedInstallaion.prerequisites[1],
-          "LibAlchemica: Lodge Tech Tree Reqs not met"
+          InstallationDiamondInterface(s.installationsDiamond).getInstallationType(s.parcels[_realmId].altarId).level >=
+            equippedInstallaion.prerequisites[0],
+          "LibAlchemica: Altar Tech Tree Reqs not met"
         );
+
+        // check lodge requirement
+        if (equippedInstallaion.prerequisites[1] > 0) {
+          require(
+            InstallationDiamondInterface(s.installationsDiamond).getInstallationType(s.parcels[_realmId].lodgeId).level >=
+              equippedInstallaion.prerequisites[1],
+            "LibAlchemica: Lodge Tech Tree Reqs not met"
+          );
+        }
       }
     }
 
