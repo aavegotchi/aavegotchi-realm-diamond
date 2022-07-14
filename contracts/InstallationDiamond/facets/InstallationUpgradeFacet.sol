@@ -197,6 +197,26 @@ contract InstallationUpgradeFacet is Modifiers {
     return false;
   }
 
+  function reduceUpgradeTime(uint256 _upgradeIndex, uint40 _blocks) external {
+    UpgradeQueue storage queue = s.upgradeQueue[_upgradeIndex];
+
+    //todo: check access rights
+
+    //todo: Way to prevent user from spending too much?
+
+    //burn GLTR
+    uint256 gltrAmount = uint256(_blocks) * 1e18;
+    IERC20(s.gltr).transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, gltrAmount);
+
+    //reduce the blocks
+    queue.readyBlock -= _blocks;
+
+    //if upgrade should be finalized, call finalizeUpgrade
+    if (queue.readyBlock <= block.number) {
+      _finalizeUpgrade(queue.owner, _upgradeIndex);
+    }
+  }
+
   /// @dev TO BE DEPRECATED
   /// @notice Query details about all ongoing upgrade queues
   /// @return output_ An array of structs, each representing an ongoing upgrade queue
