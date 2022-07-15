@@ -197,10 +197,20 @@ contract InstallationUpgradeFacet is Modifiers {
     return false;
   }
 
-  function reduceUpgradeTime(uint256 _upgradeIndex, uint40 _blocks) external {
+  function reduceUpgradeTime(
+    uint256 _upgradeIndex,
+    uint40 _blocks,
+    bytes memory _signature
+  ) external {
     UpgradeQueue storage queue = s.upgradeQueue[_upgradeIndex];
 
+    require(
+      LibSignature.isValid(keccak256(abi.encodePacked(_upgradeIndex)), _signature, s.backendPubKey),
+      "InstallationAdminFacet: Invalid signature"
+    );
+
     //todo: check access rights
+    require(msg.sender == queue.owner, "InstallationUpgradeFacet: Not owner");
 
     //todo: Way to prevent user from spending too much?
 
