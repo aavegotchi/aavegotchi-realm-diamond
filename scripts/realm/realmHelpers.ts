@@ -80,7 +80,7 @@ export function outputTile(tile: TileTypeInput): TileTypeOutput {
 
 const backendSigner = () => {
   //@ts-ignore
-  return new ethers.Wallet(process.env.PROD_PK); // PK should start with '0x'
+  return new ethers.Wallet(process.env.MUMBAI_REALM_PK); // PK should start with '0x'
 };
 
 export const genEquipInstallationSignature = async (
@@ -122,11 +122,11 @@ export const genUpgradeInstallationSignature = async (
 export const genClaimAlchemicaSignature = async (
   parcelId: number,
   gotchiId: number,
-  amount: BigNumber
+  lastClaimed: BigNumber
 ) => {
   let messageHash = ethers.utils.solidityKeccak256(
-    ["uint256", "uint256", "uint256", "uint256"],
-    [0, parcelId, gotchiId, amount]
+    ["uint256", "uint256", "uint256"],
+    [parcelId, gotchiId, lastClaimed]
   );
   let signedMessage = await backendSigner().signMessage(
     ethers.utils.arrayify(messageHash)

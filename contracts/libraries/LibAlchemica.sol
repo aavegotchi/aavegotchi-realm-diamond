@@ -119,28 +119,6 @@ library LibAlchemica {
       _realmId
     );
 
-    for (uint256 i; i < installationBalances.length; i++) {
-      // tech tree requirements are checked at the beginning of the upgradeInstallation function, so we can skip them during an upgrade
-      if (!isUpgrade) {
-        InstallationDiamondInterface.InstallationType memory equippedInstallaion = installationsDiamond.getInstallationType(_installationId);
-
-        require(
-          InstallationDiamondInterface(s.installationsDiamond).getInstallationType(s.parcels[_realmId].altarId).level >=
-            equippedInstallaion.prerequisites[0],
-          "LibAlchemica: Altar Tech Tree Reqs not met"
-        );
-
-        // check lodge requirement
-        if (equippedInstallaion.prerequisites[1] > 0) {
-          require(
-            InstallationDiamondInterface(s.installationsDiamond).getInstallationType(s.parcels[_realmId].lodgeId).level >=
-              equippedInstallaion.prerequisites[1],
-            "LibAlchemica: Lodge Tech Tree Reqs not met"
-          );
-        }
-      }
-    }
-
     uint256 alchemicaType = installationType.alchemicaType;
 
     //unclaimed alchemica must be settled before updating harvestRate and capacity
@@ -183,6 +161,31 @@ library LibAlchemica {
     // Reduce upgrade queue boost. Handle underflow exception for bugged parcels
     if (installationType.upgradeQueueBoost > 0 && s.parcels[_realmId].upgradeQueueCapacity >= installationType.upgradeQueueBoost) {
       s.parcels[_realmId].upgradeQueueCapacity -= installationType.upgradeQueueBoost;
+    }
+
+    //Verify tech tree requirements for remaining installations
+    for (uint256 i; i < installationBalances.length; i++) {
+      uint256 installationId = installationBalances[i].installationId;
+
+      // tech tree requirements are checked at the beginning of the upgradeInstallation function, so we can skip them during an upgrade
+      if (!isUpgrade) {
+        InstallationDiamondInterface.InstallationType memory equippedInstallation = installationsDiamond.getInstallationType(installationId);
+
+        require(
+          InstallationDiamondInterface(s.installationsDiamond).getInstallationType(s.parcels[_realmId].altarId).level >=
+            equippedInstallation.prerequisites[0],
+          "LibAlchemica: Altar Tech Tree Reqs not met"
+        );
+
+        // check lodge requirement
+        if (equippedInstallation.prerequisites[1] > 0) {
+          require(
+            InstallationDiamondInterface(s.installationsDiamond).getInstallationType(s.parcels[_realmId].lodgeId).level >=
+              equippedInstallation.prerequisites[1],
+            "LibAlchemica: Lodge Tech Tree Reqs not met"
+          );
+        }
+      }
     }
   }
 
