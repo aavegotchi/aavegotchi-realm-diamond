@@ -82,7 +82,7 @@ const networkToVars: NetworkToConstants = {
   100: maticVars, //update
 };
 
-export const gasPrice = 75000000000;
+export const gasPrice = 750000000000;
 
 export const aavegotchiDAOAddress =
   "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
