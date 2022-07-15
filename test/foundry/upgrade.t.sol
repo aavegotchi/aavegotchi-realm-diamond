@@ -79,6 +79,32 @@ contract TestUpgrades is Test {
     cut = IDiamondCut.FacetCut({facetAddress: address(0), action: IDiamondCut.FacetCutAction.Remove, functionSelectors: functionSelectors});
   }
 
+  function getRemoveSelectorsFromExistingSelectors(
+    address diamond,
+    bytes4[] memory _existingSelectors,
+    address _existingFacet
+  ) internal view returns (bytes4[] memory removeFunctionSelectors) {
+    bytes4[] memory facetSelectors = getFacetSelectors(diamond, _existingFacet);
+    removeFunctionSelectors = new bytes4[](facetSelectors.length);
+    uint256 counter;
+    for (uint256 i; i < facetSelectors.length; i++) {
+      bool isInExistingSelectors;
+      for (uint256 j; j < _existingSelectors.length; j++) {
+        if (facetSelectors[i] == _existingSelectors[j]) {
+          isInExistingSelectors = true;
+        }
+      }
+      if (!isInExistingSelectors) {
+        removeFunctionSelectors[counter] = facetSelectors[i];
+        counter++;
+      }
+    }
+
+    assembly {
+      mstore(removeFunctionSelectors, counter)
+    }
+  }
+
   function replaceInstallationFacetSelectors(bool _log) internal returns (address) {
     InstallationFacet installationFacet = new InstallationFacet();
     if (_log) {

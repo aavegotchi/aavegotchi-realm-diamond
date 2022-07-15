@@ -1,12 +1,12 @@
 import { run, ethers } from "hardhat";
-import { maticInstallationDiamondAddress } from "../../../../constants";
+import { varsForNetwork } from "../../../../constants";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../../tasks/deployUpgrade";
 
-export async function upgradeTest() {
+export async function upgradeInstallationTest() {
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
 
   const UpgradeQueue =
@@ -15,12 +15,15 @@ export async function upgradeTest() {
     {
       facetName: "TestInstallationFacet",
       addSelectors: [
-        `function testUpgradeInstallation(${UpgradeQueue} calldata _upgradeQueue,uint40 _gltr) external`,
-        `function testCraftInstallations(uint16[] calldata _installationTypes) external`,
+        `function mockUpgradeInstallation(${UpgradeQueue} calldata _upgradeQueue,uint40 _gltr) external`,
+        `function mockCraftInstallation(uint16 installationId) external`,
+        `function mockGetInstallationsLength() external view`,
       ],
       removeSelectors: [],
     },
   ];
+
+  const maticInstallationDiamondAddress = (await varsForNetwork(ethers)).installationDiamond;
 
   const joined = convertFacetAndSelectorsToString(facets);
 
@@ -38,7 +41,7 @@ export async function upgradeTest() {
 }
 
 if (require.main === module) {
-  upgradeTest()
+  upgradeInstallationTest()
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

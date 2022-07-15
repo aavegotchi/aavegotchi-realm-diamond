@@ -39,6 +39,23 @@ contract TestRealmFacet is Modifiers {
     LibAlchemica.increaseTraits(_realmId, _installationId, false);
   }
 
+  /// @dev Unequip an installation without signature or owner checks for testing
+  function mockUnequipInstallation(
+    uint256 _realmId,
+    uint256 _installationId,
+    uint256 _x,
+    uint256 _y
+  ) external {
+    InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
+    InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
+
+    require(!LibRealm.installationInUpgradeQueue(_realmId, _installationId, _x, _y), "RealmFacet: Can't unequip installation in upgrade queue");
+
+    LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
+    InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(msg.sender, _realmId, _installationId);
+    LibAlchemica.reduceTraits(_realmId, _installationId, false);
+  }
+
   /// @notice Allow the owner of a parcel to start surveying his parcel
   /// @dev Will throw if a surveying round has not started
   /// @param _realmId Identifier of the parcel to survey
