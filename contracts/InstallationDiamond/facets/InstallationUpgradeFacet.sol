@@ -212,7 +212,9 @@ contract InstallationUpgradeFacet is Modifiers {
     //todo: check access rights
     require(msg.sender == queue.owner, "InstallationUpgradeFacet: Not owner");
 
-    //todo: Way to prevent user from spending too much?
+    //handle underflow / overspend
+    uint256 nextLevelId = s.installationTypes[queue.installationId].nextLevelId;
+    require(_blocks <= s.installationTypes[nextLevelId].craftTime, "InstallationUpgradeFacet: Too much GLTR");
 
     //burn GLTR
     uint256 gltrAmount = uint256(_blocks) * 1e18;
