@@ -197,6 +197,38 @@ contract InstallationUpgradeFacet is Modifiers {
     return false;
   }
 
+  function reduceUpgradeTime(
+    uint256 _upgradeIndex,
+    uint40 _blocks,
+    bytes memory _signature
+  ) external {
+    UpgradeQueue storage queue = s.upgradeQueue[_upgradeIndex];
+
+    require(
+      LibSignature.isValid(keccak256(abi.encodePacked(_upgradeIndex)), _signature, s.backendPubKey),
+      "InstallationAdminFacet: Invalid signature"
+    );
+
+    //todo: check access rights
+    require(msg.sender == queue.owner, "InstallationUpgradeFacet: Not owner");
+
+    //handle underflow / overspend
+    uint256 nextLevelId = s.installationTypes[queue.installationId].nextLevelId;
+    require(_blocks <= s.installationTypes[nextLevelId].craftTime, "InstallationUpgradeFacet: Too much GLTR");
+
+    //burn GLTR
+    uint256 gltrAmount = uint256(_blocks) * 1e18;
+    IERC20(s.gltr).transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, gltrAmount);
+
+    //reduce the blocks
+    queue.readyBlock -= _blocks;
+
+    //if upgrade should be finalized, call finalizeUpgrade
+    if (queue.readyBlock <= block.number) {
+      _finalizeUpgrade(queue.owner, _upgradeIndex);
+    }
+  }
+
   /// @dev TO BE DEPRECATED
   /// @notice Query details about all ongoing upgrade queues
   /// @return output_ An array of structs, each representing an ongoing upgrade queue
