@@ -7,7 +7,7 @@ import "./AppStorage.sol";
 import "./BinomialRandomizer.sol";
 
 library LibRealm {
-  event SurveyParcel(uint256 _tokenId, uint256[] _alchemicas);
+  event SurveyParcel(uint256 _tokenId, uint256 _round, uint256[] _alchemicas);
 
   uint256 constant MAX_SUPPLY = 420069;
 
@@ -137,7 +137,7 @@ library LibRealm {
     //update round alchemica
     s.parcels[_tokenId].roundAlchemica[_round] = alchemicas;
     s.parcels[_tokenId].roundBaseAlchemica[_round] = roundAmounts;
-    emit SurveyParcel(_tokenId, alchemicas);
+    emit SurveyParcel(_tokenId, _round, alchemicas);
   }
 
   function getWidths() internal pure returns (uint256[5] memory) {

@@ -12,6 +12,7 @@ import "./ERC721Facet.sol";
 contract RealmGettersAndSettersFacet is Modifiers {
   event ParcelAccessRightSet(uint256 _realmId, uint256 _actionRight, uint256 _accessRight);
   event ResyncParcel(uint256 _realmId);
+  event SetAltarId(uint256 _realmId, uint256 _altarId);
 
   /// @notice Return the maximum realm supply
   /// @return The max realm token supply
@@ -207,5 +208,6 @@ contract RealmGettersAndSettersFacet is Modifiers {
 
   function setAltarId(uint256 _parcelId, uint256 _altarId) external onlyOwner {
     s.parcels[_parcelId].altarId = _altarId;
+    emit SetAltarId(_parcelId, _altarId);
   }
 }
