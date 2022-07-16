@@ -31,6 +31,14 @@ export async function harvesterUpgrade() {
     {
       facetName: "RealmFacet",
       addSelectors: [
+        // `function getAltarId(uint256 _parcelId)`,
+        // `function setAltarId(uint256 _parcelId, uint256 _altarId) external`,
+      ],
+      removeSelectors: [],
+    },
+    {
+      facetName: "RealmGettersAndSettersFacet",
+      addSelectors: [
         `function getAltarId(uint256 _parcelId)`,
         `function setAltarId(uint256 _parcelId, uint256 _altarId) external`,
       ],
