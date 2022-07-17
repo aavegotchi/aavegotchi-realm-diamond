@@ -105,16 +105,16 @@ contract RealmGridFacet is Modifiers {
     uint256[] memory _x,
     uint256[] memory _y,
     bool _isTile,
-    bool _isTrue
+    uint256[] memory _ids
   ) external onlyOwner {
     require(_parcelIds.length == _x.length && _parcelIds.length == _y.length, "RealmFacet: Mismatched arrays");
     if (_isTile) {
       for (uint256 i; i < _parcelIds.length; i++) {
-        s.parcels[_parcelIds[i]].startPositionTileGrid[_x[i]][_y[i]] = _isTrue;
+        s.parcels[_parcelIds[i]].startPositionTileGrid[_x[i]][_y[i]] = _ids[i];
       }
     } else {
       for (uint256 i; i < _parcelIds.length; i++) {
-        s.parcels[_parcelIds[i]].startPositionBuildGrid[_x[i]][_y[i]] = _isTrue;
+        s.parcels[_parcelIds[i]].startPositionBuildGrid[_x[i]][_y[i]] = _ids[i];
       }
     }
   }
@@ -123,12 +123,13 @@ contract RealmGridFacet is Modifiers {
     uint256 _parcelId,
     uint256 _x,
     uint256 _y,
-    bool _isTile
+    bool _isTile,
+    uint256 _id
   ) external view returns (bool) {
     if (_isTile) {
-      return s.parcels[_parcelId].startPositionTileGrid[_x][_y];
+      return s.parcels[_parcelId].startPositionTileGrid[_x][_y] == _id;
     } else {
-      return s.parcels[_parcelId].startPositionBuildGrid[_x][_y];
+      return s.parcels[_parcelId].startPositionBuildGrid[_x][_y] == _id;
     }
   }
 }

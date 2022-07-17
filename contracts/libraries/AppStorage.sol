@@ -43,8 +43,8 @@ struct Parcel {
   uint256 upgradeQueueLength;
   uint256 lodgeId;
   bool surveying;
-  bool[64][64] startPositionBuildGrid;
-  bool[64][64] startPositionTileGrid;
+  uint256[64][64] startPositionBuildGrid;
+  uint256[64][64] startPositionTileGrid;
 }
 
 struct RequestConfig {

@@ -1,15 +1,12 @@
 const apollo = require("apollo-fetch");
 const fs = require("fs").promises;
 const hre = require("hardhat");
-import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { task } from "hardhat/config";
-import { Signer } from "ethers";
 import { ethers, network } from "hardhat";
-import { maticRealmDiamondAddress } from "../../../constants";
-import { RealmFacet, Ownable } from "../../../typechain";
+import { Ownable, RealmGridFacet } from "../../../typechain";
 import { impersonate } from "../../helperFunctions";
 import { BigNumberish } from "@ethersproject/bignumber";
 import { upgrade } from "../upgrades/upgrade-fixStartGrid";
+import { varsForNetwork } from "../../../constants";
 
 let DEFAULT_BLOCKNUMBER = 0;
 let id = DEFAULT_BLOCKNUMBER;
@@ -113,15 +110,22 @@ async function main() {
     console.log("Unequipped Tiles: ", uneqippedTiles.length);
   }
 
+  interface FinalEquippedTiles {
+    x: BigNumberish;
+    y: BigNumberish;
+    realmId: BigNumberish;
+    tileId: BigNumberish;
+  }
+
   // remove uneqipped from equipped
-  let finalEquippedTiles = equippedTiles;
+  let finalEquippedTiles: FinalEquippedTiles[] = equippedTiles;
   uneqippedTiles.forEach((e) => {
     finalEquippedTiles = finalEquippedTiles.filter(
       (f) =>
         e.x != f.x ||
         e.y != e.y ||
         e.realmId != f.realmId ||
-        e.installationId != f.installationId
+        e.tileId != f.tileId
     );
   });
 
@@ -207,7 +211,16 @@ async function main() {
     ).data.unequipInstallationEvents;
     console.log("Unequipped Installations: ", uneqippedInstallations.length);
   }
-  let finalEquippedInstallations = equippedInstallations;
+
+  interface FinalEquippedInstallations {
+    x: BigNumberish;
+    y: BigNumberish;
+    realmId: BigNumberish;
+    installationId: BigNumberish;
+  }
+
+  let finalEquippedInstallations: FinalEquippedInstallations[] =
+    equippedInstallations;
   uneqippedInstallations.forEach((e) => {
     finalEquippedInstallations = finalEquippedInstallations.filter(
       (f) =>
@@ -237,25 +250,22 @@ async function main() {
 
   const accounts = await ethers.getSigners();
 
+  const c = await varsForNetwork(ethers);
+
   let realmFacet = (await ethers.getContractAt(
-    "RealmFacet",
-    maticRealmDiamondAddress
-  )) as RealmFacet;
+    "RealmGridFacet",
+    c.realmDiamond
+  )) as RealmGridFacet;
 
   let ownable = (await ethers.getContractAt(
     "contracts/interfaces/Ownable.sol:Ownable",
-    maticRealmDiamondAddress
+    c.realmDiamond
   )) as Ownable;
 
   const owner = await ownable.owner();
 
   if (testing) {
-    realmFacet = (await impersonate(
-      owner,
-      realmFacet,
-      ethers,
-      network
-    )) as RealmFacet;
+    realmFacet = await impersonate(owner, realmFacet, ethers, network);
   }
 
   console.log("Fixing installation start positions");
@@ -263,17 +273,21 @@ async function main() {
     let realmIds: BigNumberish[] = [];
     let xs: BigNumberish[] = [];
     let ys: BigNumberish[] = [];
+    let ids: BigNumberish[] = [];
     for (let j = 0; j < 100; j++) {
-      realmIds.push(finalEquippedInstallations[i * 100 + j].realmId);
-      xs.push(finalEquippedInstallations[i * 100 + j].x);
-      ys.push(finalEquippedInstallations[i * 100 + j].y);
+      const pos = i * 100 + j;
+
+      realmIds.push(finalEquippedInstallations[pos].realmId);
+      xs.push(finalEquippedInstallations[pos].x);
+      ys.push(finalEquippedInstallations[pos].y);
+      ids.push(finalEquippedInstallations[pos].installationId);
     }
     let tx = await realmFacet.fixGridStartPositions(
       realmIds,
       xs,
       ys,
       false,
-      true
+      ids
     );
     console.log("TXID: ", tx.hash);
     await tx.wait();
@@ -284,17 +298,20 @@ async function main() {
     let realmIds: BigNumberish[] = [];
     let xs: BigNumberish[] = [];
     let ys: BigNumberish[] = [];
+    let ids: BigNumberish[] = [];
     for (let j = 0; j < 100; j++) {
-      realmIds.push(finalEquippedTiles[i * 100 + j].realmId);
-      xs.push(finalEquippedTiles[i * 100 + j].x);
-      ys.push(finalEquippedTiles[i * 100 + j].y);
+      const pos = i * 100 + j;
+      realmIds.push(finalEquippedTiles[pos].realmId);
+      xs.push(finalEquippedTiles[pos].x);
+      ys.push(finalEquippedTiles[pos].y);
+      ids.push(finalEquippedTiles[pos].tileId);
     }
     let tx = await realmFacet.fixGridStartPositions(
       realmIds,
       xs,
       ys,
       true,
-      true
+      ids
     );
     console.log("TXID: ", tx.hash);
     await tx.wait();

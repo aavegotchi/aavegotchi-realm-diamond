@@ -30,8 +30,8 @@ export async function upgrade() {
     {
       facetName: "RealmGridFacet",
       addSelectors: [
-        "function fixGridStartPositions(uint256[] memory _parcelIds,uint256[] memory _x,uint256[] memory _y,bool _isTile,bool _isTrue) external",
-        "function isGridStartPosition(uint256 _parcelId,uint256 _x,uint256 _y,bool _isTile) external view",
+        "function fixGridStartPositions(uint256[] memory _parcelIds,uint256[] memory _x,uint256[] memory _y,bool _isTile, uint256[] memory _ids) external",
+        "function isGridStartPosition(uint256 _parcelId,uint256 _x,uint256 _y,bool _isTile, uint256 _id) external view",
         `function getHumbleGrid(uint256 _parcelId, uint256 _gridType) external view`,
         `function getReasonableGrid(uint256 _parcelId, uint256 _gridType) external view`,
         `function getSpaciousVerticalGrid(uint256 _parcelId, uint256 _gridType) external view`,

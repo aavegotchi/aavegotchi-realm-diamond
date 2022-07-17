@@ -112,12 +112,7 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
-    realmGridFacet = await impersonate(
-      owner,
-      realmGridFacet,
-      ethers,
-      network
-    )
+    realmGridFacet = await impersonate(owner, realmGridFacet, ethers, network);
 
     realmFacet = await impersonate(owner, realmFacet, ethers, network);
     testRealmFacet = await impersonate(owner, testRealmFacet, ethers, network);
@@ -133,7 +128,7 @@ describe("Testing Equip Installation", async function () {
     await testInstallationFacet.testCraftInstallations([10]);
     await testRealmFacet.testEquipInstallation(realmId, 10, 3, 3);
     expect(
-      await realmGridFacet.isGridStartPosition(realmId, 3, 3, false)
+      await realmGridFacet.isGridStartPosition(realmId, 3, 3, false, 10)
     ).to.equal(true);
   });
   it("Should fail to move installations if not parcel owner", async () => {
@@ -150,23 +145,23 @@ describe("Testing Equip Installation", async function () {
     await realmFacet.moveInstallation(realmId, 10, 3, 3, 2, 2);
 
     expect(
-      await realmGridFacet.isGridStartPosition(realmId, 3, 3, false)
+      await realmGridFacet.isGridStartPosition(realmId, 3, 3, false, 10)
     ).to.equal(false);
     expect(
-      await realmGridFacet.isGridStartPosition(realmId, 2, 2, false)
+      await realmGridFacet.isGridStartPosition(realmId, 2, 2, false, 10)
     ).to.equal(true);
   });
   it("Should remove start position on installation removal", async () => {
     await testRealmFacet.testRemoveInstallation(realmId, 10, 2, 2);
     expect(
-      await realmGridFacet.isGridStartPosition(realmId, 2, 2, false)
+      await realmGridFacet.isGridStartPosition(realmId, 2, 2, false, 10)
     ).to.equal(false);
   });
   it("Should update start position for tiles on placement", async () => {
     await testTileFacet.testCraftTiles([4]);
     await testRealmFacet.testEquipTile(realmId, 4, 3, 3);
     expect(
-      await realmGridFacet.isGridStartPosition(realmId, 3, 3, true)
+      await realmGridFacet.isGridStartPosition(realmId, 3, 3, true, 4)
     ).to.equal(true);
   });
   it("Should fail to move tile if not parcel owner", async () => {
@@ -183,10 +178,10 @@ describe("Testing Equip Installation", async function () {
     await realmFacet.moveTile(realmId, 4, 3, 3, 2, 2);
 
     expect(
-      await realmGridFacet.isGridStartPosition(realmId, 3, 3, true)
+      await realmGridFacet.isGridStartPosition(realmId, 3, 3, true, 4)
     ).to.equal(false);
     expect(
-      await realmGridFacet.isGridStartPosition(realmId, 2, 2, true)
+      await realmGridFacet.isGridStartPosition(realmId, 2, 2, true, 4)
     ).to.equal(true);
   });
   it("Should not allow removal if the start position is not correct", async () => {
@@ -197,12 +192,12 @@ describe("Testing Equip Installation", async function () {
   it("Should remove start position for tiles on removal", async () => {
     await testRealmFacet.testUnequipTile(realmId, 4, 2, 2);
     expect(
-      await realmGridFacet.isGridStartPosition(realmId, 2, 2, true)
+      await realmGridFacet.isGridStartPosition(realmId, 2, 2, true, 4)
     ).to.equal(false);
   });
   it("Should not be able to manually update start positions by non-owner", async () => {
     await expect(
-      realmGridFacet.fixGridStartPositions([realmId], [2], [2], true, true)
+      realmGridFacet.fixGridStartPositions([realmId], [2], [2], true, [])
     ).to.be.revertedWith("LibDiamond: Must be contract owner");
   });
   it("Should be able to manually update start positions by owner", async () => {
@@ -218,16 +213,10 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
-    
-    await realmGridFacet.fixGridStartPositions(
-      [realmId],
-      [1],
-      [1],
-      true,
-      true
-    );
+
+    await realmGridFacet.fixGridStartPositions([realmId], [1], [1], true, [1]);
     expect(
-      await realmGridFacet.isGridStartPosition(realmId, 1, 1, true)
+      await realmGridFacet.isGridStartPosition(realmId, 1, 1, true, 1)
     ).to.equal(true);
   });
 });
