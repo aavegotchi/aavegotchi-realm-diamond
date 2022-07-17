@@ -1,4 +1,3 @@
-const fs = require("fs").promises;
 const hre = require("hardhat");
 import { request } from "graphql-request";
 import { ethers, network } from "hardhat";
@@ -10,6 +9,14 @@ import { varsForNetwork } from "../../../constants";
 
 let DEFAULT_BLOCKNUMBER = 0;
 let id = DEFAULT_BLOCKNUMBER;
+
+interface InstallationObject {
+  id: string;
+  x: string;
+  y: string;
+  type: { id: string };
+  parcel: { id: string };
+}
 
 const uri =
   "https://api.thegraph.com/subgraphs/name/aavegotchi/gotchiverse-matic";
@@ -48,7 +55,7 @@ async function main() {
   await upgrade();
 
   // Tiles
-  let tiles = [];
+  let tiles: InstallationObject[] = [];
   let tilesTmp = (await request(uri, getTilesQuery())).tiles;
   while (tilesTmp.length > 0) {
     id = tilesTmp[tilesTmp.length - 1].id;
@@ -60,7 +67,7 @@ async function main() {
 
   // Installations
   id = DEFAULT_BLOCKNUMBER;
-  let installations = [];
+  let installations: InstallationObject[] = [];
   let installationsTmp = (await request(uri, getInstallationsQuery()))
     .installations;
 
@@ -98,19 +105,21 @@ async function main() {
 
   console.log("Fixing installation start positions");
   const batchSize = 500;
-  for (let i = 0; i < installations.length / batchSize; i++) {
-    let realmIds: BigNumberish[] = [];
-    let xs: BigNumberish[] = [];
-    let ys: BigNumberish[] = [];
-    let ids: BigNumberish[] = [];
-    for (let j = 0; j < batchSize; j++) {
-      const pos = i * batchSize + j;
+  const batches = Math.ceil(installations.length / batchSize);
 
-      realmIds.push(installations[pos].parcel.id);
-      xs.push(installations[pos].x);
-      ys.push(installations[pos].y);
-      ids.push(installations[pos].type.id);
-    }
+  for (let i = 0; i < batches; i++) {
+    let realmIds = installations
+      .slice(i * batchSize, (i + 1) * batchSize)
+      .map((val) => val.parcel.id);
+    let xs = installations
+      .slice(i * batchSize, (i + 1) * batchSize)
+      .map((val) => val.x);
+    let ys = installations
+      .slice(i * batchSize, (i + 1) * batchSize)
+      .map((val) => val.y);
+    let ids = installations
+      .slice(i * batchSize, (i + 1) * batchSize)
+      .map((val) => val.type.id);
 
     console.log("realm ids:", realmIds);
     console.log("xs", xs);
