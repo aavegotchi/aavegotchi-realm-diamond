@@ -108,6 +108,7 @@ async function main() {
   const batches = Math.ceil(installations.length / batchSize);
 
   for (let i = 0; i < batches; i++) {
+    console.log("current batch:", i);
     let realmIds = installations
       .slice(i * batchSize, (i + 1) * batchSize)
       .map((val) => val.parcel.id);
@@ -140,17 +141,21 @@ async function main() {
 
   console.log("Fixing tile start positions");
   for (let i = 0; i < tiles.length / batchSize; i++) {
-    let realmIds: BigNumberish[] = [];
-    let xs: BigNumberish[] = [];
-    let ys: BigNumberish[] = [];
-    let ids: BigNumberish[] = [];
-    for (let j = 0; j < batchSize; j++) {
-      const pos = i * batchSize + j;
-      realmIds.push(tiles[pos].parcel.id);
-      xs.push(tiles[pos].x);
-      ys.push(tiles[pos].y);
-      ids.push(tiles[pos].type.id);
-    }
+    console.log("current batch:", i);
+
+    let realmIds = tiles
+      .slice(i * batchSize, (i + 1) * batchSize)
+      .map((val) => val.parcel.id);
+    let xs = tiles
+      .slice(i * batchSize, (i + 1) * batchSize)
+      .map((val) => val.x);
+    let ys = tiles
+      .slice(i * batchSize, (i + 1) * batchSize)
+      .map((val) => val.y);
+    let ids = tiles
+      .slice(i * batchSize, (i + 1) * batchSize)
+      .map((val) => val.type.id);
+
     let tx = await realmFacet.fixGridStartPositions(
       realmIds,
       xs,
@@ -158,6 +163,7 @@ async function main() {
       true,
       ids
     );
+
     console.log("TXID: ", tx.hash);
     await tx.wait();
   }
