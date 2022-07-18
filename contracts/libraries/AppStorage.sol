@@ -43,6 +43,8 @@ struct Parcel {
   uint256 upgradeQueueLength;
   uint256 lodgeId;
   bool surveying;
+  uint256[64][64] startPositionBuildGrid;
+  uint256[64][64] startPositionTileGrid;
 }
 
 struct RequestConfig {
@@ -91,6 +93,7 @@ struct AppStorage {
   mapping(uint256 => mapping(uint256 => uint256)) accessRights;
   // gotchiId => lastChanneledDay
   mapping(uint256 => uint256) lastChanneledDay;
+  bool freezeBuilding;
 }
 
 library LibAppStorage {
@@ -132,6 +135,11 @@ contract Modifiers {
 
   modifier gameActive() {
     require(s.gameActive, "AppStorage: game not active");
+    _;
+  }
+
+  modifier canBuild() {
+    require(!s.freezeBuilding, "AppStorage: Building temporarily disabled");
     _;
   }
 }

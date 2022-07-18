@@ -38,4 +38,36 @@ contract TestRealmFacet is Modifiers {
 
     LibAlchemica.increaseTraits(_realmId, _installationId, false);
   }
+
+  /// @dev Remove installation without signature/owner/alchemica effects for testing
+  function testRemoveInstallation(
+    uint256 _realmId,
+    uint256 _installationId,
+    uint256 _x,
+    uint256 _y
+  ) external {
+    LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
+    InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(msg.sender, _realmId, _installationId);
+    LibAlchemica.reduceTraits(_realmId, _installationId, false);
+  }
+
+  function testEquipTile(
+    uint256 _realmId,
+    uint256 _tileId,
+    uint256 _x,
+    uint256 _y
+  ) external {
+    LibRealm.placeTile(_realmId, _tileId, _x, _y);
+    TileDiamondInterface(s.tileDiamond).equipTile(msg.sender, _realmId, _tileId);
+  }
+
+  function testUnequipTile(
+    uint256 _realmId,
+    uint256 _tileId,
+    uint256 _x,
+    uint256 _y
+  ) external {
+    LibRealm.removeTile(_realmId, _tileId, _x, _y);
+    TileDiamondInterface(s.tileDiamond).unequipTile(msg.sender, _realmId, _tileId);
+  }
 }

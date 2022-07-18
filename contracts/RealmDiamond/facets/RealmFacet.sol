@@ -87,7 +87,7 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) external gameActive {
+  ) external gameActive canBuild {
     //2 - Equip Installations
     LibRealm.verifyAccessRight(_realmId, _gotchiId, 2);
     require(
@@ -132,7 +132,7 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) gameActive {
+  ) external onlyParcelOwner(_realmId) gameActive canBuild {
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
@@ -173,6 +173,27 @@ contract RealmFacet is Modifiers {
     emit UnequipInstallation(_realmId, _installationId, _x, _y);
   }
 
+  /// @notice Allow a parcel owner to move an installation
+  /// @param _realmId The identifier of the parcel which the installation is being moved on
+  /// @param _installationId The identifier of the installation being moved
+  /// @param _x0 The x(horizontal) coordinate of the installation
+  /// @param _y0 The y(vertical) coordinate of the installation
+  /// @param _x1 The x(horizontal) coordinate of the installation to move to
+  /// @param _y1 The y(vertical) coordinate of the installation to move to
+  function moveInstallation(
+    uint256 _realmId,
+    uint256 _installationId,
+    uint256 _x0,
+    uint256 _y0,
+    uint256 _x1,
+    uint256 _y1
+  ) external onlyParcelOwner(_realmId) gameActive canBuild {
+    LibRealm.removeInstallation(_realmId, _installationId, _x0, _y0);
+    emit UnequipInstallation(_realmId, _installationId, _x0, _y0);
+    LibRealm.placeInstallation(_realmId, _installationId, _x1, _y1);
+    emit EquipInstallation(_realmId, _installationId, _x1, _y1);
+  }
+
   /// @notice Allow a parcel owner to equip a tile
   /// @dev The _x and _y denote the starting coordinates of the tile and are used to make sure that slot is available on a parcel
   /// @param _realmId The identifier of the parcel which the tile is being equipped on
@@ -186,7 +207,7 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) external gameActive {
+  ) external gameActive canBuild {
     //3 - Equip Tile
     LibRealm.verifyAccessRight(_realmId, _gotchiId, 3);
     require(
@@ -214,7 +235,7 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) gameActive {
+  ) external onlyParcelOwner(_realmId) gameActive canBuild {
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
@@ -224,6 +245,27 @@ contract RealmFacet is Modifiers {
     TileDiamondInterface(s.tileDiamond).unequipTile(msg.sender, _realmId, _tileId);
 
     emit UnequipTile(_realmId, _tileId, _x, _y);
+  }
+
+  /// @notice Allow a parcel owner to move a tile
+  /// @param _realmId The identifier of the parcel which the tile is being moved on
+  /// @param _tileId The identifier of the tile being moved
+  /// @param _x0 The x(horizontal) coordinate of the tile
+  /// @param _y0 The y(vertical) coordinate of the tile
+  /// @param _x1 The x(horizontal) coordinate of the tile to move to
+  /// @param _y1 The y(vertical) coordinate of the tile to move to
+  function moveTile(
+    uint256 _realmId,
+    uint256 _tileId,
+    uint256 _x0,
+    uint256 _y0,
+    uint256 _x1,
+    uint256 _y1
+  ) external onlyParcelOwner(_realmId) gameActive canBuild {
+    LibRealm.removeTile(_realmId, _tileId, _x0, _y0);
+    emit UnequipTile(_realmId, _tileId, _x0, _y0);
+    LibRealm.placeTile(_realmId, _tileId, _x1, _y1);
+    emit EquipTile(_realmId, _tileId, _x1, _y1);
   }
 
   function setParcelsAccessRights(
@@ -314,91 +356,6 @@ contract RealmFacet is Modifiers {
     s.parcels[_realmId].upgradeQueueLength--;
   }
 
-  function getHumbleGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[8][8] memory output_) {
-    require(s.parcels[_parcelId].size == 0, "RealmFacet: Not humble");
-    for (uint256 i; i < 8; i++) {
-      for (uint256 j; j < 8; j++) {
-        if (_gridType == 0) {
-          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
-        } else if (_gridType == 1) {
-          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
-        }
-      }
-    }
-  }
-
-  function getReasonableGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[16][16] memory output_) {
-    require(s.parcels[_parcelId].size == 1, "RealmFacet: Not reasonable");
-    for (uint256 i; i < 16; i++) {
-      for (uint256 j; j < 16; j++) {
-        if (_gridType == 0) {
-          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
-        } else if (_gridType == 1) {
-          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
-        }
-      }
-    }
-  }
-
-  function getSpaciousVerticalGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[32][64] memory output_) {
-    require(s.parcels[_parcelId].size == 2, "RealmFacet: Not spacious vertical");
-    for (uint256 i; i < 64; i++) {
-      for (uint256 j; j < 32; j++) {
-        if (_gridType == 0) {
-          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
-        } else if (_gridType == 1) {
-          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
-        }
-      }
-    }
-  }
-
-  function getSpaciousHorizontalGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[64][32] memory output_) {
-    require(s.parcels[_parcelId].size == 3, "RealmFacet: Not spacious horizontal");
-    for (uint256 i; i < 32; i++) {
-      for (uint256 j; j < 64; j++) {
-        if (_gridType == 0) {
-          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
-        } else if (_gridType == 1) {
-          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
-        }
-      }
-    }
-  }
-
-  function getPaartnerGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[64][64] memory output_) {
-    require(s.parcels[_parcelId].size == 4, "RealmFacet: Not paartner");
-    for (uint256 i; i < 64; i++) {
-      for (uint256 j; j < 64; j++) {
-        if (_gridType == 0) {
-          output_[i][j] = s.parcels[_parcelId].buildGrid[j][i];
-        } else if (_gridType == 1) {
-          output_[i][j] = s.parcels[_parcelId].tileGrid[j][i];
-        }
-      }
-    }
-  }
-
-  struct ParcelCoordinates {
-    uint256[64][64] coords;
-  }
-
-  function batchGetGrid(uint256[] calldata _parcelIds, uint256 _gridType) external view returns (ParcelCoordinates[] memory) {
-    ParcelCoordinates[] memory parcels = new ParcelCoordinates[](_parcelIds.length);
-    for (uint256 k; k < _parcelIds.length; k++) {
-      for (uint256 i; i < 64; i++) {
-        for (uint256 j; j < 64; j++) {
-          if (_gridType == 0) {
-            parcels[k].coords[i][j] = s.parcels[_parcelIds[k]].buildGrid[j][i];
-          } else if (_gridType == 1) {
-            parcels[k].coords[i][j] = s.parcels[_parcelIds[k]].tileGrid[j][i];
-          }
-        }
-      }
-    }
-    return parcels;
-  }
-
   function batchGetDistrictParcels(address _owner, uint256 _district) external view returns (uint256[] memory) {
     uint256 totalSupply = ERC721Facet(address(this)).totalSupply();
     uint256 balance = ERC721Facet(address(this)).balanceOf(_owner);
@@ -448,5 +405,13 @@ contract RealmFacet is Modifiers {
         parcel.altarId = 11;
       }
     }
+  }
+
+  function buildingFrozen() external view returns (bool) {
+    return s.freezeBuilding;
+  }
+
+  function setFreezeBuilding(bool _freezeBuilding) external onlyOwner {
+    s.freezeBuilding = _freezeBuilding;
   }
 }
