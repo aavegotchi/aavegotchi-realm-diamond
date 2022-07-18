@@ -5,6 +5,8 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
+import { RealmFacet__factory } from "../../../typechain";
+import { RealmFacet, RealmFacetInterface } from "../../../typechain/RealmFacet";
 
 export async function upgrade() {
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
@@ -17,6 +19,8 @@ export async function upgrade() {
       addSelectors: [
         "function moveInstallation(uint256 _realmId, uint256 _installationId, uint256 _x0, uint256 _y0, uint256 _x1, uint256 _y1) external",
         "function moveTile(uint256 _realmId, uint256 _tileId, uint256 _x0, uint256 _y0, uint256 _x1, uint256 _y1) external",
+        `function setFreezeBuilding(bool _freezeBuilding) external`,
+        "function buildingFrozen() external view returns (bool)",
       ],
       removeSelectors: [
         `function getHumbleGrid(uint256 _parcelId, uint256 _gridType) external view`,
@@ -45,15 +49,30 @@ export async function upgrade() {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
+  let iface: RealmFacetInterface = new ethers.utils.Interface(
+    RealmFacet__factory.abi
+  ) as RealmFacetInterface;
+
+  const calldata = iface.encodeFunctionData("setFreezeBuilding", [true]);
+
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: c.realmDiamond,
     facetsAndAddSelectors: joined,
     useLedger: false,
     useMultisig: false,
+    initCalldata: calldata,
+    initAddress: c.realmDiamond,
   };
 
   await run("deployUpgrade", args);
+
+  const realm = (await ethers.getContractAt(
+    "RealmFacet",
+    c.realmDiamond
+  )) as RealmFacet;
+  const frozen = await realm.buildingFrozen();
+  console.log("frozem:", frozen);
 }
 
 if (require.main === module) {

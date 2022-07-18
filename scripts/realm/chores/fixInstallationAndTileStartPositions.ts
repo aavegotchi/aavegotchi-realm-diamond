@@ -6,6 +6,7 @@ import { impersonate } from "../../helperFunctions";
 import { BigNumberish } from "@ethersproject/bignumber";
 import { upgrade } from "../upgrades/upgrade-fixStartGrid";
 import { varsForNetwork } from "../../../constants";
+import { LedgerSigner } from "@anders-t/ethers-ledger";
 
 let DEFAULT_BLOCKNUMBER = 0;
 let id = DEFAULT_BLOCKNUMBER;
@@ -80,13 +81,14 @@ async function main() {
 
   const testing = ["hardhat", "localhost"].includes(hre.network.name);
 
-  const accounts = await ethers.getSigners();
+  const signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
 
   const c = await varsForNetwork(ethers);
 
   let realmFacet = (await ethers.getContractAt(
     "RealmGridFacet",
-    c.realmDiamond
+    c.realmDiamond,
+    signer
   )) as RealmGridFacet;
 
   let ownable = (await ethers.getContractAt(

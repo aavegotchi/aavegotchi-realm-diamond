@@ -87,7 +87,7 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) external gameActive {
+  ) external gameActive canBuild {
     //2 - Equip Installations
     LibRealm.verifyAccessRight(_realmId, _gotchiId, 2);
     require(
@@ -132,7 +132,7 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) gameActive {
+  ) external onlyParcelOwner(_realmId) gameActive canBuild {
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
@@ -187,7 +187,7 @@ contract RealmFacet is Modifiers {
     uint256 _y0,
     uint256 _x1,
     uint256 _y1
-  ) external onlyParcelOwner(_realmId) gameActive {
+  ) external onlyParcelOwner(_realmId) gameActive canBuild {
     LibRealm.removeInstallation(_realmId, _installationId, _x0, _y0);
     emit UnequipInstallation(_realmId, _installationId, _x0, _y0);
     LibRealm.placeInstallation(_realmId, _installationId, _x1, _y1);
@@ -207,7 +207,7 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) external gameActive {
+  ) external gameActive canBuild {
     //3 - Equip Tile
     LibRealm.verifyAccessRight(_realmId, _gotchiId, 3);
     require(
@@ -235,7 +235,7 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) external onlyParcelOwner(_realmId) gameActive {
+  ) external onlyParcelOwner(_realmId) gameActive canBuild {
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
@@ -261,7 +261,7 @@ contract RealmFacet is Modifiers {
     uint256 _y0,
     uint256 _x1,
     uint256 _y1
-  ) external onlyParcelOwner(_realmId) gameActive {
+  ) external onlyParcelOwner(_realmId) gameActive canBuild {
     LibRealm.removeTile(_realmId, _tileId, _x0, _y0);
     emit UnequipTile(_realmId, _tileId, _x0, _y0);
     LibRealm.placeTile(_realmId, _tileId, _x1, _y1);
@@ -404,5 +404,13 @@ contract RealmFacet is Modifiers {
         parcel.altarId = 11;
       }
     }
+  }
+
+  function buildingFrozen() external view returns (bool) {
+    return s.freezeBuilding;
+  }
+
+  function setFreezeBuilding(bool _freezeBuilding) external onlyOwner {
+    s.freezeBuilding = _freezeBuilding;
   }
 }
