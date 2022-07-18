@@ -3,9 +3,8 @@ import { request } from "graphql-request";
 import { ethers, network } from "hardhat";
 import { Ownable, RealmGridFacet } from "../../../typechain";
 import { impersonate } from "../../helperFunctions";
-import { BigNumberish } from "@ethersproject/bignumber";
 import { upgrade } from "../upgrades/upgrade-fixStartGrid";
-import { varsForNetwork } from "../../../constants";
+import { gasPrice, varsForNetwork } from "../../../constants";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 
 let DEFAULT_BLOCKNUMBER = 0;
@@ -53,7 +52,7 @@ function getTilesQuery() {
 }
 
 async function main() {
-  await upgrade();
+  // await upgrade();
 
   // Tiles
   let tiles: InstallationObject[] = [];
@@ -109,37 +108,38 @@ async function main() {
   const batchSize = 500;
   const batches = Math.ceil(installations.length / batchSize);
 
-  for (let i = 0; i < batches; i++) {
-    console.log("current batch:", i);
-    let realmIds = installations
-      .slice(i * batchSize, (i + 1) * batchSize)
-      .map((val) => val.parcel.id);
-    let xs = installations
-      .slice(i * batchSize, (i + 1) * batchSize)
-      .map((val) => val.x);
-    let ys = installations
-      .slice(i * batchSize, (i + 1) * batchSize)
-      .map((val) => val.y);
-    let ids = installations
-      .slice(i * batchSize, (i + 1) * batchSize)
-      .map((val) => val.type.id);
+  // for (let i = 8; i < batches; i++) {
+  //   console.log("current batch:", i);
+  //   let realmIds = installations
+  //     .slice(i * batchSize, (i + 1) * batchSize)
+  //     .map((val) => val.parcel.id);
+  //   let xs = installations
+  //     .slice(i * batchSize, (i + 1) * batchSize)
+  //     .map((val) => val.x);
+  //   let ys = installations
+  //     .slice(i * batchSize, (i + 1) * batchSize)
+  //     .map((val) => val.y);
+  //   let ids = installations
+  //     .slice(i * batchSize, (i + 1) * batchSize)
+  //     .map((val) => val.type.id);
 
-    console.log("realm ids:", realmIds);
-    console.log("xs", xs);
-    console.log("ys", ys);
-    console.log("ids:", ids);
+  //   console.log("realm ids:", realmIds);
+  //   console.log("xs", xs);
+  //   console.log("ys", ys);
+  //   console.log("ids:", ids);
 
-    let tx = await realmFacet.fixGridStartPositions(
-      realmIds,
-      xs,
-      ys,
-      false,
-      ids
-    );
+  //   let tx = await realmFacet.fixGridStartPositions(
+  //     realmIds,
+  //     xs,
+  //     ys,
+  //     false,
+  //     ids,
+  //     { gasPrice: gasPrice }
+  //   );
 
-    console.log("TXID: ", tx.hash, tx.gasLimit.toString());
-    await tx.wait();
-  }
+  //   console.log("TXID: ", tx.hash, tx.gasLimit.toString());
+  //   await tx.wait();
+  // }
 
   console.log("Fixing tile start positions");
   for (let i = 0; i < tiles.length / batchSize; i++) {
@@ -158,12 +158,18 @@ async function main() {
       .slice(i * batchSize, (i + 1) * batchSize)
       .map((val) => val.type.id);
 
+    console.log("realm ids:", realmIds);
+    console.log("xs", xs);
+    console.log("ys", ys);
+    console.log("ids:", ids);
+
     let tx = await realmFacet.fixGridStartPositions(
       realmIds,
       xs,
       ys,
       true,
-      ids
+      ids,
+      { gasPrice: gasPrice }
     );
 
     console.log("TXID: ", tx.hash);

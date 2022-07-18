@@ -65,7 +65,7 @@ export async function upgrade() {
     initAddress: c.realmDiamond,
   };
 
-  await run("deployUpgrade", args);
+  // await run("deployUpgrade", args);
 
   const realm = (await ethers.getContractAt(
     "RealmFacet",
