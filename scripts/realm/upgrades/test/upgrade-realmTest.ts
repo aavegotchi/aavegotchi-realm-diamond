@@ -21,7 +21,7 @@ export async function upgradeRealmTest() {
         `function mockStartSurveying(uint256 _realmId) external`,
         `function mockRawFulfillRandomWords(uint256 tokenId, uint256 surveyingRound, uint256 seed) external`,
         `function mockClaimAvailableAlchemica(uint256 _realmId, uint256 _gotchiId) external`,
-        `function mockMintParcels(address[] calldata _to, uint256[] calldata _tokenIds, ${MintParcelInput}[] memory _metadata) external`
+        `function mockMintParcels(address[] calldata _to, uint256[] calldata _tokenIds, ${MintParcelInput}[] memory _metadata) external`,
       ],
       removeSelectors: [],
     },
@@ -29,11 +29,11 @@ export async function upgradeRealmTest() {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
-  const maticRealmDiamondAddress = (await varsForNetwork(ethers)).realmDiamond;
+  const c = await varsForNetwork(ethers);
 
   const args: DeployUpgradeTaskArgs = {
-    diamondUpgrader: await diamondOwner(maticRealmDiamondAddress, ethers),
-    diamondAddress: maticRealmDiamondAddress,
+    diamondUpgrader: await diamondOwner(c.realmDiamond, ethers),
+    diamondAddress: c.realmDiamond,
     facetsAndAddSelectors: joined,
     initAddress: ethers.constants.AddressZero,
     initCalldata: "0x",

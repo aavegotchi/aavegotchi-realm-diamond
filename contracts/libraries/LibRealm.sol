@@ -31,6 +31,10 @@ library LibRealm {
     //Check if these slots are available onchain
     require(_x <= widths[parcel.size] - installation.width, "LibRealm: x exceeding width");
     require(_y <= heights[parcel.size] - installation.height, "LibRealm: y exceeding height");
+
+    // Track the start position of the build grid
+    parcel.startPositionBuildGrid[_x][_y] = _installationId;
+
     for (uint256 indexW = _x; indexW < _x + installation.width; indexW++) {
       for (uint256 indexH = _y; indexH < _y + installation.height; indexH++) {
         require(parcel.buildGrid[indexW][indexH] == 0, "LibRealm: Invalid spot");
@@ -50,11 +54,13 @@ library LibRealm {
     InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
     Parcel storage parcel = s.parcels[_realmId];
     require(parcel.buildGrid[_x][_y] == _installationId, "LibRealm: wrong installationId");
+    require(parcel.startPositionBuildGrid[_x][_y] == _installationId, "LibRealm: wrong startPosition");
     for (uint256 indexW = _x; indexW < _x + installation.width; indexW++) {
       for (uint256 indexH = _y; indexH < _y + installation.height; indexH++) {
         parcel.buildGrid[indexW][indexH] = 0;
       }
     }
+    parcel.startPositionBuildGrid[_x][_y] = 0;
   }
 
   function placeTile(
@@ -76,6 +82,9 @@ library LibRealm {
     //Check if these slots are available onchain
     require(_x <= widths[parcel.size] - tile.width, "LibRealm: x exceeding width");
     require(_y <= heights[parcel.size] - tile.height, "LibRealm: y exceeding height");
+
+    parcel.startPositionTileGrid[_x][_y] = _tileId;
+
     for (uint256 indexW = _x; indexW < _x + tile.width; indexW++) {
       for (uint256 indexH = _y; indexH < _y + tile.height; indexH++) {
         require(parcel.tileGrid[indexW][indexH] == 0, "LibRealm: Invalid spot");
@@ -94,12 +103,16 @@ library LibRealm {
     TileDiamondInterface tilesDiamond = TileDiamondInterface(s.tileDiamond);
     TileDiamondInterface.TileType memory tile = tilesDiamond.getTileType(_tileId);
     Parcel storage parcel = s.parcels[_realmId];
+
     require(parcel.tileGrid[_x][_y] == _tileId, "LibRealm: wrong tileId");
+    require(parcel.startPositionTileGrid[_x][_y] == _tileId, "LibRealm: wrong startPosition");
+
     for (uint256 indexW = _x; indexW < _x + tile.width; indexW++) {
       for (uint256 indexH = _y; indexH < _y + tile.height; indexH++) {
         parcel.tileGrid[indexW][indexH] = 0;
       }
     }
+    parcel.startPositionTileGrid[_x][_y] = 0;
   }
 
   function calculateAmount(

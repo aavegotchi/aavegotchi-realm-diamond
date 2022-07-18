@@ -45,6 +45,19 @@ export async function impersonate(
   return contract;
 }
 
+export async function impersonateSigner(
+  address: string,
+  ethers: any,
+  network: Network
+) {
+  await network.provider.request({
+    method: "hardhat_impersonateAccount",
+    params: [address],
+  });
+  let signer = await ethers.getSigner(address);
+  return signer;
+}
+
 export async function resetChain(hre: any) {
   await hre.network.provider.request({
     method: "hardhat_reset",

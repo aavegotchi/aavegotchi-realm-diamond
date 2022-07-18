@@ -17,3 +17,5 @@ hardhat.config.ts
 yarn.lock
 package.lock.json
 out/*
+data/allInstallations.json
+data/allTiles.json

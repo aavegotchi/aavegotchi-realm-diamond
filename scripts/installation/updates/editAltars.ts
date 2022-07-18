@@ -35,19 +35,19 @@ export async function editInstallationTypes() {
     throw new Error("Incorrect length");
   }
 
-  const tx = await installationFacet.editInstallationUnequipTypes(
-    ["55"],
-    ["1"],
-    {
-      gasPrice: gasPrice,
-    }
-  );
-  await tx.wait();
+  // const tx = await installationFacet.editInstallationUnequipTypes(
+  //   ["55"],
+  //   ["1"],
+  //   {
+  //     gasPrice: gasPrice,
+  //   }
+  // );
+  // await tx.wait();
 
-  // console.log("Updating ");
-  // await installationFacet.editInstallationTypes(ids, altars, {
-  //   gasPrice: gasPrice,
-  // });
+  console.log("Updating ");
+  await installationFacet.editInstallationTypes(ids, altars, {
+    gasPrice: gasPrice,
+  });
 
   const installationfacet = (await ethers.getContractAt(
     "InstallationFacet",
