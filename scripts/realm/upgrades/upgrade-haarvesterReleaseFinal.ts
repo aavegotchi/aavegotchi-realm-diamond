@@ -20,30 +20,21 @@ export interface VrfConfig {
 export async function harvesterUpgrade() {
   const c = await varsForNetwork(ethers);
 
-
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
 
   const requestConfig =
     "(uint64 subId, uint32 callbackGasLimit, uint16 requestConfirmations, uint32 numWords, bytes32 keyHash)";
 
   const realmFacets: FacetsAndAddSelectors[] = [
-    
     {
       facetName: "RealmFacet",
-      addSelectors: [
-      ],
+      addSelectors: [],
       removeSelectors: [
         "function setParcelsAccessRights(uint256[] calldata _realmIds,uint256[] calldata _actionRights, uint256[] calldata _accessRights) external",
         "function resyncParcel(uint256[] calldata _tokenIds) external",
         "function setGameActive(bool _gameActive) external",
         "function getParcelInfo(uint256 _realmId) external view",
         "function checkCoordinates(uint256 _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _installationId) external view",
-        "function getHumbleGrid(uint256 _parcelId, uint256 _gridType) external view",
-        "function getReasonableGrid(uint256 _parcelId, uint256 _gridType) external view",
-        "function getSpaciousVerticalGrid(uint256 _parcelId, uint256 _gridType) external view",
-        "function getSpaciousHorizontalGrid(uint256 _parcelId, uint256 _gridType) external view",
-        "function getPaartnerGrid(uint256 _parcelId, uint256 _gridType) external view",
-        "function batchGetGrid(uint256[] calldata _parcelIds, uint256 _gridType) external view",
         "function batchGetDistrictParcels(address _owner, uint256 _district) external view",
         "function getParcelUpgradeQueueLength(uint256 _parcelId) external view",
         "function getParcelUpgradeQueueCapacity(uint256 _parcelId) external view",
@@ -63,12 +54,6 @@ export async function harvesterUpgrade() {
         "function setGameActive(bool _gameActive) external",
         "function getParcelInfo(uint256 _realmId) external view",
         "function checkCoordinates(uint256 _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _installationId) external view",
-        "function getHumbleGrid(uint256 _parcelId, uint256 _gridType) external view",
-        "function getReasonableGrid(uint256 _parcelId, uint256 _gridType) external view",
-        "function getSpaciousVerticalGrid(uint256 _parcelId, uint256 _gridType) external view",
-        "function getSpaciousHorizontalGrid(uint256 _parcelId, uint256 _gridType) external view",
-        "function getPaartnerGrid(uint256 _parcelId, uint256 _gridType) external view",
-        "function batchGetGrid(uint256[] calldata _parcelIds, uint256 _gridType) external view",
         "function batchGetDistrictParcels(address _owner, uint256 _district) external view",
         "function getParcelUpgradeQueueLength(uint256 _parcelId) external view",
         "function getParcelUpgradeQueueCapacity(uint256 _parcelId) external view",
@@ -101,8 +86,7 @@ export async function harvesterUpgrade() {
         "function topUpSubscription(uint256 amount) external",
         `function setConfig(${requestConfig} _requestConfig, address _vrfCoordinator) external`,
       ],
-      removeSelectors: [
-      ],
+      removeSelectors: [],
     },
   ];
 
@@ -110,14 +94,16 @@ export async function harvesterUpgrade() {
     {
       facetName: "InstallationUpgradeFacet",
       addSelectors: [
-        "function parcelQueueEmpty(uint256 _parcelId) external view returns (bool)"
+        "function parcelQueueEmpty(uint256 _parcelId) external view returns (bool)",
+        "function reduceUpgradeTime(uint256 _upgradeIndex, uint40 _blocks, bytes memory _signature) external",
       ],
       removeSelectors: [],
-    }
-  ]
+    },
+  ];
 
   const realmJoined = convertFacetAndSelectorsToString(realmFacets);
-  const installationJoined = convertFacetAndSelectorsToString(installationFacets);
+  const installationJoined =
+    convertFacetAndSelectorsToString(installationFacets);
 
   let iface: VRFFacetInterface = new ethers.utils.Interface(
     VRFFacet__factory.abi
@@ -174,12 +160,10 @@ export async function harvesterUpgrade() {
     initAddress: c.realmDiamond,
   };
 
-
   await run("deployUpgrade", realmArgs);
 
   console.log("installation diamond:", c.installationDiamond);
 
-  
   const installationArgs: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: c.installationDiamond,
