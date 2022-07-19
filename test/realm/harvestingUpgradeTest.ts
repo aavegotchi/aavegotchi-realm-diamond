@@ -20,10 +20,11 @@ import {
 import { harvesterUpgrade } from "../../scripts/realm/upgrades/upgrade-haarvesterReleaseFinal";
 import { upgradeRealmTest } from "../../scripts/realm/upgrades/test/upgrade-realmTest";
 import { upgradeInstallationTest } from "../../scripts/installation/upgrades/test/upgrade-testInstallationFacet";
+import { addFarmInstallations } from "../../scripts/installation/updates/addFarmInstallations";
 import { alchemica, varsForNetwork } from "../../constants";
 import { Signer } from "ethers";
 
-describe("Access rights test", async function () {
+describe("Harvesting test", async function () {
   let parcelId = 141;
   let owner = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
   let altarPosition = [7, 7];
@@ -97,6 +98,7 @@ describe("Access rights test", async function () {
     await harvesterUpgrade();
     await upgradeRealmTest();
     await upgradeInstallationTest();
+    await addFarmInstallations(true);
   });
 
   describe("Installation in upgrade queue", async () => {
@@ -124,6 +126,13 @@ describe("Access rights test", async function () {
       ).to.be.revertedWith(
         "RealmFacet: Can't unequip installation in upgrade queue"
       );
+    });
+
+    it("Should not let a user equip more than 1 maker", async () => {
+      await testInstallationFacet.mockCraftInstallation(59);
+      await testInstallationFacet.mockCraftInstallation(59);
+      await testRealmFacet.mockEquipInstallation(parcelId, 59, 0, 0);
+      await testRealmFacet.mockEquipInstallation(parcelId, 59, 2, 0);
     });
   });
 });

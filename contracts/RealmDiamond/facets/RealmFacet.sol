@@ -97,6 +97,7 @@ contract RealmFacet is Modifiers {
       require(s.parcels[_realmId].lodgeId == 0, "RealmFacet: Lodge already equipped");
       s.parcels[_realmId].lodgeId = _installationId;
     }
+    if (installation.installationType == 6) require(s.parcels[_realmId].upgradeQueueCapacity <= 1, "RealmFacet: Maker already equipped");
 
     LibRealm.placeInstallation(_realmId, _installationId, _x, _y);
     InstallationDiamondInterface(s.installationsDiamond).equipInstallation(msg.sender, _realmId, _installationId);

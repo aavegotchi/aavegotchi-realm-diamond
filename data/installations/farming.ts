@@ -2,7 +2,7 @@ import { InstallationTypeInput } from "../../types";
 
 export const installationTypes: InstallationTypeInput[] = [
   {
-    id: 55,
+    id: 56,
     installation: "FUD Harvester",
     name: "FUD Harvester Level 1",
     fud: 125,
@@ -27,7 +27,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 56,
+    id: 57,
     installation: "FUD Harvester",
     name: "FUD Harvester Level 2",
     fud: 178,
@@ -52,7 +52,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 57,
+    id: 58,
     installation: "FUD Harvester",
     name: "FUD Harvester Level 3",
     fud: 227,
@@ -77,7 +77,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 58,
+    id: 59,
     installation: "FUD Harvester",
     name: "FUD Harvester Level 4",
     fud: 255,
@@ -102,7 +102,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 59,
+    id: 60,
     installation: "FUD Harvester",
     name: "FUD Harvester Level 5",
     fud: 385,
@@ -127,7 +127,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 60,
+    id: 61,
     installation: "FUD Harvester",
     name: "FUD Harvester Level 6",
     fud: 592,
@@ -152,7 +152,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 61,
+    id: 62,
     installation: "FUD Harvester",
     name: "FUD Harvester Level 7",
     fud: 665,
@@ -177,7 +177,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 62,
+    id: 63,
     installation: "FUD Harvester",
     name: "FUD Harvester Level 8",
     fud: 892,
@@ -202,7 +202,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 63,
+    id: 64,
     installation: "FUD Harvester",
     name: "FUD Harvester Level 9",
     fud: 729,
@@ -227,7 +227,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 64,
+    id: 65,
     installation: "FOMO Harvester",
     name: "FOMO Harvester Level 1",
     fud: 104,
@@ -252,7 +252,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 65,
+    id: 66,
     installation: "FOMO Harvester",
     name: "FOMO Harvester Level 2",
     fud: 156,
@@ -277,7 +277,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 66,
+    id: 67,
     installation: "FOMO Harvester",
     name: "FOMO Harvester Level 3",
     fud: 200,
@@ -302,7 +302,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 67,
+    id: 68,
     installation: "FOMO Harvester",
     name: "FOMO Harvester Level 4",
     fud: 212,
@@ -327,7 +327,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 68,
+    id: 69,
     installation: "FOMO Harvester",
     name: "FOMO Harvester Level 5",
     fud: 319,
@@ -352,7 +352,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 69,
+    id: 70,
     installation: "FOMO Harvester",
     name: "FOMO Harvester Level 6",
     fud: 491,
@@ -377,7 +377,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 70,
+    id: 71,
     installation: "FOMO Harvester",
     name: "FOMO Harvester Level 7",
     fud: 488,
@@ -402,7 +402,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 71,
+    id: 72,
     installation: "FOMO Harvester",
     name: "FOMO Harvester Level 8",
     fud: 657,
@@ -427,7 +427,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 72,
+    id: 73,
     installation: "FOMO Harvester",
     name: "FOMO Harvester Level 9",
     fud: 403,
@@ -452,7 +452,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 73,
+    id: 74,
     installation: "ALPHA Harvester",
     name: "ALPHA Harvester Level 1",
     fud: 94,
@@ -477,7 +477,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 74,
+    id: 75,
     installation: "ALPHA Harvester",
     name: "ALPHA Harvester Level 2",
     fud: 133,
@@ -502,7 +502,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 75,
+    id: 76,
     installation: "ALPHA Harvester",
     name: "ALPHA Harvester Level 3",
     fud: 172,
@@ -527,7 +527,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 76,
+    id: 77,
     installation: "ALPHA Harvester",
     name: "ALPHA Harvester Level 4",
     fud: 181,
@@ -552,7 +552,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 77,
+    id: 78,
     installation: "ALPHA Harvester",
     name: "ALPHA Harvester Level 5",
     fud: 274,
@@ -577,7 +577,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 78,
+    id: 79,
     installation: "ALPHA Harvester",
     name: "ALPHA Harvester Level 6",
     fud: 421,
@@ -602,7 +602,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 79,
+    id: 80,
     installation: "ALPHA Harvester",
     name: "ALPHA Harvester Level 7",
     fud: 418,
@@ -627,7 +627,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 80,
+    id: 81,
     installation: "ALPHA Harvester",
     name: "ALPHA Harvester Level 8",
     fud: 563,
@@ -652,7 +652,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 81,
+    id: 82,
     installation: "ALPHA Harvester",
     name: "ALPHA Harvester Level 9",
     fud: 691,
@@ -677,7 +677,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 82,
+    id: 83,
     installation: "KEK Harvester",
     name: "KEK Harvester Level 1",
     fud: 115,
@@ -702,7 +702,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 83,
+    id: 84,
     installation: "KEK Harvester",
     name: "KEK Harvester Level 2",
     fud: 163,
@@ -727,7 +727,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 84,
+    id: 85,
     installation: "KEK Harvester",
     name: "KEK Harvester Level 3",
     fud: 210,
@@ -752,7 +752,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 85,
+    id: 86,
     installation: "KEK Harvester",
     name: "KEK Harvester Level 4",
     fud: 221,
@@ -777,7 +777,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 86,
+    id: 87,
     installation: "KEK Harvester",
     name: "KEK Harvester Level 5",
     fud: 335,
@@ -802,7 +802,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 87,
+    id: 88,
     installation: "KEK Harvester",
     name: "KEK Harvester Level 6",
     fud: 514,
@@ -827,7 +827,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 88,
+    id: 89,
     installation: "KEK Harvester",
     name: "KEK Harvester Level 7",
     fud: 511,
@@ -852,7 +852,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 89,
+    id: 90,
     installation: "KEK Harvester",
     name: "KEK Harvester Level 8",
     fud: 688,
@@ -877,7 +877,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 90,
+    id: 91,
     installation: "KEK Harvester",
     name: "KEK Harvester Level 9",
     fud: 422,
@@ -902,7 +902,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 91,
+    id: 92,
     installation: "FUD Reservoir",
     name: "FUD Reservoir Level 1",
     fud: 290,
@@ -927,7 +927,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 92,
+    id: 93,
     installation: "FUD Reservoir",
     name: "FUD Reservoir Level 2",
     fud: 570,
@@ -952,7 +952,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 93,
+    id: 94,
     installation: "FUD Reservoir",
     name: "FUD Reservoir Level 3",
     fud: 1140,
@@ -977,7 +977,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 94,
+    id: 95,
     installation: "FUD Reservoir",
     name: "FUD Reservoir Level 4",
     fud: 2400,
@@ -1002,7 +1002,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 95,
+    id: 96,
     installation: "FUD Reservoir",
     name: "FUD Reservoir Level 5",
     fud: 4750,
@@ -1027,7 +1027,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 96,
+    id: 97,
     installation: "FUD Reservoir",
     name: "FUD Reservoir Level 6",
     fud: 9500,
@@ -1052,7 +1052,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 97,
+    id: 98,
     installation: "FUD Reservoir",
     name: "FUD Reservoir Level 7",
     fud: 19000,
@@ -1077,7 +1077,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 98,
+    id: 99,
     installation: "FUD Reservoir",
     name: "FUD Reservoir Level 8",
     fud: 38000,
@@ -1102,7 +1102,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 99,
+    id: 100,
     installation: "FUD Reservoir",
     name: "FUD Reservoir Level 9",
     fud: 57000,
@@ -1127,7 +1127,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 100,
+    id: 101,
     installation: "FOMO Reservoir",
     name: "FOMO Reservoir Level 1",
     fud: 260,
@@ -1152,7 +1152,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 101,
+    id: 102,
     installation: "FOMO Reservoir",
     name: "FOMO Reservoir Level 2",
     fud: 525,
@@ -1177,7 +1177,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 102,
+    id: 103,
     installation: "FOMO Reservoir",
     name: "FOMO Reservoir Level 3",
     fud: 1050,
@@ -1202,7 +1202,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 103,
+    id: 104,
     installation: "FOMO Reservoir",
     name: "FOMO Reservoir Level 4",
     fud: 2100,
@@ -1227,7 +1227,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 104,
+    id: 105,
     installation: "FOMO Reservoir",
     name: "FOMO Reservoir Level 5",
     fud: 4200,
@@ -1252,7 +1252,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 105,
+    id: 106,
     installation: "FOMO Reservoir",
     name: "FOMO Reservoir Level 6",
     fud: 8400,
@@ -1277,7 +1277,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 106,
+    id: 107,
     installation: "FOMO Reservoir",
     name: "FOMO Reservoir Level 7",
     fud: 15800,
@@ -1302,7 +1302,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 107,
+    id: 108,
     installation: "FOMO Reservoir",
     name: "FOMO Reservoir Level 8",
     fud: 31500,
@@ -1327,7 +1327,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 108,
+    id: 109,
     installation: "FOMO Reservoir",
     name: "FOMO Reservoir Level 9",
     fud: 42000,
@@ -1352,7 +1352,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 109,
+    id: 110,
     installation: "ALPHA Reservoir",
     name: "ALPHA Reservoir Level 1",
     fud: 225,
@@ -1377,7 +1377,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 110,
+    id: 111,
     installation: "ALPHA Reservoir",
     name: "ALPHA Reservoir Level 2",
     fud: 450,
@@ -1402,7 +1402,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 111,
+    id: 112,
     installation: "ALPHA Reservoir",
     name: "ALPHA Reservoir Level 3",
     fud: 900,
@@ -1427,7 +1427,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 112,
+    id: 113,
     installation: "ALPHA Reservoir",
     name: "ALPHA Reservoir Level 4",
     fud: 1800,
@@ -1452,7 +1452,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 113,
+    id: 114,
     installation: "ALPHA Reservoir",
     name: "ALPHA Reservoir Level 5",
     fud: 3600,
@@ -1477,7 +1477,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 114,
+    id: 115,
     installation: "ALPHA Reservoir",
     name: "ALPHA Reservoir Level 6",
     fud: 7200,
@@ -1502,7 +1502,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 115,
+    id: 116,
     installation: "ALPHA Reservoir",
     name: "ALPHA Reservoir Level 7",
     fud: 13500,
@@ -1527,7 +1527,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 116,
+    id: 117,
     installation: "ALPHA Reservoir",
     name: "ALPHA Reservoir Level 8",
     fud: 27000,
@@ -1552,7 +1552,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 117,
+    id: 118,
     installation: "ALPHA Reservoir",
     name: "ALPHA Reservoir Level 9",
     fud: 36000,
@@ -1577,7 +1577,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 118,
+    id: 119,
     installation: "KEK Reservoir",
     name: "KEK Reservoir Level 1",
     fud: 275,
@@ -1602,7 +1602,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 119,
+    id: 120,
     installation: "KEK Reservoir",
     name: "KEK Reservoir Level 2",
     fud: 550,
@@ -1627,7 +1627,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 120,
+    id: 121,
     installation: "KEK Reservoir",
     name: "KEK Reservoir Level 3",
     fud: 1100,
@@ -1652,7 +1652,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 121,
+    id: 122,
     installation: "KEK Reservoir",
     name: "KEK Reservoir Level 4",
     fud: 2200,
@@ -1677,7 +1677,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 122,
+    id: 123,
     installation: "KEK Reservoir",
     name: "KEK Reservoir Level 5",
     fud: 4400,
@@ -1702,7 +1702,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 123,
+    id: 124,
     installation: "KEK Reservoir",
     name: "KEK Reservoir Level 6",
     fud: 8800,
@@ -1727,7 +1727,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 124,
+    id: 125,
     installation: "KEK Reservoir",
     name: "KEK Reservoir Level 7",
     fud: 16500,
@@ -1752,7 +1752,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 125,
+    id: 126,
     installation: "KEK Reservoir",
     name: "KEK Reservoir Level 8",
     fud: 33000,
@@ -1777,7 +1777,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 126,
+    id: 127,
     installation: "KEK Reservoir",
     name: "KEK Reservoir Level 9",
     fud: 66000,
@@ -1802,7 +1802,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 127,
+    id: 128,
     installation: "Maaker",
     name: "Maaker Level 1",
     fud: 2500,
@@ -1827,7 +1827,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 128,
+    id: 129,
     installation: "Maaker",
     name: "Maaker Level 2",
     fud: 5000,
@@ -1852,7 +1852,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 129,
+    id: 130,
     installation: "Maaker",
     name: "Maaker Level 3",
     fud: 10000,
@@ -1877,7 +1877,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 130,
+    id: 131,
     installation: "Maaker",
     name: "Maaker Level 4",
     fud: 15000,
@@ -1902,7 +1902,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 131,
+    id: 132,
     installation: "Maaker",
     name: "Maaker Level 5",
     fud: 22500,
@@ -1927,7 +1927,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 132,
+    id: 133,
     installation: "Maaker",
     name: "Maaker Level 6",
     fud: 30000,
@@ -1952,7 +1952,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 133,
+    id: 134,
     installation: "Maaker",
     name: "Maaker Level 7",
     fud: 27500,
@@ -1977,7 +1977,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 134,
+    id: 135,
     installation: "Maaker",
     name: "Maaker Level 8",
     fud: 35000,
@@ -2002,7 +2002,7 @@ export const installationTypes: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 135,
+    id: 136,
     installation: "Maaker",
     name: "Maaker Level 9",
     fud: 42500,
@@ -3867,7 +3867,7 @@ export const installationTypesMatic: InstallationTypeInput[] = [
     capacity: 0,
     spillRadius: 0,
     spillRate: 0,
-    upgradeQueueBoost: 0,
+    upgradeQueueBoost: 1,
     craftTime: 0,
     deprecated: false,
     nextLevelId: 129,
@@ -3892,7 +3892,7 @@ export const installationTypesMatic: InstallationTypeInput[] = [
     capacity: 0,
     spillRadius: 0,
     spillRate: 0,
-    upgradeQueueBoost: 0,
+    upgradeQueueBoost: 2,
     craftTime: 4000,
     deprecated: false,
     nextLevelId: 130,
@@ -3917,7 +3917,7 @@ export const installationTypesMatic: InstallationTypeInput[] = [
     capacity: 0,
     spillRadius: 0,
     spillRate: 0,
-    upgradeQueueBoost: 0,
+    upgradeQueueBoost: 3,
     craftTime: 10000,
     deprecated: false,
     nextLevelId: 131,
@@ -3942,7 +3942,7 @@ export const installationTypesMatic: InstallationTypeInput[] = [
     capacity: 0,
     spillRadius: 0,
     spillRate: 0,
-    upgradeQueueBoost: 0,
+    upgradeQueueBoost: 4,
     craftTime: 20000,
     deprecated: false,
     nextLevelId: 132,
@@ -3967,7 +3967,7 @@ export const installationTypesMatic: InstallationTypeInput[] = [
     capacity: 0,
     spillRadius: 0,
     spillRate: 0,
-    upgradeQueueBoost: 0,
+    upgradeQueueBoost: 5,
     craftTime: 30000,
     deprecated: false,
     nextLevelId: 133,
@@ -3992,7 +3992,7 @@ export const installationTypesMatic: InstallationTypeInput[] = [
     capacity: 0,
     spillRadius: 0,
     spillRate: 0,
-    upgradeQueueBoost: 0,
+    upgradeQueueBoost: 6,
     craftTime: 40000,
     deprecated: false,
     nextLevelId: 134,
@@ -4017,7 +4017,7 @@ export const installationTypesMatic: InstallationTypeInput[] = [
     capacity: 0,
     spillRadius: 0,
     spillRate: 0,
-    upgradeQueueBoost: 0,
+    upgradeQueueBoost: 7,
     craftTime: 80000,
     deprecated: false,
     nextLevelId: 135,
@@ -4042,7 +4042,7 @@ export const installationTypesMatic: InstallationTypeInput[] = [
     capacity: 0,
     spillRadius: 0,
     spillRate: 0,
-    upgradeQueueBoost: 0,
+    upgradeQueueBoost: 8,
     craftTime: 120000,
     deprecated: false,
     nextLevelId: 136,
@@ -4067,7 +4067,7 @@ export const installationTypesMatic: InstallationTypeInput[] = [
     capacity: 0,
     spillRadius: 0,
     spillRate: 0,
-    upgradeQueueBoost: 0,
+    upgradeQueueBoost: 9,
     craftTime: 200000,
     deprecated: false,
     nextLevelId: 0,
@@ -4078,7 +4078,7 @@ export const installationTypesMatic: InstallationTypeInput[] = [
 
 export const installationTypesTest: InstallationTypeInput[] = [
   {
-    id: 19,
+    id: 56,
     installationType: 1,
     level: 1,
     width: 2,
@@ -4098,7 +4098,7 @@ export const installationTypesTest: InstallationTypeInput[] = [
     unequipType: 0,
   },
   {
-    id: 20,
+    id: 57,
     installationType: 1,
     level: 2,
     width: 2,
@@ -4119,7 +4119,7 @@ export const installationTypesTest: InstallationTypeInput[] = [
   },
 
   {
-    id: 55,
+    id: 58,
     installationType: 2,
     level: 1,
     width: 2,
@@ -4140,7 +4140,7 @@ export const installationTypesTest: InstallationTypeInput[] = [
   },
 
   {
-    id: 118,
+    id: 59,
     installationType: 6,
     level: 1,
     width: 2,
@@ -4151,7 +4151,7 @@ export const installationTypesTest: InstallationTypeInput[] = [
     capacity: 0,
     spillRadius: 0,
     spillRate: 0,
-    upgradeQueueBoost: 0,
+    upgradeQueueBoost: 1,
     craftTime: 0,
     deprecated: false,
     nextLevelId: 119,
