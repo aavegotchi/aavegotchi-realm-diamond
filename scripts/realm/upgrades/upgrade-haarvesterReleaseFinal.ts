@@ -7,7 +7,6 @@ import {
 } from "../../../tasks/deployUpgrade";
 import { VRFFacet__factory } from "../../../typechain";
 import { VRFFacetInterface } from "../../../typechain/VRFFacet";
-import { upgradeDiamondCut } from "./upgrade-diamond";
 
 export interface VrfConfig {
   subId: number;

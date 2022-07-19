@@ -5,7 +5,7 @@ import { AlchemicaFacet } from "../../../typechain";
 import { getDiamondSigner } from "../../helperFunctions";
 import { addFarmInstallations } from "../../installation/updates/addFarmInstallations";
 import { alchemicaTotals } from "../../setVars";
-import { harvesterUpgrade } from "../upgrades/upgrade-haarvesterRelease";
+import { harvesterUpgrade } from "../upgrades/upgrade-haarvesterReleaseFinal";
 
 export async function deployFarmRelease() {
   const c = await varsForNetwork(ethers);
