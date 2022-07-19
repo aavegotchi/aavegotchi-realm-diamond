@@ -32,6 +32,8 @@ contract TestRealmFacet is Modifiers {
       require(s.parcels[_realmId].lodgeId == 0, "RealmFacet: Lodge already equipped");
       s.parcels[_realmId].lodgeId = _installationId;
     }
+    if (installation.installationType == 6)
+      require(s.parcels[_realmId].upgradeQueueCapacity == 1, "RealmFacet: Maker already equipped or altar not equipped");
 
     LibRealm.placeInstallation(_realmId, _installationId, _x, _y);
     InstallationDiamondInterface(s.installationsDiamond).equipInstallation(msg.sender, _realmId, _installationId);
@@ -50,6 +52,10 @@ contract TestRealmFacet is Modifiers {
     InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
 
     require(!LibRealm.installationInUpgradeQueue(_realmId, _installationId, _x, _y), "RealmFacet: Can't unequip installation in upgrade queue");
+    require(
+      installation.installationType != 0 || s.parcels[_realmId].upgradeQueueCapacity == 1,
+      "RealmFacet: Cannot unequip altar when there is a maker"
+    );
 
     LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
     InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(msg.sender, _realmId, _installationId);

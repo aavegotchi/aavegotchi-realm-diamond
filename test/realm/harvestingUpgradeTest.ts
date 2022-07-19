@@ -25,9 +25,9 @@ import { alchemica, varsForNetwork } from "../../constants";
 import { Signer } from "ethers";
 
 describe("Harvesting test", async function () {
-  let parcelId = 141;
-  let owner = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
-  let altarPosition = [7, 7];
+  let parcelId = 11095;
+  let owner = "0x38A1E0Bf2745740C303FE4140397D157818A6e3C";
+  let altarPosition = [15, 0];
 
   let impersonatedSigner: Signer;
 
@@ -99,9 +99,43 @@ describe("Harvesting test", async function () {
     await upgradeRealmTest();
     await upgradeInstallationTest();
     await addFarmInstallations(true);
+
+    await testInstallationFacet.mockCraftInstallation(10);
+    await testRealmFacet.mockEquipInstallation(
+      parcelId,
+      10,
+      altarPosition[0],
+      altarPosition[1]
+    );
   });
 
   describe("Installation in upgrade queue", async () => {
+    it("Should not let a user equip more than 1 maker", async () => {
+      await testInstallationFacet.mockCraftInstallation(59);
+      await testInstallationFacet.mockCraftInstallation(59);
+      await testRealmFacet.mockEquipInstallation(parcelId, 59, 0, 0);
+      await expect(
+        testRealmFacet.mockEquipInstallation(parcelId, 59, 2, 0)
+      ).to.be.revertedWith(
+        "RealmFacet: Maker already equipped or altar not equipped"
+      );
+    });
+    it("Should not let user unequip altar with a maker", async () => {
+      await expect(
+        testRealmFacet.mockUnequipInstallation(
+          parcelId,
+          10,
+          altarPosition[0],
+          altarPosition[1]
+        )
+      ).to.be.revertedWith(
+        "RealmFacet: Cannot unequip altar when there is a maker"
+      );
+    });
+    it("Should unequip a maker", async () => {
+      await testRealmFacet.mockUnequipInstallation(parcelId, 59, 0, 0);
+    });
+
     it("Should not let a user unequip an installation if it is in queue", async () => {
       await testInstallationFacet.mockUpgradeInstallation(
         {
@@ -126,13 +160,6 @@ describe("Harvesting test", async function () {
       ).to.be.revertedWith(
         "RealmFacet: Can't unequip installation in upgrade queue"
       );
-    });
-
-    it("Should not let a user equip more than 1 maker", async () => {
-      await testInstallationFacet.mockCraftInstallation(59);
-      await testInstallationFacet.mockCraftInstallation(59);
-      await testRealmFacet.mockEquipInstallation(parcelId, 59, 0, 0);
-      await testRealmFacet.mockEquipInstallation(parcelId, 59, 2, 0);
     });
   });
 });
