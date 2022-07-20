@@ -5,6 +5,7 @@ import { AlchemicaFacet } from "../../../typechain";
 import { getDiamondSigner } from "../../helperFunctions";
 import { addFarmInstallations } from "../../installation/updates/addFarmInstallations";
 import { alchemicaTotals } from "../../setVars";
+import { setVRF } from "../chores/setVRF";
 import { harvesterUpgrade } from "../upgrades/upgrade-haarvesterReleaseFinal";
 
 export async function deployFarmRelease() {
@@ -37,6 +38,9 @@ export async function deployFarmRelease() {
   //@ts-ignore
   let tx = await alchemicaFacet.setTotalAlchemicas(alchemicaTotals());
   await tx.wait();
+
+  //Update VRF config
+  await setVRF();
 
   return true;
 }
