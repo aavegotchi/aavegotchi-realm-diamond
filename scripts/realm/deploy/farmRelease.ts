@@ -22,7 +22,7 @@ export async function deployFarmRelease() {
 
   if (network.config.chainId === 137 && network.name === "hardhat") {
     console.log("Add test installations");
-    await addFarmInstallations(true);
+    await addFarmInstallations(false);
   } else {
     console.log("Add real installations");
     await addFarmInstallations(false);

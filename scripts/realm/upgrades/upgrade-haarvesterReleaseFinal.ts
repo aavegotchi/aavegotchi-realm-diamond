@@ -135,7 +135,7 @@ export async function harvesterUpgrade() {
     vrfConfig = {
       subId: 114,
       callbackGasLimit: 500_000,
-      requestConfirmations: 64,
+      requestConfirmations: 40,
       numWords: 4,
       keyHash:
         "0x6e099d640cde6de9d40ac749b4b594126b0169747122711109c9985d47751f93",
