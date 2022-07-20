@@ -14,25 +14,29 @@ export async function deployFarmRelease() {
     `Deploying farm release on ${network.name} with Realm Diamond address ${c.realmDiamond}`
   );
 
-  let signer = await getDiamondSigner(c.realmDiamond, ethers, network, true);
-
-  if (network.config.chainId === 137) {
-    console.log("Add installations");
-    await addFarmInstallations(true);
-  }
-
-  console.log("Set alchemica totals");
-  //@ts-expect-error
-  let tx = await alchemicaFacet.setTotalAlchemicas(alchemicaTotals());
-  await tx.wait();
-
   console.log("Run upgrade");
   await harvesterUpgrade();
+
+  let signer = await getDiamondSigner(c.realmDiamond, ethers, network, true);
+
+  if (network.config.chainId === 137 && network.name === "hardhat") {
+    console.log("Add test installations");
+    await addFarmInstallations(true);
+  } else {
+    console.log("Add real installations");
+    await addFarmInstallations(false);
+  }
+
   const alchemicaFacet = (await ethers.getContractAt(
     "AlchemicaFacet",
     c.realmDiamond,
     signer
   )) as AlchemicaFacet;
+
+  console.log("Set alchemica totals");
+  //@ts-ignore
+  let tx = await alchemicaFacet.setTotalAlchemicas(alchemicaTotals());
+  await tx.wait();
 
   return true;
 }
