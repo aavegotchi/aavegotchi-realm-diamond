@@ -154,7 +154,8 @@ library LibAlchemica {
         //step 1 - unequip all harvesters
         //step 2 - claim alchemica balance
         //step 3 - unequip reservoir
-        revert("LibAlchemica: Unclaimed alchemica greater than reservoir capacity");
+
+        revert("LibAlchemica: Claim Alchemica before reducing capacity");
       }
     }
 
@@ -300,14 +301,15 @@ library LibAlchemica {
   function mintAvailableAlchemica(
     uint256 _alchemicaType,
     uint256 _gotchiId,
-    uint256 _owner,
-    uint256 _spill
+    uint256 _ownerAmount,
+    uint256 _spillAmount
   ) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
     IERC20Mintable alchemica = IERC20Mintable(s.alchemicaAddresses[_alchemicaType]);
-    alchemica.mint(alchemicaRecipient(_gotchiId), _owner);
-    alchemica.mint(address(this), _spill);
+
+    if (_ownerAmount > 0) alchemica.mint(alchemicaRecipient(_gotchiId), _ownerAmount);
+    if (_spillAmount > 0) alchemica.mint(address(this), _spillAmount);
   }
 
   function alchemicaRecipient(uint256 _gotchiId) internal view returns (address) {

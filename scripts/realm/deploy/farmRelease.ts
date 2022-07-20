@@ -21,6 +21,11 @@ export async function deployFarmRelease() {
     await addFarmInstallations(true);
   }
 
+  console.log("Set alchemica totals");
+  //@ts-expect-error
+  let tx = await alchemicaFacet.setTotalAlchemicas(alchemicaTotals());
+  await tx.wait();
+
   console.log("Run upgrade");
   await harvesterUpgrade();
   const alchemicaFacet = (await ethers.getContractAt(
@@ -28,11 +33,6 @@ export async function deployFarmRelease() {
     c.realmDiamond,
     signer
   )) as AlchemicaFacet;
-
-  console.log("Set alchemica totals");
-  //@ts-expect-error
-  let tx = await alchemicaFacet.setTotalAlchemicas(alchemicaTotals());
-  await tx.wait();
 
   return true;
 }
