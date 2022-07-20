@@ -60,12 +60,12 @@ export async function setVRF() {
       requestConfirmations: 32,
       numWords: 4,
       keyHash:
-        "0xf86195cf7690c55907b2b611ebb7343a6f649bff128701cc542f0569e2c549da",
+        "0x6e099d640cde6de9d40ac749b4b594126b0169747122711109c9985d47751f93",
     };
 
     tx = await vrfFacet.setConfig(
       requestConfig,
-      "0x3d2341ADb2D31f1c5530cDC622016af293177AE0",
+      "0xAE975071Be8F8eE67addBC1A82488F1C24858067",
       {
         gasPrice: 50000000000,
       }

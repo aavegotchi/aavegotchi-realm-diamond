@@ -39,9 +39,6 @@ export async function deployFarmRelease() {
   let tx = await alchemicaFacet.setTotalAlchemicas(alchemicaTotals());
   await tx.wait();
 
-  //Update VRF config
-  await setVRF();
-
   return true;
 }
 

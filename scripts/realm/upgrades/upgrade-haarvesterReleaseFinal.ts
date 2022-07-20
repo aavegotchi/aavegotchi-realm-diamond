@@ -131,7 +131,7 @@ export async function harvesterUpgrade() {
 
     //matic
   } else {
-    vrfCoordinator = "0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed";
+    vrfCoordinator = "0xAE975071Be8F8eE67addBC1A82488F1C24858067";
     vrfConfig = {
       subId: 114,
       callbackGasLimit: 500_000,
