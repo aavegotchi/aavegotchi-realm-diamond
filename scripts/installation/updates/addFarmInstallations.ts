@@ -3,26 +3,20 @@ import {
   installationTypes,
   installationTypesTest,
 } from "../../../data/installations/farming";
-import { InstallationAdminFacet, InstallationFacet } from "../../../typechain";
+import { InstallationAdminFacet } from "../../../typechain";
 
 import { outputInstallation } from "../../realm/realmHelpers";
 import { gasPrice } from "../helperFunctions";
-import { getDiamondSigner } from "../../helperFunctions";
 import { varsForNetwork } from "../../../constants";
+import { LedgerSigner } from "@anders-t/ethers-ledger";
 
 export async function addFarmInstallations(test: boolean) {
   const c = await varsForNetwork(ethers);
-  const signer = await getDiamondSigner(
-    c.installationDiamond,
-    ethers,
-    network,
-    true
-  );
 
   const installationFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
     c.installationDiamond,
-    signer
+    new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0")
   )) as InstallationAdminFacet;
 
   let farming = [];
@@ -33,6 +27,7 @@ export async function addFarmInstallations(test: boolean) {
     farming = installationTypes.map((val) => outputInstallation(val));
   }
 
+  console.log("Farming:", farming);
   const tx = await installationFacet.addInstallationTypes(farming, {
     gasPrice: gasPrice,
   });

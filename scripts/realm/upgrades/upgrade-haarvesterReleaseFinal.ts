@@ -153,21 +153,21 @@ export async function harvesterUpgrade() {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: c.realmDiamond,
     facetsAndAddSelectors: realmJoined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
     initCalldata: calldata,
     initAddress: c.realmDiamond,
   };
 
-  await run("deployUpgrade", realmArgs);
+  // await run("deployUpgrade", realmArgs);
 
-  console.log("installation diamond:", c.installationDiamond);
+  console.log("Deploying installation diamond:", c.installationDiamond);
 
   const installationArgs: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: c.installationDiamond,
     facetsAndAddSelectors: installationJoined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
     initCalldata: "0x",
     initAddress: ethers.constants.AddressZero,
