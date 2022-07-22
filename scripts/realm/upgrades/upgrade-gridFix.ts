@@ -5,21 +5,13 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
-import { VRFFacet__factory } from "../../../typechain";
-import { VRFFacetInterface } from "../../../typechain/VRFFacet";
-
-export interface VrfConfig {
-  subId: number;
-  callbackGasLimit: number;
-  requestConfirmations: number;
-  numWords: number;
-  keyHash: string;
-}
+import { RealmGridFacet, RealmFacet } from "../../../typechain";
 
 export async function harvesterUpgrade() {
   const c = await varsForNetwork(ethers);
 
-  const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
+  const diamondUpgrader = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
+  const signer = await ethers.getSigner(diamondUpgrader);
 
   const requestConfig =
     "(uint64 subId, uint32 callbackGasLimit, uint16 requestConfirmations, uint32 numWords, bytes32 keyHash)";
@@ -49,6 +41,22 @@ export async function harvesterUpgrade() {
   };
 
   await run("deployUpgrade", realmArgs);
+
+  // Fix known grid problem
+  const realmFacet = (await ethers.getContractAt(
+    "RealmFacet",
+    c.realmDiamond,
+    signer
+  )) as RealmFacet;
+  const realmGridFacet = (await ethers.getContractAt(
+    "RealmGridFacet",
+    c.realmDiamond,
+    signer
+  )) as RealmGridFacet;
+  let tx = await realmFacet.fixGrid(49205, 0, [7, 7], [7, 8], false);
+  console.log("Fixed grid tx:", tx.hash);
+  console.log("new grid:");
+  console.log(await realmGridFacet.getReasonableGrid(49205, 0));
 }
 
 if (require.main === module) {
