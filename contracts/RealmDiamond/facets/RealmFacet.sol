@@ -246,6 +246,27 @@ contract RealmFacet is Modifiers {
     emit UnequipTile(_realmId, _tileId, _x, _y);
   }
 
+  /// @notice Allow a parcel owner to move a tile
+  /// @param _realmId The identifier of the parcel which the tile is being moved on
+  /// @param _tileId The identifier of the tile being moved
+  /// @param _x0 The x(horizontal) coordinate of the tile
+  /// @param _y0 The y(vertical) coordinate of the tile
+  /// @param _x1 The x(horizontal) coordinate of the tile to move to
+  /// @param _y1 The y(vertical) coordinate of the tile to move to
+  function moveTile(
+    uint256 _realmId,
+    uint256 _tileId,
+    uint256 _x0,
+    uint256 _y0,
+    uint256 _x1,
+    uint256 _y1
+  ) external onlyParcelOwner(_realmId) gameActive canBuild {
+    LibRealm.removeTile(_realmId, _tileId, _x0, _y0);
+    emit UnequipTile(_realmId, _tileId, _x0, _y0);
+    LibRealm.placeTile(_realmId, _tileId, _x1, _y1);
+    emit EquipTile(_realmId, _tileId, _x1, _y1);
+  }
+
   function upgradeInstallation(
     uint256 _realmId,
     uint256 _prevInstallationId,
@@ -266,5 +287,32 @@ contract RealmFacet is Modifiers {
 
   function subUpgradeQueueLength(uint256 _realmId) external onlyInstallationDiamond {
     s.parcels[_realmId].upgradeQueueLength--;
+  }
+
+  function fixGrid(
+    uint256 _realmId,
+    uint256 _installationId,
+    uint256[] memory _x,
+    uint256[] memory _y,
+    bool tile
+  ) external onlyOwner {
+    require(_x.length == _y.length, "RealmFacet: _x and _y must be the same length");
+    Parcel storage parcel = s.parcels[_realmId];
+    for (uint256 i; i < _x.length; i++) {
+      require(_x[i] < 64 && _y[i] < 64, "RealmFacet: _x and _y must be less than 64");
+      if (!tile) {
+        parcel.buildGrid[_x[i]][_y[i]] = _installationId;
+      } else {
+        parcel.tileGrid[_x[i]][_y[i]] = _installationId;
+      }
+    }
+  }
+
+  function buildingFrozen() external view returns (bool) {
+    return s.freezeBuilding;
+  }
+
+  function setFreezeBuilding(bool _freezeBuilding) external onlyOwner {
+    s.freezeBuilding = _freezeBuilding;
   }
 }
