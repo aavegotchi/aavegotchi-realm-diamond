@@ -21,6 +21,7 @@ library LibInstallation {
   );
   event UpgradeFinalized(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _newInstallationId);
   event UpgradeQueued(address indexed _owner, uint256 indexed _realmId, uint256 indexed _queueIndex);
+  event UpgradeQueueFinalized(address indexed _owner, uint256 indexed _realmId, uint256 indexed _queueIndex);
 
   function _equipInstallation(
     address _owner,
@@ -181,5 +182,46 @@ library LibInstallation {
       _upgradeQueue.installationId
     );
     emit UpgradeQueued(_upgradeQueue.owner, _upgradeQueue.parcelId, upgradeIdIndex);
+  }
+
+  function finalizeUpgrade(address _owner, uint256 index) internal returns (bool) {
+    InstallationAppStorage storage s = LibAppStorageInstallation.diamondStorage();
+
+    if (s.upgradeComplete[index]) return true;
+    uint40 readyBlock = s.upgradeQueue[index].readyBlock;
+    uint256 parcelId = s.upgradeQueue[index].parcelId;
+    uint256 installationId = s.upgradeQueue[index].installationId;
+    uint256 coordinateX = s.upgradeQueue[index].coordinateX;
+    uint256 coordinateY = s.upgradeQueue[index].coordinateY;
+
+    // check that upgrade is ready
+    if (block.number >= readyBlock) {
+      // burn old installation
+      LibInstallation._unequipInstallation(_owner, parcelId, installationId);
+      // mint new installation
+      uint256 nextLevelId = s.installationTypes[installationId].nextLevelId;
+      LibERC1155._safeMint(_owner, nextLevelId, 1, true, index);
+      // equip new installation
+      LibInstallation._equipInstallation(_owner, parcelId, nextLevelId);
+
+      RealmDiamond realm = RealmDiamond(s.realmDiamond);
+      realm.upgradeInstallation(parcelId, installationId, nextLevelId, coordinateX, coordinateY);
+
+      // update updateQueueLength
+      realm.subUpgradeQueueLength(parcelId);
+
+      // clean unique hash
+      bytes32 uniqueHash = keccak256(abi.encodePacked(parcelId, coordinateX, coordinateY, installationId));
+      s.upgradeHashes[uniqueHash] = 0;
+
+      s.upgradeComplete[index] = true;
+
+      LibInstallation._removeFromParcelIdToUpgradeIds(parcelId, index);
+
+      emit UpgradeFinalized(parcelId, coordinateX, coordinateY, nextLevelId);
+      emit UpgradeQueueFinalized(_owner, parcelId, index);
+      return true;
+    }
+    return false;
   }
 }
