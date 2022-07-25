@@ -59,7 +59,7 @@ contract InstallationUpgradeFacet is Modifiers {
     require(_gltr <= nextInstallation.craftTime, "InstallationUpgradeFacet: Too much GLTR");
 
     require(
-      IERC20(s.gltr).transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, (uint256(_gltr) * 1e18)),
+      IERC20(s.gltr).transferFrom(LibMeta.msgSender(), 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, (uint256(_gltr) * 1e18)),
       "InstallationUpgradeFacet: Failed GLTR transfer"
     ); //should revert if user doesnt have enough GLTR
 
