@@ -88,11 +88,11 @@ contract InstallationUpgradeFacet is Modifiers {
 
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_upgradeIndex)), _signature, s.backendPubKey),
-      "InstallationAdminFacet: Invalid signature"
+      "InstallationUpgradeFacet: Invalid signature"
     );
 
     //todo: check access rights
-    require(msg.sender == queue.owner, "InstallationUpgradeFacet: Not owner");
+    require(LibMeta.msgSender() == queue.owner, "InstallationUpgradeFacet: Not owner");
 
     //handle underflow / overspend
     uint256 nextLevelId = s.installationTypes[queue.installationId].nextLevelId;
@@ -100,7 +100,7 @@ contract InstallationUpgradeFacet is Modifiers {
 
     //burn GLTR
     uint256 gltrAmount = uint256(_blocks) * 1e18;
-    IERC20(s.gltr).transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, gltrAmount);
+    IERC20(s.gltr).transferFrom(LibMeta.msgSender(), 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, gltrAmount);
 
     //reduce the blocks
     queue.readyBlock -= _blocks;
