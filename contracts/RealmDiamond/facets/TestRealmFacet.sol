@@ -89,7 +89,7 @@ contract TestRealmFacet is Modifiers {
   /// @param _gotchiId Identifier of Aavegotchi to use for alchemica collecction/claiming
   function mockClaimAvailableAlchemica(uint256 _realmId, uint256 _gotchiId) external {
     //1 - Empty Reservoir Access Right
-    LibRealm.verifyAccessRight(_realmId, _gotchiId, 1);
+    LibRealm.verifyAccessRight(_realmId, _gotchiId, 1, LibMeta.msgSender());
     LibAlchemica.claimAvailableAlchemica(_realmId, _gotchiId);
   }
 

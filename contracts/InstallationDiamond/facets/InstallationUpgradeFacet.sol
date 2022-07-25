@@ -11,20 +11,11 @@ import {InstallationAdminFacet} from "./InstallationAdminFacet.sol";
 import {LibInstallation} from "../../libraries/LibInstallation.sol";
 import {LibERC1155} from "../../libraries/LibERC1155.sol";
 import {LibERC998} from "../../libraries/LibERC998.sol";
+import {LibMeta} from "../../libraries/LibMeta.sol";
 
 contract InstallationUpgradeFacet is Modifiers {
-  event UpgradeInitiated(
-    uint256 indexed _realmId,
-    uint256 _coordinateX,
-    uint256 _coordinateY,
-    uint256 blockInitiated,
-    uint256 readyBlock,
-    uint256 installationId
-  );
-
   event UpgradeFinalized(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _newInstallationId);
 
-  event UpgradeQueued(address indexed _owner, uint256 indexed _realmId, uint256 indexed _queueIndex);
   event UpgradeQueueFinalized(address indexed _owner, uint256 indexed _realmId, uint256 indexed _queueIndex);
 
   event UpgradeTimeReduced(uint256 indexed _queueId, uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint40 _blocksReduced);
@@ -32,121 +23,55 @@ contract InstallationUpgradeFacet is Modifiers {
   /// @notice Allow a user to upgrade an installation in a parcel
   /// @dev Will throw if the caller is not the owner of the parcel in which the installation is installed
   /// @param _upgradeQueue A struct containing details about the queue which contains the installation to upgrade
+  /// @param _gotchiId The id of the gotchi which is upgrading the installation
   ///@param _signature API signature
   ///@param _gltr Amount of GLTR to use, can be 0
   function upgradeInstallation(
-    UpgradeQueue calldata _upgradeQueue,
+    UpgradeQueue memory _upgradeQueue,
+    uint256 _gotchiId,
     bytes memory _signature,
     uint40 _gltr
   ) external {
+    // Check signature
     require(
       LibSignature.isValid(
-        keccak256(abi.encodePacked(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId)),
+        keccak256(
+          abi.encodePacked(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId, _gotchiId)
+        ),
         _signature,
         s.backendPubKey
       ),
       "InstallationAdminFacet: Invalid signature"
     );
-    // check owner
-    require(IERC721(s.realmDiamond).ownerOf(_upgradeQueue.parcelId) == _upgradeQueue.owner, "InstallationFacet: Not owner");
-    // check coordinates
+
+    // Storing variables in memory needed for validation and execution
+    uint256 nextLevelId = s.installationTypes[_upgradeQueue.installationId].nextLevelId;
+    InstallationType memory nextInstallation = s.installationTypes[nextLevelId];
     RealmDiamond realm = RealmDiamond(s.realmDiamond);
 
-    //check upgradeQueueCapacity
-    require(
-      realm.getParcelUpgradeQueueCapacity(_upgradeQueue.parcelId) > realm.getParcelUpgradeQueueLength(_upgradeQueue.parcelId),
-      "InstallationFacet: UpgradeQueue full"
-    );
+    // Validation checks
+    LibInstallation.checkAndUpdateUniqueHash(_upgradeQueue);
+    LibInstallation.checkUpgrade(_upgradeQueue, _gotchiId, realm);
 
-    realm.checkCoordinates(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId);
-
-    // check unique hash
-    bytes32 uniqueHash = keccak256(
-      abi.encodePacked(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId)
-    );
-
-    //The same upgrade cannot be queued twice
-    require(s.upgradeHashes[uniqueHash] == 0, "InstallationFacet: Upgrade hash not unique");
-
-    s.upgradeHashes[uniqueHash] = _upgradeQueue.parcelId;
-
-    //current installation
-    InstallationType memory prevInstallation = s.installationTypes[_upgradeQueue.installationId];
-
-    //next level
-    InstallationType memory nextInstallation = s.installationTypes[prevInstallation.nextLevelId];
-
-    // check altar requirement
-    //altar prereq is 0
-    if (nextInstallation.prerequisites[0] > 0) {
-      uint256 equippedAltarId = RealmDiamond(s.realmDiamond).getAltarId(_upgradeQueue.parcelId);
-      uint256 equippedAltarLevel = s.installationTypes[equippedAltarId].level;
-      require(equippedAltarLevel >= nextInstallation.prerequisites[0], "LibAlchemica: Altar Tech Tree Reqs not met");
-    }
-
-    //@todo: check for lodge prereq once lodges are implemented
-
-    //take the required alchemica
-    address[4] memory alchemicaAddresses = realm.getAlchemicaAddresses();
-    LibItems._splitAlchemica(nextInstallation.alchemicaCost, alchemicaAddresses);
-
-    require(prevInstallation.nextLevelId > 0, "InstallationFacet: Maximum upgrade reached");
-    require(prevInstallation.installationType == nextInstallation.installationType, "InstallationFacet: Wrong installation type");
-    require(prevInstallation.alchemicaType == nextInstallation.alchemicaType, "InstallationFacet: Wrong alchemicaType");
-    require(prevInstallation.level == nextInstallation.level - 1, "InstallationFacet: Wrong installation level");
-
-    uint256 gltrAmount = uint256(_gltr) * 1e18;
-    IERC20(s.gltr).transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, gltrAmount); //should revert if user doesnt have enough GLTR
-
+    // Take the required alchemica and GLTR
+    LibItems._splitAlchemica(nextInstallation.alchemicaCost, realm.getAlchemicaAddresses());
     //prevent underflow if user sends too much GLTR
-    if (_gltr > nextInstallation.craftTime) revert("InstallationFacet: Too much GLTR");
+    require(_gltr <= nextInstallation.craftTime, "InstallationUpgradeFacet: Too much GLTR");
 
-    //Confirm upgrade immediately
+    require(
+      IERC20(s.gltr).transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, (uint256(_gltr) * 1e18)),
+      "InstallationUpgradeFacet: Failed GLTR transfer"
+    ); //should revert if user doesnt have enough GLTR
+
     if (nextInstallation.craftTime - _gltr == 0) {
-      LibInstallation._unequipInstallation(_upgradeQueue.owner, _upgradeQueue.parcelId, _upgradeQueue.installationId);
-      // mint new installation
-      uint256 nextLevelId = s.installationTypes[_upgradeQueue.installationId].nextLevelId;
-      //mint without queue
-      LibERC1155._safeMint(_upgradeQueue.owner, nextLevelId, 1, false, 0);
-      // equip new installation
-      LibInstallation._equipInstallation(_upgradeQueue.owner, _upgradeQueue.parcelId, nextLevelId);
-
-      realm.upgradeInstallation(
-        _upgradeQueue.parcelId,
-        _upgradeQueue.installationId,
-        prevInstallation.nextLevelId,
-        _upgradeQueue.coordinateX,
-        _upgradeQueue.coordinateY
-      );
-
+      //Confirm upgrade immediately
       emit UpgradeTimeReduced(0, _upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _gltr);
+      LibInstallation.upgradeInstallation(_upgradeQueue, nextLevelId, realm);
     } else {
-      UpgradeQueue memory upgrade = UpgradeQueue(
-        _upgradeQueue.owner,
-        _upgradeQueue.coordinateX,
-        _upgradeQueue.coordinateY,
-        uint40(block.number) + nextInstallation.craftTime - _gltr,
-        false,
-        _upgradeQueue.parcelId,
-        _upgradeQueue.installationId
-      );
-      s.upgradeQueue.push(upgrade);
-
-      // update upgradeQueueLength
-      realm.addUpgradeQueueLength(_upgradeQueue.parcelId);
-
-      // Add to indexing helper to help for efficient getter
-      s.parcelIdToUpgradeIds[_upgradeQueue.parcelId].push(s.upgradeQueue.length - 1);
-
-      emit UpgradeInitiated(
-        _upgradeQueue.parcelId,
-        _upgradeQueue.coordinateX,
-        _upgradeQueue.coordinateY,
-        block.number,
-        uint40(block.number) + nextInstallation.craftTime - _gltr,
-        _upgradeQueue.installationId
-      );
-      emit UpgradeQueued(_upgradeQueue.owner, _upgradeQueue.parcelId, s.upgradeQueue.length - 1);
+      // Set the ready block and claimed flag before adding to the queue
+      _upgradeQueue.readyBlock = uint40(block.number) + nextInstallation.craftTime - _gltr;
+      _upgradeQueue.claimed = false;
+      LibInstallation.addToUpgradeQueue(_upgradeQueue, realm);
     }
   }
 
