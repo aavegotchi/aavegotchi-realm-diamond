@@ -25,6 +25,7 @@ contract InstallationAdminFacet is Modifiers {
   event DeprecateInstallation(uint256 _installationId);
   event SetInstallationUnequipType(uint256 _installationId, uint256 _unequipType);
   event EditInstallationUnequipType(uint256 _installationId);
+  event UpgradeCancelled(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _installationId);
 
   /// @notice Allow the Diamond owner to deprecate an installation
   /// @dev Deprecated installations cannot be crafted by users
@@ -183,5 +184,28 @@ contract InstallationAdminFacet is Modifiers {
       //fix
       LibERC1155.addToOwner(s.realmDiamond, newId, 1);
     }
+  }
+
+  ///@notice Used if a parcel has an upgrade that must be deleted.
+  function deleteBuggedUpgrades(
+    uint256 _parcelId,
+    uint256 _coordinateX,
+    uint256 _coordinateY,
+    uint256 _installationId,
+    uint256 _upgradeIndex
+  ) external onlyOwner {
+    // check unique hash
+    bytes32 uniqueHash = keccak256(abi.encodePacked(_parcelId, _coordinateX, _coordinateY, _installationId));
+    s.upgradeHashes[uniqueHash] = 0;
+
+    delete s.upgradeQueue[_upgradeIndex];
+
+    RealmDiamond realmDiamond = RealmDiamond(s.realmDiamond);
+    realmDiamond.subUpgradeQueueLength(_parcelId);
+
+    //@todo: Remove from parcel if needed
+    // LibInstallation._removeFromParcelIdToUpgradeIds(_parcelid, _upgradeIndex);
+
+    emit UpgradeCancelled(_parcelId, _coordinateX, _coordinateY, _installationId);
   }
 }

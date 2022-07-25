@@ -207,8 +207,8 @@ library LibAlchemica {
   function addHarvesterAllowed(uint256 _realmSize, uint16 _harvesterCount) internal pure returns (bool) {
     if (_realmSize == 0) return _harvesterCount < 4;
     else if (_realmSize == 1) return _harvesterCount < 16;
-    else if (_realmSize == 2) return _harvesterCount < 128;
-    else if (_realmSize == 3) return _harvesterCount < 256;
+    else if (_realmSize == 2 || _realmSize == 3) return _harvesterCount < 128;
+    else if (_realmSize == 4) return _harvesterCount < 256;
     else return false;
   }
 
