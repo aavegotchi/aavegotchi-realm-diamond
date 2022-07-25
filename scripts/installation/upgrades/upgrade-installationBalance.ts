@@ -14,17 +14,20 @@ import {
   InstallationUpgradeFacet,
 } from "../../../typechain";
 import { InstallationAdminFacetInterface } from "../../../typechain/InstallationAdminFacet";
-import { diamondOwner, impersonate } from "../helperFunctions";
+import { diamondOwner, gasPrice, impersonate } from "../helperFunctions";
 
 export async function upgrade() {
   const diamondUpgrader = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "InstallationAdminFacet",
-      addSelectors: [
-        `function deleteBuggedUpgrades(uint256 _parcelId, uint256 _coordinateX,uint256 _coordinateY,uint256 _installationId, uint256 _upgradeIndex) external`,
-      ],
+      facetName: "InstallationFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
+    {
+      facetName: "InstallationUpgradeFacet",
+      addSelectors: [],
       removeSelectors: [],
     },
   ];
@@ -37,15 +40,15 @@ export async function upgrade() {
     InstallationAdminFacet__factory.abi
   ) as InstallationAdminFacetInterface;
 
-  const parcelId = "24557";
+  const parcelId = "6987";
 
-  const calldata = iface.encodeFunctionData("deleteBuggedUpgrades", [
-    parcelId,
-    "12",
-    "30",
-    "11",
-    "5131",
-  ]);
+  // const calldata = iface.encodeFunctionData("deleteBuggedUpgrades", [
+  //   parcelId,
+  //   "12",
+  //   "30",
+  //   "11",
+  //   "5131",
+  // ]);
 
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
@@ -53,11 +56,11 @@ export async function upgrade() {
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,
-    initAddress: c.installationDiamond,
-    initCalldata: calldata,
+    // initAddress: c.installationDiamond,
+    // initCalldata: calldata,
   };
 
-  await run("deployUpgrade", args);
+  // await run("deployUpgrade", args);
 
   const installationsUpgradeFacet = (await ethers.getContractAt(
     "InstallationUpgradeFacet",
@@ -79,6 +82,15 @@ export async function upgrade() {
     );
   }
 
+  const missingAltar = {
+    _parcelId: parcelId,
+    _oldAltarId: "11",
+    _newAltarId: "12",
+  };
+
+  //  const tx =  await installationAdminFacet.fixMissingAltars([missingAltar], {
+  //     gasPrice: gasPrice,
+  //   });
   const installationFacet = (await ethers.getContractAt(
     "InstallationFacet",
     c.installationDiamond
@@ -89,13 +101,22 @@ export async function upgrade() {
     parcelId
   );
 
-  // console.log("balance:", balance);
+  console.log("balances:", balance);
 
-  const upgrades = await installationsUpgradeFacet.getUserUpgradeQueueNew(
-    "0x42A6C8cF7001bB08D22145Ef8a1E58126b2Ea2c8"
-  );
+  // const upgrades = await installationsUpgradeFacet.getUserUpgradeQueueNew(
+  //   "0xea651e5b72751f1d2e36255f5f59792c84cd856f"
+  // );
 
-  console.log("upgrades:", upgrades);
+  // console.log("upgrades:", upgrades);
+
+  // const upgradeInfo = await installationsUpgradeFacet.getUpgradeQueueId(
+  //   "10232"
+  // );
+  // console.log("info:", upgradeInfo);
+
+  await installationsUpgradeFacet.finalizeUpgrades(["10232"], {
+    gasPrice: gasPrice,
+  });
 
   // const adminFacet = (await ethers.getContractAt(
   //   "InstallationAdminFacet",
