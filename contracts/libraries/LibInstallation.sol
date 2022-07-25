@@ -89,7 +89,7 @@ library LibInstallation {
     InstallationAppStorage storage s = LibAppStorageInstallation.diamondStorage();
 
     // check owner
-    require(IERC721(address(_realmDiamond)).ownerOf(_upgradeQueue.parcelId) == _upgradeQueue.owner, "InstallationFacet: Not owner");
+    require(IERC721(address(_realmDiamond)).ownerOf(_upgradeQueue.parcelId) == _upgradeQueue.owner, "LibInstallation: Not owner");
     // check coordinates
 
     // verify access right
@@ -98,7 +98,7 @@ library LibInstallation {
     //check upgradeQueueCapacity
     require(
       _realmDiamond.getParcelUpgradeQueueCapacity(_upgradeQueue.parcelId) > _realmDiamond.getParcelUpgradeQueueLength(_upgradeQueue.parcelId),
-      "InstallationFacet: UpgradeQueue full"
+      "LibInstallation: UpgradeQueue full"
     );
     _realmDiamond.checkCoordinates(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId);
 
@@ -113,13 +113,13 @@ library LibInstallation {
     if (nextInstallation.prerequisites[0] > 0) {
       uint256 equippedAltarId = _realmDiamond.getAltarId(_upgradeQueue.parcelId);
       uint256 equippedAltarLevel = s.installationTypes[equippedAltarId].level;
-      require(equippedAltarLevel >= nextInstallation.prerequisites[0], "LibAlchemica: Altar Tech Tree Reqs not met");
+      require(equippedAltarLevel >= nextInstallation.prerequisites[0], "LibInstallation: Altar Tech Tree Reqs not met");
     }
 
-    require(prevInstallation.nextLevelId > 0, "InstallationFacet: Maximum upgrade reached");
-    require(prevInstallation.installationType == nextInstallation.installationType, "InstallationFacet: Wrong installation type");
-    require(prevInstallation.alchemicaType == nextInstallation.alchemicaType, "InstallationFacet: Wrong alchemicaType");
-    require(prevInstallation.level == nextInstallation.level - 1, "InstallationFacet: Wrong installation level");
+    require(prevInstallation.nextLevelId > 0, "LibInstallation: Maximum upgrade reached");
+    require(prevInstallation.installationType == nextInstallation.installationType, "LibInstallation: Wrong installation type");
+    require(prevInstallation.alchemicaType == nextInstallation.alchemicaType, "LibInstallation: Wrong alchemicaType");
+    require(prevInstallation.level == nextInstallation.level - 1, "LibInstallation: Wrong installation level");
 
     //@todo: check for lodge prereq once lodges are implemented
   }
@@ -133,7 +133,7 @@ library LibInstallation {
       abi.encodePacked(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId)
     );
 
-    require(s.upgradeHashes[uniqueHash] == 0, "InstallationFacet: Upgrade hash not unique");
+    require(s.upgradeHashes[uniqueHash] == 0, "LibInstallation: Upgrade hash not unique");
 
     s.upgradeHashes[uniqueHash] = _upgradeQueue.parcelId;
   }

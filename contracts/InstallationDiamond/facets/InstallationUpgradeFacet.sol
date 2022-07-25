@@ -14,10 +14,6 @@ import {LibERC998} from "../../libraries/LibERC998.sol";
 import {LibMeta} from "../../libraries/LibMeta.sol";
 
 contract InstallationUpgradeFacet is Modifiers {
-  event UpgradeFinalized(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _newInstallationId);
-
-  event UpgradeQueueFinalized(address indexed _owner, uint256 indexed _realmId, uint256 indexed _queueIndex);
-
   event UpgradeTimeReduced(uint256 indexed _queueId, uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint40 _blocksReduced);
 
   /// @notice Allow a user to upgrade an installation in a parcel
