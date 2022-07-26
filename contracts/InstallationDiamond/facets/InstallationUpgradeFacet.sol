@@ -37,7 +37,7 @@ contract InstallationUpgradeFacet is Modifiers {
         _signature,
         s.backendPubKey
       ),
-      "InstallationAdminFacet: Invalid signature"
+      "InstallationUpgradeFacet: Invalid signature"
     );
 
     // Storing variables in memory needed for validation and execution

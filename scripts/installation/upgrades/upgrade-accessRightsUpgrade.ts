@@ -6,7 +6,7 @@ import {
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
 
-export async function updateInstallationUpgradeFacet() {
+export async function upgradeInstallation() {
   const diamondUpgrader = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
 
   const UpgradeQueue =
@@ -39,7 +39,7 @@ export async function updateInstallationUpgradeFacet() {
 }
 
 if (require.main === module) {
-  updateInstallationUpgradeFacet()
+  upgradeInstallation()
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {
