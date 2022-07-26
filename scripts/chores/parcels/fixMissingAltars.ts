@@ -29,10 +29,12 @@ export async function syncParcels() {
   //   throw Error("Incorrect network selected");
   // }
 
+  const currentBlock = await ethers.provider.getBlockNumber();
+
   const c = await varsForNetwork(ethers);
 
   // const parcelIds = ["46069", "40437", "40587"];
-  const parcelIds = ["19682"];
+  const parcelIds = ["545"];
 
   const installationsUpgradeFacet = (await ethers.getContractAt(
     "InstallationUpgradeFacet",
@@ -80,41 +82,52 @@ export async function syncParcels() {
       parcelOwner
     );
 
+    console.log(
+      "Pending upgrades:",
+      userQueue.output_.filter((val) => val.parcelId.toString() === parcelId)
+    );
+
     let i = 0;
     for await (const upgrade of userQueue.output_) {
+      const upgradeIndex = userQueue.indexes_[i];
+
       const installationId = upgrade.installationId.toString();
-      console.log("installation id:", installationId);
 
       //Only altars
-      if (Number(installationId) <= 18) {
-        const balances = await installationFacet.installationBalancesOfToken(
-          c.realmDiamond,
-          parcelId
+      // if (Number(installationId) <= 18) {
+      const balances = await installationFacet.installationBalancesOfToken(
+        c.realmDiamond,
+        parcelId
+      );
+
+      const foundBalance = balances.filter(
+        (val) => val.installationId.toString() === installationId
+      );
+
+      if (upgrade.readyBlock > currentBlock) {
+        console.log("Upgrade not ready yet, skipping.");
+        continue;
+      }
+
+      if (foundBalance) {
+        console.log(
+          `Parcel has a balance of token ${installationId}. Upgrade ${upgradeIndex} can likely be executed.`
+        );
+      } else {
+        console.log(
+          `Parcel does NOT have a balance of token ${installationId}. Upgrade ${upgradeIndex} cannot be executed.`
         );
 
-        const foundBalance = balances.filter(
-          (val) => val.installationId.toString() === installationId
-        );
-        const upgradeIndex = userQueue.indexes_[i];
-
-        if (foundBalance) {
-          console.log(
-            `Parcel has a balance of token ${installationId}. Upgrade ${upgradeIndex} can likely be executed.`
-          );
-        } else {
-          console.log(
-            `Parcel does NOT have a balance of token ${installationId}. Upgrade ${upgradeIndex} cannot be executed.`
-          );
-
-          const missingAltar = {
-            _parcelId: parcelId,
-            _oldAltarId: "11",
-            _newAltarId: "12",
-          };
-        }
+        const missingAltar = {
+          _parcelId: parcelId,
+          _oldAltarId: "11",
+          _newAltarId: "12",
+        };
       }
       i++;
     }
+
+    // }
   }
 
   // console.log("user upgrades:", userUpgrades);
