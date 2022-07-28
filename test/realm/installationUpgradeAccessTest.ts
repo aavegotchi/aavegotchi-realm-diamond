@@ -163,8 +163,36 @@ describe("Installation Upgrade Access Rights test", async function () {
   });
 
   describe("Installation Test", async () => {
-    it("Should upgrade an installation instantly with GLTR", async () => {});
-    it("Should add an installation to upgrade queue", async () => {});
+    it("Should upgrade an installation instantly with GLTR", async () => {
+      await testInstallationFacet.mockUpgradeInstallation(
+        {
+          owner: owner,
+          coordinateX: altarPosition[0],
+          coordinateY: altarPosition[1],
+          readyBlock: 0,
+          claimed: false,
+          parcelId: parcelId,
+          installationId: 11,
+        },
+        gotchiId,
+        1_000_000_000_000
+      );
+    });
+    it("Should add an installation to upgrade queue", async () => {
+      await testInstallationFacet.mockUpgradeInstallation(
+        {
+          owner: owner,
+          coordinateX: altarPosition[0],
+          coordinateY: altarPosition[1],
+          readyBlock: 0,
+          claimed: false,
+          parcelId: parcelId,
+          installationId: 12,
+        },
+        gotchiId,
+        0
+      );
+    });
     it("Should be able to finalize an installation upgrade", async () => {});
     it("Should revert if the start position is wrong", async () => {});
     it("Non-owner should not be able to upgrade with access right 0", async () => {});

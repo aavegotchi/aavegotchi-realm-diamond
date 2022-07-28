@@ -95,11 +95,6 @@ library LibInstallation {
     // verify access right
     _realmDiamond.verifyAccessRight(_upgradeQueue.parcelId, _gotchiId, 6, LibMeta.msgSender());
 
-    //check upgradeQueueCapacity
-    require(
-      _realmDiamond.getParcelUpgradeQueueCapacity(_upgradeQueue.parcelId) > _realmDiamond.getParcelUpgradeQueueLength(_upgradeQueue.parcelId),
-      "LibInstallation: UpgradeQueue full"
-    );
     _realmDiamond.checkCoordinates(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId);
 
     //current installation
@@ -138,6 +133,8 @@ library LibInstallation {
     s.upgradeHashes[uniqueHash] = _upgradeQueue.parcelId;
   }
 
+  function checkUpgradeQueueLength(uint256 _parcelId, RealmDiamond _realmDiamond) internal {}
+
   function upgradeInstallation(
     UpgradeQueue memory _upgradeQueue,
     uint256 _nextLevelId,
@@ -163,7 +160,11 @@ library LibInstallation {
 
   function addToUpgradeQueue(UpgradeQueue memory _upgradeQueue, RealmDiamond _realmDiamond) internal {
     InstallationAppStorage storage s = LibAppStorageInstallation.diamondStorage();
-
+    //check upgradeQueueCapacity
+    require(
+      _realmDiamond.getParcelUpgradeQueueCapacity(_upgradeQueue.parcelId) > _realmDiamond.getParcelUpgradeQueueLength(_upgradeQueue.parcelId),
+      "LibInstallation: UpgradeQueue full"
+    );
     s.upgradeQueue.push(_upgradeQueue);
 
     // update upgradeQueueLength
