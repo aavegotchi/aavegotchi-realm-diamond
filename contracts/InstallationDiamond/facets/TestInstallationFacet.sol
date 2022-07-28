@@ -40,8 +40,8 @@ contract TestInstallationFacet is Modifiers {
     LibInstallation.checkAndUpdateUniqueHash(_upgradeQueue);
     LibInstallation.checkUpgrade(_upgradeQueue, _gotchiId, realm);
 
-    //prevent underflow if user sends too much GLTR
-    require(_gltr <= nextInstallation.craftTime, "InstallationUpgradeFacet: Too much GLTR");
+    // For easier testing, we min gltr instead of reverting
+    _gltr = nextInstallation.craftTime < _gltr ? nextInstallation.craftTime : _gltr;
 
     if (nextInstallation.craftTime - _gltr == 0) {
       //Confirm upgrade immediately

@@ -16,8 +16,8 @@ export async function upgradeRealmTest() {
     {
       facetName: "TestRealmFacet",
       addSelectors: [
-        `function mockEquipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y) external`,
-        `function mockUnequipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y) external`,
+        `function mockEquipInstallation(uint256 _realmId, uint256 _gotchiId, uint256 _installationId, uint256 _x, uint256 _y) external`,
+        `function mockUnequipInstallation(uint256 _realmId, uint256 _gotchiId, uint256 _installationId, uint256 _x, uint256 _y) external`,
         `function mockStartSurveying(uint256 _realmId) external`,
         `function mockRawFulfillRandomWords(uint256 tokenId, uint256 surveyingRound, uint256 seed) external`,
         `function mockClaimAvailableAlchemica(uint256 _realmId, uint256 _gotchiId) external`,

@@ -124,16 +124,26 @@ contract InstallationUpgradeFacet is Modifiers {
   /// @return output_ An array of structs, each representing a pending craft queue
   /// @return indexes_ An array of IDs, to be used in the new finalizeUpgrades() function
   function getUserUpgradeQueue(address _owner) external view returns (UpgradeQueue[] memory output_, uint256[] memory indexes_) {
-    uint256 length = s.upgradeQueue.length;
-    output_ = new UpgradeQueue[](length);
-    indexes_ = new uint256[](length);
+    RealmDiamond realm = RealmDiamond(s.realmDiamond);
+    uint256[] memory tokenIds = realm.tokenIdsOfOwner(_owner);
+
+    // Only return up to the first 500 upgrades.
+    output_ = new UpgradeQueue[](500);
+    indexes_ = new uint256[](500);
 
     uint256 counter;
-    for (uint256 i; i < length; i++) {
-      if (s.upgradeQueue[i].owner == _owner && !s.upgradeComplete[i]) {
-        output_[counter] = s.upgradeQueue[i];
-        indexes_[counter] = i;
+    for (uint256 i; i < tokenIds.length; i++) {
+      uint256[] memory parcelUpgradeIds = s.parcelIdToUpgradeIds[tokenIds[i]];
+      for (uint256 j; j < parcelUpgradeIds.length; j++) {
+        output_[counter] = s.upgradeQueue[parcelUpgradeIds[j]];
+        indexes_[counter] = parcelUpgradeIds[j];
         counter++;
+        if (counter >= 500) {
+          break;
+        }
+      }
+      if (counter >= 500) {
+        break;
       }
     }
     assembly {
