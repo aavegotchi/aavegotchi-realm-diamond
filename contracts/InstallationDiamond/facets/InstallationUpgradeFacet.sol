@@ -52,12 +52,6 @@ contract InstallationUpgradeFacet is Modifiers {
     // check coordinates
     RealmDiamond realm = RealmDiamond(s.realmDiamond);
 
-    //check upgradeQueueCapacity
-    require(
-      realm.getParcelUpgradeQueueCapacity(_upgradeQueue.parcelId) > realm.getParcelUpgradeQueueLength(_upgradeQueue.parcelId),
-      "InstallationFacet: UpgradeQueue full"
-    );
-
     realm.checkCoordinates(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId);
 
     // check unique hash
@@ -121,6 +115,11 @@ contract InstallationUpgradeFacet is Modifiers {
 
       emit UpgradeTimeReduced(0, _upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _gltr);
     } else {
+      //check upgradeQueueCapacity
+      require(
+        realm.getParcelUpgradeQueueCapacity(_upgradeQueue.parcelId) > realm.getParcelUpgradeQueueLength(_upgradeQueue.parcelId),
+        "InstallationFacet: UpgradeQueue full"
+      );
       UpgradeQueue memory upgrade = UpgradeQueue(
         _upgradeQueue.owner,
         _upgradeQueue.coordinateX,
