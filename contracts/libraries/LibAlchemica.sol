@@ -119,26 +119,6 @@ library LibAlchemica {
       _realmId
     );
 
-    for (uint256 i; i < installationBalances.length; i++) {
-      InstallationDiamondInterface.InstallationType memory equippedInstallaion = installationsDiamond.getInstallationType(_installationId);
-
-      // check altar requirement
-      require(
-        InstallationDiamondInterface(s.installationsDiamond).getInstallationType(s.parcels[_realmId].altarId).level >=
-          equippedInstallaion.prerequisites[0],
-        "LibAlchemica: Altar Tech Tree Reqs not met"
-      );
-
-      // check lodge requirement
-      if (equippedInstallaion.prerequisites[1] > 0) {
-        require(
-          InstallationDiamondInterface(s.installationsDiamond).getInstallationType(s.parcels[_realmId].lodgeId).level >=
-            equippedInstallaion.prerequisites[1],
-          "LibAlchemica: Lodge Tech Tree Reqs not met"
-        );
-      }
-    }
-
     uint256 alchemicaType = installationType.alchemicaType;
 
     //unclaimed alchemica must be settled before updating harvestRate and capacity
@@ -170,17 +150,43 @@ library LibAlchemica {
           break;
         }
       }
-      if (s.parcels[_realmId].unclaimedAlchemica[alchemicaType] > calculateTotalCapacity(_realmId, alchemicaType)) {
+      if (!isUpgrade && s.parcels[_realmId].unclaimedAlchemica[alchemicaType] > calculateTotalCapacity(_realmId, alchemicaType)) {
         //step 1 - unequip all harvesters
         //step 2 - claim alchemica balance
         //step 3 - unequip reservoir
-        revert("LibAlchemica: Unclaimed alchemica greater than reservoir capacity");
+
+        revert("LibAlchemica: Claim Alchemica before reducing capacity");
       }
     }
 
-    // upgradeQueueBoost
-    if (installationType.upgradeQueueBoost > 0) {
+    // Reduce upgrade queue boost. Handle underflow exception for bugged parcels
+    if (installationType.upgradeQueueBoost > 0 && s.parcels[_realmId].upgradeQueueCapacity >= installationType.upgradeQueueBoost) {
       s.parcels[_realmId].upgradeQueueCapacity -= installationType.upgradeQueueBoost;
+    }
+
+    //Verify tech tree requirements for remaining installations
+    for (uint256 i; i < installationBalances.length; i++) {
+      uint256 installationId = installationBalances[i].installationId;
+
+      // tech tree requirements are checked at the beginning of the upgradeInstallation function, so we can skip them during an upgrade
+      if (!isUpgrade) {
+        InstallationDiamondInterface.InstallationType memory equippedInstallation = installationsDiamond.getInstallationType(installationId);
+
+        require(
+          InstallationDiamondInterface(s.installationsDiamond).getInstallationType(s.parcels[_realmId].altarId).level >=
+            equippedInstallation.prerequisites[0],
+          "LibAlchemica: Altar Tech Tree Reqs not met"
+        );
+
+        // check lodge requirement
+        if (equippedInstallation.prerequisites[1] > 0) {
+          require(
+            InstallationDiamondInterface(s.installationsDiamond).getInstallationType(s.parcels[_realmId].lodgeId).level >=
+              equippedInstallation.prerequisites[1],
+            "LibAlchemica: Lodge Tech Tree Reqs not met"
+          );
+        }
+      }
     }
   }
 
@@ -201,8 +207,8 @@ library LibAlchemica {
   function addHarvesterAllowed(uint256 _realmSize, uint16 _harvesterCount) internal pure returns (bool) {
     if (_realmSize == 0) return _harvesterCount < 4;
     else if (_realmSize == 1) return _harvesterCount < 16;
-    else if (_realmSize == 2) return _harvesterCount < 128;
-    else if (_realmSize == 3) return _harvesterCount < 256;
+    else if (_realmSize == 2 || _realmSize == 3) return _harvesterCount < 128;
+    else if (_realmSize == 4) return _harvesterCount < 256;
     else return false;
   }
 
@@ -295,14 +301,15 @@ library LibAlchemica {
   function mintAvailableAlchemica(
     uint256 _alchemicaType,
     uint256 _gotchiId,
-    uint256 _owner,
-    uint256 _spill
+    uint256 _ownerAmount,
+    uint256 _spillAmount
   ) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
     IERC20Mintable alchemica = IERC20Mintable(s.alchemicaAddresses[_alchemicaType]);
-    alchemica.mint(alchemicaRecipient(_gotchiId), _owner);
-    alchemica.mint(address(this), _spill);
+
+    if (_ownerAmount > 0) alchemica.mint(alchemicaRecipient(_gotchiId), _ownerAmount);
+    if (_spillAmount > 0) alchemica.mint(address(this), _spillAmount);
   }
 
   function alchemicaRecipient(uint256 _gotchiId) internal view returns (address) {

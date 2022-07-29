@@ -1,21 +1,14 @@
-import { run, ethers, network } from "hardhat";
+import { run, ethers } from "hardhat";
 import { varsForNetwork } from "../../../constants";
+
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
-import { AlchemicaFacet, RealmFacet } from "../../../typechain";
-import { impersonate } from "../../helperFunctions";
-import {
-  genClaimAlchemicaSignature,
-  genEquipInstallationSignature,
-} from "../realmHelpers";
 
-export async function upgradeRealm() {
+export async function upgrade() {
   const diamondUpgrader = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
-
-  const c = await varsForNetwork(ethers);
 
   const facets: FacetsAndAddSelectors[] = [
     {
@@ -23,22 +16,9 @@ export async function upgradeRealm() {
       addSelectors: [],
       removeSelectors: [],
     },
-    {
-      facetName: "RealmFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "RealmGettersAndSettersFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "RealmGridFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
   ];
+
+  const c = await varsForNetwork(ethers);
 
   const joined = convertFacetAndSelectorsToString(facets);
 
@@ -56,7 +36,7 @@ export async function upgradeRealm() {
 }
 
 if (require.main === module) {
-  upgradeRealm()
+  upgrade()
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

@@ -7,7 +7,9 @@ import "./AppStorage.sol";
 import "./BinomialRandomizer.sol";
 
 library LibRealm {
-  event SurveyParcel(uint256 _tokenId, uint256[] _alchemicas);
+  event SurveyParcel(uint256 _tokenId, uint256 _round, uint256[] _alchemicas);
+
+  uint256 constant MAX_SUPPLY = 420069;
 
   //Place installation
   function placeInstallation(
@@ -29,6 +31,10 @@ library LibRealm {
     //Check if these slots are available onchain
     require(_x <= widths[parcel.size] - installation.width, "LibRealm: x exceeding width");
     require(_y <= heights[parcel.size] - installation.height, "LibRealm: y exceeding height");
+
+    // Track the start position of the build grid
+    parcel.startPositionBuildGrid[_x][_y] = _installationId;
+
     for (uint256 indexW = _x; indexW < _x + installation.width; indexW++) {
       for (uint256 indexH = _y; indexH < _y + installation.height; indexH++) {
         require(parcel.buildGrid[indexW][indexH] == 0, "LibRealm: Invalid spot");
@@ -48,11 +54,13 @@ library LibRealm {
     InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
     Parcel storage parcel = s.parcels[_realmId];
     require(parcel.buildGrid[_x][_y] == _installationId, "LibRealm: wrong installationId");
+    require(parcel.startPositionBuildGrid[_x][_y] == _installationId, "LibRealm: wrong startPosition");
     for (uint256 indexW = _x; indexW < _x + installation.width; indexW++) {
       for (uint256 indexH = _y; indexH < _y + installation.height; indexH++) {
         parcel.buildGrid[indexW][indexH] = 0;
       }
     }
+    parcel.startPositionBuildGrid[_x][_y] = 0;
   }
 
   function placeTile(
@@ -74,6 +82,9 @@ library LibRealm {
     //Check if these slots are available onchain
     require(_x <= widths[parcel.size] - tile.width, "LibRealm: x exceeding width");
     require(_y <= heights[parcel.size] - tile.height, "LibRealm: y exceeding height");
+
+    parcel.startPositionTileGrid[_x][_y] = _tileId;
+
     for (uint256 indexW = _x; indexW < _x + tile.width; indexW++) {
       for (uint256 indexH = _y; indexH < _y + tile.height; indexH++) {
         require(parcel.tileGrid[indexW][indexH] == 0, "LibRealm: Invalid spot");
@@ -92,12 +103,16 @@ library LibRealm {
     TileDiamondInterface tilesDiamond = TileDiamondInterface(s.tileDiamond);
     TileDiamondInterface.TileType memory tile = tilesDiamond.getTileType(_tileId);
     Parcel storage parcel = s.parcels[_realmId];
+
     require(parcel.tileGrid[_x][_y] == _tileId, "LibRealm: wrong tileId");
+    require(parcel.startPositionTileGrid[_x][_y] == _tileId, "LibRealm: wrong startPosition");
+
     for (uint256 indexW = _x; indexW < _x + tile.width; indexW++) {
       for (uint256 indexH = _y; indexH < _y + tile.height; indexH++) {
         parcel.tileGrid[indexW][indexH] = 0;
       }
     }
+    parcel.startPositionTileGrid[_x][_y] = 0;
   }
 
   function calculateAmount(
@@ -135,7 +150,7 @@ library LibRealm {
     //update round alchemica
     s.parcels[_tokenId].roundAlchemica[_round] = alchemicas;
     s.parcels[_tokenId].roundBaseAlchemica[_round] = roundAmounts;
-    emit SurveyParcel(_tokenId, alchemicas);
+    emit SurveyParcel(_tokenId, _round, alchemicas);
   }
 
   function getWidths() internal pure returns (uint256[5] memory) {
@@ -214,5 +229,29 @@ library LibRealm {
     else if (accessRight == 4) {
       //do nothing! anyone can perform this action
     }
+  }
+
+  function installationInUpgradeQueue(
+    uint256 _realmId,
+    uint256 _installationId,
+    uint256 _x,
+    uint256 _y
+  ) internal view returns (bool) {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+
+    InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
+
+    (InstallationDiamondInterface.UpgradeQueue[] memory parcelUpgrades, ) = installationsDiamond.getParcelUpgradeQueue(_realmId);
+    for (uint256 i; i < parcelUpgrades.length; i++) {
+      // Checking whether x and y match is sufficient when start positions are checked in a separate check
+      if (
+        parcelUpgrades[i].installationId == _installationId &&
+        parcelUpgrades[i].coordinateX == uint16(_x) &&
+        parcelUpgrades[i].coordinateY == uint16(_y)
+      ) {
+        return true;
+      }
+    }
+    return false;
   }
 }

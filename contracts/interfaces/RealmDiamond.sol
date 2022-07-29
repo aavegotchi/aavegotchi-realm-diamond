@@ -13,6 +13,8 @@ interface RealmDiamond {
     uint256[4] boost;
   }
 
+  function getAltarId(uint256 _parcelId) external view returns (uint256);
+
   function getAlchemicaAddresses() external view returns (address[4] memory);
 
   function ownerOf(uint256 _tokenId) external view returns (address owner_);

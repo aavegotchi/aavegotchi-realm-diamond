@@ -32,12 +32,6 @@ contract TestInstallationFacet is Modifiers {
     // check coordinates
     RealmDiamond realm = RealmDiamond(s.realmDiamond);
 
-    //check upgradeQueueCapacity
-    require(
-      realm.getParcelUpgradeQueueCapacity(_upgradeQueue.parcelId) > realm.getParcelUpgradeQueueLength(_upgradeQueue.parcelId),
-      "TestInstallationFacet: UpgradeQueue full"
-    );
-
     realm.checkCoordinates(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId);
 
     // check unique hash

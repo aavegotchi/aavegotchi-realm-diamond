@@ -1,27 +1,28 @@
 //@ts-ignore
-import hardhat, { run, ethers, network } from "hardhat";
+import { ethers, network } from "hardhat";
+import { varsForNetwork } from "../../../constants";
 import {
   InstallationAdminFacet,
   InstallationFacet,
   OwnershipFacet,
 } from "../../../typechain";
-import { InstallationTypeInput } from "../../../types";
-import { installationDiamondAddress } from "../../helperFunctions";
-import { goldenAaltar, testInstallations } from "../realmHelpers";
+import { installationTypes } from "../../../data/installations/graandFountain";
+import { outputInstallation } from "../realmHelpers";
+import { LedgerSigner } from "@anders-t/ethers-ledger";
 
-const gasPrice = 900000000000;
+const gasPrice = 90000000000;
 
 async function addInstallations() {
   const accounts = await ethers.getSigners();
 
-  const diamondAddress = installationDiamondAddress(network.name);
+  const c = await varsForNetwork(ethers);
 
-  console.log("diamond address:", diamondAddress);
+  console.log("diamond address:", c.installationDiamond);
 
   //transfer ownership to multisig
   const ownershipFacet = (await ethers.getContractAt(
     "OwnershipFacet",
-    diamondAddress
+    c.installationDiamond
   )) as OwnershipFacet;
 
   let currentOwner = await ownershipFacet.owner();
@@ -29,18 +30,17 @@ async function addInstallations() {
   console.log("Current owner is:", currentOwner);
   let signer: any;
 
-  const testing = ["hardhat", "localhost"].includes(hardhat.network.name);
+  const testing = ["hardhat", "localhost"].includes(network.name);
 
   if (testing) {
-    await hardhat.network.provider.request({
+    await network.provider.request({
       method: "hardhat_impersonateAccount",
       params: [currentOwner],
     });
     signer = await ethers.provider.getSigner(currentOwner);
-  } else if (
-    hardhat.network.name === "matic" ||
-    hardhat.network.name === "mumbai"
-  ) {
+  } else if (network.name === "matic") {
+    signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
+  } else if (network.name === "mumbai") {
     signer = accounts[0];
   } else {
     throw Error("Incorrect network selected");
@@ -48,26 +48,34 @@ async function addInstallations() {
 
   const installationAdminFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
-    diamondAddress,
+    c.installationDiamond,
     signer
   )) as InstallationAdminFacet;
 
   const installationFacet = (await ethers.getContractAt(
     "InstallationFacet",
-    diamondAddress,
+    c.installationDiamond,
     signer
   )) as InstallationFacet;
 
-  const tx = await installationAdminFacet.addInstallationTypes(goldenAaltar(), {
+  const toAdd = [outputInstallation(installationTypes[0])];
+
+  console.log("to add:", toAdd);
+
+  const tx = await installationAdminFacet.addInstallationTypes(toAdd, {
     gasPrice: gasPrice,
   });
   await tx.wait();
 
   console.log("Installations have been added!");
 
-  const types = await installationFacet.getInstallationType(0);
+  const types = await installationFacet.getInstallationTypes([]);
 
-  console.log("types:", types);
+  types.forEach((element) => {
+    console.log("el:", element);
+  });
+
+  // console.log("types:", types);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

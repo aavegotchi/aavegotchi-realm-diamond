@@ -4,28 +4,30 @@ import { expect } from "chai";
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-import { outputInstallation } from "../../scripts/realm/realmHelpers";
+import {
+  genEquipInstallationSignature,
+  outputInstallation,
+} from "../../scripts/realm/realmHelpers";
 import { TestBeforeVars } from "../../types";
 import { deployFarmRelease } from "../../scripts/realm/deploy/farmRelease";
 import { Constants, varsForNetwork } from "../../constants";
-import { AlchemicaFacet } from "../../typechain";
+import { AlchemicaFacet, RealmFacet } from "../../typechain";
 describe("Testing Harvester Release", async function () {
   const testAddress = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";
 
   let currentAccount: SignerWithAddress;
   let alchemicaFacet: AlchemicaFacet;
+  let realmFacet: RealmFacet;
   let c: Constants;
 
   before(async function () {
     c = await varsForNetwork(ethers);
 
-    console.log("c:", c);
-
     this.timeout(20000000);
     const accounts = await ethers.getSigners();
     currentAccount = accounts[0];
 
-    const success = await deployFarmRelease();
+    await deployFarmRelease();
   });
 
   it("Survey Parcel", async function () {
@@ -42,15 +44,10 @@ describe("Testing Harvester Release", async function () {
     );
     await alchemicaFacet.startSurveying(2893);
   });
-  // it("Equip reservoir", async function () {
-  //   g.realmFacet = await impersonate(
-  //     testAddress,
-  //     g.realmFacet,
-  //     ethers,
-  //     network
-  //   );
-  //   await g.realmFacet.equipInstallation(2893, 2, 9, 9);
-  // });
+  it("Equip reservoir", async function () {
+    realmFacet = await impersonate(testAddress, realmFacet, ethers, network);
+    await realmFacet.equipInstallation(2893, 0, 2, 9, 9);
+  });
   // it("Equip harvester", async function () {
   //   await realmFacet.equipInstallation(2893, 1, 2, 2);
   //   const blockNumBefore = await ethers.provider.getBlockNumber();

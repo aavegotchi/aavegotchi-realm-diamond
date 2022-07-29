@@ -1,11 +1,11 @@
 //@ts-ignore
+import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { ethers, network } from "hardhat";
-import { varsForNetwork } from "../../../constants";
+import { gasPrice, varsForNetwork } from "../../../constants";
 import { AlchemicaFacet } from "../../../typechain";
 import { getDiamondSigner } from "../../helperFunctions";
 import { addFarmInstallations } from "../../installation/updates/addFarmInstallations";
 import { alchemicaTotals } from "../../setVars";
-import { harvesterUpgrade } from "../upgrades/upgrade-haarvesterRelease";
 
 export async function deployFarmRelease() {
   const c = await varsForNetwork(ethers);
@@ -14,24 +14,30 @@ export async function deployFarmRelease() {
     `Deploying farm release on ${network.name} with Realm Diamond address ${c.realmDiamond}`
   );
 
-  let signer = await getDiamondSigner(c.realmDiamond, ethers, network, true);
+  // console.log("Run upgrade");
+  // await harvesterUpgrade();
 
-  if (network.config.chainId === 137) {
-    console.log("Add installations");
-    await addFarmInstallations(true);
-  }
+  // let signer = await getDiamondSigner(c.realmDiamond, ethers, network, true);
 
-  console.log("Run upgrade");
-  await harvesterUpgrade();
+  // if (network.config.chainId === 137 && network.name === "hardhat") {
+  //   console.log("Add test installations");
+  //   await addFarmInstallations(false);
+  // } else {
+  //   console.log("Add real installations");
+  //   await addFarmInstallations(false);
+  // }
+
   const alchemicaFacet = (await ethers.getContractAt(
     "AlchemicaFacet",
     c.realmDiamond,
-    signer
+    new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0")
   )) as AlchemicaFacet;
 
   console.log("Set alchemica totals");
-  //@ts-expect-error
-  let tx = await alchemicaFacet.setTotalAlchemicas(alchemicaTotals());
+  //@ts-ignore
+  let tx = await alchemicaFacet.setTotalAlchemicas(alchemicaTotals(), {
+    gasPrice: gasPrice,
+  });
   await tx.wait();
 
   return true;

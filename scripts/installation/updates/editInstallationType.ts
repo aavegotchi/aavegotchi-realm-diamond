@@ -1,10 +1,10 @@
 import { ethers, network } from "hardhat";
-import { installationTypes } from "../../../data/installations/graandFountain";
+import { installationTypesMatic } from "../../../data/installations/farming";
 import { InstallationAdminFacet, InstallationFacet } from "../../../typechain";
 
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { outputInstallation } from "../../realm/realmHelpers";
-import { gasPrice, impersonate } from "../helperFunctions";
+import { diamondOwner, gasPrice, impersonate } from "../helperFunctions";
 import { varsForNetwork } from "../../../constants";
 
 export async function editInstallationTypes() {
@@ -20,32 +20,19 @@ export async function editInstallationTypes() {
 
   if (network.name === "hardhat") {
     installationFacet = await impersonate(
-      "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119",
+      await diamondOwner(c.installationDiamond, ethers),
       installationFacet,
       ethers,
       network
     );
   }
 
-  const altars = installationTypes.map((val) => outputInstallation(val));
+  const installation = outputInstallation(installationTypesMatic[0]); //graand fountain
 
-  const ids = ["55"];
-
-  if (ids.length !== altars.length) {
-    throw new Error("Incorrect length");
-  }
-
-  // const tx = await installationFacet.editInstallationUnequipTypes(
-  //   ["55"],
-  //   ["1"],
-  //   {
-  //     gasPrice: gasPrice,
-  //   }
-  // );
-  // await tx.wait();
+  const id = "55";
 
   console.log("Updating ");
-  await installationFacet.editInstallationTypes(ids, altars, {
+  await installationFacet.editInstallationTypes([id], [installation], {
     gasPrice: gasPrice,
   });
 
@@ -54,7 +41,7 @@ export async function editInstallationTypes() {
     c.installationDiamond
   )) as InstallationFacet;
 
-  const insts = await installationfacet.getInstallationTypes([55]);
+  const insts = await installationfacet.getInstallationTypes([id]);
   console.log("insts:", insts);
 }
 

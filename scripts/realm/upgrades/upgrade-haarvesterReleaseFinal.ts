@@ -7,7 +7,6 @@ import {
 } from "../../../tasks/deployUpgrade";
 import { VRFFacet__factory } from "../../../typechain";
 import { VRFFacetInterface } from "../../../typechain/VRFFacet";
-import { upgradeDiamondCut } from "./upgrade-diamond";
 
 export interface VrfConfig {
   subId: number;
@@ -20,14 +19,49 @@ export interface VrfConfig {
 export async function harvesterUpgrade() {
   const c = await varsForNetwork(ethers);
 
-  await upgradeDiamondCut();
-
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
 
   const requestConfig =
     "(uint64 subId, uint32 callbackGasLimit, uint16 requestConfirmations, uint32 numWords, bytes32 keyHash)";
 
-  const facets: FacetsAndAddSelectors[] = [
+  const realmFacets: FacetsAndAddSelectors[] = [
+    {
+      facetName: "RealmFacet",
+      addSelectors: [],
+      removeSelectors: [
+        "function setParcelsAccessRights(uint256[] calldata _realmIds,uint256[] calldata _actionRights, uint256[] calldata _accessRights) external",
+        "function resyncParcel(uint256[] calldata _tokenIds) external",
+        "function setGameActive(bool _gameActive) external",
+        "function getParcelInfo(uint256 _realmId) external view",
+        "function checkCoordinates(uint256 _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _installationId) external view",
+        "function batchGetDistrictParcels(address _owner, uint256 _district) external view",
+        "function getParcelUpgradeQueueLength(uint256 _parcelId) external view",
+        "function getParcelUpgradeQueueCapacity(uint256 _parcelId) external view",
+        "function getParcelsAccessRights(uint256[] calldata _parcelIds, uint256[] calldata _actionRights) external view",
+        "function getAltarId(uint256 _parcelId) external view",
+        "function setAltarId(uint256 _parcelId, uint256 _altarId) external",
+        "function fixAltarLevel(uint256[] memory _parcelIds) external",
+        "function maxSupply() external pure",
+      ],
+    },
+    {
+      facetName: "RealmGettersAndSettersFacet",
+      addSelectors: [
+        "function maxSupply() external pure",
+        "function setParcelsAccessRights(uint256[] calldata _realmIds,uint256[] calldata _actionRights, uint256[] calldata _accessRights) external",
+        "function resyncParcel(uint256[] calldata _tokenIds) external",
+        "function setGameActive(bool _gameActive) external",
+        "function getParcelInfo(uint256 _realmId) external view",
+        "function checkCoordinates(uint256 _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _installationId) external view",
+        "function batchGetDistrictParcels(address _owner, uint256 _district) external view",
+        "function getParcelUpgradeQueueLength(uint256 _parcelId) external view",
+        "function getParcelUpgradeQueueCapacity(uint256 _parcelId) external view",
+        "function getParcelsAccessRights(uint256[] calldata _parcelIds, uint256[] calldata _actionRights) external view",
+        "function getAltarId(uint256 _parcelId) external view",
+        "function setAltarId(uint256 _parcelId, uint256 _altarId) external",
+      ],
+      removeSelectors: [],
+    },
     {
       facetName: "AlchemicaFacet",
       addSelectors: [
@@ -51,13 +85,24 @@ export async function harvesterUpgrade() {
         "function topUpSubscription(uint256 amount) external",
         `function setConfig(${requestConfig} _requestConfig, address _vrfCoordinator) external`,
       ],
-      removeSelectors: [
-        // `function setConfig(${requestConfig} _requestConfig) external`,
-      ],
+      removeSelectors: [],
     },
   ];
 
-  const joined = convertFacetAndSelectorsToString(facets);
+  const installationFacets: FacetsAndAddSelectors[] = [
+    {
+      facetName: "InstallationUpgradeFacet",
+      addSelectors: [
+        "function parcelQueueEmpty(uint256 _parcelId) external view returns (bool)",
+        "function reduceUpgradeTime(uint256 _upgradeIndex, uint40 _blocks, bytes memory _signature) external",
+      ],
+      removeSelectors: [],
+    },
+  ];
+
+  const realmJoined = convertFacetAndSelectorsToString(realmFacets);
+  const installationJoined =
+    convertFacetAndSelectorsToString(installationFacets);
 
   let iface: VRFFacetInterface = new ethers.utils.Interface(
     VRFFacet__factory.abi
@@ -86,14 +131,14 @@ export async function harvesterUpgrade() {
 
     //matic
   } else {
-    vrfCoordinator = "0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed";
+    vrfCoordinator = "0xAE975071Be8F8eE67addBC1A82488F1C24858067";
     vrfConfig = {
-      subId: 900,
-      callbackGasLimit: 100_000,
-      requestConfirmations: 10,
+      subId: 114,
+      callbackGasLimit: 500_000,
+      requestConfirmations: 40,
       numWords: 4,
       keyHash:
-        "0x4b09e658ed251bcafeebbc69400383d49f344ace09b9576fe248bb02c003fe9f",
+        "0x6e099d640cde6de9d40ac749b4b594126b0169747122711109c9985d47751f93",
     };
   }
 
@@ -104,17 +149,30 @@ export async function harvesterUpgrade() {
 
   console.log("realm diamond:", c.realmDiamond);
 
-  const args: DeployUpgradeTaskArgs = {
+  const realmArgs: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: c.realmDiamond,
-    facetsAndAddSelectors: joined,
-    useLedger: false,
+    facetsAndAddSelectors: realmJoined,
+    useLedger: true,
     useMultisig: false,
     initCalldata: calldata,
     initAddress: c.realmDiamond,
   };
 
-  await run("deployUpgrade", args);
+  // await run("deployUpgrade", realmArgs);
+
+  console.log("Deploying installation diamond:", c.installationDiamond);
+
+  const installationArgs: DeployUpgradeTaskArgs = {
+    diamondUpgrader: diamondUpgrader,
+    diamondAddress: c.installationDiamond,
+    facetsAndAddSelectors: installationJoined,
+    useLedger: true,
+    useMultisig: false,
+    initCalldata: "0x",
+    initAddress: ethers.constants.AddressZero,
+  };
+  await run("deployUpgrade", installationArgs);
 }
 
 if (require.main === module) {

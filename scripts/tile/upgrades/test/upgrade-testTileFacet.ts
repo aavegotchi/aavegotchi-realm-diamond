@@ -1,42 +1,41 @@
-import { run, ethers, network } from "hardhat";
-import { varsForNetwork } from "../../../constants";
-
+import { ethers, run } from "hardhat";
+import { varsForNetwork } from "../../../../constants";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
-} from "../../../tasks/deployUpgrade";
+} from "../../../../tasks/deployUpgrade";
 
-export async function upgrade() {
+export async function upgradeTileTest() {
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
-
-  const c = await varsForNetwork(ethers);
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "InstallationUpgradeFacet",
-      addSelectors: [],
+      facetName: "TestTileFacet",
+      addSelectors: [
+        "function testCraftTiles(uint16[] calldata _tileTypes) external",
+      ],
       removeSelectors: [],
     },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
 
+  const c = await varsForNetwork(ethers);
+
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
-    diamondAddress: c.installationDiamond,
+    diamondAddress: c.tileDiamond,
     facetsAndAddSelectors: joined,
     useLedger: false,
     useMultisig: false,
-    initAddress: ethers.constants.AddressZero,
-    initCalldata: "0x",
   };
 
   await run("deployUpgrade", args);
 }
 
 if (require.main === module) {
-  upgrade()
+  upgradeTileTest()
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

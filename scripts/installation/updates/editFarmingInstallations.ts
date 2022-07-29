@@ -1,10 +1,10 @@
 import { ethers, network } from "hardhat";
-import { installationTypes } from "../../../data/installations/graandFountain";
+import { installationTypesMatic } from "../../../data/installations/farming";
 import { InstallationAdminFacet, InstallationFacet } from "../../../typechain";
 
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { outputInstallation } from "../../realm/realmHelpers";
-import { gasPrice, impersonate } from "../helperFunctions";
+import { diamondOwner, gasPrice, impersonate } from "../helperFunctions";
 import { varsForNetwork } from "../../../constants";
 
 export async function editInstallationTypes() {
@@ -14,35 +14,33 @@ export async function editInstallationTypes() {
 
   let installationFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
-    c.installationDiamond,
-    signer
+    c.installationDiamond
+    // signer
   )) as InstallationAdminFacet;
 
   if (network.name === "hardhat") {
     installationFacet = await impersonate(
-      "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119",
+      await diamondOwner(c.installationDiamond, ethers),
       installationFacet,
       ethers,
       network
     );
   }
 
-  const altars = installationTypes.map((val) => outputInstallation(val));
+  const altars = installationTypesMatic.map((val) => outputInstallation(val));
 
-  const ids = ["55"];
+  //change 55 from fud harvester to fountain
+  const ids: string[] = [];
+  for (let index = 55; index < 137; index++) {
+    ids.push(index.toString());
+  }
+
+  console.log("altars:", altars.length);
+  console.log("ids:", ids.length);
 
   if (ids.length !== altars.length) {
     throw new Error("Incorrect length");
   }
-
-  // const tx = await installationFacet.editInstallationUnequipTypes(
-  //   ["55"],
-  //   ["1"],
-  //   {
-  //     gasPrice: gasPrice,
-  //   }
-  // );
-  // await tx.wait();
 
   console.log("Updating ");
   await installationFacet.editInstallationTypes(ids, altars, {

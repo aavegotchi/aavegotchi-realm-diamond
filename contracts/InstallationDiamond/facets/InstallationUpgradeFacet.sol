@@ -52,12 +52,6 @@ contract InstallationUpgradeFacet is Modifiers {
     // check coordinates
     RealmDiamond realm = RealmDiamond(s.realmDiamond);
 
-    //check upgradeQueueCapacity
-    require(
-      realm.getParcelUpgradeQueueCapacity(_upgradeQueue.parcelId) > realm.getParcelUpgradeQueueLength(_upgradeQueue.parcelId),
-      "InstallationFacet: UpgradeQueue full"
-    );
-
     realm.checkCoordinates(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId);
 
     // check unique hash
@@ -75,6 +69,16 @@ contract InstallationUpgradeFacet is Modifiers {
 
     //next level
     InstallationType memory nextInstallation = s.installationTypes[prevInstallation.nextLevelId];
+
+    // check altar requirement
+    //altar prereq is 0
+    if (nextInstallation.prerequisites[0] > 0) {
+      uint256 equippedAltarId = RealmDiamond(s.realmDiamond).getAltarId(_upgradeQueue.parcelId);
+      uint256 equippedAltarLevel = s.installationTypes[equippedAltarId].level;
+      require(equippedAltarLevel >= nextInstallation.prerequisites[0], "LibAlchemica: Altar Tech Tree Reqs not met");
+    }
+
+    //@todo: check for lodge prereq once lodges are implemented
 
     //take the required alchemica
     address[4] memory alchemicaAddresses = realm.getAlchemicaAddresses();
@@ -111,6 +115,11 @@ contract InstallationUpgradeFacet is Modifiers {
 
       emit UpgradeTimeReduced(0, _upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _gltr);
     } else {
+      //check upgradeQueueCapacity
+      require(
+        realm.getParcelUpgradeQueueCapacity(_upgradeQueue.parcelId) > realm.getParcelUpgradeQueueLength(_upgradeQueue.parcelId),
+        "InstallationFacet: UpgradeQueue full"
+      );
       UpgradeQueue memory upgrade = UpgradeQueue(
         _upgradeQueue.owner,
         _upgradeQueue.coordinateX,
@@ -187,6 +196,38 @@ contract InstallationUpgradeFacet is Modifiers {
     return false;
   }
 
+  function reduceUpgradeTime(
+    uint256 _upgradeIndex,
+    uint40 _blocks,
+    bytes memory _signature
+  ) external {
+    UpgradeQueue storage queue = s.upgradeQueue[_upgradeIndex];
+
+    require(
+      LibSignature.isValid(keccak256(abi.encodePacked(_upgradeIndex)), _signature, s.backendPubKey),
+      "InstallationAdminFacet: Invalid signature"
+    );
+
+    //todo: check access rights
+    require(msg.sender == queue.owner, "InstallationUpgradeFacet: Not owner");
+
+    //handle underflow / overspend
+    uint256 nextLevelId = s.installationTypes[queue.installationId].nextLevelId;
+    require(_blocks <= s.installationTypes[nextLevelId].craftTime, "InstallationUpgradeFacet: Too much GLTR");
+
+    //burn GLTR
+    uint256 gltrAmount = uint256(_blocks) * 1e18;
+    IERC20(s.gltr).transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, gltrAmount);
+
+    //reduce the blocks
+    queue.readyBlock -= _blocks;
+
+    //if upgrade should be finalized, call finalizeUpgrade
+    if (queue.readyBlock <= block.number) {
+      _finalizeUpgrade(queue.owner, _upgradeIndex);
+    }
+  }
+
   /// @dev TO BE DEPRECATED
   /// @notice Query details about all ongoing upgrade queues
   /// @return output_ An array of structs, each representing an ongoing upgrade queue
@@ -200,16 +241,26 @@ contract InstallationUpgradeFacet is Modifiers {
   /// @return output_ An array of structs, each representing a pending craft queue
   /// @return indexes_ An array of IDs, to be used in the new finalizeUpgrades() function
   function getUserUpgradeQueue(address _owner) external view returns (UpgradeQueue[] memory output_, uint256[] memory indexes_) {
-    uint256 length = s.upgradeQueue.length;
-    output_ = new UpgradeQueue[](length);
-    indexes_ = new uint256[](length);
+    RealmDiamond realm = RealmDiamond(s.realmDiamond);
+    uint256[] memory tokenIds = realm.tokenIdsOfOwner(_owner);
+
+    // Only return up to the first 500 upgrades.
+    output_ = new UpgradeQueue[](500);
+    indexes_ = new uint256[](500);
 
     uint256 counter;
-    for (uint256 i; i < length; i++) {
-      if (s.upgradeQueue[i].owner == _owner && !s.upgradeComplete[i]) {
-        output_[counter] = s.upgradeQueue[i];
-        indexes_[counter] = i;
+    for (uint256 i; i < tokenIds.length; i++) {
+      uint256[] memory parcelUpgradeIds = s.parcelIdToUpgradeIds[tokenIds[i]];
+      for (uint256 j; j < parcelUpgradeIds.length; j++) {
+        output_[counter] = s.upgradeQueue[parcelUpgradeIds[j]];
+        indexes_[counter] = parcelUpgradeIds[j];
         counter++;
+        if (counter >= 500) {
+          break;
+        }
+      }
+      if (counter >= 500) {
+        break;
       }
     }
     assembly {
@@ -261,6 +312,11 @@ contract InstallationUpgradeFacet is Modifiers {
     for (uint256 i; i < indexes_.length; i++) {
       output_[i] = s.upgradeQueue[indexes_[i]];
     }
+  }
+
+  /// @notice For realm to validate whether a parcel has an upgrade queueing before removing an installation
+  function parcelQueueEmpty(uint256 _parcelId) external view returns (bool) {
+    return s.parcelIdToUpgradeIds[_parcelId].length == 0;
   }
 
   function getUpgradeQueueLength() external view returns (uint256) {

@@ -12,6 +12,8 @@ import "../../libraries/LibSignature.sol";
 uint256 constant bp = 100 ether;
 
 contract AlchemicaFacet is Modifiers {
+  event StartSurveying(uint256 _realmId, uint256 _round);
+
   event ChannelAlchemica(
     uint256 indexed _realmId,
     uint256 indexed _gotchiId,
@@ -40,6 +42,8 @@ contract AlchemicaFacet is Modifiers {
     s.parcels[_realmId].surveying = true;
     // do we need to cancel the listing?
     drawRandomNumbers(_realmId, s.parcels[_realmId].currentRound);
+
+    emit StartSurveying(_realmId, s.parcels[_realmId].currentRound);
   }
 
   function drawRandomNumbers(uint256 _realmId, uint256 _surveyingRound) internal {
@@ -277,7 +281,8 @@ contract AlchemicaFacet is Modifiers {
     //update latest channeling
     s.gotchiChannelings[_gotchiId] = block.timestamp;
     s.parcelChannelings[_realmId] = block.timestamp;
-
+    //finally interact
+    AavegotchiDiamond(s.aavegotchiDiamond).realmInteract(_gotchiId);
     emit ChannelAlchemica(_realmId, _gotchiId, channelAmounts, rate, radius);
   }
 

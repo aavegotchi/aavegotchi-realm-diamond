@@ -1,48 +1,38 @@
 import { ethers, network } from "hardhat";
 import { tileTypes } from "../../data/tiles/tileTypes";
 import { TileFacet, OwnershipFacet } from "../../typechain";
-import { impersonate } from "../helperFunctions";
+import { diamondOwner, impersonate } from "../helperFunctions";
 
+import { gasPrice, varsForNetwork } from "../../constants";
+import { outputTile } from "../realm/realmHelpers";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 
-import { gasPrice } from "../../constants";
-import { outputTile } from "../realm/realmHelpers";
-
 export async function setAddresses() {
-  let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
-
-  //matic address
-  const diamondAddress = "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
-
-  const ownershipFacet = (await ethers.getContractAt(
-    "OwnershipFacet",
-    diamondAddress
-  )) as OwnershipFacet;
-  const owner = await ownershipFacet.owner();
-  console.log("owner:", owner);
+  const c = await varsForNetwork(ethers);
+  const signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
 
   let tileFacet = (await ethers.getContractAt(
     "TileFacet",
-    diamondAddress,
+    c.tileDiamond,
     signer
   )) as TileFacet;
 
   if (network.name === "hardhat") {
-    tileFacet = await impersonate(owner, tileFacet, ethers, network);
+    tileFacet = await impersonate(
+      await diamondOwner(c.tileDiamond, ethers),
+      tileFacet,
+      ethers,
+      network
+    );
   }
 
-  // cyan grass
-  const tile = outputTile(tileTypes[6]);
+  // godlike rug
+  const tile = outputTile(tileTypes[7]);
 
   console.log("Adding tile:", tile);
   await tileFacet.addTileTypes([tile], {
     gasPrice: gasPrice,
   });
-
-  //july 15th, 2pm utc
-  // const deprecateTime = "1657893600";
-  // console.log("Set deprecate time to:", new Date(1657893600 * 1000));
-  // await tileFacet.editDeprecateTime("5", deprecateTime, { gasPrice: gasPrice });
 
   const tiles = await tileFacet.getTileTypes([]);
   console.log("tiles:", tiles);
