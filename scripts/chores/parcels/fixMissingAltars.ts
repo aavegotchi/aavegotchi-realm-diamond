@@ -5,11 +5,13 @@ import {
   InstallationFacet,
   InstallationUpgradeFacet,
   RealmFacet,
+  RealmGettersAndSettersFacet,
 } from "../../../typechain";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { diamondOwner, gasPrice, impersonate } from "../../helperFunctions";
 import { varsForNetwork } from "../../../constants";
 import request from "graphql-request";
+import { upgradeInstallation } from "../../installation/upgrades/upgrade-installationBalance";
 
 export async function syncParcels() {
   let currentOwner = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
@@ -17,24 +19,26 @@ export async function syncParcels() {
 
   const testing = ["hardhat", "localhost"].includes(network.name);
 
-  // if (testing) {
-  //   await network.provider.request({
-  //     method: "hardhat_impersonateAccount",
-  //     params: [currentOwner],
-  //   });
-  //   signer = await ethers.provider.getSigner(currentOwner);
-  // } else if (network.name === "matic") {
-  //   signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
-  // } else {
-  //   throw Error("Incorrect network selected");
-  // }
+  await upgradeInstallation();
+
+  if (testing) {
+    await network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [currentOwner],
+    });
+    signer = await ethers.provider.getSigner(currentOwner);
+  } else if (network.name === "matic") {
+    signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
+  } else {
+    throw Error("Incorrect network selected");
+  }
 
   const currentBlock = await ethers.provider.getBlockNumber();
 
   const c = await varsForNetwork(ethers);
 
   // const parcelIds = ["46069", "40437", "40587"];
-  const parcelIds = ["545"];
+  const parcelIds = ["51234"];
 
   const installationsUpgradeFacet = (await ethers.getContractAt(
     "InstallationUpgradeFacet",
@@ -44,7 +48,7 @@ export async function syncParcels() {
   let installationAdminFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
     c.installationDiamond,
-    new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0")
+    signer
   )) as InstallationAdminFacet;
 
   if (network.name === "hardhat") {
@@ -61,11 +65,16 @@ export async function syncParcels() {
     c.installationDiamond
   )) as InstallationFacet;
 
+  console.log("Finalize upgrades");
+  // await installationsUpgradeFacet.finalizeUpgrades(["14150"]);
+
   // console.log("upgrades:", upgrades);
 
   // console.log("balances:", balance);
 
   for await (const parcelId of parcelIds) {
+    console.log("PARCEL ID UPGRADES:", parcelId);
+
     const query = `{parcel(id:"${parcelId}") {
       id
       owner
@@ -77,15 +86,29 @@ export async function syncParcels() {
 
     const parcelOwner = parcelData.parcel.owner;
 
+    const realmFacet = (await ethers.getContractAt(
+      "RealmGettersAndSettersFacet",
+      c.realmDiamond
+    )) as RealmGettersAndSettersFacet;
+    const parcelUpgradeLength = await realmFacet.getParcelUpgradeQueueLength(
+      parcelId
+    );
+    const parcelUpgradeCapacity =
+      await realmFacet.getParcelUpgradeQueueCapacity(parcelId);
+
+    console.log("capacity:", parcelUpgradeLength, parcelUpgradeCapacity);
+
     //Get all pending upgrades for the parcel owner
-    const userQueue = await installationsUpgradeFacet.getUserUpgradeQueue(
+    const userQueue = await installationsUpgradeFacet.getUserUpgradeQueueNew(
       parcelOwner
     );
 
-    console.log(
-      "Pending upgrades:",
-      userQueue.output_.filter((val) => val.parcelId.toString() === parcelId)
-    );
+    console.log("user queue:", userQueue);
+
+    // console.log(
+    //   "Pending upgrades:",
+    //   userQueue.output_.filter((val) => val.parcelId.toString() === parcelId)
+    // );
 
     let i = 0;
     for await (const upgrade of userQueue.output_) {
@@ -100,30 +123,42 @@ export async function syncParcels() {
         parcelId
       );
 
-      const foundBalance = balances.filter(
-        (val) => val.installationId.toString() === installationId
-      );
+      //Filter out upgrades for other parcels
+      if (upgrade.parcelId.toString() === parcelId) {
+        if (upgrade.readyBlock > currentBlock) {
+          console.log(`Upgrade ${upgradeIndex} not ready yet, skipping.`);
+        } else {
+          // const upgradeInfo = await installationsUpgradeFacet.getUpgradeQueueId(
+          // upgradeIndex
+          // );
 
-      if (upgrade.readyBlock > currentBlock) {
-        console.log("Upgrade not ready yet, skipping.");
-        continue;
+          // console.log(`Upgrade info for ${upgradeIndex}:`, upgradeInfo);
+
+          const foundBalance = balances.filter(
+            (val) => val.installationId.toString() === installationId
+          );
+
+          if (foundBalance) {
+            console.log(
+              `Parcel has a balance of token ${installationId}. Upgrade ${upgradeIndex} can likely be executed.`
+            );
+          } else {
+            console.log(
+              `Parcel does NOT have a balance of token ${installationId}. Upgrade ${upgradeIndex} cannot be executed.`
+            );
+
+            const missingAltar = {
+              _parcelId: parcelId,
+              _oldAltarId: "11",
+              _newAltarId: "12",
+            };
+          }
+        }
       }
 
-      if (foundBalance) {
-        console.log(
-          `Parcel has a balance of token ${installationId}. Upgrade ${upgradeIndex} can likely be executed.`
-        );
-      } else {
-        console.log(
-          `Parcel does NOT have a balance of token ${installationId}. Upgrade ${upgradeIndex} cannot be executed.`
-        );
+      // console.log("ready block:", upgrade.readyBlock);
+      // console.log("current block:", currentBlock);
 
-        const missingAltar = {
-          _parcelId: parcelId,
-          _oldAltarId: "11",
-          _newAltarId: "12",
-        };
-      }
       i++;
     }
 
