@@ -29,12 +29,15 @@ import { Signer, BigNumber, BigNumberish } from "ethers";
 describe("Installation Upgrade Access Rights test", async function () {
   let parcelId = 15882;
   let gotchiId = 21655;
+  let borrowedGotchiId = 11939;
   let owner = "0x8FEebfA4aC7AF314d90a0c17C3F91C800cFdE44B";
+  let borrower = "0xd82974D2E506388e1d82Ab9d77A7337F4A470284";
   let realmOwner: string;
   let installationOwner: string;
   let altarPosition = [14, 0];
 
   let impersonatedSigner: Signer;
+  let impersonatedBorrower: Signer;
   let impersonatedRealmOwner: Signer;
   let impersonatedInstallationOwner: Signer;
 
@@ -79,8 +82,13 @@ describe("Installation Upgrade Access Rights test", async function () {
       method: "hardhat_impersonateAccount",
       params: [installationOwner],
     });
+    await network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [borrower],
+    });
 
     impersonatedSigner = await ethers.getSigner(owner);
+    impersonatedBorrower = await ethers.getSigner(borrower);
     impersonatedRealmOwner = await ethers.getSigner(realmOwner);
     impersonatedInstallationOwner = await ethers.getSigner(installationOwner);
 
@@ -177,6 +185,12 @@ describe("Installation Upgrade Access Rights test", async function () {
         gotchiId,
         1_000_000_000_000
       );
+      await realmGettersAndSettersFacet.checkCoordinates(
+        parcelId,
+        altarPosition[0],
+        altarPosition[1],
+        12
+      );
     });
     it("Should add an installation to upgrade queue", async () => {
       await testInstallationFacet.mockUpgradeInstallation(
@@ -192,11 +206,115 @@ describe("Installation Upgrade Access Rights test", async function () {
         gotchiId,
         0
       );
+      expect(
+        (await installationUpgradeFacet.getParcelUpgradeQueue(parcelId))
+          .indexes_.length
+      ).to.equal(1);
     });
-    it("Should be able to finalize an installation upgrade", async () => {});
-    it("Should revert if the start position is wrong", async () => {});
-    it("Non-owner should not be able to upgrade with access right 0", async () => {});
-    it("Should allow borrowed gotchis to upgrade if access right is 1", async () => {});
-    it("Should not be able to queue the same upgrade twice", async () => {});
+    it("Should be able to finalize an installation upgrade", async () => {
+      let upgradeId = (
+        await installationUpgradeFacet.getParcelUpgradeQueue(parcelId)
+      ).indexes_[0];
+      await mineBlocks(ethers, 320000);
+      await installationUpgradeFacet.finalizeUpgrades([upgradeId]);
+      await realmGettersAndSettersFacet.checkCoordinates(
+        parcelId,
+        altarPosition[0],
+        altarPosition[1],
+        13
+      );
+    });
+    it("Should revert if the start position is wrong", async () => {
+      await expect(
+        testInstallationFacet.mockUpgradeInstallation(
+          {
+            owner: owner,
+            coordinateX: altarPosition[0] + 1,
+            coordinateY: altarPosition[1],
+            readyBlock: 0,
+            claimed: false,
+            parcelId: parcelId,
+            installationId: 13,
+          },
+          gotchiId,
+          0
+        )
+      ).to.be.revertedWith("RealmGettersAndSettersFacet: wrong coordinates");
+    });
+    it("Non-owner should not be able to upgrade with access right 0", async () => {
+      await expect(
+        testInstallationFacet
+          .connect(impersonatedBorrower)
+          .mockUpgradeInstallation(
+            {
+              owner: owner,
+              coordinateX: altarPosition[0],
+              coordinateY: altarPosition[1],
+              readyBlock: 0,
+              claimed: false,
+              parcelId: parcelId,
+              installationId: 13,
+            },
+            gotchiId,
+            1e9
+          )
+      ).to.be.revertedWith("LibRealm: Access Right - Only Owner");
+    });
+    it("Should allow borrowed gotchis to upgrade if access right is 1", async () => {
+      await realmGettersAndSettersFacet.setParcelsAccessRights(
+        [parcelId],
+        [6],
+        [1]
+      );
+      await testInstallationFacet.mockUpgradeInstallation(
+        {
+          owner: owner,
+          coordinateX: altarPosition[0],
+          coordinateY: altarPosition[1],
+          readyBlock: 0,
+          claimed: false,
+          parcelId: parcelId,
+          installationId: 13,
+        },
+        gotchiId,
+        1e9
+      );
+      await realmGettersAndSettersFacet.checkCoordinates(
+        parcelId,
+        altarPosition[0],
+        altarPosition[1],
+        14
+      );
+    });
+    it("Should not be able to queue the same upgrade twice", async () => {
+      await testInstallationFacet.mockUpgradeInstallation(
+        {
+          owner: owner,
+          coordinateX: altarPosition[0],
+          coordinateY: altarPosition[1],
+          readyBlock: 0,
+          claimed: false,
+          parcelId: parcelId,
+          installationId: 14,
+        },
+        gotchiId,
+        0
+      );
+      await expect(
+        testInstallationFacet.mockUpgradeInstallation(
+          {
+            owner: owner,
+            coordinateX: altarPosition[0],
+            coordinateY: altarPosition[1],
+            readyBlock: 0,
+            claimed: false,
+            parcelId: parcelId,
+            installationId: 14,
+          },
+          gotchiId,
+          0
+        )
+      ).to.be.revertedWith("InstallationUpgradeFacet: Upgrade hash not unique");
+    });
   });
 });

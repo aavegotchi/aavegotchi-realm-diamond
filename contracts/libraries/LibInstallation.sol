@@ -119,22 +119,6 @@ library LibInstallation {
     //@todo: check for lodge prereq once lodges are implemented
   }
 
-  function checkAndUpdateUniqueHash(UpgradeQueue memory _upgradeQueue) internal {
-    InstallationAppStorage storage s = LibAppStorageInstallation.diamondStorage();
-
-    // check unique hash
-    // The same upgrade cannot be queued twice
-    bytes32 uniqueHash = keccak256(
-      abi.encodePacked(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId)
-    );
-
-    require(s.upgradeHashes[uniqueHash] == 0, "LibInstallation: Upgrade hash not unique");
-
-    s.upgradeHashes[uniqueHash] = _upgradeQueue.parcelId;
-  }
-
-  function checkUpgradeQueueLength(uint256 _parcelId, RealmDiamond _realmDiamond) internal {}
-
   function upgradeInstallation(
     UpgradeQueue memory _upgradeQueue,
     uint256 _nextLevelId,

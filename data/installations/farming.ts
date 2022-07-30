@@ -2037,7 +2037,7 @@ export const installationTypesMatic: InstallationTypeInput[] = [
     prerequisites: [0, 0],
     width: 4,
     height: 4,
-    deprecated: false,
+    deprecated: true,
     installationType: 7,
     alchemicaType: 0,
     alchemicaCost: [10000, 0, 6008.2, 0],

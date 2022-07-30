@@ -37,7 +37,10 @@ contract TestInstallationFacet is Modifiers {
     RealmDiamond realm = RealmDiamond(s.realmDiamond);
 
     // Validation checks
-    LibInstallation.checkAndUpdateUniqueHash(_upgradeQueue);
+    bytes32 uniqueHash = keccak256(
+      abi.encodePacked(_upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _upgradeQueue.installationId)
+    );
+    require(s.upgradeHashes[uniqueHash] == 0, "InstallationUpgradeFacet: Upgrade hash not unique");
     LibInstallation.checkUpgrade(_upgradeQueue, _gotchiId, realm);
 
     // For easier testing, we min gltr instead of reverting
@@ -48,6 +51,8 @@ contract TestInstallationFacet is Modifiers {
       emit UpgradeTimeReduced(0, _upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _gltr);
       LibInstallation.upgradeInstallation(_upgradeQueue, nextLevelId, realm);
     } else {
+      s.upgradeHashes[uniqueHash] = _upgradeQueue.parcelId;
+
       // Set the ready block and claimed flag before adding to the queue
       _upgradeQueue.readyBlock = uint40(block.number) + nextInstallation.craftTime - _gltr;
       _upgradeQueue.claimed = false;
