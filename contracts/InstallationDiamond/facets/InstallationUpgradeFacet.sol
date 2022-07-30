@@ -226,6 +226,8 @@ contract InstallationUpgradeFacet is Modifiers {
     if (queue.readyBlock <= block.number) {
       _finalizeUpgrade(queue.owner, _upgradeIndex);
     }
+
+    emit UpgradeTimeReduced(_upgradeIndex, queue.parcelId, queue.coordinateX, queue.coordinateY, _blocks);
   }
 
   /// @dev TO BE DEPRECATED
