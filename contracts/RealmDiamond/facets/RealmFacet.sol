@@ -124,8 +124,6 @@ contract RealmFacet is Modifiers {
     uint256 _y,
     bytes memory _signature
   ) external onlyParcelOwner(_realmId) gameActive canBuild {
-    LibRealm.verifyAccessRight(_realmId, _gotchiId, 4, LibMeta.msgSender());
-
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
@@ -237,8 +235,6 @@ contract RealmFacet is Modifiers {
     uint256 _y,
     bytes memory _signature
   ) external onlyParcelOwner(_realmId) gameActive canBuild {
-    LibRealm.verifyAccessRight(_realmId, _gotchiId, 5, LibMeta.msgSender());
-
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
