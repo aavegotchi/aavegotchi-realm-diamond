@@ -321,6 +321,24 @@ contract InstallationUpgradeFacet is Modifiers {
     return s.parcelIdToUpgradeIds[_parcelId].length == 0;
   }
 
+  function parcelInstallationUpgrading(
+    uint256 _parcelId,
+    uint256 _installationId,
+    uint256 _x,
+    uint256 _y
+  ) external view returns (bool) {
+    uint256[] memory parcelQueue = s.parcelIdToUpgradeIds[_parcelId];
+
+    for (uint256 i; i < parcelQueue.length; i++) {
+      UpgradeQueue memory queue = s.upgradeQueue[parcelQueue[i]];
+
+      if (queue.installationId == _installationId && queue.coordinateX == _x && queue.coordinateY == _y) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   function getUpgradeQueueLength() external view returns (uint256) {
     return s.upgradeQueue.length;
   }

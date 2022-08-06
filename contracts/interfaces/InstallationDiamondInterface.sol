@@ -116,4 +116,11 @@ interface InstallationDiamondInterface {
   function parcelQueueEmpty(uint256 _parcelId) external view returns (bool);
 
   function getParcelUpgradeQueue(uint256 _parcelId) external view returns (UpgradeQueue[] memory output_, uint256[] memory indexes_);
+
+  function parcelInstallationUpgrading(
+    uint256 _parcelId,
+    uint256 _installationId,
+    uint256 _x,
+    uint256 _y
+  ) external view returns (bool);
 }
