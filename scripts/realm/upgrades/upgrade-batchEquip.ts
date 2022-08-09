@@ -6,7 +6,7 @@ import {
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
 
-export async function upgradeRealm() {
+export async function batchEquipUpgrade() {
   const diamondUpgrader = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
 
   const c = await varsForNetwork(ethers);
@@ -39,7 +39,7 @@ export async function upgradeRealm() {
 }
 
 if (require.main === module) {
-  upgradeRealm()
+  batchEquipUpgrade()
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {
