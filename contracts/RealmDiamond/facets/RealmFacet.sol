@@ -61,27 +61,32 @@ contract RealmFacet is Modifiers {
     }
   }
 
+  struct BatchEquipIO {
+    uint256[] types; //0 for installation, 1 for tile
+    bool[] equip; //true for equip, false for unequip
+    uint256[] ids;
+    uint256[] x;
+    uint256[] y;
+  }
+
   function batchEquip(
     uint256 _realmId,
     uint256 _gotchiId,
-    uint256[] calldata _types, //0 for installation, 1 for tile
-    bool[] calldata _equip, //true for equip, false for unequip
-    uint256[] calldata _ids,
-    uint256[] calldata _x,
-    uint256[] calldata _y,
-    bytes[] memory _signature
+    BatchEquipIO memory _params,
+    bytes[] memory _signatures
   ) external gameActive canBuild {
-    require(_ids.length == _x.length, "RealmFacet: Wrong length");
-    require(_x.length == _y.length, "RealmFacet: Wrong length");
-    for (uint256 i = 0; i < _ids.length; i++) {
-      if (_types[i] == 0 && _equip[i]) {
-        equipInstallation(_realmId, _gotchiId, _ids[i], _x[i], _y[i], _signature[i]);
-      } else if (_types[i] == 1 && _equip[i]) {
-        equipTile(_realmId, _gotchiId, _ids[i], _x[i], _y[i], _signature[i]);
-      } else if (_types[i] == 0 && !_equip[i]) {
-        unequipInstallation(_realmId, _gotchiId, _ids[i], _x[i], _y[i], _signature[i]);
-      } else if (_types[i] == 1 && !_equip[i]) {
-        unequipTile(_realmId, _gotchiId, _ids[i], _x[i], _y[i], _signature[i]);
+    require(_params.ids.length == _params.x.length, "RealmFacet: Wrong length");
+    require(_params.x.length == _params.y.length, "RealmFacet: Wrong length");
+
+    for (uint256 i = 0; i < _params.ids.length; i++) {
+      if (_params.types[i] == 0 && _params.equip[i]) {
+        equipInstallation(_realmId, _gotchiId, _params.ids[i], _params.x[i], _params.y[i], _signatures[i]);
+      } else if (_params.types[i] == 1 && _params.equip[i]) {
+        equipTile(_realmId, _gotchiId, _params.ids[i], _params.x[i], _params.y[i], _signatures[i]);
+      } else if (_params.types[i] == 0 && !_params.equip[i]) {
+        unequipInstallation(_realmId, _gotchiId, _params.ids[i], _params.x[i], _params.y[i], _signatures[i]);
+      } else if (_params.types[i] == 1 && !_params.equip[i]) {
+        unequipTile(_realmId, _gotchiId, _params.ids[i], _params.x[i], _params.y[i], _signatures[i]);
       }
     }
   }
