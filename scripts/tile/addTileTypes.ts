@@ -9,7 +9,11 @@ import { LedgerSigner } from "@anders-t/ethers-ledger";
 
 export async function setAddresses() {
   const c = await varsForNetwork(ethers);
-  const signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
+  let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
+
+  if (network.name === "mumbai") {
+    signer = await ethers.getSigners()[0];
+  }
 
   let tileFacet = (await ethers.getContractAt(
     "TileFacet",
@@ -26,13 +30,15 @@ export async function setAddresses() {
     );
   }
 
-  // godlike rug
-  const tile = outputTile(tileTypes[7]);
+  // blue tiles
+  const tilesToAdd = tileTypes.slice(8, 12).map((val) => outputTile(val));
 
-  console.log("Adding tile:", tile);
-  await tileFacet.addTileTypes([tile], {
+  console.log("Adding tile:", tilesToAdd);
+  const tx = await tileFacet.addTileTypes(tilesToAdd, {
     gasPrice: gasPrice,
   });
+
+  await tx.wait();
 
   const tiles = await tileFacet.getTileTypes([]);
   console.log("tiles:", tiles);

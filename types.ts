@@ -120,6 +120,10 @@ export interface TileTypeInput {
   alchemicaCost: BigNumberish[];
   craftTime: number;
   name: string;
+  FUD?: number;
+  FOMO?: number;
+  ALPHA?: number;
+  KEK?: number;
 }
 
 export type Level = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
