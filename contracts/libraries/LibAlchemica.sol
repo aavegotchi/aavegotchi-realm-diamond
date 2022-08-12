@@ -5,9 +5,12 @@ import {InstallationDiamondInterface} from "../interfaces/InstallationDiamondInt
 import {LibAppStorage, AppStorage, Parcel} from "./AppStorage.sol";
 import "../interfaces/IERC20Mintable.sol";
 import "../interfaces/AavegotchiDiamond.sol";
+import "../interfaces/IAlchemicaHook.sol";
+import "./LibMeta.sol";
 
 library LibAlchemica {
   uint256 constant bp = 100 ether;
+  bytes4 constant ON_ALCHEMICA_CHANNELED = IAlchemicaHook.onAlchemicaChanneled.selector;
 
   event AlchemicaClaimed(
     uint256 indexed _realmId,
@@ -326,5 +329,25 @@ library LibAlchemica {
   function popArray(uint256[] storage _array, uint256 _index) internal {
     _array[_index] = _array[_array.length - 1];
     _array.pop();
+  }
+
+  function checkOnAlchemicaChanneled(
+    uint256 _realmId,
+    uint256 _gotchiId,
+    address[4] memory _tokens,
+    uint256[4] memory _values
+  ) internal returns (bool) {
+    uint256 size;
+    address sender = LibMeta.msgSender();
+    assembly {
+      size := extcodesize(sender)
+    }
+    if (size > 0) {
+      require(
+        ON_ALCHEMICA_CHANNELED == IAlchemicaHook(sender).onAlchemicaChanneled(_realmId, _gotchiId, _tokens, _values),
+        "LibAlchemica: Is contract and does not implement onAlchemicaChanneled"
+      );
+    }
+    return true;
   }
 }
