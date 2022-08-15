@@ -8,8 +8,10 @@ import {
 } from "../../../tasks/deployUpgrade";
 import { OwnershipFacet } from "../../../typechain";
 
-export async function upgrade() {
+export async function upgradePreventMoving() {
   const diamondUpgrader = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
+
+  // await upgradeDiamondCut();
 
   const facets: FacetsAndAddSelectors[] = [
     {
@@ -51,7 +53,7 @@ export async function upgrade() {
 
   const args2: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
-    diamondAddress: c.tileDiamond,
+    diamondAddress: c.realmDiamond,
     facetsAndAddSelectors: joined2,
     useLedger: true,
     useMultisig: false,
@@ -59,11 +61,10 @@ export async function upgrade() {
 
   await run("deployUpgrade", args1); //upgrades to installation diamond
   await run("deployUpgrade", args2); //upgrades to tile diamond
-  //await resetChain(ethers);
 }
 
 if (require.main === module) {
-  upgrade()
+  upgradePreventMoving()
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {
