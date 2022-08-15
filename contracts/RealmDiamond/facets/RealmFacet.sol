@@ -289,24 +289,24 @@ contract RealmFacet is Modifiers {
     s.parcels[_realmId].upgradeQueueLength--;
   }
 
-  function fixGrid(
-    uint256 _realmId,
-    uint256 _installationId,
-    uint256[] memory _x,
-    uint256[] memory _y,
-    bool tile
-  ) external onlyOwner {
-    require(_x.length == _y.length, "RealmFacet: _x and _y must be the same length");
-    Parcel storage parcel = s.parcels[_realmId];
-    for (uint256 i; i < _x.length; i++) {
-      require(_x[i] < 64 && _y[i] < 64, "RealmFacet: _x and _y must be less than 64");
-      if (!tile) {
-        parcel.buildGrid[_x[i]][_y[i]] = _installationId;
-      } else {
-        parcel.tileGrid[_x[i]][_y[i]] = _installationId;
-      }
-    }
-  }
+  // function fixGrid(
+  //   uint256 _realmId,
+  //   uint256 _installationId,
+  //   uint256[] memory _x,
+  //   uint256[] memory _y,
+  //   bool tile
+  // ) external onlyOwner {
+  //   require(_x.length == _y.length, "RealmFacet: _x and _y must be the same length");
+  //   Parcel storage parcel = s.parcels[_realmId];
+  //   for (uint256 i; i < _x.length; i++) {
+  //     require(_x[i] < 64 && _y[i] < 64, "RealmFacet: _x and _y must be less than 64");
+  //     if (!tile) {
+  //       parcel.buildGrid[_x[i]][_y[i]] = _installationId;
+  //     } else {
+  //       parcel.tileGrid[_x[i]][_y[i]] = _installationId;
+  //     }
+  //   }
+  // }
 
   function buildingFrozen() external view returns (bool) {
     return s.freezeBuilding;

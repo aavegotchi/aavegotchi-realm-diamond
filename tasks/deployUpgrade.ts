@@ -177,8 +177,15 @@ task(
         const removeSelectors = getSighashes(facet.removeSelectors, hre.ethers);
 
         //debug
-        let existingFuncs = getSelectors(deployedFacet);
-        // let existingFuncNames = getFunctionNames(deployedFacet);
+        let existingSigHashes = getSelectors(deployedFacet);
+        let existingFuncNames = getFunctionNames(deployedFacet);
+
+        // console.log("existing func names", existingFuncNames);
+        // console.log("existing funcs:", existingSigHashes);
+
+        existingSigHashes.forEach((hash, index) => {
+          console.log("Debug:", hash, existingFuncNames[index]);
+        });
 
         for (const selector of newSelectors) {
           const index = newSelectors.findIndex((val) => val == selector);
@@ -186,7 +193,7 @@ task(
             `selector: ${selector}, function: ${facet.addSelectors[index]}`
           );
 
-          if (!existingFuncs.includes(selector)) {
+          if (!existingSigHashes.includes(selector)) {
             throw Error(
               `Selector ${selector} (${facet.addSelectors[index]}) not found`
             );

@@ -87,6 +87,7 @@ export function getFunctionNames(contract: Contract) {
   const selectors = signatures.reduce((acc: string[], val: string) => {
     if (val !== "init(bytes)") {
       const func = contract.interface.getFunction(val);
+
       acc.push(func.name);
     }
     return acc;
