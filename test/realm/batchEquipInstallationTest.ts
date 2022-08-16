@@ -1,7 +1,6 @@
 import { ethers, network } from "hardhat";
-import { varsForNetwork, alchemica, Constants } from "../../constants";
+import { varsForNetwork } from "../../constants";
 import { expect } from "chai";
-import { batchEquipUpgrade } from "../../scripts/realm/upgrades/upgrade-batchEquip";
 import { upgradeRealmTest } from "../../scripts/realm/upgrades/test/upgrade-realmTest";
 import {
   InstallationFacet,
@@ -14,18 +13,9 @@ import {
   RealmGettersAndSettersFacet,
   TestRealmFacet,
 } from "../../typechain-types";
-import { TileTypeInput, InstallationTypeInput } from "../../types";
-import {
-  genEquipInstallationSignature,
-  outputInstallation,
-  outputTile,
-} from "../../scripts/realm/realmHelpers";
+import { TileTypeInput } from "../../types";
+import { outputTile } from "../../scripts/realm/realmHelpers";
 import { impersonate } from "../../scripts/helperFunctions";
-import {
-  alchemicaTotals,
-  boostMultipliers,
-  greatPortalCapacity,
-} from "../../scripts/setVars";
 
 describe("Testing Equip Installation", async function () {
   const testAddress = "0xC76b85Cd226518DAF2027081dEfF2Eac4Cc91a00";
@@ -105,25 +95,6 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
-
-    // const backendSigner = new ethers.Wallet(process.env.PROD_PK);
-    // await (
-    //   await alchemicaFacet.setVars(
-    //     //@ts-ignore
-    //     alchemicaTotals(),
-    //     boostMultipliers,
-    //     greatPortalCapacity,
-    //     "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A",
-    //     "0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed",
-    //     "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
-    //     alchemica,
-    //     ethers.constants.AddressZero,
-    //     ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
-    //     ethers.constants.AddressZero,
-    //     "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355",
-    //     "0x86935F11C86623deC8a25696E1C19a8659CbF95d"
-    //   )
-    // ).wait();
   });
 
   it("Can craft installations and tiles", async () => {
@@ -320,21 +291,6 @@ describe("Testing Equip Installation", async function () {
       ethers,
       network
     );
-    // realmGettersAndSettersFacet = await impersonate(
-    //   testAddress,
-    //   realmGettersAndSettersFacet,
-    //   ethers,
-    //   network
-    // );
-    // let getParcelID = await realmGettersAndSettersFacet.getParcelInfo(
-    //   testParcelId
-    // );
-    // console.log("Parcel X Info: ", getParcelID.coordinateX.toString());
-    // console.log("Parcel Y Info: ", getParcelID.coordinateY.toString());
-    // console.log("Parcel Size Info: ", getParcelID.size.toString());
-
-    // let tileBalance = await tileFacet.tilesBalancesWithTypes(testAddress);
-    // console.log("Balance: ", tileBalance);
 
     const tileUnequipBatch = {
       types: [1],
@@ -357,42 +313,6 @@ describe("Testing Equip Installation", async function () {
       testParcelId,
       tileEquipBatch
     );
-
-    // for (let j = 0; j < 9; j++) {
-    //   for (let k = 0; k < 9; k++) {
-    //     const testEquipBatch = {
-    //       types: [1],
-    //       equip: [true],
-    //       ids: [7],
-    //       x: [j],
-    //       y: [k],
-    //     };
-    //     console.log("X: ", testEquipBatch.x);
-    //     console.log("Y: ", testEquipBatch.y);
-
-    //     await expect(
-    //       testRealmFacet.mockBatchEquip(testParcelId, testEquipBatch)
-    //     ).to.be.revertedWith("LibRealm: Invalid spot");
-    //   }
-    // }
-
-    // for (let j = 0; j < 9; j++) {
-    //   for (let k = 0; k < 9; k++) {
-    //     const testUnequipBatch = {
-    //       types: [1],
-    //       equip: [false],
-    //       ids: [4],
-    //       x: [j],
-    //       y: [k],
-    //     };
-    //     console.log("X: ", testUnequipBatch.x);
-    //     console.log("Y: ", testUnequipBatch.y);
-
-    //     await expect(
-    //       testRealmFacet.mockBatchEquip(testParcelId, testUnequipBatch)
-    //     ).to.be.revertedWith("LibRealm: wrong tileId");
-    //   }
-    // }
 
     await expect(equipped)
       .to.emit(testRealmFacet, "MockEquipTile")
