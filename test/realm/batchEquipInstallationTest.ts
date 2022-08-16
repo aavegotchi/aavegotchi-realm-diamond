@@ -1,7 +1,8 @@
 import { ethers, network } from "hardhat";
-import { varsForNetwork } from "../../constants";
+import { varsForNetwork, alchemica, Constants } from "../../constants";
 import { expect } from "chai";
 import { batchEquipUpgrade } from "../../scripts/realm/upgrades/upgrade-batchEquip";
+import { upgradeRealmTest } from "../../scripts/realm/upgrades/test/upgrade-realmTest";
 import {
   InstallationFacet,
   RealmFacet,
@@ -9,8 +10,11 @@ import {
   OwnershipFacet,
   AlchemicaFacet,
 } from "../../typechain";
-import { RealmGettersAndSettersFacet } from "../../typechain-types";
-import { TileTypeInput } from "../../types";
+import {
+  RealmGettersAndSettersFacet,
+  TestRealmFacet,
+} from "../../typechain-types";
+import { TileTypeInput, InstallationTypeInput } from "../../types";
 import {
   genEquipInstallationSignature,
   outputInstallation,
@@ -22,11 +26,9 @@ import {
   boostMultipliers,
   greatPortalCapacity,
 } from "../../scripts/setVars";
-import { alchemica, Constants } from "../../constants";
 
 describe("Testing Equip Installation", async function () {
   const testAddress = "0xC76b85Cd226518DAF2027081dEfF2Eac4Cc91a00";
-  const diamondAddress: string = "0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11";
 
   let realmFacet: RealmFacet;
   let installationsFacet: InstallationFacet;
@@ -34,17 +36,21 @@ describe("Testing Equip Installation", async function () {
   let ownershipFacet: OwnershipFacet;
   let alchemicaFacet: AlchemicaFacet;
   let realmGettersAndSettersFacet: RealmGettersAndSettersFacet;
+  let testRealmFacet: TestRealmFacet;
+  let installationAdminFacet;
   let ownerAddress: string;
   let testParcelId: number;
 
   before(async function () {
     this.timeout(20000000);
 
-    await batchEquipUpgrade();
+    // await batchEquipUpgrade();
+    await upgradeRealmTest();
 
     const c = await varsForNetwork(ethers);
     // testParcelId = 4887; //6614
     testParcelId = 6614;
+    // testParcelId = 2893;
 
     realmFacet = (await ethers.getContractAt(
       "RealmFacet",
@@ -63,7 +69,7 @@ describe("Testing Equip Installation", async function () {
 
     ownershipFacet = (await ethers.getContractAt(
       "OwnershipFacet",
-      diamondAddress
+      c.installationDiamond
     )) as OwnershipFacet;
 
     alchemicaFacet = (await ethers.getContractAt(
@@ -76,6 +82,11 @@ describe("Testing Equip Installation", async function () {
       c.realmDiamond
     )) as RealmGettersAndSettersFacet;
 
+    testRealmFacet = (await ethers.getContractAt(
+      "TestRealmFacet",
+      c.realmDiamond
+    )) as TestRealmFacet;
+
     ownerAddress = await ownershipFacet.owner();
 
     alchemicaFacet = await impersonate(
@@ -85,27 +96,37 @@ describe("Testing Equip Installation", async function () {
       network
     );
 
-    const backendSigner = new ethers.Wallet(process.env.PROD_PK);
-    await (
-      await alchemicaFacet.setVars(
-        //@ts-ignore
-        alchemicaTotals(),
-        boostMultipliers,
-        greatPortalCapacity,
-        "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A",
-        "0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed",
-        "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
-        alchemica,
-        ethers.constants.AddressZero,
-        ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
-        ethers.constants.AddressZero,
-        "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355",
-        "0x86935F11C86623deC8a25696E1C19a8659CbF95d"
-      )
-    ).wait();
+    installationAdminFacet = await impersonate(
+      ownerAddress,
+      await ethers.getContractAt(
+        "InstallationAdminFacet",
+        c.installationDiamond
+      ),
+      ethers,
+      network
+    );
+
+    // const backendSigner = new ethers.Wallet(process.env.PROD_PK);
+    // await (
+    //   await alchemicaFacet.setVars(
+    //     //@ts-ignore
+    //     alchemicaTotals(),
+    //     boostMultipliers,
+    //     greatPortalCapacity,
+    //     "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A",
+    //     "0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed",
+    //     "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
+    //     alchemica,
+    //     ethers.constants.AddressZero,
+    //     ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
+    //     ethers.constants.AddressZero,
+    //     "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355",
+    //     "0x86935F11C86623deC8a25696E1C19a8659CbF95d"
+    //   )
+    // ).wait();
   });
 
-  it.only("Can craft installations and tiles", async () => {
+  it("Can craft installations and tiles", async () => {
     //Craft all the tiles/installations you need
     installationsFacet = await impersonate(
       testAddress,
@@ -187,165 +208,324 @@ describe("Testing Equip Installation", async function () {
     await expect(getParcelID[2].toString()).to.equal(testAddress);
   });
 
-  it.only("Can batch equip installations", async () => {
+  it("Can batch equip installations", async () => {
     const installationBatchEquip = {
       types: [0, 0],
       equip: [true, true],
-      ids: [10, 10],
-      x: [8, 8],
-      y: [8, 8],
+      ids: [51, 27],
+      x: [2, 1],
+      y: [2, 1],
     };
 
-    installationsFacet = await impersonate(
+    testRealmFacet = await impersonate(
       testAddress,
-      installationsFacet,
+      testRealmFacet,
       ethers,
       network
     );
 
-    let installationsBalance = await installationsFacet.installationsBalances(
-      testAddress
-    );
-    console.log("Installations Balance: ", installationsBalance.toString());
-
-    realmFacet = await impersonate(testAddress, realmFacet, ethers, network);
-
-    const sig = await genEquipInstallationSignature(
+    let equipped = await testRealmFacet.mockBatchEquip(
       testParcelId,
-      12565,
-      10,
-      8,
-      8
+      installationBatchEquip
     );
-    console.log("Batching");
-    await realmFacet.batchEquip(testParcelId, 10, installationBatchEquip, [
-      sig,
-    ]);
 
-    // let parcelTokenBalance =
-    //   await installationsFacet.installationBalancesOfTokenByIds(
-    //     realmFacet,
-    //     testParcelId,
-    //     [1]
-    //   );
+    await expect(equipped)
+      .to.emit(testRealmFacet, "MockEquipInstallation")
+      .withArgs(testParcelId, 51, 2, 2);
+    await expect(equipped)
+      .to.emit(testRealmFacet, "MockEquipInstallation")
+      .withArgs(testParcelId, 27, 1, 1);
   });
 
   it("Can batch unequip installations", async () => {
-    const installationBatchUnequip = {
+    testRealmFacet = await impersonate(
+      testAddress,
+      testRealmFacet,
+      ethers,
+      network
+    );
+
+    const unequipBatch = {
       types: [0, 0],
       equip: [false, false],
-      ids: [1, 1],
-      x: [8, 8],
-      y: [8, 8],
+      ids: [51, 27],
+      x: [2, 1],
+      y: [2, 1],
     };
 
-    realmFacet = await impersonate(testAddress, realmFacet, ethers, network);
-
-    const sig = await genEquipInstallationSignature(
-      testParcelId,
-      12565,
-      10,
-      8,
-      8
+    testRealmFacet = await impersonate(
+      testAddress,
+      testRealmFacet,
+      ethers,
+      network
     );
-    console.log("Batching");
-    await realmFacet.batchEquip(testParcelId, 12565, installationBatchUnequip, [
-      sig,
-    ]);
+
+    let unequipped = await testRealmFacet.mockBatchEquip(
+      testParcelId,
+      unequipBatch
+    );
+
+    await expect(unequipped)
+      .to.emit(testRealmFacet, "MockUnequipInstallation")
+      .withArgs(testParcelId, 51, 2, 2);
+    await expect(unequipped)
+      .to.emit(testRealmFacet, "MockUnequipInstallation")
+      .withArgs(testParcelId, 27, 1, 1);
   });
 
   it("Can batch equip and unequip installations", async () => {
-    const installationBatchEquipAndUnequip = {
+    const equipBatch = {
       types: [0, 0],
-      equip: [true, false],
-      ids: [1, 2],
-      x: [8, 8],
-      y: [8, 8],
+      equip: [true, true],
+      ids: [51, 27],
+      x: [2, 1],
+      y: [2, 1],
     };
 
-    realmFacet = await impersonate(testAddress, realmFacet, ethers, network);
+    testRealmFacet = await impersonate(
+      testAddress,
+      testRealmFacet,
+      ethers,
+      network
+    );
 
-    const sig = await genEquipInstallationSignature(
+    await testRealmFacet.mockBatchEquip(testParcelId, equipBatch);
+
+    const equipAndUnequipBatch = {
+      types: [0, 0],
+      equip: [false, true],
+      ids: [51, 27],
+      x: [2, 3],
+      y: [2, 3],
+    };
+
+    let equipAandUnequip = await testRealmFacet.mockBatchEquip(
       testParcelId,
-      12565,
-      10,
-      8,
-      8
+      equipAndUnequipBatch
     );
-    console.log("Batching");
-    await realmFacet.batchEquip(
-      testParcelId,
-      12565,
-      installationBatchEquipAndUnequip,
-      [sig]
-    );
+
+    await expect(equipAandUnequip)
+      .to.emit(testRealmFacet, "MockUnequipInstallation")
+      .withArgs(testParcelId, 51, 2, 2);
+    await expect(equipAandUnequip)
+      .to.emit(testRealmFacet, "MockEquipInstallation")
+      .withArgs(testParcelId, 27, 3, 3);
   });
 
   it("Can batch equip tiles", async () => {
-    const tileBatchEquip = {
-      types: [0, 0],
+    tileFacet = await impersonate(testAddress, tileFacet, ethers, network);
+    testRealmFacet = await impersonate(
+      testAddress,
+      testRealmFacet,
+      ethers,
+      network
+    );
+    // realmGettersAndSettersFacet = await impersonate(
+    //   testAddress,
+    //   realmGettersAndSettersFacet,
+    //   ethers,
+    //   network
+    // );
+    // let getParcelID = await realmGettersAndSettersFacet.getParcelInfo(
+    //   testParcelId
+    // );
+    // console.log("Parcel X Info: ", getParcelID.coordinateX.toString());
+    // console.log("Parcel Y Info: ", getParcelID.coordinateY.toString());
+    // console.log("Parcel Size Info: ", getParcelID.size.toString());
+
+    // let tileBalance = await tileFacet.tilesBalancesWithTypes(testAddress);
+    // console.log("Balance: ", tileBalance);
+
+    const tileUnequipBatch = {
+      types: [1],
+      equip: [false],
+      ids: [2],
+      x: [4],
+      y: [4],
+    };
+    await testRealmFacet.mockBatchEquip(testParcelId, tileUnequipBatch);
+
+    const tileEquipBatch = {
+      types: [1, 1],
       equip: [true, true],
-      ids: [1, 1],
-      x: [8, 8],
-      y: [8, 8],
+      ids: [2, 3],
+      x: [0, 8],
+      y: [0, 8],
     };
 
-    realmFacet = await impersonate(testAddress, realmFacet, ethers, network);
-
-    const sig = await genEquipInstallationSignature(
+    let equipped = await testRealmFacet.mockBatchEquip(
       testParcelId,
-      12565,
-      10,
-      8,
-      8
+      tileEquipBatch
     );
-    console.log("Batching");
-    await realmFacet.batchEquip(testParcelId, 12565, tileBatchEquip, [sig]);
+
+    // for (let j = 0; j < 9; j++) {
+    //   for (let k = 0; k < 9; k++) {
+    //     const testEquipBatch = {
+    //       types: [1],
+    //       equip: [true],
+    //       ids: [7],
+    //       x: [j],
+    //       y: [k],
+    //     };
+    //     console.log("X: ", testEquipBatch.x);
+    //     console.log("Y: ", testEquipBatch.y);
+
+    //     await expect(
+    //       testRealmFacet.mockBatchEquip(testParcelId, testEquipBatch)
+    //     ).to.be.revertedWith("LibRealm: Invalid spot");
+    //   }
+    // }
+
+    // for (let j = 0; j < 9; j++) {
+    //   for (let k = 0; k < 9; k++) {
+    //     const testUnequipBatch = {
+    //       types: [1],
+    //       equip: [false],
+    //       ids: [4],
+    //       x: [j],
+    //       y: [k],
+    //     };
+    //     console.log("X: ", testUnequipBatch.x);
+    //     console.log("Y: ", testUnequipBatch.y);
+
+    //     await expect(
+    //       testRealmFacet.mockBatchEquip(testParcelId, testUnequipBatch)
+    //     ).to.be.revertedWith("LibRealm: wrong tileId");
+    //   }
+    // }
+
+    await expect(equipped)
+      .to.emit(testRealmFacet, "MockEquipTile")
+      .withArgs(testParcelId, 2, 0, 0);
+    await expect(equipped)
+      .to.emit(testRealmFacet, "MockEquipTile")
+      .withArgs(testParcelId, 3, 8, 8);
+
+    const newTileUnequipBatch = {
+      types: [1, 1],
+      equip: [false, false],
+      ids: [2, 3],
+      x: [0, 8],
+      y: [0, 8],
+    };
+    await testRealmFacet.mockBatchEquip(testParcelId, newTileUnequipBatch);
   });
 
   it("Can batch unequip tiles", async () => {
-    const tileBatchUnequip = {
-      types: [0, 0],
-      equip: [false, false],
-      ids: [1, 1],
-      x: [8, 8],
-      y: [8, 8],
-    };
-
-    realmFacet = await impersonate(testAddress, realmFacet, ethers, network);
-
-    const sig = await genEquipInstallationSignature(
-      testParcelId,
-      12565,
-      10,
-      8,
-      8
+    testRealmFacet = await impersonate(
+      testAddress,
+      testRealmFacet,
+      ethers,
+      network
     );
-    console.log("Batching");
-    await realmFacet.batchEquip(testParcelId, 12565, tileBatchUnequip, [sig]);
+
+    const newTileEquipBatch = {
+      types: [1, 1],
+      equip: [true, true],
+      ids: [2, 3],
+      x: [0, 8],
+      y: [0, 8],
+    };
+    await testRealmFacet.mockBatchEquip(testParcelId, newTileEquipBatch);
+
+    const newTileUnequipBatch = {
+      types: [1, 1],
+      equip: [false, false],
+      ids: [2, 3],
+      x: [0, 8],
+      y: [0, 8],
+    };
+    let unequipped = await testRealmFacet.mockBatchEquip(
+      testParcelId,
+      newTileUnequipBatch
+    );
+
+    await expect(unequipped)
+      .to.emit(testRealmFacet, "MockUnequipTile")
+      .withArgs(testParcelId, 2, 0, 0);
+    await expect(unequipped)
+      .to.emit(testRealmFacet, "MockUnequipTile")
+      .withArgs(testParcelId, 3, 8, 8);
   });
 
   it("Can batch equip and unequip tiles", async () => {
-    const tileBatchEquipAndUnepuip = {
-      types: [0, 0],
-      equip: [true, false],
-      ids: [1, 2],
-      x: [8, 8],
-      y: [8, 8],
+    testRealmFacet = await impersonate(
+      testAddress,
+      testRealmFacet,
+      ethers,
+      network
+    );
+
+    let tileEquipBatch = {
+      types: [1],
+      equip: [true],
+      ids: [2],
+      x: [0],
+      y: [0],
+    };
+    await testRealmFacet.mockBatchEquip(testParcelId, tileEquipBatch);
+
+    let tileUnequipBatch = {
+      types: [1, 1],
+      equip: [false, true],
+      ids: [2, 3],
+      x: [0, 8],
+      y: [0, 8],
+    };
+    let equipped = await testRealmFacet.mockBatchEquip(
+      testParcelId,
+      tileUnequipBatch
+    );
+
+    await expect(equipped)
+      .to.emit(testRealmFacet, "MockUnequipTile")
+      .withArgs(testParcelId, 2, 0, 0);
+    await expect(equipped)
+      .to.emit(testRealmFacet, "MockEquipTile")
+      .withArgs(testParcelId, 3, 8, 8);
+
+    tileEquipBatch = {
+      types: [1],
+      equip: [false],
+      ids: [3],
+      x: [8],
+      y: [8],
+    };
+    await testRealmFacet.mockBatchEquip(testParcelId, tileEquipBatch);
+  });
+
+  it("CANNOT equip a installation or tile on a position that already has one equipped", async () => {
+    testRealmFacet = await impersonate(
+      testAddress,
+      testRealmFacet,
+      ethers,
+      network
+    );
+
+    const tileEquipBatch = {
+      types: [1, 1],
+      equip: [true, true],
+      ids: [2, 3],
+      x: [0, 8],
+      y: [0, 8],
     };
 
-    realmFacet = await impersonate(testAddress, realmFacet, ethers, network);
+    await testRealmFacet.mockBatchEquip(testParcelId, tileEquipBatch);
 
-    const sig = await genEquipInstallationSignature(
-      testParcelId,
-      12565,
-      10,
-      8,
-      8
-    );
-    console.log("Batching");
-    await realmFacet.batchEquip(testParcelId, 12565, tileBatchEquipAndUnepuip, [
-      sig,
-    ]);
+    await expect(
+      testRealmFacet.mockBatchEquip(testParcelId, tileEquipBatch)
+    ).to.be.revertedWith("LibRealm: Invalid spot");
+
+    const newEquipBatch = {
+      types: [0, 0],
+      equip: [true, true],
+      ids: [51, 27],
+      x: [2, 1],
+      y: [2, 1],
+    };
+
+    await expect(
+      testRealmFacet.mockBatchEquip(testParcelId, newEquipBatch)
+    ).to.be.revertedWith("LibRealm: Invalid spot");
   });
 });
