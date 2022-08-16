@@ -21,6 +21,11 @@ export async function upgrade() {
       addSelectors: ["function setIndex(uint256 _tokenId) external"],
       removeSelectors: [],
     },
+    {
+      facetName: "RealmFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
   ];
 
   const c = await varsForNetwork(ethers);
