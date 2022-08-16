@@ -181,6 +181,11 @@ contract ERC721Facet is Modifiers {
     return LibStrings.strWithUint("https://app.aavegotchi.com/metadata/realm/", _tokenId); //Here is your URL!
   }
 
+  function setIndex(uint256 _tokenId) external onlyOwner {
+    address owner = this.ownerOf(_tokenId);
+    s.ownerTokenIdIndexes[owner][_tokenId] -= 1;
+  }
+
   struct MintParcelInput {
     uint256 coordinateX;
     uint256 coordinateY;
