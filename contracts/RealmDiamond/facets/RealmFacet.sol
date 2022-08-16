@@ -187,6 +187,11 @@ contract RealmFacet is Modifiers {
     uint256 _x1,
     uint256 _y1
   ) external onlyParcelOwner(_realmId) gameActive canBuild {
+    //Check if upgrade is in progress
+    InstallationDiamondInterface installation = InstallationDiamondInterface(s.installationsDiamond);
+
+    require(installation.parcelInstallationUpgrading(_realmId, _installationId, _x0, _y0) == false, "RealmFacet: Installation is upgrading");
+
     LibRealm.removeInstallation(_realmId, _installationId, _x0, _y0);
     emit UnequipInstallation(_realmId, _installationId, _x0, _y0);
     LibRealm.placeInstallation(_realmId, _installationId, _x1, _y1);

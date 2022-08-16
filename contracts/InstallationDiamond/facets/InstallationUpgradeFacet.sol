@@ -226,6 +226,8 @@ contract InstallationUpgradeFacet is Modifiers {
     if (queue.readyBlock <= block.number) {
       _finalizeUpgrade(queue.owner, _upgradeIndex);
     }
+
+    emit UpgradeTimeReduced(_upgradeIndex, queue.parcelId, queue.coordinateX, queue.coordinateY, _blocks);
   }
 
   /// @dev TO BE DEPRECATED
@@ -317,6 +319,24 @@ contract InstallationUpgradeFacet is Modifiers {
   /// @notice For realm to validate whether a parcel has an upgrade queueing before removing an installation
   function parcelQueueEmpty(uint256 _parcelId) external view returns (bool) {
     return s.parcelIdToUpgradeIds[_parcelId].length == 0;
+  }
+
+  function parcelInstallationUpgrading(
+    uint256 _parcelId,
+    uint256 _installationId,
+    uint256 _x,
+    uint256 _y
+  ) external view returns (bool) {
+    uint256[] memory parcelQueue = s.parcelIdToUpgradeIds[_parcelId];
+
+    for (uint256 i; i < parcelQueue.length; i++) {
+      UpgradeQueue memory queue = s.upgradeQueue[parcelQueue[i]];
+
+      if (queue.installationId == _installationId && queue.coordinateX == _x && queue.coordinateY == _y) {
+        return true;
+      }
+    }
+    return false;
   }
 
   function getUpgradeQueueLength() external view returns (uint256) {
