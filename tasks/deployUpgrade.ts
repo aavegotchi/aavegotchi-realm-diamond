@@ -178,7 +178,11 @@ task(
 
         //debug
         let existingFuncs = getSelectors(deployedFacet);
-        // let existingFuncNames = getFunctionNames(deployedFacet);
+        let existingFuncNames = getFunctionNames(deployedFacet);
+
+        existingFuncs.forEach((el, index) => {
+          console.log("debug:", el, existingFuncNames[index]);
+        });
 
         for (const selector of newSelectors) {
           const index = newSelectors.findIndex((val) => val == selector);

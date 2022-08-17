@@ -155,6 +155,16 @@ export const genChannelAlchemicaSignature = async (
   // signedMessage = await backendSigner.signMessage(messageHash);
 };
 
+export const genReduceUpgradeTimeSignature = async (upgradeIndex: number) => {
+  let messageHash = ethers.utils.solidityKeccak256(["uint256"], [upgradeIndex]);
+  let signedMessage = await backendSigner().signMessage(
+    ethers.utils.arrayify(messageHash)
+  );
+  let signature = ethers.utils.arrayify(signedMessage);
+
+  return signature;
+};
+
 export async function faucetRealAlchemica(receiver: string, ethers: any) {
   const alchemica = [
     "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f",
