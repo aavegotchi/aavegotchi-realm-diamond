@@ -51,7 +51,7 @@ const kovanVars: Constants = {
   gltr: "",
 };
 
-const maticVars: Constants = {
+export const maticVars: Constants = {
   aavegotchiDiamond: "0x86935F11C86623deC8a25696E1C19a8659CbF95d",
   realmDiamond: "0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11",
   installationDiamond: "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A",
