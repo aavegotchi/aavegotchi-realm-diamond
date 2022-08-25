@@ -15,6 +15,8 @@ import { maticRealmDiamondAddress } from "../../tile/helperFunctions";
 export async function upgrade() {
   let chainIds: BigNumberish[];
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
+  const aaveFrensArtwork = "0xa983b3d938eedf79783ce88ed227a47b6861a3e9";
+  const ghstStakingDiamond = "0xA02d547512Bb90002807499F05495Fe9C4C3943f";
 
   const c = await varsForNetwork(ethers);
 
@@ -38,10 +40,15 @@ export async function upgrade() {
     maticRealmDiamondAddress,
     maticVars.tileDiamond,
     maticVars.installationDiamond,
+    aaveFrensArtwork,
+    ghstStakingDiamond,
   ];
   //assume all tokens are on matic
   // chainIds = chainIds.fill(BigNumber.from(137), 0, addresses.length - 1);
-  chainIds = new Array(addresses.length).fill(BigNumber.from(137));
+  chainIds = new Array(addresses.length - 1).fill(BigNumber.from(137));
+  //aaveFrens is on ethereum mainnet
+  chainIds.push(1);
+
   let iface: NFTDisplayFacetInterface = new ethers.utils.Interface(
     NFTDisplayFacet__factory.abi
   ) as NFTDisplayFacetInterface;
