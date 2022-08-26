@@ -31,17 +31,11 @@ export async function setAddresses() {
     tileFacet = await impersonate(owner, tileFacet, ethers, network);
   }
 
-  // add real data
-  // const tile = outputTile(tileTypes[3]);
+  const tx = await tileFacet.deprecateTiles(["8", "9", "10", "11"], {
+    gasPrice: gasPrice,
+  });
 
-  // console.log("Adding tile:", tile);
-  // await tileFacet.addTileTypes([tile], {
-  //   gasPrice: gasPrice,
-  // });
-
-  console.log("Set deprecate time to:", new Date(1654092000 * 1000));
-  await tileFacet.deprecateTiles(["3"], { gasPrice: gasPrice });
-
+  await tx.wait();
   const tiles = await tileFacet.getTileTypes([]);
   console.log("tiles:", tiles);
 }
