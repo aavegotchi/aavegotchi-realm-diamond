@@ -30,13 +30,13 @@ contract NFTDisplayTests is Test {
 
   function testWhitelistAndBlacklist() public {
     displayFacet = NFTDisplayFacet(TestConstants.REALM_DIAMOND_ADDRESS_MATIC);
-    displayFacet.whitelistNFTs(populateAddressArray(), maticChainId());
+    displayFacet.toggleWhitelist(populateAddressArray(), maticChainId(), populateWhitelistArray());
 
     for (uint256 i; i == 4; i++) {
       assertEq(displayFacet.viewNFTDisplayStatus(populateAddressArray()[i], maticChainId()[i]), true);
     }
     //blacklist
-    displayFacet.blacklistNFTs(populateAddressArray(), maticChainId());
+    displayFacet.toggleWhitelist(populateAddressArray(), maticChainId(), populateBlacklistArray());
     for (uint256 i; i == 4; i++) {
       assertEq(displayFacet.viewNFTDisplayStatus(populateAddressArray()[i], maticChainId()[i]), false);
     }
@@ -58,6 +58,22 @@ function populateAddressArray() view returns (address[] memory a) {
   a[1] = TestConstants.REALM_DIAMOND_ADDRESS_MATIC;
   a[2] = TestConstants.INSTALLATION_DIAMOND_ADDRESS_MATIC;
   a[3] = TestConstants.TILE_DIAMOND_ADDRESS_MATIC;
+}
+
+function populateWhitelistArray() view returns (bool[] memory b) {
+  b = new bool[](4);
+  b[0] = true;
+  b[1] = true;
+  b[2] = true;
+  b[3] = true;
+}
+
+function populateBlacklistArray() view returns (bool[] memory b) {
+  b = new bool[](4);
+  b[0] = false;
+  b[1] = false;
+  b[2] = false;
+  b[3] = false;
 }
 
 function maticChainId() view returns (uint256[] memory cIds) {

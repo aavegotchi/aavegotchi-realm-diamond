@@ -14,6 +14,7 @@ import { maticRealmDiamondAddress } from "../../tile/helperFunctions";
 
 export async function upgrade() {
   let chainIds: BigNumberish[];
+  let whitelists: boolean[];
   const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
   const aaveFrensArtwork = "0xa983b3d938eedf79783ce88ed227a47b6861a3e9";
   const ghstStakingDiamond = "0xA02d547512Bb90002807499F05495Fe9C4C3943f";
@@ -24,9 +25,8 @@ export async function upgrade() {
     {
       facetName: "NFTDisplayFacet",
       addSelectors: [
-        "function whitelistNFTs(address[] calldata _tokens, uint256[] calldata _chainIds) external",
-        "function blacklistNFTs(address[] calldata _tokens, uint256[] calldata _chainIds) external",
-        "function viewNFTDisplayStatus(address _token, uint256 _chainId) public ",
+        "function toggleWhitelist(address[] calldata _tokens, uint256[] calldata _chainIds,bool[] calldata _whitelist) external",
+        "function viewNFTDisplayStatus(address _token, uint256 _chainId) public",
       ],
       removeSelectors: [],
     },
@@ -48,14 +48,16 @@ export async function upgrade() {
   chainIds = new Array(addresses.length - 1).fill(BigNumber.from(137));
   //aaveFrens is on ethereum mainnet
   chainIds.push(1);
+  whitelists = new Array(chainIds.length).fill(true);
 
   let iface: NFTDisplayFacetInterface = new ethers.utils.Interface(
     NFTDisplayFacet__factory.abi
   ) as NFTDisplayFacetInterface;
 
-  const calldata = iface.encodeFunctionData("whitelistNFTs", [
+  const calldata = iface.encodeFunctionData("toggleWhitelist", [
     addresses,
     chainIds,
+    whitelists,
   ]);
 
   const args: DeployUpgradeTaskArgs = {

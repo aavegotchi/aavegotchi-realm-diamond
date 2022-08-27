@@ -8,19 +8,19 @@ contract NFTDisplayFacet is Modifiers {
   //  event NFTBlacklisted(address _token, uint256 _chainId);
   error LengthMisMatch();
 
-  function whitelistNFTs(address[] calldata _tokens, uint256[] calldata _chainIds) external onlyOwner {
-    if (_tokens.length != _chainIds.length) revert LengthMisMatch();
+  function toggleWhitelist(
+    address[] calldata _tokens,
+    uint256[] calldata _chainIds,
+    bool[] calldata _whitelist
+  ) external onlyOwner {
+    if (_tokens.length != _chainIds.length && _tokens.length != _whitelist.length) revert LengthMisMatch();
     for (uint256 i; i < _tokens.length; i++) {
-      s.allowedNFTDisplays[_chainIds[i]][_tokens[i]] = true;
-      emit NFTDisplayStatusUpdated(_tokens[i], _chainIds[i], true);
-    }
-  }
+      address token = _tokens[i];
+      uint256 chainId = _chainIds[i];
+      bool whitelist = _whitelist[i];
 
-  function blacklistNFTs(address[] calldata _tokens, uint256[] calldata _chainIds) external onlyOwner {
-    if (_tokens.length != _chainIds.length) revert LengthMisMatch();
-    for (uint256 i; i < _tokens.length; i++) {
-      s.allowedNFTDisplays[_chainIds[i]][_tokens[i]] = false;
-      emit NFTDisplayStatusUpdated(_tokens[i], _chainIds[i], false);
+      s.allowedNFTDisplays[chainId][token] = whitelist;
+      emit NFTDisplayStatusUpdated(token, chainId, whitelist);
     }
   }
 
