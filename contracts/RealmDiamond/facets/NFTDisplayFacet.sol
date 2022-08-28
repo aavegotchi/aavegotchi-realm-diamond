@@ -5,7 +5,6 @@ import "../../libraries/AppStorage.sol";
 
 contract NFTDisplayFacet is Modifiers {
   event NFTDisplayStatusUpdated(address _token, uint256 _chainId, bool _allowed);
-  //  event NFTBlacklisted(address _token, uint256 _chainId);
   error LengthMisMatch();
 
   function toggleWhitelist(
