@@ -8,11 +8,10 @@ import {
   TileFacet,
   OwnershipFacet,
   AlchemicaFacet,
-} from "../../typechain";
-import {
   RealmGettersAndSettersFacet,
   TestRealmFacet,
-} from "../../typechain-types";
+} from "../../typechain";
+
 import { TileTypeInput } from "../../types";
 import { outputTile } from "../../scripts/realm/realmHelpers";
 import { impersonate } from "../../scripts/helperFunctions";
