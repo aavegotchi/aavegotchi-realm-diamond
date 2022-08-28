@@ -1,0 +1,10 @@
+[profile.default]
+src = 'contracts'
+out = 'out'
+libs = ['lib']
+fuzz_runs = 256
+verbosity=3
+
+ffi=true
+
+# See more config options https://github.com/gakonst/foundry/tree/master/config

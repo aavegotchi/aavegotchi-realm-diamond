@@ -15,3 +15,7 @@ test-foundry-diamond:
 test-harvesting:
 	@echo Run harvesting tests
 	@forge test -vvv -c test/foundry/harvesting
+
+test-nftDisplay:
+	@echo Running tests for NFT Displays
+	@forge test --mc NFTDisplayTests --fork-url FOUNDRY_ETH_RPC_URL -vvvvv    

@@ -63,40 +63,40 @@ library LibERC721 {
     require(_from == owner, "ERC721: _from is not owner, transfer failed");
     s.parcels[_tokenId].owner = _to;
 
-    //Update indexes and arrays
+    //Update indexes and arrays if _to is a different address
+    if (_from != _to) {
+      //Get the index of the tokenID to transfer
+      uint256 transferIndex = s.ownerTokenIdIndexes[_from][_tokenId];
+      uint256 lastIndex = s.ownerTokenIds[_from].length - 1;
+      uint256 lastTokenId = s.ownerTokenIds[_from][lastIndex];
+      uint256 newIndex = s.ownerTokenIds[_to].length;
 
-    //Get the index of the tokenID to transfer
-    uint256 transferIndex = s.ownerTokenIdIndexes[_from][_tokenId];
+      //Move the last element of the ownerIds array to replace the tokenId to be transferred
+      s.ownerTokenIdIndexes[_from][lastTokenId] = transferIndex;
+      s.ownerTokenIds[_from][transferIndex] = lastTokenId;
+      delete s.ownerTokenIdIndexes[_from][_tokenId];
 
-    uint256 lastIndex = s.ownerTokenIds[_from].length - 1;
-    uint256 lastTokenId = s.ownerTokenIds[_from][lastIndex];
-    uint256 newIndex = s.ownerTokenIds[_to].length;
+      //pop from array
+      s.ownerTokenIds[_from].pop();
 
-    //Move the last element of the ownerIds array to replace the tokenId to be transferred
-    s.ownerTokenIdIndexes[_from][lastTokenId] = transferIndex;
-    s.ownerTokenIds[_from][transferIndex] = lastTokenId;
-    delete s.ownerTokenIdIndexes[_from][_tokenId];
+      //update index of new token
+      s.ownerTokenIdIndexes[_to][_tokenId] = newIndex;
+      s.ownerTokenIds[_to].push(_tokenId);
 
-    //pop from array
-    s.ownerTokenIds[_from].pop();
-
-    //update index of new token
-    s.ownerTokenIdIndexes[_to][_tokenId] = newIndex;
-    s.ownerTokenIds[_to].push(_tokenId);
-
-    if (s.approved[_tokenId] != address(0)) {
-      delete s.approved[_tokenId];
-      emit LibERC721.Approval(owner, address(0), _tokenId);
-    }
-
-    //reset the parcel access rights on transfer to 0
-    for (uint256 i; i < 7; ) {
-      if (s.accessRights[_tokenId][i] > 0) {
-        s.accessRights[_tokenId][i] = 0;
-        emit ParcelAccessRightSet(_tokenId, i, 0);
+      if (s.approved[_tokenId] != address(0)) {
+        delete s.approved[_tokenId];
+        emit LibERC721.Approval(owner, address(0), _tokenId);
       }
-      unchecked {
-        ++i;
+
+      //reset the parcel access rights on transfer to 0
+      for (uint256 i; i < 7; ) {
+        if (s.accessRights[_tokenId][i] > 0) {
+          s.accessRights[_tokenId][i] = 0;
+          emit ParcelAccessRightSet(_tokenId, i, 0);
+        }
+        unchecked {
+          ++i;
+        }
       }
     }
 
