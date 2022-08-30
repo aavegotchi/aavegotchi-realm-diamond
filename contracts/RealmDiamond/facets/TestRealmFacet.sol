@@ -31,11 +31,11 @@ contract TestRealmFacet is Modifiers {
 
     for (uint256 i = 0; i < _params.ids.length; i++) {
       if (_params.types[i] == 0 && _params.equip[i]) {
-        mockEquipInstallation(_realmId, _params.ids[i], _params.x[i], _params.y[i]);
+        mockEquipInstallation(_realmId, 0, _params.ids[i], _params.x[i], _params.y[i]);
       } else if (_params.types[i] == 1 && _params.equip[i]) {
         mockEquipTile(_realmId, _params.ids[i], _params.x[i], _params.y[i]);
       } else if (_params.types[i] == 0 && !_params.equip[i]) {
-        mockUnequipInstallation(_realmId, _params.ids[i], _params.x[i], _params.y[i]);
+        mockUnequipInstallation(_realmId, 0, _params.ids[i], _params.x[i], _params.y[i]);
       } else if (_params.types[i] == 1 && !_params.equip[i]) {
         mockUnequipTile(_realmId, _params.ids[i], _params.x[i], _params.y[i]);
       }
