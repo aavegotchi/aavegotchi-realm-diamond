@@ -31,7 +31,7 @@ export async function setAddresses() {
   }
 
   // blue tiles
-  const tilesToAdd = tileTypes.slice(16, 20).map((val) => outputTile(val));
+  const tilesToAdd = tileTypes.slice(20, 24).map((val) => outputTile(val));
 
   console.log("Adding tile:", tilesToAdd);
   const tx = await tileFacet.addTileTypes(tilesToAdd, {
