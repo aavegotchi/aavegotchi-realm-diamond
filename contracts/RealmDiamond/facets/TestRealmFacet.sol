@@ -12,13 +12,43 @@ import "../../libraries/LibAlchemica.sol";
 import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamondInterface.sol";
 
 contract TestRealmFacet is Modifiers {
+  event MockEquipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y);
+  event MockUnequipInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y);
+  event MockEquipTile(uint256 _realmId, uint256 _tileId, uint256 _x, uint256 _y);
+  event MockUnequipTile(uint256 _realmId, uint256 _tileId, uint256 _x, uint256 _y);
+
+  struct BatchEquipIO {
+    uint256[] types; //0 for installation, 1 for tile
+    bool[] equip; //true for equip, false for unequip
+    uint256[] ids;
+    uint256[] x;
+    uint256[] y;
+  }
+
+  function mockBatchEquip(uint256 _realmId, BatchEquipIO memory _params) external {
+    require(_params.ids.length == _params.x.length, "RealmFacet: Wrong length");
+    require(_params.x.length == _params.y.length, "RealmFacet: Wrong length");
+
+    for (uint256 i = 0; i < _params.ids.length; i++) {
+      if (_params.types[i] == 0 && _params.equip[i]) {
+        mockEquipInstallation(_realmId, _params.ids[i], _params.x[i], _params.y[i]);
+      } else if (_params.types[i] == 1 && _params.equip[i]) {
+        mockEquipTile(_realmId, _params.ids[i], _params.x[i], _params.y[i]);
+      } else if (_params.types[i] == 0 && !_params.equip[i]) {
+        mockUnequipInstallation(_realmId, _params.ids[i], _params.x[i], _params.y[i]);
+      } else if (_params.types[i] == 1 && !_params.equip[i]) {
+        mockUnequipTile(_realmId, _params.ids[i], _params.x[i], _params.y[i]);
+      }
+    }
+  }
+
   /// @dev Equip installation without signature or owner checks for testing
   function mockEquipInstallation(
     uint256 _realmId,
     uint256 _installationId,
     uint256 _x,
     uint256 _y
-  ) external {
+  ) public {
     InstallationDiamondInterface.InstallationType memory installation = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(
       _installationId
     );
@@ -39,6 +69,8 @@ contract TestRealmFacet is Modifiers {
     InstallationDiamondInterface(s.installationsDiamond).equipInstallation(msg.sender, _realmId, _installationId);
 
     LibAlchemica.increaseTraits(_realmId, _installationId, false);
+
+    emit MockEquipInstallation(_realmId, _installationId, _x, _y);
   }
 
   /// @dev Unequip an installation without signature or owner checks for testing
@@ -47,7 +79,7 @@ contract TestRealmFacet is Modifiers {
     uint256 _installationId,
     uint256 _x,
     uint256 _y
-  ) external {
+  ) public {
     InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
     InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
 
@@ -60,6 +92,38 @@ contract TestRealmFacet is Modifiers {
     LibRealm.removeInstallation(_realmId, _installationId, _x, _y);
     InstallationDiamondInterface(s.installationsDiamond).unequipInstallation(msg.sender, _realmId, _installationId);
     LibAlchemica.reduceTraits(_realmId, _installationId, false);
+
+    emit MockUnequipInstallation(_realmId, _installationId, _x, _y);
+  }
+
+  /// @dev Equip a tile without signature or owner checks for testing
+  function mockEquipTile(
+    uint256 _realmId,
+    uint256 _tileId,
+    uint256 _x,
+    uint256 _y
+  ) public {
+    //3 - Equip Tile
+    // LibRealm.verifyAccessRight(_realmId, _gotchiId, 3);
+
+    LibRealm.placeTile(_realmId, _tileId, _x, _y);
+    TileDiamondInterface(s.tileDiamond).equipTile(msg.sender, _realmId, _tileId);
+
+    emit MockEquipTile(_realmId, _tileId, _x, _y);
+  }
+
+  /// @dev Unequip a tile without signature or owner checks for testing
+  function mockUnequipTile(
+    uint256 _realmId,
+    uint256 _tileId,
+    uint256 _x,
+    uint256 _y
+  ) public {
+    LibRealm.removeTile(_realmId, _tileId, _x, _y);
+
+    TileDiamondInterface(s.tileDiamond).unequipTile(msg.sender, _realmId, _tileId);
+
+    emit MockUnequipTile(_realmId, _tileId, _x, _y);
   }
 
   /// @notice Allow the owner of a parcel to start surveying his parcel
