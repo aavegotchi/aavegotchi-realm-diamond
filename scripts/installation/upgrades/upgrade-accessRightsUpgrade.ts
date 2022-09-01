@@ -22,8 +22,18 @@ export async function upgradeInstallation() {
       ],
     },
   ];
+  const facets2: FacetsAndAddSelectors[] = [
+    {
+      facetName: "RealmGettersAndSettersFacet",
+      addSelectors: [
+        `function verifyAccessRight(uint256 _realmId,uint256 _gotchiId,uint256 _actionRight, address _sender ) external view`,
+      ],
+      removeSelectors: [],
+    },
+  ];
 
   const joined = convertFacetAndSelectorsToString(facets);
+  const joined2 = convertFacetAndSelectorsToString(facets2);
 
   const c = await varsForNetwork(ethers);
 
@@ -34,8 +44,16 @@ export async function upgradeInstallation() {
     useLedger: true,
     useMultisig: false,
   };
+  const args2: DeployUpgradeTaskArgs = {
+    diamondUpgrader: diamondUpgrader,
+    diamondAddress: c.realmDiamond,
+    facetsAndAddSelectors: joined2,
+    useLedger: true,
+    useMultisig: false,
+  };
 
   await run("deployUpgrade", args);
+  await run("deployUpgrade", args2);
 }
 
 if (require.main === module) {
