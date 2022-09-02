@@ -88,9 +88,9 @@ library LibInstallation {
   ) internal view {
     InstallationAppStorage storage s = LibAppStorageInstallation.diamondStorage();
 
-    // check owner
-    require(IERC721(address(_realmDiamond)).ownerOf(_upgradeQueue.parcelId) == _upgradeQueue.owner, "LibInstallation: Not owner");
-    // check coordinates
+    // // check owner
+    // require(IERC721(address(_realmDiamond)).ownerOf(_upgradeQueue.parcelId) == _upgradeQueue.owner, "LibInstallation: Not owner");
+    // // check coordinates
 
     // verify access right
     _realmDiamond.verifyAccessRight(_upgradeQueue.parcelId, _gotchiId, 6, LibMeta.msgSender());
