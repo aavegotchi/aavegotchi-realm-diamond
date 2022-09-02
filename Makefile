@@ -1,7 +1,7 @@
 -include .env
 
 export FOUNDRY_ETH_RPC_URL=${MATIC_URL}
-export FOUNDRY_FORK_BLOCK_NUMBER?=30365922
+#export FOUNDRY_FORK_BLOCK_NUMBER?=30365922
 
 
 update-submodules: 
@@ -18,4 +18,8 @@ test-harvesting:
 
 test-nftDisplay:
 	@echo Running tests for NFT Displays
-	@forge test --mc NFTDisplayTests --fork-url FOUNDRY_ETH_RPC_URL -vvvvv    
+	@forge test --mc NFTDisplayTests --fork-url FOUNDRY_ETH_RPC_URL -vvvvv  
+
+test-events:
+	@echo Running tests for paarty portals
+	@forge test --mc PaartyPortalTests --fork-url FOUNDRY_ETH_RPC_URL -vvvvv 

@@ -46,6 +46,17 @@ struct Parcel {
   uint256[64][64] startPositionBuildGrid;
   uint256[64][64] startPositionTileGrid;
   uint16 harvesterCount;
+  Paarty paarty;
+}
+
+struct Paarty {
+  string title;
+  string mediaHash;
+  uint64 startTime;
+  uint64 endTime;
+  uint120 priority;
+  bool equipped;
+  uint256 parcelId;
 }
 
 struct RequestConfig {

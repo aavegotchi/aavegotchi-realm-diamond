@@ -101,6 +101,11 @@ library LibAlchemica {
     if (installationType.upgradeQueueBoost > 0) {
       s.parcels[_realmId].upgradeQueueCapacity += installationType.upgradeQueueBoost;
     }
+    //Paarty Portals
+    if (installationType.installationType == 7 && !isUpgrade) {
+      require(!s.parcels[_realmId].paarty.equipped, "LibAlchemica:Paarty Portal already equipped");
+      s.parcels[_realmId].paarty.equipped = true;
+    }
   }
 
   function reduceTraits(
@@ -157,6 +162,15 @@ library LibAlchemica {
 
         revert("LibAlchemica: Claim Alchemica before reducing capacity");
       }
+    }
+    //Paarty Portals
+    if (installationType.installationType == 7 && !isUpgrade) {
+      require(s.parcels[_realmId].paarty.equipped, "LibAlchemica:Paarty Portal not equipped");
+      //cannot uninstall a paarty portal if an event is ongoing
+      if (s.parcels[_realmId].paarty.startTime > 0) {
+        require(s.parcels[_realmId].paarty.endTime < block.timestamp, "LibAlchemica:Ongoing event,cannot unequip Portal");
+      }
+      s.parcels[_realmId].paarty.equipped = false;
     }
 
     // Reduce upgrade queue boost. Handle underflow exception for bugged parcels
