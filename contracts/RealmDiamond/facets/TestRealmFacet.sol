@@ -45,6 +45,7 @@ contract TestRealmFacet is Modifiers {
   /// @dev Equip installation without signature or owner checks for testing
   function mockEquipInstallation(
     uint256 _realmId,
+    uint256 _gotchiId,
     uint256 _installationId,
     uint256 _x,
     uint256 _y
@@ -76,6 +77,7 @@ contract TestRealmFacet is Modifiers {
   /// @dev Unequip an installation without signature or owner checks for testing
   function mockUnequipInstallation(
     uint256 _realmId,
+    uint256 _gotchiId,
     uint256 _installationId,
     uint256 _x,
     uint256 _y
@@ -153,7 +155,7 @@ contract TestRealmFacet is Modifiers {
   /// @param _gotchiId Identifier of Aavegotchi to use for alchemica collecction/claiming
   function mockClaimAvailableAlchemica(uint256 _realmId, uint256 _gotchiId) external {
     //1 - Empty Reservoir Access Right
-    LibRealm.verifyAccessRight(_realmId, _gotchiId, 1);
+    LibRealm.verifyAccessRight(_realmId, _gotchiId, 1, LibMeta.msgSender());
     LibAlchemica.claimAvailableAlchemica(_realmId, _gotchiId);
   }
 

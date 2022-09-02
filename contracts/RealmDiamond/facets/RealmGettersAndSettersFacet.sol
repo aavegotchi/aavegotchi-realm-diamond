@@ -84,6 +84,7 @@ contract RealmGettersAndSettersFacet is Modifiers {
   ) public view {
     Parcel storage parcel = s.parcels[_realmId];
     require(parcel.buildGrid[_coordinateX][_coordinateY] == _installationId, "RealmGettersAndSettersFacet: wrong coordinates");
+    require(parcel.startPositionBuildGrid[_coordinateX][_coordinateY] == _installationId, "RealmGettersAndSettersFacet: wrong coordinates");
   }
 
   function batchGetDistrictParcels(address _owner, uint256 _district) external view returns (uint256[] memory) {
@@ -124,5 +125,14 @@ contract RealmGettersAndSettersFacet is Modifiers {
   function setAltarId(uint256 _parcelId, uint256 _altarId) external onlyOwner {
     s.parcels[_parcelId].altarId = _altarId;
     emit SetAltarId(_parcelId, _altarId);
+  }
+
+  function verifyAccessRight(
+    uint256 _realmId,
+    uint256 _gotchiId,
+    uint256 _actionRight,
+    address _sender
+  ) external view {
+    LibRealm.verifyAccessRight(_realmId, _gotchiId, _actionRight, _sender);
   }
 }
