@@ -140,7 +140,7 @@ describe("Installation Upgrade Access Rights test", async function () {
       impersonatedSigner
     )) as TestInstallationFacet;
 
-    await upgradeRealm();
+    // await upgradeRealm();
     await upgradeRealmTest();
     await upgradeInstallation();
     await upgradeInstallationTest();
