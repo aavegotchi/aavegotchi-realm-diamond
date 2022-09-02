@@ -5,7 +5,7 @@ import { FixParcelStartPositionTaskArgs } from "../../../tasks/fixParcelStartPos
 
 async function main() {
   const taskArgs: FixParcelStartPositionTaskArgs = {
-    parcelID: "6580",
+    parcelID: "10648",
     updateInstallation: true,
     updateTiles: false,
   };

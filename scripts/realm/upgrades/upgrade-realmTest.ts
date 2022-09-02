@@ -13,9 +13,9 @@ export async function upgradeRealm() {
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "RealmGettersAndSettersFacet",
+      facetName: "RealmGridFacet",
       addSelectors: [
-        `function verifyAccessRight(uint256 _realmId,uint256 _gotchiId,uint256 _actionRight, address _sender ) external view`,
+        `function fixGridStartPositions(uint256[] memory _parcelIds,uint256[] memory _x, uint256[] memory _y, bool _isTile, uint256[] memory _ids) external`,
       ],
       removeSelectors: [],
     },
