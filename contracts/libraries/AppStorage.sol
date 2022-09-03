@@ -95,6 +95,9 @@ struct AppStorage {
   // gotchiId => lastChanneledDay
   mapping(uint256 => uint256) lastChanneledDay;
   bool freezeBuilding;
+  //NFT DISPLAY STORAGE
+  //chainId => contractAddress => allowed
+  mapping(uint256 => mapping(address => bool)) nftDisplayAllowed;
 }
 
 library LibAppStorage {
