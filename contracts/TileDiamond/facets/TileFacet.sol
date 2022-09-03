@@ -407,6 +407,8 @@ contract TileFacet is Modifiers {
           _tileTypes[i].name
         )
       );
+      string memory uri = "https://app.aavegotchi.com/metadata/tile/";
+      emit LibERC1155Tile.URI(LibStrings.strWithUint(uri, i), i);
     }
   }
 
