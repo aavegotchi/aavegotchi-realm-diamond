@@ -188,7 +188,7 @@ contract AlchemicaFacet is Modifiers {
     );
 
     //1 - Empty Reservoir Access Right
-    LibRealm.verifyAccessRight(_realmId, _gotchiId, 1, LibMeta.msgSender());
+    LibRealm.verifyAccessRight(_realmId, _gotchiId, 1);
     LibAlchemica.claimAvailableAlchemica(_realmId, _gotchiId);
   }
 
@@ -228,7 +228,7 @@ contract AlchemicaFacet is Modifiers {
     AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
 
     //0 - alchemical channeling
-    LibRealm.verifyAccessRight(_realmId, _gotchiId, 0, LibMeta.msgSender());
+    LibRealm.verifyAccessRight(_realmId, _gotchiId, 0);
 
     require(_lastChanneled == s.gotchiChannelings[_gotchiId], "AlchemicaFacet: Incorrect last duration");
 

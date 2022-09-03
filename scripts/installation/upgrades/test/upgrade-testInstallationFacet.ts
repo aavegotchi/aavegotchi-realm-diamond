@@ -17,7 +17,7 @@ export async function upgradeInstallationTest() {
     {
       facetName: "TestInstallationFacet",
       addSelectors: [
-        `function mockUpgradeInstallation(${UpgradeQueue} calldata _upgradeQueue,uint256 _gotchiId,uint40 _gltr) external`,
+        `function mockUpgradeInstallation(${UpgradeQueue} calldata _upgradeQueue,uint40 _gltr) external`,
         `function mockCraftInstallation(uint16 installationId) external`,
         `function mockGetInstallationsLength() external view`,
       ],
@@ -25,8 +25,7 @@ export async function upgradeInstallationTest() {
     },
   ];
 
-  const maticInstallationDiamondAddress = (await varsForNetwork(ethers))
-    .installationDiamond;
+  const maticInstallationDiamondAddress = (await varsForNetwork(ethers)).installationDiamond;
 
   const joined = convertFacetAndSelectorsToString(facets);
 

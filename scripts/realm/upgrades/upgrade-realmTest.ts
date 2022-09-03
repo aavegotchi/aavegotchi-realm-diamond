@@ -5,6 +5,12 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
+import { AlchemicaFacet, RealmFacet } from "../../../typechain";
+import { impersonate } from "../../helperFunctions";
+import {
+  genClaimAlchemicaSignature,
+  genEquipInstallationSignature,
+} from "../realmHelpers";
 
 export async function upgradeRealm() {
   const diamondUpgrader = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
@@ -13,10 +19,23 @@ export async function upgradeRealm() {
 
   const facets: FacetsAndAddSelectors[] = [
     {
+      facetName: "AlchemicaFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
+    {
+      facetName: "RealmFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
+    {
       facetName: "RealmGettersAndSettersFacet",
-      addSelectors: [
-        `function verifyAccessRight(uint256 _realmId,uint256 _gotchiId,uint256 _actionRight, address _sender ) external view`,
-      ],
+      addSelectors: [],
+      removeSelectors: [],
+    },
+    {
+      facetName: "RealmGridFacet",
+      addSelectors: [],
       removeSelectors: [],
     },
   ];

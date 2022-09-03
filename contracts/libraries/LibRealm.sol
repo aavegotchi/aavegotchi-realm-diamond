@@ -197,8 +197,7 @@ library LibRealm {
   function verifyAccessRight(
     uint256 _realmId,
     uint256 _gotchiId,
-    uint256 _actionRight,
-    address _sender
+    uint256 _actionRight
   ) internal view {
     AppStorage storage s = LibAppStorage.diamondStorage();
     AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
@@ -208,18 +207,18 @@ library LibRealm {
 
     //Only owner
     if (accessRight == 0) {
-      require(_sender == parcelOwner, "LibRealm: Access Right - Only Owner");
+      require(LibMeta.msgSender() == parcelOwner, "LibRealm: Access Right - Only Owner");
     }
     //Owner or borrowed gotchi
     else if (accessRight == 1) {
       if (diamond.isAavegotchiLent(uint32(_gotchiId))) {
         AavegotchiDiamond.GotchiLending memory listing = diamond.getGotchiLendingFromToken(uint32(_gotchiId));
         require(
-          _sender == parcelOwner || (_sender == listing.borrower && listing.lender == parcelOwner),
+          LibMeta.msgSender() == parcelOwner || (LibMeta.msgSender() == listing.borrower && listing.lender == parcelOwner),
           "LibRealm: Access Right - Only Owner/Borrower"
         );
       } else {
-        require(_sender == parcelOwner, "LibRealm: Access Right - Only Owner");
+        require(LibMeta.msgSender() == parcelOwner, "LibRealm: Access Right - Only Owner");
       }
     }
     // //whitelisted addresses

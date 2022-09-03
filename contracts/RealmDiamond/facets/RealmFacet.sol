@@ -61,36 +61,6 @@ contract RealmFacet is Modifiers {
     }
   }
 
-  struct BatchEquipIO {
-    uint256[] types; //0 for installation, 1 for tile
-    bool[] equip; //true for equip, false for unequip
-    uint256[] ids;
-    uint256[] x;
-    uint256[] y;
-  }
-
-  function batchEquip(
-    uint256 _realmId,
-    uint256 _gotchiId,
-    BatchEquipIO memory _params,
-    bytes[] memory _signatures
-  ) external gameActive canBuild {
-    require(_params.ids.length == _params.x.length, "RealmFacet: Wrong length");
-    require(_params.x.length == _params.y.length, "RealmFacet: Wrong length");
-
-    for (uint256 i = 0; i < _params.ids.length; i++) {
-      if (_params.types[i] == 0 && _params.equip[i]) {
-        equipInstallation(_realmId, _gotchiId, _params.ids[i], _params.x[i], _params.y[i], _signatures[i]);
-      } else if (_params.types[i] == 1 && _params.equip[i]) {
-        equipTile(_realmId, _gotchiId, _params.ids[i], _params.x[i], _params.y[i], _signatures[i]);
-      } else if (_params.types[i] == 0 && !_params.equip[i]) {
-        unequipInstallation(_realmId, _gotchiId, _params.ids[i], _params.x[i], _params.y[i], _signatures[i]);
-      } else if (_params.types[i] == 1 && !_params.equip[i]) {
-        unequipTile(_realmId, _gotchiId, _params.ids[i], _params.x[i], _params.y[i], _signatures[i]);
-      }
-    }
-  }
-
   /// @notice Allow a parcel owner to equip an installation
   /// @dev The _x and _y denote the starting coordinates of the installation and are used to make sure that slot is available on a parcel
   /// @param _realmId The identifier of the parcel which the installation is being equipped on
@@ -106,9 +76,9 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) public gameActive canBuild {
+  ) external gameActive canBuild {
     //2 - Equip Installations
-    LibRealm.verifyAccessRight(_realmId, _gotchiId, 2, LibMeta.msgSender());
+    LibRealm.verifyAccessRight(_realmId, _gotchiId, 2);
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
@@ -153,7 +123,7 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) public onlyParcelOwner(_realmId) gameActive canBuild {
+  ) external onlyParcelOwner(_realmId) gameActive canBuild {
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
@@ -241,9 +211,9 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) public gameActive canBuild {
+  ) external gameActive canBuild {
     //3 - Equip Tile
-    LibRealm.verifyAccessRight(_realmId, _gotchiId, 3, LibMeta.msgSender());
+    LibRealm.verifyAccessRight(_realmId, _gotchiId, 3);
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
@@ -269,7 +239,7 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) public onlyParcelOwner(_realmId) gameActive canBuild {
+  ) external onlyParcelOwner(_realmId) gameActive canBuild {
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"

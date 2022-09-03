@@ -43,11 +43,4 @@ interface RealmDiamond {
   function addUpgradeQueueLength(uint256 _realmId) external;
 
   function subUpgradeQueueLength(uint256 _realmId) external;
-
-  function verifyAccessRight(
-    uint256 _realmId,
-    uint256 _gotchiId,
-    uint256 _actionRight,
-    address _sender
-  ) external view;
 }
