@@ -29,17 +29,17 @@ contract TestRealmFacet is Modifiers {
     require(_params.ids.length == _params.x.length, "RealmFacet: Wrong length");
     require(_params.x.length == _params.y.length, "RealmFacet: Wrong length");
 
-    for (uint256 i = 0; i < _params.ids.length; i++) {
-      if (_params.types[i] == 0 && _params.equip[i]) {
-        mockEquipInstallation(_realmId, _params.ids[i], _params.x[i], _params.y[i]);
-      } else if (_params.types[i] == 1 && _params.equip[i]) {
-        mockEquipTile(_realmId, _params.ids[i], _params.x[i], _params.y[i]);
-      } else if (_params.types[i] == 0 && !_params.equip[i]) {
-        mockUnequipInstallation(_realmId, _params.ids[i], _params.x[i], _params.y[i]);
-      } else if (_params.types[i] == 1 && !_params.equip[i]) {
-        mockUnequipTile(_realmId, _params.ids[i], _params.x[i], _params.y[i]);
-      }
-    }
+    // for (uint256 i = 0; i < _params.ids.length; i++) {
+    //   if (_params.types[i] == 0 && _params.equip[i]) {
+    //     mockEquipInstallation(_realmId, _params.ids[i], _params.x[i], _params.y[i]);
+    //   } else if (_params.types[i] == 1 && _params.equip[i]) {
+    //     mockEquipTile(_realmId, _params.ids[i], _params.x[i], _params.y[i]);
+    //   } else if (_params.types[i] == 0 && !_params.equip[i]) {
+    //     mockUnequipInstallation(_realmId, _params.ids[i], _params.x[i], _params.y[i]);
+    //   } else if (_params.types[i] == 1 && !_params.equip[i]) {
+    //     mockUnequipTile(_realmId, _params.ids[i], _params.x[i], _params.y[i]);
+    //   }
+    // }
   }
 
   /// @dev Equip installation without signature or owner checks for testing
