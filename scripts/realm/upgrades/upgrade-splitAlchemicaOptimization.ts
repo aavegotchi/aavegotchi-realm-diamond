@@ -63,7 +63,7 @@ export async function upgradeRealm() {
   };
 
   //run upgrades both for tile and installtion diamonds
-  await run("deployUpgrade", args1);
+  // await run("deployUpgrade", args1);
   await run("deployUpgrade", args2);
 }
 
