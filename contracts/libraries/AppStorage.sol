@@ -97,7 +97,7 @@ struct AppStorage {
   bool freezeBuilding;
   //NFT DISPLAY STORAGE
   //contract addresses of NFTs that are whitelisted to be diplayed on the gotchiverse
-  mapping(uint256 => mapping(address => bool)) allowedNFTDisplays;
+  mapping(uint256 => mapping(address => bool)) nftDisplayAllowed;
 }
 
 library LibAppStorage {

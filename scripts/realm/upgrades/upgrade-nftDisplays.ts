@@ -23,8 +23,8 @@ export async function upgrade() {
     {
       facetName: "NFTDisplayFacet",
       addSelectors: [
-        "function toggleWhitelist(address[] calldata _tokens, uint256[] calldata _chainIds,bool[] calldata _whitelist) external",
-        "function viewNFTDisplayStatus(address _token, uint256 _chainId) public",
+        "function toggleNftDisplayAllowed(address[] calldata _tokens, uint256[] calldata _chainIds,bool[] calldata _whitelist) external",
+        "function nftDisplayAllowed(address _token, uint256 _chainId) public",
       ],
       removeSelectors: [],
     },
@@ -50,7 +50,7 @@ export async function upgrade() {
     NFTDisplayFacet__factory.abi
   ) as NFTDisplayFacetInterface;
 
-  const calldata = iface.encodeFunctionData("toggleWhitelist", [
+  const calldata = iface.encodeFunctionData("toggleNftDisplayAllowed", [
     addresses,
     chainIds,
     whitelists,
