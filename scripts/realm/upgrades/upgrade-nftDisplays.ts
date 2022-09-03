@@ -34,12 +34,12 @@ export async function upgrade() {
 
   //TO-DO add remaining addresses
   const addresses: string[] = [
-    maticAavegotchiDiamondAddress,
-    maticRealmDiamondAddress,
-    maticVars.tileDiamond,
-    maticVars.installationDiamond,
-    aaveFrensArtwork,
-    ghstStakingDiamond,
+    maticAavegotchiDiamondAddress, //aavegotchis
+    maticRealmDiamondAddress, //parcels
+    maticVars.tileDiamond, //tiles
+    maticVars.installationDiamond, //installations
+    aaveFrensArtwork, //aave frens
+    ghstStakingDiamond, //tickets
   ];
 
   const chainIds = [137, 137, 137, 137, 1, 137];
