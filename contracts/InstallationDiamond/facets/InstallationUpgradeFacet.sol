@@ -87,6 +87,7 @@ contract InstallationUpgradeFacet is Modifiers {
 
   function reduceUpgradeTime(
     uint256 _upgradeIndex,
+    uint256 _gotchiId,
     uint40 _blocks,
     bytes memory _signature
   ) external {
@@ -97,8 +98,8 @@ contract InstallationUpgradeFacet is Modifiers {
       "InstallationUpgradeFacet: Invalid signature"
     );
 
-    //todo: check access rights
-    require(LibMeta.msgSender() == queue.owner, "InstallationUpgradeFacet: Not owner");
+    RealmDiamond realm = RealmDiamond(s.realmDiamond);
+    realm.verifyAccessRight(queue.parcelId, _gotchiId, 6, LibMeta.msgSender());
 
     //handle underflow / overspend
     uint256 nextLevelId = s.installationTypes[queue.installationId].nextLevelId;

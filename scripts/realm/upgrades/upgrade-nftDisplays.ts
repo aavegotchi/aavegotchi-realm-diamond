@@ -60,7 +60,7 @@ export async function upgrade() {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: c.realmDiamond,
     facetsAndAddSelectors: joined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
     initCalldata: calldata,
     initAddress: c.realmDiamond,
