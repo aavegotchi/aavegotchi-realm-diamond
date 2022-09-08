@@ -101,8 +101,6 @@ contract InstallationUpgradeFacet is Modifiers {
     RealmDiamond realm = RealmDiamond(s.realmDiamond);
     realm.verifyAccessRight(queue.parcelId, _gotchiId, 6, LibMeta.msgSender());
 
-    require(LibMeta.msgSender() == queue.owner, "InstallationUpgradeFacet: Not owner");
-
     //handle underflow / overspend
     uint256 nextLevelId = s.installationTypes[queue.installationId].nextLevelId;
     require(_blocks <= s.installationTypes[nextLevelId].craftTime, "InstallationUpgradeFacet: Too much GLTR");
