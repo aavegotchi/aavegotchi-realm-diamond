@@ -82,15 +82,15 @@ contract PaartyPortalTests is Test, Helpers {
       harvestRate: 0,
       capacity: 0,
       prerequisites: prereqs, //[0,0] altar level, lodge level
-      name: "Paarty Portal",
+      name: "Bounce Gate",
       unequipType: 0
     });
 
-    //add new installation aka Paarty Portal
+    //add new installation aka Bounce Gate
     InstallationAdminFacetI(TestConstants.INSTALLATION_DIAMOND_ADDRESS_MATIC).addInstallationTypes(installation);
 
     vm.stopPrank();
-    //mint 2 paarty portals
+    //mint 2 Bounce Gates
     vm.prank(REALM_USER);
     InstallationAdminFacetI(TestConstants.INSTALLATION_DIAMOND_ADDRESS_MATIC).craftInstallations(populateUint16Array(137), populateUint40Array(0));
     vm.prank(REALM_USER);
@@ -99,7 +99,7 @@ contract PaartyPortalTests is Test, Helpers {
 
   function testEventCreation() public {
     vm.prank(REALM_USER);
-    //a paarty portal must be equipped
+    //a Bounce Gate must be equipped
     vm.expectRevert(NoPaarty.selector);
     partyDiamondFacet.createEvent(
       "Gotchigang hangout",
@@ -112,15 +112,15 @@ contract PaartyPortalTests is Test, Helpers {
 
     vm.prank(REALM_USER);
 
-    // equip a paarty portal
-    //can equip a paarty portal
+    // equip a Bounce Gate
+    //can equip a Bounce Gate
     bytes memory sig = constructSig(realmId, gotchiId, 137, 0, 4, privKey);
     rDiamondFacet.equipInstallation(realmId, gotchiId, 137, 0, 4, sig);
 
     vm.prank(REALM_USER);
-    //cannot equip more than 1 paarty portal
+    //cannot equip more than 1 Bounce Gate
     sig = constructSig(realmId, gotchiId, 137, 0, 2, privKey);
-    vm.expectRevert("LibAlchemica:Paarty Portal already equipped");
+    vm.expectRevert("LibAlchemica:Bounce Gate already equipped");
     rDiamondFacet.equipInstallation(realmId, gotchiId, 137, 0, 2, sig);
 
     //only parcel owner can create event

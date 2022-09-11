@@ -21,5 +21,5 @@ test-nftDisplay:
 	@forge test --mc NFTDisplayTests --fork-url FOUNDRY_ETH_RPC_URL -vvvvv  
 
 test-events:
-	@echo Running tests for paarty portals
+	@echo Running tests for Bounce Gates
 	@forge test --mc PaartyPortalTests --fork-url FOUNDRY_ETH_RPC_URL -vvvvv 

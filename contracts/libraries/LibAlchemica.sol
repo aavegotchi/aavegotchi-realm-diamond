@@ -101,9 +101,9 @@ library LibAlchemica {
     if (installationType.upgradeQueueBoost > 0) {
       s.parcels[_realmId].upgradeQueueCapacity += installationType.upgradeQueueBoost;
     }
-    //Paarty Portals
-    if (installationType.installationType == 7 && !isUpgrade) {
-      require(!s.parcels[_realmId].paarty.equipped, "LibAlchemica:Paarty Portal already equipped");
+    //Bounce Gate
+    if (installationType.installationType == 8 && !isUpgrade) {
+      require(!s.parcels[_realmId].paarty.equipped, "LibAlchemica:Bounce Gate already equipped");
       s.parcels[_realmId].paarty.equipped = true;
     }
   }
@@ -163,12 +163,12 @@ library LibAlchemica {
         revert("LibAlchemica: Claim Alchemica before reducing capacity");
       }
     }
-    //Paarty Portals
-    if (installationType.installationType == 7 && !isUpgrade) {
-      require(s.parcels[_realmId].paarty.equipped, "LibAlchemica:Paarty Portal not equipped");
-      //cannot uninstall a paarty portal if an event is ongoing
+    //Bounce Gate
+    if (installationType.installationType == 8 && !isUpgrade) {
+      require(s.parcels[_realmId].paarty.equipped, "LibAlchemica: Bounce Gate not equipped");
+      //cannot uninstall a Bounce Gate if an event is ongoing
       if (s.parcels[_realmId].paarty.startTime > 0) {
-        require(s.parcels[_realmId].paarty.endTime < block.timestamp, "LibAlchemica:Ongoing event,cannot unequip Portal");
+        require(s.parcels[_realmId].paarty.endTime < block.timestamp, "LibAlchemica: Ongoing event, cannot unequip Portal");
       }
       s.parcels[_realmId].paarty.equipped = false;
     }
