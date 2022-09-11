@@ -51,12 +51,10 @@ struct Parcel {
 
 struct BounceGate {
   string title;
-  string mediaHash;
   uint64 startTime;
   uint64 endTime;
   uint120 priority;
   bool equipped;
-  uint256 parcelId;
 }
 
 struct RequestConfig {

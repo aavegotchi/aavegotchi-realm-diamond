@@ -8,12 +8,11 @@ contract BounceGateFacet is Modifiers {
   function createEvent(
     string calldata _title,
     uint64 _startTime,
-    string calldata _mediaHash,
     uint64 _durationInMinutes,
     uint256[4] calldata _alchemicaSpent,
     uint256 _realmId
   ) external {
-    LibBounceGate._createPaarty(_title, _startTime, _mediaHash, _durationInMinutes, _alchemicaSpent, _realmId);
+    LibBounceGate._createEvent(_title, _startTime, _durationInMinutes, _alchemicaSpent, _realmId);
   }
 
   function updateEvent(
@@ -21,7 +20,7 @@ contract BounceGateFacet is Modifiers {
     uint256[4] calldata _alchemicaSpent,
     uint40 _durationExtensionInMinutes
   ) external {
-    LibBounceGate._updatePaarty(_realmId, _alchemicaSpent, _durationExtensionInMinutes);
+    LibBounceGate._updateEvent(_realmId, _alchemicaSpent, _durationExtensionInMinutes);
   }
 
   function viewEvent(uint256 _realmId) public view returns (BounceGate memory) {

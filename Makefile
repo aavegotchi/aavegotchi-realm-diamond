@@ -22,4 +22,4 @@ test-nftDisplay:
 
 test-events:
 	@echo Running tests for Bounce Gates
-	@forge test --mc PaartyPortalTests --fork-url FOUNDRY_ETH_RPC_URL -vvvvv 
+	@forge test --mc BounceGateTests --fork-url FOUNDRY_ETH_RPC_URL -vvvvv 

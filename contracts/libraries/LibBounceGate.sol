@@ -12,16 +12,16 @@ error NoEvent();
 error PaartyEnded();
 
 uint256 constant GLTR_PER_MINUTE = 30;
-uint256 constant MAX_DURATION_IN_MINUTES = 4320 minutes; //72 hours
+
+// uint256 constant MAX_DURATION_IN_MINUTES = 4320 minutes; //72 hours
 
 library LibBounceGate {
-  event PaartyStarted(uint256 indexed _paartyId, BounceGate paartyDetails);
-  event PaartyPriorityUpdated(uint256 indexed _paartyId, uint120 _newPriority);
+  event EventStarted(uint256 indexed _paartyId, BounceGate paartyDetails);
+  event EventPriorityUpdated(uint256 indexed _paartyId, uint120 _newPriority);
 
-  function _createPaarty(
+  function _createEvent(
     string calldata _title,
     uint64 _startTime,
-    string calldata _mediaHash,
     uint64 _durationInMinutes,
     uint256[4] calldata _alchemicaSpent,
     uint256 _realmId
@@ -33,35 +33,35 @@ library LibBounceGate {
     //make sure there is no ongoing event
     if (s.parcels[_realmId].bounceGate.endTime > block.timestamp) revert OngoingEvent();
     //validate event
-    uint64 endTime = _validateInitialPaartyPortal(_startTime, _durationInMinutes);
+    uint64 endTime = _validateInitialBounceGate(_startTime, _durationInMinutes);
     //calculate event priority
     uint120 priority = _calculatePriorityAndSettleAlchemica(_alchemicaSpent);
     //update storage
     BounceGate storage p = s.parcels[_realmId].bounceGate;
     p.title = _title;
-    p.mediaHash = _mediaHash;
     p.startTime = _startTime;
     p.endTime = endTime;
     p.priority = priority;
-    p.parcelId = _realmId;
-    emit PaartyStarted(_realmId, p);
+    emit EventStarted(_realmId, p);
   }
 
-  function _updatePaarty(
+  function _updateEvent(
     uint256 _realmId,
     uint256[4] calldata _alchemicaSpent,
     uint40 _durationExtensionInMinutes
   ) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
     BounceGate storage p = s.parcels[_realmId].bounceGate;
-    uint256 parcelId = p.parcelId;
-    address parcelOwner = s.parcels[parcelId].owner;
+    address parcelOwner = s.parcels[_realmId].owner;
+
+    //@todo: replace with access rights
+
     if (msg.sender != parcelOwner) revert NotParcelOwner();
     if (p.startTime == 0) revert NoEvent();
     if (p.endTime < block.timestamp) revert PaartyEnded();
     if (_durationExtensionInMinutes > 0) {
       uint256 currentDurationInMinutes = p.endTime - p.startTime;
-      if (currentDurationInMinutes + _durationExtensionInMinutes > MAX_DURATION_IN_MINUTES) revert DurationTooHigh();
+      // if (currentDurationInMinutes + _durationExtensionInMinutes > MAX_DURATION_IN_MINUTES) revert DurationTooHigh();
       uint256 gltr = _getGltrAmount(_durationExtensionInMinutes);
       require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), gltr));
       //update storage
@@ -71,13 +71,13 @@ library LibBounceGate {
     //update storage
     uint120 newPriority = p.priority + uint120(addedPriority);
     p.priority = newPriority;
-    emit PaartyPriorityUpdated(_realmId, newPriority);
+    emit EventPriorityUpdated(_realmId, newPriority);
   }
 
-  function _validateInitialPaartyPortal(uint64 _startTime, uint256 _durationInMinutes) private returns (uint64 endTime_) {
+  function _validateInitialBounceGate(uint64 _startTime, uint256 _durationInMinutes) private returns (uint64 endTime_) {
     if (_startTime < block.timestamp) revert StartTimeError();
     //check for Duration
-    if (_durationInMinutes > MAX_DURATION_IN_MINUTES) revert DurationTooHigh();
+    // if (_durationInMinutes > MAX_DURATION_IN_MINUTES) revert DurationTooHigh();
     AppStorage storage s = LibAppStorage.diamondStorage();
     //calculate gltr needed for duration
     uint256 total = _getGltrAmount(_durationInMinutes);

@@ -5,19 +5,19 @@ import "forge-std/Test.sol";
 
 import {TestConstants} from "@test/constants.t.sol";
 import "../../../contracts/RealmDiamond/facets/RealmFacet.sol";
-import "../../../contracts/RealmDiamond/facets/PaartyPortalFacet.sol";
+import "../../../contracts/RealmDiamond/facets/BounceGateFacet.sol";
 import "./Helpers.sol";
 import "../SetPubKeyFacet.sol";
 import "../../../contracts/interfaces/IDiamondCut.sol";
 import "../../../contracts/shared/OwnershipFacet.sol";
 
-contract PaartyPortalTests is Test, Helpers {
-  PaartyPortalFacet partyFacet;
+contract BounceGateTests is Test, Helpers {
+  BounceGateFacet partyFacet;
   RealmFacet rFacet;
   SetPubKeyFacet setPub;
 
   IDiamondCut dCut = IDiamondCut(TestConstants.REALM_DIAMOND_ADDRESS_MATIC);
-  PaartyPortalFacet partyDiamondFacet = PaartyPortalFacet(TestConstants.REALM_DIAMOND_ADDRESS_MATIC);
+  BounceGateFacet partyDiamondFacet = BounceGateFacet(TestConstants.REALM_DIAMOND_ADDRESS_MATIC);
   RealmFacet rDiamondFacet = RealmFacet(TestConstants.REALM_DIAMOND_ADDRESS_MATIC);
   SetPubKeyFacet setPubKeyDiamondFacet = SetPubKeyFacet(TestConstants.REALM_DIAMOND_ADDRESS_MATIC);
 
@@ -35,7 +35,7 @@ contract PaartyPortalTests is Test, Helpers {
   function setUp() public {
     address diamondOwner = OwnershipFacet(TestConstants.REALM_DIAMOND_ADDRESS_MATIC).owner();
     vm.startPrank(diamondOwner);
-    partyFacet = new PaartyPortalFacet();
+    partyFacet = new BounceGateFacet();
     rFacet = new RealmFacet();
     setPub = new SetPubKeyFacet();
     //upgrade diamond
@@ -43,7 +43,7 @@ contract PaartyPortalTests is Test, Helpers {
     cut[0] = IDiamondCut.FacetCut({
       facetAddress: address(partyFacet),
       action: IDiamondCut.FacetCutAction.Add,
-      functionSelectors: generateSelectors("PaartyPortalFacet")
+      functionSelectors: generateSelectors("BounceGateFacet")
     });
     cut[1] = IDiamondCut.FacetCut({
       facetAddress: address(rFacet),

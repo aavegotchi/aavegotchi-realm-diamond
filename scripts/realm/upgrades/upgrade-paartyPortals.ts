@@ -12,7 +12,7 @@ export async function upgrade() {
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "PaartyPortalFacet",
+      facetName: "BounceGateFacet",
       addSelectors: [
         " function createEvent(string calldata _title, uint64 _startTime,string calldata _mediaHash,uint64 _durationInMinutes,uint256[4] calldata _alchemicaSpent,uint256 _realmId) external",
         " function updateEvent(uint256 _realmId,uint256[4] calldata _alchemicaSpent,uint40 _durationExtensionInMinutes) external",
