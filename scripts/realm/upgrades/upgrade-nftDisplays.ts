@@ -23,8 +23,8 @@ export async function upgrade() {
     {
       facetName: "NFTDisplayFacet",
       addSelectors: [
-        "function toggleWhitelist(address[] calldata _tokens, uint256[] calldata _chainIds,bool[] calldata _whitelist) external",
-        "function viewNFTDisplayStatus(address _token, uint256 _chainId) public",
+        "function toggleNftDisplayAllowed(address[] calldata _tokens, uint256[] calldata _chainIds,bool[] calldata _whitelist) external",
+        "function nftDisplayAllowed(address _token, uint256 _chainId) public",
       ],
       removeSelectors: [],
     },
@@ -34,12 +34,12 @@ export async function upgrade() {
 
   //TO-DO add remaining addresses
   const addresses: string[] = [
-    maticAavegotchiDiamondAddress,
-    maticRealmDiamondAddress,
-    maticVars.tileDiamond,
-    maticVars.installationDiamond,
-    aaveFrensArtwork,
-    ghstStakingDiamond,
+    maticAavegotchiDiamondAddress, //aavegotchis
+    maticRealmDiamondAddress, //parcels
+    maticVars.tileDiamond, //tiles
+    maticVars.installationDiamond, //installations
+    aaveFrensArtwork, //aave frens
+    ghstStakingDiamond, //tickets
   ];
 
   const chainIds = [137, 137, 137, 137, 1, 137];
@@ -50,7 +50,7 @@ export async function upgrade() {
     NFTDisplayFacet__factory.abi
   ) as NFTDisplayFacetInterface;
 
-  const calldata = iface.encodeFunctionData("toggleWhitelist", [
+  const calldata = iface.encodeFunctionData("toggleNftDisplayAllowed", [
     addresses,
     chainIds,
     whitelists,
@@ -60,7 +60,7 @@ export async function upgrade() {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: c.realmDiamond,
     facetsAndAddSelectors: joined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
     initCalldata: calldata,
     initAddress: c.realmDiamond,
