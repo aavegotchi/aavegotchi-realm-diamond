@@ -14,8 +14,8 @@ error PaartyEnded();
 uint256 constant GLTR_PER_MINUTE = 30;
 uint256 constant MAX_DURATION_IN_MINUTES = 4320 minutes; //72 hours
 
-library LibPaartyPortal {
-  event PaartyStarted(uint256 indexed _paartyId, Paarty paartyDetails);
+library LibBounceGate {
+  event PaartyStarted(uint256 indexed _paartyId, BounceGate paartyDetails);
   event PaartyPriorityUpdated(uint256 indexed _paartyId, uint120 _newPriority);
 
   function _createPaarty(
@@ -37,7 +37,7 @@ library LibPaartyPortal {
     //calculate event priority
     uint120 priority = _calculatePriorityAndSettleAlchemica(_alchemicaSpent);
     //update storage
-    Paarty storage p = s.parcels[_realmId].paarty;
+    BounceGate storage p = s.parcels[_realmId].bounceGate;
     p.title = _title;
     p.mediaHash = _mediaHash;
     p.startTime = _startTime;
@@ -53,7 +53,7 @@ library LibPaartyPortal {
     uint40 _durationExtensionInMinutes
   ) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
-    Paarty storage p = s.parcels[_realmId].paarty;
+    BounceGate storage p = s.parcels[_realmId].bounceGate;
     uint256 parcelId = p.parcelId;
     address parcelOwner = s.parcels[parcelId].owner;
     if (msg.sender != parcelOwner) revert NotParcelOwner();

@@ -2,9 +2,9 @@
 pragma solidity 0.8.9;
 
 import "../../libraries/AppStorage.sol";
-import "../../libraries/LibPaartyPortal.sol";
+import "../../libraries/LibBounceGate.sol";
 
-contract PaartyPortalFacet is Modifiers {
+contract BounceGateFacet is Modifiers {
   function createEvent(
     string calldata _title,
     uint64 _startTime,
@@ -13,7 +13,7 @@ contract PaartyPortalFacet is Modifiers {
     uint256[4] calldata _alchemicaSpent,
     uint256 _realmId
   ) external {
-    LibPaartyPortal._createPaarty(_title, _startTime, _mediaHash, _durationInMinutes, _alchemicaSpent, _realmId);
+    LibBounceGate._createPaarty(_title, _startTime, _mediaHash, _durationInMinutes, _alchemicaSpent, _realmId);
   }
 
   function updateEvent(
@@ -21,10 +21,10 @@ contract PaartyPortalFacet is Modifiers {
     uint256[4] calldata _alchemicaSpent,
     uint40 _durationExtensionInMinutes
   ) external {
-    LibPaartyPortal._updatePaarty(_realmId, _alchemicaSpent, _durationExtensionInMinutes);
+    LibBounceGate._updatePaarty(_realmId, _alchemicaSpent, _durationExtensionInMinutes);
   }
 
-  function viewEvent(uint256 _realmId) public view returns (Paarty memory) {
-    return s.parcels[_realmId].paarty;
+  function viewEvent(uint256 _realmId) public view returns (BounceGate memory) {
+    return s.parcels[_realmId].bounceGate;
   }
 }
