@@ -18,8 +18,8 @@ test-harvesting:
 
 test-nftDisplay:
 	@echo Running tests for NFT Displays
-	@forge test --mc NFTDisplayTests --fork-url FOUNDRY_ETH_RPC_URL -vvvvv  
+	@forge test --mc NFTDisplayTests -vvvvv  
 
 test-events:
 	@echo Running tests for Bounce Gates
-	@forge test --mc BounceGateTests --fork-url FOUNDRY_ETH_RPC_URL -vvvvv 
+	@forge test --mc BounceGateTests -vvvvv 

@@ -17,7 +17,7 @@ uint256 constant GLTR_PER_MINUTE = 30;
 
 library LibBounceGate {
   event EventStarted(uint256 indexed _paartyId, BounceGate paartyDetails);
-  event EventPriorityUpdated(uint256 indexed _paartyId, uint120 _newPriority);
+  event EventPriorityAndDurationUpdated(uint256 indexed _paartyId, uint120 _newPriority, uint64 _newEndTime);
 
   function _createEvent(
     string calldata _title,
@@ -71,7 +71,7 @@ library LibBounceGate {
     //update storage
     uint120 newPriority = p.priority + uint120(addedPriority);
     p.priority = newPriority;
-    emit EventPriorityUpdated(_realmId, newPriority);
+    emit EventPriorityAndDurationUpdated(_realmId, newPriority, p.endTime);
   }
 
   function _validateInitialBounceGate(uint64 _startTime, uint256 _durationInMinutes) private returns (uint64 endTime_) {

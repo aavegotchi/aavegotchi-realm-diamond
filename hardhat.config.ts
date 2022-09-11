@@ -14,9 +14,9 @@ require("./tasks/generateDiamondABI_installation.js");
 // require("./tasks/generateDiamondABI_tile.js");
 // require("./tasks/verifyFacet.js");
 // //require("./tasks/mintParcels.ts");
-require("./tasks/releaseVesting.ts");
-require("./tasks/batchTransferAlchemica");
-require("./tasks/fixParcelStartPosition");
+// require("./tasks/releaseVesting.ts");
+// require("./tasks/batchTransferAlchemica");
+// require("./tasks/fixParcelStartPosition");
 
 const GWEI = 1000 * 1000 * 1000;
 
@@ -61,12 +61,12 @@ module.exports = {
       maxPriorityFeePerGas: 1 * GWEI,
       //   timeout: 90000
     },
-    mumbai: {
-      url: process.env.MUMBAI_MORALIS,
-      accounts: [process.env.SECRET],
-      blockGasLimit: 20000000,
-      // gasPrice: 1000000000,
-    },
+    // mumbai: {
+    //   url: process.env.MUMBAI_MORALIS,
+    //   accounts: [process.env.SECRET],
+    //   blockGasLimit: 20000000,
+    //   // gasPrice: 1000000000,
+    // },
     kovan: {
       url: process.env.KOVAN_URL,
       // url: 'https://rpc-mainnet.maticvigil.com/',
