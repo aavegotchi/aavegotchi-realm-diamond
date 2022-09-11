@@ -46,10 +46,10 @@ struct Parcel {
   uint256[64][64] startPositionBuildGrid;
   uint256[64][64] startPositionTileGrid;
   uint16 harvesterCount;
-  Paarty paarty;
+  BounceGate bounceGate;
 }
 
-struct Paarty {
+struct BounceGate {
   string title;
   string mediaHash;
   uint64 startTime;

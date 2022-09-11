@@ -103,8 +103,8 @@ library LibAlchemica {
     }
     //Bounce Gate
     if (installationType.installationType == 8 && !isUpgrade) {
-      require(!s.parcels[_realmId].paarty.equipped, "LibAlchemica:Bounce Gate already equipped");
-      s.parcels[_realmId].paarty.equipped = true;
+      require(!s.parcels[_realmId].bounceGate.equipped, "LibAlchemica: Bounce Gate already equipped");
+      s.parcels[_realmId].bounceGate.equipped = true;
     }
   }
 
@@ -165,12 +165,12 @@ library LibAlchemica {
     }
     //Bounce Gate
     if (installationType.installationType == 8 && !isUpgrade) {
-      require(s.parcels[_realmId].paarty.equipped, "LibAlchemica: Bounce Gate not equipped");
+      require(s.parcels[_realmId].bounceGate.equipped, "LibAlchemica: Bounce Gate not equipped");
       //cannot uninstall a Bounce Gate if an event is ongoing
-      if (s.parcels[_realmId].paarty.startTime > 0) {
-        require(s.parcels[_realmId].paarty.endTime < block.timestamp, "LibAlchemica: Ongoing event, cannot unequip Portal");
+      if (s.parcels[_realmId].bounceGate.startTime > 0) {
+        require(s.parcels[_realmId].bounceGate.endTime < block.timestamp, "LibAlchemica: Ongoing event, cannot unequip Portal");
       }
-      s.parcels[_realmId].paarty.equipped = false;
+      s.parcels[_realmId].bounceGate.equipped = false;
     }
 
     // Reduce upgrade queue boost. Handle underflow exception for bugged parcels

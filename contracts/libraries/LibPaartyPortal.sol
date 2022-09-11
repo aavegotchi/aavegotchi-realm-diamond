@@ -29,9 +29,9 @@ library LibPaartyPortal {
     AppStorage storage s = LibAppStorage.diamondStorage();
     address owner = s.parcels[_realmId].owner;
     if (msg.sender != owner) revert NotParcelOwner();
-    if (!s.parcels[_realmId].paarty.equipped) revert NoPaarty();
+    if (!s.parcels[_realmId].bounceGate.equipped) revert NoPaarty();
     //make sure there is no ongoing event
-    if (s.parcels[_realmId].paarty.endTime > block.timestamp) revert OngoingEvent();
+    if (s.parcels[_realmId].bounceGate.endTime > block.timestamp) revert OngoingEvent();
     //validate event
     uint64 endTime = _validateInitialPaartyPortal(_startTime, _durationInMinutes);
     //calculate event priority
