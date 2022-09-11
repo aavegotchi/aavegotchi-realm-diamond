@@ -60,7 +60,7 @@ library LibBounceGate {
     if (p.startTime == 0) revert NoEvent();
     if (p.endTime < block.timestamp) revert PaartyEnded();
     if (_durationExtensionInMinutes > 0) {
-      uint256 currentDurationInMinutes = p.endTime - p.startTime;
+      // uint256 currentDurationInMinutes = p.endTime - p.startTime;
       // if (currentDurationInMinutes + _durationExtensionInMinutes > MAX_DURATION_IN_MINUTES) revert DurationTooHigh();
       uint256 gltr = _getGltrAmount(_durationExtensionInMinutes);
       require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), gltr));
