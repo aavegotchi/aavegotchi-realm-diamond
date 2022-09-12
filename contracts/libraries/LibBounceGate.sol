@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 error NotParcelOwner();
 error StartTimeError();
 error OngoingEvent();
+error NoOngoingEvent();
 error DurationTooHigh();
 error NoBounceGate();
 error NoEvent();
@@ -81,6 +82,7 @@ library LibBounceGate {
     BounceGate storage p = s.parcels[_realmId].bounceGate;
     address parcelOwner = s.parcels[_realmId].owner;
     if (msg.sender != parcelOwner) revert NotParcelOwner();
+    if p.endTime<=uint64(block.timestamp) revert NoOngoingEvent();
 
     //Cancel event
     p.startTime = uint64(block.timestamp);
