@@ -7,17 +7,17 @@ error NotParcelOwner();
 error StartTimeError();
 error OngoingEvent();
 error DurationTooHigh();
-error NoPaarty();
+error NoBounceGate();
 error NoEvent();
-error PaartyEnded();
+error EventEnded();
 
 uint256 constant GLTR_PER_MINUTE = 30;
 
 // uint256 constant MAX_DURATION_IN_MINUTES = 4320 minutes; //72 hours
 
 library LibBounceGate {
-  event EventStarted(uint256 indexed _paartyId, BounceGate paartyDetails);
-  event EventPriorityAndDurationUpdated(uint256 indexed _paartyId, uint120 _newPriority, uint64 _newEndTime);
+  event EventStarted(uint256 indexed _eventId, BounceGate eventDetails);
+  event EventPriorityAndDurationUpdated(uint256 indexed _eventId, uint120 _newPriority, uint64 _newEndTime);
 
   function _createEvent(
     string calldata _title,
@@ -29,7 +29,7 @@ library LibBounceGate {
     AppStorage storage s = LibAppStorage.diamondStorage();
     address owner = s.parcels[_realmId].owner;
     if (msg.sender != owner) revert NotParcelOwner();
-    if (!s.parcels[_realmId].bounceGate.equipped) revert NoPaarty();
+    if (!s.parcels[_realmId].bounceGate.equipped) revert NoBounceGate();
     //make sure there is no ongoing event
     if (s.parcels[_realmId].bounceGate.endTime > block.timestamp) revert OngoingEvent();
     //validate event
@@ -58,7 +58,7 @@ library LibBounceGate {
 
     if (msg.sender != parcelOwner) revert NotParcelOwner();
     if (p.startTime == 0) revert NoEvent();
-    if (p.endTime < block.timestamp) revert PaartyEnded();
+    if (p.endTime < block.timestamp) revert EventEnded();
     if (_durationExtensionInMinutes > 0) {
       // uint256 currentDurationInMinutes = p.endTime - p.startTime;
       // if (currentDurationInMinutes + _durationExtensionInMinutes > MAX_DURATION_IN_MINUTES) revert DurationTooHigh();

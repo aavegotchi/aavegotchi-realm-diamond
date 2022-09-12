@@ -100,7 +100,7 @@ contract BounceGateTests is Test, Helpers {
   function testEventCreation() public {
     vm.prank(REALM_USER);
     //a Bounce Gate must be equipped
-    vm.expectRevert(NoPaarty.selector);
+    vm.expectRevert(NoBounceGate.selector);
     partyDiamondFacet.createEvent("Gotchigang hangout", uint64(block.timestamp + 1 minutes), 300, [uint256(100e18), 0, 0, 0], realmId);
 
     vm.prank(REALM_USER);
@@ -150,7 +150,7 @@ contract BounceGateTests is Test, Helpers {
     vm.warp(block.timestamp + 3 days + 2 minutes);
 
     //priority cannot be changed for ended events
-    vm.expectRevert(PaartyEnded.selector);
+    vm.expectRevert(EventEnded.selector);
     partyDiamondFacet.updateEvent(realmId, [uint256(100), 0, 0, 0], 0);
 
     //can create another event
