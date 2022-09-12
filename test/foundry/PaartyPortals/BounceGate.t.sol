@@ -161,8 +161,9 @@ contract BounceGateTests is Test, Helpers {
     vm.expectRevert("LibAlchemica: Ongoing event, cannot unequip Portal");
     rDiamondFacet.unequipInstallation(realmId, gotchiId, 137, 0, 4, sig);
 
-    //end event and unequip
-    vm.warp(block.timestamp + 210 minutes);
+    //end/cancel event and unequip
+    partyDiamondFacet.cancelEvent(realmId);
+    vm.warp(block.timestamp + 1);
     rDiamondFacet.unequipInstallation(realmId, gotchiId, 137, 0, 4, sig);
     //portal should now be unequipped
     assertEq(partyDiamondFacet.viewEvent(realmId).equipped, false);
