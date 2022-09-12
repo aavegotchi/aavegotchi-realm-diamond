@@ -17,6 +17,7 @@ uint256 constant GLTR_PER_MINUTE = 30;
 
 library LibBounceGate {
   event EventStarted(uint256 indexed _eventId, BounceGate eventDetails);
+  event EventCancelled(uint256 indexed _eventId);
   event EventPriorityAndDurationUpdated(uint256 indexed _eventId, uint120 _newPriority, uint64 _newEndTime);
 
   function _createEvent(
@@ -28,6 +29,8 @@ library LibBounceGate {
   ) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
     address owner = s.parcels[_realmId].owner;
+
+    //@todo: replace with Access Rights
     if (msg.sender != owner) revert NotParcelOwner();
     if (!s.parcels[_realmId].bounceGate.equipped) revert NoBounceGate();
     //make sure there is no ongoing event
@@ -55,7 +58,6 @@ library LibBounceGate {
     address parcelOwner = s.parcels[_realmId].owner;
 
     //@todo: replace with access rights
-
     if (msg.sender != parcelOwner) revert NotParcelOwner();
     if (p.startTime == 0) revert NoEvent();
     if (p.endTime < block.timestamp) revert EventEnded();
@@ -72,6 +74,19 @@ library LibBounceGate {
     uint120 newPriority = p.priority + uint120(addedPriority);
     p.priority = newPriority;
     emit EventPriorityAndDurationUpdated(_realmId, newPriority, p.endTime);
+  }
+
+  function _cancelEvent(uint256 _realmId) internal {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+    BounceGate storage p = s.parcels[_realmId].bounceGate;
+    address parcelOwner = s.parcels[_realmId].owner;
+    if (msg.sender != parcelOwner) revert NotParcelOwner();
+
+    //Cancel event
+    p.startTime = uint64(block.timestamp);
+    p.endTime = uint64(block.timestamp);
+
+    emit EventCancelled(_realmId);
   }
 
   function _validateInitialBounceGate(uint64 _startTime, uint256 _durationInMinutes) private returns (uint64 endTime_) {

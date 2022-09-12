@@ -14,14 +14,20 @@ export async function upgrade() {
     {
       facetName: "BounceGateFacet",
       addSelectors: [
-        " function createEvent(string calldata _title, uint64 _startTime,string calldata _mediaHash,uint64 _durationInMinutes,uint256[4] calldata _alchemicaSpent,uint256 _realmId) external",
-        " function updateEvent(uint256 _realmId,uint256[4] calldata _alchemicaSpent,uint40 _durationExtensionInMinutes) external",
-        " function viewEvent(uint256 _realmId) public",
+        "function createEvent(string calldata _title, uint64 _startTime,uint64 _durationInMinutes,uint256[4] calldata _alchemicaSpent,uint256 _realmId) external",
+        "function updateEvent(uint256 _realmId,uint256[4] calldata _alchemicaSpent,uint40 _durationExtensionInMinutes) external",
+        "function viewEvent(uint256 _realmId) public",
+        `function cancelEvent(uint256 _realmId) external`,
       ],
       removeSelectors: [],
     },
     {
       facetName: "RealmFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
+    {
+      facetName: "AlchemicaFacet",
       addSelectors: [],
       removeSelectors: [],
     },
