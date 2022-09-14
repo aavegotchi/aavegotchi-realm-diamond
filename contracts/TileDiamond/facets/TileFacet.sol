@@ -26,6 +26,10 @@ contract TileFacet is Modifiers {
 
   event AddressesUpdated(address _aavegotchiDiamond, address _realmDiamond, address _gltr);
 
+  event EditTileType(uint256 indexed _tileId);
+
+  event EditDeprecateTime(uint256 _tileId);
+
   /***********************************|
    |             Read Functions         |
    |__________________________________*/
@@ -414,9 +418,11 @@ contract TileFacet is Modifiers {
 
   function editDeprecateTime(uint256 _typeId, uint40 _deprecateTime) external onlyOwner {
     s.deprecateTime[_typeId] = _deprecateTime;
+    emit EditDeprecateTime(_typeId);
   }
 
   function editTileType(uint256 _typeId, TileType calldata _updatedTile) external onlyOwner {
     s.tileTypes[_typeId] = _updatedTile;
+    emit EditTileType(_typeId);
   }
 }
