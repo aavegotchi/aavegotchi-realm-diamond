@@ -31,7 +31,7 @@ export async function setAddresses() {
     tileFacet = await impersonate(owner, tileFacet, ethers, network);
   }
 
-  const tx = await tileFacet.deprecateTiles(["16", "17", "18", "19"], {
+  const tx = await tileFacet.deprecateTiles(["20", "21", "22", "23"], {
     gasPrice: gasPrice,
   });
 
