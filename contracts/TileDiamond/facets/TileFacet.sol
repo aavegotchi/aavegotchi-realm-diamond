@@ -26,9 +26,9 @@ contract TileFacet is Modifiers {
 
   event AddressesUpdated(address _aavegotchiDiamond, address _realmDiamond, address _gltr);
 
-  event EditTileType(uint256 indexed _tileId);
+  event EditTileType(uint256 indexed _tileId, TileType);
 
-  event EditDeprecateTime(uint256 _tileId);
+  event EditDeprecateTime(uint256 _tileId, uint256 _newDeprecatetime);
 
   /***********************************|
    |             Read Functions         |
@@ -416,13 +416,21 @@ contract TileFacet is Modifiers {
     }
   }
 
-  function editDeprecateTime(uint256 _typeId, uint40 _deprecateTime) external onlyOwner {
-    s.deprecateTime[_typeId] = _deprecateTime;
-    emit EditDeprecateTime(_typeId);
+  error LengthMisMatch();
+
+  function editDeprecateTime(uint256[] calldata _typeIds, uint40[] calldata _deprecateTimes) external onlyOwner {
+    if (_typeIds.length != _deprecateTimes.length) revert LengthMisMatch();
+    for (uint256 i = 0; i < _typeIds.length; i++) {
+      s.deprecateTime[_typeIds[i]] = _deprecateTimes[i];
+      emit EditDeprecateTime(_typeIds[i], _deprecateTimes[i]);
+    }
   }
 
-  function editTileType(uint256 _typeId, TileType calldata _updatedTile) external onlyOwner {
-    s.tileTypes[_typeId] = _updatedTile;
-    emit EditTileType(_typeId);
+  function editTileTypes(uint256[] calldata _typeIds, TileType[] calldata _updatedTiles) external onlyOwner {
+    if (_typeIds.length != _updatedTiles.length) revert LengthMisMatch();
+    for (uint256 i = 0; i < _typeIds.length; i++) {
+      s.tileTypes[_typeIds[i]] = _updatedTiles[i];
+      emit EditTileType(_typeIds[i], _updatedTiles[i]);
+    }
   }
 }

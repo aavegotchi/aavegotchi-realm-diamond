@@ -78,6 +78,30 @@ export function outputTile(tile: TileTypeInput): TileTypeOutput {
   return output;
 }
 
+export function outputTiles(tiles: TileTypeInput[]): TileTypeOutput[] {
+  let output: TileTypeOutput[] = [];
+  for (let i = 0; i < tiles.length; i++) {
+    const tile: TileTypeInput = tiles[i];
+    if (tile.width > 64) throw new Error("Width too much");
+    if (tile.height > 64) throw new Error("Height too much");
+    output.push({
+      deprecated: false,
+      tileType: tile.tileType,
+      width: tile.width,
+      height: tile.height,
+      alchemicaCost: [
+        ethers.utils.parseEther(tile.alchemicaCost[0].toString()),
+        ethers.utils.parseEther(tile.alchemicaCost[1].toString()),
+        ethers.utils.parseEther(tile.alchemicaCost[2].toString()),
+        ethers.utils.parseEther(tile.alchemicaCost[3].toString()),
+      ],
+      craftTime: tile.craftTime,
+      name: tile.name,
+    });
+  }
+  return output;
+}
+
 const backendSigner = () => {
   //@ts-ignore
   return new ethers.Wallet(process.env.PROD_PK); // PK should start with '0x'

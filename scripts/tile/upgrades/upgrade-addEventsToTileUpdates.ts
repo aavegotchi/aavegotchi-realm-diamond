@@ -1,5 +1,5 @@
 import { LedgerSigner } from "@anders-t/ethers-ledger/lib/ledger";
-import { Signer } from "ethers";
+import { BigNumberish, Signer } from "ethers";
 import { run, ethers, network } from "hardhat";
 import { maticVars } from "../../../constants";
 import { tileTypes } from "../../../data/tiles/tileTypes";
@@ -8,17 +8,27 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
-import { TileFacet, OwnershipFacet } from "../../../typechain";
-import { outputTile } from "../../realm/realmHelpers";
-import { diamondOwner, impersonate } from "../helperFunctions";
+import {
+  TileFacet,
+  OwnershipFacet,
+  TileFacet__factory,
+} from "../../../typechain";
+import { TileFacetInterface } from "../../../typechain/TileFacet";
+import { outputTiles } from "../../realm/realmHelpers";
 const diamondUpgrader = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
 let signer: Signer;
 export async function upgrade() {
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "TileFacet",
-      addSelectors: [],
-      removeSelectors: [],
+      addSelectors: [
+        " function editDeprecateTime(uint256[] calldata _typeIds, uint40[] calldata _deprecateTimes) external",
+        " function editTileTypes(uint256[] calldata _typeIds,(uint8 width,uint8 height,bool deprecated, uint16 tileType,uint32 craftTime,uint256[4] alchemicaCost,string name)[] _updatedTiles) external",
+      ],
+      removeSelectors: [
+        "function editTileType(uint256 _typeIds,(uint8 width,uint8 height,bool deprecated, uint16 tileType,uint32 craftTime,uint256[4] alchemicaCost,string name) _updatedTile) external",
+        "function editDeprecateTime(uint256 _typeId, uint40 _deprecateTime) external",
+      ],
     },
   ];
 
@@ -31,48 +41,32 @@ export async function upgrade() {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
+  let iface: TileFacetInterface = new ethers.utils.Interface(
+    TileFacet__factory.abi
+  ) as TileFacetInterface;
+
+  let ids: BigNumberish[] = [];
+  for (let i = 0; i < tileTypes.length; i++) {
+    ids.push(tileTypes[i].id);
+  }
+
+  const calldata = iface.encodeFunctionData("editTileTypes", [
+    ids,
+    outputTiles(tileTypes),
+  ]);
+  console.log("updating tiles", ids);
+
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: maticVars.tileDiamond,
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,
-    initAddress: ethers.constants.AddressZero,
-    initCalldata: "0x",
+    initAddress: maticVars.tileDiamond,
+    initCalldata: calldata,
   };
 
   await run("deployUpgrade", args);
-  await updateTiles();
-}
-
-async function updateTiles() {
-  const testing = ["hardhat", "localhost"].includes(network.name);
-
-  let tileFacet = (await ethers.getContractAt(
-    "TileFacet",
-    maticVars.tileDiamond
-  )) as TileFacet;
-
-  if (testing) {
-    signer = await ethers.getSigner(diamondUpgrader);
-    await network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [diamondUpgrader],
-    });
-
-    tileFacet = tileFacet.connect(signer);
-  } else if (network.name == "matic") {
-    signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
-    tileFacet = tileFacet.connect(signer);
-  }
-
-  for (let i = 0; i < tileTypes.length; i++) {
-    const id = tileTypes[i].id;
-    const tile = outputTile(tileTypes[i]);
-    console.log("updating", tileTypes[i].name);
-
-    await tileFacet.editTileType(id, tile);
-  }
 }
 
 if (require.main === module) {

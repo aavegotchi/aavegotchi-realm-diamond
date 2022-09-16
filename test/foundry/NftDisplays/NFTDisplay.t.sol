@@ -30,15 +30,15 @@ contract NFTDisplayTests is Test {
 
   function testWhitelistAndBlacklist() public {
     displayFacet = NFTDisplayFacet(TestConstants.REALM_DIAMOND_ADDRESS_MATIC);
-    displayFacet.toggleWhitelist(populateAddressArray(), maticChainId(), populateWhitelistArray());
+    displayFacet.toggleNftDisplayAllowed(populateAddressArray(), maticChainId(), populateWhitelistArray());
 
     for (uint256 i; i == 4; i++) {
-      assertEq(displayFacet.viewNFTDisplayStatus(populateAddressArray()[i], maticChainId()[i]), true);
+      assertEq(displayFacet.nftDisplayAllowed(populateAddressArray()[i], maticChainId()[i]), true);
     }
     //blacklist
-    displayFacet.toggleWhitelist(populateAddressArray(), maticChainId(), populateBlacklistArray());
+    displayFacet.toggleNftDisplayAllowed(populateAddressArray(), maticChainId(), populateBlacklistArray());
     for (uint256 i; i == 4; i++) {
-      assertEq(displayFacet.viewNFTDisplayStatus(populateAddressArray()[i], maticChainId()[i]), false);
+      assertEq(displayFacet.nftDisplayAllowed(populateAddressArray()[i], maticChainId()[i]), false);
     }
   }
 
