@@ -14,37 +14,24 @@ export async function upgradeInstallation() {
     {
       facetName: "InstallationUpgradeFacet",
       addSelectors: [
-        `function upgradeInstallation(${UpgradeQueue} memory _upgradeQueue,uint256 _gotchiId,bytes memory _signature,uint40 _gltr) external`,
+        `function reduceUpgradeTime(
+        uint256 _upgradeIndex,
+        uint256 _gotchiId,
+        uint40 _blocks,
+        bytes memory _signature
+      ) external`,
       ],
       removeSelectors: [
-        `function upgradeInstallation(${UpgradeQueue} calldata _upgradeQueue,bytes memory _signature,uint40 _gltr) external`,
+        `function reduceUpgradeTime(
+        uint256 _upgradeIndex,
+        uint40 _blocks,
+        bytes memory _signature
+      ) external`,
       ],
-    },
-  ];
-
-  //Realm Upgrade
-  const facets2: FacetsAndAddSelectors[] = [
-    {
-      facetName: "AlchemicaFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "RealmFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "RealmGettersAndSettersFacet",
-      addSelectors: [
-        `function verifyAccessRight(uint256 _realmId,uint256 _gotchiId,uint256 _actionRight, address _sender ) external view`,
-      ],
-      removeSelectors: [],
     },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
-  const joined2 = convertFacetAndSelectorsToString(facets2);
 
   const c = await varsForNetwork(ethers);
 
@@ -55,16 +42,8 @@ export async function upgradeInstallation() {
     useLedger: true,
     useMultisig: false,
   };
-  const args2: DeployUpgradeTaskArgs = {
-    diamondUpgrader: await diamondOwner(c.realmDiamond, ethers),
-    diamondAddress: c.realmDiamond,
-    facetsAndAddSelectors: joined2,
-    useLedger: true,
-    useMultisig: false,
-  };
 
   await run("deployUpgrade", args);
-  await run("deployUpgrade", args2);
 }
 
 if (require.main === module) {
