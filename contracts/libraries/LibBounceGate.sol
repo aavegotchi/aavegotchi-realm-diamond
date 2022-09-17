@@ -72,7 +72,7 @@ library LibBounceGate {
     }
     uint256 addedPriority = _calculatePriorityAndSettleAlchemica(_alchemicaSpent);
     //update storage
-    uint120 newPriority = p.priority + uint120(addedPriority);
+    uint120 newPriority = _getUpdatedPriority(_realmId) + uint120(addedPriority);
     p.priority = newPriority;
     emit EventPriorityAndDurationUpdated(_realmId, newPriority, p.endTime);
   }
@@ -89,6 +89,35 @@ library LibBounceGate {
     p.endTime = uint64(block.timestamp);
 
     emit EventCancelled(_realmId);
+  }
+
+  function _getUpdatedPriority(uint256 _realmId) internal view returns (uint120 _currentPriority) {
+    AppStorage storage s = LibAppStorage.diamondStorage();
+    BounceGate storage p = s.parcels[_realmId].bounceGate;
+    //only for started events
+    if (p.startTime <= block.timestamp) {
+      if (p.endTime <= uint64(block.timestamp)) {
+        _currentPriority = 0;
+      } else {
+        //priority decreases by 1 point every minute
+        uint256 elapsedMinutes = ((uint64(block.timestamp) - p.startTime) + 1) / 60;
+        uint256 remainder = (uint64(block.timestamp) - p.startTime) % 60;
+        //round up elapsedMinute(to cover for <60 seconds)
+        if (remainder > 0 && elapsedMinutes > 0) {
+          elapsedMinutes -= 1;
+        }
+
+        if (elapsedMinutes > 0 && elapsedMinutes < p.priority) {
+          _currentPriority = p.priority - uint120(elapsedMinutes);
+        } else {
+          //no significant usage yet..so piority doesn't change
+          _currentPriority = p.priority;
+        }
+      }
+    }
+    if (p.startTime > block.timestamp) {
+      _currentPriority = p.priority;
+    }
   }
 
   function _validateInitialBounceGate(uint64 _startTime, uint256 _durationInMinutes) private returns (uint64 endTime_) {
@@ -110,11 +139,9 @@ library LibBounceGate {
     AppStorage storage s = LibAppStorage.diamondStorage();
     for (uint256 i = 0; i < 4; i++) {
       uint256 amount = _alchemicaSpent[i] / 1e18;
-      //each amount must be a multiple of 100
+      //each amount must be greater than or equal to 1
       if (amount > 0) {
-        assert(amount % 100 == 0);
-        uint256 units = amount / 100;
-        _startingPriority += uint120(units * _getAlchemicaRankings()[i]);
+        _startingPriority += uint120(amount * _getAlchemicaRankings()[i]);
         require(IERC20(s.alchemicaAddresses[i]).transferFrom(msg.sender, address(this), amount));
       }
     }

@@ -27,7 +27,12 @@ contract BounceGateFacet is Modifiers {
     LibBounceGate._cancelEvent(_realmId);
   }
 
-  function viewEvent(uint256 _realmId) public view returns (BounceGate memory) {
-    return s.parcels[_realmId].bounceGate;
+  function viewEvent(uint256 _realmId) public view returns (BounceGate memory b_) {
+    BounceGate memory p = s.parcels[_realmId].bounceGate;
+    b_.title = p.title;
+    b_.startTime = p.startTime;
+    b_.endTime = p.endTime;
+    b_.priority = LibBounceGate._getUpdatedPriority(_realmId);
+    b_.equipped = p.equipped;
   }
 }
