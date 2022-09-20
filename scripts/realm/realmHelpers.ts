@@ -78,6 +78,12 @@ export function outputTile(tile: TileTypeInput): TileTypeOutput {
   return output;
 }
 
+export function outputTiles(tiles: TileTypeInput[]): TileTypeOutput[] {
+  let output: TileTypeOutput[] = [];
+  output = tiles.map(outputTile);
+  return output;
+}
+
 const backendSigner = () => {
   //@ts-ignore
   return new ethers.Wallet(process.env.PROD_PK); // PK should start with '0x'
