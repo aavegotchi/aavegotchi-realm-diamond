@@ -45,6 +45,7 @@ contract TestRealmFacet is Modifiers {
   /// @dev Equip installation without signature or owner checks for testing
   function mockEquipInstallation(
     uint256 _realmId,
+    uint256 _gotchiId,
     uint256 _installationId,
     uint256 _x,
     uint256 _y
