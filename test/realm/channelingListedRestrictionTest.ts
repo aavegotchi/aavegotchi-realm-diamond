@@ -8,43 +8,26 @@ import {
 } from "../../scripts/setVars";
 import { expect } from "chai";
 import {
-  InstallationFacet,
   RealmFacet,
-  TileFacet,
   OwnershipFacet,
   AlchemicaFacet,
   AavegotchiDiamond,
 } from "../../typechain";
-import {
-  approveAlchemica,
-  mintAlchemica,
-  genEquipInstallationSignature,
-  genChannelAlchemicaSignature,
-  genUpgradeInstallationSignature,
-} from "../../scripts/realm/realmHelpers";
-import { TestBeforeVars, UpgradeQueue } from "../../types";
+import { genChannelAlchemicaSignature } from "../../scripts/realm/realmHelpers";
 import { impersonate } from "../../scripts/helperFunctions";
 import { upgradeChannelingRestrictions } from "../../scripts/alchemica/upgradeChannelingRestrictions";
 
 describe("Channeling Restrictions during Lending Listing", async function () {
-  //   const testAddress = "0xDd564df884Fd4e217c9ee6F65B4BA6e5641eAC63";
-  //   const testParcelId = 2893;
-  //   const testGotchiId = 22306;
-  //   const testGotchiId2 = 23491;
-  //   const testGotchiId3 = 19652;
   let parcelId = 141;
   let gotchiId = 1484;
   let ownerAddress = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
   const otherAddress = "0x51208e5cC9215c6360210C48F81C8270637a5218";
   const otherGotchi = 2575;
   const otherParcelId = 3783;
-  const unlockedAavegotchiId = 21655;
 
   let realmFacet: RealmFacet;
   let alchemicaFacet: AlchemicaFacet;
-  let ownershipFacet: OwnershipFacet;
   let aavegotchiDiamond: AavegotchiDiamond;
-  let g: TestBeforeVars;
   let c;
 
   const initialCost = ethers.utils.parseUnits("1", "ether");
@@ -71,15 +54,6 @@ describe("Channeling Restrictions during Lending Listing", async function () {
       "AlchemicaFacet",
       c.realmDiamond
     )) as AlchemicaFacet;
-
-    // g.alchemicaFacet = await impersonate(
-    //   g.ownerAddress,
-    //   g.alchemicaFacet,
-    //   ethers,
-    //   network
-    // );
-
-    // await g.alchemicaFacet.setChannelingLimits([1, 2], [86400, 64800]);
 
     const realmOwnershipFacet = (await ethers.getContractAt(
       "OwnershipFacet",
@@ -146,7 +120,7 @@ describe("Channeling Restrictions during Lending Listing", async function () {
     );
   });
 
-  it("Should NOT channel Alchemica when gotchi is listed for lending", async function () {
+  it("Should NOT channel Alchemica when gotchi is listed for lending, ONLY when gotchi is lent", async function () {
     const lastChanneled = await alchemicaFacet.getLastChanneled(otherGotchi);
 
     const signature = await genChannelAlchemicaSignature(
@@ -194,12 +168,26 @@ describe("Channeling Restrictions during Lending Listing", async function () {
       "AavegotchiDiamond: Gotchi CANNOT have active listing for lending"
     );
 
+    aavegotchiDiamond = await impersonate(
+      ownerAddress,
+      await ethers.getContractAt("AavegotchiDiamond", c.aavegotchiDiamond),
+      ethers,
+      network
+    );
+
     await aavegotchiDiamond.agreeGotchiLending(
       await aavegotchiDiamond.getGotchiLendingsLength(),
       otherGotchi,
       initialCost,
       period,
       revenueSplitWithoutThirdParty
+    );
+
+    await alchemicaFacet.channelAlchemica(
+      otherParcelId,
+      otherGotchi,
+      lastChanneled,
+      signature
     );
   });
 });

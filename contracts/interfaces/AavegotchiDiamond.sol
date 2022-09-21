@@ -58,4 +58,6 @@ interface AavegotchiDiamond {
   function realmInteract(uint256 _tokenId) external;
 
   function isAavegotchiListed(uint32 _erc721TokenId) external view returns (bool);
+
+  function getGotchiLendingsLength() external view returns (uint256);
 }
