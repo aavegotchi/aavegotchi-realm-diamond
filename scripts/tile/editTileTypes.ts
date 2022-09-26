@@ -1,5 +1,4 @@
 import { ethers, network } from "hardhat";
-import { tileTypes } from "../../data/tiles/tileTypes";
 import { TileFacet, OwnershipFacet } from "../../typechain";
 import { impersonate } from "../helperFunctions";
 
@@ -7,6 +6,7 @@ import { LedgerSigner } from "@anders-t/ethers-ledger";
 
 import { gasPrice } from "../../constants";
 import { outputTile } from "../realm/realmHelpers";
+import { tileTypes } from "../../data/tiles/tileTypes";
 
 export async function setAddresses() {
   let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
@@ -31,13 +31,24 @@ export async function setAddresses() {
     tileFacet = await impersonate(owner, tileFacet, ethers, network);
   }
 
-  const tx = await tileFacet.deprecateTiles([0], {
+  let tiles = tileTypes.map((val) => outputTile(val));
+  // console.log("tile:", tile);
+  const ids = tileTypes.map((val) => val.id);
+
+  console.log("Editing tile:", tiles);
+  console.log("ids:", ids);
+  const tx = await tileFacet.editTileTypes(ids, tiles, {
     gasPrice: gasPrice,
   });
 
+  // console.log("Set deprecate time to:", new Date(1));
+  // const tx = await tileFacet.editDeprecateTime("2", "1", {
+  //   gasPrice: gasPrice,
+  // });
+
   await tx.wait();
-  const tiles = await tileFacet.getTileTypes([]);
-  console.log("tiles:", tiles);
+  const afterTiles = await tileFacet.getTileTypes([]);
+  console.log("tiles:", afterTiles);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

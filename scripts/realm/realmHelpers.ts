@@ -61,7 +61,7 @@ export function outputTile(tile: TileTypeInput): TileTypeOutput {
   if (tile.height > 64) throw new Error("Height too much");
 
   let output: TileTypeOutput = {
-    deprecated: false,
+    deprecated: tile.deprecated ? tile.deprecated : false,
     tileType: tile.tileType,
     width: tile.width,
     height: tile.height,

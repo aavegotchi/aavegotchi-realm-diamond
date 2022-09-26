@@ -31,28 +31,28 @@ export async function setAddresses() {
     tileFacet = await impersonate(owner, tileFacet, ethers, network);
   }
 
-  // const tile = outputTile({
-  //   id: 2,
-  //   name: "LE Golden Tile - Portal",
-  //   width: 8,
-  //   height: 8,
-  //   deprecated: true,
-  //   tileType: 0,
-  //   alchemicaCost: [25, 25, 75, 25],
-  //   craftTime: 0,
-  // });
+  const tile = outputTile({
+    id: 24,
+    name: "Pink Ghost",
+    width: 2,
+    height: 2,
+    deprecated: false,
+    tileType: 0,
+    craftTime: 0,
+    alchemicaCost: [20, 10, 10, 2],
+  });
 
   // console.log("tile:", tile);
 
-  // console.log("Editing tile:", tile);
-  // const tx = await tileFacet.editTileType("2", tile, {
-  //   gasPrice: gasPrice,
-  // });
-
-  console.log("Set deprecate time to:", new Date(1));
-  const tx = await tileFacet.editDeprecateTime("2", "1", {
+  console.log("Editing tile:", tile);
+  const tx = await tileFacet.editTileTypes([24], [tile], {
     gasPrice: gasPrice,
   });
+
+  // console.log("Set deprecate time to:", new Date(1));
+  // const tx = await tileFacet.editDeprecateTime("2", "1", {
+  //   gasPrice: gasPrice,
+  // });
 
   await tx.wait();
   const tiles = await tileFacet.getTileTypes([]);
