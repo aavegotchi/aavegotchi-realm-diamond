@@ -6,6 +6,8 @@ import "./RealmFacet.sol";
 import "../../libraries/LibRealm.sol";
 import "../../libraries/LibMeta.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import "../../interfaces/IRewardRecipient.sol";
 import "../../libraries/LibAlchemica.sol";
 import "../../libraries/LibSignature.sol";
 
@@ -261,21 +263,30 @@ contract AlchemicaFacet is Modifiers {
       channelAmounts[i] = (channelAmounts[i] * kinshipModifier) / 100;
     }
 
+    address alchemicaRecipient = LibAlchemica.alchemicaRecipient(_gotchiId);
+    TransferAmounts[] memory transferAmounts = new TransferAmounts[](channelAmounts.length);
     for (uint256 i; i < channelAmounts.length; i++) {
       IERC20Mintable alchemica = IERC20Mintable(s.alchemicaAddresses[i]);
 
       //Mint new tokens if the Great Portal Balance is less than capacity
 
       if (alchemica.balanceOf(address(this)) < s.greatPortalCapacity[i]) {
-        TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], rate);
+        transferAmounts[i] = calculateTransferAmounts(channelAmounts[i], rate);
 
-        alchemica.mint(LibAlchemica.alchemicaRecipient(_gotchiId), amounts.owner);
-        alchemica.mint(address(this), amounts.spill);
+        alchemica.mint(alchemicaRecipient, transferAmounts[i].owner);
+        alchemica.mint(address(this), transferAmounts[i].spill);
       } else {
-        TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], rate);
+        transferAmounts[i] = calculateTransferAmounts(channelAmounts[i], rate);
 
-        alchemica.transfer(LibAlchemica.alchemicaRecipient(_gotchiId), amounts.owner);
+        alchemica.transfer(alchemicaRecipient, transferAmounts[i].owner);
       }
+
+    }
+
+    //If recipient supports IRewardRecipient, notify about transfer
+    if (ERC165Checker.supportsInterface(alchemicaRecipient, type(IRewardRecipient).interfaceId)) {
+      uint256[] memory alchemicaAmounts = [ transferAmounts[0].owner, transferAmounts[1].owner, transferAmounts[2].owner, transferAmounts[3].owner ];
+      IRewardRecipient(alchemicaRecipient).onTokenGeneratingEvent([ address(this), s.aavegotchiDiamond ], [ _realmId, _gotchiId ], s.alchemicaAddresses, alchemicaAmounts);
     }
 
     //update latest channeling

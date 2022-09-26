@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
+import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import "../../interfaces/IRewardRecipient.sol";
 import {InstallationDiamondInterface} from "../interfaces/InstallationDiamondInterface.sol";
 import {LibAppStorage, AppStorage, Parcel} from "./AppStorage.sol";
 import "../interfaces/IERC20Mintable.sol";
@@ -279,6 +281,7 @@ library LibAlchemica {
     require(block.timestamp > s.lastClaimedAlchemica[_realmId] + 8 hours, "AlchemicaFacet: 8 hours claim cooldown");
     s.lastClaimedAlchemica[_realmId] = block.timestamp;
 
+    uint256[] memory alchemicaAmounts = new uint256[](4);
     for (uint256 i; i < 4; i++) {
       uint256 remaining = s.parcels[_realmId].alchemicaRemaining[i];
       uint256 available = getAvailableAlchemica(_realmId, i);
@@ -290,11 +293,17 @@ library LibAlchemica {
 
       (uint256 spilloverRate, uint256 spilloverRadius) = calculateSpilloverForReservoir(_realmId, i);
       (uint256 ownerAmount, uint256 spillAmount) = calculateTransferAmounts(available, spilloverRate);
+      alchemicaAmounts[i] = ownerAmount;
 
       //Mint new tokens
       mintAvailableAlchemica(i, _gotchiId, ownerAmount, spillAmount);
 
       emit AlchemicaClaimed(_realmId, _gotchiId, i, available, spilloverRate, spilloverRadius);
+    }
+    //If recipient supports IRewardRecipient, notify about transfer
+    address alchemicaRecipient = alchemicaRecipient(_gotchiId);
+    if (ERC165Checker.supportsInterface(alchemicaRecipient, type(IRewardRecipient).interfaceId)) {
+      IRewardRecipient(alchemicaRecipient).onTokenGeneratingEvent([ address(this), s.aavegotchiDiamond ], [ _realmId, _gotchiId ], s.alchemicaAddresses, alchemicaAmounts);
     }
   }
 
