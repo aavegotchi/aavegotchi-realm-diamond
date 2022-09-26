@@ -47,6 +47,9 @@ struct TileAppStorage {
   mapping(address => mapping(uint256 => uint256)) ownerTileIndexes;
   // installationId => deprecateTime
   mapping(uint256 => uint256) deprecateTime;
+  //CONSOLE AND CAARTRIDGES
+  address consoleDiamond;
+  address caartridgeDiamond;
 }
 
 library LibAppStorageTile {

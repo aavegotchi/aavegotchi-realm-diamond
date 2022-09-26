@@ -420,4 +420,12 @@ contract InstallationFacet is Modifiers {
   //   emit UpgradeTimeReduced(_queueId, upgradeQueue.parcelId, upgradeQueue.coordinateX, upgradeQueue.coordinateY, removeBlocks);
 
   // }
+
+  function getConsoleDiamond() public view returns (address) {
+    return s.consoleDiamond;
+  }
+
+  function getCaartridgeDiamond() public view returns (address) {
+    return s.caartridgeDiamond;
+  }
 }

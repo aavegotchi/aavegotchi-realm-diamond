@@ -93,6 +93,9 @@ struct InstallationAppStorage {
   mapping(uint256 => bool) upgradeComplete;
   mapping(uint256 => uint256) unequipTypes; // installationType.id => unequipType
   mapping(uint256 => uint256[]) parcelIdToUpgradeIds; // will not track upgrades before this variable's existence
+  //CONSOLE AND CAARTRIDGES
+  address consoleDiamond;
+  address caartridgeDiamond;
 }
 
 library LibAppStorageInstallation {
