@@ -97,9 +97,6 @@ library LibBounceGate {
     emit EventCancelled(_realmId);
   }
 
-  event elapsed(uint256 e);
-  event used(uint256);
-
   function _getUpdatedPriority(uint256 _realmId) internal view returns (uint120 _newPriority) {
     AppStorage storage s = LibAppStorage.diamondStorage();
     BounceGate storage p = s.parcels[_realmId].bounceGate;
@@ -145,8 +142,6 @@ library LibBounceGate {
     gltr_ = GLTR_PER_MINUTE * _durationInMinutes * 1e18;
   }
 
-  event pi(uint256 k);
-
   function _calculatePriorityAndSettleAlchemica(uint256[4] calldata _alchemicaSpent) internal returns (uint120 _startingPriority) {
     AppStorage storage s = LibAppStorage.diamondStorage();
     for (uint256 i = 0; i < 4; i++) {
@@ -154,10 +149,7 @@ library LibBounceGate {
       //each amount must be greater than or equal to 1
       if (amount >= 1e18) {
         amount /= 1e18;
-        emit pi(amount);
         _startingPriority += uint120(amount * _getAlchemicaRankings()[i]);
-
-        emit pi(_startingPriority);
         require(IERC20(s.alchemicaAddresses[i]).transferFrom(msg.sender, address(this), amount));
       }
     }
