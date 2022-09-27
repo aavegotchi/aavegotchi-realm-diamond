@@ -55,6 +55,7 @@ struct BounceGate {
   uint64 endTime;
   uint120 priority;
   bool equipped;
+  uint64 lastTimeUpdated;
 }
 
 struct RequestConfig {
