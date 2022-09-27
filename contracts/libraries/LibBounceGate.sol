@@ -115,9 +115,9 @@ library LibBounceGate {
         if (elapsedMinutesSinceLastUpdated <= 1) {
           _newPriority = currentPriority;
         } else {
-          //reduces by 0.01% of current priority every minute
-          uint256 negPriority = (1 * currentPriority) * elapsedMinutesSinceLastUpdated;
-          negPriority /= 100;
+          //reduces by 0.1% of current priority every minute
+          uint256 negPriority = (currentPriority) * elapsedMinutesSinceLastUpdated;
+          negPriority /= 1000;
           if (currentPriority > negPriority) {
             _newPriority = uint120(currentPriority - negPriority);
           } else {
@@ -161,7 +161,7 @@ library LibBounceGate {
         require(IERC20(s.alchemicaAddresses[i]).transferFrom(msg.sender, address(this), amount));
       }
     }
-    _startingPriority *= 100;
+    _startingPriority *= 1000;
   }
 
   function _getAlchemicaRankings() private pure returns (uint256[4] memory rankings_) {

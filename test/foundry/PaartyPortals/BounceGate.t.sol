@@ -25,7 +25,7 @@ contract BounceGateTests is Test, Helpers {
   uint256 realmId = 12860;
   uint256 gotchiId = 3410;
 
-  uint256[4] totalPriority = [1e18, 1e18, 1e18, 1e18]; //priority 1700
+  uint256[4] totalPriority = [1e18, 1e18, 1e18, 1e18]; //priority 17000
 
   //BURNER WALLET..DO NOT USE IN PRODUCTION
   uint256 privKey = 0x18329f54ac729d4765e74e32b1bf7a5ced7a2c0136a03ce18ed1590d43f39890;
@@ -136,7 +136,7 @@ contract BounceGateTests is Test, Helpers {
       realmId
     );
 
-    uint120 startingPriority = 1700;
+    uint120 startingPriority = 17000;
     uint120 originalPriority = startingPriority;
     //create an event
     partyDiamondFacet.createEvent("Gotchigang hangout", uint64(block.timestamp + 1 minutes), 300, totalPriority, realmId);
@@ -153,9 +153,9 @@ contract BounceGateTests is Test, Helpers {
 
     //extend duration by 4020 minutes(total duration now 3 days) and priority by 2
     partyDiamondFacet.updateEvent(realmId, [uint256(2e18), 0, 0, 0], 4020);
-    assertEq(partyDiamondFacet.viewEvent(realmId).priority, startingPriority + 200);
-    startingPriority += 200;
-    originalPriority += 200;
+    assertEq(partyDiamondFacet.viewEvent(realmId).priority, startingPriority + 2000);
+    startingPriority += 2000;
+    originalPriority += 2000;
 
     assertEq(partyDiamondFacet.viewEvent(realmId).endTime, endTimeBefore + 4020 minutes);
 
@@ -165,8 +165,8 @@ contract BounceGateTests is Test, Helpers {
     assertEq(partyDiamondFacet.viewEvent(realmId).priority, startingPriority);
 
     //event exists for 2 minutes
-    //0.01% of startingPriority decays every minute
-    uint256 decayedPriority = (2 * startingPriority) / 100;
+    //0.1% of startingPriority decays every minute
+    uint256 decayedPriority = (2 * startingPriority) / 1000;
     vm.warp(startTime + 2 minutes);
 
     //priority decreases according to formulae
@@ -175,7 +175,7 @@ contract BounceGateTests is Test, Helpers {
 
     //event exists for 30 minutes
     vm.warp(block.timestamp + 30 minutes);
-    decayedPriority = (30 * originalPriority) / 100;
+    decayedPriority = (30 * originalPriority) / 1000;
     assertEq(partyDiamondFacet.viewEvent(realmId).priority, startingPriority - decayedPriority);
     // //extending duration should fail
     // vm.expectRevert(DurationTooHigh.selector);
@@ -189,7 +189,7 @@ contract BounceGateTests is Test, Helpers {
     partyDiamondFacet.updateEvent(realmId, [uint256(1), 0, 0, 0], 0);
 
     //can create another event
-    partyDiamondFacet.createEvent("Gotchigang hangout2", uint64(block.timestamp + 1 minutes), 200, totalPriority, realmId);
+    partyDiamondFacet.createEvent("Gotchigang hangout2", uint64(block.timestamp + 1 minutes), 1000, totalPriority, realmId);
 
     //unequiping should fail until event ends
     sig = constructSig(realmId, gotchiId, 137, 0, 4, privKey);
