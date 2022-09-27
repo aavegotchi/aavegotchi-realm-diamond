@@ -25,7 +25,7 @@ contract BounceGateTests is Test, Helpers {
   uint256 realmId = 12860;
   uint256 gotchiId = 3410;
 
-  uint256[4] totalPriority = [1e18, 1e18, 1e18, 1e18]; //priority 17
+  uint256[4] totalPriority = [1e18, 1e18, 1e18, 1e18]; //priority 1700
 
   //BURNER WALLET..DO NOT USE IN PRODUCTION
   uint256 privKey = 0x18329f54ac729d4765e74e32b1bf7a5ced7a2c0136a03ce18ed1590d43f39890;
@@ -126,6 +126,18 @@ contract BounceGateTests is Test, Helpers {
     vm.expectRevert(StartTimeError.selector);
     partyDiamondFacet.createEvent("Gotchigang hangout", uint64(block.timestamp - 1 minutes), 300, totalPriority, realmId);
 
+    //cannot create an event with a name length >35 characters
+    vm.expectRevert(TitleLengthOverflow.selector);
+    partyDiamondFacet.createEvent(
+      "Gotchigang hangout in the gotchiverse but in this casse it is loonger than 35 characters",
+      uint64(block.timestamp - 1 minutes),
+      300,
+      totalPriority,
+      realmId
+    );
+
+    uint120 startingPriority = 1700;
+    uint120 originalPriority = startingPriority;
     //create an event
     partyDiamondFacet.createEvent("Gotchigang hangout", uint64(block.timestamp + 1 minutes), 300, totalPriority, realmId);
 
@@ -133,32 +145,44 @@ contract BounceGateTests is Test, Helpers {
     vm.expectRevert(OngoingEvent.selector);
     partyDiamondFacet.createEvent("Gotchigang hangout", uint64(block.timestamp + 1 minutes), 300, [uint256(1e18), 0, 0, 0], realmId);
 
-    assertEq(partyDiamondFacet.viewEvent(realmId).priority, 17);
+    //events that haven't started still have priority
+    assertEq(partyDiamondFacet.viewEvent(realmId).priority, startingPriority);
+
     uint256 startTime = partyDiamondFacet.viewEvent(realmId).startTime;
     uint256 endTimeBefore = partyDiamondFacet.viewEvent(realmId).endTime;
-    uint120 priorityBefore = partyDiamondFacet.viewEvent(realmId).priority;
 
     //extend duration by 4020 minutes(total duration now 3 days) and priority by 2
     partyDiamondFacet.updateEvent(realmId, [uint256(2e18), 0, 0, 0], 4020);
-    assertEq(partyDiamondFacet.viewEvent(realmId).priority, priorityBefore + 2);
-    priorityBefore += 2;
+    assertEq(partyDiamondFacet.viewEvent(realmId).priority, startingPriority + 200);
+    startingPriority += 200;
+    originalPriority += 200;
+
     assertEq(partyDiamondFacet.viewEvent(realmId).endTime, endTimeBefore + 4020 minutes);
 
     //test priority decay
     //events that have not started cannot decay
-    vm.warp(block.timestamp + 1 minutes);
-    assertEq(partyDiamondFacet.viewEvent(realmId).priority, priorityBefore);
-    //event exists for 2 minutes
-    vm.warp(startTime + 2 minutes);
-    //priority decreases by 2
-    assertEq(partyDiamondFacet.viewEvent(realmId).priority, priorityBefore - 2);
+    vm.warp(block.timestamp + 59);
+    assertEq(partyDiamondFacet.viewEvent(realmId).priority, startingPriority);
 
+    //event exists for 2 minutes
+    //0.01% of startingPriority decays every minute
+    uint256 decayedPriority = (2 * startingPriority) / 100;
+    vm.warp(startTime + 2 minutes);
+
+    //priority decreases according to formulae
+    assertEq(partyDiamondFacet.viewEvent(realmId).priority, startingPriority - decayedPriority);
+    startingPriority -= uint120(decayedPriority);
+
+    //event exists for 30 minutes
+    vm.warp(block.timestamp + 30 minutes);
+    decayedPriority = (30 * originalPriority) / 100;
+    assertEq(partyDiamondFacet.viewEvent(realmId).priority, startingPriority - decayedPriority);
     // //extending duration should fail
     // vm.expectRevert(DurationTooHigh.selector);
     // partyDiamondFacet.updateEvent(realmId, [uint256(0), 0, 0, 0], 1);
 
     //warp to end of event
-    vm.warp(block.timestamp + 3 days);
+    vm.warp(block.timestamp + 3 days - 30 minutes);
 
     //priority cannot be changed for ended events
     vm.expectRevert(EventEnded.selector);
