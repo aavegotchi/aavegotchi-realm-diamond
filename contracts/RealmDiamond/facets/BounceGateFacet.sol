@@ -27,7 +27,7 @@ contract BounceGateFacet is Modifiers {
     LibBounceGate._cancelEvent(_realmId);
   }
 
-  function viewEvent(uint256 _realmId) public returns (BounceGate memory b_) {
+  function viewEvent(uint256 _realmId) public view returns (BounceGate memory b_) {
     BounceGate memory p = s.parcels[_realmId].bounceGate;
     b_.title = p.title;
     b_.startTime = p.startTime;
