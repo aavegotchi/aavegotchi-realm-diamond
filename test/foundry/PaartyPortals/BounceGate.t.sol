@@ -165,18 +165,18 @@ contract BounceGateTests is Test, Helpers {
     assertEq(partyDiamondFacet.viewEvent(realmId).priority, startingPriority);
 
     //event exists for 2 minutes
-    //0.1% of startingPriority decays every minute
+    //0.01% of startingPriority decays every minute
     uint256 decayedPriority = (2 * startingPriority) / 1000;
     vm.warp(startTime + 2 minutes);
 
     //priority decreases according to formulae
-    assertEq(partyDiamondFacet.viewEvent(realmId).priority, startingPriority - decayedPriority);
-    startingPriority -= uint120(decayedPriority);
+    assertEq(partyDiamondFacet.viewEvent(realmId).priority, ((startingPriority * 10) - decayedPriority) / 10);
+    //startingPriority -= uint120(decayedPriority);
 
-    //event exists for 30 minutes
+    //event exists for 30 more minutes
     vm.warp(block.timestamp + 30 minutes);
-    decayedPriority = (30 * originalPriority) / 1000;
-    assertEq(partyDiamondFacet.viewEvent(realmId).priority, startingPriority - decayedPriority);
+    decayedPriority = ((30 + 2) * originalPriority) / 1000;
+    assertEq(partyDiamondFacet.viewEvent(realmId).priority, ((startingPriority * 10) - decayedPriority) / 10);
     // //extending duration should fail
     // vm.expectRevert(DurationTooHigh.selector);
     // partyDiamondFacet.updateEvent(realmId, [uint256(0), 0, 0, 0], 1);

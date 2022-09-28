@@ -112,11 +112,12 @@ library LibBounceGate {
         if (elapsedMinutesSinceLastUpdated <= 1) {
           _newPriority = currentPriority;
         } else {
-          //reduces by 0.1% of current priority every minute
+          //reduces by 0.01% of current priority every minute
           uint256 negPriority = (currentPriority) * elapsedMinutesSinceLastUpdated;
           negPriority /= 1000;
           if (currentPriority > negPriority) {
-            _newPriority = uint120(currentPriority - negPriority);
+            _newPriority = uint120((currentPriority * 10) - negPriority);
+            _newPriority /= 10;
           } else {
             _newPriority = 0;
           }
