@@ -36,7 +36,9 @@ library LibBounceGate {
     if (msg.sender != owner) revert NotParcelOwner();
     //validate title length
     if (bytes(_title).length > 35) revert TitleLengthOverflow();
-    if (!s.parcels[_realmId].bounceGate.equipped) revert NoBounceGate();
+
+    //REMOVED FOR TESTING ON MUMBAI
+    //   if (!s.parcels[_realmId].bounceGate.equipped) revert NoBounceGate();
     //make sure there is no ongoing event
     if (s.parcels[_realmId].bounceGate.endTime > block.timestamp) revert OngoingEvent();
     //validate event
@@ -70,7 +72,8 @@ library LibBounceGate {
       // uint256 currentDurationInMinutes = p.endTime - p.startTime;
       // if (currentDurationInMinutes + _durationExtensionInMinutes > MAX_DURATION_IN_MINUTES) revert DurationTooHigh();
       uint256 gltr = _getGltrAmount(_durationExtensionInMinutes);
-      require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), gltr));
+      //REMOVED FOR TESTING ON MUMBAI
+      //  require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), gltr));
       //update storage
       p.endTime += (_durationExtensionInMinutes * 60);
     }
@@ -135,7 +138,8 @@ library LibBounceGate {
     AppStorage storage s = LibAppStorage.diamondStorage();
     //calculate gltr needed for duration
     uint256 total = _getGltrAmount(_durationInMinutes);
-    require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), total));
+    //REMOVED FOR TESTING ON MUMBAI
+    // require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), total));
     endTime_ = uint64(_startTime + (_durationInMinutes * 60));
   }
 

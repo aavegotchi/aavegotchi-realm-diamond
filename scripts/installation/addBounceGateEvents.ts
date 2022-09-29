@@ -1,40 +1,36 @@
 import { ethers, network } from "hardhat";
-import { installationTypes } from "../../data/installations/bounceGate";
-import {
-  ERC721Facet,
-  InstallationAdminFacet,
-  TestRealmFacet,
-} from "../../typechain";
+import { ERC20, ERC721Facet } from "../../typechain";
 
-import { outputInstallation } from "../realm/realmHelpers";
-import { diamondOwner, gasPrice, impersonate } from "../helperFunctions";
+import { gasPrice, impersonate } from "../helperFunctions";
 import { varsForNetwork } from "../../constants";
-import { LedgerSigner } from "@anders-t/ethers-ledger";
+//import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { BounceGateFacet } from "../../typechain/BounceGateFacet";
+import { Signer } from "ethers";
 import { upgradeBounceGateTest } from "../realm/upgrades/upgrade-bounceGateTest";
 
 export async function addFarmInstallations(test: boolean) {
   const c = await varsForNetwork(ethers);
 
-  let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
+  let signer: Signer;
 
   if (network.name === "mumbai") {
     signer = await ethers.getSigners()[0];
   }
+  const realmDiamond = "0x726F201A9aB38cD56D60ee392165F1434C4F193D";
 
   let bgFacet = (await ethers.getContractAt(
     "BounceGateFacet",
-    c.realmDiamond,
+    realmDiamond,
     signer
   )) as BounceGateFacet;
 
-  console.log("ins:", c.realmDiamond);
+  console.log("ins:", realmDiamond);
 
   const parcelId = "1";
 
   const erc721Facet = (await ethers.getContractAt(
     "ERC721Facet",
-    c.realmDiamond
+    realmDiamond
   )) as ERC721Facet;
 
   const owner = await erc721Facet.ownerOf(parcelId);
@@ -42,7 +38,7 @@ export async function addFarmInstallations(test: boolean) {
 
   await upgradeBounceGateTest();
 
-  if (network.name === "hardhat") {
+  if (network.name === "hardhat" || "localhost") {
     bgFacet = await impersonate(
       await erc721Facet.ownerOf(parcelId),
       bgFacet,
@@ -51,14 +47,9 @@ export async function addFarmInstallations(test: boolean) {
     );
   }
 
-  const testRealmFacet = (await ethers.getContractAt(
-    "TestRealmFacet",
-    c.realmDiamond
-  )) as TestRealmFacet;
-
   const event = {
     _title: "Test Event 1",
-    _startTime: Date.now(),
+    _startTime: (Date.now() / 1000).toFixed(),
     _durationInMinutes: 86400 * 30, //30 days,
     _alchemicaSpent: ["0", "0", "0", "0"], //no priority,
     _realmId: parcelId,
