@@ -33,10 +33,14 @@ library LibBounceGate {
     address owner = s.parcels[_realmId].owner;
 
     //@todo: replace with Access Rights
-    if (msg.sender != owner) revert NotParcelOwner();
+
+    //@todo: uncomment for mainnet
+    // if (msg.sender != owner) revert NotParcelOwner();
     //validate title length
     if (bytes(_title).length > 35) revert TitleLengthOverflow();
-    if (!s.parcels[_realmId].bounceGate.equipped) revert NoBounceGate();
+
+    //REMOVED FOR TESTING ON MUMBAI
+    //   if (!s.parcels[_realmId].bounceGate.equipped) revert NoBounceGate();
     //make sure there is no ongoing event
     if (s.parcels[_realmId].bounceGate.endTime > block.timestamp) revert OngoingEvent();
     //validate event
@@ -65,12 +69,17 @@ library LibBounceGate {
     //@todo: replace with access rights
     if (msg.sender != parcelOwner) revert NotParcelOwner();
     if (p.startTime == 0) revert NoEvent();
-    if (p.endTime < block.timestamp) revert EventEnded();
+
+    //@todo: check
+    // if (p.endTime < block.timestamp) revert EventEnded();
     if (_durationExtensionInMinutes > 0) {
       // uint256 currentDurationInMinutes = p.endTime - p.startTime;
       // if (currentDurationInMinutes + _durationExtensionInMinutes > MAX_DURATION_IN_MINUTES) revert DurationTooHigh();
       uint256 gltr = _getGltrAmount(_durationExtensionInMinutes);
-      require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), gltr));
+      //REMOVED FOR TESTING ON MUMBAI
+
+      //@todo: uncomment for mainnet
+      //  require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), gltr));
       //update storage
       p.endTime += (_durationExtensionInMinutes * 60);
     }
@@ -97,33 +106,32 @@ library LibBounceGate {
     emit EventCancelled(_realmId);
   }
 
-  event elapsed(uint256 e);
-  event used(uint256);
-
   function _getUpdatedPriority(uint256 _realmId) internal view returns (uint120 _newPriority) {
     AppStorage storage s = LibAppStorage.diamondStorage();
     BounceGate storage p = s.parcels[_realmId].bounceGate;
 
     if (p.startTime <= block.timestamp) {
-      if (p.endTime <= uint64(block.timestamp)) {
-        _newPriority = 0;
+      //@todo: check
+      // if (p.endTime <= uint64(block.timestamp)) {
+      //   _newPriority = 0;
+      // } else {
+      uint256 elapsedMinutesSinceLastUpdated = ((uint64(block.timestamp) - p.lastTimeUpdated)) / 60;
+
+      uint120 currentPriority = p.priority;
+
+      if (elapsedMinutesSinceLastUpdated <= 1) {
+        _newPriority = currentPriority;
       } else {
-        uint256 elapsedMinutesSinceLastUpdated = ((uint64(block.timestamp) - p.lastTimeUpdated)) / 60;
-
-        uint120 currentPriority = p.priority;
-
-        if (elapsedMinutesSinceLastUpdated <= 1) {
-          _newPriority = currentPriority;
+        //reduces by 0.01% of current priority every minute
+        uint256 negPriority = (currentPriority) * elapsedMinutesSinceLastUpdated;
+        negPriority /= 1000;
+        if (currentPriority > negPriority) {
+          _newPriority = uint120((currentPriority * 10) - negPriority);
+          _newPriority /= 10;
         } else {
-          //reduces by 0.01% of current priority every minute
-          uint256 negPriority = (1 * currentPriority) * elapsedMinutesSinceLastUpdated;
-          negPriority /= 100;
-          if (currentPriority > negPriority) {
-            _newPriority = uint120(currentPriority - negPriority);
-          } else {
-            _newPriority = 0;
-          }
+          _newPriority = 0;
         }
+        // }
       }
     } else {
       _newPriority = p.priority;
@@ -137,15 +145,16 @@ library LibBounceGate {
     AppStorage storage s = LibAppStorage.diamondStorage();
     //calculate gltr needed for duration
     uint256 total = _getGltrAmount(_durationInMinutes);
-    require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), total));
+    //REMOVED FOR TESTING ON MUMBAI
+
+    //@todo: uncomment for prod
+    // require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), total));
     endTime_ = uint64(_startTime + (_durationInMinutes * 60));
   }
 
   function _getGltrAmount(uint256 _durationInMinutes) private pure returns (uint256 gltr_) {
     gltr_ = GLTR_PER_MINUTE * _durationInMinutes * 1e18;
   }
-
-  event pi(uint256 k);
 
   function _calculatePriorityAndSettleAlchemica(uint256[4] calldata _alchemicaSpent) internal returns (uint120 _startingPriority) {
     AppStorage storage s = LibAppStorage.diamondStorage();
@@ -154,14 +163,11 @@ library LibBounceGate {
       //each amount must be greater than or equal to 1
       if (amount >= 1e18) {
         amount /= 1e18;
-        emit pi(amount);
         _startingPriority += uint120(amount * _getAlchemicaRankings()[i]);
-
-        emit pi(_startingPriority);
         require(IERC20(s.alchemicaAddresses[i]).transferFrom(msg.sender, address(this), amount));
       }
     }
-    _startingPriority *= 100;
+    _startingPriority *= 1000;
   }
 
   function _getAlchemicaRankings() private pure returns (uint256[4] memory rankings_) {

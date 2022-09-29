@@ -6,10 +6,18 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
+import { OwnershipFacet } from "../../../typechain";
 
+let ownershipFacet: OwnershipFacet;
 export async function upgradeBounceGateTest() {
-  const diamondUpgrader = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
+  const c = await varsForNetwork(ethers);
+  ownershipFacet = await ethers.getContractAt(
+    "OwnershipFacet",
+    "0x726F201A9aB38cD56D60ee392165F1434C4F193D"
+  );
+  const diamondUpgrader = await ownershipFacet.owner();
 
+  //this upgrade removes the need for bouncegate equip checks and disables gltr transfers
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "BounceGateFacet",
@@ -18,13 +26,11 @@ export async function upgradeBounceGateTest() {
     },
   ];
 
-  const c = await varsForNetwork(ethers);
-
   const joined = convertFacetAndSelectorsToString(facets);
 
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
-    diamondAddress: c.realmDiamond,
+    diamondAddress: "0x726F201A9aB38cD56D60ee392165F1434C4F193D",
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,
