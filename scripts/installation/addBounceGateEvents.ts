@@ -38,14 +38,14 @@ export async function addFarmInstallations(test: boolean) {
 
   await upgradeBounceGateTest();
 
-  if (network.name === "hardhat" || "localhost") {
-    bgFacet = await impersonate(
-      await erc721Facet.ownerOf(parcelId),
-      bgFacet,
-      ethers,
-      network
-    );
-  }
+  // if (network.name === "hardhat" || "localhost") {
+  //   bgFacet = await impersonate(
+  //     await erc721Facet.ownerOf(parcelId),
+  //     bgFacet,
+  //     ethers,
+  //     network
+  //   );
+  // }
 
   const event = {
     _title: "Test Event 1",
@@ -55,6 +55,7 @@ export async function addFarmInstallations(test: boolean) {
     _realmId: parcelId,
   };
 
+  console.log("Adding event");
   const tx = await bgFacet.createEvent(
     event._title,
     event._startTime,

@@ -1,8 +1,4 @@
-import {
-  customError,
-  impersonate,
-  impersonateSigner,
-} from "../../scripts/helperFunctions";
+import { impersonate, impersonateSigner } from "../../scripts/helperFunctions";
 import {
   InstallationFacet,
   RealmFacet,
@@ -19,7 +15,6 @@ import { upgrade } from "../../scripts/realm/upgrades/upgrade-bounceGate";
 import { Constants, varsForNetwork } from "../../constants";
 import { InstallationTypeInput } from "../../types";
 import { genEquipInstallationSignature } from "../../scripts/realm/realmHelpers";
-import { time } from "console";
 
 describe("Testing Bounce Gates", async function () {
   let bounceGateFacet: BounceGateFacet;
@@ -34,8 +29,8 @@ describe("Testing Bounce Gates", async function () {
   let parcelOwnerSigner;
   let startTime: BigNumber;
   const parcelOwner = "0x3a79bF3555F33f2adCac02da1c4a0A0163F666ce";
-  const pubKey: BytesLike =
-    "0x18db6dd94c8b8eeeeadbd0f7b4a0050135f086e0ba16f915773652d10e39e409a60a59adc13c2747f8fc4e405a08327849f51a2ed7073eb19f0a815c73dbd399";
+  // const pubKey: BytesLike =
+  //   "0x18db6dd94c8b8eeeeadbd0f7b4a0050135f086e0ba16f915773652d10e39e409a60a59adc13c2747f8fc4e405a08327849f51a2ed7073eb19f0a815c73dbd399";
   const realmId = 12860;
   const gotchiId = 3410;
   let priority: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
@@ -82,7 +77,7 @@ describe("Testing Bounce Gates", async function () {
       ownerSigner
     )) as SetPubKeyFacet;
     //set the public key
-    await pubkeyFacet.setPubKey(pubKey);
+    // await pubkeyFacet.setPubKey(pubKey);
     //add bounce gate installation
     installations.push({
       deprecated: false,
@@ -139,44 +134,44 @@ describe("Testing Bounce Gates", async function () {
     ];
   });
 
-  it("Cannot create events if bounce gate is not equipped", async () => {
-    // await testInstallationFacet.testCraftInstallations([10]);
-    // await testRealmFacet.testEquipInstallation(realmId, 10, 3, 3);
+  // it("Cannot create events if bounce gate is not equipped", async () => {
+  //   // await testInstallationFacet.testCraftInstallations([10]);
+  //   // await testRealmFacet.testEquipInstallation(realmId, 10, 3, 3);
 
-    await expect(
-      bounceGateFacet.createEvent(
-        "Gotchigang Hangout",
-        Date.now(),
-        BigNumber.from(300).mul(60),
-        priority,
-        realmId
-      )
-    ).to.revertedWith("NoBounceGate()");
-  });
-  it("Can only equip one bounceGate ", async () => {
-    //craft 2 bouncegates
-    await installationFacet.craftInstallations([BigNumber.from(137)], [0]);
-    await installationFacet.craftInstallations([BigNumber.from(137)], [0]);
+  //   await expect(
+  //     bounceGateFacet.createEvent(
+  //       "Gotchigang Hangout",
+  //       Date.now(),
+  //       BigNumber.from(300).mul(60),
+  //       priority,
+  //       realmId
+  //     )
+  //   ).to.revertedWith("NoBounceGate()");
+  // });
+  // it("Can only equip one bounceGate ", async () => {
+  //   //craft 2 bouncegates
+  //   await installationFacet.craftInstallations([BigNumber.from(137)], [0]);
+  //   await installationFacet.craftInstallations([BigNumber.from(137)], [0]);
 
-    const sig = await genEquipInstallationSignature(
-      realmId,
-      gotchiId,
-      137,
-      0,
-      4
-    );
-    const sig2 = await genEquipInstallationSignature(
-      realmId,
-      gotchiId,
-      137,
-      0,
-      2
-    );
-    await realmFacet.equipInstallation(realmId, gotchiId, 137, 0, 4, sig);
-    await expect(
-      realmFacet.equipInstallation(realmId, gotchiId, 137, 0, 2, sig2)
-    ).to.revertedWith("LibAlchemica: Bounce Gate already equipped");
-  });
+  //   const sig = await genEquipInstallationSignature(
+  //     realmId,
+  //     gotchiId,
+  //     137,
+  //     0,
+  //     4
+  //   );
+  //   const sig2 = await genEquipInstallationSignature(
+  //     realmId,
+  //     gotchiId,
+  //     137,
+  //     0,
+  //     2
+  //   );
+  //   await realmFacet.equipInstallation(realmId, gotchiId, 137, 0, 4, sig);
+  //   await expect(
+  //     realmFacet.equipInstallation(realmId, gotchiId, 137, 0, 2, sig2)
+  //   ).to.revertedWith("LibAlchemica: Bounce Gate already equipped");
+  // });
 
   it("Only parcel owner can create an event", async () => {
     await expect(
@@ -254,12 +249,17 @@ describe("Testing Bounce Gates", async function () {
     const currentPriority = await (
       await bounceGateFacet.viewEvent(realmId)
     ).priority;
+
+    // console.log("current pririty:", currentPriority);
     //jump through 20 minutes
     await ethers.provider.send("evm_increaseTime", [1200]);
     await ethers.provider.send("evm_mine", []);
     const newPriority = await (
       await bounceGateFacet.viewEvent(realmId)
     ).priority;
+
+    // console.log("new priority:", newPriority);
+
     const expectedDecay = getDecayedPriority(
       BigNumber.from(1200).div(60),
       currentPriority
@@ -269,6 +269,31 @@ describe("Testing Bounce Gates", async function () {
       currentPriority.sub(expectedDecay),
       currentPriority.sub(expectedDecay).sub(40)
     );
+  });
+
+  it("Priority should go approach 0 after a very long time", async () => {
+    const currentPriority = await (
+      await bounceGateFacet.viewEvent(realmId)
+    ).priority;
+
+    console.log("current pririty:", currentPriority);
+    //jump through 20 minutes
+    await ethers.provider.send("evm_increaseTime", [86400 * 200]);
+    await ethers.provider.send("evm_mine", []);
+    const newPriority = await (
+      await bounceGateFacet.viewEvent(realmId)
+    ).priority;
+
+    console.log("new priority:", newPriority);
+
+    //hardhat time jumps are not precise so we check for ranges
+    expect(newPriority).to.equal(0);
+  });
+
+  it("Priority should go back up after update", async () => {
+    await bounceGateFacet.updateEvent(realmId, priority2, 1140);
+    const eventDetails = await bounceGateFacet.viewEvent(realmId);
+    expect(eventDetails.priority).to.equal(2000);
   });
 
   it("Cannot unequip till event ends", async () => {

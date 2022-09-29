@@ -33,7 +33,9 @@ library LibBounceGate {
     address owner = s.parcels[_realmId].owner;
 
     //@todo: replace with Access Rights
-    if (msg.sender != owner) revert NotParcelOwner();
+
+    //@todo: uncomment for mainnet
+    // if (msg.sender != owner) revert NotParcelOwner();
     //validate title length
     if (bytes(_title).length > 35) revert TitleLengthOverflow();
 
@@ -67,12 +69,16 @@ library LibBounceGate {
     //@todo: replace with access rights
     if (msg.sender != parcelOwner) revert NotParcelOwner();
     if (p.startTime == 0) revert NoEvent();
-    if (p.endTime < block.timestamp) revert EventEnded();
+
+    //@todo: check
+    // if (p.endTime < block.timestamp) revert EventEnded();
     if (_durationExtensionInMinutes > 0) {
       // uint256 currentDurationInMinutes = p.endTime - p.startTime;
       // if (currentDurationInMinutes + _durationExtensionInMinutes > MAX_DURATION_IN_MINUTES) revert DurationTooHigh();
       uint256 gltr = _getGltrAmount(_durationExtensionInMinutes);
       //REMOVED FOR TESTING ON MUMBAI
+
+      //@todo: uncomment for mainnet
       //  require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), gltr));
       //update storage
       p.endTime += (_durationExtensionInMinutes * 60);
@@ -105,26 +111,27 @@ library LibBounceGate {
     BounceGate storage p = s.parcels[_realmId].bounceGate;
 
     if (p.startTime <= block.timestamp) {
-      if (p.endTime <= uint64(block.timestamp)) {
-        _newPriority = 0;
+      //@todo: check
+      // if (p.endTime <= uint64(block.timestamp)) {
+      //   _newPriority = 0;
+      // } else {
+      uint256 elapsedMinutesSinceLastUpdated = ((uint64(block.timestamp) - p.lastTimeUpdated)) / 60;
+
+      uint120 currentPriority = p.priority;
+
+      if (elapsedMinutesSinceLastUpdated <= 1) {
+        _newPriority = currentPriority;
       } else {
-        uint256 elapsedMinutesSinceLastUpdated = ((uint64(block.timestamp) - p.lastTimeUpdated)) / 60;
-
-        uint120 currentPriority = p.priority;
-
-        if (elapsedMinutesSinceLastUpdated <= 1) {
-          _newPriority = currentPriority;
+        //reduces by 0.01% of current priority every minute
+        uint256 negPriority = (currentPriority) * elapsedMinutesSinceLastUpdated;
+        negPriority /= 1000;
+        if (currentPriority > negPriority) {
+          _newPriority = uint120((currentPriority * 10) - negPriority);
+          _newPriority /= 10;
         } else {
-          //reduces by 0.01% of current priority every minute
-          uint256 negPriority = (currentPriority) * elapsedMinutesSinceLastUpdated;
-          negPriority /= 1000;
-          if (currentPriority > negPriority) {
-            _newPriority = uint120((currentPriority * 10) - negPriority);
-            _newPriority /= 10;
-          } else {
-            _newPriority = 0;
-          }
+          _newPriority = 0;
         }
+        // }
       }
     } else {
       _newPriority = p.priority;
@@ -139,6 +146,8 @@ library LibBounceGate {
     //calculate gltr needed for duration
     uint256 total = _getGltrAmount(_durationInMinutes);
     //REMOVED FOR TESTING ON MUMBAI
+
+    //@todo: uncomment for prod
     // require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), total));
     endTime_ = uint64(_startTime + (_durationInMinutes * 60));
   }
