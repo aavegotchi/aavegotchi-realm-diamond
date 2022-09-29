@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-import "../../contracts/libraries/AppStorage.sol";
+import "../libraries/AppStorage.sol";
 
 contract SetPubKeyFacet is Modifiers {
   function setPubKey(bytes memory _newPubKey) public {
