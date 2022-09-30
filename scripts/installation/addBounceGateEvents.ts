@@ -26,7 +26,7 @@ export async function addFarmInstallations(test: boolean) {
 
   console.log("ins:", realmDiamond);
 
-  const parcelId = "1";
+  const parcelId = "4";
 
   const erc721Facet = (await ethers.getContractAt(
     "ERC721Facet",
@@ -48,8 +48,8 @@ export async function addFarmInstallations(test: boolean) {
   // }
 
   const event = {
-    _title: "Test Event 1",
-    _startTime: (Date.now() / 1000).toFixed(),
+    _title: "Parcel 4 Event",
+    _startTime: (Date.now() / 1000).toFixed() + 300,
     _durationInMinutes: 86400 * 30, //30 days,
     _alchemicaSpent: ["0", "0", "0", "0"], //no priority,
     _realmId: parcelId,
