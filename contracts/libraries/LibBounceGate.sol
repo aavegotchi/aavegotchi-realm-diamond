@@ -34,13 +34,11 @@ library LibBounceGate {
 
     //@todo: replace with Access Rights
 
-    //@todo: uncomment for mainnet
-    // if (msg.sender != owner) revert NotParcelOwner();
+    if (msg.sender != owner) revert NotParcelOwner();
     //validate title length
     if (bytes(_title).length > 35) revert TitleLengthOverflow();
 
-    //REMOVED FOR TESTING ON MUMBAI
-    //   if (!s.parcels[_realmId].bounceGate.equipped) revert NoBounceGate();
+    if (!s.parcels[_realmId].bounceGate.equipped) revert NoBounceGate();
     //make sure there is no ongoing event
     if (s.parcels[_realmId].bounceGate.endTime > block.timestamp) revert OngoingEvent();
     //validate event
@@ -70,16 +68,10 @@ library LibBounceGate {
     if (msg.sender != parcelOwner) revert NotParcelOwner();
     if (p.startTime == 0) revert NoEvent();
 
-    //@todo: check
-    // if (p.endTime < block.timestamp) revert EventEnded();
     if (_durationExtensionInMinutes > 0) {
-      // uint256 currentDurationInMinutes = p.endTime - p.startTime;
-      // if (currentDurationInMinutes + _durationExtensionInMinutes > MAX_DURATION_IN_MINUTES) revert DurationTooHigh();
+      //Spend GLTR
       uint256 gltr = _getGltrAmount(_durationExtensionInMinutes);
-      //REMOVED FOR TESTING ON MUMBAI
-
-      //@todo: uncomment for mainnet
-      //  require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), gltr));
+      require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), gltr));
       //update storage
       p.endTime += (_durationExtensionInMinutes * 60);
     }
@@ -100,9 +92,7 @@ library LibBounceGate {
     if (p.endTime <= uint64(block.timestamp)) revert NoOngoingEvent();
 
     //Cancel event
-    //p.startTime = uint64(block.timestamp);
     p.endTime = uint64(block.timestamp);
-
     emit EventCancelled(_realmId);
   }
 
@@ -139,16 +129,14 @@ library LibBounceGate {
   }
 
   function _validateInitialBounceGate(uint64 _startTime, uint256 _durationInMinutes) private returns (uint64 endTime_) {
-    if (_startTime < block.timestamp) revert StartTimeError();
     //check for Duration
-    // if (_durationInMinutes > MAX_DURATION_IN_MINUTES) revert DurationTooHigh();
+    if (_startTime < block.timestamp) revert StartTimeError();
     AppStorage storage s = LibAppStorage.diamondStorage();
     //calculate gltr needed for duration
     uint256 total = _getGltrAmount(_durationInMinutes);
     //REMOVED FOR TESTING ON MUMBAI
 
-    //@todo: uncomment for prod
-    // require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), total));
+    require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), total));
     endTime_ = uint64(_startTime + (_durationInMinutes * 60));
   }
 

@@ -31,12 +31,12 @@ export async function upgrade() {
       addSelectors: [],
       removeSelectors: [],
     },
-    //for testing only
-    {
-      facetName: "SetPubKeyFacet",
-      addSelectors: ["function setPubKey(bytes memory _newPubKey) external"],
-      removeSelectors: [],
-    },
+    // //for testing only
+    // {
+    //   facetName: "SetPubKeyFacet",
+    //   addSelectors: ["function setPubKey(bytes memory _newPubKey) external"],
+    //   removeSelectors: [],
+    // },
   ];
 
   const c = await varsForNetwork(ethers);
