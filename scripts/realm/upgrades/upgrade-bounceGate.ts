@@ -14,23 +14,23 @@ export async function upgrade() {
     {
       facetName: "BounceGateFacet",
       addSelectors: [
-        "function createEvent(string calldata _title, uint64 _startTime,uint64 _durationInMinutes,uint256[4] calldata _alchemicaSpent,uint256 _realmId) external",
-        "function updateEvent(uint256 _realmId,uint256[4] calldata _alchemicaSpent,uint40 _durationExtensionInMinutes) external",
-        "function viewEvent(uint256 _realmId) public",
-        `function cancelEvent(uint256 _realmId) external`,
+        // "function createEvent(string calldata _title, uint64 _startTime,uint64 _durationInMinutes,uint256[4] calldata _alchemicaSpent,uint256 _realmId) external",
+        // "function updateEvent(uint256 _realmId,uint256[4] calldata _alchemicaSpent,uint40 _durationExtensionInMinutes) external",
+        // "function viewEvent(uint256 _realmId) public",
+        // `function cancelEvent(uint256 _realmId) external`,
       ],
       removeSelectors: [],
     },
-    {
-      facetName: "RealmFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "AlchemicaFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
+    // {
+    //   facetName: "RealmFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
+    // {
+    //   facetName: "AlchemicaFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
     // //for testing only
     // {
     //   facetName: "SetPubKeyFacet",
@@ -40,6 +40,8 @@ export async function upgrade() {
   ];
 
   const c = await varsForNetwork(ethers);
+
+  console.log("diamond:", c.realmDiamond);
 
   const joined = convertFacetAndSelectorsToString(facets);
 

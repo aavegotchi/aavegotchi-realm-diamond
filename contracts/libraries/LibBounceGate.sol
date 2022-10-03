@@ -34,11 +34,11 @@ library LibBounceGate {
 
     //@todo: replace with Access Rights
 
-    if (msg.sender != owner) revert NotParcelOwner();
+    // if (msg.sender != owner) revert NotParcelOwner();
     //validate title length
     if (bytes(_title).length > 35) revert TitleLengthOverflow();
 
-    if (!s.parcels[_realmId].bounceGate.equipped) revert NoBounceGate();
+    // if (!s.parcels[_realmId].bounceGate.equipped) revert NoBounceGate();
     //make sure there is no ongoing event
     if (s.parcels[_realmId].bounceGate.endTime > block.timestamp) revert OngoingEvent();
     //validate event
@@ -65,13 +65,19 @@ library LibBounceGate {
     address parcelOwner = s.parcels[_realmId].owner;
 
     //@todo: replace with access rights
-    if (msg.sender != parcelOwner) revert NotParcelOwner();
+
+    //#todo: uncomment in prod
+    // if (msg.sender != parcelOwner) revert NotParcelOwner();
     if (p.startTime == 0) revert NoEvent();
+
+    if (p.endTime < block.timestamp) revert EventEnded();
 
     if (_durationExtensionInMinutes > 0) {
       //Spend GLTR
       uint256 gltr = _getGltrAmount(_durationExtensionInMinutes);
-      require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), gltr));
+
+      //#todo: uncomment in prod
+      // require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), gltr));
       //update storage
       p.endTime += (_durationExtensionInMinutes * 60);
     }
@@ -100,30 +106,31 @@ library LibBounceGate {
     AppStorage storage s = LibAppStorage.diamondStorage();
     BounceGate storage p = s.parcels[_realmId].bounceGate;
 
+    //if event has started
     if (p.startTime <= block.timestamp) {
-      //@todo: check
-      // if (p.endTime <= uint64(block.timestamp)) {
-      //   _newPriority = 0;
-      // } else {
-      uint256 elapsedMinutesSinceLastUpdated = ((uint64(block.timestamp) - p.lastTimeUpdated)) / 60;
-
-      uint120 currentPriority = p.priority;
-
-      if (elapsedMinutesSinceLastUpdated <= 1) {
-        _newPriority = currentPriority;
+      if (p.endTime <= uint64(block.timestamp)) {
+        _newPriority = 0;
       } else {
-        //reduces by 0.01% of current priority every minute
-        uint256 negPriority = (currentPriority) * elapsedMinutesSinceLastUpdated;
-        negPriority /= 1000;
-        if (currentPriority > negPriority) {
-          _newPriority = uint120((currentPriority * 10) - negPriority);
-          _newPriority /= 10;
+        uint256 elapsedMinutesSinceLastUpdated = ((uint64(block.timestamp) - p.lastTimeUpdated)) / 60;
+
+        uint120 currentPriority = p.priority;
+
+        if (elapsedMinutesSinceLastUpdated <= 1) {
+          _newPriority = currentPriority;
         } else {
-          _newPriority = 0;
+          //reduces by 0.01% of current priority every minute
+          uint256 negPriority = (currentPriority) * elapsedMinutesSinceLastUpdated;
+          negPriority /= 1000;
+          if (currentPriority > negPriority) {
+            _newPriority = uint120((currentPriority * 10) - negPriority);
+            _newPriority /= 10;
+          } else {
+            _newPriority = 0;
+          }
         }
-        // }
       }
     } else {
+      //priority does not decrease for events that haven't started
       _newPriority = p.priority;
     }
   }
@@ -136,7 +143,8 @@ library LibBounceGate {
     uint256 total = _getGltrAmount(_durationInMinutes);
     //REMOVED FOR TESTING ON MUMBAI
 
-    require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), total));
+    //#todo: uncomment in prod
+    // require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), total));
     endTime_ = uint64(_startTime + (_durationInMinutes * 60));
   }
 
@@ -152,7 +160,9 @@ library LibBounceGate {
       if (amount >= 1e18) {
         amount /= 1e18;
         _startingPriority += uint120(amount * _getAlchemicaRankings()[i]);
-        require(IERC20(s.alchemicaAddresses[i]).transferFrom(msg.sender, address(this), amount));
+
+        //#todo: uncomment in prod
+        // require(IERC20(s.alchemicaAddresses[i]).transferFrom(msg.sender, address(this), amount));
       }
     }
     _startingPriority *= 1000;

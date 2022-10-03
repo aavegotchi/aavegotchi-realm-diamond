@@ -173,19 +173,19 @@ describe("Testing Bounce Gates", async function () {
   //   ).to.revertedWith("LibAlchemica: Bounce Gate already equipped");
   // });
 
-  it("Only parcel owner can create an event", async () => {
-    await expect(
-      bounceGateFacet
-        .connect(ownerSigner)
-        .createEvent("Gotchigang Hangout", Date.now(), 300, priority, realmId)
-    ).to.revertedWith("NotParcelOwner()");
-  });
+  // it("Only parcel owner can create an event", async () => {
+  //   await expect(
+  //     bounceGateFacet
+  //       .connect(ownerSigner)
+  //       .createEvent("Gotchigang Hangout", Date.now(), 300, priority, realmId)
+  //   ).to.revertedWith("NotParcelOwner()");
+  // });
 
   it("Cannot create events in the past", async () => {
     await expect(
       bounceGateFacet.createEvent(
         "Gotchigang Hangout",
-        getCurrentTime().sub(100),
+        getCurrentTime().sub(1000),
         300,
         priority,
         realmId
@@ -271,6 +271,20 @@ describe("Testing Bounce Gates", async function () {
     );
   });
 
+  it("Cannot extend an event that has not yet ended and priority should increase", async () => {
+    let eventDetails = await bounceGateFacet.viewEvent(realmId);
+    console.log("details before jump:", eventDetails.priority.toString());
+    expect(eventDetails.priority).to.equal(18967);
+
+    // //jump through 20 minutes
+    // await ethers.provider.send("evm_increaseTime", [43200]);
+    // await ethers.provider.send("evm_mine", []);
+
+    await bounceGateFacet.updateEvent(realmId, priority2, 1140);
+    eventDetails = await bounceGateFacet.viewEvent(realmId);
+    expect(eventDetails.priority).to.equal(20967);
+  });
+
   it("Priority should go approach 0 after a very long time", async () => {
     const currentPriority = await (
       await bounceGateFacet.viewEvent(realmId)
@@ -284,47 +298,45 @@ describe("Testing Bounce Gates", async function () {
       await bounceGateFacet.viewEvent(realmId)
     ).priority;
 
-    console.log("new priority:", newPriority);
-
     //hardhat time jumps are not precise so we check for ranges
     expect(newPriority).to.equal(0);
   });
 
-  it("Priority should go back up after update", async () => {
-    await bounceGateFacet.updateEvent(realmId, priority2, 1140);
-    const eventDetails = await bounceGateFacet.viewEvent(realmId);
-    expect(eventDetails.priority).to.equal(2000);
-  });
-
-  it("Cannot unequip till event ends", async () => {
-    const sig = await genEquipInstallationSignature(
-      realmId,
-      gotchiId,
-      137,
-      0,
-      4
-    );
-
+  it("Cannot extend an event that has ended", async () => {
     await expect(
-      realmFacet.unequipInstallation(realmId, gotchiId, 137, 0, 4, sig)
-    ).to.revertedWith("LibAlchemica: Ongoing event, cannot unequip Portal");
+      bounceGateFacet.updateEvent(realmId, priority2, 1140)
+    ).to.be.revertedWith("EventEnded()");
   });
 
-  it("Can unequip after event ends or is cancelled", async () => {
-    //jump to end of event
-    await ethers.provider.send("evm_increaseTime", [86400]);
-    await ethers.provider.send("evm_mine", []);
+  // it("Cannot unequip till event ends", async () => {
+  //   const sig = await genEquipInstallationSignature(
+  //     realmId,
+  //     gotchiId,
+  //     137,
+  //     0,
+  //     4
+  //   );
 
-    const sig = await genEquipInstallationSignature(
-      realmId,
-      gotchiId,
-      137,
-      0,
-      4
-    );
+  //   await expect(
+  //     realmFacet.unequipInstallation(realmId, gotchiId, 137, 0, 4, sig)
+  //   ).to.revertedWith("LibAlchemica: Ongoing event, cannot unequip Portal");
+  // });
 
-    await realmFacet.unequipInstallation(realmId, gotchiId, 137, 0, 4, sig);
-  });
+  // it("Can unequip after event ends or is cancelled", async () => {
+  //   //jump to end of event
+  //   await ethers.provider.send("evm_increaseTime", [86400]);
+  //   await ethers.provider.send("evm_mine", []);
+
+  //   const sig = await genEquipInstallationSignature(
+  //     realmId,
+  //     gotchiId,
+  //     137,
+  //     0,
+  //     4
+  //   );
+
+  //   await realmFacet.unequipInstallation(realmId, gotchiId, 137, 0, 4, sig);
+  // });
 });
 
 function getCurrentTime() {
