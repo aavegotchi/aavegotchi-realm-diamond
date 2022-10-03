@@ -273,12 +273,7 @@ describe("Testing Bounce Gates", async function () {
 
   it("Cannot extend an event that has not yet ended and priority should increase", async () => {
     let eventDetails = await bounceGateFacet.viewEvent(realmId);
-    console.log("details before jump:", eventDetails.priority.toString());
     expect(eventDetails.priority).to.equal(18967);
-
-    // //jump through 20 minutes
-    // await ethers.provider.send("evm_increaseTime", [43200]);
-    // await ethers.provider.send("evm_mine", []);
 
     await bounceGateFacet.updateEvent(realmId, priority2, 1140);
     eventDetails = await bounceGateFacet.viewEvent(realmId);
@@ -286,11 +281,6 @@ describe("Testing Bounce Gates", async function () {
   });
 
   it("Priority should go approach 0 after a very long time", async () => {
-    const currentPriority = await (
-      await bounceGateFacet.viewEvent(realmId)
-    ).priority;
-
-    console.log("current pririty:", currentPriority);
     //jump through 20 minutes
     await ethers.provider.send("evm_increaseTime", [86400 * 200]);
     await ethers.provider.send("evm_mine", []);
