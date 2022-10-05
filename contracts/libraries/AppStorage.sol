@@ -56,12 +56,6 @@ struct RequestConfig {
   bytes32 keyHash;
 }
 
-struct Whitelist {
-  address owner;
-  string name;
-  address[] addresses;
-}
-
 struct AppStorage {
   uint256[] tokenIds;
   mapping(uint256 => Parcel) parcels;
@@ -104,10 +98,8 @@ struct AppStorage {
   //NFT DISPLAY STORAGE
   //chainId => contractAddress => allowed
   mapping(uint256 => mapping(address => bool)) nftDisplayAllowed;
-  Whitelist[] whitelists;
-  mapping(uint256 => mapping(address => uint256)) isWhitelisted; // whitelistId => whitelistAddress => isWhitelisted
   // parcelId => action: 0 Alchemical Channeling, 1 Emptying Reservoirs => whitelistIds
-  mapping(uint256 => mapping(uint256 => uint256)) whitelistIds;
+  mapping(uint256 => mapping(uint256 => uint32)) whitelistIds;
 }
 
 library LibAppStorage {

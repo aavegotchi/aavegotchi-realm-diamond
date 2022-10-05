@@ -15,22 +15,7 @@ export async function upgradeRealm() {
     {
       facetName: "RealmGettersAndSettersFacet",
       addSelectors: [
-        `function setParcelsWhitelists(uint256[] calldata _realmIds, uint256[] calldata _actionRights, uint256[] calldata _whitelistIds) external`,
-      ],
-      removeSelectors: [],
-    },
-    {
-      facetName: "WhitelistFacet",
-      addSelectors: [
-        "function createWhitelist(string calldata _name, address[] calldata _whitelistAddresses) external",
-        "function updateWhitelist(uint256 _whitelistId, address[] calldata _whitelistAddresses) external",
-        "function removeAddressesFromWhitelist(uint256 _whitelistId, address[] calldata _whitelistAddresses) external",
-        "function transferOwnershipOfWhitelist(uint256 _whitelistId, address _whitelistOwner) external",
-        "function whitelistExists(uint256 whitelistId) external view",
-        "function isWhitelisted(uint256 _whitelistId, address _whitelistAddress) external view",
-        "function getWhitelistsLength() external view",
-        "function getWhitelist(uint256 _whitelistId) external view",
-        "function whitelistOwner(uint256 _whitelistId) external view",
+        `function setParcelsWhitelists(uint256[] calldata _realmIds, uint256[] calldata _actionRights, uint32[] calldata _whitelistIds) external`,
       ],
       removeSelectors: [],
     },

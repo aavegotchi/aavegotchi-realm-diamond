@@ -5,7 +5,6 @@ import "../../libraries/AppStorage.sol";
 
 import "../../libraries/LibRealm.sol";
 import "../../libraries/LibAlchemica.sol";
-import "../../libraries/LibWhitelist.sol";
 
 import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamondInterface.sol";
 import "./ERC721Facet.sol";
@@ -39,7 +38,7 @@ contract RealmGettersAndSettersFacet is Modifiers {
   function setParcelsWhitelists(
     uint256[] calldata _realmIds,
     uint256[] calldata _actionRights,
-    uint256[] calldata _whitelistIds
+    uint32[] calldata _whitelistIds
   ) external gameActive {
     require(
       _realmIds.length == _actionRights.length && _whitelistIds.length == _actionRights.length,
@@ -49,7 +48,10 @@ contract RealmGettersAndSettersFacet is Modifiers {
     for (uint256 i; i < _realmIds.length; i++) {
       require(LibMeta.msgSender() == s.parcels[_realmIds[i]].owner, "RealmGettersAndSettersFacet: Only Parcel owner can call");
       require(LibRealm.isAccessRightValid(_actionRights[i], _accessRight), "RealmGettersAndSettersFacet: Invalid access rights");
-      require(LibWhitelist.checkWhitelistOwner(_whitelistIds[i]), "RealmGettersAndSettersFacet: Not whitelist owner");
+      require(
+        LibMeta.msgSender() == AavegotchiDiamond(s.aavegotchiDiamond).whitelistOwner(_whitelistIds[i]),
+        "RealmGettersAndSettersFacet: Not whitelist owner"
+      );
       s.accessRights[_realmIds[i]][_actionRights[i]] = _accessRight;
       s.whitelistIds[_realmIds[i]][_actionRights[i]] = _whitelistIds[i];
       emit ParcelAccessRightSet(_realmIds[i], _actionRights[i], _accessRight);

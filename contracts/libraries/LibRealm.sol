@@ -224,7 +224,8 @@ library LibRealm {
     }
     //whitelisted addresses
     else if (accessRight == 2) {
-      require(s.isWhitelisted[s.whitelistIds[_realmId][_actionRight]][_sender] > 0, "LibRealm: Access Right - Only Whitelisted");
+      // TODO: replace
+      require(diamond.isWhitelisted(s.whitelistIds[_realmId][_actionRight], _sender) > 0, "LibRealm: Access Right - Only Whitelisted");
     }
     // //blacklisted addresses
     // else if (accessRight == 3) {}

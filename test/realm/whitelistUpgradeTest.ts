@@ -12,7 +12,6 @@ import {
   OwnershipFacet,
   RealmFacet,
   RealmGettersAndSettersFacet,
-  WhitelistFacet,
 } from "../../typechain";
 import { upgradeRealm } from "../../scripts/realm/upgrades/upgrade-whitelist";
 import { alchemica, varsForNetwork } from "../../constants";
@@ -37,8 +36,6 @@ describe("Whitelist test", async function () {
   const borrowerAddress = "0x51208e5cC9215c6360210C48F81C8270637a5218"; // borrower should be GHST holder, whitelisted during test, should be owner of an installation
   const nonWhitelistedAddress = "0xaA3B1fDC3Aa57Bf24418E397f8c80e7385aAa594"; // non-whitelisted address should be GHST holder
 
-  let whitelistFacet: WhitelistFacet;
-  let whitelistFacetWithSigner2: WhitelistFacet;
   let realmGettersAndSettersFacet: RealmGettersAndSettersFacet;
   let realmFacet: RealmFacet;
   let installationFacet: InstallationFacet;
@@ -47,7 +44,6 @@ describe("Whitelist test", async function () {
 
   let whitelistId: any;
   let secondWhitelistId: any;
-  let signer2Address: any;
 
   before(async function () {
     this.timeout(20000000);
@@ -61,28 +57,11 @@ describe("Whitelist test", async function () {
 
     const accounts = await ethers.getSigners();
     const signer2 = accounts[1];
-    signer2Address = await signer2.getAddress();
+    const signer2Address = await signer2.getAddress();
 
     aavegotchiDiamond = await ethers.getContractAt(
       "AavegotchiDiamond",
       maticAavegotchiDiamondAddress
-    );
-
-    whitelistFacet = (await ethers.getContractAt(
-      "WhitelistFacet",
-      maticDiamondAddress
-    )) as WhitelistFacet;
-    whitelistFacet = await impersonate(
-      ownerAddress,
-      whitelistFacet,
-      ethers,
-      network
-    );
-    whitelistFacetWithSigner2 = await impersonate(
-      signer2Address,
-      whitelistFacet,
-      ethers,
-      network
     );
 
     realmGettersAndSettersFacet = (await ethers.getContractAt(
@@ -171,223 +150,32 @@ describe("Whitelist test", async function () {
       ownerAddress,
       gotchiId
     );
-  });
-
-  describe("Testing WhitelistFacet", async function () {
-    describe("Testing createWhitelist", async function () {
-      it("Should revert if whitelist is empty", async function () {
-        await expect(
-          whitelistFacet.createWhitelist("Empty", [])
-        ).to.be.revertedWith(
-          "WhitelistFacet: Whitelist length should be larger than zero"
-        );
-      });
-      it("Should revert if whitelist name is empty", async function () {
-        await expect(
-          whitelistFacet.createWhitelist("", [borrowerAddress])
-        ).to.be.revertedWith("WhitelistFacet: Whitelist name cannot be blank");
-      });
-      it("Should succeed if whitelist is valid", async function () {
-        const whitelistsLength = await whitelistFacet.getWhitelistsLength();
-        const receipt = await (
-          await whitelistFacet.createWhitelist("Empty", [borrowerAddress])
-        ).wait();
-        const event = receipt!.events!.find(
-          (event) => event.event === "WhitelistCreated"
-        );
-        whitelistId = event!.args!.whitelistId;
-        expect(whitelistId).to.equal(whitelistsLength.add(1));
-      });
-    });
-
-    describe("Testing updateWhitelist", async function () {
-      it("Should revert if whitelist is empty", async function () {
-        await expect(
-          whitelistFacet.updateWhitelist(whitelistId, [])
-        ).to.be.revertedWith(
-          "WhitelistFacet: Whitelist length should be larger than zero"
-        );
-      });
-      it("Should revert if invalid whitelist id", async function () {
-        await expect(
-          whitelistFacet.updateWhitelist(whitelistId + 1, [
-            nonWhitelistedAddress,
-          ])
-        ).to.be.revertedWith("WhitelistFacet: Whitelist not found");
-      });
-      it("Should revert if not whitelist owner", async function () {
-        const receipt = await (
-          await whitelistFacetWithSigner2.createWhitelist("Empty", [
-            nonWhitelistedAddress,
-          ])
-        ).wait();
-        const event = receipt!.events!.find(
-          (event) => event.event === "WhitelistCreated"
-        );
-        secondWhitelistId = event!.args!.whitelistId;
-        await expect(
-          whitelistFacet.updateWhitelist(secondWhitelistId, [
-            nonWhitelistedAddress,
-          ])
-        ).to.be.revertedWith("WhitelistFacet: Not whitelist owner");
-      });
-      it("Should succeed if all parameters are valid", async function () {
-        const receipt = await (
-          await whitelistFacet.updateWhitelist(whitelistId, [
-            nonWhitelistedAddress,
-          ])
-        ).wait();
-        const event = receipt!.events!.find(
-          (event) => event.event === "WhitelistUpdated"
-        );
-        expect(event!.args!.whitelistId).to.equal(whitelistId);
-      });
-    });
-
-    describe("Testing whitelistExists", async function () {
-      it("Should return false if invalid whitelist id", async function () {
-        const isExist = await whitelistFacet.whitelistExists(
-          secondWhitelistId + 1
-        );
-        expect(isExist).to.equal(false);
-      });
-      it("Should return true if valid whitelist id", async function () {
-        const isExist = await whitelistFacet.whitelistExists(whitelistId);
-        expect(isExist).to.equal(true);
-      });
-    });
-
-    describe("Testing getWhitelist", async function () {
-      it("Should revert if invalid whitelist id", async function () {
-        await expect(
-          whitelistFacet.getWhitelist(secondWhitelistId + 1)
-        ).to.be.revertedWith("WhitelistFacet: Whitelist not found");
-      });
-      it("Should return array if valid whitelist id", async function () {
-        const whitelist = await whitelistFacet.getWhitelist(whitelistId);
-        expect(whitelist.owner).to.equal(ownerAddress);
-        expect(whitelist.addresses.length).to.equal(2);
-        expect(whitelist.addresses[0]).to.equal(borrowerAddress);
-      });
-    });
-
-    describe("Testing whitelistOwner", async function () {
-      it("Should revert if invalid whitelist id", async function () {
-        await expect(
-          whitelistFacet.whitelistOwner(secondWhitelistId + 1)
-        ).to.be.revertedWith("WhitelistFacet: Whitelist not found");
-      });
-      it("Should return whitelist owner address if valid whitelist id", async function () {
-        const whitelistOwner = await whitelistFacet.whitelistOwner(whitelistId);
-        expect(whitelistOwner).to.equal(ownerAddress);
-      });
-    });
-
-    describe("Testing removeAddressesFromWhitelist", async () => {
-      it("Should revert if whitelist is empty", async function () {
-        await expect(
-          whitelistFacet.removeAddressesFromWhitelist(whitelistId, [])
-        ).to.be.revertedWith(
-          "WhitelistFacet: Whitelist length should be larger than zero"
-        );
-      });
-      it("Should revert if invalid whitelist id", async function () {
-        await expect(
-          whitelistFacet.removeAddressesFromWhitelist(whitelistId + 1, [
-            nonWhitelistedAddress,
-          ])
-        ).to.be.revertedWith("WhitelistFacet: Whitelist not found");
-      });
-      it("Should revert if not whitelist owner", async function () {
-        await expect(
-          whitelistFacetWithSigner2.removeAddressesFromWhitelist(whitelistId, [
-            nonWhitelistedAddress,
-          ])
-        ).to.be.revertedWith("WhitelistFacet: Not whitelist owner");
-      });
-      it("Should succeed in removing elements if all parameters are valid", async () => {
-        const receipt = await (
-          await whitelistFacet.removeAddressesFromWhitelist(whitelistId, [
-            nonWhitelistedAddress,
-          ])
-        ).wait();
-        const event = receipt!.events!.find(
-          (event) => event.event === "WhitelistUpdated"
-        );
-        expect(event!.args!.whitelistId).to.equal(whitelistId);
-
-        const whitelist = await whitelistFacet.getWhitelist(whitelistId);
-        expect(whitelist.owner).to.equal(ownerAddress);
-        expect(whitelist.addresses.length).to.equal(1);
-        expect(whitelist.addresses[0]).to.equal(borrowerAddress);
-      });
-    });
-
-    describe("Testing isWhitelisted", async function () {
-      it("Should return 0 if invalid whitelist id", async function () {
-        const isWhitelisted = await whitelistFacet.isWhitelisted(
-          secondWhitelistId + 1,
-          borrowerAddress
-        );
-        expect(isWhitelisted).to.equal(0);
-      });
-      it("Should return 0 if not whitelisted", async function () {
-        const isWhitelisted = await whitelistFacet.isWhitelisted(
-          whitelistId,
-          nonWhitelistedAddress
-        );
-        expect(isWhitelisted).to.equal(0);
-      });
-      it("Should return true if valid whitelist id and whitelisted address", async function () {
-        const isWhitelisted = await whitelistFacet.isWhitelisted(
-          whitelistId,
-          borrowerAddress
-        );
-        expect(isWhitelisted).to.equal(1);
-      });
-    });
-
-    describe("Testing transferOwnershipOfWhitelist", async () => {
-      it("Should revert if invalid whitelist id", async function () {
-        await expect(
-          whitelistFacet.transferOwnershipOfWhitelist(
-            whitelistId + 1,
-            signer2Address
-          )
-        ).to.be.revertedWith("WhitelistFacet: Whitelist not found");
-      });
-      it("Should revert if not whitelist owner", async function () {
-        await expect(
-          whitelistFacetWithSigner2.transferOwnershipOfWhitelist(
-            whitelistId,
-            signer2Address
-          )
-        ).to.be.revertedWith("WhitelistFacet: Not whitelist owner");
-      });
-      it("Should succeed in transferring ownership if all parameters are valid", async () => {
-        const receipt = await (
-          await whitelistFacet.transferOwnershipOfWhitelist(
-            whitelistId,
-            signer2Address
-          )
-        ).wait();
-        const event = receipt!.events!.find(
-          (event) => event.event === "WhitelistOwnershipTransferred"
-        );
-        expect(event!.args!.whitelistId).to.equal(whitelistId);
-        expect(event!.args!.newOwner).to.equal(signer2Address);
-
-        const whitelistOwner = await whitelistFacet.whitelistOwner(whitelistId);
-        expect(whitelistOwner).to.equal(signer2Address);
-
-        await (
-          await whitelistFacetWithSigner2.transferOwnershipOfWhitelist(
-            whitelistId,
-            ownerAddress
-          )
-        ).wait();
-      });
-    });
+    // create whitelist in aavegotchi diamond
+    const aavegotchiDiamondWithSigner1 = await impersonate(
+      ownerAddress,
+      aavegotchiDiamond,
+      ethers,
+      network
+    );
+    await (
+      await aavegotchiDiamondWithSigner1.createWhitelist("test1", [
+        borrowerAddress,
+      ])
+    ).wait();
+    whitelistId = await aavegotchiDiamondWithSigner1.getWhitelistsLength();
+    const aavegotchiDiamondWithSigner2 = await impersonate(
+      signer2Address,
+      aavegotchiDiamond,
+      ethers,
+      network
+    );
+    await (
+      await aavegotchiDiamondWithSigner2.createWhitelist("test2", [
+        nonWhitelistedAddress,
+      ])
+    ).wait();
+    secondWhitelistId =
+      await aavegotchiDiamondWithSigner2.getWhitelistsLength();
   });
 
   describe("Testing setParcelsAccessRights and getParcelsAccessRights", async function () {
