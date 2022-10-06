@@ -11,6 +11,18 @@ export async function upgrade() {
 
   const facets: FacetsAndAddSelectors[] = [
     {
+      facetName: "InstallationAdminFacet",
+      addSelectors: [
+        `function getUniqueHash(
+      uint256 _parcelId,
+      uint16 _x,
+      uint16 _y,
+      uint256 _installationId
+    ) external view`,
+      ],
+      removeSelectors: [],
+    },
+    {
       facetName: "InstallationUpgradeFacet",
       addSelectors: [],
       removeSelectors: [],

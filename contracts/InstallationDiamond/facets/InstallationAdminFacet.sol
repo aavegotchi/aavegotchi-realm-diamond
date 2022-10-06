@@ -189,23 +189,21 @@ contract InstallationAdminFacet is Modifiers {
   ///@notice Used if a parcel has an upgrade that must be deleted.
   function deleteBuggedUpgrades(
     uint256 _parcelId,
-    uint256 _coordinateX,
-    uint256 _coordinateY,
-    uint256 _installationId,
-    uint256 _upgradeIndex
+    uint16 _coordinateX,
+    uint16 _coordinateY,
+    uint256 _installationId
   ) external onlyOwner {
     // check unique hash
     bytes32 uniqueHash = keccak256(abi.encodePacked(_parcelId, _coordinateX, _coordinateY, _installationId));
     s.upgradeHashes[uniqueHash] = 0;
+  }
 
-    delete s.upgradeQueue[_upgradeIndex];
-
-    RealmDiamond realmDiamond = RealmDiamond(s.realmDiamond);
-    realmDiamond.subUpgradeQueueLength(_parcelId);
-
-    //@todo: Remove from parcel if needed
-    // LibInstallation._removeFromParcelIdToUpgradeIds(_parcelid, _upgradeIndex);
-
-    emit UpgradeCancelled(_parcelId, _coordinateX, _coordinateY, _installationId);
+  function getUniqueHash(
+    uint256 _parcelId,
+    uint16 _x,
+    uint16 _y,
+    uint256 _installationId
+  ) external view returns (uint256) {
+    return s.upgradeHashes[keccak256(abi.encodePacked(_parcelId, _x, _y, _installationId))];
   }
 }
