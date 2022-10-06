@@ -13,47 +13,60 @@ export async function editInstallationTypes() {
   const c = await varsForNetwork(ethers);
 
   let installationFacet = (await ethers.getContractAt(
+    "InstallationFacet",
+    c.installationDiamond
+    // signer
+  )) as InstallationFacet;
+
+  let installationAdminFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
     c.installationDiamond
     // signer
   )) as InstallationAdminFacet;
 
   if (network.name === "hardhat") {
-    installationFacet = await impersonate(
+    installationAdminFacet = await impersonate(
       await diamondOwner(c.installationDiamond, ethers),
-      installationFacet,
+      installationAdminFacet,
       ethers,
       network
     );
   }
 
-  const altars = installationTypesMatic.map((val) => outputInstallation(val));
+  // const currentInstallations = await installationFacet.getInstallationTypes([
+  //   93,
+  // ]);
 
-  //change 55 from fud harvester to fountain
-  const ids: string[] = [];
-  for (let index = 55; index < 137; index++) {
-    ids.push(index.toString());
-  }
+  // console.log("current:", currentInstallations);
 
-  console.log("altars:", altars.length);
-  console.log("ids:", ids.length);
+  const ids = [
+    92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108,
+    109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123,
+    124, 125, 126, 127,
+  ];
 
-  if (ids.length !== altars.length) {
+  const installationsToFix = ids.map((val) =>
+    outputInstallation(installationTypesMatic.find((inst) => inst.id === val))
+  );
+
+  console.log("to fix:", installationsToFix);
+
+  if (ids.length !== installationsToFix.length) {
     throw new Error("Incorrect length");
   }
 
   console.log("Updating ");
-  await installationFacet.editInstallationTypes(ids, altars, {
+  await installationAdminFacet.editInstallationTypes(ids, installationsToFix, {
     gasPrice: gasPrice,
   });
 
-  const installationfacet = (await ethers.getContractAt(
-    "InstallationFacet",
-    c.installationDiamond
-  )) as InstallationFacet;
+  // const installationfacet = (await ethers.getContractAt(
+  //   "InstallationFacet",
+  //   c.installationDiamond
+  // )) as InstallationFacet;
 
-  const insts = await installationfacet.getInstallationTypes([55]);
-  console.log("insts:", insts);
+  // const insts = await installationfacet.getInstallationTypes([55]);
+  // console.log("insts:", insts);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

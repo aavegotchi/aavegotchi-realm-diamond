@@ -26,8 +26,6 @@ export function outputInstallation(
     installation.harvestRate.toString()
   );
 
-  console.log("spill rate:", installation.spillRate.toString());
-
   let output: InstallationTypeOutput = {
     deprecated: installation.deprecated,
     installationType: installation.installationType,
