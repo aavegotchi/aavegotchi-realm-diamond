@@ -9,23 +9,18 @@ import {
 export async function upgrade() {
   const diamondUpgrader = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
 
+  const BuggedUpgradeInput =
+    "tuple(uint256 _parcelId, uint16 _coordinateX, uint16 _coordinateY, uint256 _installationId)";
+
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "InstallationAdminFacet",
       addSelectors: [
-        `function getUniqueHash(
-      uint256 _parcelId,
-      uint16 _x,
-      uint16 _y,
-      uint256 _installationId
-    ) external view`,
+        `function deleteBuggedUpgrades(${BuggedUpgradeInput}[] memory _upgrades) external`,
       ],
-      removeSelectors: [],
-    },
-    {
-      facetName: "InstallationUpgradeFacet",
-      addSelectors: [],
-      removeSelectors: [],
+      removeSelectors: [
+        `function deleteBuggedUpgrades(uint256 _parcelId, uint16 _coordinateX, uint16 _coordinateY,uint256 _installationId) external`,
+      ],
     },
   ];
 

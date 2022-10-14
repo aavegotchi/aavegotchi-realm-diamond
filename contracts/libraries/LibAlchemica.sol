@@ -221,6 +221,11 @@ library LibAlchemica {
 
   function getAvailableAlchemica(uint256 _realmId, uint256 _alchemicaType) internal view returns (uint256) {
     AppStorage storage s = LibAppStorage.diamondStorage();
+
+    uint256 remaining = s.parcels[_realmId].alchemicaRemaining[_alchemicaType];
+
+    if (remaining == 0) return remaining;
+
     //First get the onchain amount
     uint256 available = s.parcels[_realmId].unclaimedAlchemica[_alchemicaType];
     //Then get the floating amount

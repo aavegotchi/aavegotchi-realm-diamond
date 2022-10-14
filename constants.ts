@@ -31,6 +31,8 @@ function varsByChainId(chainId: number) {
 export async function varsForNetwork(ethers: HardhatEthersHelpers) {
   return varsByChainId((await ethers.provider.getNetwork()).chainId);
 }
+export const gotchiverseSubgraph =
+  "https://api.thegraph.com/subgraphs/name/aavegotchi/gotchiverse-matic";
 
 export const alchemica = [
   "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f",

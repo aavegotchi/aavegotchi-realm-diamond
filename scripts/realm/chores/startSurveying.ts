@@ -1,27 +1,43 @@
 import { ethers, network } from "hardhat";
-import { varsForNetwork } from "../../../constants";
+import { alchemica, varsForNetwork } from "../../../constants";
 import { AlchemicaFacet, VRFFacet } from "../../../typechain";
 import { impersonate } from "../../helperFunctions";
+import { genClaimAlchemicaSignature } from "../realmHelpers";
+import { upgradeRemaining } from "../upgrades/upgrade-remainingAlchemica";
 
 export async function setAddresses() {
   const c = await varsForNetwork(ethers);
 
-  console.log("c:", c);
+  const owner = "0x26bac3547908e923b641c186000585e8ce98f4db";
 
   let alchemicaFacet = (await ethers.getContractAt(
     "AlchemicaFacet",
     c.realmDiamond
   )) as AlchemicaFacet;
 
-  alchemicaFacet = await impersonate(
-    "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5",
-    alchemicaFacet,
-    ethers,
-    network
-  );
+  await upgradeRemaining();
 
-  const tx = await alchemicaFacet.startSurveying("2258");
-  await tx.wait();
+  alchemicaFacet = await impersonate(owner, alchemicaFacet, ethers, network);
+
+  const lastClaimed = await alchemicaFacet.lastClaimedAlchemica("10439");
+  const sig = await genClaimAlchemicaSignature(10439, 0, lastClaimed);
+
+  const alpha = await ethers.getContractAt("ERC20", c.alpha);
+
+  const balance = await alpha.balanceOf(owner);
+  console.log("balance before:", balance.toString());
+
+  const available = await alchemicaFacet.getAvailableAlchemica(10439);
+  console.log("available:", available[2].toString());
+
+  const tx = await alchemicaFacet.claimAvailableAlchemica("10439", "0", sig);
+
+  const balanceAfter = await alpha.balanceOf(owner);
+  console.log("balance after:", balanceAfter.toString());
+
+  const available2 = await alchemicaFacet.getAvailableAlchemica("391");
+
+  console.log("available:", available2);
 
   // console.log("subscribe");
   // const subTx = await vrfFacet.subscribe({

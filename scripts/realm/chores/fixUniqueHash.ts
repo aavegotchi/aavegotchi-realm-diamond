@@ -5,12 +5,17 @@ import {
   InstallationUpgradeFacet,
 } from "../../../typechain";
 
-import { gasPrice, varsForNetwork } from "../../../constants";
+import {
+  gasPrice,
+  gotchiverseSubgraph,
+  varsForNetwork,
+} from "../../../constants";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { diamondOwner, impersonate } from "../../helperFunctions";
 import { upgrade } from "../../installation/upgrades/upgrade-fixUpgradeQueue";
 import { UpgradeQueue } from "../../../types";
 import { genUpgradeInstallationSignature } from "../realmHelpers";
+import request from "graphql-request";
 
 export async function setAddresses() {
   const c = await varsForNetwork(ethers);
@@ -32,10 +37,10 @@ export async function setAddresses() {
     c.realmDiamond
   )) as ERC721Facet;
 
-  const parcelId = 5328;
-  const x = 7;
-  const y = 7;
-  const installationId = 10;
+  const parcelId = 11646;
+  const x = 30;
+  const y = 18;
+  const installationId = 67;
   const gotchiId = 0;
 
   const owner = await realmFacet.ownerOf(parcelId);
@@ -56,35 +61,61 @@ export async function setAddresses() {
     );
   }
 
-  // await upgrade();
+  await upgrade();
 
-  console.log("owner:", owner);
+  const query = `
+  {installationUpgradedEvents(where:{parcel:"${parcelId}"}) {
+    id
+    prevInstallation {
+      id
+    }
+    x
+    y
+  }}
+  `;
 
-  //kokusho 2
-  /*  {
-    "id": "53490-74-2-58-30955428",
-    "installationId": "74",
-    "x": "2",
-    "y": "58"
-  }, */
+  interface Upgrade {
+    installationUpgradedEvents: {
+      id: string;
+      prevInstallation: {
+        id: string;
+      };
+      x: string;
+      y: string;
+    }[];
+  }
 
-  const beforeHash = await adminFacet.getUniqueHash(
-    parcelId,
-    x,
-    y,
-    installationId
-  );
+  const allUpgrades: Upgrade = await request(gotchiverseSubgraph, query);
 
-  console.log("hash:", beforeHash);
+  console.log("upgrades:", allUpgrades);
+
+  for (let i = 0; i < allUpgrades.installationUpgradedEvents.length; i++) {
+    const upgrade = allUpgrades.installationUpgradedEvents[i];
+
+    const beforeHash = await adminFacet.getUniqueHash(
+      parcelId,
+      upgrade.x,
+      upgrade.y,
+      upgrade.prevInstallation.id
+    );
+
+    console.log(
+      `Before Hash for ${x}, ${y} of ${upgrade.prevInstallation.id}:`,
+      beforeHash
+    );
+  }
+
+  const upgrade1 = {
+    _parcelId: parcelId,
+    _coordinateX: x,
+    _coordinateY: y,
+    _installationId: installationId,
+  };
 
   console.log("Deleting bugged upgrade");
-  let tx = await adminFacet.deleteBuggedUpgrades(
-    parcelId,
-    x,
-    y,
-    installationId,
-    { gasPrice: gasPrice }
-  );
+  let tx = await adminFacet.deleteBuggedUpgrades([upgrade1], {
+    gasPrice: gasPrice,
+  });
   await tx.wait();
 
   const afterHash = await adminFacet.getUniqueHash(

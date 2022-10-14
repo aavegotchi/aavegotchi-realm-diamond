@@ -187,15 +187,32 @@ contract InstallationAdminFacet is Modifiers {
   }
 
   ///@notice Used if a parcel has an upgrade that must be deleted.
-  function deleteBuggedUpgrades(
-    uint256 _parcelId,
-    uint16 _coordinateX,
-    uint16 _coordinateY,
-    uint256 _installationId
-  ) external onlyOwner {
-    // check unique hash
-    bytes32 uniqueHash = keccak256(abi.encodePacked(_parcelId, _coordinateX, _coordinateY, _installationId));
-    s.upgradeHashes[uniqueHash] = 0;
+  // function deleteBuggedUpgrades(
+  //   uint256 _parcelId,
+  //   uint16 _coordinateX,
+  //   uint16 _coordinateY,
+  //   uint256 _installationId
+  // ) external onlyOwner {
+  //   // check unique hash
+  //   bytes32 uniqueHash = keccak256(abi.encodePacked(_parcelId, _coordinateX, _coordinateY, _installationId));
+  //   s.upgradeHashes[uniqueHash] = 0;
+  // }
+
+  struct BuggedUpgradeInput {
+    uint256 _parcelId;
+    uint16 _coordinateX;
+    uint16 _coordinateY;
+    uint256 _installationId;
+  }
+
+  ///@notice Used if a parcel has an upgrade that must be deleted.
+  function deleteBuggedUpgrades(BuggedUpgradeInput[] memory _upgrades) external onlyOwner {
+    for (uint256 i = 0; i < _upgrades.length; i++) {
+      BuggedUpgradeInput memory u = _upgrades[i];
+      // check unique hash
+      bytes32 uniqueHash = keccak256(abi.encodePacked(u._parcelId, u._coordinateX, u._coordinateY, u._installationId));
+      s.upgradeHashes[uniqueHash] = 0;
+    }
   }
 
   function getUniqueHash(
