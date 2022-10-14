@@ -185,10 +185,10 @@ library LibBounceGate {
     for (uint256 i = 0; i < 4; i++) {
       uint256 amount = _alchemicaSpent[i];
       //each amount must be greater than or equal to 1
-      if (amount >= 1e18) {
+   if (amount >= 1e18) {
         amount /= 1e18;
         _startingPriority += uint120(amount * _getAlchemicaRankings()[i]);
-        require(IERC20(s.alchemicaAddresses[i]).transferFrom(msg.sender, address(this), amount));
+        require(IERC20(s.alchemicaAddresses[i]).transferFrom(msg.sender, address(this), _alchemicaSpent[i]));
       }
     }
     _startingPriority *= 1000;
