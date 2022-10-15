@@ -27,6 +27,15 @@ contract BounceGateFacet is Modifiers {
     LibBounceGate._cancelEvent(_realmId);
   }
 
+  function recreateEvent(
+    uint256 _realmId,
+    uint64 _startTime,
+    uint64 _durationInMinutes,
+    uint256[4] calldata _alchemicaSpent
+  ) external {
+    LibBounceGate._recreateEvent(_realmId, _startTime, _durationInMinutes, _alchemicaSpent);
+  }
+
   function viewEvent(uint256 _realmId) public view returns (BounceGate memory b_) {
     BounceGate memory p = s.parcels[_realmId].bounceGate;
     b_.title = p.title;

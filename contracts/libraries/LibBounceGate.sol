@@ -92,6 +92,30 @@ library LibBounceGate {
     emit EventPriorityAndDurationUpdated(_realmId, newPriority, p.endTime);
   }
 
+  //basically used to create a clone of an ended event
+  function _recreateEvent(
+    uint256 _realmId,
+    uint64 _startTime,
+    uint64 _durationInMinutes,
+    uint256[4] calldata _alchemicaSpent
+  ) internal {
+    //make sure there is no ongoing event
+    AppStorage storage s = LibAppStorage.diamondStorage();
+    //makes sure an event has been created before
+    if (s.parcels[_realmId].bounceGate.startTime == 0) revert NoEvent();
+    if (s.parcels[_realmId].bounceGate.endTime > block.timestamp) revert OngoingEvent();
+    //validate
+    uint64 endTime = _validateInitialBounceGate(_startTime, _durationInMinutes);
+    uint120 priority = _calculatePriorityAndSettleAlchemica(_alchemicaSpent);
+    //update storage
+    BounceGate storage p = s.parcels[_realmId].bounceGate;
+    p.startTime = _startTime;
+    p.endTime = endTime;
+    p.priority = priority;
+    p.lastTimeUpdated = uint64(block.timestamp);
+    emit EventStarted(_realmId, p);
+  }
+
   function _cancelEvent(uint256 _realmId) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
     BounceGate storage p = s.parcels[_realmId].bounceGate;
@@ -161,10 +185,10 @@ library LibBounceGate {
     for (uint256 i = 0; i < 4; i++) {
       uint256 amount = _alchemicaSpent[i];
       //each amount must be greater than or equal to 1
-      if (amount >= 1e18) {
+   if (amount >= 1e18) {
         amount /= 1e18;
         _startingPriority += uint120(amount * _getAlchemicaRankings()[i]);
-        require(IERC20(s.alchemicaAddresses[i]).transferFrom(msg.sender, address(this), amount));
+        require(IERC20(s.alchemicaAddresses[i]).transferFrom(msg.sender, address(this), _alchemicaSpent[i]));
       }
     }
     _startingPriority *= 1000;
