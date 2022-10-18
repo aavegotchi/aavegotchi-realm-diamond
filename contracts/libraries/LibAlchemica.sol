@@ -59,7 +59,9 @@ library LibAlchemica {
     uint256 equippedAltarId = s.parcels[_realmId].altarId;
     uint256 equippedAltarLevel = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(equippedAltarId).level;
 
-    require(equippedAltarLevel >= altarPrerequisite, "LibAlchemica: Altar Tech Tree Reqs not met");
+    if (altarPrerequisite > 0) {
+      require(equippedAltarLevel >= altarPrerequisite, "LibAlchemica: Altar Tech Tree Reqs not met");
+    }
 
     // check lodge requirement
     if (lodgePrerequisite > 0) {
