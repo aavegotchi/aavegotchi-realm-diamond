@@ -59,7 +59,9 @@ library LibAlchemica {
     uint256 equippedAltarId = s.parcels[_realmId].altarId;
     uint256 equippedAltarLevel = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(equippedAltarId).level;
 
-    require(equippedAltarLevel >= altarPrerequisite, "LibAlchemica: Altar Tech Tree Reqs not met");
+    if (altarPrerequisite > 0) {
+      require(equippedAltarLevel >= altarPrerequisite, "LibAlchemica: Altar Tech Tree Reqs not met");
+    }
 
     // check lodge requirement
     if (lodgePrerequisite > 0) {
@@ -235,6 +237,11 @@ library LibAlchemica {
 
   function getAvailableAlchemica(uint256 _realmId, uint256 _alchemicaType) internal view returns (uint256) {
     AppStorage storage s = LibAppStorage.diamondStorage();
+
+    uint256 remaining = s.parcels[_realmId].alchemicaRemaining[_alchemicaType];
+
+    if (remaining == 0) return remaining;
+
     //First get the onchain amount
     uint256 available = s.parcels[_realmId].unclaimedAlchemica[_alchemicaType];
     //Then get the floating amount
