@@ -1,24 +1,33 @@
-import { ethers, network } from "hardhat";
+import { ethers, hardhatArguments, network } from "hardhat";
 import { installationTypes } from "../../../data/installations/nftDisplay";
 import { InstallationAdminFacet } from "../../../typechain";
 
 import { outputInstallation } from "../../realm/realmHelpers";
-import { gasPrice } from "../helperFunctions";
+import { diamondOwner, gasPrice, impersonate } from "../helperFunctions";
 import { varsForNetwork } from "../../../constants";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 
 export async function addFarmInstallations() {
   const c = await varsForNetwork(ethers);
 
-  const installationFacet = (await ethers.getContractAt(
+  let installationFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
     c.installationDiamond,
     new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0")
   )) as InstallationAdminFacet;
 
+  if (network.name === "hardhat") {
+    installationFacet = await impersonate(
+      await diamondOwner(c.installationDiamond, ethers),
+      installationFacet,
+      ethers,
+      network
+    );
+  }
+
   let farming = installationTypes.map((val) => outputInstallation(val));
 
-  console.log("Farming:", farming);
+  console.log("NFT displays:", farming);
   const tx = await installationFacet.addInstallationTypes(farming, {
     gasPrice: gasPrice,
   });
