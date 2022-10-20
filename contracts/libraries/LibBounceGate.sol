@@ -37,15 +37,15 @@ library LibBounceGate {
     //validate title length
     if (bytes(_title).length > 35) revert TitleLengthOverflow();
 
-    if (!s.parcels[_realmId].bounceGate.equipped) revert NoBounceGate();
+    if (!s.bounceGates[_realmId].equipped) revert NoBounceGate();
     //make sure there is no ongoing event
-    if (s.parcels[_realmId].bounceGate.endTime > block.timestamp) revert OngoingEvent();
+    if (s.bounceGates[_realmId].endTime > block.timestamp) revert OngoingEvent();
     //validate event
     uint64 endTime = _validateInitialBounceGate(_startTime, _durationInMinutes);
     //calculate event priority
     uint120 priority = _calculatePriorityAndSettleAlchemica(_alchemicaSpent);
     //update storage
-    BounceGate storage p = s.parcels[_realmId].bounceGate;
+    BounceGate storage p = s.bounceGates[_realmId];
     p.title = _title;
     p.startTime = _startTime;
     p.endTime = endTime;
@@ -60,7 +60,7 @@ library LibBounceGate {
     uint40 _durationExtensionInMinutes
   ) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
-    BounceGate storage p = s.parcels[_realmId].bounceGate;
+    BounceGate storage p = s.bounceGates[_realmId];
     address parcelOwner = s.parcels[_realmId].owner;
 
     //@todo: replace with access rights
@@ -92,13 +92,13 @@ library LibBounceGate {
     //make sure there is no ongoing event
     AppStorage storage s = LibAppStorage.diamondStorage();
     //makes sure an event has been created before
-    if (s.parcels[_realmId].bounceGate.startTime == 0) revert NoEvent();
-    if (s.parcels[_realmId].bounceGate.endTime > block.timestamp) revert OngoingEvent();
+    if (s.bounceGates[_realmId].startTime == 0) revert NoEvent();
+    if (s.bounceGates[_realmId].endTime > block.timestamp) revert OngoingEvent();
     //validate
     uint64 endTime = _validateInitialBounceGate(_startTime, _durationInMinutes);
     uint120 priority = _calculatePriorityAndSettleAlchemica(_alchemicaSpent);
     //update storage
-    BounceGate storage p = s.parcels[_realmId].bounceGate;
+    BounceGate storage p = s.bounceGates[_realmId];
     p.startTime = _startTime;
     p.endTime = endTime;
     p.priority = priority;
@@ -108,7 +108,7 @@ library LibBounceGate {
 
   function _cancelEvent(uint256 _realmId) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
-    BounceGate storage p = s.parcels[_realmId].bounceGate;
+    BounceGate storage p = s.bounceGates[_realmId];
     address parcelOwner = s.parcels[_realmId].owner;
     if (msg.sender != parcelOwner) revert NotParcelOwner();
     if (p.endTime <= uint64(block.timestamp)) revert NoOngoingEvent();
@@ -122,7 +122,7 @@ library LibBounceGate {
 
   function _getUpdatedPriority(uint256 _realmId) internal view returns (uint120 _newPriority) {
     AppStorage storage s = LibAppStorage.diamondStorage();
-    BounceGate storage p = s.parcels[_realmId].bounceGate;
+    BounceGate storage p = s.bounceGates[_realmId];
 
     //If event has started, priority begins dropping
     if (p.startTime <= block.timestamp) {
