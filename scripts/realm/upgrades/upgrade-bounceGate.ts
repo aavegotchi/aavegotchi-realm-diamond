@@ -22,16 +22,16 @@ export async function upgrade() {
       ],
       removeSelectors: [],
     },
-    // {
-    //   facetName: "RealmFacet",
-    //   addSelectors: [],
-    //   removeSelectors: [],
-    // },
-    // {
-    //   facetName: "AlchemicaFacet",
-    //   addSelectors: [],
-    //   removeSelectors: [],
-    // },
+    {
+      facetName: "RealmFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
+    {
+      facetName: "AlchemicaFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
     // //for testing only
     // {
     //   facetName: "SetPubKeyFacet",
