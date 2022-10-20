@@ -7,7 +7,6 @@ error NotParcelOwner();
 error StartTimeError();
 error OngoingEvent();
 error NoOngoingEvent();
-error DurationTooHigh();
 error NoBounceGate();
 error NoEvent();
 error EventEnded();
@@ -34,13 +33,11 @@ library LibBounceGate {
 
     //@todo: replace with Access Rights
 
-    //@todo: uncomment for mainnet
-    // if (msg.sender != owner) revert NotParcelOwner();
+    if (msg.sender != owner) revert NotParcelOwner();
     //validate title length
     if (bytes(_title).length > 35) revert TitleLengthOverflow();
 
-    //REMOVED FOR TESTING ON MUMBAI
-    //   if (!s.parcels[_realmId].bounceGate.equipped) revert NoBounceGate();
+    if (!s.parcels[_realmId].bounceGate.equipped) revert NoBounceGate();
     //make sure there is no ongoing event
     if (s.parcels[_realmId].bounceGate.endTime > block.timestamp) revert OngoingEvent();
     //validate event
@@ -69,18 +66,11 @@ library LibBounceGate {
     //@todo: replace with access rights
     if (msg.sender != parcelOwner) revert NotParcelOwner();
     if (p.startTime == 0) revert NoEvent();
+    if (p.endTime < block.timestamp) revert EventEnded();
 
-    //@todo: check
-    // if (p.endTime < block.timestamp) revert EventEnded();
     if (_durationExtensionInMinutes > 0) {
-      // uint256 currentDurationInMinutes = p.endTime - p.startTime;
-      // if (currentDurationInMinutes + _durationExtensionInMinutes > MAX_DURATION_IN_MINUTES) revert DurationTooHigh();
       uint256 gltr = _getGltrAmount(_durationExtensionInMinutes);
-      //REMOVED FOR TESTING ON MUMBAI
-
-      //@todo: uncomment for mainnet
-      //  require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), gltr));
-      //update storage
+      require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), gltr));
       p.endTime += (_durationExtensionInMinutes * 60);
     }
     uint256 addedPriority = _calculatePriorityAndSettleAlchemica(_alchemicaSpent);
@@ -134,28 +124,29 @@ library LibBounceGate {
     AppStorage storage s = LibAppStorage.diamondStorage();
     BounceGate storage p = s.parcels[_realmId].bounceGate;
 
+    //If event has started, priority begins dropping
     if (p.startTime <= block.timestamp) {
-      //@todo: check
-      // if (p.endTime <= uint64(block.timestamp)) {
-      //   _newPriority = 0;
-      // } else {
-      uint256 elapsedMinutesSinceLastUpdated = ((uint64(block.timestamp) - p.lastTimeUpdated)) / 60;
-
-      uint120 currentPriority = p.priority;
-
-      if (elapsedMinutesSinceLastUpdated <= 1) {
-        _newPriority = currentPriority;
+      //If event has already ended, priority is 0
+      if (p.endTime <= uint64(block.timestamp)) {
+        _newPriority = 0;
       } else {
-        //reduces by 0.01% of current priority every minute
-        uint256 negPriority = (currentPriority) * elapsedMinutesSinceLastUpdated;
-        negPriority /= 1000;
-        if (currentPriority > negPriority) {
-          _newPriority = uint120((currentPriority * 10) - negPriority);
-          _newPriority /= 10;
+        uint256 elapsedMinutesSinceLastUpdated = ((uint64(block.timestamp) - p.lastTimeUpdated)) / 60;
+
+        uint120 currentPriority = p.priority;
+
+        if (elapsedMinutesSinceLastUpdated <= 1) {
+          _newPriority = currentPriority;
         } else {
-          _newPriority = 0;
+          //reduces by 0.01% of current priority every minute
+          uint256 negPriority = (currentPriority) * elapsedMinutesSinceLastUpdated;
+          negPriority /= 1000;
+          if (currentPriority > negPriority) {
+            _newPriority = uint120((currentPriority * 10) - negPriority);
+            _newPriority /= 10;
+          } else {
+            _newPriority = 0;
+          }
         }
-        // }
       }
     } else {
       _newPriority = p.priority;
@@ -164,15 +155,11 @@ library LibBounceGate {
 
   function _validateInitialBounceGate(uint64 _startTime, uint256 _durationInMinutes) private returns (uint64 endTime_) {
     if (_startTime < block.timestamp) revert StartTimeError();
-    //check for Duration
-    // if (_durationInMinutes > MAX_DURATION_IN_MINUTES) revert DurationTooHigh();
     AppStorage storage s = LibAppStorage.diamondStorage();
     //calculate gltr needed for duration
     uint256 total = _getGltrAmount(_durationInMinutes);
-    //REMOVED FOR TESTING ON MUMBAI
 
-    //@todo: uncomment for prod
-    // require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), total));
+    require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), total));
     endTime_ = uint64(_startTime + (_durationInMinutes * 60));
   }
 
@@ -185,7 +172,7 @@ library LibBounceGate {
     for (uint256 i = 0; i < 4; i++) {
       uint256 amount = _alchemicaSpent[i];
       //each amount must be greater than or equal to 1
-   if (amount >= 1e18) {
+      if (amount >= 1e18) {
         amount /= 1e18;
         _startingPriority += uint120(amount * _getAlchemicaRankings()[i]);
         require(IERC20(s.alchemicaAddresses[i]).transferFrom(msg.sender, address(this), _alchemicaSpent[i]));
