@@ -41,11 +41,11 @@ module.exports = {
         },
        ],*/
       forking: {
-        url: process.env.MUMBAI_MORALIS,
+        url: process.env.MATIC_URL,
         timeout: 2000000,
         // blockNumber: 30865190,
       },
-      chainId: 80001,
+      chainId: 137,
       blockGasLimit: 20000000,
       timeout: 2000000,
       gas: "auto",
