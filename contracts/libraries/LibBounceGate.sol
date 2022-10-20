@@ -12,9 +12,7 @@ error NoEvent();
 error EventEnded();
 error TitleLengthOverflow();
 
-uint256 constant GLTR_PER_MINUTE = 30;
-
-// uint256 constant MAX_DURATION_IN_MINUTES = 4320 minutes; //72 hours
+uint256 constant GLTR_PER_MINUTE = 30; //roughly 2 seconds per GLTR
 
 library LibBounceGate {
   event EventStarted(uint256 indexed _eventId, BounceGate eventDetails);
@@ -114,7 +112,6 @@ library LibBounceGate {
     if (p.endTime <= uint64(block.timestamp)) revert NoOngoingEvent();
 
     //Cancel event
-    //p.startTime = uint64(block.timestamp);
     p.endTime = uint64(block.timestamp);
 
     emit EventCancelled(_realmId);
