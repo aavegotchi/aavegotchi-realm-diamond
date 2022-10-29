@@ -112,7 +112,7 @@ export interface InstallationTypeInput {
 }
 
 export interface TileTypeInput {
-  id?: number;
+  id: number;
   deprecated: boolean;
   tileType: number;
   width: Width;

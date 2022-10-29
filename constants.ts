@@ -31,6 +31,8 @@ function varsByChainId(chainId: number) {
 export async function varsForNetwork(ethers: HardhatEthersHelpers) {
   return varsByChainId((await ethers.provider.getNetwork()).chainId);
 }
+export const gotchiverseSubgraph =
+  "https://api.thegraph.com/subgraphs/name/aavegotchi/gotchiverse-matic";
 
 export const alchemica = [
   "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f",
@@ -82,7 +84,7 @@ const networkToVars: NetworkToConstants = {
   100: maticVars, //update
 };
 
-export const gasPrice = 75000000000;
+export const gasPrice = 275000000000;
 
 export const aavegotchiDAOAddress =
   "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";

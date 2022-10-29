@@ -48,6 +48,15 @@ struct Parcel {
   uint16 harvesterCount;
 }
 
+struct BounceGate {
+  string title;
+  uint64 startTime;
+  uint64 endTime;
+  uint120 priority;
+  bool equipped;
+  uint64 lastTimeUpdated;
+}
+
 struct RequestConfig {
   uint64 subId;
   uint32 callbackGasLimit;
@@ -98,6 +107,7 @@ struct AppStorage {
   //NFT DISPLAY STORAGE
   //chainId => contractAddress => allowed
   mapping(uint256 => mapping(address => bool)) nftDisplayAllowed;
+  mapping(uint256 => BounceGate) bounceGates;
 }
 
 library LibAppStorage {

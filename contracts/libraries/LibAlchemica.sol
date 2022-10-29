@@ -59,7 +59,9 @@ library LibAlchemica {
     uint256 equippedAltarId = s.parcels[_realmId].altarId;
     uint256 equippedAltarLevel = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(equippedAltarId).level;
 
-    require(equippedAltarLevel >= altarPrerequisite, "LibAlchemica: Altar Tech Tree Reqs not met");
+    if (altarPrerequisite > 0) {
+      require(equippedAltarLevel >= altarPrerequisite, "LibAlchemica: Altar Tech Tree Reqs not met");
+    }
 
     // check lodge requirement
     if (lodgePrerequisite > 0) {
@@ -100,6 +102,11 @@ library LibAlchemica {
     // upgradeQueueBoost
     if (installationType.upgradeQueueBoost > 0) {
       s.parcels[_realmId].upgradeQueueCapacity += installationType.upgradeQueueBoost;
+    }
+    //Bounce Gate
+    if (installationType.installationType == 8 && !isUpgrade) {
+      require(!s.bounceGates[_realmId].equipped, "LibAlchemica: Bounce Gate already equipped");
+      s.bounceGates[_realmId].equipped = true;
     }
   }
 
@@ -157,6 +164,15 @@ library LibAlchemica {
 
         revert("LibAlchemica: Claim Alchemica before reducing capacity");
       }
+    }
+    //Bounce Gate
+    if (installationType.installationType == 8 && !isUpgrade) {
+      require(s.bounceGates[_realmId].equipped, "LibAlchemica: Bounce Gate not equipped");
+      //cannot uninstall a Bounce Gate if an event is ongoing
+      if (s.bounceGates[_realmId].startTime > 0) {
+        require(s.bounceGates[_realmId].endTime < block.timestamp, "LibAlchemica: Ongoing event, cannot unequip Portal");
+      }
+      s.bounceGates[_realmId].equipped = false;
     }
 
     // Reduce upgrade queue boost. Handle underflow exception for bugged parcels
@@ -221,6 +237,11 @@ library LibAlchemica {
 
   function getAvailableAlchemica(uint256 _realmId, uint256 _alchemicaType) internal view returns (uint256) {
     AppStorage storage s = LibAppStorage.diamondStorage();
+
+    uint256 remaining = s.parcels[_realmId].alchemicaRemaining[_alchemicaType];
+
+    if (remaining == 0) return remaining;
+
     //First get the onchain amount
     uint256 available = s.parcels[_realmId].unclaimedAlchemica[_alchemicaType];
     //Then get the floating amount

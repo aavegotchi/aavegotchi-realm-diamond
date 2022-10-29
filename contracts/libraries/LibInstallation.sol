@@ -176,8 +176,8 @@ library LibInstallation {
     uint40 readyBlock = s.upgradeQueue[index].readyBlock;
     uint256 parcelId = s.upgradeQueue[index].parcelId;
     uint256 installationId = s.upgradeQueue[index].installationId;
-    uint256 coordinateX = s.upgradeQueue[index].coordinateX;
-    uint256 coordinateY = s.upgradeQueue[index].coordinateY;
+    uint16 coordinateX = s.upgradeQueue[index].coordinateX;
+    uint16 coordinateY = s.upgradeQueue[index].coordinateY;
 
     // check that upgrade is ready
     if (block.number >= readyBlock) {

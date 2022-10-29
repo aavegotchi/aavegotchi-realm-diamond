@@ -1,4 +1,4 @@
-import { ethers, run } from "hardhat";
+import { run, ethers, network } from "hardhat";
 import { varsForNetwork } from "../../../constants";
 import {
   convertFacetAndSelectorsToString,
@@ -6,41 +6,51 @@ import {
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
 
-export async function upgrade() {
-  const diamondUpgrader = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
+export async function upgradeRealm() {
+  const diamondUpgrader = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
 
-  const BuggedUpgradeInput =
-    "tuple(uint256 _parcelId, uint16 _coordinateX, uint16 _coordinateY, uint256 _installationId)";
+  const c = await varsForNetwork(ethers);
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "InstallationAdminFacet",
-      addSelectors: [
-        `function deleteBuggedUpgrades(${BuggedUpgradeInput}[] memory _upgrades) external`,
-      ],
-      removeSelectors: [
-        `function deleteBuggedUpgrades(uint256 _parcelId, uint16 _coordinateX, uint16 _coordinateY,uint256 _installationId) external`,
-      ],
+      facetName: "RealmGettersAndSettersFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
+    {
+      facetName: "AlchemicaFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
+    {
+      facetName: "RealmFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
+    {
+      facetName: "RealmGridFacet",
+      addSelectors: [],
+      removeSelectors: [],
     },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
 
-  const c = await varsForNetwork(ethers);
-
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
-    diamondAddress: c.installationDiamond,
+    diamondAddress: c.realmDiamond,
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,
+    initAddress: ethers.constants.AddressZero,
+    initCalldata: "0x",
   };
 
   await run("deployUpgrade", args);
 }
 
 if (require.main === module) {
-  upgrade()
+  upgradeRealm()
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

@@ -1,5 +1,6 @@
-import { ethers, run } from "hardhat";
+import { run, ethers } from "hardhat";
 import { varsForNetwork } from "../../../constants";
+
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
@@ -7,33 +8,30 @@ import {
 } from "../../../tasks/deployUpgrade";
 
 export async function upgrade() {
-  const diamondUpgrader = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
-
-  const BuggedUpgradeInput =
-    "tuple(uint256 _parcelId, uint16 _coordinateX, uint16 _coordinateY, uint256 _installationId)";
+  const diamondUpgrader = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "InstallationAdminFacet",
+      facetName: "BounceGateFacet",
       addSelectors: [
-        `function deleteBuggedUpgrades(${BuggedUpgradeInput}[] memory _upgrades) external`,
+        "function recreateEvent(uint256 _realmId,uint64 _startTime,uint64 _durationInMinutes,uint256[4] calldata _alchemicaSpent) external ",
       ],
-      removeSelectors: [
-        `function deleteBuggedUpgrades(uint256 _parcelId, uint16 _coordinateX, uint16 _coordinateY,uint256 _installationId) external`,
-      ],
+      removeSelectors: [],
     },
   ];
 
-  const joined = convertFacetAndSelectorsToString(facets);
-
   const c = await varsForNetwork(ethers);
+
+  const joined = convertFacetAndSelectorsToString(facets);
 
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
-    diamondAddress: c.installationDiamond,
+    diamondAddress: c.realmDiamond,
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,
+    initAddress: ethers.constants.AddressZero,
+    initCalldata: "0x",
   };
 
   await run("deployUpgrade", args);
