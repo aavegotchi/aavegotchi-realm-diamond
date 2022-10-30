@@ -9,3 +9,4 @@
 @interfaces/=contracts/interfaces/
 @openzeppelin/=node_modules/@openzeppelin
 @chainlink/=node_modules/@chainlink
+@contractTests=contracts/test

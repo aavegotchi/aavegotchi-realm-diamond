@@ -123,4 +123,8 @@ interface InstallationDiamondInterface {
     uint256 _x,
     uint256 _y
   ) external view returns (bool);
+
+  function getConsoleDiamond() external view returns (address);
+
+  function getCaartridgeDiamond() external view returns (address);
 }

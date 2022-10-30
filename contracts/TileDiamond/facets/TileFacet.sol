@@ -433,4 +433,17 @@ contract TileFacet is Modifiers {
       emit EditTileType(_typeIds[i], _updatedTiles[i]);
     }
   }
+
+  function getConsoleDiamond() public view returns (address) {
+    return s.consoleDiamond;
+  }
+
+  function getCaartridgeDiamond() public view returns (address) {
+    return s.caartridgeDiamond;
+  }
+
+  function setAddresses(address _consoleDiamond, address _caartridgeDiamond) external onlyOwner {
+    s.consoleDiamond = _consoleDiamond;
+    s.caartridgeDiamond = _caartridgeDiamond;
+  }
 }
