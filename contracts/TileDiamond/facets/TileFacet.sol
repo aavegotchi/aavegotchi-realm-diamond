@@ -441,4 +441,9 @@ contract TileFacet is Modifiers {
   function getCaartridgeDiamond() public view returns (address) {
     return s.caartridgeDiamond;
   }
+
+  function setAddresses(address _consoleDiamond, address _caartridgeDiamond) external onlyOwner {
+    s.consoleDiamond = _consoleDiamond;
+    s.caartridgeDiamond = _caartridgeDiamond;
+  }
 }

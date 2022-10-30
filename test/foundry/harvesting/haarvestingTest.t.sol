@@ -16,7 +16,7 @@ import {InstallationFacet} from "@installation/facets/InstallationFacet.sol";
 import {InstallationTypeIO} from "@libraries/AppStorageInstallation.sol";
 import {IERC20} from "@interfaces/IERC20.sol";
 
-import {TestRealmFacet} from "@realm/facets/TestRealmFacet.sol";
+import {TestRealmFacet} from "@contractTests/TestRealmFacet.sol";
 import {TestInstallationFacet} from "@installation/facets/TestInstallationFacet.sol";
 
 contract HaarvestingTest is Test, TestUpgrades {
