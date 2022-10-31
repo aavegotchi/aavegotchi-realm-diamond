@@ -7,6 +7,7 @@ import {TestConstants} from "@test/constants.t.sol";
 import {AlchemicaFacet} from "@contracts/RealmDiamond/facets/AlchemicaFacet.sol";
 import {OwnershipFacet} from "@shared/OwnershipFacet.sol";
 import {IDiamondCut} from "@interfaces/IDiamondCut.sol";
+import {IERC20Extended} from "@interfaces/IERC20Extended.sol";
 import {IERC20} from "@interfaces/IERC20.sol";
 
 contract BatchtransferTests is Test {
@@ -53,7 +54,7 @@ contract BatchtransferTests is Test {
     uint256 amount = 10e18;
     address[4] memory a = AlchemicaFacet(TestConstants.REALM_DIAMOND_ADDRESS_MATIC).getAlchemicaAddresses();
     //kek transfer will fail, but others will pass
-    emit ERC20ErrorHandled(IERC20(a[3]).name());
+    emit ERC20ErrorHandled(IERC20Extended(a[3]).name());
     vm.expectEmit(true, false, false, false, TestConstants.REALM_DIAMOND_ADDRESS_MATIC);
     AlchemicaFacet(TestConstants.REALM_DIAMOND_ADDRESS_MATIC).batchTransferTokens(
       populateAddress(a[0], a[1], a[2], a[3]),
