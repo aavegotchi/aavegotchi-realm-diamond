@@ -1,40 +1,25 @@
-import { run, ethers } from "hardhat";
+import { run, ethers, network } from "hardhat";
 import { varsForNetwork } from "../../../constants";
-
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
 
-export async function upgrade() {
+export async function batchtransferTokens() {
   const diamondUpgrader = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
+
+  const c = await varsForNetwork(ethers);
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "BounceGateFacet",
+      facetName: "AlchemicaFacet",
       addSelectors: [
-        "function createEvent(string calldata _title, uint64 _startTime,uint64 _durationInMinutes,uint256[4] calldata _alchemicaSpent,uint256 _realmId) external",
-        "function updateEvent(uint256 _realmId,uint256[4] calldata _alchemicaSpent,uint40 _durationExtensionInMinutes) external",
-        "function viewEvent(uint256 _realmId) public",
-        `function cancelEvent(uint256 _realmId) external`,
-        `function recreateEvent(uint256 _realmId,uint64 _startTime, uint64 _durationInMinutes,uint256[4] calldata _alchemicaSpent) external`,
+        `function batchTransferTokens(address[] calldata _tokens,uint256[] calldata _amounts,address _to)`,
       ],
       removeSelectors: [],
     },
-    {
-      facetName: "RealmFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "AlchemicaFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
   ];
-
-  const c = await varsForNetwork(ethers);
 
   const joined = convertFacetAndSelectorsToString(facets);
 
@@ -52,7 +37,7 @@ export async function upgrade() {
 }
 
 if (require.main === module) {
-  upgrade()
+  batchtransferTokens()
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

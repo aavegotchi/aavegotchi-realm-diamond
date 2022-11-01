@@ -23,3 +23,7 @@ test-nftDisplay:
 test-events:
 	@echo Running tests for Bounce Gates
 	@forge test --mc BounceGateTests -vvvvv 
+
+test-batchTransfer:
+	@echo Running tests for batch Transfer
+	@forge test --mc BatchtransferTests -vvv

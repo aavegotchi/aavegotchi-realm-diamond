@@ -7,7 +7,7 @@ import {TestConstants} from "@test/constants.t.sol";
 import "../../../contracts/RealmDiamond/facets/RealmFacet.sol";
 import "../../../contracts/RealmDiamond/facets/BounceGateFacet.sol";
 import "./Helpers.sol";
-import "../../../contracts/RealmDiamond/SetPubKeyFacet.sol";
+import "@contractTests/SetPubKeyFacet.sol";
 import "../../../contracts/interfaces/IDiamondCut.sol";
 import "../../../contracts/shared/OwnershipFacet.sol";
 

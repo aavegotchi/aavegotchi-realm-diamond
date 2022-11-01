@@ -14,7 +14,7 @@ export async function upgrade() {
     {
       facetName: "BounceGateFacet",
       addSelectors: [
-        "  function recreateEvent(uint256 _realmId,uint64 _startTime,uint64 _durationInMinutes,uint256[4] calldata _alchemicaSpent) external ",
+        "function recreateEvent(uint256 _realmId,uint64 _startTime,uint64 _durationInMinutes,uint256[4] calldata _alchemicaSpent) external ",
       ],
       removeSelectors: [],
     },
@@ -26,7 +26,7 @@ export async function upgrade() {
 
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
-    diamondAddress: "0x726F201A9aB38cD56D60ee392165F1434C4F193D",
+    diamondAddress: c.realmDiamond,
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,

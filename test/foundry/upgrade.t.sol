@@ -14,7 +14,7 @@ import {TestInstallationFacet} from "@installation/facets/TestInstallationFacet.
 import {RealmFacet} from "@realm/facets/RealmFacet.sol";
 import {AlchemicaFacet} from "@realm/facets/AlchemicaFacet.sol";
 import {VRFFacet} from "@realm/facets/VRFFacet.sol";
-import {TestRealmFacet} from "@realm/facets/TestRealmFacet.sol";
+import {TestRealmFacet} from "@contractTests/TestRealmFacet.sol";
 
 contract TestUpgrades is Test {
   function logFunctionSelectors(IDiamondCut.FacetCut[] memory cuts) internal view {

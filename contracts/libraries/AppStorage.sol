@@ -46,7 +46,6 @@ struct Parcel {
   uint256[64][64] startPositionBuildGrid;
   uint256[64][64] startPositionTileGrid;
   uint16 harvesterCount;
-  BounceGate bounceGate;
 }
 
 struct BounceGate {
@@ -108,6 +107,7 @@ struct AppStorage {
   //NFT DISPLAY STORAGE
   //chainId => contractAddress => allowed
   mapping(uint256 => mapping(address => bool)) nftDisplayAllowed;
+  mapping(uint256 => BounceGate) bounceGates;
   // parcelId => action: 0 Alchemical Channeling, 1 Emptying Reservoirs => whitelistIds
   mapping(uint256 => mapping(uint256 => uint32)) whitelistIds;
 }

@@ -8,6 +8,7 @@ import "../../libraries/LibMeta.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "../../libraries/LibAlchemica.sol";
 import "../../libraries/LibSignature.sol";
+import {IERC20Extended} from "../../interfaces/IERC20Extended.sol";
 
 uint256 constant bp = 100 ether;
 
@@ -25,6 +26,8 @@ contract AlchemicaFacet is Modifiers {
   event ExitAlchemica(uint256 indexed _gotchiId, uint256[] _alchemica);
 
   event SurveyingRoundProgressed(uint256 indexed _newRound);
+
+  error ERC20TransferFailed(string _tokenName);
 
   function isSurveying(uint256 _realmId) external view returns (bool) {
     return s.parcels[_realmId].surveying;
@@ -371,6 +374,39 @@ contract AlchemicaFacet is Modifiers {
         return x;
       }
       return 0;
+    }
+  }
+
+  function _batchTransferTokens(
+    address[] memory _tokens,
+    uint256[] memory _amounts,
+    address _to
+  ) internal onlyOwner {
+    require(_tokens.length == _amounts.length, "Array legth mismatch");
+    require(_to != address(0), "Address Zero Transfer");
+    for (uint256 i; i < _tokens.length; i++) {
+      address token = _tokens[i];
+      uint256 amount = _amounts[i];
+      bool success;
+      try IERC20(token).transfer(_to, amount) {
+        success;
+      } catch {
+        if (!success) {
+          revert ERC20TransferFailed(IERC20Extended(token).name());
+        }
+      }
+    }
+  }
+
+  function batchTransferTokens(
+    address[][] calldata _tokens,
+    uint256[][] calldata _amounts,
+    address[] calldata _to
+  ) external {
+    require(_tokens.length == _amounts.length, "Array length mismatch");
+    require(_to.length == _amounts.length, "Array length mismatch");
+    for (uint256 i; i < _to.length; i++) {
+      _batchTransferTokens(_tokens[i], _amounts[i], _to[i]);
     }
   }
 }
