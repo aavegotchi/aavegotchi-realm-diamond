@@ -377,11 +377,11 @@ contract AlchemicaFacet is Modifiers {
     }
   }
 
-  function batchTransferTokens(
-    address[] calldata _tokens,
-    uint256[] calldata _amounts,
+  function _batchTransferTokens(
+    address[] memory _tokens,
+    uint256[] memory _amounts,
     address _to
-  ) external onlyOwner {
+  ) internal onlyOwner {
     require(_tokens.length == _amounts.length, "Array legth mismatch");
     require(_to != address(0), "Address Zero Transfer");
     for (uint256 i; i < _tokens.length; i++) {
@@ -395,6 +395,17 @@ contract AlchemicaFacet is Modifiers {
           revert ERC20TransferFailed(IERC20Extended(token).name());
         }
       }
+    }
+  }
+
+  function batchTransferTokens(
+    address[][] calldata _tokens,
+    uint256[][] calldata _amounts,
+    address[] calldata _to
+  ) external {
+    require(_tokens.length == _amounts.length, "Array length mismatch");
+    for (uint256 i; i < _tokens.length; i++) {
+      _batchTransferTokens(_tokens[i], _amounts[i], _to[i]);
     }
   }
 }
