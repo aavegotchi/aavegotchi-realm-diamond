@@ -404,7 +404,8 @@ contract AlchemicaFacet is Modifiers {
     address[] calldata _to
   ) external {
     require(_tokens.length == _amounts.length, "Array length mismatch");
-    for (uint256 i; i < _tokens.length; i++) {
+    require(_to.length == _amounts.length, "Array length mismatch");
+    for (uint256 i; i < _to.length; i++) {
       _batchTransferTokens(_tokens[i], _amounts[i], _to[i]);
     }
   }
