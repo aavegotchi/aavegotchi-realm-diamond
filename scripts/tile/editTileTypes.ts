@@ -31,9 +31,11 @@ export async function setAddresses() {
     tileFacet = await impersonate(owner, tileFacet, ethers, network);
   }
 
-  let tiles = tileTypes.map((val) => outputTile(val));
-  // console.log("tile:", tile);
-  const ids = tileTypes.map((val) => val.id);
+  const ids = [28, 29, 30, 31];
+  let tiles = tileTypes
+    .slice(ids[0], ids[ids.length])
+    .map((val) => outputTile(val));
+  console.log("tiles:", tiles);
 
   console.log("Editing tile:", tiles);
   console.log("ids:", ids);
