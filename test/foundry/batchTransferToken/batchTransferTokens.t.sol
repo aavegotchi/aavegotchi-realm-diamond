@@ -48,14 +48,9 @@ contract BatchtransferTests is Test {
     }
   }
 
-  event ERC20ErrorHandled(string _tokenName);
-
   function testFailTransfers() public {
     uint256 amount = 10e18;
     address[4] memory a = AlchemicaFacet(TestConstants.REALM_DIAMOND_ADDRESS_MATIC).getAlchemicaAddresses();
-    //kek transfer will fail, but others will pass
-    emit ERC20ErrorHandled(IERC20Extended(a[3]).name());
-    vm.expectEmit(true, false, false, false, TestConstants.REALM_DIAMOND_ADDRESS_MATIC);
     AlchemicaFacet(TestConstants.REALM_DIAMOND_ADDRESS_MATIC).batchTransferTokens(
       populateAddress(a[0], a[1], a[2], a[3]),
       populateUINT(amount, amount, amount, 1000000000000000000000e18),

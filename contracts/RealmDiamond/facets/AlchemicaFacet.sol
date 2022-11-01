@@ -27,7 +27,7 @@ contract AlchemicaFacet is Modifiers {
 
   event SurveyingRoundProgressed(uint256 indexed _newRound);
 
-  event ERC20ErrorHandled(string _tokenName);
+  error ERC20TransferFailed(string _tokenName);
 
   function isSurveying(uint256 _realmId) external view returns (bool) {
     return s.parcels[_realmId].surveying;
@@ -392,7 +392,7 @@ contract AlchemicaFacet is Modifiers {
         success;
       } catch {
         if (!success) {
-          emit ERC20ErrorHandled(IERC20Extended(token).name());
+          revert ERC20TransferFailed(IERC20Extended(token).name());
         }
       }
     }
