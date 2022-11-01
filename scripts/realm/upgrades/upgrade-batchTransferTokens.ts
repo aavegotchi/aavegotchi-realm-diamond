@@ -15,7 +15,7 @@ export async function batchtransferTokens() {
     {
       facetName: "AlchemicaFacet",
       addSelectors: [
-        `function batchTransferTokens(address[] calldata _tokens,uint256[] calldata _amounts,address _to)`,
+        `function batchTransferTokens(address[][] calldata _tokens,uint256[][] calldata _amounts,address[] _to)`,
       ],
       removeSelectors: [],
     },
