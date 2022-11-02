@@ -381,7 +381,7 @@ contract AlchemicaFacet is Modifiers {
     address[] memory _tokens,
     uint256[] memory _amounts,
     address _to
-  ) internal onlyOwner {
+  ) internal {
     require(_tokens.length == _amounts.length, "Array legth mismatch");
     require(_to != address(0), "Address Zero Transfer");
     for (uint256 i; i < _tokens.length; i++) {
