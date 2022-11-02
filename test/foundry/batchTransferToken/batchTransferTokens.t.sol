@@ -15,6 +15,7 @@ contract BatchtransferTests is Test {
   OwnershipFacet oFacet = OwnershipFacet(TestConstants.REALM_DIAMOND_ADDRESS_MATIC);
   IDiamondCut dCut = IDiamondCut(TestConstants.REALM_DIAMOND_ADDRESS_MATIC);
   address diamondOwner;
+  address alchOwner = 0x019Ed608dD806b80193942F2A960e7AC8aBb2EE3;
 
   function setUp() public {
     diamondOwner = OwnershipFacet(TestConstants.REALM_DIAMOND_ADDRESS_MATIC).owner();
@@ -30,30 +31,33 @@ contract BatchtransferTests is Test {
     });
 
     dCut.diamondCut(cut, address(0), "");
+    vm.stopPrank();
   }
 
   function testTransfers() public {
     //attempt to transfer 10 alchemica tokens out
+    vm.startPrank(alchOwner);
     uint256 amount = 10e18;
-    uint256[4] memory realmBalancesBefore = getBalances(TestConstants.REALM_DIAMOND_ADDRESS_MATIC);
+    uint256[4] memory realmBalancesBefore = getBalances(alchOwner);
     address[4] memory a = AlchemicaFacet(TestConstants.REALM_DIAMOND_ADDRESS_MATIC).getAlchemicaAddresses();
+    approve();
     AlchemicaFacet(TestConstants.REALM_DIAMOND_ADDRESS_MATIC).batchTransferTokens(
       populate2DAddress(a[0], a[1], a[2], a[3]),
       populate2DUINT(amount, amount, amount, amount),
       populateAddress(address(0xdead))
     );
-    uint256[4] memory realmBalancesAfter = getBalances(TestConstants.REALM_DIAMOND_ADDRESS_MATIC);
+    uint256[4] memory realmBalancesAfter = getBalances(alchOwner);
     for (uint256 i; i < 4; i++) {
       assertEq(realmBalancesBefore[i], realmBalancesAfter[i] + amount);
     }
+    vm.stopPrank();
   }
 
-  event no(uint256);
-
   function testFailTransfers() public {
+    vm.startPrank(alchOwner);
     uint256 amount = 10e18;
     address[4] memory a = AlchemicaFacet(TestConstants.REALM_DIAMOND_ADDRESS_MATIC).getAlchemicaAddresses();
-    emit no(populate2DAddress(a[0], a[1], a[2], a[3]).length);
+    approve();
     AlchemicaFacet(TestConstants.REALM_DIAMOND_ADDRESS_MATIC).batchTransferTokens(
       populate2DAddress(a[0], a[1], a[2], a[3]),
       populate2DUINT(amount, amount, amount, 1000000000000000000000e18),
@@ -65,6 +69,13 @@ contract BatchtransferTests is Test {
     address[4] memory alchemicaAddresses = AlchemicaFacet(TestConstants.REALM_DIAMOND_ADDRESS_MATIC).getAlchemicaAddresses();
     for (uint256 i = 0; i < 4; i++) {
       balances[i] = IERC20(alchemicaAddresses[i]).balanceOf(user);
+    }
+  }
+
+  function approve() public {
+    address[4] memory alchemicaAddresses = AlchemicaFacet(TestConstants.REALM_DIAMOND_ADDRESS_MATIC).getAlchemicaAddresses();
+    for (uint256 i = 0; i < 4; i++) {
+      IERC20(alchemicaAddresses[i]).approve(TestConstants.REALM_DIAMOND_ADDRESS_MATIC, 10000e18);
     }
   }
 }
