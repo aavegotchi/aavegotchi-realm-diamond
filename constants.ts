@@ -10,6 +10,7 @@ export interface Constants {
   alpha: string;
   kek: string;
   gltr: string;
+  ghst: string;
 }
 
 interface NetworkToConstants {
@@ -51,6 +52,7 @@ const kovanVars: Constants = {
   alpha: "",
   kek: "",
   gltr: "",
+  ghst: "",
 };
 
 export const maticVars: Constants = {
@@ -63,6 +65,7 @@ export const maticVars: Constants = {
   alpha: "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2",
   kek: "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C",
   gltr: "",
+  ghst: "0x385eeac5cb85a38a9a07a70c73e0a3271cfb54a7",
 };
 
 const mumbaiVars: Constants = {
@@ -75,6 +78,7 @@ const mumbaiVars: Constants = {
   alpha: "0x066F7B9172DE92945dF4e7fB29a0815dc225d45F",
   kek: "0x1C5714F00cc2e795Cf4F4F7e2A9F3AA04149d423",
   gltr: "0x3FF9E39009bfFe903C262f6d63161B1f4414d3c8",
+  ghst: "",
 };
 
 const networkToVars: NetworkToConstants = {
