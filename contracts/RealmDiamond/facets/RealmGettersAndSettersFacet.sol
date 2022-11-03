@@ -11,6 +11,7 @@ import "./ERC721Facet.sol";
 
 contract RealmGettersAndSettersFacet is Modifiers {
   event ParcelAccessRightSet(uint256 _realmId, uint256 _actionRight, uint256 _accessRight);
+  event ParcelWhitelistSet(uint256 _realmId, uint256 _actionRight, uint256 _whitelistId);
   event ResyncParcel(uint256 _realmId);
   event SetAltarId(uint256 _realmId, uint256 _altarId);
 
@@ -31,6 +32,30 @@ contract RealmGettersAndSettersFacet is Modifiers {
       require(LibRealm.isAccessRightValid(_actionRights[i], _accessRights[i]), "RealmGettersAndSettersFacet: Invalid access rights");
       s.accessRights[_realmIds[i]][_actionRights[i]] = _accessRights[i];
       emit ParcelAccessRightSet(_realmIds[i], _actionRights[i], _accessRights[i]);
+    }
+  }
+
+  function setParcelsWhitelists(
+    uint256[] calldata _realmIds,
+    uint256[] calldata _actionRights,
+    uint32[] calldata _whitelistIds
+  ) external gameActive {
+    require(
+      _realmIds.length == _actionRights.length && _whitelistIds.length == _actionRights.length,
+      "RealmGettersAndSettersFacet: Mismatched arrays"
+    );
+    uint256 _accessRight = 2;
+    for (uint256 i; i < _realmIds.length; i++) {
+      require(LibMeta.msgSender() == s.parcels[_realmIds[i]].owner, "RealmGettersAndSettersFacet: Only Parcel owner can call");
+      require(LibRealm.isAccessRightValid(_actionRights[i], _accessRight), "RealmGettersAndSettersFacet: Invalid access rights");
+      require(
+        LibMeta.msgSender() == AavegotchiDiamond(s.aavegotchiDiamond).whitelistOwner(_whitelistIds[i]),
+        "RealmGettersAndSettersFacet: Not whitelist owner"
+      );
+      s.accessRights[_realmIds[i]][_actionRights[i]] = _accessRight;
+      s.whitelistIds[_realmIds[i]][_actionRights[i]] = _whitelistIds[i];
+      emit ParcelAccessRightSet(_realmIds[i], _actionRights[i], _accessRight);
+      emit ParcelWhitelistSet(_realmIds[i], _actionRights[i], _whitelistIds[i]);
     }
   }
 

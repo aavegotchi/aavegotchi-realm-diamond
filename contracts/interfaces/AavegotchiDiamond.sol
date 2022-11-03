@@ -56,4 +56,13 @@ interface AavegotchiDiamond {
   function kinship(uint256 _tokenId) external view returns (uint256 score_);
 
   function realmInteract(uint256 _tokenId) external;
+
+  // whitelist functions
+  function createWhitelist(string calldata _name, address[] calldata _whitelistAddresses) external;
+
+  function whitelistOwner(uint32 _whitelistId) external view returns (address);
+
+  function isWhitelisted(uint32 _whitelistId, address _whitelistAddress) external view returns (uint256);
+
+  function getWhitelistsLength() external view returns (uint256);
 }

@@ -222,8 +222,10 @@ library LibRealm {
         require(_sender == parcelOwner, "LibRealm: Access Right - Only Owner");
       }
     }
-    // //whitelisted addresses
-    // else if (accessRight == 2) {}
+    //whitelisted addresses
+    else if (accessRight == 2) {
+      require(diamond.isWhitelisted(s.whitelistIds[_realmId][_actionRight], _sender) > 0, "LibRealm: Access Right - Only Whitelisted");
+    }
     // //blacklisted addresses
     // else if (accessRight == 3) {}
     //anyone
