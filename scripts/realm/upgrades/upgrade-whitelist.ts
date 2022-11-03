@@ -15,22 +15,24 @@ export async function upgradeRealm() {
     {
       facetName: "RealmGettersAndSettersFacet",
       addSelectors: [
+        `function setParcelsAccessRightWithWhitelists(uint256[] calldata _realmIds,uint256[] calldata _actionRights,uint256[] calldata _accessRights,uint32[] _whitelistIds) external`,
+      ],
+      removeSelectors: [
         `function setParcelsWhitelists(uint256[] calldata _realmIds, uint256[] calldata _actionRights, uint32[] calldata _whitelistIds) external`,
         `function getParcelsAccessRightsWhitelistIds(uint256[] calldata _parcelIds, uint256[] calldata _actionRights) external view returns (uint256[] memory output_)`,
       ],
-      removeSelectors: [],
     },
-    {
-      facetName: "AlchemicaFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    ,
-    {
-      facetName: "RealmFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
+    // {
+    //   facetName: "AlchemicaFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
+    // ,
+    // {
+    //   facetName: "RealmFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
