@@ -231,6 +231,15 @@ async function transferOwner() {
     throw Error("Incorrect network selected");
   }
 
+  const erc20 = await ethers.getContractAt("ERC20", c.ghst, signer);
+  const balance = await erc20.balanceOf(owner);
+  console.log("bal", ethers.utils.formatEther(balance));
+
+  console.log("Approving");
+  await erc20.approve(c.realmDiamond, ethers.constants.MaxUint256, {
+    gasPrice: gasPrice,
+  });
+
   //transfer ownership to multisig
   const alchemicaFacet = await ethers.getContractAt(
     "AlchemicaFacet",
@@ -238,14 +247,19 @@ async function transferOwner() {
     signer
   );
 
+  console.log("Transferring tokens");
   const tx = await alchemicaFacet.batchTransferTokens(
     tokens,
     amountsFinal,
-    addresses
+    addresses,
+    { gasPrice: gasPrice }
   );
 
   await tx.wait();
   console.log("Tokens transferred successfully!");
+
+  const afterBalance = await erc20.balanceOf(owner);
+  console.log("bal", ethers.utils.formatEther(afterBalance));
 }
 
 // We recommend this pattern to be able to use async/await everywhere
