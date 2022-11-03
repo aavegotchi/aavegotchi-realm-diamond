@@ -388,7 +388,7 @@ contract AlchemicaFacet is Modifiers {
       address token = _tokens[i];
       uint256 amount = _amounts[i];
       bool success;
-      try IERC20(token).transfer(_to, amount) {
+      try IERC20(token).transferFrom(msg.sender, _to, amount) {
         success;
       } catch {
         if (!success) {
