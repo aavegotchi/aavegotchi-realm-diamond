@@ -35,27 +35,30 @@ contract RealmGettersAndSettersFacet is Modifiers {
     }
   }
 
-  function setParcelsWhitelists(
+  function setParcelsAccessRightWithWhitelists(
     uint256[] calldata _realmIds,
     uint256[] calldata _actionRights,
+    uint256[] calldata _accessRights,
     uint32[] calldata _whitelistIds
   ) external gameActive {
     require(
-      _realmIds.length == _actionRights.length && _whitelistIds.length == _actionRights.length,
+      _realmIds.length == _actionRights.length && _whitelistIds.length == _actionRights.length && _whitelistIds.length == _actionRights.length,
       "RealmGettersAndSettersFacet: Mismatched arrays"
     );
-    uint256 _accessRight = 2;
+
+    require(_realmIds.length == _accessRights.length && _realmIds.length == _actionRights.length, "RealmGettersAndSettersFacet: Mismatched arrays");
     for (uint256 i; i < _realmIds.length; i++) {
       require(LibMeta.msgSender() == s.parcels[_realmIds[i]].owner, "RealmGettersAndSettersFacet: Only Parcel owner can call");
-      require(LibRealm.isAccessRightValid(_actionRights[i], _accessRight), "RealmGettersAndSettersFacet: Invalid access rights");
-      require(
-        LibMeta.msgSender() == AavegotchiDiamond(s.aavegotchiDiamond).whitelistOwner(_whitelistIds[i]),
-        "RealmGettersAndSettersFacet: Not whitelist owner"
-      );
-      s.accessRights[_realmIds[i]][_actionRights[i]] = _accessRight;
-      s.whitelistIds[_realmIds[i]][_actionRights[i]] = _whitelistIds[i];
-      emit ParcelAccessRightSet(_realmIds[i], _actionRights[i], _accessRight);
-      emit ParcelWhitelistSet(_realmIds[i], _actionRights[i], _whitelistIds[i]);
+      require(LibRealm.isAccessRightValid(_actionRights[i], _accessRights[i]), "RealmGettersAndSettersFacet: Invalid access rights");
+      s.accessRights[_realmIds[i]][_actionRights[i]] = _accessRights[i];
+
+      //for whitelist
+      if (_accessRights[i] == 2) {
+        s.whitelistIds[_realmIds[i]][_actionRights[i]] = _whitelistIds[i];
+        emit ParcelWhitelistSet(_realmIds[i], _actionRights[i], _whitelistIds[i]);
+      }
+
+      emit ParcelAccessRightSet(_realmIds[i], _actionRights[i], _accessRights[i]);
     }
   }
 
