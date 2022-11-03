@@ -143,6 +143,19 @@ contract RealmGettersAndSettersFacet is Modifiers {
     return output_;
   }
 
+  function getParcelsAccessRightsWhitelistIds(uint256[] calldata _parcelIds, uint256[] calldata _actionRights)
+    external
+    view
+    returns (uint256[] memory output_)
+  {
+    require(_parcelIds.length == _actionRights.length, "RealmGettersAndSettersFacet: Mismatched arrays");
+    output_ = new uint256[](_parcelIds.length);
+    for (uint256 i; i < _parcelIds.length; i++) {
+      output_[i] = s.whitelistIds[_parcelIds[i]][_actionRights[i]];
+    }
+    return output_;
+  }
+
   function getAltarId(uint256 _parcelId) external view returns (uint256) {
     return s.parcels[_parcelId].altarId;
   }
