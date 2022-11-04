@@ -15,6 +15,17 @@ struct TileType {
   string name;
 }
 
+struct TileTypeIO {
+  uint8 width;
+  uint8 height;
+  bool deprecated;
+  uint16 tileType;
+  uint32 craftTime; // in blocks
+  uint256[4] alchemicaCost; // [fud, fomo, alpha, kek]
+  string name;
+  uint256 deprecateTime;
+}
+
 struct QueueItem {
   //slot 1
   uint256 id;

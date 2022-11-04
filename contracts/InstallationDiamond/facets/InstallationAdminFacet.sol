@@ -26,6 +26,7 @@ contract InstallationAdminFacet is Modifiers {
   event SetInstallationUnequipType(uint256 _installationId, uint256 _unequipType);
   event EditInstallationUnequipType(uint256 _installationId);
   event UpgradeCancelled(uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _installationId);
+  event EditDeprecateTime(uint256 _installationId, uint256 _newDeprecatetime);
 
   /// @notice Allow the Diamond owner to deprecate an installation
   /// @dev Deprecated installations cannot be crafted by users
@@ -104,11 +105,17 @@ contract InstallationAdminFacet is Modifiers {
 
       emit AddInstallationType(s.installationTypes.length - 1);
       emit SetInstallationUnequipType(s.installationTypes.length - 1, _installationTypes[i].unequipType);
+
+      if(_installationTypes[i].deprecateTime > 0){
+        s.deprecateTime[s.installationTypes.length - 1] = _installationTypes[i].deprecateTime;
+        emit EditDeprecateTime(s.installationTypes.length - 1, _installationTypes[i].deprecateTime);
+      }
     }
   }
 
   function editDeprecateTime(uint256 _typeId, uint40 _deprecateTime) external onlyOwner {
     s.deprecateTime[_typeId] = _deprecateTime;
+    emit EditDeprecateTime(_typeId, _deprecateTime);
   }
 
   function editInstallationTypes(uint256[] calldata _ids, InstallationType[] calldata _installationTypes) external onlyOwner {
