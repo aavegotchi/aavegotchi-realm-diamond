@@ -50,7 +50,11 @@ export async function editInstallationTypes() {
 
   const altars = [];
   ids.forEach((id) => {
-    altars.push(installationTypes.find((val) => val.id.toString() === id));
+    altars.push(
+      outputInstallation(
+        installationTypes.find((val) => val.id.toString() === id)
+      )
+    );
   });
   if (ids.length !== altars.length) {
     throw new Error("Incorrect length");
@@ -60,9 +64,10 @@ export async function editInstallationTypes() {
   console.log("altars:", altars);
 
   console.log("Updating ");
-  await installationFacet.editInstallationTypes(ids, altars, {
+  const tx = await installationFacet.editInstallationTypes(ids, altars, {
     gasPrice: gasPrice,
   });
+  await tx.wait();
 
   const installationfacet = (await ethers.getContractAt(
     "InstallationFacet",
