@@ -1,7 +1,7 @@
 import { logErrorToJSON, writeToJSON } from "./request/output";
 import { fetchGraphQLData } from "./request/request";
 
-const mainApp = async () => {
+const fetchEvents = async () => {
   let startBlock = 26540483;
   let endBlock = 34327583;
 
@@ -33,7 +33,7 @@ const mainApp = async () => {
 };
 
 if (require.main === module) {
-  mainApp()
+  fetchEvents()
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);
