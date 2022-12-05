@@ -32,7 +32,7 @@ const removeFinalUpgrades = () => {
   
         let lastItem = filteredJsonData[filteredJsonData.length - 1];
   
-        // --- run this if the array is not empty. Like if there is a last item ----
+        // --- run this if the array is not empty. i.e if there is a last item ----
         if (lastItem) {
           removedJsonData.push(lastItem);
           filteredJsonData.pop();

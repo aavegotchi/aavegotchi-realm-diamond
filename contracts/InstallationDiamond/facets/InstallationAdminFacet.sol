@@ -215,6 +215,16 @@ contract InstallationAdminFacet is Modifiers {
     }
   }
 
+  //take hash calculations offchain
+  function deleteBuggedUpgrades(bytes32[] calldata _hashes) external onlyOwner {
+    for (uint256 i = 0; i < _hashes.length; i++) {
+      s.upgradeHashes[_hashes[i]] = 0;
+      unchecked {
+        ++i;
+      }
+    }
+  }
+
   function getUniqueHash(
     uint256 _parcelId,
     uint16 _x,
