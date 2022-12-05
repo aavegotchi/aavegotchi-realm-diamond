@@ -16,7 +16,7 @@ import { upgrade } from "../upgrades/upgrade-deleteHashes";
 //   // calculate hash for each element in the input array
 //   inputData.forEach((data) => {
 //     const hash = ethers.utils.solidityKeccak256(
-//       ["uint256", "uint256", "uint256", "uint256"],
+//       ["uint256", "uint16", "uint16", "uint256"],
 //       [data.parcel.id, data.x, data.y, data.installation.id]
 //     );
 
@@ -41,7 +41,7 @@ export async function fixUpgrades() {
     signer
   )) as InstallationAdminFacet;
 
-  if (network.name === "localhost") {
+  if (network.name === "hardhat") {
     installationFacet = await impersonate(
       await diamondOwner(c.installationDiamond, ethers),
       installationFacet,
@@ -63,7 +63,7 @@ export async function fixUpgrades() {
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-
+//getUpgrades();
 if (require.main === module) {
   fixUpgrades()
     .then(() => process.exit(0))
