@@ -230,6 +230,12 @@ contract AlchemicaFacet is Modifiers {
   ) external gameActive {
     AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
 
+    //gotchi CANNOT have active listing for lending
+    require(
+      !diamond.isAavegotchiListed(uint32(_gotchiId)) || diamond.isAavegotchiLent(uint32(_gotchiId)),
+      "AavegotchiDiamond: Gotchi CANNOT have active listing for lending"
+    );
+
     //0 - alchemical channeling
     LibRealm.verifyAccessRight(_realmId, _gotchiId, 0, LibMeta.msgSender());
 

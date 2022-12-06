@@ -65,4 +65,8 @@ interface AavegotchiDiamond {
   function isWhitelisted(uint32 _whitelistId, address _whitelistAddress) external view returns (uint256);
 
   function getWhitelistsLength() external view returns (uint256);
+
+  function isAavegotchiListed(uint32 _erc721TokenId) external view returns (bool);
+
+  function getGotchiLendingsLength() external view returns (uint256);
 }
