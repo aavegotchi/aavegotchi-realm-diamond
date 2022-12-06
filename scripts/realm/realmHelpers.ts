@@ -26,6 +26,9 @@ export function outputInstallation(
     installation.harvestRate.toString()
   );
 
+  //Altar spilloverRate is parsed in 2 units, reservoirs are parsed in 4
+  const isAltar = installation.id <= 18 ? true : false;
+
   console.log("spill rate:", installation.spillRate.toString());
 
   let output: InstallationTypeOutput = {
@@ -44,7 +47,10 @@ export function outputInstallation(
     harvestRate: harvestRate,
     capacity: ethers.utils.parseEther(installation.capacity.toString()),
     spillRadius: installation.spillRadius,
-    spillRate: ethers.utils.parseUnits(installation.spillRate.toString(), 4),
+    spillRate: ethers.utils.parseUnits(
+      installation.spillRate.toString(),
+      isAltar ? 2 : 4
+    ),
     upgradeQueueBoost: installation.upgradeQueueBoost,
     craftTime: installation.craftTime,
     nextLevelId: installation.nextLevelId,
