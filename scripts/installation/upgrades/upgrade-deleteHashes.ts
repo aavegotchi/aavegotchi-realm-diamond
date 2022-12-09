@@ -13,9 +13,11 @@ export async function upgrade() {
     {
       facetName: "InstallationAdminFacet",
       addSelectors: [
+        `function deleteBuggedUpgradesWithHashes(bytes32[] calldata _hashes) external`,
+      ],
+      removeSelectors: [
         `function deleteBuggedUpgrades(bytes32[] calldata _hashes) external`,
       ],
-      removeSelectors: [],
     },
   ];
 

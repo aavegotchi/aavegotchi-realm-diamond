@@ -1,12 +1,11 @@
 import { ethers, network } from "hardhat";
-import { InstallationAdminFacet } from "../../../typechain";
+import { InstallationAdminFacet } from "../../../typechain/InstallationAdminFacet";
 
 import { diamondOwner, impersonate } from "../helperFunctions";
-import { varsForNetwork } from "../../../constants";
+import { gasPrice, varsForNetwork } from "../../../constants";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 const inputData = require("./finalizedCleanedEvents.json");
 const inputjson = require("./finalizedHashes.json");
-import { upgrade } from "../upgrades/upgrade-deleteHashes";
 
 // function getUpgrades() {
 //   const hashFile = "scripts/installation/fetch/finalizedHashes.json";
@@ -30,7 +29,7 @@ import { upgrade } from "../upgrades/upgrade-deleteHashes";
 // }
 
 export async function fixUpgrades() {
-  await upgrade();
+  // await upgrade();
   const c = await varsForNetwork(ethers);
 
   let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
@@ -52,10 +51,17 @@ export async function fixUpgrades() {
   const batchSize = 900;
   for (let i = 0; i < inputjson.length; i += batchSize) {
     const batch = inputjson.slice(i, i + batchSize);
+
+    console.log("running batch", i);
     try {
-      await installationFacet["deleteBuggedUpgrades(bytes32[])"](batch);
+      const tx = await installationFacet.deleteBuggedUpgradesWithHashes(batch, {
+        gasPrice: gasPrice,
+      });
+      await tx.wait();
+
       console.log("successfully executed batch", i / batchSize);
     } catch (error) {
+      console.log(error);
       console.log("error occured at batch", i / batchSize);
     }
   }
