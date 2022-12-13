@@ -1,17 +1,21 @@
 //@ts-ignore
 
 import { run, ethers, network } from "hardhat";
-import { maticInstallationDiamondAddress } from "../../../constants";
+import { varsForNetwork } from "../../../constants";
 import { InstallationFacet } from "../../../typechain";
 
 async function addInstallations() {
+  const c = await varsForNetwork(ethers);
+
   const installationFacet = (await ethers.getContractAt(
     "InstallationFacet",
-    maticInstallationDiamondAddress
+    c.installationDiamond
   )) as InstallationFacet;
 
   const types = await installationFacet.getInstallationTypes([]);
   for (let index = 0; index < types.length; index++) {
+    console.log("installation:", types[index].name);
+
     const unequip = await installationFacet.getInstallationUnequipType(index);
     console.log("unequip:", index, unequip);
   }

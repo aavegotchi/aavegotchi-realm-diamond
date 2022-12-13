@@ -19,6 +19,7 @@ export async function upgradeRealm() {
       ],
       removeSelectors: [
         `function setParcelsWhitelists(uint256[] calldata _realmIds, uint256[] calldata _actionRights, uint32[] calldata _whitelistIds) external`,
+        `function getParcelsAccessRightsWhitelistIds(uint256[] calldata _parcelIds, uint256[] calldata _actionRights) external view returns (uint256[] memory output_)`,
       ],
     },
     // {

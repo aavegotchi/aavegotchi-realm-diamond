@@ -63,6 +63,7 @@ struct InstallationTypeIO {
   uint256[] prerequisites; //[0,0] altar level, lodge level
   string name;
   uint256 unequipType;
+  uint256 deprecateTime;
 }
 
 struct InstallationAppStorage {
