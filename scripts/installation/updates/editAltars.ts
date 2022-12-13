@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat";
-import { installationTypes } from "../../../data/installations/graandFountain";
+import { installationTypes } from "../../../data/installations/installationTypes";
 import { InstallationAdminFacet, InstallationFacet } from "../../../typechain";
 
 import { LedgerSigner } from "@anders-t/ethers-ledger";
@@ -27,34 +27,54 @@ export async function editInstallationTypes() {
     );
   }
 
-  const altars = installationTypes.map((val) => outputInstallation(val));
+  const ids = [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+  ];
 
-  const ids = ["55"];
-
+  const altars = [];
+  ids.forEach((id) => {
+    altars.push(
+      outputInstallation(
+        installationTypes.find((val) => val.id.toString() === id)
+      )
+    );
+  });
   if (ids.length !== altars.length) {
     throw new Error("Incorrect length");
   }
 
-  // const tx = await installationFacet.editInstallationUnequipTypes(
-  //   ["55"],
-  //   ["1"],
-  //   {
-  //     gasPrice: gasPrice,
-  //   }
-  // );
-  // await tx.wait();
+  console.log("ids:", ids);
+  console.log("altars:", altars);
 
   console.log("Updating ");
-  await installationFacet.editInstallationTypes(ids, altars, {
+  const tx = await installationFacet.editInstallationTypes(ids, altars, {
     gasPrice: gasPrice,
   });
+  await tx.wait();
 
   const installationfacet = (await ethers.getContractAt(
     "InstallationFacet",
     c.installationDiamond
   )) as InstallationFacet;
 
-  const insts = await installationfacet.getInstallationTypes([55]);
+  const insts = await installationfacet.getInstallationTypes(ids);
   console.log("insts:", insts);
 }
 

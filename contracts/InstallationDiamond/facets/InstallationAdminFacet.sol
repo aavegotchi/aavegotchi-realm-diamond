@@ -106,7 +106,7 @@ contract InstallationAdminFacet is Modifiers {
       emit AddInstallationType(s.installationTypes.length - 1);
       emit SetInstallationUnequipType(s.installationTypes.length - 1, _installationTypes[i].unequipType);
 
-      if(_installationTypes[i].deprecateTime > 0){
+      if (_installationTypes[i].deprecateTime > 0) {
         s.deprecateTime[s.installationTypes.length - 1] = _installationTypes[i].deprecateTime;
         emit EditDeprecateTime(s.installationTypes.length - 1, _installationTypes[i].deprecateTime);
       }
@@ -194,7 +194,45 @@ contract InstallationAdminFacet is Modifiers {
   }
 
   ///@notice Used if a parcel has an upgrade that must be deleted.
-  function deleteBuggedUpgrades(
+  // function deleteBuggedUpgrades(
+  //   uint256 _parcelId,
+  //   uint16 _coordinateX,
+  //   uint16 _coordinateY,
+  //   uint256 _installationId
+  // ) external onlyOwner {
+  //   // check unique hash
+  //   bytes32 uniqueHash = keccak256(abi.encodePacked(_parcelId, _coordinateX, _coordinateY, _installationId));
+  //   s.upgradeHashes[uniqueHash] = 0;
+  // }
+
+  struct BuggedUpgradeInput {
+    uint256 _parcelId;
+    uint16 _coordinateX;
+    uint16 _coordinateY;
+    uint256 _installationId;
+  }
+
+  ///@notice Used if a parcel has an upgrade that must be deleted.
+  function deleteBuggedUpgrades(BuggedUpgradeInput[] memory _upgrades) external onlyOwner {
+    for (uint256 i = 0; i < _upgrades.length; i++) {
+      BuggedUpgradeInput memory u = _upgrades[i];
+      // check unique hash
+      bytes32 uniqueHash = keccak256(abi.encodePacked(u._parcelId, u._coordinateX, u._coordinateY, u._installationId));
+      s.upgradeHashes[uniqueHash] = 0;
+    }
+  }
+
+  //take hash calculations offchain
+  function deleteBuggedUpgradesWithHashes(bytes32[] calldata _hashes) external onlyOwner {
+    for (uint256 i = 0; i < _hashes.length; i++) {
+      s.upgradeHashes[_hashes[i]] = 0;
+      unchecked {
+        ++i;
+      }
+    }
+  }
+
+  function getUniqueHash(
     uint256 _parcelId,
     uint256 _coordinateX,
     uint256 _coordinateY,

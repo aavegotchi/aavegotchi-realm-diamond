@@ -10,7 +10,6 @@ import {
   RealmFacet,
   TileFacet,
 } from "./typechain";
-import { Contract } from "ethers";
 
 export type Domain = {
   name: string;
@@ -109,6 +108,7 @@ export interface InstallationTypeInput {
   prerequisites: number[];
   name: string;
   unequipType: number;
+  deprecateTime?: number;
 }
 
 export interface TileTypeInput {
@@ -147,6 +147,7 @@ export interface InstallationTypeOutput {
   prerequisites: BigNumberish[];
   name: string;
   unequipType: number;
+  deprecateTime: number;
 }
 
 export interface TileTypeOutput {

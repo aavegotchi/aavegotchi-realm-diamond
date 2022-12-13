@@ -68,7 +68,7 @@ library LibBounceGate {
 
     if (_durationExtensionInMinutes > 0) {
       uint256 gltr = _getGltrAmount(_durationExtensionInMinutes);
-      require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), gltr));
+      require(IERC20(s.gltrAddress).transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, gltr));
       p.endTime += (_durationExtensionInMinutes * 60);
     }
     uint256 addedPriority = _calculatePriorityAndSettleAlchemica(_alchemicaSpent);
@@ -156,7 +156,7 @@ library LibBounceGate {
     //calculate gltr needed for duration
     uint256 total = _getGltrAmount(_durationInMinutes);
 
-    require(IERC20(s.gltrAddress).transferFrom(msg.sender, address(this), total));
+    require(IERC20(s.gltrAddress).transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, total));
     endTime_ = uint64(_startTime + (_durationInMinutes * 60));
   }
 
@@ -172,7 +172,7 @@ library LibBounceGate {
       if (amount >= 1e18) {
         amount /= 1e18;
         _startingPriority += uint120(amount * _getAlchemicaRankings()[i]);
-        require(IERC20(s.alchemicaAddresses[i]).transferFrom(msg.sender, address(this), _alchemicaSpent[i]));
+        require(IERC20(s.alchemicaAddresses[i]).transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, _alchemicaSpent[i]));
       }
     }
     _startingPriority *= 1000;
