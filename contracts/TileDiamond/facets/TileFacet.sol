@@ -26,6 +26,8 @@ contract TileFacet is Modifiers {
 
   event AddressesUpdated(address _aavegotchiDiamond, address _realmDiamond, address _gltr);
 
+  event EditDeprecateTime(uint256 _tileId, uint256 _newDeprecatetime);
+
   /***********************************|
    |             Read Functions         |
    |__________________________________*/
@@ -409,7 +411,7 @@ contract TileFacet is Modifiers {
       );
       string memory uri = "https://app.aavegotchi.com/metadata/tile/";
       emit LibERC1155Tile.URI(LibStrings.strWithUint(uri, i), i);
-      if(_tileTypes[i].deprecateTime > 0){
+      if (_tileTypes[i].deprecateTime > 0) {
         s.deprecateTime[s.tileTypes.length - 1] = _tileTypes[i].deprecateTime;
         emit EditDeprecateTime(s.tileTypes.length - 1, _tileTypes[i].deprecateTime);
       }

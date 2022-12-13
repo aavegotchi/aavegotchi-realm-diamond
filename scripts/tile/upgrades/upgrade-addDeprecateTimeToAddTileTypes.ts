@@ -1,13 +1,11 @@
-import { run } from "hardhat";
-import { maticVars } from "../../../constants";
+import { run, ethers } from "hardhat";
+import { maticVars, varsForNetwork } from "../../../constants";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
-import {
-  TileFacet,
-} from "../../../typechain";
+import { TileFacet } from "../../../typechain";
 const diamondUpgrader = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
 
 export async function upgrade() {
@@ -23,11 +21,13 @@ export async function upgrade() {
     },
   ];
 
+  const vars = await varsForNetwork(ethers);
+
   const joined = convertFacetAndSelectorsToString(facets);
 
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
-    diamondAddress: maticVars.tileDiamond,
+    diamondAddress: vars.tileDiamond,
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,
