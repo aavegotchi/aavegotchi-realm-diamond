@@ -216,8 +216,8 @@ contract InstallationAdminFacet is Modifiers {
   }
 
   //take hash calculations offchain
-  function deleteBuggedUpgradesWithHashes(bytes32[] calldata _hashes) external onlyOwner {
-    for (uint256 i = 0; i < _hashes.length; i++) {
+  function deleteBuggedUpgrades(bytes32[] calldata _hashes) external onlyOwner {
+    for (uint256 i = 0; i < _hashes.length; ) {
       s.upgradeHashes[_hashes[i]] = 0;
       unchecked {
         ++i;
