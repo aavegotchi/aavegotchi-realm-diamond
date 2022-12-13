@@ -27,6 +27,8 @@ contract AlchemicaFacet is Modifiers {
 
   event SurveyingRoundProgressed(uint256 indexed _newRound);
 
+  event TransferTokensToGotchi(address indexed _sender, uint256 indexed _gotchiId, address _tokenAddresses, uint256 _amount);
+
   error ERC20TransferFailed(string _tokenName);
 
   function isSurveying(uint256 _realmId) external view returns (bool) {
@@ -230,6 +232,12 @@ contract AlchemicaFacet is Modifiers {
   ) external gameActive {
     AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
 
+    //gotchi CANNOT have active listing for lending
+    require(
+      !diamond.isAavegotchiListed(uint32(_gotchiId)) || diamond.isAavegotchiLent(uint32(_gotchiId)),
+      "AavegotchiDiamond: Gotchi CANNOT have active listing for lending"
+    );
+
     //0 - alchemical channeling
     LibRealm.verifyAccessRight(_realmId, _gotchiId, 0, LibMeta.msgSender());
 
@@ -345,6 +353,7 @@ contract AlchemicaFacet is Modifiers {
         uint256 amount = _amounts[i][j];
         if (amount > 0) {
           IERC20(_tokenAddresses[j]).transferFrom(msg.sender, LibAlchemica.alchemicaRecipient(_gotchiIds[i]), amount);
+          emit TransferTokensToGotchi(msg.sender, _gotchiIds[i], _tokenAddresses[j], amount);
         }
       }
     }

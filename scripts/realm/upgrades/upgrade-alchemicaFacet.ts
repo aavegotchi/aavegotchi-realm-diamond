@@ -1,4 +1,4 @@
-import { ethers, run } from "hardhat";
+import { run, ethers } from "hardhat";
 import { varsForNetwork } from "../../../constants";
 import {
   convertFacetAndSelectorsToString,
@@ -6,29 +6,27 @@ import {
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
 
-export async function upgrade() {
-  const diamondUpgrader = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
+export async function upgradeRealm() {
+  const c = await varsForNetwork(ethers);
+
+  const diamondUpgrader = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "InstallationAdminFacet",
-      addSelectors: [
-        `function deleteBuggedUpgradesWithHashes(bytes32[] calldata _hashes) external`,
-      ],
-      removeSelectors: [
-        `function deleteBuggedUpgrades(bytes32[] calldata _hashes) external`,
-      ],
+      facetName: "AlchemicaFacet",
+      addSelectors: [],
+      removeSelectors: [],
     },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
 
-  const c = await varsForNetwork(ethers);
-
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
-    diamondAddress: c.installationDiamond,
+    diamondAddress: c.realmDiamond,
     facetsAndAddSelectors: joined,
+    initAddress: ethers.constants.AddressZero,
+    initCalldata: "0x",
     useLedger: true,
     useMultisig: false,
   };
@@ -37,7 +35,7 @@ export async function upgrade() {
 }
 
 if (require.main === module) {
-  upgrade()
+  upgradeRealm()
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

@@ -64,7 +64,7 @@ export const maticVars: Constants = {
   fomo: "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8",
   alpha: "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2",
   kek: "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C",
-  gltr: "",
+  gltr: "0x3801c3b3b5c98f88a9c9005966aa96aa440b9afc",
   ghst: "0x385eeac5cb85a38a9a07a70c73e0a3271cfb54a7",
 };
 
