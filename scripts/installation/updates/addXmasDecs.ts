@@ -8,7 +8,11 @@ import { diamondOwner, gasPrice, impersonate } from "../helperFunctions";
 import { varsForNetwork } from "../../../constants";
 
 export async function addDecorations() {
-  const signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
+  let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
+
+  if (network.name === "mumbai") {
+    signer = await ethers.getSigners()[0];
+  }
 
   const c = await varsForNetwork(ethers);
 
