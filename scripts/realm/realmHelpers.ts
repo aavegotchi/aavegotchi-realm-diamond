@@ -57,6 +57,7 @@ export function outputInstallation(
     prerequisites: installation.prerequisites,
     name: installation.name,
     unequipType: installation.unequipType,
+    deprecateTime: installation.deprecateTime ? installation.deprecateTime : 0,
   };
 
   return output;
