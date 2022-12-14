@@ -37,9 +37,9 @@ export async function addDecorations() {
     outputInstallation(val)
   );
 
-  console.log("Adding installation types!");
+  console.log("Adding installation types!", formattedInstallations);
 
-  console.log("types:", installationTypes);
+  // console.log("types:", installationTypes);
   let tx = await installationAdminFacet.addInstallationTypes(
     formattedInstallations,
     {
