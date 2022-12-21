@@ -42,7 +42,7 @@ export async function mintPaartnerParcels() {
     "28585",
     "28203",
     "28413",
-    "28264",
+    "28624",
     "28116",
     "28323",
     "28526",
@@ -61,7 +61,7 @@ export async function mintPaartnerParcels() {
     "25361",
   ];
 
-  const to = "";
+  const to = "0x6fb7e0AAFBa16396Ad6c1046027717bcA25F821f";
 
   const mintArgs: MintParcelArgs[] = ids.map((val) => {
     return {
