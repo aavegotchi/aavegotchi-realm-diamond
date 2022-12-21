@@ -8,7 +8,7 @@ const path = "scripts/xmasInstallationEvents.json";
 const client = new GraphQLClient(graphqlClientUrl);
 
 const startBlock = "26540483";
-const endBlock = "36922476";
+const endBlock = "36941563";
 
 const getCraftEvents = () => {
   return `{
