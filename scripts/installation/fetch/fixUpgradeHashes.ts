@@ -40,7 +40,7 @@ export async function fixUpgrades() {
     signer
   )) as InstallationAdminFacet;
 
-  if (network.name === "hardhat") {
+  if (["hardhat", "localhost"].includes(network.name)) {
     installationFacet = await impersonate(
       await diamondOwner(c.installationDiamond, ethers),
       installationFacet,

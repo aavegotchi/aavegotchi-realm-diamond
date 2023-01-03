@@ -135,11 +135,7 @@ contract InstallationAdminFacet is Modifiers {
   /// @param _installationIds An array containing the identifiers of the installationTypes to mint
   /// @param _amounts An array containing the amounts of the installationTypes to mint
   /// @param _toAddress Address to mint installations
-  function mintInstallations(
-    uint16[] calldata _installationIds,
-    uint16[] calldata _amounts,
-    address _toAddress
-  ) external onlyOwner {
+  function mintInstallations(uint16[] calldata _installationIds, uint16[] calldata _amounts, address _toAddress) external onlyOwner {
     require(_installationIds.length == _amounts.length, "InstallationFacet: Mismatched arrays");
     for (uint256 i = 0; i < _installationIds.length; i++) {
       uint256 installationId = _installationIds[i];
@@ -216,7 +212,7 @@ contract InstallationAdminFacet is Modifiers {
   }
 
   //take hash calculations offchain
-  function deleteBuggedUpgrades(bytes32[] calldata _hashes) external onlyOwner {
+  function deleteBuggedUpgradesWithHashes(bytes32[] calldata _hashes) external onlyOwner {
     for (uint256 i = 0; i < _hashes.length; ) {
       s.upgradeHashes[_hashes[i]] = 0;
       unchecked {
@@ -225,12 +221,7 @@ contract InstallationAdminFacet is Modifiers {
     }
   }
 
-  function getUniqueHash(
-    uint256 _parcelId,
-    uint16 _x,
-    uint16 _y,
-    uint256 _installationId
-  ) external view returns (uint256) {
+  function getUniqueHash(uint256 _parcelId, uint16 _x, uint16 _y, uint256 _installationId) external view returns (uint256) {
     return s.upgradeHashes[keccak256(abi.encodePacked(_parcelId, _x, _y, _installationId))];
   }
 }
