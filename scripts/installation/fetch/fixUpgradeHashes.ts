@@ -52,7 +52,7 @@ export async function fixUpgrades() {
   for (let i = 0; i < inputjson.length; i += batchSize) {
     const batch = inputjson.slice(i, i + batchSize);
 
-    console.log("running batch", i);
+    console.log("running batch", i / batchSize);
     try {
       const tx = await installationFacet.deleteBuggedUpgradesWithHashes(batch, {
         gasPrice: gasPrice,
