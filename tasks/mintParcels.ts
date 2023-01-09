@@ -34,7 +34,10 @@ task("mintParcels", "Mints parcels")
         tokenIds
       );
 
-      console.log("parcels:", parcels);
+      parcels.forEach((parcel, index) => {
+        console.log("token id:", tokenIds[index]);
+        console.log("parcels:", parcel);
+      });
 
       const ownershipFacet = (await hre.ethers.getContractAt(
         "OwnershipFacet",

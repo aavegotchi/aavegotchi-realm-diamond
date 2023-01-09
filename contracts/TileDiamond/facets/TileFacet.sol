@@ -6,7 +6,7 @@ import {LibERC1155Tile} from "../../libraries/LibERC1155Tile.sol";
 import {LibItems} from "../../libraries/LibItems.sol";
 import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
 import {LibERC998Tile, ItemTypeIO} from "../../libraries/LibERC998Tile.sol";
-import {LibAppStorageTile, TileType, QueueItem, Modifiers} from "../../libraries/AppStorageTile.sol";
+import {LibAppStorageTile, TileType, TileTypeIO, QueueItem, Modifiers} from "../../libraries/AppStorageTile.sol";
 import {LibStrings} from "../../libraries/LibStrings.sol";
 import {LibMeta} from "../../libraries/LibMeta.sol";
 import {LibERC1155Tile} from "../../libraries/LibERC1155Tile.sol";
@@ -398,7 +398,7 @@ contract TileFacet is Modifiers {
 
   /// @notice Allow the diamond owner to add a tile type
   /// @param _tileTypes An array of structs, each struct representing each tileType to be added
-  function addTileTypes(TileType[] calldata _tileTypes) external onlyOwner {
+  function addTileTypes(TileTypeIO[] calldata _tileTypes) external onlyOwner {
     for (uint256 i = 0; i < _tileTypes.length; i++) {
       s.tileTypes.push(
         TileType(
@@ -413,6 +413,10 @@ contract TileFacet is Modifiers {
       );
       string memory uri = "https://app.aavegotchi.com/metadata/tile/";
       emit LibERC1155Tile.URI(LibStrings.strWithUint(uri, i), i);
+      if(_tileTypes[i].deprecateTime > 0){
+        s.deprecateTime[s.tileTypes.length - 1] = _tileTypes[i].deprecateTime;
+        emit EditDeprecateTime(s.tileTypes.length - 1, _tileTypes[i].deprecateTime);
+      }
     }
   }
 
