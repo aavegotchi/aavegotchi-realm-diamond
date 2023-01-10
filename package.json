@@ -44,6 +44,7 @@
     "@types/node": "^16.6.1",
     "buidler-contract-sizer": "^1.0.2",
     "chalk": "^4.1.1",
+    "defender-relay-client": "^1.37.0",
     "ethers": "^5.6.2",
     "hardhat-gas-reporter": "^1.0.8",
     "moment": "^2.29.1",

@@ -4,35 +4,16 @@ import { InstallationAdminFacet } from "../../../typechain/InstallationAdminFace
 import { diamondOwner, impersonate } from "../helperFunctions";
 import { gasPrice, varsForNetwork } from "../../../constants";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
-const inputData = require("./finalizedCleanedEvents.json");
+import { upgrade } from "../upgrades/upgrade-deleteHashes";
+import { getRelayerSigner } from "../../helperFunctions";
 const inputjson = require("./finalizedHashes.json");
 
-// function getUpgrades() {
-//   const hashFile = "scripts/installation/fetch/finalizedHashes.json";
-//   // output array to hold calculated hashes
-//   const output = [];
-
-//   // calculate hash for each element in the input array
-//   inputData.forEach((data) => {
-//     const hash = ethers.utils.solidityKeccak256(
-//       ["uint256", "uint16", "uint16", "uint256"],
-//       [data.parcel.id, data.x, data.y, data.installation.id]
-//     );
-
-//     // add calculated hash to the output array
-//     output.push(hash);
-//   });
-
-//   // write the output array to an output file
-//   const fs = require("fs");
-//   fs.writeFileSync(hashFile, JSON.stringify(output, null, 2));
-// }
-
 export async function fixUpgrades() {
-  // await upgrade();
+  await upgrade();
   const c = await varsForNetwork(ethers);
 
-  let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
+  //let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
+  let signer = getRelayerSigner();
 
   let installationFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
