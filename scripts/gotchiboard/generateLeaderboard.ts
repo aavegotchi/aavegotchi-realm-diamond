@@ -197,10 +197,6 @@ const transform = (owner, alchemicaCost, modifier, quantity = 1) => {
 
   const totalSpend = (fudSpent + fomoSpent + alphaSpent + kekSpent) * quantity;
   const totalSpendWMultiplier = totalSpend * modifier;
-
-  if (owner == "0x58c78b5d1875bdc6448851d3a3d25904cbb4b16e") {
-    console.log(totalSpend, totalSpendWMultiplier);
-  }
   return { owner, totalSpend, totalSpendWMultiplier };
 };
 
