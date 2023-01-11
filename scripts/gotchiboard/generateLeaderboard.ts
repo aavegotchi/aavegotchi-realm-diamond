@@ -1,8 +1,20 @@
-import competitions, { Competition } from "./competitions";
-
+const competitions = require("./competitions.json");
 const axios = require("axios").default;
 const ethers = require("ethers");
 const { DateTime } = require("luxon");
+
+export interface Competition {
+  timeFrom: number;
+  timePeriod: String;
+  dayModifiers: Array<number>;
+  ghstPayouts: Array<number>;
+}
+
+interface LeaderboardEntry {
+  account: string;
+  total: number;
+  ghstReward: number;
+}
 
 interface InstallationType {
   id: String;
@@ -208,7 +220,10 @@ function getTimeTo(timeFrom, period) {
   return timeFrom;
 }
 
-export async function generateLeaderboard(timeFrom, timePeriod) {
+export async function generateLeaderboard(
+  timeFrom: number,
+  timePeriod: string
+): Promise<Array<LeaderboardEntry>> {
   let competition = getCompetition(timeFrom, timePeriod);
   let timeTo = getTimeTo(timeFrom, timePeriod);
 
