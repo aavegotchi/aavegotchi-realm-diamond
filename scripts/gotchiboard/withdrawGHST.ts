@@ -32,6 +32,9 @@ async function main() {
   let interval = "week";
   const leaderboard = await generateLeaderboard(timeFrom, interval);
   let winners = leaderboard.filter((e) => e.ghstReward > 0);
+  if (winners.length == 0) {
+    return;
+  }
 
   let allTokens = winners.map((e) => [maticVars.ghst]);
   let allAmounts = winners.map((e) => [
