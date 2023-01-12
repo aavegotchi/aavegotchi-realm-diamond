@@ -1,5 +1,4 @@
-/* global ethers hre */
-/* eslint-disable  prefer-const */
+import * as hre from "hardhat";
 
 import { ethers } from "hardhat";
 import { maticVars } from "../../constants";
@@ -8,27 +7,31 @@ import { generateLeaderboard } from "./generateLeaderboard";
 const { LedgerSigner } = require("@ethersproject/hardware-wallets");
 
 async function main() {
-  const alchemicaFacet = await (
-    await ethers.getContractAt("AlchemicaFacet", maticVars.aavegotchiDiamond)
-  ).gameManager();
-  console.log(alchemicaFacet);
+  const owner = "0x26bac3547908e923b641c186000585e8ce98f4db";
   let signer;
   const testing = ["hardhat", "localhost"].includes(hre.network.name);
+
   if (testing) {
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: [alchemicaFacet],
+      params: [owner],
     });
-    signer = await ethers.provider.getSigner(alchemicaFacet);
+    signer = await hre.ethers.getSigner(owner);
   } else if (hre.network.name === "matic") {
     signer = new LedgerSigner(ethers.provider, "hid", "m/44'/60'/2'/0/0");
   } else {
     throw Error("Incorrect network selected");
   }
 
+  const alchemicaFacet = await ethers.getContractAt(
+    "AlchemicaFacet",
+    maticVars.realmDiamond,
+    signer
+  );
+
   // get Leaderboard with ghst to withdraw
   // set time from and interval
-  let timeFrom = 123123;
+  let timeFrom = 1672617600;
   let interval = "week";
   const leaderboard = await generateLeaderboard(timeFrom, interval);
   let winners = leaderboard.filter((e) => e.ghstReward > 0);
