@@ -30,7 +30,7 @@ export async function fixUpgrades() {
     );
   }
   const batchSize = 900;
-  for (let i = 2; i < inputjson.length; i += batchSize) {
+  for (let i = 0; i < inputjson.length; i += batchSize) {
     const batch = inputjson.slice(i, i + batchSize);
 
     console.log("running batch", i / batchSize);
