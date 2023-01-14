@@ -2,32 +2,20 @@ import { logErrorToJSON, writeToJSON } from "./request/output";
 import { fetchGraphQLData } from "./request/request";
 
 const fetchEvents = async () => {
-  let startBlock = 26540483;
-  let endBlock = 34327583;
-
-  let dataSize = 1000;
+  const startBlock = 28520483; //26540483, no hashes exist until 28520483;
+  const endBlock = 34327583;
 
   let startTime = new Date().getTime();
 
-  let { failedPages, results } = await fetchGraphQLData(
-    startBlock,
-    endBlock,
-    dataSize
-  );
-
-  let resultsToSet = new Set(results);
-  let removedDuplicateData = [...resultsToSet];
+  let { results } = await fetchGraphQLData(startBlock, endBlock);
 
   // --- write to json file here ---
-  writeToJSON(removedDuplicateData);
-
-  logErrorToJSON(failedPages);
+  writeToJSON(results);
 
   let endTime = new Date().getTime();
 
   console.log("STATISTICS:", {
-    failedPages,
-    totalSize: removedDuplicateData?.length,
+    totalSize: results?.length,
     executionTime: (endTime - startTime) / 1000,
   });
 };

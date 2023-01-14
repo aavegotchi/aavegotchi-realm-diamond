@@ -21,3 +21,4 @@ data/allInstallations.json
 data/allTiles.json
 scripts/team/*
 package-lock.json
+scripts/alchemica/misc/send.ts
