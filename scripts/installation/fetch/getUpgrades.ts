@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 
-const inputData = require("./finalizedEvents.json");
+const inputData = require("./finalizedCleanedEvents.json");
 
 function getUpgrades() {
   const hashFile = "scripts/installation/fetch/finalizedHashes.json";

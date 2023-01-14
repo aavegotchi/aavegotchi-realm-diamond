@@ -31,8 +31,6 @@ export async function fixUpgrades() {
 
   console.log("number of events:", inputjson.length);
 
-  return;
-
   const batchSize = 900;
   for (let i = 0; i < inputjson.length; i += batchSize) {
     const batch = inputjson.slice(i, i + batchSize);
