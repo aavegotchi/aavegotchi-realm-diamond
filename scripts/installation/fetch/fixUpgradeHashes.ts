@@ -4,7 +4,7 @@ import { InstallationAdminFacet } from "../../../typechain/InstallationAdminFace
 import { impersonate } from "../helperFunctions";
 import { varsForNetwork } from "../../../constants";
 import { getRelayerSigner } from "../../helperFunctions";
-const inputjson = require("./finalizedHashes.json");
+const inputjson = require("./rogueHashes.json");
 
 export async function fixUpgrades() {
   // await upgrade();
