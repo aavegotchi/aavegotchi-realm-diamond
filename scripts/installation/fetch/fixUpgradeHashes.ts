@@ -3,16 +3,14 @@ import { InstallationAdminFacet } from "../../../typechain/InstallationAdminFace
 
 import { diamondOwner, impersonate } from "../helperFunctions";
 import { gasPrice, varsForNetwork } from "../../../constants";
-import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { upgrade } from "../upgrades/upgrade-deleteHashes";
 import { getRelayerSigner } from "../../helperFunctions";
 const inputjson = require("./finalizedHashes.json");
 
 export async function fixUpgrades() {
-  await upgrade();
+  // await upgrade();
   const c = await varsForNetwork(ethers);
 
-  //let signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
   let signer = getRelayerSigner();
 
   let installationFacet = (await ethers.getContractAt(
@@ -21,26 +19,26 @@ export async function fixUpgrades() {
     signer
   )) as InstallationAdminFacet;
 
+  console.log("relayer:", c.defenderRelayer);
+
   if (["hardhat", "localhost"].includes(network.name)) {
     installationFacet = await impersonate(
-      await diamondOwner(c.installationDiamond, ethers),
+      c.defenderRelayer,
       installationFacet,
       ethers,
       network
     );
   }
   const batchSize = 900;
-  for (let i = 0; i < inputjson.length; i += batchSize) {
+  for (let i = 2; i < inputjson.length; i += batchSize) {
     const batch = inputjson.slice(i, i + batchSize);
 
     console.log("running batch", i / batchSize);
     try {
-      const tx = await installationFacet.deleteBuggedUpgradesWithHashes(batch, {
-        gasPrice: gasPrice,
-      });
-      await tx.wait();
+      await installationFacet.deleteBuggedUpgradesWithHashes(batch);
+      // await tx.wait();
 
-      console.log("successfully executed batch", i / batchSize);
+      console.log("successfully relayed batch", i / batchSize);
     } catch (error) {
       console.log(error);
       console.log("error occured at batch", i / batchSize);
