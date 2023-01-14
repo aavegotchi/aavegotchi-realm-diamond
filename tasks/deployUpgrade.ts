@@ -8,7 +8,6 @@ import {
   ContractTransaction,
   PopulatedTransaction,
 } from "@ethersproject/contracts";
-import { Signer } from "@ethersproject/abstract-signer";
 
 import { OwnershipFacet } from "../typechain/OwnershipFacet";
 import { IDiamondCut } from "../typechain/IDiamondCut";
@@ -21,6 +20,7 @@ import {
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { gasPrice } from "../constants";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 export interface FacetsAndAddSelectors {
   facetName: string;
@@ -123,7 +123,7 @@ task(
       }
 
       //Instantiate the Signer
-      let signer: Signer;
+      let signer: SignerWithAddress | LedgerSigner;
       const owner = await (
         (await hre.ethers.getContractAt(
           "OwnershipFacet",
