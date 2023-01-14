@@ -1,9 +1,8 @@
 import { ethers, network } from "hardhat";
 import { InstallationAdminFacet } from "../../../typechain/InstallationAdminFacet";
 
-import { diamondOwner, impersonate } from "../helperFunctions";
-import { gasPrice, varsForNetwork } from "../../../constants";
-import { upgrade } from "../upgrades/upgrade-deleteHashes";
+import { impersonate } from "../helperFunctions";
+import { varsForNetwork } from "../../../constants";
 import { getRelayerSigner } from "../../helperFunctions";
 const inputjson = require("./finalizedHashes.json");
 
@@ -29,6 +28,11 @@ export async function fixUpgrades() {
       network
     );
   }
+
+  console.log("number of events:", inputjson.length);
+
+  return;
+
   const batchSize = 900;
   for (let i = 0; i < inputjson.length; i += batchSize) {
     const batch = inputjson.slice(i, i + batchSize);
