@@ -20,3 +20,4 @@ out/*
 data/allInstallations.json
 data/allTiles.json
 scripts/team/*
+package-lock.json
