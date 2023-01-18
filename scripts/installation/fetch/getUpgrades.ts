@@ -1,9 +1,9 @@
 import { ethers } from "hardhat";
 
-const inputData = require("./rogueEvents.json");
+const inputData = require("./LevelOneEvents.json");
 
 function getUpgrades() {
-  const hashFile = "scripts/installation/fetch/rogueHashes.json";
+  const hashFile = "scripts/installation/fetch/LevelOneHashes.json";
   // output array to hold calculated hashes
   const output = [];
 

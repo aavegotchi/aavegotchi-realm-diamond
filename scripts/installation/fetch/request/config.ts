@@ -21,13 +21,13 @@ const getQuery = async (queryString: String) => {
 const getFinalizedEventsQuery = (startBlock: number, endBlock: number) => {
   // let skipNumber = currentPage ? currentPage * 1000 : 0;
   // skip:${skipNumber}
-
   return `{
-      upgradeFinalizedEvents(
+    upgradeInitiatedEvents(
         first: 1000,
         where: { 
           block_gte: ${startBlock} 
           block_lte : ${endBlock}
+          installation_in:["56","65","74","83","92","101","110","119","128","59"]
         })
          {
       x

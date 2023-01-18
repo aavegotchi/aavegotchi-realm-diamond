@@ -1,8 +1,10 @@
 import { readFileSync, writeFileSync } from "fs";
 
-const path = "scripts/installation/fetch/finalizedEvents.json";
-const cleanedJsonDataFile = "scripts/installation/fetch/finalizedCleanedEvents.json";
-const removedJsonDataFile = "scripts/installation/fetch/finalizedRemovedEvents.json";
+const path = "scripts/installation/fetch/LevelOneEvents.json";
+const cleanedJsonDataFile =
+  "scripts/installation/fetch/finalizedLevelOneEvents.json";
+const removedJsonDataFile =
+  "scripts/installation/fetch/finalizedLevelOneEvents.json";
 
 const writeToJSON = (data: any) => {
   try {

@@ -4,7 +4,7 @@ import { getFinalizedEventsQuery } from "./config";
 const fetchData = async (query: string) => {
   try {
     const queryResp = await getQuery(query);
-    return { status: true, data: queryResp.upgradeFinalizedEvents };
+    return { status: true, data: queryResp.upgradeInitiatedEvents };
   } catch (e) {
     return { status: false };
   }
