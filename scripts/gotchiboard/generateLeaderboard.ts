@@ -265,6 +265,7 @@ export async function generateLeaderboard(
     .map((e, i) => ({
       ...e,
       ghstReward: getGhstReward(i, competition),
+      position: i + 1,
     }));
 
   return sortedLeaderboard;

@@ -1,31 +1,39 @@
-import * as hre from "hardhat";
-
-import { ethers } from "hardhat";
-import { maticVars } from "../../constants";
+import { LedgerSigner } from "@anders-t/ethers-ledger";
+import { BigNumber } from "ethers";
+import { ethers, network } from "hardhat";
+import { varsForNetwork } from "../../constants";
+import { ERC20 } from "../../typechain";
 import { generateLeaderboard } from "./generateLeaderboard";
 
-const { LedgerSigner } = require("@ethersproject/hardware-wallets");
-
 async function main() {
-  const owner = "0x26bac3547908e923b641c186000585e8ce98f4db";
+  //change to deployer wallet
+  const owner = "0x080b5bf8f360f624628e0fb961f4e67c9e3c7cf1";
   let signer;
-  const testing = ["hardhat", "localhost"].includes(hre.network.name);
+  const testing = ["hardhat", "localhost"].includes(network.name);
 
   if (testing) {
-    await hre.network.provider.request({
+    await network.provider.request({
       method: "hardhat_impersonateAccount",
       params: [owner],
     });
-    signer = await hre.ethers.getSigner(owner);
-  } else if (hre.network.name === "matic") {
+
+    await network.provider.request({
+      method: "hardhat_setBalance",
+      params: [owner, "0x1000000000000000"],
+    });
+
+    signer = await ethers.getSigner(owner);
+  } else if (network.name === "matic") {
     signer = new LedgerSigner(ethers.provider, "hid", "m/44'/60'/2'/0/0");
   } else {
     throw Error("Incorrect network selected");
   }
 
+  const vars = await varsForNetwork(ethers);
+
   const alchemicaFacet = await ethers.getContractAt(
     "AlchemicaFacet",
-    maticVars.realmDiamond,
+    vars.realmDiamond,
     signer
   );
 
@@ -39,17 +47,47 @@ async function main() {
     return;
   }
 
-  let allTokens = winners.map((e) => [maticVars.ghst]);
+  console.log("leaderboard:", leaderboard);
+
+  let allTokens = winners.map((e) => [vars.ghst]);
   let allAmounts = winners.map((e) => [
-    ethers.utils.parseUnits(e.ghstReward.toString(), 18),
+    ethers.utils.parseUnits(e.ghstReward.toString(), 18).toString(),
   ]);
   let allAddresses = winners.map((e) => e.account);
 
-  const tx = await alchemicaFacet.batchTransferTokens(
+  const ghst = (await ethers.getContractAt(
+    "ERC20",
+    vars.ghst,
+    signer
+  )) as ERC20;
+  let bal = await ghst.balanceOf(owner);
+  console.log("Before balance:", ethers.utils.formatEther(bal));
+
+  let totalPayout = BigNumber.from(0);
+  for (let i = 0; i < allAmounts.length; i++) {
+    const element = allAmounts[i];
+    const amount = BigNumber.from(element[0]);
+    totalPayout = totalPayout.add(amount);
+  }
+
+  console.log("total payout:", ethers.utils.formatEther(totalPayout));
+  //Payout should be 20,000 GHST per round
+  if (ethers.utils.formatEther(totalPayout) !== "20000.0") {
+    throw new Error("Incorrect payout!");
+  }
+
+  console.log("Approving");
+  let tx = await ghst.approve(vars.realmDiamond, ethers.constants.MaxUint256);
+  await tx.wait();
+
+  tx = await alchemicaFacet.batchTransferTokens(
     allTokens,
     allAmounts,
     allAddresses
   );
+
+  bal = await ghst.balanceOf(owner);
+  console.log("After balance:", ethers.utils.formatEther(bal));
 
   let receipt = await tx.wait();
   console.log("Gas used:", receipt.gasUsed);
