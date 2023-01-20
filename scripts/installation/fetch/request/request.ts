@@ -4,43 +4,55 @@ import { getFinalizedEventsQuery } from "./config";
 const fetchData = async (query: string) => {
   try {
     const queryResp = await getQuery(query);
-    return { status: true, data: queryResp.upgradeFinalizedEvents };
+    return { status: true, data: queryResp.upgradeInitiatedEvents };
   } catch (e) {
     return { status: false };
   }
 };
 
-const fetchGraphQLData = async (
-  startBlock: number,
-  endBlock: number,
-  dataSize: number
-) => {
-  let maxPageCount = 100000000000000000; // replace with your language MAX SAFE INTEGER
-  let failedPages = [];
+const fetchGraphQLData = async (startBlock: number, endBlock: number) => {
   let results = [];
-  let start = startBlock;
-  let end = endBlock;
+  const increment = 10000;
 
-  for (let currentPage = 0; currentPage < maxPageCount; currentPage++) {
-    const query = getFinalizedEventsQuery(start, end, dataSize);
+  for (
+    let currentBlock = startBlock;
+    currentBlock < endBlock;
+    currentBlock = currentBlock + increment
+  ) {
+    const query = getFinalizedEventsQuery(
+      currentBlock,
+      currentBlock + increment
+    );
 
     let { status, data } = await fetchData(query);
-    console.log("---counter log---", currentPage);
 
-    if (status) {
-      start = data[data.length - 1]?.block;
+    console.log("---counter log---", currentBlock);
+
+    if (status && data.length > 0) {
+      //todo: This could be handled better but for simplicitys take we will just ensure that our increment is low enough to prevent us hitting the maximum number of events in one query.
+
+      //If the number reaches 1000 it means we are missing events in that block range.
+      if (data.length === 1000) {
+        throw new Error("Too many results in range");
+      }
 
       results.push(...data);
-      if (data?.length < dataSize) {
-        // --- break the loop when the batch data is below the dataSize. That means we've come to the end of the pagination ---
-        break;
-      }
+
+      console.log(
+        `Start block: ${currentBlock}, end block: ${
+          currentBlock + increment
+        } data: ${data.length}`
+      );
     } else {
-      failedPages.push({ currentPage, start, end });
+      console.log(
+        `No results found between blocks ${currentBlock} and ${
+          currentBlock + increment
+        }`
+      );
     }
   }
 
-  return { failedPages, results };
+  return { results };
 };
 
 export { fetchGraphQLData };

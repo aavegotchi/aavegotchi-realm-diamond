@@ -4,6 +4,10 @@ import { ethers } from "ethers";
 import { Domain, PERMIT_TYPES } from "../constants";
 import { HardhatEthersHelpers, Network } from "hardhat/types";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
+import {
+  DefenderRelayProvider,
+  DefenderRelaySigner,
+} from "defender-relay-client/lib/ethers";
 
 export const gasPrice = 75000000000;
 
@@ -184,4 +188,21 @@ export async function permitRSV(
   let sig: Signature = ethers.utils.splitSignature(result);
 
   return sig;
+}
+
+export interface RelayerInfo {
+  apiKey: string;
+  apiSecret: string;
+}
+export function getRelayerSigner() {
+  const credentials: RelayerInfo = {
+    apiKey: process.env.DEFENDER_APIKEY!,
+    apiSecret: process.env.DEFENDER_SECRET!,
+  };
+
+  const provider = new DefenderRelayProvider(credentials);
+  return new DefenderRelaySigner(credentials, provider, {
+    speed: "fast",
+    validForSeconds: 3600,
+  });
 }

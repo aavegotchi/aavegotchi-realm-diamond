@@ -94,6 +94,7 @@ struct InstallationAppStorage {
   mapping(uint256 => bool) upgradeComplete;
   mapping(uint256 => uint256) unequipTypes; // installationType.id => unequipType
   mapping(uint256 => uint256[]) parcelIdToUpgradeIds; // will not track upgrades before this variable's existence
+  mapping(address => bool) gameManager;
 }
 
 library LibAppStorageInstallation {
@@ -114,6 +115,11 @@ contract Modifiers {
 
   modifier onlyRealmDiamond() {
     require(msg.sender == s.realmDiamond, "LibDiamond: Must be realm diamond");
+    _;
+  }
+
+  modifier onlyGameManager() {
+    require(s.gameManager[msg.sender] == true, "LibDiamond: Must be a gameManager");
     _;
   }
 }

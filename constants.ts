@@ -11,6 +11,7 @@ export interface Constants {
   kek: string;
   gltr: string;
   ghst: string;
+  defenderRelayer?: string;
 }
 
 interface NetworkToConstants {
@@ -66,6 +67,7 @@ export const maticVars: Constants = {
   kek: "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C",
   gltr: "0x3801c3b3b5c98f88a9c9005966aa96aa440b9afc",
   ghst: "0x385eeac5cb85a38a9a07a70c73e0a3271cfb54a7",
+  defenderRelayer: "0xb6384935d68e9858f8385ebeed7db84fc93b1420",
 };
 
 const mumbaiVars: Constants = {

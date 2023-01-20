@@ -18,24 +18,18 @@ const getQuery = async (queryString: String) => {
   return data;
 };
 
-const getFinalizedEventsQuery = (
-  startBlock?: number,
-  endBlock?: number,
-  dataSize?: number
-  // currentPage?: number
-) => {
+const getFinalizedEventsQuery = (startBlock: number, endBlock: number) => {
   // let skipNumber = currentPage ? currentPage * 1000 : 0;
   // skip:${skipNumber}
-
   return `{
-      upgradeFinalizedEvents(
-        orderBy: block 
-        orderDirection: asc 
-        first: ${dataSize ? dataSize : 1000}
+    upgradeInitiatedEvents(
+        first: 1000,
         where: { 
           block_gte: ${startBlock} 
-          block_lte : ${endBlock}}
-          ) {
+          block_lte : ${endBlock}
+          installation_in:["56","65","74","83","92","101","110","119","128","59"]
+        })
+         {
       x
       y
       parcel {

@@ -223,8 +223,8 @@ contract InstallationAdminFacet is Modifiers {
   }
 
   //take hash calculations offchain
-  function deleteBuggedUpgradesWithHashes(bytes32[] calldata _hashes) external onlyOwner {
-    for (uint256 i = 0; i < _hashes.length; i++) {
+  function deleteBuggedUpgradesWithHashes(bytes32[] calldata _hashes) external onlyGameManager {
+    for (uint256 i = 0; i < _hashes.length; ) {
       s.upgradeHashes[_hashes[i]] = 0;
       unchecked {
         ++i;
@@ -239,5 +239,9 @@ contract InstallationAdminFacet is Modifiers {
     uint256 _installationId
   ) external view returns (uint256) {
     return s.upgradeHashes[keccak256(abi.encodePacked(_parcelId, _x, _y, _installationId))];
+  }
+
+  function toggleGameManager(address _newGameManager, bool _active) external onlyOwner {
+    s.gameManager[_newGameManager] = _active;
   }
 }
