@@ -227,6 +227,9 @@ export async function generateLeaderboard(
   let competition = getCompetition(timeFrom, timePeriod);
   let timeTo = getTimeTo(timeFrom, timePeriod);
 
+  console.log("time from:", timeFrom);
+  console.log("time to:", timeTo);
+
   const values = await Promise.all([
     mintTileEvents(timeFrom, timeTo),
     mintInstallationEvents(timeFrom, timeTo),

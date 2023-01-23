@@ -39,15 +39,13 @@ async function main() {
 
   // get Leaderboard with ghst to withdraw
   // set time from and interval
-  let timeFrom = 1672617600;
+  let timeFrom = 1673827200;
   let interval = "week";
   const leaderboard = await generateLeaderboard(timeFrom, interval);
   let winners = leaderboard.filter((e) => e.ghstReward > 0);
   if (winners.length == 0) {
     return;
   }
-
-  console.log("leaderboard:", leaderboard);
 
   let allTokens = winners.map((e) => [vars.ghst]);
   let allAmounts = winners.map((e) => [
