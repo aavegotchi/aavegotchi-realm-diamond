@@ -1,4 +1,3 @@
-import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
 import { varsForNetwork } from "../../constants";
@@ -7,7 +6,7 @@ import { generateLeaderboard } from "./generateLeaderboard";
 
 async function main() {
   //change to deployer wallet
-  const owner = "0x080b5bf8f360f624628e0fb961f4e67c9e3c7cf1";
+  const owner = "0x94cb5C277FCC64C274Bd30847f0821077B231022";
   let signer;
   const testing = ["hardhat", "localhost"].includes(network.name);
 
@@ -24,7 +23,8 @@ async function main() {
 
     signer = await ethers.getSigner(owner);
   } else if (network.name === "matic") {
-    signer = new LedgerSigner(ethers.provider, "hid", "m/44'/60'/2'/0/0");
+    signer = (await ethers.getSigners())[0];
+    console.log("signer:", await signer.getAddress());
   } else {
     throw Error("Incorrect network selected");
   }
@@ -83,6 +83,7 @@ async function main() {
     allAmounts,
     allAddresses
   );
+  await tx.wait();
 
   bal = await ghst.balanceOf(owner);
   console.log("After balance:", ethers.utils.formatEther(bal));
