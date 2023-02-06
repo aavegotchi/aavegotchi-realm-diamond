@@ -61,12 +61,12 @@ module.exports = {
       maxPriorityFeePerGas: 1 * GWEI,
       //   timeout: 90000
     },
-    // mumbai: {
-    //   url: process.env.MUMBAI_MORALIS,
-    //   accounts: [process.env.SECRET],
-    //   blockGasLimit: 20000000,
-    //   // gasPrice: 1000000000,
-    // },
+    mumbai: {
+      url: process.env.MUMBAI_MORALIS,
+      accounts: [process.env.SECRET],
+      blockGasLimit: 20000000,
+      // gasPrice: 1000000000,
+    },
     kovan: {
       url: process.env.KOVAN_URL,
       // url: 'https://rpc-mainnet.maticvigil.com/',

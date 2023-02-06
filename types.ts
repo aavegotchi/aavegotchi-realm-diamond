@@ -127,8 +127,8 @@ export interface TileTypeInput {
 }
 
 export type Level = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
-export type Width = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 16;
-export type Height = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type Width = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 12 | 16;
+export type Height = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 12 | 16;
 export interface InstallationTypeOutput {
   deprecated: boolean;
   installationType: BigNumberish;
