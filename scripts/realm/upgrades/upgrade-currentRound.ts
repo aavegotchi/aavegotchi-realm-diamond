@@ -24,7 +24,7 @@ export async function upgrade() {
   const args: DeployUpgradeTaskArgs = {
     diamondAddress: vars.realmDiamond,
     facetsAndAddSelectors: joined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
   };
 
