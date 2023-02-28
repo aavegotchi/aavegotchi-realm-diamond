@@ -81,6 +81,13 @@ contract AlchemicaFacet is Modifiers {
     return s.parcels[_realmId].alchemicaRemaining;
   }
 
+  /// @notice Query details about the remaining alchemica in a parcel
+  /// @param _realmId The identifier of the parcel to query
+  /// @return output_ An array containing details about each remaining alchemica in the parcel
+  function getParcelCurrentRound(uint256 _realmId) external view returns (uint256) {
+    return s.parcels[_realmId].currentRound;
+  }
+
   /// @notice Allow the diamond owner to increment the surveying round
   function progressSurveyingRound() external onlyOwner {
     s.surveyingRound++;

@@ -32,7 +32,6 @@ type FacetCutType = { Add: 0; Replace: 1; Remove: 2 };
 const FacetCutAction: FacetCutType = { Add: 0, Replace: 1, Remove: 2 };
 
 export interface DeployUpgradeTaskArgs {
-  diamondUpgrader: string;
   diamondAddress: string;
   facetsAndAddSelectors: string;
   useMultisig: boolean;
@@ -110,7 +109,6 @@ task(
       const facets: string = taskArgs.facetsAndAddSelectors;
       const facetsAndAddSelectors: FacetsAndAddSelectors[] =
         convertStringToFacetAndSelectors(facets);
-      const diamondUpgrader: string = taskArgs.diamondUpgrader;
       const diamondAddress: string = taskArgs.diamondAddress;
       const useMultisig = taskArgs.useMultisig;
       const useLedger = taskArgs.useLedger;
