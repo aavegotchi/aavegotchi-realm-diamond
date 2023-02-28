@@ -89,7 +89,6 @@ task(
   "deployUpgrade",
   "Deploys a Diamond Cut, given an address, facets and addSelectors, and removeSelectors"
 )
-  .addParam("diamondUpgrader", "Address of the multisig signer")
   .addParam("diamondAddress", "Address of the Diamond to upgrade")
   .addParam(
     "facetsAndAddSelectors",
