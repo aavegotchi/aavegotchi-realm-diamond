@@ -6,6 +6,7 @@ import { ethers, network } from "hardhat";
 import { expect } from "chai";
 import {
   AlchemicaFacet,
+  ERC721Facet,
   InstallationFacet,
   OwnershipFacet,
   RealmFacet,
@@ -26,6 +27,7 @@ import {
 describe("Testing Progress Surveying Round", async function () {
   let alchemicaFacet: AlchemicaFacet;
   let alchemicaFacetWithOwner: AlchemicaFacet;
+  let alchemicaFacetWithRealmOwners: AlchemicaFacet[] = [];
   let realmFacet: RealmFacet;
   let installationFacet: InstallationFacet;
 
@@ -33,9 +35,15 @@ describe("Testing Progress Surveying Round", async function () {
   const testRealmId = 2258;
   const testGotchiId = 1484;
   const testReservoirId = 92;
+  const reservoirRealmIds = [
+    141, 10396, 24174, 28250, 20626, 12694, 1923, 26722, 18456, 10234, 6056,
+    2957,
+  ]; // fetched from subgraph
 
   let harvestRatesBefore;
   let capacityBefore;
+  let roundAlchemicasOfRealmsBefore = [];
+  let harvestRatesOfRealmsBefore = [];
 
   before(async function () {
     this.timeout(20000000);
@@ -58,6 +66,10 @@ describe("Testing Progress Surveying Round", async function () {
       "RealmFacet",
       diamondAddress
     )) as RealmFacet;
+    const erc721Facet = (await ethers.getContractAt(
+      "ERC721Facet",
+      diamondAddress
+    )) as ERC721Facet;
 
     installationFacet = (await ethers.getContractAt(
       "InstallationFacet",
@@ -129,16 +141,51 @@ describe("Testing Progress Surveying Round", async function () {
       )
     ).wait();
 
+    for (let i = 0; i < reservoirRealmIds.length; i++) {
+      const realmOwner = await erc721Facet.ownerOf(reservoirRealmIds[i]);
+      const alchemicaFacetWithRealmOwner = await impersonate(
+        realmOwner,
+        alchemicaFacet,
+        ethers,
+        network
+      );
+      alchemicaFacetWithRealmOwners.push(alchemicaFacetWithRealmOwner);
+      await network.provider.send("hardhat_setBalance", [
+        realmOwner,
+        "0x1000000000000000",
+      ]);
+    }
     harvestRatesBefore = await alchemicaFacet.getHarvestRates(testRealmId);
     capacityBefore = await installationFacet.getReservoirCapacity(
       testReservoirId
     );
+
+    for (let i = 0; i < reservoirRealmIds.length; i++) {
+      const roundAlchemica = await alchemicaFacet.getRoundAlchemica(
+        reservoirRealmIds[i],
+        "1"
+      );
+      roundAlchemicasOfRealmsBefore.push(roundAlchemica);
+
+      const harvestRatesOfRealmBefore = await alchemicaFacet.getHarvestRates(
+        reservoirRealmIds[i]
+      );
+      harvestRatesOfRealmsBefore.push(harvestRatesOfRealmBefore);
+    }
   });
 
   it("Should revert test surveying first(current) round", async function () {
     await expect(
       alchemicaFacet.testingStartSurveying(testRealmId)
     ).to.be.revertedWith("AlchemicaFacet: Round not released");
+
+    for (let i = 0; i < reservoirRealmIds.length; i++) {
+      await expect(
+        alchemicaFacetWithRealmOwners[i].testingStartSurveying(
+          reservoirRealmIds[i]
+        )
+      ).to.be.revertedWith("AlchemicaFacet: Round not released");
+    }
   });
 
   it("Should start surveying and values same after progress round", async function () {
@@ -171,5 +218,33 @@ describe("Testing Progress Surveying Round", async function () {
       testReservoirId
     );
     expect(capacityAfter).to.equal(capacityBefore);
+
+    for (let i = 0; i < reservoirRealmIds.length; i++) {
+      const roundAlchemicaBefore = await alchemicaFacet.getRoundAlchemica(
+        reservoirRealmIds[i],
+        "1"
+      );
+      expect(roundAlchemicaBefore.length).to.equal(0);
+
+      await alchemicaFacetWithRealmOwners[i].testingStartSurveying(
+        reservoirRealmIds[i]
+      );
+
+      const roundAlchemica = await alchemicaFacet.getRoundAlchemica(
+        reservoirRealmIds[i],
+        "1"
+      );
+      expect(roundAlchemica[0]).to.gt(0);
+      expect(roundAlchemica[1]).to.gt(0);
+      expect(roundAlchemica[2]).to.gt(0);
+      expect(roundAlchemica[3]).to.gt(0);
+
+      const harvestRatesAfter = await alchemicaFacet.getHarvestRates(
+        reservoirRealmIds[i]
+      );
+      for (let j = 0; j < harvestRatesAfter.length; j++) {
+        expect(harvestRatesAfter[j]).to.equal(harvestRatesOfRealmsBefore[i][j]);
+      }
+    }
   });
 });
