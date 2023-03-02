@@ -44,6 +44,7 @@ describe("Testing Progress Surveying Round", async function () {
   let capacityBefore;
   let roundAlchemicasOfRealmsBefore = [];
   let harvestRatesOfRealmsBefore = [];
+  let alchemicasRemainingBefore = [];
 
   before(async function () {
     this.timeout(20000000);
@@ -171,6 +172,11 @@ describe("Testing Progress Surveying Round", async function () {
         reservoirRealmIds[i]
       );
       harvestRatesOfRealmsBefore.push(harvestRatesOfRealmBefore);
+
+      const alchemicaRemaining = await alchemicaFacet.getRealmAlchemica(
+        reservoirRealmIds[i]
+      );
+      alchemicasRemainingBefore.push(alchemicaRemaining);
     }
   });
 
@@ -226,6 +232,13 @@ describe("Testing Progress Surveying Round", async function () {
       );
       expect(roundAlchemicaBefore.length).to.equal(0);
 
+      const alchemicaRemaining = await alchemicaFacet.getRealmAlchemica(
+        reservoirRealmIds[i]
+      );
+      for (let j = 0; j < alchemicaRemaining.length; j++) {
+        expect(alchemicaRemaining[j]).to.equal(alchemicasRemainingBefore[i][j]);
+      }
+
       await alchemicaFacetWithRealmOwners[i].testingStartSurveying(
         reservoirRealmIds[i]
       );
@@ -244,6 +257,15 @@ describe("Testing Progress Surveying Round", async function () {
       );
       for (let j = 0; j < harvestRatesAfter.length; j++) {
         expect(harvestRatesAfter[j]).to.equal(harvestRatesOfRealmsBefore[i][j]);
+      }
+
+      const alchemicaRemainingAfter = await alchemicaFacet.getRealmAlchemica(
+        reservoirRealmIds[i]
+      );
+      for (let j = 0; j < alchemicaRemaining.length; j++) {
+        expect(alchemicaRemainingAfter[j]).to.gt(
+          alchemicasRemainingBefore[i][j]
+        );
       }
     }
   });
