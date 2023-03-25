@@ -57,12 +57,13 @@ contract InstallationUpgradeFacet is Modifiers {
     LibItems._splitAlchemica(nextInstallation.alchemicaCost, realm.getAlchemicaAddresses());
     //prevent underflow if user sends too much GLTR
     require(_gltr <= nextInstallation.craftTime, "InstallationUpgradeFacet: Too much GLTR");
-
-    require(
-      IERC20(s.gltr).transferFrom(LibMeta.msgSender(), 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, (uint256(_gltr) * 1e18)),
-      "InstallationUpgradeFacet: Failed GLTR transfer"
-    ); //should revert if user doesnt have enough GLTR
-
+    //only burn when gltr amount >0
+    if (_gltr > 0) {
+      require(
+        IERC20(s.gltr).transferFrom(LibMeta.msgSender(), 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, (uint256(_gltr) * 1e18)),
+        "InstallationUpgradeFacet: Failed GLTR transfer"
+      ); //should revert if user doesnt have enough GLTR
+    }
     if (nextInstallation.craftTime - _gltr == 0) {
       //Confirm upgrade immediately
       emit UpgradeTimeReduced(0, _upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _gltr);
