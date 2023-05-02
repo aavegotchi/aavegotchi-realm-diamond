@@ -159,7 +159,6 @@ export interface TileTypeOutput {
   alchemicaCost: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
   craftTime: BigNumberish;
   name: string;
-  deprecateTime: BigNumberish;
 }
 
 export type AlchemicaTotals = [
