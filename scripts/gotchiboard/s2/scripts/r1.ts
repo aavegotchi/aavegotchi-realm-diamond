@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
-import { varsForNetwork } from "../../../../constants";
+import { gasPrice, varsForNetwork } from "../../../../constants";
 import { ERC20 } from "../../../../typechain";
 import { leaderboard } from "../data/r1";
 import { szn2payouts } from "../competitions";
@@ -82,14 +82,19 @@ async function main() {
     throw new Error("Incorrect payout!");
   }
 
-  console.log("Approving");
-  let tx = await ghst.approve(vars.realmDiamond, ethers.constants.MaxUint256);
-  await tx.wait();
+  // console.log("Approving");
+  // let tx = await ghst.approve(vars.realmDiamond, ethers.constants.MaxUint256, {
+  //   gasPrice: gasPrice,
+  // });
+  // await tx.wait();
 
-  tx = await alchemicaFacet.batchTransferTokens(
+  console.log("Sending");
+
+  const tx = await alchemicaFacet.batchTransferTokens(
     allTokens,
     allAmounts,
-    allAddresses
+    allAddresses,
+    { gasPrice: gasPrice }
   );
   await tx.wait();
 
