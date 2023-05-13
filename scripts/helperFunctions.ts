@@ -38,12 +38,19 @@ export async function impersonate(
   address: string,
   contract: any,
   ethers: any,
-  network: Network
+  network: any
 ) {
   await network.provider.request({
     method: "hardhat_impersonateAccount",
     params: [address],
   });
+
+  //give some ether
+  await ethers.provider.send("hardhat_setBalance", [
+    address,
+    "0x100000000000000000000",
+  ]);
+
   let signer = await ethers.getSigner(address);
   contract = contract.connect(signer);
   return contract;

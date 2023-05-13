@@ -175,8 +175,8 @@ contract AlchemicaFacet is Modifiers {
   }
 
   function calculateTransferAmounts(uint256 _amount, uint256 _spilloverRate) internal pure returns (TransferAmounts memory) {
-    uint256 owner = (_amount * (bp - (_spilloverRate * 10**16))) / bp;
-    uint256 spill = (_amount * (_spilloverRate * 10**16)) / bp;
+    uint256 owner = (_amount * (bp - (_spilloverRate * 10 ** 16))) / bp;
+    uint256 spill = (_amount * (_spilloverRate * 10 ** 16)) / bp;
     return TransferAmounts(owner, spill);
   }
 
@@ -188,11 +188,7 @@ contract AlchemicaFacet is Modifiers {
   /// @param _realmId Identifier of parcel to claim alchemica from
   /// @param _gotchiId Identifier of Aavegotchi to use for alchemica collecction/claiming
   /// @param _signature Message signature used for backend validation
-  function claimAvailableAlchemica(
-    uint256 _realmId,
-    uint256 _gotchiId,
-    bytes memory _signature
-  ) external gameActive {
+  function claimAvailableAlchemica(uint256 _realmId, uint256 _gotchiId, bytes memory _signature) external gameActive {
     //Check signature
     require(
       LibSignature.isValid(keccak256(abi.encode(_realmId, _gotchiId, s.lastClaimedAlchemica[_realmId])), _signature, s.backendPubKey),
@@ -231,12 +227,7 @@ contract AlchemicaFacet is Modifiers {
   /// @param _gotchiId Identifier of parent ERC721 aavegotchi which alchemica is channeled to
   /// @param _lastChanneled The last time alchemica was channeled in this _realmId
   /// @param _signature Message signature used for backend validation
-  function channelAlchemica(
-    uint256 _realmId,
-    uint256 _gotchiId,
-    uint256 _lastChanneled,
-    bytes memory _signature
-  ) external gameActive {
+  function channelAlchemica(uint256 _realmId, uint256 _gotchiId, uint256 _lastChanneled, bytes memory _signature) external gameActive {
     AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
 
     //gotchi CANNOT have active listing for lending
@@ -244,6 +235,9 @@ contract AlchemicaFacet is Modifiers {
       !diamond.isAavegotchiListed(uint32(_gotchiId)) || diamond.isAavegotchiLent(uint32(_gotchiId)),
       "AavegotchiDiamond: Gotchi CANNOT have active listing for lending"
     );
+
+    //finally interact while reducing kinship
+    diamond.reduceKinshipViaChanneling(uint32(_gotchiId));
 
     //0 - alchemical channeling
     LibRealm.verifyAccessRight(_realmId, _gotchiId, 0, LibMeta.msgSender());
@@ -299,8 +293,7 @@ contract AlchemicaFacet is Modifiers {
     //update latest channeling
     s.gotchiChannelings[_gotchiId] = block.timestamp;
     s.parcelChannelings[_realmId] = block.timestamp;
-    //finally interact
-    AavegotchiDiamond(s.aavegotchiDiamond).realmInteract(_gotchiId);
+
     emit ChannelAlchemica(_realmId, _gotchiId, channelAmounts, rate, radius);
   }
 
@@ -347,11 +340,7 @@ contract AlchemicaFacet is Modifiers {
   /// @param _gotchiIds Array of Gotchi IDs
   /// @param _tokenAddresses Array of tokens to transfer
   /// @param _amounts Nested array of amounts to transfer.
-  function batchTransferTokensToGotchis(
-    uint256[] calldata _gotchiIds,
-    address[] calldata _tokenAddresses,
-    uint256[][] calldata _amounts
-  ) external {
+  function batchTransferTokensToGotchis(uint256[] calldata _gotchiIds, address[] calldata _tokenAddresses, uint256[][] calldata _amounts) external {
     require(_gotchiIds.length == _amounts.length, "AlchemicaFacet: Mismatched array lengths");
 
     for (uint256 i = 0; i < _gotchiIds.length; i++) {
@@ -393,11 +382,7 @@ contract AlchemicaFacet is Modifiers {
     }
   }
 
-  function _batchTransferTokens(
-    address[] memory _tokens,
-    uint256[] memory _amounts,
-    address _to
-  ) internal {
+  function _batchTransferTokens(address[] memory _tokens, uint256[] memory _amounts, address _to) internal {
     require(_tokens.length == _amounts.length, "Array legth mismatch");
     require(_to != address(0), "Address Zero Transfer");
     for (uint256 i; i < _tokens.length; i++) {
@@ -414,11 +399,7 @@ contract AlchemicaFacet is Modifiers {
     }
   }
 
-  function batchTransferTokens(
-    address[][] calldata _tokens,
-    uint256[][] calldata _amounts,
-    address[] calldata _to
-  ) external {
+  function batchTransferTokens(address[][] calldata _tokens, uint256[][] calldata _amounts, address[] calldata _to) external {
     require(_tokens.length == _amounts.length, "Array length mismatch");
     require(_to.length == _amounts.length, "Array length mismatch");
     for (uint256 i; i < _to.length; i++) {
