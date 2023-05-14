@@ -80,6 +80,7 @@ export function outputTile(tile: TileTypeInput): TileTypeOutput {
     ],
     craftTime: tile.craftTime,
     name: tile.name,
+    deprecateTime: tile.deprecateTime,
   };
 
   return output;

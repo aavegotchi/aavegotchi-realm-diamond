@@ -124,6 +124,7 @@ export interface TileTypeInput {
   FOMO?: number;
   ALPHA?: number;
   KEK?: number;
+  deprecateTime?: number;
 }
 
 export type Level = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
@@ -158,6 +159,7 @@ export interface TileTypeOutput {
   alchemicaCost: [BigNumberish, BigNumberish, BigNumberish, BigNumberish];
   craftTime: BigNumberish;
   name: string;
+  deprecateTime: BigNumberish;
 }
 
 export type AlchemicaTotals = [
