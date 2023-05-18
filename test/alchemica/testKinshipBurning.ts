@@ -13,6 +13,7 @@ import { BigNumber, ContractReceipt } from "ethers";
 import { upgradeRealmTest } from "../../scripts/alchemica/test/upgrade-testAlchemica";
 import { upgradeBurnKinship } from "../../scripts/alchemica/upgrades/upgrade-burnKinship";
 import { log } from "console";
+import { constructPermissionsBitMap } from "../../scripts/realm/LendingPermissionHelpers";
 
 describe("Testing kinship Burning ", async function () {
   //lending channeling
@@ -51,33 +52,33 @@ describe("Testing kinship Burning ", async function () {
 
   //This test assumes that the upgrade has been executed on the aaavegotchiDiamond
 
-  //   it("Test kinship burning through normal channeling", async function () {
-  //     const owner2 = await aFacet.ownerOf(gotchiId2);
+  it("Test kinship burning through normal channeling", async function () {
+    const owner2 = await aFacet.ownerOf(gotchiId2);
 
-  //     testAlchemicaFacet = await impersonate(
-  //       owner2,
-  //       testAlchemicaFacet,
-  //       ethers,
-  //       network
-  //     );
-  //     //get kinship before
-  //     const kinshipBefore = await aFacet.kinship(gotchiId2);
-  //     const lastChanneled = await alchemicaFacet.getLastChanneled(gotchiId2);
+    testAlchemicaFacet = await impersonate(
+      owner2,
+      testAlchemicaFacet,
+      ethers,
+      network
+    );
+    //get kinship before
+    const kinshipBefore = await aFacet.kinship(gotchiId2);
+    const lastChanneled = await alchemicaFacet.getLastChanneled(gotchiId2);
 
-  //     log("kinship before: ", kinshipBefore.toString());
-  //     log("lastChanneled before: ", lastChanneled.toString());
-  //     //channel
+    log("kinship before: ", kinshipBefore.toString());
+    log("lastChanneled before: ", lastChanneled.toString());
+    //channel
 
-  //     await testAlchemicaFacet.mockChannelAlchemica(
-  //       parcelId2,
-  //       gotchiId2,
-  //       lastChanneled
-  //     );
+    await testAlchemicaFacet.mockChannelAlchemica(
+      parcelId2,
+      gotchiId2,
+      lastChanneled
+    );
 
-  //     expect(await aFacet.kinship(gotchiId2)).to.equal(kinshipBefore.sub(2));
-  //   });
+    expect(await aFacet.kinship(gotchiId2)).to.equal(kinshipBefore.sub(2));
+  });
 
-  it("Cannot channel with lent gotchi if channeling is not enabled", async function () {
+  it("Cannot channel with lent gotchi if permissions are not set", async function () {
     const owner = await aFacet.ownerOf(lentGotchiId);
     const lastChanneled = await alchemicaFacet.getLastChanneled(lentGotchiId);
 
@@ -94,7 +95,7 @@ describe("Testing kinship Burning ", async function () {
         lentGotchiId,
         lastChanneled
       )
-    ).to.be.revertedWith("Channeling not enabled by listing owner");
+    ).to.be.revertedWith("This listing has no permissions set");
   });
 
   it("Can channel with lent gotchi if channeling is enabled", async function () {
@@ -108,6 +109,11 @@ describe("Testing kinship Burning ", async function () {
 
     await aFacet.claimAndEndGotchiLending(lentGotchiId);
 
+    const channellingAllowed = constructPermissionsBitMap({
+      noPermissions: 1,
+      channellingAllowed: 1,
+    });
+
     //create a new listing with channeling enabled
     const tx = await aFacet[
       "addGotchiLending(uint32,uint96,uint32,uint8[3],address,address,uint32,address[],uint256)"
@@ -120,14 +126,14 @@ describe("Testing kinship Burning ", async function () {
       listingInfo.thirdParty,
       0,
       listingInfo.revenueTokens,
-      1
+      channellingAllowed
     );
     const newListingId = getNewListingId(await tx.wait());
     log("new listing id: ", newListingId.toString());
     //assert that channelling status has changed
     listingInfo = await aFacet.getGotchiLendingFromToken(lentGotchiId);
 
-    expect(listingInfo.channellingStatus).to.equal(1);
+    expect(listingInfo.channellingStatus).to.equal(channellingAllowed);
 
     //accept listing
     aFacet = await impersonate(listingInfo.borrower, aFacet, ethers, network);
