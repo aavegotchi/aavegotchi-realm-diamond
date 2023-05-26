@@ -10,7 +10,7 @@ const channellingModifiers = {
 };
 
 interface LendingPermissions {
-  noPermissions: 0 | 1;
+  permissionsAllowed: 0 | 1;
   channellingAllowed: 0 | 1;
 
   //new lending permissions can be added here up to 32
@@ -19,7 +19,7 @@ interface LendingPermissions {
 export function constructPermissionsBitMap(permissions: LendingPermissions) {
   let permissionsBitMap = BigInt(0);
 
-  if (permissions.noPermissions == 0) {
+  if (permissions.permissionsAllowed == 0) {
     return 0;
   } else {
     //loop through all object keys and set the permissions
@@ -35,6 +35,24 @@ export function constructPermissionsBitMap(permissions: LendingPermissions) {
   }
 
   return permissionsBitMap;
+}
+
+export function getPermissionsFromBitmap(bitmap: bigint): LendingPermissions {
+  const permissions: LendingPermissions = {
+    permissionsAllowed: 0,
+    channellingAllowed: 0,
+    // Initialize additional lending permissions here
+  };
+
+  const totalKeys = Object.keys(permissions).length;
+
+  for (let i = 0; i < totalKeys; i++) {
+    const value = Number((bitmap >> BigInt(i * 8)) & BigInt(0xff));
+    permissions[Object.keys(permissions)[i] as keyof LendingPermissions] =
+      value as 0 | 1;
+  }
+
+  return permissions;
 }
 
 function storeValueInBitmap(value: number, position: number, bitmap: any) {
