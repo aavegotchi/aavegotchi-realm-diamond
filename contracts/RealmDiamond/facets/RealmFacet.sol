@@ -35,11 +35,7 @@ contract RealmFacet is Modifiers {
   /// @param _to The address to mint the parcels to
   /// @param _tokenIds The identifiers of tokens to mint
   /// @param _metadata An array of structs containing the metadata of each parcel being minted
-  function mintParcels(
-    address[] calldata _to,
-    uint256[] calldata _tokenIds,
-    MintParcelInput[] memory _metadata
-  ) external onlyOwner {
+  function mintParcels(address[] calldata _to, uint256[] calldata _tokenIds, MintParcelInput[] memory _metadata) external onlyOwner {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
       require(s.tokenIds.length < LibRealm.MAX_SUPPLY, "RealmFacet: Cannot mint more than 420,069 parcels");
       uint256 tokenId = _tokenIds[index];
@@ -69,12 +65,7 @@ contract RealmFacet is Modifiers {
     uint256[] y;
   }
 
-  function batchEquip(
-    uint256 _realmId,
-    uint256 _gotchiId,
-    BatchEquipIO memory _params,
-    bytes[] memory _signatures
-  ) external gameActive canBuild {
+  function batchEquip(uint256 _realmId, uint256 _gotchiId, BatchEquipIO memory _params, bytes[] memory _signatures) external gameActive canBuild {
     require(_params.ids.length == _params.x.length, "RealmFacet: Wrong length");
     require(_params.x.length == _params.y.length, "RealmFacet: Wrong length");
 
@@ -109,11 +100,12 @@ contract RealmFacet is Modifiers {
   ) public gameActive canBuild {
     //2 - Equip Installations
     LibRealm.verifyAccessRight(_realmId, _gotchiId, 2, LibMeta.msgSender());
-    require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
-      "RealmFacet: Invalid signature"
-    );
-
+    if (assertMainnet()) {
+      require(
+        LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
+        "RealmFacet: Invalid signature"
+      );
+    }
     InstallationDiamondInterface.InstallationType memory installation = InstallationDiamondInterface(s.installationsDiamond).getInstallationType(
       _installationId
     );
@@ -154,11 +146,12 @@ contract RealmFacet is Modifiers {
     uint256 _y,
     bytes memory _signature
   ) public onlyParcelOwner(_realmId) gameActive canBuild {
-    require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
-      "RealmFacet: Invalid signature"
-    );
-
+    if (assertMainnet()) {
+      require(
+        LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
+        "RealmFacet: Invalid signature"
+      );
+    }
     //@todo: Prevent unequipping if an upgrade is active for this installationId on the parcel
 
     InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
@@ -244,10 +237,12 @@ contract RealmFacet is Modifiers {
   ) public gameActive canBuild {
     //3 - Equip Tile
     LibRealm.verifyAccessRight(_realmId, _gotchiId, 3, LibMeta.msgSender());
-    require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
-      "RealmFacet: Invalid signature"
-    );
+    if (assertMainnet()) {
+      require(
+        LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
+        "RealmFacet: Invalid signature"
+      );
+    }
     LibRealm.placeTile(_realmId, _tileId, _x, _y);
     TileDiamondInterface(s.tileDiamond).equipTile(msg.sender, _realmId, _tileId);
 
@@ -270,10 +265,12 @@ contract RealmFacet is Modifiers {
     uint256 _y,
     bytes memory _signature
   ) public onlyParcelOwner(_realmId) gameActive canBuild {
-    require(
-      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
-      "RealmFacet: Invalid signature"
-    );
+    if (assertMainnet()) {
+      require(
+        LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
+        "RealmFacet: Invalid signature"
+      );
+    }
     LibRealm.removeTile(_realmId, _tileId, _x, _y);
 
     TileDiamondInterface(s.tileDiamond).unequipTile(msg.sender, _realmId, _tileId);
@@ -324,30 +321,39 @@ contract RealmFacet is Modifiers {
     s.parcels[_realmId].upgradeQueueLength--;
   }
 
-  function fixGrid(
-    uint256 _realmId,
-    uint256 _installationId,
-    uint256[] memory _x,
-    uint256[] memory _y,
-    bool tile
-  ) external onlyOwner {
-    require(_x.length == _y.length, "RealmFacet: _x and _y must be the same length");
-    Parcel storage parcel = s.parcels[_realmId];
-    for (uint256 i; i < _x.length; i++) {
-      require(_x[i] < 64 && _y[i] < 64, "RealmFacet: _x and _y must be less than 64");
-      if (!tile) {
-        parcel.buildGrid[_x[i]][_y[i]] = _installationId;
-      } else {
-        parcel.tileGrid[_x[i]][_y[i]] = _installationId;
-      }
-    }
-  }
+  // function fixGrid(uint256 _realmId, uint256 _installationId, uint256[] memory _x, uint256[] memory _y, bool tile) external onlyOwner {
+  //   require(_x.length == _y.length, "RealmFacet: _x and _y must be the same length");
+  //   Parcel storage parcel = s.parcels[_realmId];
+  //   for (uint256 i; i < _x.length; i++) {
+  //     require(_x[i] < 64 && _y[i] < 64, "RealmFacet: _x and _y must be less than 64");
+  //     if (!tile) {
+  //       parcel.buildGrid[_x[i]][_y[i]] = _installationId;
+  //     } else {
+  //       parcel.tileGrid[_x[i]][_y[i]] = _installationId;
+  //     }
+  //   }
+  // }
 
-  function buildingFrozen() external view returns (bool) {
-    return s.freezeBuilding;
-  }
+  //these functions are no longer needed
+
+  // function buildingFrozen() external view returns (bool) {
+  //   return s.freezeBuilding;
+  // }
 
   function setFreezeBuilding(bool _freezeBuilding) external onlyOwner {
     s.freezeBuilding = _freezeBuilding;
+  }
+
+  function assertMainnet() internal view returns (bool _isMainnet) {
+    uint256 id;
+    assembly {
+      id := chainid()
+    }
+
+    if (id == 137) {
+      _isMainnet = true;
+    } else {
+      _isMainnet = false;
+    }
   }
 }
