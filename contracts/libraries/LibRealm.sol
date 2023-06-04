@@ -12,12 +12,7 @@ library LibRealm {
   uint256 constant MAX_SUPPLY = 420069;
 
   //Place installation
-  function placeInstallation(
-    uint256 _realmId,
-    uint256 _installationId,
-    uint256 _x,
-    uint256 _y
-  ) internal {
+  function placeInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
     uint256[5] memory widths = getWidths();
 
@@ -43,12 +38,7 @@ library LibRealm {
     }
   }
 
-  function removeInstallation(
-    uint256 _realmId,
-    uint256 _installationId,
-    uint256 _x,
-    uint256 _y
-  ) internal {
+  function removeInstallation(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
     InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
     InstallationDiamondInterface.InstallationType memory installation = installationsDiamond.getInstallationType(_installationId);
@@ -63,12 +53,7 @@ library LibRealm {
     parcel.startPositionBuildGrid[_x][_y] = 0;
   }
 
-  function placeTile(
-    uint256 _realmId,
-    uint256 _tileId,
-    uint256 _x,
-    uint256 _y
-  ) internal {
+  function placeTile(uint256 _realmId, uint256 _tileId, uint256 _x, uint256 _y) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
     uint256[5] memory widths = getWidths();
 
@@ -93,12 +78,7 @@ library LibRealm {
     }
   }
 
-  function removeTile(
-    uint256 _realmId,
-    uint256 _tileId,
-    uint256 _x,
-    uint256 _y
-  ) internal {
+  function removeTile(uint256 _realmId, uint256 _tileId, uint256 _x, uint256 _y) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
     TileDiamondInterface tilesDiamond = TileDiamondInterface(s.tileDiamond);
     TileDiamondInterface.TileType memory tile = tilesDiamond.getTileType(_tileId);
@@ -115,20 +95,12 @@ library LibRealm {
     parcel.startPositionTileGrid[_x][_y] = 0;
   }
 
-  function calculateAmount(
-    uint256 _tokenId,
-    uint256[] memory randomWords,
-    uint256 i
-  ) internal view returns (uint256) {
+  function calculateAmount(uint256 _tokenId, uint256[] memory randomWords, uint256 i) internal view returns (uint256) {
     AppStorage storage s = LibAppStorage.diamondStorage();
     return BinomialRandomizer.calculateAlchemicaSurveyAmount(randomWords[i], s.totalAlchemicas[s.parcels[_tokenId].size][i]);
   }
 
-  function updateRemainingAlchemica(
-    uint256 _tokenId,
-    uint256[] memory randomWords,
-    uint256 _round
-  ) internal {
+  function updateRemainingAlchemica(uint256 _tokenId, uint256[] memory randomWords, uint256 _round) internal {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
     s.parcels[_tokenId].currentRound++;
@@ -194,12 +166,7 @@ library LibRealm {
     return false;
   }
 
-  function verifyAccessRight(
-    uint256 _realmId,
-    uint256 _gotchiId,
-    uint256 _actionRight,
-    address _sender
-  ) internal view {
+  function verifyAccessRight(uint256 _realmId, uint256 _gotchiId, uint256 _actionRight, address _sender) internal view {
     AppStorage storage s = LibAppStorage.diamondStorage();
     AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
 
@@ -234,12 +201,7 @@ library LibRealm {
     }
   }
 
-  function installationInUpgradeQueue(
-    uint256 _realmId,
-    uint256 _installationId,
-    uint256 _x,
-    uint256 _y
-  ) internal view returns (bool) {
+  function installationInUpgradeQueue(uint256 _realmId, uint256 _installationId, uint256 _x, uint256 _y) internal view returns (bool) {
     AppStorage storage s = LibAppStorage.diamondStorage();
 
     InstallationDiamondInterface installationsDiamond = InstallationDiamondInterface(s.installationsDiamond);
@@ -256,5 +218,18 @@ library LibRealm {
       }
     }
     return false;
+  }
+
+  function assertMainnet() internal view returns (bool _isMainnet) {
+    uint256 id;
+    assembly {
+      id := chainid()
+    }
+
+    if (id == 137) {
+      _isMainnet = true;
+    } else {
+      _isMainnet = false;
+    }
   }
 }

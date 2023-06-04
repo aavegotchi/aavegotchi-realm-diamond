@@ -100,7 +100,7 @@ contract RealmFacet is Modifiers {
   ) public gameActive canBuild {
     //2 - Equip Installations
     LibRealm.verifyAccessRight(_realmId, _gotchiId, 2, LibMeta.msgSender());
-    if (assertMainnet()) {
+    if (LibRealm.assertMainnet()) {
       require(
         LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
         "RealmFacet: Invalid signature"
@@ -146,7 +146,7 @@ contract RealmFacet is Modifiers {
     uint256 _y,
     bytes memory _signature
   ) public onlyParcelOwner(_realmId) gameActive canBuild {
-    if (assertMainnet()) {
+    if (LibRealm.assertMainnet()) {
       require(
         LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
         "RealmFacet: Invalid signature"
@@ -237,7 +237,7 @@ contract RealmFacet is Modifiers {
   ) public gameActive canBuild {
     //3 - Equip Tile
     LibRealm.verifyAccessRight(_realmId, _gotchiId, 3, LibMeta.msgSender());
-    if (assertMainnet()) {
+    if (LibRealm.assertMainnet()) {
       require(
         LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
         "RealmFacet: Invalid signature"
@@ -265,7 +265,7 @@ contract RealmFacet is Modifiers {
     uint256 _y,
     bytes memory _signature
   ) public onlyParcelOwner(_realmId) gameActive canBuild {
-    if (assertMainnet()) {
+    if (LibRealm.assertMainnet()) {
       require(
         LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
         "RealmFacet: Invalid signature"
@@ -340,18 +340,5 @@ contract RealmFacet is Modifiers {
 
   function setFreezeBuilding(bool _freezeBuilding) external onlyOwner {
     s.freezeBuilding = _freezeBuilding;
-  }
-
-  function assertMainnet() internal view returns (bool _isMainnet) {
-    uint256 id;
-    assembly {
-      id := chainid()
-    }
-
-    if (id == 137) {
-      _isMainnet = true;
-    } else {
-      _isMainnet = false;
-    }
   }
 }
