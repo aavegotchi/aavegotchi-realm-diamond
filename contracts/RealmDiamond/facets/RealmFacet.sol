@@ -341,4 +341,8 @@ contract RealmFacet is Modifiers {
   function setFreezeBuilding(bool _freezeBuilding) external onlyOwner {
     s.freezeBuilding = _freezeBuilding;
   }
+
+  function setDiamondAddress(address _newDiamondAddress) external onlyOwner {
+    s.aavegotchiDiamond = _newDiamondAddress;
+  }
 }
