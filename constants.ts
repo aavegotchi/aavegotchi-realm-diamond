@@ -71,7 +71,7 @@ export const maticVars: Constants = {
 };
 
 const mumbaiVars: Constants = {
-  aavegotchiDiamond: "0x83e73D9CF22dFc3A767EA1cE0611F7f50306622e",
+  aavegotchiDiamond: "0x14B55C7862023c9f2aEfCA1EB5a606465dA034B0",
   realmDiamond: "0x726F201A9aB38cD56D60ee392165F1434C4F193D",
   installationDiamond: "0x663aeA831087487d2944ce44836F419A35Ee005A",
   tileDiamond: "0xDd8947D7F6705136e5A12971231D134E80DFC15d",
@@ -86,12 +86,11 @@ const mumbaiVars: Constants = {
 const networkToVars: NetworkToConstants = {
   137: maticVars,
   80001: mumbaiVars,
-
   0: kovanVars, //update
   100: maticVars, //update
 };
 
-export const gasPrice = 17500000;
+export const gasPrice = 175000000000;
 
 export const aavegotchiDAOAddress =
   "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
