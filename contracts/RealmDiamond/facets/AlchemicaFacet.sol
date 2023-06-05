@@ -190,12 +190,11 @@ contract AlchemicaFacet is Modifiers {
   /// @param _signature Message signature used for backend validation
   function claimAvailableAlchemica(uint256 _realmId, uint256 _gotchiId, bytes memory _signature) external gameActive {
     //Check signature
-    if (assertMainnet()) {
-      require(
-        LibSignature.isValid(keccak256(abi.encode(_realmId, _gotchiId, s.lastClaimedAlchemica[_realmId])), _signature, s.backendPubKey),
-        "AlchemicaFacet: Invalid signature"
-      );
-    }
+    require(
+      LibSignature.isValid(keccak256(abi.encode(_realmId, _gotchiId, s.lastClaimedAlchemica[_realmId])), _signature, s.backendPubKey),
+      "AlchemicaFacet: Invalid signature"
+    );
+
     //1 - Empty Reservoir Access Right
     LibRealm.verifyAccessRight(_realmId, _gotchiId, 1, LibMeta.msgSender());
     LibAlchemica.claimAvailableAlchemica(_realmId, _gotchiId);
@@ -257,12 +256,11 @@ contract AlchemicaFacet is Modifiers {
     require(block.timestamp >= s.parcelChannelings[_realmId] + s.channelingLimits[altarLevel], "AlchemicaFacet: Parcel can't channel yet");
 
     //Use _lastChanneled to ensure that each signature hash is unique
-    if (assertMainnet()) {
-      require(
-        LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _lastChanneled)), _signature, s.backendPubKey),
-        "AlchemicaFacet: Invalid signature"
-      );
-    }
+    require(
+      LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _lastChanneled)), _signature, s.backendPubKey),
+      "AlchemicaFacet: Invalid signature"
+    );
+
     (uint256 rate, uint256 radius) = InstallationDiamondInterface(s.installationsDiamond).spilloverRateAndRadiusOfId(s.parcels[_realmId].altarId);
 
     require(rate > 0, "InstallationFacet: Spillover Rate cannot be 0");
@@ -406,19 +404,6 @@ contract AlchemicaFacet is Modifiers {
     require(_to.length == _amounts.length, "Array length mismatch");
     for (uint256 i; i < _to.length; i++) {
       _batchTransferTokens(_tokens[i], _amounts[i], _to[i]);
-    }
-  }
-
-  function assertMainnet() internal view returns (bool _isMainnet) {
-    uint256 id;
-    assembly {
-      id := chainid()
-    }
-
-    if (id == 137) {
-      _isMainnet = true;
-    } else {
-      _isMainnet = false;
     }
   }
 }
