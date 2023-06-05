@@ -22,9 +22,7 @@ export async function upgradeRealmTest() {
     },
     {
       facetName: "RealmFacet",
-      addSelectors: [
-        "function fixGrid(uint256 _realmId, uint256 _installationId, uint256[] memory _x, uint256[] memory _y, bool tile) external",
-      ],
+      addSelectors: [],
 
       removeSelectors: [],
     },
