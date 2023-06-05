@@ -36,7 +36,7 @@ export async function upgradeRealmTest() {
   const args: DeployUpgradeTaskArgs = {
     diamondAddress: c.realmDiamond,
     facetsAndAddSelectors: joined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
     initAddress: c.realmDiamond,
     initCalldata: calldata,
