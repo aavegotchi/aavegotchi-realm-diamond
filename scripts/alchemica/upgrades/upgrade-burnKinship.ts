@@ -12,10 +12,7 @@ export async function upgradeBurnKinship() {
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "AlchemicaFacet",
-      addSelectors: [
-        //remove for mainnet upgrade
-        "function getParcelCurrentRound(uint256 _realmId) external view returns (uint256)",
-      ],
+      addSelectors: [],
       removeSelectors: [],
     },
   ];
@@ -25,7 +22,7 @@ export async function upgradeBurnKinship() {
   const args: DeployUpgradeTaskArgs = {
     diamondAddress: c.realmDiamond,
     facetsAndAddSelectors: joined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
     initAddress: ethers.constants.AddressZero,
     initCalldata: "0x",
