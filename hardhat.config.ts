@@ -40,11 +40,11 @@ module.exports = {
           balance: "1000000000000000000000000",
         },
        ],*/
-      forking: {
-        url: process.env.MATIC_URL,
-        timeout: 2000000,
-        // blockNumber: 30865190,
-      },
+      // forking: {
+      //   url: process.env.MATIC_URL,
+      //   timeout: 2000000,
+      //   blockNumber: 30865190,
+      // },
       chainId: 137,
       blockGasLimit: 20000000,
       timeout: 2000000,
@@ -53,29 +53,29 @@ module.exports = {
     localhost: {
       timeout: 800000,
     },
-    matic: {
-      url: process.env.MATIC_URL,
-      accounts: [process.env.SECRET],
-      // blockGasLimit: 20000000,
-      maxFeePerGas: 50 * GWEI,
-      maxPriorityFeePerGas: 1 * GWEI,
-      //   timeout: 90000
-    },
-    mumbai: {
-      url: process.env.MUMBAI_MORALIS,
-      accounts: [process.env.SECRET],
-      blockGasLimit: 20000000,
-      // gasPrice: 1000000000,
-    },
-    kovan: {
-      url: process.env.KOVAN_URL,
-      // url: 'https://rpc-mainnet.maticvigil.com/',
-      accounts: [process.env.SECRET],
-      // blockGasLimit: 20000000,
-      blockGasLimit: 12000000,
-      gasPrice: 100000000000,
-      //   timeout: 90000
-    },
+    // matic: {
+    //   url: process.env.MATIC_URL,
+    //   accounts: [process.env.SECRET],
+    //   // blockGasLimit: 20000000,
+    //   maxFeePerGas: 50 * GWEI,
+    //   maxPriorityFeePerGas: 1 * GWEI,
+    //   //   timeout: 90000
+    // },
+    // mumbai: {
+    //   url: process.env.MUMBAI_MORALIS,
+    //   accounts: [process.env.SECRET],
+    //   blockGasLimit: 20000000,
+    //   // gasPrice: 1000000000,
+    // },
+    // kovan: {
+    //   url: process.env.KOVAN_URL,
+    //   // url: 'https://rpc-mainnet.maticvigil.com/',
+    //   accounts: [process.env.SECRET],
+    //   // blockGasLimit: 20000000,
+    //   blockGasLimit: 12000000,
+    //   gasPrice: 100000000000,
+    //   //   timeout: 90000
+    // },
   },
 
   gasReporter: {
