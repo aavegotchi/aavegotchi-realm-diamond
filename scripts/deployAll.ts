@@ -141,12 +141,14 @@ export async function deploy() {
   const accounts: Signer[] = await ethers.getSigners();
   const deployer = accounts[0];
 
+  const privateKey = ethers.Wallet.createRandom().privateKey
+
   // Constants
   // TODO: Confirm
   const vrfCoordinator = ethers.constants.AddressZero;
   const linkAddress = ethers.constants.AddressZero;
   const aavegotchiDiamond = ethers.constants.AddressZero;
-  const backendSigner = new ethers.Wallet(process.env.MUMBAI_REALM_PK); // PK should start with '0x'
+  const backendSigner = new ethers.Wallet(privateKey); // PK should start with '0x'
   const deployerAddress = await deployer.getAddress();
   const pixelcraft = deployerAddress;
   const dao = deployerAddress;
@@ -316,16 +318,22 @@ export async function deploy() {
   );
   await tx.wait();
 
-  console.log("Adding tile types");
-  tx = await tileFacet.addTileTypes(
-    tileTypes.map((val) => outputTile(val)),
-    {
-      gasPrice: gasPrice,
-    }
-  );
-  await tx.wait();
+  // console.log("Adding tile types");
+  // tx = await tileFacet.addTileTypes(
+  //   tileTypes.map((val) => outputTile(val)),
+  //   {
+  //     gasPrice: gasPrice,
+  //   }
+  // );
+  // await tx.wait();
+
+  // console.log('Getting tile types')
   // const tileTypes = await tileFacet.getTileTypes([]);
   // console.log("Saved tileTypes:", tileTypes);
+  
+  
+  // console.log('Crafting tiles')
+  // tileFacet.craftTiles([1])
 
   return realmDiamond.address;
 }
