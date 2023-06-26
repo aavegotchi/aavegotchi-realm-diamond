@@ -40,11 +40,13 @@ module.exports = {
           balance: "1000000000000000000000000",
         },
        ],*/
-      // forking: {
-      //   url: process.env.MATIC_URL,
-      //   timeout: 2000000,
-      //   blockNumber: 30865190,
-      // },
+      forking: {
+        url:
+          process.env.MATIC_URL ||
+          "https://polygon-mainnet.g.alchemy.com/v2/9kFj_i69vfuicw9CNUFevkF9jLQfae93",
+        timeout: 2000000,
+        blockNumber: 30865190,
+      },
       chainId: 137,
       blockGasLimit: 20000000,
       timeout: 2000000,

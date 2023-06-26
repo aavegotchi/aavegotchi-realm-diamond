@@ -10,7 +10,7 @@ import {
   TestBeforeVars,
 } from "../../types";
 
-import { impersonate } from "../installation/helperFunctions";
+import { impersonate, setBalance } from "../installation/helperFunctions";
 
 export function outputInstallation(
   installation: InstallationTypeInput
@@ -238,10 +238,10 @@ export const genReduceUpgradeTimeSignature = async (upgradeIndex: number) => {
 
 export async function faucetRealAlchemica(receiver: string, ethers: any) {
   const alchemica = [
-    "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f",
-    "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8",
-    "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2",
-    "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C",
+    "0xeba55192c97CfBb5BE73Be94538b0CF9FA601CB0",
+    "0xf55Af0D2ee9B645D2DE0247353a7bAD71863e28F",
+    "0x7484BA2BbCAa3A568021d508C0897dE0F7a314Da",
+    "0x7484BA2BbCAa3A568021d508C0897dE0F7a314Da",
   ];
 
   for (let i = 0; i < alchemica.length; i++) {
@@ -250,8 +250,11 @@ export async function faucetRealAlchemica(receiver: string, ethers: any) {
       "AlchemicaToken",
       alchemicaToken
     )) as AlchemicaToken;
+    await setBalance(await token.owner(), network);
     token = await impersonate(await token.owner(), token, ethers, network);
+    // console.log(token);
     await token.mint(receiver, ethers.utils.parseEther("10000"));
+    console.log("minted ", ethers.utils.parseEther("10000"));
   }
 }
 
@@ -261,10 +264,10 @@ export async function approveRealAlchemica(
   ethers: any
 ) {
   const alchemica = [
-    "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f",
-    "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8",
-    "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2",
-    "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C",
+    "0xeba55192c97CfBb5BE73Be94538b0CF9FA601CB0",
+    "0xf55Af0D2ee9B645D2DE0247353a7bAD71863e28F",
+    "0x7484BA2BbCAa3A568021d508C0897dE0F7a314Da",
+    "0x7484BA2BbCAa3A568021d508C0897dE0F7a314Da",
   ];
 
   for (let i = 0; i < alchemica.length; i++) {

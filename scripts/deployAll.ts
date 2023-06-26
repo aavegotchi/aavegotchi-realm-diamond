@@ -141,7 +141,7 @@ export async function deploy() {
   const accounts: Signer[] = await ethers.getSigners();
   const deployer = accounts[0];
 
-  const privateKey = ethers.Wallet.createRandom().privateKey
+  const privateKey = ethers.Wallet.createRandom().privateKey;
 
   // Constants
   // TODO: Confirm
@@ -302,21 +302,21 @@ export async function deploy() {
   // const installationTypes = await installationFacet.getInstallationTypes([]);
   // console.log("Saved installationTypes:", installationTypes);
 
-  const tileFacet = (await ethers.getContractAt(
-    "TileFacet",
-    tileDiamond,
-    deployer
-  )) as TileFacet;
+  // const tileFacet = (await ethers.getContractAt(
+  //   "TileFacet",
+  //   tileDiamond,
+  //   deployer
+  // )) as TileFacet;
 
-  console.log("Setting addresses for tile diamond");
-  tx = await tileFacet.setAddresses(
-    aavegotchiDiamond,
-    realmDiamond.address,
-    alchemica.gltr.address,
-    pixelcraft,
-    dao
-  );
-  await tx.wait();
+  // console.log("Setting addresses for tile diamond");
+  // tx = await tileFacet.setAddresses(
+  //   aavegotchiDiamond,
+  //   realmDiamond.address,
+  //   alchemica.gltr.address,
+  //   pixelcraft,
+  //   dao
+  // );
+  // await tx.wait();
 
   // console.log("Adding tile types");
   // tx = await tileFacet.addTileTypes(
@@ -330,12 +330,11 @@ export async function deploy() {
   // console.log('Getting tile types')
   // const tileTypes = await tileFacet.getTileTypes([]);
   // console.log("Saved tileTypes:", tileTypes);
-  
-  
+
   // console.log('Crafting tiles')
   // tileFacet.craftTiles([1])
 
-  return realmDiamond.address;
+  return installationDiamond;
 }
 
 // We recommend this pattern to be able to use async/await everywhere

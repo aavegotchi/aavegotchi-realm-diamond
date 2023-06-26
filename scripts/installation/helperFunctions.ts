@@ -5,6 +5,14 @@ import { DiamondLoupeFacet } from "../../typechain";
 
 export const gasPrice = 180000000000;
 
+export async function setBalance(address: string, network: any) {
+  const res = await network.provider.request({
+    method: "hardhat_setBalance",
+    params: [address, "0x1000000000000000"],
+  });
+  return res;
+}
+
 export async function impersonate(
   address: string,
   contract: any,
