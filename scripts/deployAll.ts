@@ -33,6 +33,7 @@ import { installationTypes as halloweenInstallationTypes } from "../data/install
 import { installationTypes as xmasInstallationTypes } from "../data/installations/xmas";
 import { installationTypes as nftBigInstallationTypes } from "../data/installations/nftDisplay_big";
 import { tileTypes } from "../data/tiles/tileTypes";
+import { InstallationsPolygonXGotchichainBridgeFacet } from "../typechain-types";
 
 const { getSelectors, FacetCutAction } = require("./libraries/diamond.js");
 
@@ -167,7 +168,9 @@ export async function deploy() {
   const realmDiamond = await deployRealmDiamond(deployerAddress);
 
   console.log("\nDeploying Installation Diamond");
-  const installationDiamond = await deployDiamond(realmDiamond.address);
+  const { diamond: installationDiamond, cut } = await deployDiamond(
+    realmDiamond.address
+  );
 
   console.log("\nDeploying Tile Diamond");
   const tileDiamond = await deployDiamondTile(realmDiamond.address);
@@ -176,7 +179,7 @@ export async function deploy() {
   const alchemica = await deployAlchemica(ethers, realmDiamond.address);
 
   console.log("Realm Diamond deployed:", realmDiamond.address);
-  console.log("InstallationDiamond deployed:", installationDiamond);
+  console.log("InstallationDiamond deployed:", installationDiamond.address);
   console.log("Tile Diamond deployed:", tileDiamond);
   console.log("FUD deployed:", alchemica.fud.address);
   console.log("FOMO deployed:", alchemica.fomo.address);
@@ -197,7 +200,7 @@ export async function deploy() {
     alchemicaTotals(),
     boostMultipliers,
     greatPortalCapacity,
-    installationDiamond,
+    installationDiamond.address,
     vrfCoordinator,
     linkAddress,
     [
@@ -259,7 +262,7 @@ export async function deploy() {
 
   const installationAdminFacet = (await ethers.getContractAt(
     "InstallationAdminFacet",
-    installationDiamond,
+    installationDiamond.address,
     deployer
   )) as InstallationAdminFacet;
 
@@ -277,12 +280,12 @@ export async function deploy() {
   console.log("Adding installation types");
   const installationTypes = [
     mainInstallationTypes,
-    farmingInstallationTypes,
-    nftInstallationTypes,
-    bounceGateInstallationTypes,
-    halloweenInstallationTypes,
-    xmasInstallationTypes,
-    nftBigInstallationTypes,
+    // farmingInstallationTypes,
+    // nftInstallationTypes,
+    // bounceGateInstallationTypes,
+    // halloweenInstallationTypes,
+    // xmasInstallationTypes,
+    // nftBigInstallationTypes,
   ];
   for (let i = 0; i < installationTypes.length; i++) {
     tx = await installationAdminFacet.addInstallationTypes(
@@ -334,7 +337,7 @@ export async function deploy() {
   // console.log('Crafting tiles')
   // tileFacet.craftTiles([1])
 
-  return installationDiamond;
+  return { installationDiamond, cut };
 }
 
 // We recommend this pattern to be able to use async/await everywhere

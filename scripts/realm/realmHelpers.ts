@@ -238,10 +238,10 @@ export const genReduceUpgradeTimeSignature = async (upgradeIndex: number) => {
 
 export async function faucetRealAlchemica(receiver: string, ethers: any) {
   const alchemica = [
-    "0xeba55192c97CfBb5BE73Be94538b0CF9FA601CB0",
     "0xf55Af0D2ee9B645D2DE0247353a7bAD71863e28F",
+    "0xE594C57812a2f9fF9C2581E0Ca8fcBAEf0451793",
     "0x7484BA2BbCAa3A568021d508C0897dE0F7a314Da",
-    "0x7484BA2BbCAa3A568021d508C0897dE0F7a314Da",
+    "0x3887f0555399FfB97EC62B7f8F99290d5007e769",
   ];
 
   for (let i = 0; i < alchemica.length; i++) {
@@ -252,9 +252,7 @@ export async function faucetRealAlchemica(receiver: string, ethers: any) {
     )) as AlchemicaToken;
     await setBalance(await token.owner(), network);
     token = await impersonate(await token.owner(), token, ethers, network);
-    // console.log(token);
     await token.mint(receiver, ethers.utils.parseEther("10000"));
-    console.log("minted ", ethers.utils.parseEther("10000"));
   }
 }
 
@@ -264,10 +262,10 @@ export async function approveRealAlchemica(
   ethers: any
 ) {
   const alchemica = [
-    "0xeba55192c97CfBb5BE73Be94538b0CF9FA601CB0",
     "0xf55Af0D2ee9B645D2DE0247353a7bAD71863e28F",
+    "0xE594C57812a2f9fF9C2581E0Ca8fcBAEf0451793",
     "0x7484BA2BbCAa3A568021d508C0897dE0F7a314Da",
-    "0x7484BA2BbCAa3A568021d508C0897dE0F7a314Da",
+    "0x3887f0555399FfB97EC62B7f8F99290d5007e769",
   ];
 
   for (let i = 0; i < alchemica.length; i++) {

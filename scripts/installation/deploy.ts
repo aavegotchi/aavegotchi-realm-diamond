@@ -58,6 +58,7 @@ export async function deployDiamond(realmDiamondAddress) {
     "InstallationAdminFacet",
     "InstallationUpgradeFacet",
     "ERC1155Facet",
+    "InstallationsPolygonXGotchichainBridgeFacet",
   ];
   const cut = [];
   for (const FacetName of FacetNames) {
@@ -71,6 +72,7 @@ export async function deployDiamond(realmDiamondAddress) {
       facetAddress: facet.address,
       action: FacetCutAction.Add,
       functionSelectors: getSelectors(facet),
+      facet,
     });
   }
 
@@ -107,7 +109,7 @@ export async function deployDiamond(realmDiamondAddress) {
     );
   }
 
-  return diamond.address;
+  return { diamond, cut };
 }
 
 // We recommend this pattern to be able to use async/await everywhere

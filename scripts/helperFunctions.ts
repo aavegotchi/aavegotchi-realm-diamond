@@ -126,8 +126,7 @@ export async function diamondOwner(address: string, ethers: any) {
 export async function mineBlocks(ethers: any, count: number) {
   //convert to hex and handle invalid leading 0 problem
   const number = ethers.utils.hexlify(count).replace("0x0", "0x");
-  const f = await ethers.provider.send("hardhat_mine", [number]);
-  console.log({ f });
+  await ethers.provider.send("hardhat_mine", [number]);
 }
 
 export async function createDomain(token: Contract): Promise<Domain> {
