@@ -1,14 +1,19 @@
+import LZEndpointMockCompiled from "@layerzerolabs/solidity-examples/artifacts/contracts/mocks/LZEndpointMock.sol/LZEndpointMock.json";
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
 import { deploy } from "../../scripts/deployAll";
 import { impersonate, mineBlocks } from "../../scripts/helperFunctions";
-import LZEndpointMockCompiled from "@layerzerolabs/solidity-examples/artifacts/contracts/mocks/LZEndpointMock.sol/LZEndpointMock.json";
 
 import {
   approveRealAlchemica,
   faucetRealAlchemica,
 } from "../../scripts/realm/realmHelpers";
-import { ERC1155Facet, IERC20, InstallationFacet } from "../../typechain";
+import {
+  ERC1155Facet,
+  IERC20,
+  InstallationDiamond,
+  InstallationFacet,
+} from "../../typechain";
 import {
   InstallationsBridgeGotchichainSide,
   InstallationsBridgePolygonSide,
@@ -26,55 +31,48 @@ describe("Installation Bridge", async function () {
     bridgePolygonSide: InstallationsBridgePolygonSide,
     bridgeGotchichainSide: InstallationsBridgeGotchichainSide;
   let lzEndpointMockA: any, lzEndpointMockB: any;
-  let bridgeFacetPolygonSide: InstallationsPolygonXGotchichainBridgeFacet,
-    bridgeFacetGotchichainSide: InstallationsPolygonXGotchichainBridgeFacet;
 
   const testAddress = "0xf3678737dC45092dBb3fc1f49D89e3950Abb866d";
   const maticGhstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
-  let diamondAddress: string;
   let installationFacet: InstallationFacet;
   let erc1155FacetPolygon: ERC1155Facet, erc1155FacetGotchichain: ERC1155Facet;
   let ghst: IERC20;
-  let inst, inst2;
-  let cutPolygon, cutGotchichain;
-  let installationsPolygonBridgeFacet;
-  let installationsGotchichainBridgeFacet;
+  let installationsDiamondPolygon: InstallationDiamond,
+    installationsDiamondGotchichain: InstallationDiamond;
+  let installationsPolygonBridgeFacet: InstallationsPolygonXGotchichainBridgeFacet;
+  let installationsGotchichainBridgeFacet: InstallationsPolygonXGotchichainBridgeFacet;
 
   beforeEach(async function () {
     const accounts = await ethers.getSigners();
     const deployer = accounts[0];
 
-    ({ installationDiamond: inst, cut: cutPolygon } = await deploy());
-    ({ installationDiamond: inst2, cut: cutGotchichain } = await deploy());
+    ({ installationDiamond: installationsDiamondPolygon } = await deploy());
+    ({ installationDiamond: installationsDiamondGotchichain } = await deploy());
 
-    bridgeFacetPolygonSide = cutPolygon[cutPolygon.length - 1].facet;
-    bridgeFacetGotchichainSide =
-      cutGotchichain[cutGotchichain.length - 1].facet;
-
-    erc1155FacetPolygon = (await ethers.getContractAt(
+    erc1155FacetPolygon = await ethers.getContractAt(
       "ERC1155Facet",
-      inst.address
-    )) as ERC1155Facet;
+      installationsDiamondPolygon.address
+    );
 
-    erc1155FacetGotchichain = (await ethers.getContractAt(
+    erc1155FacetGotchichain = await ethers.getContractAt(
       "ERC1155Facet",
-      inst2.address
-    )) as ERC1155Facet;
+      installationsDiamondGotchichain.address
+    );
 
-    installationFacet = (await ethers.getContractAt(
+    installationFacet = await ethers.getContractAt(
       "InstallationFacet",
-      inst.address
-    )) as InstallationFacet;
+      installationsDiamondPolygon.address
+    );
 
-    installationsPolygonBridgeFacet = (await ethers.getContractAt(
+    installationsPolygonBridgeFacet = await ethers.getContractAt(
       "InstallationsPolygonXGotchichainBridgeFacet",
-      inst.address
-    )) as InstallationsPolygonXGotchichainBridgeFacet;
+      installationsDiamondPolygon.address
+    );
 
-    installationsGotchichainBridgeFacet = (await ethers.getContractAt(
+    installationsGotchichainBridgeFacet = await ethers.getContractAt(
       "InstallationsPolygonXGotchichainBridgeFacet",
-      inst2.address
-    )) as InstallationsPolygonXGotchichainBridgeFacet;
+      installationsDiamondGotchichain.address
+    );
 
     ghst = (await ethers.getContractAt(
       "contracts/interfaces/IERC20.sol:IERC20",
@@ -99,11 +97,11 @@ describe("Installation Bridge", async function () {
     //Deploying bridge contracts
     bridgePolygonSide = await BridgePolygonSide.deploy(
       lzEndpointMockA.address,
-      inst.address
+      installationsDiamondPolygon.address
     );
     bridgeGotchichainSide = await BridgeGotchichainSide.deploy(
       lzEndpointMockB.address,
-      inst2.address
+      installationsDiamondGotchichain.address
     );
 
     lzEndpointMockA.setDestLzEndpoint(
@@ -150,7 +148,7 @@ describe("Installation Bridge", async function () {
       .setLayerZeroBridge(bridgeGotchichainSide.address);
   });
 
-  it("Craft one installation with ID=0 and bridge it to gotchichain", async function () {
+  it("Craft one installation with ID=0 on Polygon and bridge it to gotchichain", async function () {
     ghst = await impersonate(testAddress, ghst, ethers, network);
     installationFacet = await impersonate(
       testAddress,
@@ -161,7 +159,92 @@ describe("Installation Bridge", async function () {
 
     await faucetRealAlchemica(testAddress, ethers);
 
-    await approveRealAlchemica(testAddress, inst.address, ethers);
+    await approveRealAlchemica(
+      testAddress,
+      installationsDiamondPolygon.address,
+      ethers
+    );
+
+    await ghst.approve(
+      installationFacet.address,
+      ethers.utils.parseUnits("100000000000000")
+    );
+
+    await installationFacet.craftInstallations([0], [0]);
+
+    await mineBlocks(ethers, 11000);
+
+    const balancePre = await erc1155FacetPolygon.balanceOf(testAddress, 0);
+    await installationFacet.claimInstallations([0]);
+    const balancePost = await erc1155FacetPolygon.balanceOf(testAddress, 0);
+    expect(balancePost).to.gt(balancePre);
+
+    const bridgePolygonSideImpersonated = await impersonate(
+      testAddress,
+      bridgePolygonSide,
+      ethers,
+      network
+    );
+
+    const erc1155FacetPolygonSideImpersonated = await impersonate(
+      testAddress,
+      erc1155FacetPolygon,
+      ethers,
+      network
+    );
+
+    await erc1155FacetPolygonSideImpersonated.setApprovalForAll(
+      bridgePolygonSide.address,
+      true
+    );
+    let sendFromTx = await bridgePolygonSideImpersonated.sendFrom(
+      testAddress,
+      chainId_B,
+      testAddress,
+      0,
+      1,
+      testAddress,
+      ethers.constants.AddressZero,
+      defaultAdapterParams,
+      {
+        value: (
+          await bridgePolygonSideImpersonated.estimateSendFee(
+            chainId_B,
+            testAddress,
+            0,
+            1,
+            false,
+            defaultAdapterParams
+          )
+        ).nativeFee,
+      }
+    );
+    await sendFromTx.wait();
+
+    expect(await erc1155FacetPolygon.balanceOf(testAddress, 0)).to.be.equal(
+      ethers.BigNumber.from(0)
+    );
+    expect(await erc1155FacetGotchichain.balanceOf(testAddress, 0)).to.be.equal(
+      ethers.BigNumber.from(1)
+    );
+  });
+
+  it.skip("Craft one installation with ID=0 on Gotchichain and bridge it to gotchichain and not be able to bridge it back", async function () {
+    ghst = await impersonate(testAddress, ghst, ethers, network);
+    installationFacet = await impersonate(
+      testAddress,
+      installationFacet,
+      ethers,
+      network
+    );
+
+    await faucetRealAlchemica(testAddress, ethers);
+
+    await approveRealAlchemica(
+      testAddress,
+      installationsDiamondPolygon.address,
+      ethers
+    );
 
     await ghst.approve(
       installationFacet.address,
