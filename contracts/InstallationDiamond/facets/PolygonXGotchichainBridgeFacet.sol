@@ -9,7 +9,7 @@ contract InstallationsPolygonXGotchichainBridgeFacet is Modifiers {
     address public layerZeroBridge;
 
     modifier onlyLayerZeroBridge() {
-        // require(msg.sender == layerZeroBridge, "PolygonXGotchichainBridgeFacet: Do not have access");
+        require(msg.sender == layerZeroBridge, "PolygonXGotchichainBridgeFacet: Do not have access");
         _;
     }
 
@@ -30,7 +30,7 @@ contract InstallationsPolygonXGotchichainBridgeFacet is Modifiers {
         }
     }
 
-    function setLayerZeroBridge(address _newLayerZeroBridge) external { // todo check only dao or owner
+    function setLayerZeroBridge(address _newLayerZeroBridge) external onlyOwner(){ // todo check only dao or owner
         layerZeroBridge = _newLayerZeroBridge;
     }
 }
