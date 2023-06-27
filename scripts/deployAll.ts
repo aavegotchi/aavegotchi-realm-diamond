@@ -337,7 +337,7 @@ export async function deploy() {
   // console.log('Crafting tiles')
   // tileFacet.craftTiles([1])
 
-  return { installationDiamond, cut };
+  return { installationDiamond, alchemica, realmDiamond };
 }
 
 // We recommend this pattern to be able to use async/await everywhere
