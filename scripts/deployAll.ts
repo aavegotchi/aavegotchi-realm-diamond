@@ -33,7 +33,6 @@ import { installationTypes as halloweenInstallationTypes } from "../data/install
 import { installationTypes as xmasInstallationTypes } from "../data/installations/xmas";
 import { installationTypes as nftBigInstallationTypes } from "../data/installations/nftDisplay_big";
 import { tileTypes } from "../data/tiles/tileTypes";
-import { InstallationsPolygonXGotchichainBridgeFacet } from "../typechain-types";
 
 const { getSelectors, FacetCutAction } = require("./libraries/diamond.js");
 
@@ -278,12 +277,12 @@ export async function deploy() {
   console.log("Adding installation types");
   const installationTypes = [
     mainInstallationTypes,
-    // farmingInstallationTypes,
-    // nftInstallationTypes,
-    // bounceGateInstallationTypes,
-    // halloweenInstallationTypes,
-    // xmasInstallationTypes,
-    // nftBigInstallationTypes,
+    farmingInstallationTypes,
+    nftInstallationTypes,
+    bounceGateInstallationTypes,
+    halloweenInstallationTypes,
+    xmasInstallationTypes,
+    nftBigInstallationTypes,
   ];
   for (let i = 0; i < installationTypes.length; i++) {
     tx = await installationAdminFacet.addInstallationTypes(
@@ -303,39 +302,39 @@ export async function deploy() {
   // const installationTypes = await installationFacet.getInstallationTypes([]);
   // console.log("Saved installationTypes:", installationTypes);
 
-  // const tileFacet = (await ethers.getContractAt(
-  //   "TileFacet",
-  //   tileDiamond,
-  //   deployer
-  // )) as TileFacet;
+  const tileFacet = (await ethers.getContractAt(
+    "TileFacet",
+    tileDiamond,
+    deployer
+  )) as TileFacet;
 
-  // console.log("Setting addresses for tile diamond");
-  // tx = await tileFacet.setAddresses(
-  //   aavegotchiDiamond,
-  //   realmDiamond.address,
-  //   alchemica.gltr.address,
-  //   pixelcraft,
-  //   dao
-  // );
-  // await tx.wait();
+  console.log("Setting addresses for tile diamond");
+  tx = await tileFacet.setAddresses(
+    aavegotchiDiamond,
+    realmDiamond.address,
+    alchemica.gltr.address,
+    pixelcraft,
+    dao
+  );
+  await tx.wait();
 
-  // console.log("Adding tile types");
-  // tx = await tileFacet.addTileTypes(
-  //   tileTypes.map((val) => outputTile(val)),
-  //   {
-  //     gasPrice: gasPrice,
-  //   }
-  // );
-  // await tx.wait();
+  console.log("Adding tile types");
+  tx = await tileFacet.addTileTypes(
+    tileTypes.map((val) => outputTile(val)),
+    {
+      gasPrice: gasPrice,
+    }
+  );
+  await tx.wait();
 
-  // console.log('Getting tile types')
   // const tileTypes = await tileFacet.getTileTypes([]);
   // console.log("Saved tileTypes:", tileTypes);
 
-  // console.log('Crafting tiles')
-  // tileFacet.craftTiles([1])
-
-  return { installationDiamond, alchemica, realmDiamond };
+  return {
+    installationDiamond,
+    alchemica,
+    realmDiamond,
+  };
 }
 
 // We recommend this pattern to be able to use async/await everywhere
