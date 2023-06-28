@@ -284,6 +284,90 @@ describe("Installation Bridge", async function () {
       "InstallationsBridgeGotchichainSide: not able to bridge it back"
     );
   });
+
+  it("Batch: Craft one installation with ID=0 and one ID=1 on Polygon and bridge it to gotchichain", async () => {
+    const tokenIds = [0, 1];
+    const amounts = [1, 1];
+
+    await installationFacetPolygon.craftInstallations([0], [0]);
+    await installationFacetPolygon.craftInstallations([1], [0]);
+
+    await mineBlocks(ethers, 11000);
+
+    await installationFacetPolygon.claimInstallations([0]);
+    await installationFacetPolygon.claimInstallations([1]);
+
+    await erc1155FacetPolygon.setApprovalForAll(
+      bridgePolygonSide.address,
+      true
+    );
+
+    await bridgePolygonSide.sendBatchFrom(
+      deployer.address,
+      chainId_B,
+      deployer.address,
+      tokenIds,
+      amounts,
+      deployer.address,
+      ethers.constants.AddressZero,
+      defaultAdapterParams,
+      {
+        value: (
+          await bridgePolygonSide.estimateSendBatchFee(
+            chainId_B,
+            deployer.address,
+            tokenIds,
+            amounts,
+            false,
+            defaultAdapterParams
+          )
+        ).nativeFee,
+      }
+    );
+
+    expect(
+      await erc1155FacetPolygon.balanceOf(deployer.address, 0)
+    ).to.be.equal(ethers.BigNumber.from(0));
+    expect(
+      await erc1155FacetPolygon.balanceOf(deployer.address, 1)
+    ).to.be.equal(ethers.BigNumber.from(0));
+    expect(
+      await erc1155FacetGotchichain.balanceOf(deployer.address, 0)
+    ).to.be.equal(ethers.BigNumber.from(1));
+    expect(
+      await erc1155FacetGotchichain.balanceOf(deployer.address, 1)
+    ).to.be.equal(ethers.BigNumber.from(1));
+  });
+
+  it("Only owner can set layerzero bridge", async () => {
+    const accounts = await ethers.getSigners();
+    const bob = accounts[1];
+    await expect(
+      installationsGotchichainBridgeFacet
+        .connect(bob)
+        .setLayerZeroBridge(bridgeGotchichainSide.address)
+    ).to.be.revertedWith("LibDiamond: Must be contract owner");
+  });
+
+  it("Only layerzero can call removeItemsFromOwner and addItemsToOwner", async () => {
+    const accounts = await ethers.getSigners();
+    const bob = accounts[1];
+    await expect(
+      installationsGotchichainBridgeFacet
+        .connect(bob)
+        .removeItemsFromOwner(bob.address, [1], [1])
+    ).to.be.revertedWith(
+      "InstallationsPolygonXGotchichainBridgeFacet: Only layerzero bridge"
+    );
+
+    await expect(
+      installationsGotchichainBridgeFacet
+        .connect(bob)
+        .addItemsToOwner(bob.address, [1], [1])
+    ).to.be.revertedWith(
+      "InstallationsPolygonXGotchichainBridgeFacet: Only layerzero bridge"
+    );
+  });
 });
 
 const approveRealAlchemica = async (

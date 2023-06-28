@@ -9,8 +9,12 @@ contract InstallationsPolygonXGotchichainBridgeFacet is Modifiers {
     address public layerZeroBridge;
 
     modifier onlyLayerZeroBridge() {
-        require(msg.sender == layerZeroBridge, "PolygonXGotchichainBridgeFacet: Do not have access");
+        require(msg.sender == layerZeroBridge, "InstallationsPolygonXGotchichainBridgeFacet: Only layerzero bridge");
         _;
+    }
+
+    function setLayerZeroBridge(address _newLayerZeroBridge) external onlyOwner(){ // todo check only dao or owner
+        layerZeroBridge = _newLayerZeroBridge;
     }
 
     function removeItemsFromOwner(address _owner, uint256[] calldata _tokenIds, uint256[] calldata _tokenAmounts) external onlyLayerZeroBridge() {
@@ -28,9 +32,5 @@ contract InstallationsPolygonXGotchichainBridgeFacet is Modifiers {
             uint256 tokenAmount = _tokenAmounts[i];
             LibERC1155.addToOwner(_owner, tokenId, tokenAmount);
         }
-    }
-
-    function setLayerZeroBridge(address _newLayerZeroBridge) external onlyOwner(){ // todo check only dao or owner
-        layerZeroBridge = _newLayerZeroBridge;
     }
 }
