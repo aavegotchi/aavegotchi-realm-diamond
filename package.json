@@ -2,7 +2,8 @@
   "scripts": {
     "deploy:alchemica:matic": "VERIFY=true TS_NODE_TRANSPILE_ONLY=1 npx hardhat run scripts/alchemica/deployAlchemica.ts --network matic",
     "deploy:alchemica:mumbai": "VERIFY=true TS_NODE_TRANSPILE_ONLY=1 npx hardhat run scripts/alchemica/deployAlchemica.ts --network mumbai",
-    "deploy:alchemica:local": "npx hardhat run scripts/alchemica/deployAlchemica.ts --network hardhat"
+    "deploy:alchemica:local": "npx hardhat run scripts/alchemica/deployAlchemica.ts --network hardhat",
+    "test:installation:bridge": "FORKING=false npx hardhat test test/bridge/installations.test.ts --network hardhat"
   },
   "dependencies": {
     "@anders-t/ethers-ledger": "^1.0.4",

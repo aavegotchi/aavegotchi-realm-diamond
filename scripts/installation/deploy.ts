@@ -7,7 +7,8 @@ import {
   InstallationDiamond__factory,
   OwnershipFacet,
 } from "../../typechain";
-import { gasPrice, maticRealmDiamondAddress } from "./helperFunctions";
+import { gasPrice } from "./helperFunctions";
+import { maticRealmDiamondAddress } from "../tile/helperFunctions";
 
 // import {getSelectors, FacetCutAction} from '../libraries/diamond'
 
@@ -49,7 +50,6 @@ export async function deployDiamond(realmDiamondAddress) {
   console.log("DiamondInit deployed:", diamondInit.address);
 
   // deploy facets
-  console.log("");
   console.log("Deploying facets");
   const FacetNames = [
     "DiamondLoupeFacet",
@@ -72,7 +72,6 @@ export async function deployDiamond(realmDiamondAddress) {
       facetAddress: facet.address,
       action: FacetCutAction.Add,
       functionSelectors: getSelectors(facet),
-      facet,
     });
   }
 
@@ -109,7 +108,7 @@ export async function deployDiamond(realmDiamondAddress) {
     );
   }
 
-  return { diamond, cut };
+  return diamond;
 }
 
 // We recommend this pattern to be able to use async/await everywhere

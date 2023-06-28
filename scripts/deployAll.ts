@@ -168,9 +168,7 @@ export async function deploy() {
   const realmDiamond = await deployRealmDiamond(deployerAddress);
 
   console.log("\nDeploying Installation Diamond");
-  const { diamond: installationDiamond, cut } = await deployDiamond(
-    realmDiamond.address
-  );
+  const installationDiamond = await deployDiamond(realmDiamond.address);
 
   console.log("\nDeploying Tile Diamond");
   const tileDiamond = await deployDiamondTile(realmDiamond.address);
