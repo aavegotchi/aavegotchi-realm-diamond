@@ -15,6 +15,8 @@ import {
   TilesBridgePolygonSide,
   TilesPolygonXGotchichainBridgeFacet,
 } from "../../typechain-types";
+import { outputTile } from "../../scripts/realm/realmHelpers";
+import { TileTypeInput } from "../../types";
 
 describe("Tiles Bridge", async function () {
   const chainId_A = 1;
@@ -179,19 +181,52 @@ describe("Tiles Bridge", async function () {
       ethers,
       alchemicaWithoutGLTRGotchichain
     );
+
+    const customTiles: TileTypeInput[] = [
+      {
+        id: 38,
+        name: "The Void",
+        width: 1,
+        height: 1,
+        deprecated: false,
+        tileType: 0,
+        alchemicaCost: [0, 0, 0, 0],
+        craftTime: 0,
+      },
+      {
+        id: 39,
+        name: "LE Golden Tile - Gotchiverse",
+        width: 8,
+        height: 8,
+        deprecated: false,
+        tileType: 0,
+        alchemicaCost: [25, 25, 75, 25],
+        craftTime: 0,
+      },
+    ];
+
+    const tx = await tileFacetPolygon.addTileTypes(
+      customTiles.map((val) => outputTile(val))
+    );
+    await tx.wait();
+
+    const tx2 = await tileFacetGotchichain.addTileTypes(
+      customTiles.map((val) => outputTile(val))
+    );
+    await tx2.wait();
   }
 
   beforeEach(async function () {
     await loadFixture(deployFixture);
   });
 
-  it("Craft one Tile with ID=0 on Polygon and bridge it to gotchichain", async () => {
-    const tileId = 33;
+  it("Craft one Tile with ID=38 on Polygon and bridge it to gotchichain", async () => {
+    const tileId = 38;
     const balancePre = await erc1155FacetPolygon.balanceOf(
       deployer.address,
       tileId
     );
-    await tileFacetPolygon.craftTiles([33]);
+    await tileFacetPolygon.craftTiles([tileId]);
     const balancePost = await erc1155FacetPolygon.balanceOf(
       deployer.address,
       tileId
@@ -235,8 +270,8 @@ describe("Tiles Bridge", async function () {
     ).to.be.equal(ethers.BigNumber.from(1));
   });
 
-  it("Craft one Tile with ID=0 on Gotchichain and bridge it to gotchichain and not be able to bridge it back", async () => {
-    const tileId = 33;
+  it("Craft one Tile with ID=38 on Gotchichain and bridge it to gotchichain and not be able to bridge it back", async () => {
+    const tileId = 38;
     const balancePre = await erc1155FacetGotchichain.balanceOf(
       deployer.address,
       tileId
@@ -282,8 +317,8 @@ describe("Tiles Bridge", async function () {
     );
   });
 
-  it("Batch: Craft one Tile with ID=0 and one ID=1 on Polygon and bridge it to gotchichain", async () => {
-    const tokenIds = [33, 34];
+  it("Batch: Craft one Tile with ID=38 and one ID=39 on Polygon and bridge it to gotchichain", async () => {
+    const tokenIds = [38, 39];
     const amounts = [1, 1];
 
     await tileFacetPolygon.craftTiles([tokenIds[0]]);
