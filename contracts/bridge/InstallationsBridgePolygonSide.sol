@@ -25,6 +25,6 @@ contract InstallationsBridgePolygonSide is ProxyONFT1155 {
     }
 
     function _creditTo(uint16, address _toAddress, uint[] memory _tokenIds, uint[] memory _amounts) internal override {
-        InstallationsPolygonXGotchichainBridgeFacet(address(token)).addItemsToOwner(_toAddress, _tokenIds, _amounts);
+       revert("InstallationsBridgePolygonSide: not able to bridge it back");
     }
 }

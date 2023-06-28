@@ -20,8 +20,7 @@ contract InstallationsBridgeGotchichainSide is ProxyONFT1155 {
     }
 
     function _debitFrom(address _from, uint16, bytes memory, uint[] memory _tokenIds, uint[] memory _amounts) internal override {
-        require(_from == _msgSender(), "ItemsBridgePolygonSide: owner is not send caller");
-        InstallationsPolygonXGotchichainBridgeFacet(address(token)).removeItemsFromOwner(_from, _tokenIds, _amounts);
+       revert("InstallationsBridgeGotchichainSide: not able to bridge it back");
     }
 
     function _creditTo(uint16, address _toAddress, uint[] memory _tokenIds, uint[] memory _amounts) internal override {

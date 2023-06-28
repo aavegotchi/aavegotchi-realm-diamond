@@ -37,6 +37,7 @@
     "typescript": "^4.3.5"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.8",
     "@nomiclabs/hardhat-ethers": "^2.0.5",
     "@nomiclabs/hardhat-etherscan": "^2.1.8",
     "@openzeppelin/hardhat-upgrades": "^1.17.0",
