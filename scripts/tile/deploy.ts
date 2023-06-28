@@ -56,6 +56,7 @@ export async function deployDiamondTile(realmDiamondAddress) {
     "OwnershipFacet",
     "TileFacet",
     "ERC1155TileFacet",
+    "TilesPolygonXGotchichainBridgeFacet",
   ];
   const cut = [];
   for (const FacetName of FacetNames) {
@@ -105,7 +106,7 @@ export async function deployDiamondTile(realmDiamondAddress) {
     );
   }
 
-  return diamond.address;
+  return diamond;
 }
 
 // We recommend this pattern to be able to use async/await everywhere

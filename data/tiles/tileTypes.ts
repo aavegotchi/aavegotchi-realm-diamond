@@ -446,7 +446,7 @@ export const tileTypes: TileTypeInput[] = [
     FOMO: 0,
     ALPHA: 105,
     KEK: 16,
-    deprecateTime: 1685404800,
+    deprecateTime: 16854048000,
   },
   {
     id: 34,
@@ -461,7 +461,7 @@ export const tileTypes: TileTypeInput[] = [
     FOMO: 0,
     ALPHA: 60,
     KEK: 25,
-    deprecateTime: 1685404800,
+    deprecateTime: 16854048000,
   },
   {
     id: 35,
