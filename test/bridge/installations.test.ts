@@ -188,16 +188,18 @@ describe("Installation Bridge", async function () {
   });
 
   it("Craft one installation with ID=0 on Polygon and bridge it to gotchichain", async () => {
-    await installationFacetPolygon.craftInstallations([0], [0]);
+    const installationId = 10;
+    const balancePre = await erc1155FacetPolygon.balanceOf(
+      deployer.address,
+      installationId
+    );
+    await installationFacetPolygon.craftInstallations([installationId], [0]);
 
-    await mineBlocks(ethers, 11000);
-
-    const balancePre = await erc1155FacetPolygon.balanceOf(deployer.address, 0);
-    await installationFacetPolygon.claimInstallations([0]);
     const balancePost = await erc1155FacetPolygon.balanceOf(
       deployer.address,
-      0
+      installationId
     );
+
     expect(balancePost).to.gt(balancePre);
 
     await erc1155FacetPolygon.setApprovalForAll(
@@ -208,7 +210,7 @@ describe("Installation Bridge", async function () {
       deployer.address,
       chainId_B,
       deployer.address,
-      0,
+      installationId,
       1,
       deployer.address,
       ethers.constants.AddressZero,
@@ -218,7 +220,7 @@ describe("Installation Bridge", async function () {
           await bridgePolygonSide.estimateSendFee(
             chainId_B,
             deployer.address,
-            0,
+            installationId,
             1,
             false,
             defaultAdapterParams
@@ -229,26 +231,27 @@ describe("Installation Bridge", async function () {
     await sendFromTx.wait();
 
     expect(
-      await erc1155FacetPolygon.balanceOf(deployer.address, 0)
+      await erc1155FacetPolygon.balanceOf(deployer.address, installationId)
     ).to.be.equal(ethers.BigNumber.from(0));
     expect(
-      await erc1155FacetGotchichain.balanceOf(deployer.address, 0)
+      await erc1155FacetGotchichain.balanceOf(deployer.address, installationId)
     ).to.be.equal(ethers.BigNumber.from(1));
   });
 
   it("Craft one installation with ID=0 on Gotchichain and bridge it to gotchichain and not be able to bridge it back", async () => {
-    await installationFacetGotchichain.craftInstallations([0], [0]);
-
-    await mineBlocks(ethers, 11000);
-
+    const installationId = 10;
     const balancePre = await erc1155FacetGotchichain.balanceOf(
       deployer.address,
-      0
+      installationId
     );
-    await installationFacetGotchichain.claimInstallations([0]);
+    await installationFacetGotchichain.craftInstallations(
+      [installationId],
+      [0]
+    );
+
     const balancePost = await erc1155FacetGotchichain.balanceOf(
       deployer.address,
-      0
+      installationId
     );
     expect(balancePost).to.gt(balancePre);
 
@@ -262,7 +265,7 @@ describe("Installation Bridge", async function () {
         deployer.address,
         chainId_A,
         deployer.address,
-        0,
+        installationId,
         1,
         deployer.address,
         ethers.constants.AddressZero,
@@ -272,7 +275,7 @@ describe("Installation Bridge", async function () {
             await bridgeGotchichainSide.estimateSendFee(
               chainId_A,
               deployer.address,
-              0,
+              installationId,
               1,
               false,
               defaultAdapterParams
@@ -286,16 +289,11 @@ describe("Installation Bridge", async function () {
   });
 
   it("Batch: Craft one installation with ID=0 and one ID=1 on Polygon and bridge it to gotchichain", async () => {
-    const tokenIds = [0, 1];
+    const tokenIds = [10, 55];
     const amounts = [1, 1];
 
-    await installationFacetPolygon.craftInstallations([0], [0]);
-    await installationFacetPolygon.craftInstallations([1], [0]);
-
-    await mineBlocks(ethers, 11000);
-
-    await installationFacetPolygon.claimInstallations([0]);
-    await installationFacetPolygon.claimInstallations([1]);
+    await installationFacetPolygon.craftInstallations([tokenIds[0]], [0]);
+    await installationFacetPolygon.craftInstallations([tokenIds[1]], [0]);
 
     await erc1155FacetPolygon.setApprovalForAll(
       bridgePolygonSide.address,
@@ -326,16 +324,16 @@ describe("Installation Bridge", async function () {
     );
 
     expect(
-      await erc1155FacetPolygon.balanceOf(deployer.address, 0)
+      await erc1155FacetPolygon.balanceOf(deployer.address, tokenIds[0])
     ).to.be.equal(ethers.BigNumber.from(0));
     expect(
-      await erc1155FacetPolygon.balanceOf(deployer.address, 1)
+      await erc1155FacetPolygon.balanceOf(deployer.address, tokenIds[1])
     ).to.be.equal(ethers.BigNumber.from(0));
     expect(
-      await erc1155FacetGotchichain.balanceOf(deployer.address, 0)
+      await erc1155FacetGotchichain.balanceOf(deployer.address, tokenIds[0])
     ).to.be.equal(ethers.BigNumber.from(1));
     expect(
-      await erc1155FacetGotchichain.balanceOf(deployer.address, 1)
+      await erc1155FacetGotchichain.balanceOf(deployer.address, tokenIds[1])
     ).to.be.equal(ethers.BigNumber.from(1));
   });
 
