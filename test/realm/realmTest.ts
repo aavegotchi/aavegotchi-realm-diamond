@@ -5,7 +5,6 @@ import { network } from "hardhat";
 import { ethers } from "hardhat";
 import { MintParcelInput } from "../../types";
 import { deployDiamond } from "../../scripts/deployMatic";
-import { BigNumber } from "@ethersproject/bignumber";
 
 const testAddress1 = "0xBC67F26c2b87e16e304218459D2BB60Dac5C80bC";
 const testAddress2 = "0xC99DF6B7A5130Dce61bA98614A2457DAA8d92d1c";

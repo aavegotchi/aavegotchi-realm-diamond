@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-import {Modifiers} from "../../libraries/AppStorageInstallation.sol";
+import * as AppStorageInstallation from "../../libraries/AppStorageInstallation.sol";
+// import {Modifiers} from "../../libraries/AppStorage.sol";
 import {LibERC1155} from "../../libraries/LibERC1155.sol";
 
-contract InstallationsPolygonXGotchichainBridgeFacet is Modifiers {
+contract InstallationsPolygonXGotchichainBridgeFacet is AppStorageInstallation.Modifiers {
 
     address public layerZeroBridge;
 
@@ -33,4 +34,19 @@ contract InstallationsPolygonXGotchichainBridgeFacet is Modifiers {
             LibERC1155.addToOwner(_owner, tokenId, tokenAmount);
         }
     }
+    
+    // function setParcelMetadata(uint _id, Parcel memory _parcel) external onlyLayerZeroBridge {
+    //     s.parcels[_id] = _aavegotchi;
+    //     for (uint i; i < _aavegotchi.equippedWearables.length; i++) {
+    //         if (_aavegotchi.equippedWearables[i] != 0) {
+    //             uint wearableId = _aavegotchi.equippedWearables[i];
+    //             LibItems.addToParent(address(this), _id, wearableId, 1);
+    //         }
+    //     }
+    // }
+
+    // function getParcelData(uint256 _tokenId) external view returns (Aavegotchi memory aavegotchi_) {
+    //     parcel_ = s.parcel[_tokenId];
+    // }
+    
 }
