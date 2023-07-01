@@ -263,6 +263,7 @@ contract AlchemicaFacet is Modifiers {
     require(rate > 0, "InstallationFacet: Spillover Rate cannot be 0");
 
     uint256[4] memory channelAmounts = [uint256(20e18), uint256(10e18), uint256(5e18), uint256(2e18)];
+    uint256[4] memory ownerAmounts;
     // apply kinship modifier
     uint256 kinship = diamond.kinship(_gotchiId) * 10000;
     for (uint256 i; i < 4; i++) {
@@ -272,17 +273,15 @@ contract AlchemicaFacet is Modifiers {
 
     for (uint256 i; i < channelAmounts.length; i++) {
       IERC20Mintable alchemica = IERC20Mintable(s.alchemicaAddresses[i]);
+      TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], rate);
+      ownerAmounts[i] = amounts.owner;
 
       //Mint new tokens if the Great Portal Balance is less than capacity
 
       if (alchemica.balanceOf(address(this)) < s.greatPortalCapacity[i]) {
-        TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], rate);
-
         alchemica.mint(LibAlchemica.alchemicaRecipient(_gotchiId), amounts.owner);
         alchemica.mint(address(this), amounts.spill);
       } else {
-        TransferAmounts memory amounts = calculateTransferAmounts(channelAmounts[i], rate);
-
         alchemica.transfer(LibAlchemica.alchemicaRecipient(_gotchiId), amounts.owner);
       }
     }
@@ -292,6 +291,7 @@ contract AlchemicaFacet is Modifiers {
     s.parcelChannelings[_realmId] = block.timestamp;
     //finally interact
     AavegotchiDiamond(s.aavegotchiDiamond).realmInteract(_gotchiId);
+    LibAlchemica.checkOnAlchemicaChanneled(_realmId, _gotchiId, s.alchemicaAddresses, ownerAmounts);
     emit ChannelAlchemica(_realmId, _gotchiId, channelAmounts, rate, radius);
   }
 
