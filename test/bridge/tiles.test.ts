@@ -384,7 +384,7 @@ describe("Tiles Bridge", async function () {
         .connect(bob)
         .removeItemsFromOwner(bob.address, [1], [1])
     ).to.be.revertedWith(
-      "TilesPolygonXGotchichainBridgeFacet: Only layerzero bridge"
+      "LibAppStorage: Do not have access"
     );
 
     await expect(
@@ -392,7 +392,7 @@ describe("Tiles Bridge", async function () {
         .connect(bob)
         .addItemsToOwner(bob.address, [1], [1])
     ).to.be.revertedWith(
-      "TilesPolygonXGotchichainBridgeFacet: Only layerzero bridge"
+      "LibAppStorage: Do not have access"
     );
   });
 });

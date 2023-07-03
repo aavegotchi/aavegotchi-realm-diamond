@@ -5,16 +5,8 @@ import {Modifiers} from "../../libraries/AppStorageInstallation.sol";
 import {LibERC1155} from "../../libraries/LibERC1155.sol";
 
 contract TilesPolygonXGotchichainBridgeFacet is Modifiers {
-
-    address public layerZeroBridge;
-
-    modifier onlyLayerZeroBridge() {
-        require(msg.sender == layerZeroBridge, "TilesPolygonXGotchichainBridgeFacet: Only layerzero bridge");
-        _;
-    }
-
     function setLayerZeroBridge(address _newLayerZeroBridge) external onlyOwner(){ // todo check only dao or owner
-        layerZeroBridge = _newLayerZeroBridge;
+        s.layerZeroBridgeAddresses[_newLayerZeroBridge] = true;
     }
 
     function removeItemsFromOwner(address _owner, uint256[] calldata _tokenIds, uint256[] calldata _tokenAmounts) external onlyLayerZeroBridge() {
