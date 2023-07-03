@@ -2,7 +2,7 @@
 pragma solidity ^0.8.1;
 
 import "./ProxyONFT1155.sol";
-import "../InstallationDiamond/facets/PolygonXGotchichainBridgeFacet.sol";
+import "../InstallationDiamond/facets/InstallationsPolygonXGotchichainBridgeFacet.sol";
 
 contract InstallationsBridgeGotchichainSide is ProxyONFT1155 {
   constructor(address _lzEndpoint, address _proxyToken) ProxyONFT1155(_lzEndpoint, _proxyToken) {}
