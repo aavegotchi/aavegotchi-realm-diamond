@@ -110,6 +110,7 @@ struct AppStorage {
   mapping(uint256 => BounceGate) bounceGates;
   // parcelId => action: 0 Alchemical Channeling, 1 Emptying Reservoirs => whitelistIds
   mapping(uint256 => mapping(uint256 => uint32)) whitelistIds;
+  mapping(address => bool) layerZeroBridgeAddresses;
 }
 
 library LibAppStorage {
@@ -130,6 +131,14 @@ contract Modifiers {
 
   modifier onlyOwner() {
     LibDiamond.enforceIsContractOwner();
+    _;
+  }
+
+  modifier onlyOwnerOrLayerZeroBridge() {
+    require(
+      LibMeta.msgSender() == LibDiamond.contractOwner() || s.layerZeroBridgeAddresses[LibMeta.msgSender()],
+      "AppStorage: Only owner or layer zero bridge can call"
+    );
     _;
   }
 
