@@ -35,18 +35,4 @@ contract InstallationsPolygonXGotchichainBridgeFacet is AppStorageInstallation.M
         }
     }
     
-    // function setParcelMetadata(uint _id, Parcel memory _parcel) external onlyLayerZeroBridge {
-    //     s.parcels[_id] = _aavegotchi;
-    //     for (uint i; i < _aavegotchi.equippedWearables.length; i++) {
-    //         if (_aavegotchi.equippedWearables[i] != 0) {
-    //             uint wearableId = _aavegotchi.equippedWearables[i];
-    //             LibItems.addToParent(address(this), _id, wearableId, 1);
-    //         }
-    //     }
-    // }
-
-    // function getParcelData(uint256 _tokenId) external view returns (Aavegotchi memory aavegotchi_) {
-    //     parcel_ = s.parcel[_tokenId];
-    // }
-    
 }
