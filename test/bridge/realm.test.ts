@@ -13,23 +13,25 @@ import {
 } from "../../typechain";
 import {
   ERC721Facet,
-  InstallationsBridgeGotchichainSide,
-  InstallationsBridgePolygonSide,
+  RealmsBridgePolygonSide,
+  RealmsBridgeGotchichainSide,
   InstallationsPolygonXGotchichainBridgeFacet,
   RealmFacet,
+  RealmsPolygonXGotchichainBridgeFacet,
 } from "../../typechain-types";
 import { MintParcelInput } from "../../types";
 
-describe("Installation Bridge", async function () {
+describe("Realms Bridge", async function () {
   const chainId_A = 1;
   const chainId_B = 2;
+  const minGasToStore = 150000
   const defaultAdapterParams = ethers.utils.solidityPack(
     ["uint16", "uint256"],
     [1, "350000"]
   );
   let LZEndpointMock: any,
-    bridgePolygonSide: InstallationsBridgePolygonSide,
-    bridgeGotchichainSide: InstallationsBridgeGotchichainSide;
+    bridgePolygonSide: RealmsBridgePolygonSide,
+    bridgeGotchichainSide: RealmsBridgeGotchichainSide;
   let lzEndpointMockA: any, lzEndpointMockB: any;
 
   let installationFacetPolygon: InstallationFacet,
@@ -39,8 +41,8 @@ describe("Installation Bridge", async function () {
   let erc721FacetPolygon: ERC721Facet, erc721FacetGotchichain: ERC721Facet;
   let installationsDiamondPolygon: InstallationDiamond,
     installationsDiamondGotchichain: InstallationDiamond;
-  let installationsPolygonBridgeFacet: InstallationsPolygonXGotchichainBridgeFacet;
-  let installationsGotchichainBridgeFacet: InstallationsPolygonXGotchichainBridgeFacet;
+  let realmsPolygonBridgeFacet: RealmsPolygonXGotchichainBridgeFacet;
+  let realmsGotchichainBridgeFacet: RealmsPolygonXGotchichainBridgeFacet;
   let alchemicaPolygon, alchemicaGotchichain;
   let deployer: SignerWithAddress;
   let realmDiamondPolygon, realmDiamondGotchichain;
@@ -84,14 +86,14 @@ describe("Installation Bridge", async function () {
       installationsDiamondGotchichain.address
     );
 
-    installationsPolygonBridgeFacet = await ethers.getContractAt(
-      "InstallationsPolygonXGotchichainBridgeFacet",
-      installationsDiamondPolygon.address
+    realmsPolygonBridgeFacet = await ethers.getContractAt(
+      "RealmsPolygonXGotchichainBridgeFacet",
+      realmDiamondPolygon.address
     );
 
-    installationsGotchichainBridgeFacet = await ethers.getContractAt(
-      "InstallationsPolygonXGotchichainBridgeFacet",
-      installationsDiamondGotchichain.address
+    realmsGotchichainBridgeFacet = await ethers.getContractAt(
+      "RealmsPolygonXGotchichainBridgeFacet",
+      realmDiamondGotchichain.address
     );
 
     realmFacetPolygon = await ethers.getContractAt(
@@ -99,9 +101,19 @@ describe("Installation Bridge", async function () {
       realmDiamondPolygon.address
     );
 
+    realmFacetGotchichain = await ethers.getContractAt(
+      "RealmFacet",
+      realmDiamondGotchichain.address
+    );
+
     erc721FacetPolygon = await ethers.getContractAt(
       "ERC721Facet",
       realmDiamondPolygon.address
+    );
+
+    erc721FacetGotchichain = await ethers.getContractAt(
+      "ERC721Facet",
+      realmDiamondGotchichain.address
     );
 
     LZEndpointMock = await ethers.getContractFactory(
@@ -109,10 +121,10 @@ describe("Installation Bridge", async function () {
       LZEndpointMockCompiled.bytecode
     );
     const BridgePolygonSide = await ethers.getContractFactory(
-      "InstallationsBridgePolygonSide"
+      "RealmsBridgePolygonSide"
     );
     const BridgeGotchichainSide = await ethers.getContractFactory(
-      "InstallationsBridgeGotchichainSide"
+      "RealmsBridgeGotchichainSide"
     );
 
     //Deploying LZEndpointMock contracts
@@ -120,14 +132,8 @@ describe("Installation Bridge", async function () {
     lzEndpointMockB = await LZEndpointMock.deploy(chainId_B);
 
     //Deploying bridge contracts
-    bridgePolygonSide = await BridgePolygonSide.deploy(
-      lzEndpointMockA.address,
-      installationsDiamondPolygon.address
-    );
-    bridgeGotchichainSide = await BridgeGotchichainSide.deploy(
-      lzEndpointMockB.address,
-      installationsDiamondGotchichain.address
-    );
+    bridgePolygonSide = await BridgePolygonSide.deploy(minGasToStore, lzEndpointMockA.address, realmFacetPolygon.address)
+    bridgeGotchichainSide = await BridgeGotchichainSide.deploy(minGasToStore, lzEndpointMockB.address, realmFacetGotchichain.address)
 
     lzEndpointMockA.setDestLzEndpoint(
       bridgeGotchichainSide.address,
@@ -139,8 +145,8 @@ describe("Installation Bridge", async function () {
     );
 
     //Set custom adapter params for both bridges
-    await bridgePolygonSide.setUseCustomAdapterParams(true);
-    await bridgeGotchichainSide.setUseCustomAdapterParams(true);
+    // await bridgePolygonSide.setUseCustomAdapterParams(true);
+    // await bridgeGotchichainSide.setUseCustomAdapterParams(true);
 
     //Set each contracts source address so it can send to each other
     await bridgePolygonSide.setTrustedRemote(
@@ -164,13 +170,14 @@ describe("Installation Bridge", async function () {
     await bridgePolygonSide.setMinDstGas(chainId_B, 2, 150000);
     await bridgeGotchichainSide.setMinDstGas(chainId_A, 2, 150000);
 
+    await bridgePolygonSide.setPayloadSizeLimit(chainId_B, 300000000);
+
     //Set layer zero bridge on facet
-    await installationsPolygonBridgeFacet
+    await realmsPolygonBridgeFacet
+      .addLayerZeroBridgeAddress(bridgePolygonSide.address);
+    await realmsGotchichainBridgeFacet
       .connect(deployer)
-      .setLayerZeroBridge(bridgePolygonSide.address);
-    await installationsGotchichainBridgeFacet
-      .connect(deployer)
-      .setLayerZeroBridge(bridgeGotchichainSide.address);
+      .addLayerZeroBridgeAddress(bridgeGotchichainSide.address);
 
     //Alchemica
     await faucetRealAlchemica(
@@ -203,6 +210,11 @@ describe("Installation Bridge", async function () {
   });
 
   it("", async () => {
+
+    // const parcelData = await bridgePolygonSide.test()
+    // console.log(parcelData.roundBaseAlchemicas)
+   
+
     console.log("FIRST TEST")
     const boostFomo = Math.floor(Math.random() * 4);
     const boostFud = Math.floor(Math.random() * 4);
@@ -217,11 +229,48 @@ describe("Installation Bridge", async function () {
       district: 1,
       parcelAddress: "hey-whats-up",
     }];
+    
+    console.log("deployer.address", deployer.address)
+    console.log("realmFacetPolygon", deployer.address)
 
-    console.log(deployer.address)
+
+    console.log("\n\n")
+
     await realmFacetPolygon.mintParcels([deployer.address], [5], parcelsTest1);
 
-    console.log(await erc721FacetPolygon.ownerOf(5));
+    const tokenId = 5
+
+    //Estimate nativeFees
+    
+    await erc721FacetPolygon.approve(bridgePolygonSide.address, tokenId);
+
+    console.log("Estimate nativeFees")
+    // let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, deployer.address, tokenId, false, defaultAdapterParams)).nativeFee
+
+    console.log("erc721FacetGotchichain.ownerOf(tokenId)", await erc721FacetGotchichain.ownerOf(tokenId))
+
+    console.log("SendFrom")
+    const sendFromTx = await bridgePolygonSide.sendFrom(
+      deployer.address,
+      chainId_B,
+      deployer.address,
+      tokenId,
+      deployer.address,
+      ethers.constants.AddressZero,
+      defaultAdapterParams,
+      { 
+        value: ethers.utils.parseEther("1"),
+        gasLimit: "20000000"
+      }
+    )
+    await sendFromTx.wait()
+    
+    console.log("deployer address", deployer.address)
+    expect(await erc721FacetPolygon.balanceOf(bridgePolygonSide.address)).to.equal(1)
+    expect(await erc721FacetPolygon.ownerOf(tokenId)).to.equal(bridgePolygonSide.address)
+
+    expect(await erc721FacetGotchichain.balanceOf(deployer.address)).to.equal(1)
+    expect(await erc721FacetGotchichain.ownerOf(tokenId)).to.equal(deployer.address)
   });
 });
 
