@@ -85,6 +85,7 @@ async function deployRealmDiamond(deployerAddress: string) {
     "BounceGateFacet",
     "NFTDisplayFacet",
     "VRFFacet",
+    "RealmsPolygonXGotchichainBridgeFacet"
   ];
   const cut = [];
   for (const FacetName of FacetNames) {
@@ -277,12 +278,12 @@ export async function deploy() {
   console.log("Adding installation types");
   const installationTypes = [
     mainInstallationTypes,
-    farmingInstallationTypes,
-    nftInstallationTypes,
-    bounceGateInstallationTypes,
-    halloweenInstallationTypes,
-    xmasInstallationTypes,
-    nftBigInstallationTypes,
+    // farmingInstallationTypes,
+    // nftInstallationTypes,
+    // bounceGateInstallationTypes,
+    // halloweenInstallationTypes,
+    // xmasInstallationTypes,
+    // nftBigInstallationTypes,
   ];
   for (let i = 0; i < installationTypes.length; i++) {
     tx = await installationAdminFacet.addInstallationTypes(
