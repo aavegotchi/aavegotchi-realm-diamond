@@ -126,7 +126,7 @@ contract Modifiers {
   }
 
   modifier onlyLayerZeroBridge() {
-    require(s.layerZeroBridgeAddresses[msg.sender], "LibAppStorage: Do not have access");
+    require(s.layerZeroBridgeAddresses[msg.sender], "LibDiamond: Only layerzero bridge");
     _;
   }
 }
