@@ -96,7 +96,7 @@ struct InstallationAppStorage {
   mapping(uint256 => uint256[]) parcelIdToUpgradeIds; // will not track upgrades before this variable's existence
   mapping(address => bool) gameManager;
 
-  address layerZeroBridge;
+  mapping(address => bool) layerZeroBridgeAddresses;
 }
 
 library LibAppStorageInstallation {
@@ -126,7 +126,7 @@ contract Modifiers {
   }
 
   modifier onlyLayerZeroBridge() {
-    require(msg.sender == s.layerZeroBridge, "InstallationsPolygonXGotchichainBridgeFacet: Only layerzero bridge");
+    require(s.layerZeroBridgeAddresses[msg.sender], "LibDiamond: Only layerzero bridge");
     _;
   }
 }

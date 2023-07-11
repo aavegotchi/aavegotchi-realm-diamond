@@ -1,17 +1,14 @@
 import LZEndpointMockCompiled from "@layerzerolabs/solidity-examples/artifacts/contracts/mocks/LZEndpointMock.sol/LZEndpointMock.json";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
 import { deploy } from "../../scripts/deployAll";
-import { mineBlocks } from "../../scripts/helperFunctions";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
   AlchemicaToken,
   ERC1155Facet,
   InstallationDiamond,
   InstallationFacet,
-} from "../../typechain";
-import {
   InstallationsBridgeGotchichainSide,
   InstallationsBridgePolygonSide,
   InstallationsPolygonXGotchichainBridgeFacet,
@@ -150,12 +147,12 @@ describe("Installation Bridge", async function () {
     await bridgeGotchichainSide.setMinDstGas(chainId_A, 2, 150000);
 
     //Set layer zero bridge on facet
-    await installationsPolygonBridgeFacet
+    await installationFacetPolygon
       .connect(deployer)
-      .setLayerZeroBridge(bridgePolygonSide.address);
-    await installationsGotchichainBridgeFacet
+      .addLayerZeroBridgeAddress(bridgePolygonSide.address);
+    await installationFacetGotchichain
       .connect(deployer)
-      .setLayerZeroBridge(bridgeGotchichainSide.address);
+      .addLayerZeroBridgeAddress(bridgeGotchichainSide.address);
 
     //Alchemica
     await faucetRealAlchemica(
@@ -341,9 +338,9 @@ describe("Installation Bridge", async function () {
     const accounts = await ethers.getSigners();
     const bob = accounts[1];
     await expect(
-      installationsGotchichainBridgeFacet
+      installationFacetPolygon
         .connect(bob)
-        .setLayerZeroBridge(bridgeGotchichainSide.address)
+        .addLayerZeroBridgeAddress(bridgeGotchichainSide.address)
     ).to.be.revertedWith("LibDiamond: Must be contract owner");
   });
 
@@ -355,7 +352,7 @@ describe("Installation Bridge", async function () {
         .connect(bob)
         .removeItemsFromOwner(bob.address, [1], [1])
     ).to.be.revertedWith(
-      "InstallationsPolygonXGotchichainBridgeFacet: Only layerzero bridge"
+      "LibDiamond: Only layerzero bridge"
     );
 
     await expect(
@@ -363,7 +360,7 @@ describe("Installation Bridge", async function () {
         .connect(bob)
         .addItemsToOwner(bob.address, [1], [1])
     ).to.be.revertedWith(
-      "InstallationsPolygonXGotchichainBridgeFacet: Only layerzero bridge"
+      "LibDiamond: Only layerzero bridge"
     );
   });
 });
