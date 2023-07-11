@@ -30,6 +30,10 @@ contract TileFacet is Modifiers {
 
   event EditDeprecateTime(uint256 _tileId, uint256 _newDeprecatetime);
 
+  event LayerZeroBridgeAdded(address _newLayerZeroBridge);
+
+  event LayerZeroBridgeRemoved(address _layerZeroBridgeToRemove);
+
   /***********************************|
    |             Read Functions         |
    |__________________________________*/
@@ -436,5 +440,11 @@ contract TileFacet is Modifiers {
       s.tileTypes[_typeIds[i]] = _updatedTiles[i];
       emit EditTileType(_typeIds[i], _updatedTiles[i]);
     }
+  }
+
+  ///@notice Allow the owner to add an address as a Layer Zero bridge
+  ///@param _newLayerZeroBridge The address to be added as Layer Zero bridge
+  function setLayerZeroBridgeAddress(address _newLayerZeroBridge) external onlyOwner {
+    s.layerZeroBridgeAddress = _newLayerZeroBridge;
   }
 }

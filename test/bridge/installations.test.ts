@@ -149,10 +149,10 @@ describe("Installation Bridge", async function () {
     //Set layer zero bridge on facet
     await installationFacetPolygon
       .connect(deployer)
-      .addLayerZeroBridgeAddress(bridgePolygonSide.address);
+      .setLayerZeroBridgeAddress(bridgePolygonSide.address);
     await installationFacetGotchichain
       .connect(deployer)
-      .addLayerZeroBridgeAddress(bridgeGotchichainSide.address);
+      .setLayerZeroBridgeAddress(bridgeGotchichainSide.address);
 
     //Alchemica
     await faucetRealAlchemica(
@@ -340,7 +340,7 @@ describe("Installation Bridge", async function () {
     await expect(
       installationFacetPolygon
         .connect(bob)
-        .addLayerZeroBridgeAddress(bridgeGotchichainSide.address)
+        .setLayerZeroBridgeAddress(bridgeGotchichainSide.address)
     ).to.be.revertedWith("LibDiamond: Must be contract owner");
   });
 

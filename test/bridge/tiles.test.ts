@@ -5,15 +5,13 @@ import { deploy } from "../../scripts/deployAll";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
+  TilesBridgeGotchichainSide,
+  TilesBridgePolygonSide,
+  TilesPolygonXGotchichainBridgeFacet,
   AlchemicaToken,
   ERC1155TileFacet,
   TileDiamond,
   TileFacet,
-} from "../../typechain";
-import {
-  TilesBridgeGotchichainSide,
-  TilesBridgePolygonSide,
-  TilesPolygonXGotchichainBridgeFacet,
 } from "../../typechain-types";
 import { outputTile } from "../../scripts/realm/realmHelpers";
 import { TileTypeInput } from "../../types";
@@ -150,12 +148,12 @@ describe("Tiles Bridge", async function () {
     await bridgeGotchichainSide.setMinDstGas(chainId_A, 2, 150000);
 
     //Set layer zero bridge on facet
-    await tilesPolygonBridgeFacet
+    await tileFacetPolygon
       .connect(deployer)
-      .setLayerZeroBridge(bridgePolygonSide.address);
-    await tilesGotchichainBridgeFacet
+      .setLayerZeroBridgeAddress(bridgePolygonSide.address);
+    await tileFacetGotchichain
       .connect(deployer)
-      .setLayerZeroBridge(bridgeGotchichainSide.address);
+      .setLayerZeroBridgeAddress(bridgeGotchichainSide.address);
 
     //Alchemica
     await faucetRealAlchemica(
@@ -370,9 +368,9 @@ describe("Tiles Bridge", async function () {
     const accounts = await ethers.getSigners();
     const bob = accounts[1];
     await expect(
-      tilesGotchichainBridgeFacet
+      tileFacetPolygon
         .connect(bob)
-        .setLayerZeroBridge(bridgeGotchichainSide.address)
+        .setLayerZeroBridgeAddress(bridgeGotchichainSide.address)
     ).to.be.revertedWith("LibDiamond: Must be contract owner");
   });
 
@@ -384,7 +382,7 @@ describe("Tiles Bridge", async function () {
         .connect(bob)
         .removeItemsFromOwner(bob.address, [1], [1])
     ).to.be.revertedWith(
-      "LibAppStorage: Do not have access"
+      "LibDiamond: Only layerzero bridge"
     );
 
     await expect(
@@ -392,7 +390,7 @@ describe("Tiles Bridge", async function () {
         .connect(bob)
         .addItemsToOwner(bob.address, [1], [1])
     ).to.be.revertedWith(
-      "LibAppStorage: Do not have access"
+      "LibDiamond: Only layerzero bridge"
     );
   });
 });
