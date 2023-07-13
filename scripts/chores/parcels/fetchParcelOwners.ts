@@ -11,6 +11,30 @@ export async function getParcels() {
         id
         owner
         tokenId
+        parcelId
+        parcelHash
+        coordinateX
+        coordinateY
+        district
+        alphaBoost
+        fomoBoost
+        fudBoost
+        kekBoost
+        lastChanneledAlchemica
+        remainingAlchemica
+        lastClaimedAlchemica
+        surveyRound
+        size
+        equippedInstallations {
+          id
+          width
+          height
+        }
+        equippedTiles {
+          id
+          height
+          width
+        }
       }
     }
   `;
