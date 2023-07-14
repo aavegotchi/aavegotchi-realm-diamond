@@ -48,15 +48,15 @@ async function getParcels() {
     "RealmGettersAndSettersFacet",
     c.realmDiamond
   )) as RealmGettersAndSettersFacet;
-  const testParcels = await realmGettersAndSettersFacet.getParcels([10]);
-  console.log(testParcels)
-
-  let step = 40;
+  let step = 30;
   let sliceStep = allParcelIds.length / step;
+  let allParcels = [];
   for (let i = 0; i < step; i++) {
-    const testParcels = await realmGettersAndSettersFacet.getParcels(allParcelIds.slice(sliceStep * i, sliceStep * (i + 1)));
-    console.log(testParcels)
+    const parcels = await realmGettersAndSettersFacet.getParcels(allParcelIds.slice(sliceStep * i, sliceStep * (i + 1)));
+    allParcels = allParcels.concat(parcels);
   }
+  const json = JSON.stringify(allParcels);
+  await fs.writeFile("./allParcels.json", json, "utf8");
 }
 
 // We recommend this pattern to be able to use async/await everywhere
