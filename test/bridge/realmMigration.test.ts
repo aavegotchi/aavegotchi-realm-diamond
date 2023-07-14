@@ -107,14 +107,17 @@ describe("Realms Migration", async function () {
     await loadFixture(deployFixture);
   });
 
-  it("Save simple parcel data", async () => {
-    const sparsedArray = make2DArraySparse(grid)
-    await migrationFacet.saveGrid(parcelId, sparsedArray)
+  it.only("Save simple parcel data", async () => {
+    await migrationFacet.saveSimpleParcelData(simpleParcel, parcelId)
 
-    const returnedGrid = await migrationFacet.getGrid(parcelId, 0)
-    const convertedReturnedGrid = convertContentToString(returnedGrid)
+    const returnedSimpleParcel = await migrationFacet.getSimpleParcel(parcelId);
 
-    expect(grid).to.deep.equal(convertedReturnedGrid)
+    console.log("\nBefore\n ")
+    console.log(simpleParcel)
+    console.log("\nAfter\n ")
+    console.log(returnedSimpleParcel)
+
+    compareResult(simpleParcel, returnedSimpleParcel)
   });
 
   it("Save grid", async () => {
@@ -212,6 +215,28 @@ const convertContentToString = (array) => {
   return returnArray
 }
 
+const simpleParcel: MigrationFacet.SimpleParcelStruct = {
+  owner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  parcelAddress: "test",
+  parcelId: "test",
+  coordinateX: "5",
+  coordinateY: "5",
+  district: "2",
+  size: "2",
+  alchemicaBoost: ["1", "1", "1", "1"],
+  alchemicaRemaining: ["1", "1", "1", "1"],
+  currentRound: "1",
+  alchemicaHarvestRate:["1", "1", "1", "1"],
+  lastUpdateTimestamp: ["1", "1", "1", "1"],
+  unclaimedAlchemica: ["1", "1", "1", "1"],
+  altarId: "1",
+  upgradeQueueCapacity: "1",
+  upgradeQueueLength: "1",
+  lodgeId: "1",
+  surveying: true,
+  harvesterCount: "1",
+}
+
 const grid = [
   ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
   ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
@@ -230,3 +255,29 @@ const grid = [
   ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
   ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"]
 ]
+
+function compareResult(simpleParcel: MigrationFacet.SimpleParcelStruct, returnedSimpleParcel: MigrationFacet.SimpleParcelStruct) {
+  expect(simpleParcel.owner).to.equal(returnedSimpleParcel.owner)
+  expect(simpleParcel.parcelAddress).to.equal(returnedSimpleParcel.parcelAddress)
+  expect(simpleParcel.parcelId).to.equal(returnedSimpleParcel.parcelId)
+  expect(simpleParcel.coordinateX).to.equal(returnedSimpleParcel.coordinateX)
+  expect(simpleParcel.coordinateY).to.equal(returnedSimpleParcel.coordinateY)
+  expect(simpleParcel.district).to.equal(returnedSimpleParcel.district)
+  expect(simpleParcel.size).to.equal(returnedSimpleParcel.size)
+
+  simpleParcel.alchemicaBoost.forEach((value, i) => expect(value).to.equal(returnedSimpleParcel.alchemicaBoost[i].toString()))
+  simpleParcel.alchemicaRemaining.forEach((value, i) => expect(value).to.equal(returnedSimpleParcel.alchemicaRemaining[i].toString()))
+
+  expect(simpleParcel.currentRound).to.equal(returnedSimpleParcel.currentRound)
+
+  simpleParcel.alchemicaHarvestRate.forEach((value, i) => expect(value).to.equal(returnedSimpleParcel.alchemicaHarvestRate[i].toString()))
+  simpleParcel.lastUpdateTimestamp.forEach((value, i) => expect(value).to.equal(returnedSimpleParcel.lastUpdateTimestamp[i].toString()))
+  simpleParcel.unclaimedAlchemica.forEach((value, i) => expect(value).to.equal(returnedSimpleParcel.unclaimedAlchemica[i].toString()))
+
+  expect(simpleParcel.altarId).to.equal(returnedSimpleParcel.altarId.toString())
+  expect(simpleParcel.upgradeQueueCapacity).to.equal(returnedSimpleParcel.upgradeQueueCapacity.toString())
+  expect(simpleParcel.upgradeQueueLength).to.equal(returnedSimpleParcel.upgradeQueueLength.toString())
+  expect(simpleParcel.lodgeId).to.equal(returnedSimpleParcel.lodgeId.toString())
+  expect(simpleParcel.surveying).to.equal(returnedSimpleParcel.surveying)
+  expect(simpleParcel.harvesterCount).to.equal(returnedSimpleParcel.harvesterCount.toString())
+}

@@ -28,6 +28,28 @@ contract MigrationFacet is Modifiers {
     uint16 harvesterCount;
   }
 
+  function getSimpleParcel(uint _parcelId) external view returns (SimpleParcel memory output_) {
+    output_.owner = s.parcels[_parcelId].owner;
+    output_.parcelAddress = s.parcels[_parcelId].parcelAddress;
+    output_.parcelId = s.parcels[_parcelId].parcelId;
+    output_.coordinateX = s.parcels[_parcelId].coordinateX;
+    output_.coordinateY = s.parcels[_parcelId].coordinateY;
+    output_.district = s.parcels[_parcelId].district;
+    output_.size = s.parcels[_parcelId].size;
+    output_.alchemicaBoost = s.parcels[_parcelId].alchemicaBoost;
+    output_.alchemicaRemaining = s.parcels[_parcelId].alchemicaRemaining;
+    output_.currentRound = s.parcels[_parcelId].currentRound;
+    output_.alchemicaHarvestRate = s.parcels[_parcelId].alchemicaHarvestRate;
+    output_.lastUpdateTimestamp = s.parcels[_parcelId].lastUpdateTimestamp;
+    output_.unclaimedAlchemica = s.parcels[_parcelId].unclaimedAlchemica;
+    output_.altarId = s.parcels[_parcelId].altarId;
+    output_.upgradeQueueCapacity = s.parcels[_parcelId].upgradeQueueCapacity;
+    output_.upgradeQueueLength = s.parcels[_parcelId].upgradeQueueLength;
+    output_.lodgeId = s.parcels[_parcelId].lodgeId;
+    output_.surveying = s.parcels[_parcelId].surveying;
+    output_.harvesterCount = s.parcels[_parcelId].harvesterCount;
+  }
+
   function getGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[16][16] memory output_) {
     // require(s.parcels[_parcelId].size == 1, "RealmFacet: Not reasonable");
     for (uint256 i; i < 16; i++) {
