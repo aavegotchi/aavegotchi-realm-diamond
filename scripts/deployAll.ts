@@ -85,7 +85,8 @@ async function deployRealmDiamond(deployerAddress: string) {
     "BounceGateFacet",
     "NFTDisplayFacet",
     "VRFFacet",
-    "RealmsPolygonXGotchichainBridgeFacet"
+    "RealmsPolygonXGotchichainBridgeFacet",
+    "MigrationFacet"
   ];
   const cut = [];
   for (const FacetName of FacetNames) {
