@@ -5,7 +5,6 @@ import "../../libraries/AppStorage.sol";
 import "hardhat/console.sol";
 
 contract MigrationFacet is Modifiers {
-
   struct SimpleParcel {
     address owner;
     string parcelAddress;
@@ -51,8 +50,7 @@ contract MigrationFacet is Modifiers {
   }
 
   function getGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[16][16] memory output_) {
-    // require(s.parcels[_parcelId].size == 1, "RealmFacet: Not reasonable");
-    for (uint256 i; i < 16; i++) {
+\    for (uint256 i; i < 16; i++) {
       for (uint256 j; j < 16; j++) {
         if (_gridType == 0) {
           output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
@@ -63,7 +61,22 @@ contract MigrationFacet is Modifiers {
     }
   }
 
-  function saveSimpleParcelData(SimpleParcel calldata _simpleParcel, uint _parcelId) external {
+  function migrateParcel(
+    uint _parcelId,
+    SimpleParcel calldata _simpleParcel,
+    uint[] calldata buildGrid,
+    uint[] calldata tileGrid,
+    uint[] calldata startPositionBuildGrid,
+    uint[] calldata startPositionTileGrid
+  ) external {
+    saveSimpleParcelData(_simpleParcel, _parcelId);
+    saveBuildGrid(_parcelId, buildGrid);
+    saveBuildTile(_parcelId, tileGrid);
+    saveStartPositionBuildGrid(_parcelId, startPositionBuildGrid);
+    saveStartPositionBuildTile(_parcelId, startPositionTileGrid);
+  }
+
+  function saveSimpleParcelData(SimpleParcel calldata _simpleParcel, uint _parcelId) public {
     s.parcels[_parcelId].owner = _simpleParcel.owner;
     s.parcels[_parcelId].parcelAddress = _simpleParcel.parcelAddress;
     s.parcels[_parcelId].parcelId = _simpleParcel.parcelId;
@@ -85,9 +98,31 @@ contract MigrationFacet is Modifiers {
     s.parcels[_parcelId].harvesterCount = _simpleParcel.harvesterCount;
   }
 
-  function saveGrid(uint256 _parcelId, uint[] calldata buildGrid) external {
-    for (uint i; i < buildGrid.length; i = i + 3) {
-      s.parcels[_parcelId].buildGrid[buildGrid[i]][buildGrid[i + 1]] = buildGrid[i + 2];
+  function saveBuildGrid(uint256 _parcelId, uint[] calldata sparseGrid) public {
+    require(sparseGrid.length % 3 == 0, "RealmFacet: Invalid sparse grid");
+    for (uint i; i < sparseGrid.length; i = i + 3) {
+      s.parcels[_parcelId].buildGrid[sparseGrid[i]][sparseGrid[i + 1]] = sparseGrid[i + 2];
+    }
+  }
+
+  function saveStartPositionBuildGrid(uint256 _parcelId, uint[] calldata sparseGrid) public {
+    require(sparseGrid.length % 3 == 0, "RealmFacet: Invalid sparse grid");
+    for (uint i; i < sparseGrid.length; i = i + 3) {
+      s.parcels[_parcelId].startPositionBuildGrid[sparseGrid[i]][sparseGrid[i + 1]] = sparseGrid[i + 2];
+    }
+  }
+
+  function saveBuildTile(uint256 _parcelId, uint[] calldata sparseGrid) public {
+    require(sparseGrid.length % 3 == 0, "RealmFacet: Invalid sparse grid");
+    for (uint i; i < sparseGrid.length; i = i + 3) {
+      s.parcels[_parcelId].tileGrid[sparseGrid[i]][sparseGrid[i + 1]] = sparseGrid[i + 2];
+    }
+  }
+
+  function saveStartPositionBuildTile(uint256 _parcelId, uint[] calldata sparseGrid) public {
+    require(sparseGrid.length % 3 == 0, "RealmFacet: Invalid sparse grid");
+    for (uint i; i < sparseGrid.length; i = i + 3) {
+      s.parcels[_parcelId].startPositionTileGrid[sparseGrid[i]][sparseGrid[i + 1]] = sparseGrid[i + 2];
     }
   }
 }

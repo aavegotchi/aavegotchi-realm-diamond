@@ -107,7 +107,7 @@ describe("Realms Migration", async function () {
     await loadFixture(deployFixture);
   });
 
-  it.only("Save simple parcel data", async () => {
+  it("Save simple parcel data", async () => {
     await migrationFacet.saveSimpleParcelData(simpleParcel, parcelId)
 
     const returnedSimpleParcel = await migrationFacet.getSimpleParcel(parcelId);
@@ -117,12 +117,25 @@ describe("Realms Migration", async function () {
 
   it("Save grid", async () => {
     const sparsedArray = make2DArraySparse(grid)
-    await migrationFacet.saveGrid(parcelId, sparsedArray)
+    await migrationFacet.saveBuildGrid(parcelId, sparsedArray)
 
     const returnedGrid = await migrationFacet.getGrid(parcelId, 0)
     const convertedReturnedGrid = convertContentToString(returnedGrid)
 
     expect(grid).to.deep.equal(convertedReturnedGrid)
+  });
+
+  it("Migrate Parcel", async () => {
+    const sparsedArray = make2DArraySparse(grid)
+
+    await migrationFacet.migrateParcel(parcelId, simpleParcel, sparsedArray, sparsedArray, sparsedArray, sparsedArray)
+
+    const returnedSimpleParcel = await migrationFacet.getSimpleParcel(parcelId);
+    const returnedGrid = await migrationFacet.getGrid(parcelId, 0)
+    const convertedReturnedGrid = convertContentToString(returnedGrid)
+
+    expect(grid).to.deep.equal(convertedReturnedGrid)
+    compareResult(simpleParcel, returnedSimpleParcel)
   });
 });
 
@@ -221,7 +234,7 @@ const simpleParcel: MigrationFacet.SimpleParcelStruct = {
   alchemicaBoost: ["1", "1", "1", "1"],
   alchemicaRemaining: ["1", "1", "1", "1"],
   currentRound: "1",
-  alchemicaHarvestRate:["1", "1", "1", "1"],
+  alchemicaHarvestRate: ["1", "1", "1", "1"],
   lastUpdateTimestamp: ["1", "1", "1", "1"],
   unclaimedAlchemica: ["1", "1", "1", "1"],
   altarId: "1",
