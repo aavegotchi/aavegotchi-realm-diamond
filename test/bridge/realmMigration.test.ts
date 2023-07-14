@@ -29,6 +29,7 @@ describe("Realms Migration", async function () {
   let alchemica
   let deployer: SignerWithAddress
   let realmDiamond
+  let parcelId = 5
 
   async function deployFixture() {
     const accounts = await ethers.getSigners();
@@ -85,13 +86,7 @@ describe("Realms Migration", async function () {
       ethers,
       alchemicaWithoutGLTR
     );
-  }
 
-  beforeEach(async function () {
-    await loadFixture(deployFixture);
-  });
-
-  it("", async () => {
     const boostFomo = Math.floor(Math.random() * 4);
     const boostFud = Math.floor(Math.random() * 4);
     const boostKek = Math.floor(Math.random() * 4);
@@ -105,14 +100,28 @@ describe("Realms Migration", async function () {
       district: 1,
       parcelAddress: "hey-whats-up1",
     }];
-    const tokenId = 5
-    await realmFacet.mintParcels([deployer.address], [tokenId], parcelsTest1);
+    await realmFacet.mintParcels([deployer.address], [parcelId], parcelsTest1);
+  }
 
+  beforeEach(async function () {
+    await loadFixture(deployFixture);
+  });
 
+  it("Save simple parcel data", async () => {
     const sparsedArray = make2DArraySparse(grid)
-    await migrationFacet.saveGrid(tokenId, sparsedArray)
+    await migrationFacet.saveGrid(parcelId, sparsedArray)
 
-    const returnedGrid = await migrationFacet.getGrid(tokenId, 0)
+    const returnedGrid = await migrationFacet.getGrid(parcelId, 0)
+    const convertedReturnedGrid = convertContentToString(returnedGrid)
+
+    expect(grid).to.deep.equal(convertedReturnedGrid)
+  });
+
+  it("Save grid", async () => {
+    const sparsedArray = make2DArraySparse(grid)
+    await migrationFacet.saveGrid(parcelId, sparsedArray)
+
+    const returnedGrid = await migrationFacet.getGrid(parcelId, 0)
     const convertedReturnedGrid = convertContentToString(returnedGrid)
 
     expect(grid).to.deep.equal(convertedReturnedGrid)
@@ -204,292 +213,20 @@ const convertContentToString = (array) => {
 }
 
 const grid = [
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "119",
-    "119",
-    "0",
-    "0",
-    "83",
-    "83",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "119",
-    "119",
-    "0",
-    "0",
-    "83",
-    "83",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "10",
-    "10",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "10",
-    "10",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "101",
-    "101",
-    "0",
-    "0",
-    "65",
-    "65",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "101",
-    "101",
-    "0",
-    "0",
-    "65",
-    "65",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ]
+  ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
+  ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
+  ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
+  ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
+  ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
+  ["0", "0", "0", "0", "0", "119", "119", "0", "0", "83", "83", "0", "0", "0", "0", "0"],
+  ["0", "0", "0", "0", "0", "119", "119", "0", "0", "83", "83", "0", "0", "0", "0", "0"],
+  ["0", "0", "0", "0", "0", "0", "0", "10", "10", "0", "0", "0", "0", "0", "0", "0"],
+  ["0", "0", "0", "0", "0", "0", "0", "10", "10", "0", "0", "0", "0", "0", "0", "0"],
+  ["0", "0", "0", "0", "0", "101", "101", "0", "0", "65", "65", "0", "0", "0", "0", "0"],
+  ["0", "0", "0", "0", "0", "101", "101", "0", "0", "65", "65", "0", "0", "0", "0", "0"],
+  ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
+  ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
+  ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
+  ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
+  ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"]
 ]
