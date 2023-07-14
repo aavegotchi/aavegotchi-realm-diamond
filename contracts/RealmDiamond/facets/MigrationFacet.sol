@@ -6,11 +6,26 @@ import "hardhat/console.sol";
 
 contract MigrationFacet is Modifiers {
 
-  struct Test {
-    uint256[64][64] buildGrid; 
-    uint256[64][64] tileGrid;
-    // mapping(uint256 => uint256[]) roundBaseAlchemica;
-    // mapping(uint256 => uint256[]) roundAlchemica;
+  struct SimpleParcel {
+    address owner;
+    string parcelAddress;
+    string parcelId;
+    uint256 coordinateX;
+    uint256 coordinateY;
+    uint256 district;
+    uint256 size;
+    uint256[4] alchemicaBoost;
+    uint256[4] alchemicaRemaining;
+    uint256 currentRound;
+    uint256[4] alchemicaHarvestRate;
+    uint256[4] lastUpdateTimestamp;
+    uint256[4] unclaimedAlchemica;
+    uint256 altarId;
+    uint256 upgradeQueueCapacity;
+    uint256 upgradeQueueLength;
+    uint256 lodgeId;
+    bool surveying;
+    uint16 harvesterCount;
   }
 
   function getGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[16][16] memory output_) {
@@ -26,57 +41,31 @@ contract MigrationFacet is Modifiers {
     }
   }
 
+  function saveSimpleParcelData(SimpleParcel calldata _simpleParcel, uint _parcelId) external {
+    s.parcels[_parcelId].owner = _simpleParcel.owner;
+    s.parcels[_parcelId].parcelAddress = _simpleParcel.parcelAddress;
+    s.parcels[_parcelId].parcelId = _simpleParcel.parcelId;
+    s.parcels[_parcelId].coordinateX = _simpleParcel.coordinateX;
+    s.parcels[_parcelId].coordinateY = _simpleParcel.coordinateY;
+    s.parcels[_parcelId].district = _simpleParcel.district;
+    s.parcels[_parcelId].size = _simpleParcel.size;
+    s.parcels[_parcelId].alchemicaBoost = _simpleParcel.alchemicaBoost;
+    s.parcels[_parcelId].alchemicaRemaining = _simpleParcel.alchemicaRemaining;
+    s.parcels[_parcelId].currentRound = _simpleParcel.currentRound;
+    s.parcels[_parcelId].alchemicaHarvestRate = _simpleParcel.alchemicaHarvestRate;
+    s.parcels[_parcelId].lastUpdateTimestamp = _simpleParcel.lastUpdateTimestamp;
+    s.parcels[_parcelId].unclaimedAlchemica = _simpleParcel.unclaimedAlchemica;
+    s.parcels[_parcelId].altarId = _simpleParcel.altarId;
+    s.parcels[_parcelId].upgradeQueueCapacity = _simpleParcel.upgradeQueueCapacity;
+    s.parcels[_parcelId].upgradeQueueLength = _simpleParcel.upgradeQueueLength;
+    s.parcels[_parcelId].lodgeId = _simpleParcel.lodgeId;
+    s.parcels[_parcelId].surveying = _simpleParcel.surveying;
+    s.parcels[_parcelId].harvesterCount = _simpleParcel.harvesterCount;
+  }
+
   function saveGrid(uint256 _parcelId, uint[] calldata buildGrid) external {
     for (uint i; i < buildGrid.length; i = i + 3) {
-      console.log("Saving grid on", buildGrid[i], buildGrid[i + 1], buildGrid[i + 2]);
       s.parcels[_parcelId].buildGrid[buildGrid[i]][buildGrid[i + 1]] = buildGrid[i + 2];
     }
   }
-
-  function getTokenIds() external view returns (uint256[] memory) {
-    return s.tokenIds;
-  }
-
-  function migrateParel(
-    string calldata _title,
-    uint64 _startTime,
-    uint64 _durationInMinutes,
-    uint256[4] calldata _alchemicaSpent,
-    uint256 _realmId
-  ) external {
-  }
 }
-
-/*
-  
-struct Parcel {
-  address owner;
-  string parcelAddress; //looks-like-this
-  string parcelId; //C-4208-3168-R
-  uint256 coordinateX; //x position on the map
-  uint256 coordinateY; //y position on the map
-  uint256 district;
-  uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
-  uint256[64][64] buildGrid; //x, then y array of positions - for installations
-  uint256[64][64] tileGrid; //x, then y array of positions - for tiles under the installations (floor)
-  uint256[4] alchemicaBoost; //fud, fomo, alpha, kek
-  uint256[4] alchemicaRemaining; //fud, fomo, alpha, kek
-  uint256 currentRound; //begins at 0 and increments after surveying has begun
-  mapping(uint256 => uint256[]) roundBaseAlchemica; //round alchemica not including boosts
-  mapping(uint256 => uint256[]) roundAlchemica; //round alchemica including boosts
-  // // alchemicaType => array of reservoir id
-  mapping(uint256 => uint256[]) reservoirs;
-  uint256[4] alchemicaHarvestRate;
-  uint256[4] lastUpdateTimestamp;
-  uint256[4] unclaimedAlchemica;
-  uint256 altarId;
-  uint256 upgradeQueueCapacity;
-  uint256 upgradeQueueLength;
-  uint256 lodgeId;
-  bool surveying;
-  uint256[64][64] startPositionBuildGrid;
-  uint256[64][64] startPositionTileGrid;
-  uint16 harvesterCount;
-}
-
-*/
