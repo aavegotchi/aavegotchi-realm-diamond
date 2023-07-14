@@ -112,11 +112,6 @@ describe("Realms Migration", async function () {
 
     const returnedSimpleParcel = await migrationFacet.getSimpleParcel(parcelId);
 
-    console.log("\nBefore\n ")
-    console.log(simpleParcel)
-    console.log("\nAfter\n ")
-    console.log(returnedSimpleParcel)
-
     compareResult(simpleParcel, returnedSimpleParcel)
   });
 
