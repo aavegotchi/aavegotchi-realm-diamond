@@ -177,7 +177,7 @@ export async function deploy() {
 
   console.log("Realm Diamond deployed:", realmDiamond.address);
   console.log("InstallationDiamond deployed:", installationDiamond.address);
-  console.log("Tile Diamond deployed:", tileDiamond);
+  console.log("Tile Diamond deployed:", tileDiamond.address);
   console.log("FUD deployed:", alchemica.fud.address);
   console.log("FOMO deployed:", alchemica.fomo.address);
   console.log("ALPHA deployed:", alchemica.alpha.address);
@@ -209,7 +209,7 @@ export async function deploy() {
     alchemica.gltr.address,
     ethers.utils.hexDataSlice(backendSigner.publicKey, 1),
     deployerAddress,
-    tileDiamond,
+    tileDiamond.address,
     aavegotchiDiamond,
     { gasPrice: gasPrice }
   );
@@ -304,7 +304,7 @@ export async function deploy() {
 
   const tileFacet = (await ethers.getContractAt(
     "TileFacet",
-    tileDiamond,
+    tileDiamond.address,
     deployer
   )) as TileFacet;
 
@@ -331,9 +331,10 @@ export async function deploy() {
   // console.log("Saved tileTypes:", tileTypes);
 
   return {
-    installationDiamond,
     alchemica,
+    installationDiamond,
     realmDiamond,
+    tileDiamond,
   };
 }
 
