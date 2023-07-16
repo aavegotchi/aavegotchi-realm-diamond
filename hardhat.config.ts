@@ -43,6 +43,7 @@ module.exports = {
       forking: {
         url: process.env.MATIC_URL,
         timeout: 2000000,
+        enabled: process.env.FORKING === "true",
         // blockNumber: 30865190,
       },
       chainId: 137,
