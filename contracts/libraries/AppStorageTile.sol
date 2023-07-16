@@ -58,6 +58,8 @@ struct TileAppStorage {
   mapping(address => mapping(uint256 => uint256)) ownerTileIndexes;
   // installationId => deprecateTime
   mapping(uint256 => uint256) deprecateTime;
+
+  address layerZeroBridgeAddress;
 }
 
 library LibAppStorageTile {
@@ -78,6 +80,11 @@ contract Modifiers {
 
   modifier onlyRealmDiamond() {
     require(msg.sender == s.realmDiamond, "LibDiamond: Must be realm diamond");
+    _;
+  }
+
+  modifier onlyLayerZeroBridge() {
+    require(s.layerZeroBridgeAddress == msg.sender, "LibDiamond: Only layerzero bridge");
     _;
   }
 }
