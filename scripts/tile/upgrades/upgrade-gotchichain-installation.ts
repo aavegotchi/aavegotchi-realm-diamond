@@ -13,16 +13,7 @@ export async function upgradeInstallation(bridgeAddress: string) {
     {
       facetName: "InstallationFacet",
       addSelectors: [
-        "function addLayerZeroBridgeAddress(address _newLayerZeroBridge) external",
-        "function removeLayerZeroBridgeAddress(address _layerZeroBridgeToRemove) external",
-      ],
-      removeSelectors: [],
-    },
-    {
-      facetName: "InstallationsPolygonXGotchichainBridgeFacet",
-      addSelectors: [
-        "function removeItemsFromOwner(address _owner, uint256[] calldata _tokenIds, uint256[] calldata _tokenAmounts) external",
-        "function addItemsToOwner(address _owner, uint256[] calldata _tokenIds, uint256[] calldata _tokenAmounts) external"
+        "function setLayerZeroBridgeAddress(address _newLayerZeroBridge) external",
       ],
       removeSelectors: [],
     },
@@ -36,7 +27,7 @@ export async function upgradeInstallation(bridgeAddress: string) {
     InstallationFacet__factory.abi
   );
 
-  const calldata = iface.encodeFunctionData("addLayerZeroBridgeAddress", [
+  const calldata = iface.encodeFunctionData("setLayerZeroBridgeAddress", [
     bridgeAddress,
   ]);
 
