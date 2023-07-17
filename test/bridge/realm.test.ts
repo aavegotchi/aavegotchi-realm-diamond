@@ -10,6 +10,7 @@ import {
   ERC1155Facet,
   InstallationDiamond,
   InstallationFacet,
+  MigrationFacet
 } from "../../typechain";
 import {
   ERC721Facet,
@@ -18,6 +19,7 @@ import {
   InstallationsPolygonXGotchichainBridgeFacet,
   RealmFacet,
   RealmsPolygonXGotchichainBridgeFacet,
+  RealmGridFacet,
 } from "../../typechain-types";
 import { MintParcelInput } from "../../types";
 
@@ -37,8 +39,10 @@ describe("Realms Bridge", async function () {
   let installationFacetPolygon: InstallationFacet,
     installationFacetGotchichain: InstallationFacet;
   let erc1155FacetPolygon: ERC1155Facet, erc1155FacetGotchichain: ERC1155Facet;
+  let realmGridFacetPolygon: RealmGridFacet;
   let realmFacetPolygon: RealmFacet, realmFacetGotchichain: RealmFacet;
   let erc721FacetPolygon: ERC721Facet, erc721FacetGotchichain: ERC721Facet;
+  let migrationFacet: MigrationFacet
   let installationsDiamondPolygon: InstallationDiamond,
     installationsDiamondGotchichain: InstallationDiamond;
   let realmsPolygonBridgeFacet: RealmsPolygonXGotchichainBridgeFacet;
@@ -101,6 +105,11 @@ describe("Realms Bridge", async function () {
       realmDiamondPolygon.address
     );
 
+    realmGridFacetPolygon = await ethers.getContractAt(
+      "RealmGridFacet",
+      realmDiamondPolygon.address
+    );
+
     realmFacetGotchichain = await ethers.getContractAt(
       "RealmFacet",
       realmDiamondGotchichain.address
@@ -114,6 +123,11 @@ describe("Realms Bridge", async function () {
     erc721FacetGotchichain = await ethers.getContractAt(
       "ERC721Facet",
       realmDiamondGotchichain.address
+    );
+
+    migrationFacet = await ethers.getContractAt(
+      "MigrationFacet",
+      realmDiamondPolygon.address
     );
 
     LZEndpointMock = await ethers.getContractFactory(
@@ -213,9 +227,7 @@ describe("Realms Bridge", async function () {
 
     // const parcelData = await bridgePolygonSide.test()
     // console.log(parcelData.roundBaseAlchemicas)
-   
 
-    console.log("FIRST TEST")
     const boostFomo = Math.floor(Math.random() * 4);
     const boostFud = Math.floor(Math.random() * 4);
     const boostKek = Math.floor(Math.random() * 4);
@@ -223,54 +235,51 @@ describe("Realms Bridge", async function () {
     const parcelsTest1: MintParcelInput[] = [{
       coordinateX: 0,
       coordinateY: 0,
-      parcelId: "0",
+      parcelId: "",
       size: Math.floor(Math.random() * 5),
       boost: [boostFud, boostFomo, boostAlpha, boostKek],
       district: 1,
-      parcelAddress: "hey-whats-up",
+      parcelAddress: "hey-whats-up1",
     }];
-    
-    console.log("deployer.address", deployer.address)
-    console.log("realmFacetPolygon", deployer.address)
-
-
-    console.log("\n\n")
-
-    await realmFacetPolygon.mintParcels([deployer.address], [5], parcelsTest1);
-
     const tokenId = 5
+    await realmFacetPolygon.mintParcels([deployer.address], [tokenId], parcelsTest1);
 
-    //Estimate nativeFees
-    
-    await erc721FacetPolygon.approve(bridgePolygonSide.address, tokenId);
 
-    console.log("Estimate nativeFees")
-    // let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, deployer.address, tokenId, false, defaultAdapterParams)).nativeFee
 
-    console.log("erc721FacetGotchichain.ownerOf(tokenId)", await erc721FacetGotchichain.ownerOf(tokenId))
+    // console.log(grid)
 
-    console.log("SendFrom")
-    const sendFromTx = await bridgePolygonSide.sendFrom(
-      deployer.address,
-      chainId_B,
-      deployer.address,
-      tokenId,
-      deployer.address,
-      ethers.constants.AddressZero,
-      defaultAdapterParams,
-      { 
-        value: ethers.utils.parseEther("1"),
-        gasLimit: "20000000"
-      }
-    )
-    await sendFromTx.wait()
-    
-    console.log("deployer address", deployer.address)
-    expect(await erc721FacetPolygon.balanceOf(bridgePolygonSide.address)).to.equal(1)
-    expect(await erc721FacetPolygon.ownerOf(tokenId)).to.equal(bridgePolygonSide.address)
+    const sparsedArray = make2DArraySparse(grid)
+    console.log("Sparse grid")
+    console.log(sparsedArray)
 
-    expect(await erc721FacetGotchichain.balanceOf(deployer.address)).to.equal(1)
-    expect(await erc721FacetGotchichain.ownerOf(tokenId)).to.equal(deployer.address)
+    await migrationFacet.saveGrid(tokenId, sparsedArray)
+
+
+    console.log("GRID")
+    const returnedGrid = await migrationFacet.getGrid(tokenId, 0)
+
+    console.log(returnedGrid)
+
+    expect(grid).to.deep.equal(convertContentToString(returnedGrid))
+
+
+
+    // //Craft and equip installation
+    // const installationId = 10;
+    // const balancePre = await erc1155FacetPolygon.balanceOf(
+    //   deployer.address,
+    //   installationId
+    // );
+    // await installationFacetPolygon.craftInstallations([installationId], [0]);
+
+    // const balancePost = await erc1155FacetPolygon.balanceOf(
+    //   deployer.address,
+    //   installationId
+    // );
+    // expect(balancePost).to.gt(balancePre);
+
+    // await realmFacetPolygon.equipInstallation(tokenId, 0, 10, 0, 0, await genSignature(10, 0, 0));
+
   });
 });
 
@@ -316,3 +325,335 @@ const faucetRealAlchemica = async (
       .mint(receiver, ethers.utils.parseEther("10000"));
   }
 };
+
+const genSignature = async (tileId: number, x: number, y: number) => {
+  //@ts-ignore
+  let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
+
+  let messageHash1 = ethers.utils.solidityKeccak256(
+    ["uint256", "uint256", "uint256", "uint256"],
+    [0, tileId, x, y]
+  );
+  let signedMessage1 = await backendSigner.signMessage(
+    ethers.utils.arrayify(messageHash1)
+  );
+  let signature1 = ethers.utils.arrayify(signedMessage1);
+
+  return signature1;
+};
+
+const make2DArraySparse = (array) => {
+  let sparseArray = [];
+  for (let i = 0; i < array.length; i++) {
+    for (let j = 0; j < array[i].length; j++) {
+      if (array[i][j] !== "0") {
+        sparseArray.push(i);
+        sparseArray.push(j);
+        sparseArray.push(array[i][j]);
+      }
+    }
+  }
+  return sparseArray;
+}
+
+const convertContentToString = (array) => {
+  const returnArray = [];
+  for (let i = 0; i < array.length; i++) {
+    returnArray.push([]);
+    for (let j = 0; j < array[i].length; j++) {
+      returnArray[i][j] = array[i][j].toString();
+    }
+  }
+  return returnArray
+}
+
+const grid = [
+  [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0"
+  ],
+  [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0"
+  ],
+  [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0"
+  ],
+  [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0"
+  ],
+  [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0"
+  ],
+  [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "119",
+    "119",
+    "0",
+    "0",
+    "83",
+    "83",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0"
+  ],
+  [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "119",
+    "119",
+    "0",
+    "0",
+    "83",
+    "83",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0"
+  ],
+  [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "10",
+    "10",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0"
+  ],
+  [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "10",
+    "10",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0"
+  ],
+  [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "101",
+    "101",
+    "0",
+    "0",
+    "65",
+    "65",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0"
+  ],
+  [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "101",
+    "101",
+    "0",
+    "0",
+    "65",
+    "65",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0"
+  ],
+  [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0"
+  ],
+  [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0"
+  ],
+  [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0"
+  ],
+  [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0"
+  ],
+  [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0"
+  ]
+]

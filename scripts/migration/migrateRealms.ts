@@ -8,8 +8,6 @@ const realmDiamondAddressGotchichain = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MU
 export default async function main() {
   const migrationFacet: MigrationFacet = await ethers.getContractAt("MigrationFacet", realmDiamondAddressGotchichain)
 
-
-
   const migrateParcel = async (parcel: Parcel) => {
     const simpleParcel = createSimpleParcel(parcel)
     migrationFacet.migrateParcel(parcel.id, simpleParcel, [], [], [], [])
