@@ -9,7 +9,7 @@ import {
   TileFacet__factory,
 } from "../../../typechain";
 
-const gotchichainBridgeAddress = "0xe6517944BbA81e86Bf619DF6D5b549348Bb70446";
+const gotchichainBridgeAddress = "0xB8133C7CF766f29d68b0cC470ED8F0B65eB996E6";
 
 
 export async function upgrade(bridgeAddress: string) {

@@ -4,7 +4,7 @@ import { DeployUpgradeTaskArgs, FacetsAndAddSelectors, convertFacetAndSelectorsT
 import { InstallationFacetInterface } from "../../typechain-types/contracts/InstallationDiamond/facets/InstallationFacet";
 import { InstallationFacet__factory } from "../../typechain-types";
 
-const gotchichainBridgeAddress = "0xe6517944BbA81e86Bf619DF6D5b549348Bb70446";
+const gotchichainBridgeAddress = "0x2a781B3C71e04f13d8Ec2956034EA7De434748d5";
 
 export async function upgradeInstallation(bridgeAddress: string) {
   const diamondUpgrader = "0x296903b6049161bebEc75F6f391a930bdDBDbbFc";
