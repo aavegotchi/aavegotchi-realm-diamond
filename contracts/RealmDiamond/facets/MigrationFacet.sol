@@ -50,12 +50,18 @@ contract MigrationFacet is Modifiers {
   }
 
   function getGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[16][16] memory output_) {
-\    for (uint256 i; i < 16; i++) {
-      for (uint256 j; j < 16; j++) {
+    Parcel storage parcel = s.parcels[_parcelId];
+    uint256[5] memory widths = getWidths();
+    uint256[5] memory heights = getHeights();
+    uint widthLength = widths[parcel.size];
+    uint heightLength = heights[parcel.size];
+
+    for (uint256 i; i < widthLength; i++) {
+      for (uint256 j; j < heightLength; j++) {
         if (_gridType == 0) {
-          output_[i][j] = s.parcels[_parcelId].buildGrid[i][j];
+          output_[i][j] = parcel.buildGrid[i][j];
         } else if (_gridType == 1) {
-          output_[i][j] = s.parcels[_parcelId].tileGrid[i][j];
+          output_[i][j] = parcel.tileGrid[i][j];
         }
       }
     }
@@ -124,5 +130,27 @@ contract MigrationFacet is Modifiers {
     for (uint i; i < sparseGrid.length; i = i + 3) {
       s.parcels[_parcelId].startPositionTileGrid[sparseGrid[i]][sparseGrid[i + 1]] = sparseGrid[i + 2];
     }
+  }
+
+  function getWidths() internal pure returns (uint256[5] memory) {
+    uint256[5] memory widths = [
+      HUMBLE_WIDTH, //humble
+      REASONABLE_WIDTH, //reasonable
+      SPACIOUS_WIDTH, //spacious vertical
+      SPACIOUS_HEIGHT, //spacious horizontal
+      PAARTNER_WIDTH //partner
+    ];
+    return widths;
+  }
+
+  function getHeights() internal pure returns (uint256[5] memory) {
+    uint256[5] memory heights = [
+      HUMBLE_HEIGHT, //humble
+      REASONABLE_HEIGHT, //reasonable
+      SPACIOUS_HEIGHT, //spacious vertical
+      SPACIOUS_WIDTH, //spacious horizontal
+      PAARTNER_HEIGHT //partner
+    ];
+    return heights;
   }
 }
