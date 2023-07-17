@@ -134,16 +134,18 @@ describe("Realms Bridge", async function () {
       LZEndpointMockCompiled.abi,
       LZEndpointMockCompiled.bytecode
     );
-    const BridgePolygonSide = await ethers.getContractFactory(
-      "RealmsBridgePolygonSide"
-    );
-    const BridgeGotchichainSide = await ethers.getContractFactory(
-      "RealmsBridgeGotchichainSide"
-    );
 
     //Deploying LZEndpointMock contracts
     lzEndpointMockA = await LZEndpointMock.deploy(chainId_A);
     lzEndpointMockB = await LZEndpointMock.deploy(chainId_B);
+
+    const BridgePolygonSide = await ethers.getContractFactory(
+      "RealmsBridgePolygonSide"
+    );
+
+    const BridgeGotchichainSide = await ethers.getContractFactory(
+      "RealmsBridgeGotchichainSide"
+    );
 
     //Deploying bridge contracts
     bridgePolygonSide = await BridgePolygonSide.deploy(minGasToStore, lzEndpointMockA.address, realmFacetPolygon.address)
@@ -157,41 +159,21 @@ describe("Realms Bridge", async function () {
       bridgePolygonSide.address,
       lzEndpointMockA.address
     );
-
-    //Set custom adapter params for both bridges
-    // await bridgePolygonSide.setUseCustomAdapterParams(true);
-    // await bridgeGotchichainSide.setUseCustomAdapterParams(true);
-
+    
     //Set each contracts source address so it can send to each other
-    await bridgePolygonSide.setTrustedRemote(
-      chainId_B,
-      ethers.utils.solidityPack(
-        ["address", "address"],
-        [bridgeGotchichainSide.address, bridgePolygonSide.address]
-      )
-    );
-    await bridgeGotchichainSide.setTrustedRemote(
-      chainId_A,
-      ethers.utils.solidityPack(
-        ["address", "address"],
-        [bridgePolygonSide.address, bridgeGotchichainSide.address]
-      )
-    );
+    await bridgePolygonSide.setTrustedRemote(chainId_B, ethers.utils.solidityPack(["address", "address"], [bridgeGotchichainSide.address, bridgePolygonSide.address]));
+    await bridgeGotchichainSide.setTrustedRemote(chainId_A, ethers.utils.solidityPack(["address", "address"], [bridgePolygonSide.address, bridgeGotchichainSide.address]));
+
+    //Set batch limit
+    await bridgePolygonSide.setDstChainIdToBatchLimit(chainId_B, 3)
+    await bridgeGotchichainSide.setDstChainIdToBatchLimit(chainId_A, 3)
 
     //Set min dst gas for swap
     await bridgePolygonSide.setMinDstGas(chainId_B, 1, 150000);
     await bridgeGotchichainSide.setMinDstGas(chainId_A, 1, 150000);
-    await bridgePolygonSide.setMinDstGas(chainId_B, 2, 150000);
-    await bridgeGotchichainSide.setMinDstGas(chainId_A, 2, 150000);
 
-    await bridgePolygonSide.setPayloadSizeLimit(chainId_B, 300000000);
-
-    //Set layer zero bridge on facet
-    await realmsPolygonBridgeFacet
-      .addLayerZeroBridgeAddress(bridgePolygonSide.address);
-    await realmsGotchichainBridgeFacet
-      .connect(deployer)
-      .addLayerZeroBridgeAddress(bridgeGotchichainSide.address);
+    await bridgePolygonSide.setDstChainIdToTransferGas(chainId_B, 1950000)
+    await bridgeGotchichainSide.setDstChainIdToTransferGas(chainId_A, 1950000)
 
     //Alchemica
     await faucetRealAlchemica(
@@ -206,7 +188,7 @@ describe("Realms Bridge", async function () {
       alchemicaWithoutGLTRGotchichain,
       realmDiamondGotchichain.address
     );
-
+    
     await approveRealAlchemica(
       installationsDiamondPolygon.address,
       ethers,
@@ -224,10 +206,6 @@ describe("Realms Bridge", async function () {
   });
 
   it("", async () => {
-
-    // const parcelData = await bridgePolygonSide.test()
-    // console.log(parcelData.roundBaseAlchemicas)
-
     const boostFomo = Math.floor(Math.random() * 4);
     const boostFud = Math.floor(Math.random() * 4);
     const boostKek = Math.floor(Math.random() * 4);
@@ -243,25 +221,6 @@ describe("Realms Bridge", async function () {
     }];
     const tokenId = 5
     await realmFacetPolygon.mintParcels([deployer.address], [tokenId], parcelsTest1);
-
-
-
-    // console.log(grid)
-
-    const sparsedArray = make2DArraySparse(grid)
-    console.log("Sparse grid")
-    console.log(sparsedArray)
-
-    await migrationFacet.saveGrid(tokenId, sparsedArray)
-
-
-    console.log("GRID")
-    const returnedGrid = await migrationFacet.getGrid(tokenId, 0)
-
-    console.log(returnedGrid)
-
-    expect(grid).to.deep.equal(convertContentToString(returnedGrid))
-
 
 
     // //Craft and equip installation
@@ -341,319 +300,3 @@ const genSignature = async (tileId: number, x: number, y: number) => {
 
   return signature1;
 };
-
-const make2DArraySparse = (array) => {
-  let sparseArray = [];
-  for (let i = 0; i < array.length; i++) {
-    for (let j = 0; j < array[i].length; j++) {
-      if (array[i][j] !== "0") {
-        sparseArray.push(i);
-        sparseArray.push(j);
-        sparseArray.push(array[i][j]);
-      }
-    }
-  }
-  return sparseArray;
-}
-
-const convertContentToString = (array) => {
-  const returnArray = [];
-  for (let i = 0; i < array.length; i++) {
-    returnArray.push([]);
-    for (let j = 0; j < array[i].length; j++) {
-      returnArray[i][j] = array[i][j].toString();
-    }
-  }
-  return returnArray
-}
-
-const grid = [
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "119",
-    "119",
-    "0",
-    "0",
-    "83",
-    "83",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "119",
-    "119",
-    "0",
-    "0",
-    "83",
-    "83",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "10",
-    "10",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "10",
-    "10",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "101",
-    "101",
-    "0",
-    "0",
-    "65",
-    "65",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "101",
-    "101",
-    "0",
-    "0",
-    "65",
-    "65",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ]
-]
