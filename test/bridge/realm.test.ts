@@ -222,6 +222,30 @@ describe("Realms Bridge", async function () {
     const tokenId = 5
     await realmFacetPolygon.mintParcels([deployer.address], [tokenId], parcelsTest1);
 
+    const minGasToTransferAndStorePolygonSide = await bridgePolygonSide.minDstGasLookup(chainId_B, 1)
+    const transferGasPerTokenPolygonSide = await bridgePolygonSide.dstChainIdToTransferGas(chainId_B)
+    const polygonAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, minGasToTransferAndStorePolygonSide.add(transferGasPerTokenPolygonSide.mul(1))])
+
+    let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, deployer.address, tokenId, false, polygonAdapterParams)).nativeFee
+
+    await erc721FacetPolygon.approve(bridgePolygonSide.address, tokenId)
+    const sendFromTx = await bridgePolygonSide.sendFrom(
+      deployer.address,
+      chainId_B,
+      deployer.address,
+      tokenId,
+      deployer.address,
+      ethers.constants.AddressZero,
+      polygonAdapterParams,
+      { value: nativeFee }
+    )
+    await sendFromTx.wait()
+
+    //Token is now owned by the proxy contract, because this is the original nft chain
+    expect(await erc721FacetPolygon.ownerOf(tokenId)).to.equal(bridgePolygonSide.address)
+
+    //Token received on the dst chain
+    expect(await erc721FacetPolygon.ownerOf(tokenId)).to.be.equal(deployer.address)
 
     // //Craft and equip installation
     // const installationId = 10;
