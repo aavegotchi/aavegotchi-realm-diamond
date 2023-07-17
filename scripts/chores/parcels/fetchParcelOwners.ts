@@ -48,7 +48,7 @@ async function getParcels() {
     "RealmGettersAndSettersFacet",
     c.realmDiamond
   )) as RealmGettersAndSettersFacet;
-  let step = 30;
+  let step = 100;
   let sliceStep = allParcelIds.length / step;
   let allParcels = [];
   for (let i = 0; i < step; i++) {
