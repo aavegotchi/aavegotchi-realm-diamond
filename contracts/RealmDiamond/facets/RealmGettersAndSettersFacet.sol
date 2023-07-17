@@ -177,9 +177,9 @@ contract RealmGettersAndSettersFacet is Modifiers {
     uint256[4] alchemicaBoost; //fud, fomo, alpha, kek
     uint256[4] alchemicaRemaining; //fud, fomo, alpha, kek
     uint256 currentRound; //begins at 0 and increments after surveying has begun
-    ////    uint256[] roundBaseAlchemica; //round alchemica not including boosts
-    ////    uint256[] roundAlchemica; //round alchemica including boosts
-    ////    uint256[] reservoirs;
+    uint256[][10] roundBaseAlchemica; //round alchemica not including boosts
+    uint256[][10] roundAlchemica; //round alchemica including boosts
+    uint256[][4] reservoirs;
     uint256[4] alchemicaHarvestRate;
     uint256[4] lastUpdateTimestamp;
     uint256[4] unclaimedAlchemica;
@@ -189,14 +189,16 @@ contract RealmGettersAndSettersFacet is Modifiers {
     uint256 lodgeId;
     bool surveying;
     uint16 harvesterCount;
-    //    uint256[64][64] buildGrid; //x, then y array of positions - for installations
-    //    uint256[64][64] tileGrid; //x, then y array of positions - for tiles under the installations (floor)
-    //    uint256[64][64] startPositionBuildGrid;
-    //    uint256[64][64] startPositionTileGrid;
+    uint256[64][64] buildGrid; //x, then y array of positions - for installations
+    uint256[64][64] tileGrid; //x, then y array of positions - for tiles under the installations (floor)
+    uint256[64][64] startPositionBuildGrid;
+    uint256[64][64] startPositionTileGrid;
   }
 
   function getParcels(uint256[] calldata _parcelIds) external view returns (ParcelOutTest[] memory) {
     ParcelOutTest[] memory parcels = new ParcelOutTest[](_parcelIds.length);
+    uint256[5] memory widths = LibRealm.getWidths();
+    uint256[5] memory heights = LibRealm.getHeights();
     for (uint256 i; i < _parcelIds.length; i++) {
       Parcel storage parcel = s.parcels[_parcelIds[i]];
       parcels[i].owner = parcel.owner;
@@ -218,10 +220,25 @@ contract RealmGettersAndSettersFacet is Modifiers {
       parcels[i].lodgeId = parcel.lodgeId;
       parcels[i].surveying = parcel.surveying;
       parcels[i].harvesterCount = parcel.harvesterCount;
-      //      parcels[i].buildGrid = parcel.buildGrid;
-      //      parcels[i].tileGrid = parcel.tileGrid;
-      //      parcels[i].startPositionBuildGrid = parcel.startPositionBuildGrid;
-      //      parcels[i].startPositionTileGrid = parcel.startPositionTileGrid;
+
+      uint width = widths[parcel.size];
+      uint height = heights[parcel.size];
+      for (uint256 k; k < width; k++) {
+        for (uint256 j; j < height; j++) {
+          parcels[i].buildGrid[k][j] = parcel.buildGrid[k][j];
+          parcels[i].tileGrid[k][j] = parcel.tileGrid[k][j];
+          parcels[i].startPositionBuildGrid[k][j] = parcel.startPositionBuildGrid[k][j];
+          parcels[i].startPositionTileGrid[k][j] = parcel.startPositionTileGrid[k][j];
+        }
+      }
+
+      for (uint256 j; j < 10; j++) {
+        parcels[i].roundBaseAlchemica[j] = parcel.roundBaseAlchemica[j];
+        parcels[i].roundAlchemica[j] = parcel.roundAlchemica[j];
+      }
+      for (uint256 j; j < 4; j++) {
+        parcels[i].reservoirs[j] = parcel.reservoirs[j];
+      }
     }
     return parcels;
   }

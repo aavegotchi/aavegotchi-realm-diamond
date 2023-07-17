@@ -33,7 +33,7 @@ export async function upgradeRealmParcelGetter() {
     initCalldata: "0x",
     initAddress: ethers.constants.AddressZero,
   };
-
+  
   await run("deployUpgrade", realmArgs);
 
   // const realmGettersAndSettersFacet = (await ethers.getContractAt(

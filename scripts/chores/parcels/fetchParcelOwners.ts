@@ -40,17 +40,15 @@ async function getParcels() {
   console.log("allParcelIds", allParcelIds);
 
   // run upgrade for getter function on hardhat
-  console.log("run upgrade for getter function on hardhat")
   await upgradeRealmParcelGetter();
 
   // get all parcel metadata onchain
-  console.log("get all parcel metadata onchain")
   const c = await varsForNetwork(ethers);
   const realmGettersAndSettersFacet = (await ethers.getContractAt(
     "RealmGettersAndSettersFacet",
     c.realmDiamond
   )) as RealmGettersAndSettersFacet;
-  let step = 30;
+  let step = 100;
   let sliceStep = allParcelIds.length / step;
   let allParcels = [];
   for (let i = 0; i < step; i++) {
