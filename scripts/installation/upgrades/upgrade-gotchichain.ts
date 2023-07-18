@@ -1,8 +1,8 @@
 import { ethers, run } from "hardhat";
-import { varsForNetwork } from "../../constants";
 import { DeployUpgradeTaskArgs, FacetsAndAddSelectors, convertFacetAndSelectorsToString } from "../../tasks/deployUpgrade";
 import { InstallationFacetInterface } from "../../typechain-types/contracts/InstallationDiamond/facets/InstallationFacet";
 import { InstallationFacet__factory } from "../../typechain-types";
+import { varsForNetwork } from "../../../constants";
 
 const gotchichainBridgeAddress = "0x2a781B3C71e04f13d8Ec2956034EA7De434748d5";
 

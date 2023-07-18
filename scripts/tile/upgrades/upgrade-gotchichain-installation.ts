@@ -1,5 +1,5 @@
 import { ethers, run } from "hardhat";
-import { varsForNetwork } from "../../constants";
+import { varsForNetwork } from "../../../constants";
 import { DeployUpgradeTaskArgs, FacetsAndAddSelectors, convertFacetAndSelectorsToString } from "../../tasks/deployUpgrade";
 import { InstallationFacetInterface } from "../../typechain-types/contracts/InstallationDiamond/facets/InstallationFacet";
 import { InstallationFacet__factory } from "../../typechain-types";
