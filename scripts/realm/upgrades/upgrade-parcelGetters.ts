@@ -14,8 +14,8 @@ export async function upgradeRealmParcelGetter() {
     {
       facetName: "RealmGettersAndSettersFacet",
       addSelectors: [
-        "function getParcelsAccessRightsWhitelistIds(uint256[] calldata _parcelIds, uint256[] calldata _actionRights) external view",
-        "function getParcels(uint256[] calldata _parcelIds) external view",
+        // "function getParcelsAccessRightsWhitelistIds(uint256[] calldata _parcelIds, uint256[] calldata _actionRights) external view",
+        "function getParcel(uint256 _parcelId) external view",
       ],
       removeSelectors: [],
     },
@@ -36,12 +36,12 @@ export async function upgradeRealmParcelGetter() {
 
   await run("deployUpgrade", realmArgs);
 
-  // const realmGettersAndSettersFacet = (await ethers.getContractAt(
-  //     "RealmGettersAndSettersFacet",
-  //     c.realmDiamond
-  //   )) as RealmGettersAndSettersFacet;
-  // const testParcels = await realmGettersAndSettersFacet.getParcels([10]);
-  // console.log(testParcels)
+  const realmGettersAndSettersFacet = (await ethers.getContractAt(
+      "RealmGettersAndSettersFacet",
+      c.realmDiamond
+    )) as RealmGettersAndSettersFacet;
+  const testParcel: RealmGettersAndSettersFacet.ParcelOutTestStruct = await realmGettersAndSettersFacet.getParcel('10');
+  console.log(testParcel)
 }
 
 if (require.main === module) {
