@@ -28,7 +28,7 @@ export async function upgradeRealmParcelGetter() {
   const realmArgs: DeployUpgradeTaskArgs = {
     diamondAddress: c.realmDiamond,
     facetsAndAddSelectors: realmJoined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
     initCalldata: "0x",
     initAddress: ethers.constants.AddressZero,
