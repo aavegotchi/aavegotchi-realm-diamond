@@ -5,7 +5,7 @@ import "../../libraries/AppStorage.sol";
 import "hardhat/console.sol";
 
 contract MigrationFacet is Modifiers {
-  struct SimpleParcel {
+  struct ParcelData {
     address owner;
     string parcelAddress;
     string parcelId;
@@ -25,9 +25,16 @@ contract MigrationFacet is Modifiers {
     uint256 lodgeId;
     bool surveying;
     uint16 harvesterCount;
+    uint[] buildGrid;
+    uint[] tileGrid;
+    uint[] startPositionBuildGrid;
+    uint[] startPositionTileGrid;
+    uint[][] roundBaseAlchemica;
+    uint[][] roundAlchemica;
+    uint[][] reservoirs;
   }
 
-  function getSimpleParcel(uint _parcelId) external view returns (SimpleParcel memory output_) {
+  function getParcelData(uint _parcelId) external view returns (ParcelData memory output_) {
     output_.owner = s.parcels[_parcelId].owner;
     output_.parcelAddress = s.parcels[_parcelId].parcelAddress;
     output_.parcelId = s.parcels[_parcelId].parcelId;
@@ -56,6 +63,12 @@ contract MigrationFacet is Modifiers {
     uint widthLength = widths[parcel.size];
     uint heightLength = heights[parcel.size];
 
+    console.log("size", parcel.size);
+    console.log("widthLength", widthLength);
+    console.log("heightLength", heightLength);
+
+    // uint256[widths][heights] memory output;
+
     for (uint256 i; i < widthLength; i++) {
       for (uint256 j; j < heightLength; j++) {
         if (_gridType == 0) {
@@ -67,45 +80,57 @@ contract MigrationFacet is Modifiers {
     }
   }
 
-  function migrateParcel(
-    uint _parcelId,
-    SimpleParcel calldata _simpleParcel,
-    uint[] calldata buildGrid,
-    uint[] calldata tileGrid,
-    uint[] calldata startPositionBuildGrid,
-    uint[] calldata startPositionTileGrid
-  ) external {
-    saveSimpleParcelData(_simpleParcel, _parcelId);
-    saveBuildGrid(_parcelId, buildGrid);
-    saveBuildTile(_parcelId, tileGrid);
-    saveStartPositionBuildGrid(_parcelId, startPositionBuildGrid);
-    saveStartPositionBuildTile(_parcelId, startPositionTileGrid);
+  function getStartPositionGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[][] memory output_) {
+    Parcel storage parcel = s.parcels[_parcelId];
+    uint256[5] memory widths = getWidths();
+    uint256[5] memory heights = getHeights();
+    uint widthLength = widths[parcel.size];
+    uint heightLength = heights[parcel.size];
+
+    for (uint256 i; i < widthLength; i++) {
+      for (uint256 j; j < heightLength; j++) {
+        if (_gridType == 0) {
+          output_[i][j] = parcel.startPositionBuildGrid[i][j];
+        } else if (_gridType == 1) {
+          output_[i][j] = parcel.startPositionTileGrid[i][j];
+        }
+      }
+    }
   }
 
-  function saveSimpleParcelData(SimpleParcel calldata _simpleParcel, uint _parcelId) public {
-    s.parcels[_parcelId].owner = _simpleParcel.owner;
-    s.parcels[_parcelId].parcelAddress = _simpleParcel.parcelAddress;
-    s.parcels[_parcelId].parcelId = _simpleParcel.parcelId;
-    s.parcels[_parcelId].coordinateX = _simpleParcel.coordinateX;
-    s.parcels[_parcelId].coordinateY = _simpleParcel.coordinateY;
-    s.parcels[_parcelId].district = _simpleParcel.district;
-    s.parcels[_parcelId].size = _simpleParcel.size;
-    s.parcels[_parcelId].alchemicaBoost = _simpleParcel.alchemicaBoost;
-    s.parcels[_parcelId].alchemicaRemaining = _simpleParcel.alchemicaRemaining;
-    s.parcels[_parcelId].currentRound = _simpleParcel.currentRound;
-    s.parcels[_parcelId].alchemicaHarvestRate = _simpleParcel.alchemicaHarvestRate;
-    s.parcels[_parcelId].lastUpdateTimestamp = _simpleParcel.lastUpdateTimestamp;
-    s.parcels[_parcelId].unclaimedAlchemica = _simpleParcel.unclaimedAlchemica;
-    s.parcels[_parcelId].altarId = _simpleParcel.altarId;
-    s.parcels[_parcelId].upgradeQueueCapacity = _simpleParcel.upgradeQueueCapacity;
-    s.parcels[_parcelId].upgradeQueueLength = _simpleParcel.upgradeQueueLength;
-    s.parcels[_parcelId].lodgeId = _simpleParcel.lodgeId;
-    s.parcels[_parcelId].surveying = _simpleParcel.surveying;
-    s.parcels[_parcelId].harvesterCount = _simpleParcel.harvesterCount;
+  function migrateParcel(uint _parcelId, ParcelData calldata parcelData) external {
+    s.parcels[_parcelId].owner = parcelData.owner;
+    s.parcels[_parcelId].parcelAddress = parcelData.parcelAddress;
+    s.parcels[_parcelId].parcelId = parcelData.parcelId;
+    s.parcels[_parcelId].coordinateX = parcelData.coordinateX;
+    s.parcels[_parcelId].coordinateY = parcelData.coordinateY;
+    s.parcels[_parcelId].district = parcelData.district;
+    s.parcels[_parcelId].size = parcelData.size;
+    s.parcels[_parcelId].alchemicaBoost = parcelData.alchemicaBoost;
+    s.parcels[_parcelId].alchemicaRemaining = parcelData.alchemicaRemaining;
+    s.parcels[_parcelId].currentRound = parcelData.currentRound;
+    s.parcels[_parcelId].alchemicaHarvestRate = parcelData.alchemicaHarvestRate;
+    s.parcels[_parcelId].lastUpdateTimestamp = parcelData.lastUpdateTimestamp;
+    s.parcels[_parcelId].unclaimedAlchemica = parcelData.unclaimedAlchemica;
+    s.parcels[_parcelId].altarId = parcelData.altarId;
+    s.parcels[_parcelId].upgradeQueueCapacity = parcelData.upgradeQueueCapacity;
+    s.parcels[_parcelId].upgradeQueueLength = parcelData.upgradeQueueLength;
+    s.parcels[_parcelId].lodgeId = parcelData.lodgeId;
+    s.parcels[_parcelId].surveying = parcelData.surveying;
+    s.parcels[_parcelId].harvesterCount = parcelData.harvesterCount;
+
+    saveBuildGrid(_parcelId, parcelData.buildGrid);
+    saveBuildTile(_parcelId, parcelData.tileGrid);
+    saveStartPositionBuildGrid(_parcelId, parcelData.startPositionBuildGrid);
+    saveRoundBaseAlchemica(_parcelId, parcelData.roundBaseAlchemica);
+    saveRoundAlchemica(_parcelId, parcelData.roundAlchemica);
+    saveReservoirs(_parcelId, parcelData.reservoirs);
   }
 
   function saveBuildGrid(uint256 _parcelId, uint[] calldata sparseGrid) public {
+    console.log("save build grid");
     require(sparseGrid.length % 3 == 0, "RealmFacet: Invalid sparse grid");
+    console.log("sparseGrid.length", sparseGrid.length);
     for (uint i; i < sparseGrid.length; i = i + 3) {
       s.parcels[_parcelId].buildGrid[sparseGrid[i]][sparseGrid[i + 1]] = sparseGrid[i + 2];
     }
@@ -129,6 +154,24 @@ contract MigrationFacet is Modifiers {
     require(sparseGrid.length % 3 == 0, "RealmFacet: Invalid sparse grid");
     for (uint i; i < sparseGrid.length; i = i + 3) {
       s.parcels[_parcelId].startPositionTileGrid[sparseGrid[i]][sparseGrid[i + 1]] = sparseGrid[i + 2];
+    }
+  }
+
+  function saveRoundBaseAlchemica(uint256 _parcelId, uint[][] calldata roundBaseAlchemica) public {
+    for (uint i; i < roundBaseAlchemica.length; i++) {
+      s.parcels[_parcelId].roundBaseAlchemica[i] = roundBaseAlchemica[i];
+    }
+  }
+
+  function saveRoundAlchemica(uint256 _parcelId, uint[][] calldata roundAlchemica) public {
+    for (uint i; i < roundAlchemica.length; i++) {
+      s.parcels[_parcelId].roundAlchemica[i] = roundAlchemica[i];
+    }
+  }
+
+  function saveReservoirs(uint256 _parcelId, uint[][] calldata reservoirs) public {
+    for (uint i; i < reservoirs.length; i++) {
+      s.parcels[_parcelId].reservoirs[i] = reservoirs[i];
     }
   }
 

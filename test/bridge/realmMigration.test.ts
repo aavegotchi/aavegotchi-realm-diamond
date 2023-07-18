@@ -14,6 +14,7 @@ import {
 import {
   ERC721Facet,
   RealmFacet,
+  RealmGettersAndSettersFacet,
   RealmGridFacet,
 } from "../../typechain-types";
 import { MintParcelInput } from "../../types";
@@ -25,6 +26,7 @@ describe("Realms Migration", async function () {
   let realmFacet: RealmFacet
   let erc721Facet: ERC721Facet
   let migrationFacet: MigrationFacet
+  let gettersAndSettersFacet: RealmGettersAndSettersFacet
   let installationsDiamond: InstallationDiamond
   let alchemica
   let deployer: SignerWithAddress
@@ -73,6 +75,11 @@ describe("Realms Migration", async function () {
       realmDiamond.address
     );
 
+    gettersAndSettersFacet = await ethers.getContractAt(
+      "RealmGettersAndSettersFacet",
+      realmDiamond.address
+    );
+
     //Alchemica
     await faucetRealAlchemica(
       deployer.address,
@@ -107,26 +114,38 @@ describe("Realms Migration", async function () {
     await loadFixture(deployFixture);
   });
 
-  it("Save simple parcel data", async () => {
-    await migrationFacet.saveSimpleParcelData(simpleParcel, parcelId)
+  it("Saving only simple parcel data", async () => {
+    await migrationFacet.migrateParcel(parcelId, simpleParcel)
 
-    const returnedSimpleParcel = await migrationFacet.getSimpleParcel(parcelId);
+    const returnedSimpleParcel = await migrationFacet.getParcelData(parcelId);
 
     compareResult(simpleParcel, returnedSimpleParcel)
   });
 
-  it("Save grid", async () => {
+  it.only("Saving grids", async () => {
     const sparsedArray = make2DArraySparse(grid)
-    await migrationFacet.saveBuildGrid(parcelId, sparsedArray)
+    
+    simpleParcel.buildGrid = sparsedArray
+    simpleParcel.tileGrid = sparsedArray
+    simpleParcel.startPositionBuildGrid = sparsedArray
+    simpleParcel.startPositionTiledGrid = sparsedArray
 
-    const returnedGrid = await migrationFacet.getGrid(parcelId, 0)
-    const convertedReturnedGrid = convertContentToString(returnedGrid)
-
-    expect(grid).to.deep.equal(convertedReturnedGrid)
+    console.log("migrating parcel")
+    await migrationFacet.migrateParcel(parcelId, simpleParcel)
+    
+    console.log("getting grid")
+    let buildGridAfterMigration = await migrationFacet.getGrid(parcelId, 0)
+    console.log("converting grid")
+    buildGridAfterMigration = convertContentToString(buildGridAfterMigration)
+    
+    console.log("comparing grid")
+    expect(grid).to.deep.equal(buildGridAfterMigration)
   });
-
+  
   it("Migrate Parcel", async () => {
     const sparsedArray = make2DArraySparse(grid)
+
+    // simpleParcel.
 
     await migrationFacet.migrateParcel(parcelId, simpleParcel, sparsedArray, sparsedArray, sparsedArray, sparsedArray)
 
@@ -137,6 +156,30 @@ describe("Realms Migration", async function () {
     expect(grid).to.deep.equal(convertedReturnedGrid)
     compareResult(simpleParcel, returnedSimpleParcel)
   });
+
+  it("Save round base alchemica", async () => {
+    const roundBaseAlchemica = roundGrid;
+
+    await migrationFacet.migrateParcel(parcelId, simpleParcel, [], [], [], [], roundBaseAlchemica)
+    
+    const roundBaseAlchemicaOutput = await gettersAndSettersFacet.getRoundBaseAlchemica(parcelId)
+    const convertedRoundBaseAlchemicaOutput = convertContentToString(roundBaseAlchemicaOutput)
+    
+    expect(roundBaseAlchemica).to.deep.equal(convertedRoundBaseAlchemicaOutput)
+  })
+
+  it("Save round alchemica", async () => {
+    const roundAlchemica = roundGrid;
+
+    await migrationFacet.migrateParcel(parcelId, simpleParcel, [], [], [], [], [], roundAlchemica)
+    
+    const roundAlchemicaOutput = await gettersAndSettersFacet.getRoundAlchemica(parcelId)
+    const convertedRoundAlchemicaOutput = convertContentToString(roundAlchemicaOutput)
+    
+    expect(roundAlchemica).to.deep.equal(convertedRoundAlchemicaOutput)
+  })
+
+
 });
 
 const approveRealAlchemica = async (
@@ -230,7 +273,7 @@ const simpleParcel: MigrationFacet.SimpleParcelStruct = {
   coordinateX: "5",
   coordinateY: "5",
   district: "2",
-  size: "2",
+  size: "1",
   alchemicaBoost: ["1", "1", "1", "1"],
   alchemicaRemaining: ["1", "1", "1", "1"],
   currentRound: "1",
@@ -243,6 +286,13 @@ const simpleParcel: MigrationFacet.SimpleParcelStruct = {
   lodgeId: "1",
   surveying: true,
   harvesterCount: "1",
+  buildGrid: [],
+  tileGrid: [],
+  startPositionBuildGrid: [],
+  startPositionTileGrid: [],
+  roundBaseAlchemica: [],
+  roundAlchemica: [],
+  reservoirs: []
 }
 
 const grid = [
@@ -262,6 +312,19 @@ const grid = [
   ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
   ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
   ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"]
+]
+
+const roundGrid = [
+  ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
+  ['1', '1', '1', '1', '1', '1', '1', '1', '1', '1'],
+  ['2', '2', '2', '2', '2', '2', '2', '2', '2', '2'],
+  ['3', '3', '3', '3', '3', '3', '3', '3', '3', '3'],
+  ['4', '4', '4', '4', '4', '4', '4', '4', '4', '4'],
+  ['5', '5', '5', '5', '5', '5', '5', '5', '5', '5'],
+  ['6', '6', '6', '6', '6', '6', '6', '6', '6', '6'],
+  ['7', '7', '7', '7', '7', '7', '7', '7', '7', '7'],
+  ['8', '8', '8', '8', '8', '8', '8', '8', '8', '8'],
+  ['9', '9', '9', '9', '9', '9', '9', '9', '9', '9'],
 ]
 
 function compareResult(simpleParcel: MigrationFacet.SimpleParcelStruct, returnedSimpleParcel: MigrationFacet.SimpleParcelStruct) {

@@ -10,11 +10,11 @@ export default async function main() {
 
   const migrateParcel = async (parcel: Parcel) => {
     const simpleParcel = createSimpleParcel(parcel)
-    migrationFacet.migrateParcel(parcel.id, simpleParcel, [], [], [], [])
+    migrationFacet.migrateParcel(parcel.id, simpleParcel, [], [], [], [], [])
   }
 }
 
-const createSimpleParcel = (parcel: Parcel): MigrationFacet.SimpleParcelStruct => {
+const createSimpleParcel = (parcel: Parcel): MigrationFacet.ParcelData => {
   return {
     owner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     parcelAddress: "test",
@@ -22,7 +22,7 @@ const createSimpleParcel = (parcel: Parcel): MigrationFacet.SimpleParcelStruct =
     coordinateX: "5",
     coordinateY: "5",
     district: "2",
-    size: "2",
+    size: "1",
     alchemicaBoost: ["1", "1", "1", "1"],
     alchemicaRemaining: ["1", "1", "1", "1"],
     currentRound: "1",

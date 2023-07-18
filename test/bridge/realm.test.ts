@@ -18,7 +18,6 @@ import {
   RealmsBridgeGotchichainSide,
   InstallationsPolygonXGotchichainBridgeFacet,
   RealmFacet,
-  RealmsPolygonXGotchichainBridgeFacet,
   RealmGridFacet,
 } from "../../typechain-types";
 import { MintParcelInput } from "../../types";
@@ -45,8 +44,7 @@ describe("Realms Bridge", async function () {
   let migrationFacet: MigrationFacet
   let installationsDiamondPolygon: InstallationDiamond,
     installationsDiamondGotchichain: InstallationDiamond;
-  let realmsPolygonBridgeFacet: RealmsPolygonXGotchichainBridgeFacet;
-  let realmsGotchichainBridgeFacet: RealmsPolygonXGotchichainBridgeFacet;
+  let realmsPolygonBridgeFacet: ;
   let alchemicaPolygon, alchemicaGotchichain;
   let deployer: SignerWithAddress;
   let realmDiamondPolygon, realmDiamondGotchichain;
@@ -88,16 +86,6 @@ describe("Realms Bridge", async function () {
     installationFacetGotchichain = await ethers.getContractAt(
       "InstallationFacet",
       installationsDiamondGotchichain.address
-    );
-
-    realmsPolygonBridgeFacet = await ethers.getContractAt(
-      "RealmsPolygonXGotchichainBridgeFacet",
-      realmDiamondPolygon.address
-    );
-
-    realmsGotchichainBridgeFacet = await ethers.getContractAt(
-      "RealmsPolygonXGotchichainBridgeFacet",
-      realmDiamondGotchichain.address
     );
 
     realmFacetPolygon = await ethers.getContractAt(
