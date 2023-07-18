@@ -3,9 +3,6 @@ pragma solidity ^0.8.1;
 
 import {Parcel} from "../libraries/AppStorage.sol";
 import "./ProxyONFT721.sol";
-import {ParcelData} from "../InstallationDiamond/facets/RealmsPolygonXGotchichainBridgeFacet.sol";
-import {RealmsPolygonXGotchichainBridgeFacet} from "../InstallationDiamond/facets/RealmsPolygonXGotchichainBridgeFacet.sol";
-import "hardhat/console.sol";
 
 contract RealmsBridgeGotchichainSide is ProxyONFT721 {
     constructor(
