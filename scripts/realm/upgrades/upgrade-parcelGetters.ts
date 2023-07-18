@@ -36,12 +36,12 @@ export async function upgradeRealmParcelGetter() {
 
   await run("deployUpgrade", realmArgs);
 
-  const realmGettersAndSettersFacet = (await ethers.getContractAt(
-      "RealmGettersAndSettersFacet",
-      c.realmDiamond
-    )) as RealmGettersAndSettersFacet;
-  const testParcel: RealmGettersAndSettersFacet.ParcelOutTestStruct = await realmGettersAndSettersFacet.getParcel('10');
-  console.log(testParcel)
+  // const realmGettersAndSettersFacet = (await ethers.getContractAt(
+  //     "RealmGettersAndSettersFacet",
+  //     c.realmDiamond
+  //   )) as RealmGettersAndSettersFacet;
+  // const testParcel: RealmGettersAndSettersFacet.ParcelOutTestStruct = await realmGettersAndSettersFacet.getParcel('10');
+  // console.log(testParcel)
 }
 
 if (require.main === module) {
