@@ -63,13 +63,13 @@ async function getParcels() {
   } while (parcels.length > 0);
 
   // Write empty parcels to JSON file.
-  await fs.writeFile("./emptyParcels.json", JSON.stringify(emptyParcels), "utf8");
+  // await fs.writeFile("./emptyParcels.json", JSON.stringify(emptyParcels), "utf8");
 
   // fetch non-empty parcels
   console.log("nonEmptyParcelIds", nonEmptyParcelIds);
 
   // run upgrade for getter function on hardhat
-  await upgradeRealmParcelGetter();
+  // await upgradeRealmParcelGetter();
 
   // get all parcel metadata onchain
   const c = await varsForNetwork(ethers);
