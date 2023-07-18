@@ -17,7 +17,9 @@ async function getParcels() {
   const currentBlock = 37933100;
 
   // Get all parcel ids
-  let allParcelIds = [];
+  let nonEmptyParcels = [];
+  let nonEmptyParcelIds = [];
+  let emptyParcels = [];
   let id = 0;
   let parcels = [];
   do {
@@ -25,6 +27,27 @@ async function getParcels() {
         {
           parcels(first: 2500  where:{ id_gt: ${id}} orderBy: id orderDirection: asc) {
             id
+            equippedTiles {
+              id
+            }
+            equippedInstallations {
+              id
+            }
+            coordinateX
+            coordinateY
+            district
+            alphaBoost
+            fomoBoost
+            fudBoost
+            kekBoost
+            lastChanneledAlchemica
+            lastClaimedAlchemica
+            remainingAlchemica
+            owner
+            parcelHash
+            parcelId
+            size
+            tokenId
           }
         }
       `;
@@ -33,11 +56,17 @@ async function getParcels() {
     parcels = response.data.parcels;
 
     if (parcels.length > 0) {
-      allParcelIds = allParcelIds.concat(parcels.map(parcel => parcel.id));
+      nonEmptyParcelIds = nonEmptyParcelIds.concat(parcels.filter(parcel => ((parcel.equippedTiles.length > 0) || (parcel.equippedTiles.equippedInstallations > 0))).map(parcel => Number(parcel.id)));
+      emptyParcels = emptyParcels.concat(parcels.filter(parcel => ((parcel.equippedTiles.length == 0) && (parcel.equippedTiles.equippedInstallations == 0))));
       id = parcels[parcels.length - 1].id;
     }
   } while (parcels.length > 0);
-  console.log("allParcelIds", allParcelIds);
+
+  // Write empty parcels to JSON file.
+  await fs.writeFile("./emptyParcels.json", JSON.stringify(emptyParcels), "utf8");
+
+  // fetch non-empty parcels
+  console.log("nonEmptyParcelIds", nonEmptyParcelIds);
 
   // run upgrade for getter function on hardhat
   await upgradeRealmParcelGetter();
@@ -49,14 +78,19 @@ async function getParcels() {
     c.realmDiamond
   )) as RealmGettersAndSettersFacet;
 
-  let allParcels = [];
-  for (let i = 0; i < allParcelIds.length; i++) {
-    const parcel: RealmGettersAndSettersFacet.ParcelOutTestStruct = await realmGettersAndSettersFacet.getParcel(allParcelIds[i]);
-    console.log(parcel)
-    allParcels.push(parcel);
+  for (let i = 0; i < nonEmptyParcelIds.length; i++) {
+    console.log('parcel id:', nonEmptyParcelIds[i])
+    try {
+      const parcel: RealmGettersAndSettersFacet.ParcelOutTestStruct = await realmGettersAndSettersFacet.getParcel(nonEmptyParcelIds[i]);
+      // console.log(parcel)
+      await fs.writeFile(`./parcel-${nonEmptyParcelIds[i]}.json`, JSON.stringify(parcel), "utf8");
+      nonEmptyParcels.push(parcel);
+    } catch (e) {
+      console.log("ERROR", e);
+    }
   }
-  const json = JSON.stringify(allParcels);
-  await fs.writeFile("./allParcels.json", json, "utf8");
+
+  await fs.writeFile("./nonEmptyParcels.json", JSON.stringify(nonEmptyParcels), "utf8");
 }
 
 // We recommend this pattern to be able to use async/await everywhere
