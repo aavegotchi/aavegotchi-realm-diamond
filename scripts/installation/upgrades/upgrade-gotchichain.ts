@@ -10,8 +10,7 @@ export async function upgradeInstallation(bridgeAddress: string) {
     {
       facetName: "InstallationFacet",
       addSelectors: [
-        "function addLayerZeroBridgeAddress(address _newLayerZeroBridge) external",
-        "function removeLayerZeroBridgeAddress(address _layerZeroBridgeToRemove) external",
+        "function setLayerZeroBridgeAddress(address _newLayerZeroBridge) external",
       ],
       removeSelectors: [],
     },
@@ -33,7 +32,7 @@ export async function upgradeInstallation(bridgeAddress: string) {
     InstallationFacet__factory.abi
   );
 
-  const calldata = iface.encodeFunctionData("addLayerZeroBridgeAddress", [
+  const calldata = iface.encodeFunctionData("setLayerZeroBridgeAddress", [
     bridgeAddress,
   ]);
 

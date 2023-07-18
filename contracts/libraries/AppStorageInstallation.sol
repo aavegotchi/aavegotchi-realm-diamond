@@ -97,7 +97,6 @@ struct InstallationAppStorage {
   mapping(address => bool) gameManager;
 
   address layerZeroBridgeAddress;
-  mapping(address => bool) layerZeroBridgeAddresses;
 }
 
 library LibAppStorageInstallation {
