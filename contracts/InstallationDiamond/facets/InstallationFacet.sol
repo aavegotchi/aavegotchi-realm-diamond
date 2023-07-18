@@ -401,6 +401,18 @@ contract InstallationFacet is Modifiers {
     return s.upgradeComplete[_queueId];
   }
 
+  ///@notice Allow the DAO to add an address as a Layer Zero bridge
+  ///@param _newLayerZeroBridge The address to be added as Layer Zero bridge
+  function addLayerZeroBridgeAddress(address _newLayerZeroBridge) external onlyOwner {
+      s.layerZeroBridgeAddresses[_newLayerZeroBridge] = true;
+  }
+
+  ///@notice Allow the DAO to remove an address that was an Layer Zero bridge
+  ///@param _layerZeroBridgeToRemove The address to be removed fron being a Layer Zero bridge
+  function removeLayerZeroBridgeAddress(address _layerZeroBridgeToRemove) external onlyOwner {
+      s.layerZeroBridgeAddresses[_layerZeroBridgeToRemove] = false;
+  }
+
   ///@notice Allow the owner to add an address as a Layer Zero bridge
   ///@param _newLayerZeroBridge The address to be added as Layer Zero bridge
   function setLayerZeroBridgeAddress(address _newLayerZeroBridge) external onlyOwner {

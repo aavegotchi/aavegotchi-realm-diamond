@@ -1,20 +1,15 @@
 import { run, ethers } from "hardhat";
-import { maticTileDiamondAddress } from "../../../constants";
+import { varsForNetwork } from "../../../constants";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
-import {
-  TileFacet__factory,
-} from "../../../typechain";
+import { TileFacet__factory } from "../../../typechain-types";
 
 const gotchichainBridgeAddress = "0xB8133C7CF766f29d68b0cC470ED8F0B65eB996E6";
 
-
 export async function upgrade(bridgeAddress: string) {
-  const diamondUpgrader = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
-
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "TileFacet",
@@ -43,13 +38,14 @@ export async function upgrade(bridgeAddress: string) {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
+  const addrs = await varsForNetwork(ethers)
+
   const args: DeployUpgradeTaskArgs = {
-    diamondUpgrader: diamondUpgrader,
-    diamondAddress: maticTileDiamondAddress,
+    diamondAddress: addrs.tileDiamond,
     facetsAndAddSelectors: joined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
-    initAddress: maticTileDiamondAddress,
+    initAddress: addrs.tileDiamond,
     initCalldata: calldata,
   };
 
