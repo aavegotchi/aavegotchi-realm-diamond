@@ -37,7 +37,7 @@ interface AavegotchiDiamond {
     address thirdParty;
     uint32 whitelistId;
     address[] revenueTokens;
-    uint256 channellingStatus;
+    uint256 permissions;
   }
 
   function ownerOf(uint256 _tokenId) external view returns (address owner_);
@@ -84,7 +84,7 @@ interface AavegotchiDiamond {
 
   function reduceKinshipViaChanneling(uint32 _gotchiId) external;
 
-  function setLendingChannelingStatus(uint32 _listingId, uint256 _newChannelStatus) external;
+  // function setLendingChannelingStatus(uint32 _listingId, uint256 _newChannelStatus) external;
 
   function claimAndEndGotchiLending(uint32 _tokenId) external;
 
