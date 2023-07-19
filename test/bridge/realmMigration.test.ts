@@ -115,71 +115,52 @@ describe("Realms Migration", async function () {
   });
 
   it("Saving only simple parcel data", async () => {
-    await migrationFacet.migrateParcel(parcelId, simpleParcel)
+    await migrationFacet.migrateParcel(parcelId, parcelInput)
 
-    const returnedSimpleParcel = await migrationFacet.getParcelData(parcelId);
+    const parcel = await gettersAndSettersFacet.getParcel(parcelId);
 
-    compareResult(simpleParcel, returnedSimpleParcel)
+    compareResult(parcelInput, parcel)
   });
 
-  it.only("Saving grids", async () => {
+  it("Saving grids", async () => {
     const sparsedArray = make2DArraySparse(grid)
     
-    simpleParcel.buildGrid = sparsedArray
-    simpleParcel.tileGrid = sparsedArray
-    simpleParcel.startPositionBuildGrid = sparsedArray
-    simpleParcel.startPositionTiledGrid = sparsedArray
+    parcelInput.buildGrid = sparsedArray
+    parcelInput.tileGrid = sparsedArray
+    parcelInput.startPositionBuildGrid = sparsedArray
+    parcelInput.startPositionTileGrid = sparsedArray
 
-    console.log("migrating parcel")
-    await migrationFacet.migrateParcel(parcelId, simpleParcel)
+    await migrationFacet.migrateParcel(parcelId, parcelInput)
     
-    console.log("getting grid")
-    let buildGridAfterMigration = await migrationFacet.getGrid(parcelId, 0)
-    console.log("converting grid")
-    buildGridAfterMigration = convertContentToString(buildGridAfterMigration)
-    
-    console.log("comparing grid")
-    expect(grid).to.deep.equal(buildGridAfterMigration)
-  });
-  
-  it("Migrate Parcel", async () => {
-    const sparsedArray = make2DArraySparse(grid)
-
-    // simpleParcel.
-
-    await migrationFacet.migrateParcel(parcelId, simpleParcel, sparsedArray, sparsedArray, sparsedArray, sparsedArray)
-
-    const returnedSimpleParcel = await migrationFacet.getSimpleParcel(parcelId);
-    const returnedGrid = await migrationFacet.getGrid(parcelId, 0)
-    const convertedReturnedGrid = convertContentToString(returnedGrid)
-
-    expect(grid).to.deep.equal(convertedReturnedGrid)
-    compareResult(simpleParcel, returnedSimpleParcel)
+    const parcel = await gettersAndSettersFacet.getParcel(parcelId);
+ 
+    compareGrid(grid, parcel.buildGrid, 16, 16)
+    compareGrid(grid, parcel.startPositionBuildGrid, 16, 16)
+    compareGrid(grid, parcel.tileGrid, 16, 16)
+    compareGrid(grid, parcel.startPositionTileGrid, 16, 16)
   });
 
-  it("Save round base alchemica", async () => {
-    const roundBaseAlchemica = roundGrid;
+  it("Saving roundBaseAlchemica and roundAlchemica", async () => {
+    parcelInput.roundBaseAlchemica = roundGrid;
+    parcelInput.roundAlchemica = roundGrid;
 
-    await migrationFacet.migrateParcel(parcelId, simpleParcel, [], [], [], [], roundBaseAlchemica)
+    await migrationFacet.migrateParcel(parcelId, parcelInput)
     
-    const roundBaseAlchemicaOutput = await gettersAndSettersFacet.getRoundBaseAlchemica(parcelId)
-    const convertedRoundBaseAlchemicaOutput = convertContentToString(roundBaseAlchemicaOutput)
-    
-    expect(roundBaseAlchemica).to.deep.equal(convertedRoundBaseAlchemicaOutput)
+    const parcel = await gettersAndSettersFacet.getParcel(parcelId);
+
+    compareGrid(roundGrid, parcel.roundBaseAlchemica, 10, 10)
+    compareGrid(roundGrid, parcel.roundAlchemica, 10, 10)
   })
 
-  it("Save round alchemica", async () => {
-    const roundAlchemica = roundGrid;
+  it("Saving reservoirs", async () => {
+    parcelInput.reservoirs = reservoirsGrid;
 
-    await migrationFacet.migrateParcel(parcelId, simpleParcel, [], [], [], [], [], roundAlchemica)
+    await migrationFacet.migrateParcel(parcelId, parcelInput)
     
-    const roundAlchemicaOutput = await gettersAndSettersFacet.getRoundAlchemica(parcelId)
-    const convertedRoundAlchemicaOutput = convertContentToString(roundAlchemicaOutput)
+    const parcel = await gettersAndSettersFacet.getParcel(parcelId);
     
-    expect(roundAlchemica).to.deep.equal(convertedRoundAlchemicaOutput)
+    compareGrid(reservoirsGrid, parcel.reservoirs, 4, 4)
   })
-
-
 });
 
 const approveRealAlchemica = async (
@@ -255,18 +236,7 @@ const make2DArraySparse = (array) => {
   return sparseArray;
 }
 
-const convertContentToString = (array) => {
-  const returnArray = [];
-  for (let i = 0; i < array.length; i++) {
-    returnArray.push([]);
-    for (let j = 0; j < array[i].length; j++) {
-      returnArray[i][j] = array[i][j].toString();
-    }
-  }
-  return returnArray
-}
-
-const simpleParcel: MigrationFacet.SimpleParcelStruct = {
+const parcelInput = {
   owner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
   parcelAddress: "test",
   parcelId: "test",
@@ -327,28 +297,43 @@ const roundGrid = [
   ['9', '9', '9', '9', '9', '9', '9', '9', '9', '9'],
 ]
 
-function compareResult(simpleParcel: MigrationFacet.SimpleParcelStruct, returnedSimpleParcel: MigrationFacet.SimpleParcelStruct) {
-  expect(simpleParcel.owner).to.equal(returnedSimpleParcel.owner)
-  expect(simpleParcel.parcelAddress).to.equal(returnedSimpleParcel.parcelAddress)
-  expect(simpleParcel.parcelId).to.equal(returnedSimpleParcel.parcelId)
-  expect(simpleParcel.coordinateX).to.equal(returnedSimpleParcel.coordinateX)
-  expect(simpleParcel.coordinateY).to.equal(returnedSimpleParcel.coordinateY)
-  expect(simpleParcel.district).to.equal(returnedSimpleParcel.district)
-  expect(simpleParcel.size).to.equal(returnedSimpleParcel.size)
+const reservoirsGrid = [
+  [0, 0, 0, 0],
+  [1, 1, 1, 1],
+  [2, 2, 2, 2],
+  [3, 3, 3, 3],
+]
 
-  simpleParcel.alchemicaBoost.forEach((value, i) => expect(value).to.equal(returnedSimpleParcel.alchemicaBoost[i].toString()))
-  simpleParcel.alchemicaRemaining.forEach((value, i) => expect(value).to.equal(returnedSimpleParcel.alchemicaRemaining[i].toString()))
+function compareResult(expectedParcel, resultParcel) {
+  expect(expectedParcel.owner).to.equal(resultParcel.owner)
+  expect(expectedParcel.parcelAddress).to.equal(resultParcel.parcelAddress)
+  expect(expectedParcel.parcelId).to.equal(resultParcel.parcelId)
+  expect(expectedParcel.coordinateX).to.equal(resultParcel.coordinateX)
+  expect(expectedParcel.coordinateY).to.equal(resultParcel.coordinateY)
+  expect(expectedParcel.district).to.equal(resultParcel.district)
+  expect(expectedParcel.size).to.equal(resultParcel.size)
 
-  expect(simpleParcel.currentRound).to.equal(returnedSimpleParcel.currentRound)
+  expectedParcel.alchemicaBoost.forEach((value, i) => expect(value).to.equal(resultParcel.alchemicaBoost[i].toString()))
+  expectedParcel.alchemicaRemaining.forEach((value, i) => expect(value).to.equal(resultParcel.alchemicaRemaining[i].toString()))
 
-  simpleParcel.alchemicaHarvestRate.forEach((value, i) => expect(value).to.equal(returnedSimpleParcel.alchemicaHarvestRate[i].toString()))
-  simpleParcel.lastUpdateTimestamp.forEach((value, i) => expect(value).to.equal(returnedSimpleParcel.lastUpdateTimestamp[i].toString()))
-  simpleParcel.unclaimedAlchemica.forEach((value, i) => expect(value).to.equal(returnedSimpleParcel.unclaimedAlchemica[i].toString()))
+  expect(expectedParcel.currentRound).to.equal(resultParcel.currentRound)
 
-  expect(simpleParcel.altarId).to.equal(returnedSimpleParcel.altarId.toString())
-  expect(simpleParcel.upgradeQueueCapacity).to.equal(returnedSimpleParcel.upgradeQueueCapacity.toString())
-  expect(simpleParcel.upgradeQueueLength).to.equal(returnedSimpleParcel.upgradeQueueLength.toString())
-  expect(simpleParcel.lodgeId).to.equal(returnedSimpleParcel.lodgeId.toString())
-  expect(simpleParcel.surveying).to.equal(returnedSimpleParcel.surveying)
-  expect(simpleParcel.harvesterCount).to.equal(returnedSimpleParcel.harvesterCount.toString())
+  expectedParcel.alchemicaHarvestRate.forEach((value, i) => expect(value).to.equal(resultParcel.alchemicaHarvestRate[i].toString()))
+  expectedParcel.lastUpdateTimestamp.forEach((value, i) => expect(value).to.equal(resultParcel.lastUpdateTimestamp[i].toString()))
+  expectedParcel.unclaimedAlchemica.forEach((value, i) => expect(value).to.equal(resultParcel.unclaimedAlchemica[i].toString()))
+
+  expect(expectedParcel.altarId).to.equal(resultParcel.altarId.toString())
+  expect(expectedParcel.upgradeQueueCapacity).to.equal(resultParcel.upgradeQueueCapacity.toString())
+  expect(expectedParcel.upgradeQueueLength).to.equal(resultParcel.upgradeQueueLength.toString())
+  expect(expectedParcel.lodgeId).to.equal(resultParcel.lodgeId.toString())
+  expect(expectedParcel.surveying).to.equal(resultParcel.surveying)
+  expect(expectedParcel.harvesterCount).to.equal(resultParcel.harvesterCount.toString())
+}
+
+function compareGrid(expectedGrid, resultGrid, gridLength, gridHeight) {
+  for (let i = 0; i < gridLength; i++) {
+    for (let j = 0; j < gridHeight; j++) {
+      expect(expectedGrid[i][j].toString()).to.equal(resultGrid[i][j].toString())
+    }
+  }
 }
