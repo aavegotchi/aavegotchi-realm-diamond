@@ -240,7 +240,7 @@ task(
           cut,
           initAddress ? initAddress : hre.ethers.constants.AddressZero,
           initCalldata ? initCalldata : "0x",
-          { gasLimit: 8000000 }
+          { gasPrice: gasPrice }
         );
         console.log("Diamond cut tx:", tx.hash);
         const receipt: ContractReceipt = await tx.wait();

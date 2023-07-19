@@ -236,6 +236,9 @@ contract AlchemicaFacet is Modifiers {
       "AavegotchiDiamond: Gotchi CANNOT have active listing for lending"
     );
 
+    //finally interact while reducing kinship
+    diamond.reduceKinshipViaChanneling(uint32(_gotchiId));
+
     //0 - alchemical channeling
     LibRealm.verifyAccessRight(_realmId, _gotchiId, 0, LibMeta.msgSender());
 
@@ -290,8 +293,7 @@ contract AlchemicaFacet is Modifiers {
     //update latest channeling
     s.gotchiChannelings[_gotchiId] = block.timestamp;
     s.parcelChannelings[_realmId] = block.timestamp;
-    //finally interact
-    AavegotchiDiamond(s.aavegotchiDiamond).realmInteract(_gotchiId);
+
     emit ChannelAlchemica(_realmId, _gotchiId, channelAmounts, rate, radius);
   }
 
