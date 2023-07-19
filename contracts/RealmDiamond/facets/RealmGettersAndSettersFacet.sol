@@ -195,51 +195,47 @@ contract RealmGettersAndSettersFacet is Modifiers {
     uint256[64][64] startPositionTileGrid;
   }
 
-  function getParcels(uint256[] calldata _parcelIds) external view returns (ParcelOutTest[] memory) {
-    ParcelOutTest[] memory parcels = new ParcelOutTest[](_parcelIds.length);
+  function getParcel(uint256 _parcelId) external view returns (ParcelOutTest memory parcelOut) {
+    Parcel storage parcel = s.parcels[_parcelId];
+    parcelOut.owner = parcel.owner;
+    parcelOut.parcelAddress = parcel.parcelAddress;
+    parcelOut.parcelId = parcel.parcelId;
+    parcelOut.coordinateX = parcel.coordinateX;
+    parcelOut.coordinateY = parcel.coordinateY;
+    parcelOut.district = parcel.district;
+    parcelOut.size = parcel.size;
+    parcelOut.alchemicaBoost = parcel.alchemicaBoost;
+    parcelOut.alchemicaRemaining = parcel.alchemicaRemaining;
+    parcelOut.currentRound = parcel.currentRound;
+    parcelOut.alchemicaHarvestRate = parcel.alchemicaHarvestRate;
+    parcelOut.lastUpdateTimestamp = parcel.lastUpdateTimestamp;
+    parcelOut.unclaimedAlchemica = parcel.unclaimedAlchemica;
+    parcelOut.altarId = parcel.altarId;
+    parcelOut.upgradeQueueCapacity = parcel.upgradeQueueCapacity;
+    parcelOut.upgradeQueueLength = parcel.upgradeQueueLength;
+    parcelOut.lodgeId = parcel.lodgeId;
+    parcelOut.surveying = parcel.surveying;
+    parcelOut.harvesterCount = parcel.harvesterCount;
+
     uint256[5] memory widths = LibRealm.getWidths();
     uint256[5] memory heights = LibRealm.getHeights();
-    for (uint256 i; i < _parcelIds.length; i++) {
-      Parcel storage parcel = s.parcels[_parcelIds[i]];
-      parcels[i].owner = parcel.owner;
-      parcels[i].parcelAddress = parcel.parcelAddress;
-      parcels[i].parcelId = parcel.parcelId;
-      parcels[i].coordinateX = parcel.coordinateX;
-      parcels[i].coordinateY = parcel.coordinateY;
-      parcels[i].district = parcel.district;
-      parcels[i].size = parcel.size;
-      parcels[i].alchemicaBoost = parcel.alchemicaBoost;
-      parcels[i].alchemicaRemaining = parcel.alchemicaRemaining;
-      parcels[i].currentRound = parcel.currentRound;
-      parcels[i].alchemicaHarvestRate = parcel.alchemicaHarvestRate;
-      parcels[i].lastUpdateTimestamp = parcel.lastUpdateTimestamp;
-      parcels[i].unclaimedAlchemica = parcel.unclaimedAlchemica;
-      parcels[i].altarId = parcel.altarId;
-      parcels[i].upgradeQueueCapacity = parcel.upgradeQueueCapacity;
-      parcels[i].upgradeQueueLength = parcel.upgradeQueueLength;
-      parcels[i].lodgeId = parcel.lodgeId;
-      parcels[i].surveying = parcel.surveying;
-      parcels[i].harvesterCount = parcel.harvesterCount;
-
-      uint width = widths[parcel.size];
-      uint height = heights[parcel.size];
-      for (uint256 k; k < width; k++) {
-        for (uint256 j; j < height; j++) {
-          parcels[i].buildGrid[k][j] = parcel.buildGrid[k][j];
-          parcels[i].tileGrid[k][j] = parcel.tileGrid[k][j];
-          parcels[i].startPositionBuildGrid[k][j] = parcel.startPositionBuildGrid[k][j];
-          parcels[i].startPositionTileGrid[k][j] = parcel.startPositionTileGrid[k][j];
-        }
-      }
-
-      for (uint256 j; j < 10; j++) {
-        parcels[i].roundBaseAlchemica[j] = parcel.roundBaseAlchemica[j];
-        parcels[i].roundAlchemica[j] = parcel.roundAlchemica[j];
-      }
-      for (uint256 j; j < 4; j++) {
-        parcels[i].reservoirs[j] = parcel.reservoirs[j];
+    uint width = widths[parcel.size];
+    uint height = heights[parcel.size];
+    for (uint256 k; k < width; k++) {
+      for (uint256 j; j < height; j++) {
+        parcelOut.buildGrid[k][j] = parcel.buildGrid[k][j];
+        parcelOut.tileGrid[k][j] = parcel.tileGrid[k][j];
+        parcelOut.startPositionBuildGrid[k][j] = parcel.startPositionBuildGrid[k][j];
+        parcelOut.startPositionTileGrid[k][j] = parcel.startPositionTileGrid[k][j];
       }
     }
-    return parcels;
+
+    for (uint256 j; j < 10; j++) {
+      parcelOut.roundBaseAlchemica[j] = parcel.roundBaseAlchemica[j];
+      parcelOut.roundAlchemica[j] = parcel.roundAlchemica[j];
+    }
+    for (uint256 j; j < 4; j++) {
+      parcelOut.reservoirs[j] = parcel.reservoirs[j];
+    }
   }
 }

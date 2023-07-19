@@ -5,8 +5,8 @@ import { varsForNetwork } from "../../../constants";
 
 const apollo = require("apollo-fetch");
 const uri =
-  // "https://subgraph.satsuma-prod.com/tWYl5n5y04oz/aavegotchi/gotchiverse-matic/api";
-"https://subgraph.satsuma-prod.com/tWYl5n5y04oz/aavegotchi/gotchiverse-mumbai/api";
+  "https://subgraph.satsuma-prod.com/tWYl5n5y04oz/aavegotchi/gotchiverse-matic/api";
+// "https://subgraph.satsuma-prod.com/tWYl5n5y04oz/aavegotchi/gotchiverse-mumbai/api";
 const graph = apollo.createApolloFetch({
   uri,
 });
@@ -23,7 +23,7 @@ async function getParcels() {
   do {
     let query = `
         {
-          parcels(first: 2500  where:{ id_gt: ${id}} orderBy: id orderDirection: asc block: {number: ${currentBlock}}) {
+          parcels(first: 2500  where:{ id_gt: ${id}} orderBy: id orderDirection: asc) {
             id
           }
         }
@@ -48,12 +48,12 @@ async function getParcels() {
     "RealmGettersAndSettersFacet",
     c.realmDiamond
   )) as RealmGettersAndSettersFacet;
-  let step = 100;
-  let sliceStep = allParcelIds.length / step;
+
   let allParcels = [];
-  for (let i = 0; i < step; i++) {
-    const parcels = await realmGettersAndSettersFacet.getParcels(allParcelIds.slice(sliceStep * i, sliceStep * (i + 1)));
-    allParcels = allParcels.concat(parcels);
+  for (let i = 0; i < allParcelIds.length; i++) {
+    const parcel: RealmGettersAndSettersFacet.ParcelOutTestStruct = await realmGettersAndSettersFacet.getParcel(allParcelIds[i]);
+    console.log(parcel)
+    allParcels.push(parcel);
   }
   const json = JSON.stringify(allParcels);
   await fs.writeFile("./allParcels.json", json, "utf8");
