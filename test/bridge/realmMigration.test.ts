@@ -18,6 +18,7 @@ import {
   RealmGridFacet,
 } from "../../typechain-types";
 import { MintParcelInput } from "../../types";
+import { make2DArraySparse } from "../../scripts/migration/migrateRealms";
 
 describe("Realms Migration", async function () {
   let installationFacet: InstallationFacet
@@ -122,7 +123,7 @@ describe("Realms Migration", async function () {
     compareResult(parcelInput, parcel)
   });
 
-  it("Saving grids", async () => {
+  it.only("Saving grids", async () => {
     const sparsedArray = make2DArraySparse(grid)
     
     parcelInput.buildGrid = sparsedArray
@@ -221,20 +222,6 @@ const genSignature = async (tileId: number, x: number, y: number) => {
 
   return signature1;
 };
-
-const make2DArraySparse = (array) => {
-  let sparseArray = [];
-  for (let i = 0; i < array.length; i++) {
-    for (let j = 0; j < array[i].length; j++) {
-      if (array[i][j] !== "0") {
-        sparseArray.push(i);
-        sparseArray.push(j);
-        sparseArray.push(array[i][j]);
-      }
-    }
-  }
-  return sparseArray;
-}
 
 const parcelInput = {
   owner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
