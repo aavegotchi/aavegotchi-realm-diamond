@@ -18,7 +18,7 @@ import {
   RealmGridFacet,
 } from "../../typechain-types";
 import { MintParcelInput } from "../../types";
-import { make2DArraySparse } from "../../scripts/migration/migrateRealms";
+import { make2DArraySparse } from "../../scripts/migration/migrateNonEmptyRealms";
 
 describe("Realms Migration", async function () {
   let installationFacet: InstallationFacet
