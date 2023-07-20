@@ -17,6 +17,7 @@ async function getParcels() {
   const currentBlock = 37933100;
 
   // Get all parcel ids
+  let allParcelIds = [];
   let nonEmptyParcelIds = [];
   let emptyParcels = [];
   let id = 0;
@@ -55,12 +56,24 @@ async function getParcels() {
     parcels = response.data.parcels;
 
     if (parcels.length > 0) {
-      nonEmptyParcelIds = nonEmptyParcelIds.concat(parcels.filter(parcel => parcel.equippedTiles.length > 0 || parcel.equippedInstallations > 0).map(parcel => Number(parcel.id)));
+      allParcelIds = allParcelIds.concat(parcels.map(parcel => {
+        return {
+          id: Number(parcel.id),
+          tokenId: Number(parcel.tokenId)
+        }
+      }));
+      nonEmptyParcelIds = nonEmptyParcelIds.concat(parcels.filter(parcel => parcel.equippedTiles.length > 0 || parcel.equippedInstallations > 0).map(parcel => {
+        return {
+          id: Number(parcel.id),
+          tokenId: Number(parcel.tokenId)
+        }
+      }));
       emptyParcels = emptyParcels.concat(parcels.filter(parcel => !(parcel.equippedTiles.length > 0 || parcel.equippedInstallations > 0)).map(p => {
         return {
           owner: p.owner,
           parcelAddress: p.parcelHash,
           parcelId: p.parcelId,
+          tokenId: p.tokenId,
           coordinateX: p.coordinateX,
           coordinateY: p.coordinateY,
           district: p.district,
@@ -74,10 +87,11 @@ async function getParcels() {
   } while (parcels.length > 0);
 
   // Write empty parcels to JSON file.
+  await fs.writeFile("./parcels/allParcelIds.json", JSON.stringify(allParcelIds), "utf8");
+  await fs.writeFile("./parcels/nonEmptyParcelIds.json", JSON.stringify(nonEmptyParcelIds), "utf8");
   await fs.writeFile("./parcels/emptyParcels.json", JSON.stringify(emptyParcels), "utf8");
 
   // fetch non-empty parcels
-  console.log("nonEmptyParcelIds", nonEmptyParcelIds);
 
   // run upgrade for getter function on hardhat
   // await upgradeRealmParcelGetter();
@@ -90,13 +104,14 @@ async function getParcels() {
   )) as RealmGettersAndSettersFacet;
 
   for (let i = 0; i < nonEmptyParcelIds.length; i++) {
-    console.log('parcel id:', nonEmptyParcelIds[i])
+    console.log('parcel id:', nonEmptyParcelIds[i].id)
     try {
-      const parcel: RealmGettersAndSettersFacet.ParcelOutTestStruct = await realmGettersAndSettersFacet.getParcel(nonEmptyParcelIds[i]);
+      const parcel: RealmGettersAndSettersFacet.ParcelOutTestStruct = await realmGettersAndSettersFacet.getParcel(nonEmptyParcelIds[i].id);
       const parcelObj = {
         owner: parcel.owner,
         parcelAddress: parcel.parcelAddress,
         parcelId: parcel.parcelId,
+        tokenId: nonEmptyParcelIds[i].tokenId,
         coordinateX: parcel.coordinateX,
         coordinateY: parcel.coordinateY,
         district: parcel.district,
