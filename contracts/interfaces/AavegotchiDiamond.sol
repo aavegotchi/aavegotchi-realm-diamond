@@ -24,6 +24,20 @@ interface AavegotchiDiamond {
     uint32 period; //in seconds
     // storage slot 5
     address[] revenueTokens;
+    // storage slot 6
+    uint256 channellingStatus;
+  }
+
+  struct AddGotchiListing {
+    uint32 tokenId;
+    uint96 initialCost;
+    uint32 period;
+    uint8[3] revenueSplit;
+    address originalOwner;
+    address thirdParty;
+    uint32 whitelistId;
+    address[] revenueTokens;
+    uint256 permissions;
   }
 
   function ownerOf(uint256 _tokenId) external view returns (address owner_);
@@ -55,8 +69,6 @@ interface AavegotchiDiamond {
 
   function kinship(uint256 _tokenId) external view returns (uint256 score_);
 
-  function realmInteract(uint256 _tokenId) external;
-
   // whitelist functions
   function createWhitelist(string calldata _name, address[] calldata _whitelistAddresses) external;
 
@@ -69,4 +81,22 @@ interface AavegotchiDiamond {
   function isAavegotchiListed(uint32 _erc721TokenId) external view returns (bool);
 
   function getGotchiLendingsLength() external view returns (uint256);
+
+  function reduceKinshipViaChanneling(uint32 _gotchiId) external;
+
+  // function setLendingChannelingStatus(uint32 _listingId, uint256 _newChannelStatus) external;
+
+  function claimAndEndGotchiLending(uint32 _tokenId) external;
+
+  function addGotchiLending(
+    uint32 _erc721TokenId,
+    uint96 _initialCost,
+    uint32 _period,
+    uint8[3] calldata _revenueSplit,
+    address _originalOwner,
+    address _thirdParty,
+    uint32 _whitelistId,
+    address[] calldata _revenueTokens,
+    uint256 _channellingStatus
+  ) external;
 }

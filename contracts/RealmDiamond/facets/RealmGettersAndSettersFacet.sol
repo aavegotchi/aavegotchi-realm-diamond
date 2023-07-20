@@ -176,4 +176,77 @@ contract RealmGettersAndSettersFacet is Modifiers {
   ) external view {
     LibRealm.verifyAccessRight(_realmId, _gotchiId, _actionRight, _sender);
   }
+
+  struct ParcelOutTest {
+    address owner;
+    string parcelAddress; //looks-like-this
+    string parcelId; //C-4208-3168-R
+    uint256 coordinateX; //x position on the map
+    uint256 coordinateY; //y position on the map
+    uint256 district;
+    uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
+    uint256[4] alchemicaBoost; //fud, fomo, alpha, kek
+    uint256[4] alchemicaRemaining; //fud, fomo, alpha, kek
+    uint256 currentRound; //begins at 0 and increments after surveying has begun
+    uint256[][10] roundBaseAlchemica; //round alchemica not including boosts
+    uint256[][10] roundAlchemica; //round alchemica including boosts
+    uint256[][4] reservoirs;
+    uint256[4] alchemicaHarvestRate;
+    uint256[4] lastUpdateTimestamp;
+    uint256[4] unclaimedAlchemica;
+    uint256 altarId;
+    uint256 upgradeQueueCapacity;
+    uint256 upgradeQueueLength;
+    uint256 lodgeId;
+    bool surveying;
+    uint16 harvesterCount;
+    uint256[64][64] buildGrid; //x, then y array of positions - for installations
+    uint256[64][64] tileGrid; //x, then y array of positions - for tiles under the installations (floor)
+    uint256[64][64] startPositionBuildGrid;
+    uint256[64][64] startPositionTileGrid;
+  }
+
+  function getParcel(uint256 _parcelId) external view returns (ParcelOutTest memory parcelOut) {
+    Parcel storage parcel = s.parcels[_parcelId];
+    parcelOut.owner = parcel.owner;
+    parcelOut.parcelAddress = parcel.parcelAddress;
+    parcelOut.parcelId = parcel.parcelId;
+    parcelOut.coordinateX = parcel.coordinateX;
+    parcelOut.coordinateY = parcel.coordinateY;
+    parcelOut.district = parcel.district;
+    parcelOut.size = parcel.size;
+    parcelOut.alchemicaBoost = parcel.alchemicaBoost;
+    parcelOut.alchemicaRemaining = parcel.alchemicaRemaining;
+    parcelOut.currentRound = parcel.currentRound;
+    parcelOut.alchemicaHarvestRate = parcel.alchemicaHarvestRate;
+    parcelOut.lastUpdateTimestamp = parcel.lastUpdateTimestamp;
+    parcelOut.unclaimedAlchemica = parcel.unclaimedAlchemica;
+    parcelOut.altarId = parcel.altarId;
+    parcelOut.upgradeQueueCapacity = parcel.upgradeQueueCapacity;
+    parcelOut.upgradeQueueLength = parcel.upgradeQueueLength;
+    parcelOut.lodgeId = parcel.lodgeId;
+    parcelOut.surveying = parcel.surveying;
+    parcelOut.harvesterCount = parcel.harvesterCount;
+
+    uint256[5] memory widths = LibRealm.getWidths();
+    uint256[5] memory heights = LibRealm.getHeights();
+    uint width = widths[parcel.size];
+    uint height = heights[parcel.size];
+    for (uint256 k; k < width; k++) {
+      for (uint256 j; j < height; j++) {
+        parcelOut.buildGrid[k][j] = parcel.buildGrid[k][j];
+        parcelOut.tileGrid[k][j] = parcel.tileGrid[k][j];
+        parcelOut.startPositionBuildGrid[k][j] = parcel.startPositionBuildGrid[k][j];
+        parcelOut.startPositionTileGrid[k][j] = parcel.startPositionTileGrid[k][j];
+      }
+    }
+
+    for (uint256 j; j < 10; j++) {
+      parcelOut.roundBaseAlchemica[j] = parcel.roundBaseAlchemica[j];
+      parcelOut.roundAlchemica[j] = parcel.roundAlchemica[j];
+    }
+    for (uint256 j; j < 4; j++) {
+      parcelOut.reservoirs[j] = parcel.reservoirs[j];
+    }
+  }
 }
