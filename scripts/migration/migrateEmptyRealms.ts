@@ -17,13 +17,10 @@ export default async function main() {
   const signerAddress = await ethers.provider.getSigner().getAddress();
   const migrationFacet: MigrationFacet = await ethers.getContractAt("MigrationFacet", realmDiamondAddress)
 
+  const transactionCount = await ethers.provider.getTransactionCount(signerAddress, "latest");
+
   const parcels: any[] = await readAllParcels()
   let promises = [];
-
-  const transactionCount = await ethers.provider.getTransactionCount(
-    signerAddress,
-    "latest"
-  );
 
   for (let i = 0; i < parcels.length; i++) {
     if (promises.length == BATCH_SIZE) {
