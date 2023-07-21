@@ -18,10 +18,6 @@ contract InstallationFacet is Modifiers {
 
   event UpgradeTimeReduced(uint256 indexed _queueId, uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _blocksReduced);
 
-  event LayerZeroBridgeAdded(address _newLayerZeroBridge);
-
-  event LayerZeroBridgeRemoved(address _layerZeroBridgeToRemove);
-
   /***********************************|
    |             Read Functions         |
    |__________________________________*/
