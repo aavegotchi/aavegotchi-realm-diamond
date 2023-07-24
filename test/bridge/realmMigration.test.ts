@@ -18,7 +18,7 @@ import {
   RealmGridFacet,
 } from "../../typechain-types";
 import { MintParcelInput } from "../../types";
-import { make2DArraySparse } from "../../scripts/migration/migrateNonEmptyRealms";
+import { BigNumber } from "ethers";
 
 describe("Realms Migration", async function () {
   let installationFacet: InstallationFacet
@@ -323,4 +323,37 @@ function compareGrid(expectedGrid, resultGrid, gridLength, gridHeight) {
       expect(expectedGrid[i][j].toString()).to.equal(resultGrid[i][j].toString())
     }
   }
+}
+
+const make2DArraySparse = (array) => {
+  let sparseArray = [];
+  for (let i = 0; i < array.length; i++) {
+    for (let j = 0; j < array[i].length; j++) {
+      if (BigNumber.from(array[i][j]).toString() !== BigNumber.from(0).toString()) {
+        sparseArray.push(i);
+        sparseArray.push(j);
+        sparseArray.push(array[i][j]);
+      }
+    }
+  }
+  return sparseArray;
+}
+
+const printGrid = (grid, width, height) => {
+  const coordinateToString = (v) => {
+    try { 
+      return BigNumber.from(v.hex).toString()
+    } catch(e) {
+      return v.toString()
+    }
+  }
+
+  let result = ''
+  for (let i = 0; i < width; i++) {
+    for (let j = 0; j < height; j++) {
+      result += `${coordinateToString(grid[i][j])}  `
+    }
+    result += '\n'
+  }
+  console.log(result)
 }

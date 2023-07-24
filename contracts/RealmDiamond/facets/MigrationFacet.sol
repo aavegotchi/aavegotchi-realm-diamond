@@ -56,7 +56,7 @@ contract MigrationFacet is Modifiers {
     s.parcels[_parcelId].harvesterCount = parcelData.harvesterCount;
 
     saveBuildGrid(_parcelId, parcelData.buildGrid);
-    saveBuildTile(_parcelId, parcelData.tileGrid);
+    saveTileGrid(_parcelId, parcelData.tileGrid);
     saveStartPositionBuildGrid(_parcelId, parcelData.startPositionBuildGrid);
     saveStartPositionTileGrid(_parcelId, parcelData.startPositionTileGrid);
     saveRoundBaseAlchemica(_parcelId, parcelData.roundBaseAlchemica);
@@ -78,7 +78,7 @@ contract MigrationFacet is Modifiers {
     }
   }
 
-  function saveBuildTile(uint256 _parcelId, uint[] calldata sparseGrid) public {
+  function saveTileGrid(uint256 _parcelId, uint[] calldata sparseGrid) public {
     require(sparseGrid.length % 3 == 0, "RealmFacet: Invalid sparse grid");
     for (uint i; i < sparseGrid.length; i = i + 3) {
       s.parcels[_parcelId].tileGrid[sparseGrid[i]][sparseGrid[i + 1]] = sparseGrid[i + 2];
