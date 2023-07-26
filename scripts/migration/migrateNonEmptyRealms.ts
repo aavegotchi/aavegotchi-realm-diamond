@@ -9,30 +9,39 @@ const fs = require("fs");
 
 const realmDiamondAddressGotchichain = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
 
-const BATCH_SIZE = 1
-
+const BATCH_SIZE = 200
+//10280
+//1033
 export default async function main() {
   const realmDiamondAddress = await deployRealmDiamond()
+  // const realmDiamondAddress = '0x5258fCe3bE52b399AE210D875AD70BC2e3A55aD1'
 
   const signerAddress = await ethers.provider.getSigner().getAddress();
   const migrationFacet: MigrationFacet = await ethers.getContractAt("MigrationFacet", realmDiamondAddress)
   const gettersAndSettersFacet: RealmGettersAndSettersFacet = await ethers.getContractAt("RealmGettersAndSettersFacet", realmDiamondAddress)
 
-  const transactionCount = await ethers.provider.getTransactionCount(signerAddress, "latest");
+  let txCounter = await ethers.provider.getTransactionCount(signerAddress, "latest");
 
-  const parcelIds = readParcelIds()
+  const parcelIds = readParcelIds().slice(0, 1000)
   let promises = [];
 
-  let aditionalTxCounter = 0
-  // for (let i = 0; i < parcelIds.length; i++) {
-  const parcelId = 6204//parcelIds[i].tokenId
-  for (let i = 0; i < 1; i++) {
+  // await sleep(15000)
+  
+  for (let i = 0; i < parcelIds.length; i++) {  
+    
+    // if (i % 10 === 0) {
+    //   await sleep(15000)
+    // }
+
+
     if (promises.length >= BATCH_SIZE) {
+      console.log("Waiting tx to be settled")
       await Promise.allSettled(promises);
+      console.log("Transactions settled")
       promises = [];
     }
 
-    const parcelId = 6204//parcelIds[i].tokenId
+    const parcelId = parcelIds[i].tokenId
     let parcel = await readParcel(parcelId);
 
     const allGridsLength = parcel.buildGrid.length +
@@ -40,13 +49,15 @@ export default async function main() {
       parcel.startPositionBuildGrid.length +
       parcel.startPositionTileGrid.length
 
+    console.log(`\nMigrating parcel with ID ${parcelId}`)
+
     if (allGridsLength > 1500) {
-      console.log("Sending 1")
       promises.push(
         (async () => {
           try {
-            console.log("nonce", transactionCount + i + aditionalTxCounter)
-            await migrationFacet.migrateParcel(
+            const nonce = txCounter
+            console.log(`migrateParcel(), parcelId ${parcelId}, nonce ${nonce}`)
+            const tx = await migrationFacet.migrateParcel(
               parcelId,
               {
                 ...parcel,
@@ -56,16 +67,18 @@ export default async function main() {
                 startPositionTileGrid: []
               },
               {
-                // nonce: transactionCount + i + aditionalTxCounter,
+                nonce,
                 gasLimit: 20000000
               }
             )
+            await tx.wait()
+            console.log(`migrateParcel() fineshed, parcelId ${parcelId}, nonce ${nonce}`)
           } catch (e) {
             console.log(e)
           }
         })()
       )
-      aditionalTxCounter++
+      txCounter++
 
       if (parcel.buildGrid.length > 1500) {
         while (parcel.buildGrid.length > 0) {
@@ -73,43 +86,47 @@ export default async function main() {
           promises.push(
             (async () => {
               try {
-                const nonce = transactionCount + i + aditionalTxCounter
+                const nonce = txCounter
+                console.log(`saveBuildGrid(2), parcelId ${parcelId}, nonce ${nonce}`)
                 const tx = await migrationFacet.saveBuildGrid(
                   parcelId,
                   chunk,
                   {
-                    // nonce,
+                    nonce,
                     gasLimit: 20000000
                   }
                 )
                 await tx.wait()
+                console.log(`saveBuildGrid(2) fineshed, parcelId ${parcelId}, nonce ${nonce}`)
               } catch (e) {
                 console.log(e)
               }
             })()
           )
-          aditionalTxCounter++
+          txCounter++
         }
       } else {
         promises.push(
           (async () => {
             try {
-              const nonce = transactionCount + i + aditionalTxCounter
-              await migrationFacet.saveBuildGrid(
+              const nonce = txCounter
+              console.log(`saveBuildGrid(1), parcelId ${parcelId}, nonce ${nonce}`)
+              const tx = await migrationFacet.saveBuildGrid(
                 parcelId,
                 parcel.buildGrid,
                 {
-                  // nonce,
+                  nonce,
                   gasLimit: 20000000
                 }
               )
+              await tx.wait()
+              console.log(`saveBuildGrid(1) fineshed, parcelId ${parcelId}, nonce ${nonce}`)
             } catch (e) {
               console.log(e)
             }
           })()
         )
-        aditionalTxCounter++
-        console.log(aditionalTxCounter)
+        txCounter++
       }
 
       if (parcel.tileGrid.length > 1500) {
@@ -118,41 +135,47 @@ export default async function main() {
           promises.push(
             (async () => {
               try {
-                const nonce = transactionCount + i + aditionalTxCounter
+                const nonce = txCounter
+                console.log(`saveTileGrid(2), parcelId ${parcelId}, nonce ${nonce}`)
                 const tx = await migrationFacet.saveTileGrid(
                   parcelId,
                   chunk,
                   {
-                    // nonce,
+                    nonce,
                     gasLimit: 20000000
                   }
                 )
                 await tx.wait()
+                console.log(`saveTileGrid(2) fineshed, parcelId ${parcelId}, nonce ${nonce}`)
               } catch (e) {
                 console.log(e)
               }
             })()
           )
-          aditionalTxCounter++
+          txCounter++
         }
       } else {
         promises.push(
           (async () => {
             try {
-              await migrationFacet.saveTileGrid(
+              const nonce = txCounter
+              console.log(`saveTileGrid(1) fineshed, parcelId ${parcelId}, nonce ${nonce}`)
+              const tx = await migrationFacet.saveTileGrid(
                 parcelId,
                 parcel.tileGrid,
                 {
-                  // nonce: transactionCount + i + aditionalTxCounter,
+                  nonce,
                   gasLimit: 20000000
                 }
               )
+              await tx.wait()
+              console.log(`saveTileGrid(1) fineshed, parcelId ${parcelId}, nonce ${nonce}`)
             } catch (e) {
               console.log(e)
             }
           })()
         )
-        aditionalTxCounter++
+        txCounter++
       }
 
       if (parcel.startPositionBuildGrid.length > 1500) {
@@ -161,41 +184,47 @@ export default async function main() {
           promises.push(
             (async () => {
               try {
-                const nonce = transactionCount + i + aditionalTxCounter
+                const nonce = txCounter
+                console.log(`saveStartPositionBuildGrid(2), parcelId ${parcelId}, nonce ${nonce}`)
                 const tx = await migrationFacet.saveStartPositionBuildGrid(
                   parcelId,
                   chunk,
                   {
-                    // nonce,
+                    nonce,
                     gasLimit: 20000000
                   }
                 )
                 await tx.wait()
+                console.log(`saveStartPositionBuildGrid(2) fineshed, parcelId ${parcelId}, nonce ${nonce}`)
               } catch (e) {
                 console.log(e)
               }
             })()
           )
-          aditionalTxCounter++
+          txCounter++
         }
       } else {
         promises.push(
           (async () => {
             try {
-              await migrationFacet.saveStartPositionBuildGrid(
+              const nonce = txCounter
+              console.log(`saveStartPositionBuildGrid(1), parcelId ${parcelId}, nonce ${nonce}`)
+              const tx = await migrationFacet.saveStartPositionBuildGrid(
                 parcelId,
                 parcel.startPositionBuildGrid,
                 {
-                  // nonce: transactionCount + i + aditionalTxCounter,
+                  nonce,
                   gasLimit: 20000000
                 }
               )
+            await tx.wait()
+            console.log(`saveStartPositionBuildGrid(1) fineshed, parcelId ${parcelId}, nonce ${nonce}`)
             } catch (e) {
               console.log(e)
             }
           })()
         )
-        aditionalTxCounter++
+        txCounter++
       }
 
       if (parcel.startPositionTileGrid.length > 1500) {
@@ -204,65 +233,72 @@ export default async function main() {
           promises.push(
             (async () => {
               try {
-                const nonce = transactionCount + i + aditionalTxCounter
+                const nonce = txCounter
+                console.log(`saveStartPositionTileGrid(2), parcelId ${parcelId}, nonce ${nonce}`)
                 const tx = await migrationFacet.saveStartPositionTileGrid(
                   parcelId,
                   chunk,
                   {
-                    // nonce,
+                    nonce,
                     gasLimit: 20000000
                   }
                 )
                 await tx.wait()
+                console.log(`saveStartPositionTileGrid(2) fineshed, parcelId ${parcelId}, nonce ${nonce}`)
               } catch (e) {
                 console.log(e)
               }
             })()
           )
-          aditionalTxCounter++
+          txCounter++
         }
       } else {
         promises.push(
           (async () => {
             try {
-              await migrationFacet.saveStartPositionTileGrid(
+              const nonce = txCounter
+              console.log(`saveStartPositionTileGrid(1), parcelId ${parcelId}, nonce ${nonce}`)
+              const tx = await migrationFacet.saveStartPositionTileGrid(
                 parcelId,
                 parcel.startPositionTileGrid,
                 {
-                  // nonce: transactionCount + i + aditionalTxCounter,
+                  nonce,
                   gasLimit: 20000000
                 }
               )
+              await tx.wait()
+              console.log(`saveStartPositionTileGrid(1) fineshed, parcelId ${parcelId}, nonce ${nonce}`)
             } catch (e) {
               console.log(e)
             }
           })()
         )
-        aditionalTxCounter++
+        txCounter++
       }
     } else {
       promises.push(
         (async () => {
           try {
-            console.log(`\nReading parcel with ID ${parcelId}`)
+            const nonce = txCounter
+            console.log(`migrateParcel(1), parcelId ${parcelId}, nonce ${nonce}`)
+            const tx = await migrationFacet.migrateParcel(parcelId, parcel, { nonce, gasLimit: 20000000 })
+            await tx.wait()
+            console.log(`migrateParcel(1) fineshed, parcelId ${parcelId}, nonce ${nonce}`)
 
-            const nonce = transactionCount + i + aditionalTxCounter
-            await migrationFacet.migrateParcel(parcelId, parcel, { nonce, gasLimit: 20000000 })
-            console.log(`Migrated parcel with ID ${parcelId}`);
-
-            console.log(`Saving migrated parcel to non-empty-migrated-parcels.txt`)
+            // console.log(`Saving migrated parcel to non-empty-migrated-parcels.txt`)
             // fs.appendFileSync('non-empty-migrated-parcels.txt', `${parcelId}\n`);
-            console.log(`Saved migrated parcel to non-empty-migrated-parcels.txt`)
+            // console.log(`Saved migrated parcel to non-empty-migrated-parcels.txt`)
           } catch (e) {
             // console.log('\n')
-            // console.log(e.message);
+            console.log(e);
 
-            console.log(`Logging migrating error to error-non-empty-migrated-parcels.txt`)
+            // console.log(`Logging migrating error to error-non-empty-migrated-parcels.txt`)
             // fs.appendFileSync('error-non-empty-migrated-parcels.txt', `${parcelId}\n`);
-            console.log(`Logged migration error to error-non-empty-migrated-parcels.txt`)
+            // console.log(`Logged migration error to error-non-empty-migrated-parcels.txt`)
           }
         })()
       );
+      txCounter++
     }
   }
 
@@ -270,12 +306,6 @@ export default async function main() {
   await Promise.allSettled(promises);
   console.log("Settled")
   promises = [];
-
-  const rParcel = await gettersAndSettersFacet.getParcel(parcelId)
-  console.log(rParcel.size)
-
-  console.log("\nResult Parcel")
-  console.log(rParcel.reservoirs)
 }
 
 const readParcelIds = () => {
@@ -287,9 +317,6 @@ const readParcelIds = () => {
 const readParcel = (parcelId: string | number) => {
   const rawParcelData = fs.readFileSync(`parcels/parcel-${parcelId}.json`)
   const parcel = JSON.parse(rawParcelData)
-
-  console.log("\nRead Parcel")
-  console.log(parcel.reservoirs)
 
   parcel.buildGrid = make2DArraySparse(parcel.buildGrid)
   parcel.tileGrid = make2DArraySparse(parcel.tileGrid)
@@ -394,4 +421,8 @@ if (require.main === module) {
       console.error(error);
       process.exit(1);
     });
+}
+
+const sleep = (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
