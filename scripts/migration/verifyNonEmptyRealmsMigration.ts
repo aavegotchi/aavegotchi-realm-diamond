@@ -7,13 +7,12 @@ import { BigNumber } from "ethers";
 
 const fs = require("fs");
 
-const realmDiamondAddressGotchichain = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
+// const realmDiamondAddressGotchichain = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
+const realmDiamondAddressGotchichain = '0x5258fCe3bE52b399AE210D875AD70BC2e3A55aD1'
 
 const BATCH_SIZE = 200
 
 export default async function main() {
-  const realmDiamondAddress = '0x5258fCe3bE52b399AE210D875AD70BC2e3A55aD1'
-
   const gettersAndSettersFacet: RealmGettersAndSettersFacet = await ethers.getContractAt("RealmGettersAndSettersFacet", realmDiamondAddress)
 
   const parcelIds = readParcelIds().slice(0, 1000)
@@ -21,14 +20,16 @@ export default async function main() {
 
   for (let i = 0; i < parcelIds.length; i++) {
     if (promises.length >= BATCH_SIZE) {
-      console.log("Waiting tx to be settled")
+      console.log("Waiting promises to be settled")
       await Promise.allSettled(promises);
-      console.log("Transactions settled")
+      console.log("Promises settled")
       promises = [];
     }
 
     const parcelId = parcelIds[i].tokenId
     let parcel = await readParcel(parcelId);
+
+    console.log(`Verifying parcel with ID ${parcelId} at position ${i}`)
 
     promises.push(
       (async () => {
@@ -36,120 +37,177 @@ export default async function main() {
           // console.log(`Verifiying parcel with ID ${parcelId}`)
           const migratedParcel = await gettersAndSettersFacet.getParcel(parcelId)
 
-          let message = ''
+          let message = `\nMigration gone wrong for parcel with ${parcelId}\n`
           let migrationGoneWrong = false
           if (parcel.owner !== migratedParcel.owner) {
             migrationGoneWrong = true
-            message += `incorrect owner, expected ${parcel.owner}, got ${migratedParcel.owner}\n`
+            message += `Incorrect owner, expected ${parcel.owner}, got ${migratedParcel.owner}\n`
           }
           if (parcel.parcelAddress !== migratedParcel.parcelAddress) {
             migrationGoneWrong = true
-            message += `incorrect parcelAddress, expected ${parcel.parcelAddress}, got ${migratedParcel.owner}\n`
+            message += `Incorrect parcelAddress, expected ${parcel.parcelAddress}, got ${migratedParcel.parcelAddress}\n`
           }
           if (parcel.parcelId !== migratedParcel.parcelId) {
             migrationGoneWrong = true
-            message += `incorrect parcelId, expected ${parcel.parcelId}, got ${migratedParcel.owner}\n`
+            message += `Incorrect parcelId, expected ${parcel.parcelId}, got ${migratedParcel.parcelId}\n`
           }
-          if (parcel.coordinateX !== migratedParcel.coordinateX) {
+          if (parcel.coordinateX !== migratedParcel.coordinateX._hex) {
             migrationGoneWrong = true
-            message += `incorrect coordinateX, expected ${parcel.coordinateX}, got ${migratedParcel.owner}\n`
+            message += `Incorrect coordinateX, expected ${parcel.coordinateX.hex}, got ${migratedParcel.coordinateX._hex}\n`
           }
-          if (parcel.coordinateY !== migratedParcel.coordinateY) {
+          if (parcel.coordinateY.hex !== migratedParcel.coordinateY._hex) {
             migrationGoneWrong = true
-            message += `incorrect coordinateY, expected ${parcel.coordinateY}, got ${migratedParcel.owner}\n`
+            message += `Incorrect coordinateY, expected ${parcel.coordinateY.hex}, got ${migratedParcel.coordinateY._hex}\n`
           }
-          if (parcel.district !== migratedParcel.district) {
+          if (parcel.district.hex !== migratedParcel.district._hex) {
             migrationGoneWrong = true
-            message += `incorrect district, expected ${parcel.district}, got ${migratedParcel.owner}\n`
+            message += `Incorrect district, expected ${parcel.district.hex}, got ${migratedParcel.district._hex}\n`
           }
-          if (parcel.size !== migratedParcel.size) {
+          if (parcel.size.hex !== migratedParcel.size._hex) {
             migrationGoneWrong = true
-            message += `incorrect size, expected ${parcel.size}, got ${migratedParcel.owner}\n`
+            message += `Incorrect size, expected ${parcel.size.hex}, got ${migratedParcel.size._hex}\n`
           }
-          if (parcel.alchemicaBoost !== migratedParcel.alchemicaBoost) {
+          if (parcel.currentRound.hex !== migratedParcel.currentRound._hex) {
             migrationGoneWrong = true
-            message += `incorrect alchemicaBoost, expected ${parcel.alchemicaBoost}, got ${migratedParcel.owner}\n`
+            message += `Incorrect currentRound, expected ${parcel.currentRound.hex}, got ${migratedParcel.currentRound._hex}\n`
           }
-          if (parcel.alchemicaRemaining !== migratedParcel.alchemicaRemaining) {
+          if (parcel.altarId.hex !== migratedParcel.altarId._hex) {
             migrationGoneWrong = true
-            message += `incorrect alchemicaRemaining, expected ${parcel.alchemicaRemaining}, got ${migratedParcel.owner}\n`
+            message += `Incorrect altarId, expected ${parcel.altarId.hex}, got ${migratedParcel.altarId._hex}\n`
           }
-          if (parcel.currentRound !== migratedParcel.currentRound) {
+          if (parcel.upgradeQueueCapacity.hex !== migratedParcel.upgradeQueueCapacity._hex) {
             migrationGoneWrong = true
-            message += `incorrect currentRound, expected ${parcel.currentRound}, got ${migratedParcel.owner}\n`
+            message += `Incorrect upgradeQueueCapacity, expected ${parcel.upgradeQueueCapacity}, got ${migratedParcel.upgradeQueueCapacity}\n`
           }
-          if (parcel.alchemicaHarvestRate !== migratedParcel.alchemicaHarvestRate) {
+          if (parcel.upgradeQueueLength.hex !== migratedParcel.upgradeQueueLength._hex) {
             migrationGoneWrong = true
-            message += `incorrect alchemicaHarvestRate, expected ${parcel.alchemicaHarvestRate}, got ${migratedParcel.owner}\n`
+            message += `Incorrect upgradeQueueLength, expected ${parcel.upgradeQueueLength.hex}, got ${migratedParcel.upgradeQueueLength._hex}\n`
           }
-          if (parcel.lastUpdateTimestamp !== migratedParcel.lastUpdateTimestamp) {
+          if (parcel.lodgeId.hex !== migratedParcel.lodgeId._hex) {
             migrationGoneWrong = true
-            message += `incorrect lastUpdateTimestamp, expected ${parcel.lastUpdateTimestamp}, got ${migratedParcel.owner}\n`
-          }
-          if (parcel.unclaimedAlchemica !== migratedParcel.unclaimedAlchemica) {
-            migrationGoneWrong = true
-            message += `incorrect unclaimedAlchemica, expected ${parcel.unclaimedAlchemica}, got ${migratedParcel.owner}\n`
-          }
-          if (parcel.altarId !== migratedParcel.altarId) {
-            migrationGoneWrong = true
-            message += `incorrect altarId, expected ${parcel.altarId}, got ${migratedParcel.owner}\n`
-          }
-          if (parcel.upgradeQueueCapacity !== migratedParcel.upgradeQueueCapacity) {
-            migrationGoneWrong = true
-            message += `incorrect upgradeQueueCapacity, expected ${parcel.upgradeQueueCapacity}, got ${migratedParcel.owner}\n`
-          }
-          if (parcel.upgradeQueueLength !== migratedParcel.upgradeQueueLength) {
-            migrationGoneWrong = true
-            message += `incorrect upgradeQueueLength, expected ${parcel.upgradeQueueLength}, got ${migratedParcel.owner}\n`
-          }
-          if (parcel.lodgeId !== migratedParcel.lodgeId) {
-            migrationGoneWrong = true
-            message += `incorrect lodgeId, expected ${parcel.lodgeId}, got ${migratedParcel.owner}\n`
+            message += `Incorrect lodgeId, expected ${parcel.lodgeId.hex}, got ${migratedParcel.lodgeId._hex}\n`
           }
           if (parcel.surveying !== migratedParcel.surveying) {
             migrationGoneWrong = true
-            message += `incorrect surveying, expected ${parcel.surveying}, got ${migratedParcel.owner}\n`
+            message += `Incorrect surveying, expected ${parcel.surveying}, got ${migratedParcel.surveying}\n`
           }
           if (parcel.harvesterCount !== migratedParcel.harvesterCount) {
             migrationGoneWrong = true
-            message += `incorrect harvesterCount, expected ${parcel.harvesterCount}, got ${migratedParcel.owner}\n`
+            message += `Incorrect harvesterCount, expected ${parcel.harvesterCount}, got ${migratedParcel.harvesterCount}\n`
           }
 
-          const {width, height} =  getGridSize(parcel.size)
+          let alchemicaBoostMigrationGoneWrong = false
+          let alchemicaRemainingMigrationGoneWrong = false
+          let alchemicaHarvestRateMigrationGoneWrong = false
+          let lastUpdateTimestampMigrationGoneWrong = false
+          let unclaimedAlchemicaMigrationGoneWrong = false
+          for (let i = 0; i < 4; i++) {
+            if (parcel.alchemicaBoost[i].hex !== migratedParcel.alchemicaBoost[i]._hex)
+              alchemicaBoostMigrationGoneWrong = true
+            if (parcel.alchemicaRemaining[i].hex !== migratedParcel.alchemicaRemaining[i]._hex)
+              alchemicaRemainingMigrationGoneWrong = true
+            if (parcel.alchemicaHarvestRate[i].hex !== migratedParcel.alchemicaHarvestRate[i]._hex)
+              alchemicaHarvestRateMigrationGoneWrong = true
+            if (parcel.lastUpdateTimestamp[i].hex !== migratedParcel.lastUpdateTimestamp[i]._hex)
+              lastUpdateTimestampMigrationGoneWrong = true
+            if (parcel.unclaimedAlchemica[i].hex !== migratedParcel.unclaimedAlchemica[i]._hex)
+              unclaimedAlchemicaMigrationGoneWrong = true
+          }
+
+          if (alchemicaBoostMigrationGoneWrong) {
+            migrationGoneWrong = true
+            message += `Incorrect alchemicaBoost\n`
+          }
+          if (alchemicaRemainingMigrationGoneWrong) {
+            migrationGoneWrong = true
+            message += `Incorrect alchemicaRemaining\n`
+          }
+          if (alchemicaHarvestRateMigrationGoneWrong) {
+            migrationGoneWrong = true
+            message += `Incorrect alchemicaHarvestRate\n`
+          }
+          if (lastUpdateTimestampMigrationGoneWrong) {
+            migrationGoneWrong = true
+            message += `Incorrect lastUpdateTimestamp\n`
+          }
+          if (unclaimedAlchemicaMigrationGoneWrong) {
+            migrationGoneWrong = true
+            message += `Incorrect unclaimedAlchemica\n`
+          }
+
+          const { width, height } = getGridSize(BigNumber.from(parcel.size).toNumber())
           let buildGridMigrationGoneWrong = false
           let tileGridMigrationGoneWrong = false
           let startPositionBuildGridMigrationGoneWrong = false
           let startPositionTileGridMigrationGoneWrong = false
           for (let i = 0; i < width; i++) {
             for (let j = 0; j < height; j++) {
-              if (parcel.buildGrid[i][j].hex !== migratedParcel.buildGrid[i][j].hex)
+              if (parcel.buildGrid[i][j].hex !== migratedParcel.buildGrid[i][j]._hex)
                 buildGridMigrationGoneWrong = true
-              if (parcel.tileGrid[i][j].hex !== migratedParcel.tileGrid[i][j].hex)
-                buildGridMigrationGoneWrong = true
-              if (parcel.startPositionBuildGrid[i][j].hex !== migratedParcel.startPositionBuildGrid[i][j].hex)
-                buildGridMigrationGoneWrong = true
-              if (parcel.startPositionTileGrid[i][j].hex !== migratedParcel.startPositionTileGrid[i][j].hex)
-                buildGridMigrationGoneWrong = true
+              if (parcel.tileGrid[i][j].hex !== migratedParcel.tileGrid[i][j]._hex)
+                tileGridMigrationGoneWrong = true
+              if (parcel.startPositionBuildGrid[i][j].hex !== migratedParcel.startPositionBuildGrid[i][j]._hex)
+                startPositionBuildGridMigrationGoneWrong = true
+              if (parcel.startPositionTileGrid[i][j].hex !== migratedParcel.startPositionTileGrid[i][j]._hex)
+                startPositionTileGridMigrationGoneWrong = true
             }
           }
 
           if (buildGridMigrationGoneWrong) {
             migrationGoneWrong = true
-            message += `incorrect buildGrid\n`
+            message += `Incorrect buildGrid\n`
           }
           if (tileGridMigrationGoneWrong) {
             migrationGoneWrong = true
-            message += `incorrect tileGrid\n`
+            message += `Incorrect tileGrid\n`
           }
           if (startPositionBuildGridMigrationGoneWrong) {
             migrationGoneWrong = true
-            message += `incorrect startPositionBuildGrid\n`
+            message += `Incorrect startPositionBuildGrid\n`
           }
           if (startPositionTileGridMigrationGoneWrong) {
             migrationGoneWrong = true
-            message += `incorrect startPositionTileGrid\n`
+            message += `Incorrect startPositionTileGrid\n`
           }
 
+
+          let roundAlchemicaMigrationGoneWrong = false
+          let roundBaseAlchemicaMigrationGoneWrong = false
+          for (let i = 0; i < parcel.currentRound; i++) {
+            for (let j = 0; j < 4; j++) {
+              if (parcel.roundAlchemica[i][j].hex !== migratedParcel.roundAlchemica[i][j]._hex)
+              roundAlchemicaMigrationGoneWrong = true
+              if (parcel.roundBaseAlchemica[i][j].hex !== migratedParcel.roundBaseAlchemica[i][j]._hex)
+                roundBaseAlchemicaMigrationGoneWrong = true
+            }
+          }
+
+          if (roundAlchemicaMigrationGoneWrong) {
+            migrationGoneWrong = true
+            message += `Incorrect roundAlchemica\n`
+          }
+          if (roundBaseAlchemicaMigrationGoneWrong) {
+            migrationGoneWrong = true
+            message += `Incorrect roundBaseAlchemica\n`
+          }
+
+          let reservoirsMigrationGoneWrong = false
+          for (let i = 0; i < 4; i++) {
+            for (let j = 0; j < parcel.reservoirs[i].length; j++) {
+              if (parcel.reservoirs[i][j].hex !== migratedParcel.reservoirs[i][j]._hex)
+                reservoirsMigrationGoneWrong = true
+            }
+          }
+
+          if (reservoirsMigrationGoneWrong) {
+            migrationGoneWrong = true
+            message += `Incorrect reservoirs\n`
+          }
+
+          if (migrationGoneWrong) {
+            fs.appendFileSync('non-empty-parcels-migration-errors.txt', `${message}\n`);
+            console.log(message)
+          }
           
         } catch (e) {
           console.log(e)

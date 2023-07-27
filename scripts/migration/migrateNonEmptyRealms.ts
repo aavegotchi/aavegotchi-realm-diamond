@@ -9,12 +9,12 @@ const fs = require("fs");
 
 const realmDiamondAddressGotchichain = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
 
-const BATCH_SIZE = 200
-//10280
-//1033
+const BATCH_SIZE = 60 //Making this bigger adds potetial points of failure (especically if you raise it above 100)
+const gasPrice = 3
+
 export default async function main() {
-  const realmDiamondAddress = await deployRealmDiamond()
-  // const realmDiamondAddress = '0x5258fCe3bE52b399AE210D875AD70BC2e3A55aD1'
+  // const realmDiamondAddress = await deployRealmDiamond()
+  const realmDiamondAddress = '0x5258fCe3bE52b399AE210D875AD70BC2e3A55aD1'
 
   const signerAddress = await ethers.provider.getSigner().getAddress();
   const migrationFacet: MigrationFacet = await ethers.getContractAt("MigrationFacet", realmDiamondAddress)
@@ -25,15 +25,7 @@ export default async function main() {
   const parcelIds = readParcelIds().slice(0, 1000)
   let promises = [];
 
-  // await sleep(15000)
-  
-  for (let i = 0; i < parcelIds.length; i++) {  
-    
-    // if (i % 10 === 0) {
-    //   await sleep(15000)
-    // }
-
-
+  for (let i = 0; i < parcelIds.length; i++) {
     if (promises.length >= BATCH_SIZE) {
       console.log("Waiting tx to be settled")
       await Promise.allSettled(promises);
@@ -68,7 +60,8 @@ export default async function main() {
               },
               {
                 nonce,
-                gasLimit: 20000000
+                gasPrice,
+                gasLimit: 20000000,
               }
             )
             await tx.wait()
@@ -93,7 +86,8 @@ export default async function main() {
                   chunk,
                   {
                     nonce,
-                    gasLimit: 20000000
+                    gasPrice,
+                    gasLimit: 20000000,
                   }
                 )
                 await tx.wait()
@@ -116,7 +110,8 @@ export default async function main() {
                 parcel.buildGrid,
                 {
                   nonce,
-                  gasLimit: 20000000
+                  gasPrice,
+                  gasLimit: 20000000,
                 }
               )
               await tx.wait()
@@ -142,7 +137,8 @@ export default async function main() {
                   chunk,
                   {
                     nonce,
-                    gasLimit: 20000000
+                    gasPrice,
+                    gasLimit: 20000000,
                   }
                 )
                 await tx.wait()
@@ -165,7 +161,8 @@ export default async function main() {
                 parcel.tileGrid,
                 {
                   nonce,
-                  gasLimit: 20000000
+                  gasPrice,
+                  gasLimit: 20000000,
                 }
               )
               await tx.wait()
@@ -191,7 +188,8 @@ export default async function main() {
                   chunk,
                   {
                     nonce,
-                    gasLimit: 20000000
+                    gasPrice,
+                    gasLimit: 20000000,
                   }
                 )
                 await tx.wait()
@@ -214,11 +212,12 @@ export default async function main() {
                 parcel.startPositionBuildGrid,
                 {
                   nonce,
-                  gasLimit: 20000000
+                  gasPrice,
+                  gasLimit: 20000000,
                 }
               )
-            await tx.wait()
-            console.log(`saveStartPositionBuildGrid(1) fineshed, parcelId ${parcelId}, nonce ${nonce}`)
+              await tx.wait()
+              console.log(`saveStartPositionBuildGrid(1) fineshed, parcelId ${parcelId}, nonce ${nonce}`)
             } catch (e) {
               console.log(e)
             }
@@ -240,7 +239,8 @@ export default async function main() {
                   chunk,
                   {
                     nonce,
-                    gasLimit: 20000000
+                    gasPrice,
+                    gasLimit: 20000000,
                   }
                 )
                 await tx.wait()
@@ -263,7 +263,8 @@ export default async function main() {
                 parcel.startPositionTileGrid,
                 {
                   nonce,
-                  gasLimit: 20000000
+                  gasPrice,
+                  gasLimit: 20000000,
                 }
               )
               await tx.wait()
@@ -281,7 +282,11 @@ export default async function main() {
           try {
             const nonce = txCounter
             console.log(`migrateParcel(1), parcelId ${parcelId}, nonce ${nonce}`)
-            const tx = await migrationFacet.migrateParcel(parcelId, parcel, { nonce, gasLimit: 20000000 })
+            const tx = await migrationFacet.migrateParcel(parcelId, parcel, {
+              nonce, 
+              gasPrice,
+              gasLimit: 20000000,
+            })
             await tx.wait()
             console.log(`migrateParcel(1) fineshed, parcelId ${parcelId}, nonce ${nonce}`)
 

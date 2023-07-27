@@ -7,25 +7,27 @@ import { BigNumber } from "ethers";
 
 const fs = require("fs");
 
-const realmDiamondAddressGotchichain = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
-
-const BATCH_SIZE = 200
+// const realmDiamondAddress = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
+const realmDiamondAddress = '0x5258fCe3bE52b399AE210D875AD70BC2e3A55aD1'
+const BATCH_SIZE = 60
+const gasPrice = 2
 
 export default async function main() {
-  const realmDiamondAddress = await deployRealmDiamond()
+  // const realmDiamondAddress = await deployRealmDiamond()
 
   const signerAddress = await ethers.provider.getSigner().getAddress();
   const migrationFacet: MigrationFacet = await ethers.getContractAt("MigrationFacet", realmDiamondAddress)
 
-  const transactionCount = await ethers.provider.getTransactionCount(signerAddress, "latest");
+  const transactionCount = (await ethers.provider.getTransactionCount(signerAddress, "latest"));
 
-  const parcels: any[] = await readAllParcels()
+  const parcels: any[] = (await readAllParcels()).slice(0, 100)
   let promises = [];
 
   for (let i = 0; i < parcels.length; i++) {
     if (promises.length == BATCH_SIZE) {
-      console.log()
+      console.log('Waiting txs to settle')
       await Promise.allSettled(promises);
+      console.log('Txs settled')
       promises = [];
     }
 
@@ -36,12 +38,12 @@ export default async function main() {
       (async () => {
         try {
           const nonce = transactionCount + i
-          await migrationFacet.migrateParcel(parcel.tokenId, parcel, { nonce })
-          console.log(`\nMigrated parcel with ID ${parcel.tokenId}`);
+          console.log(`Migrating parcel with ID ${parcel.tokenId} at position ${i} with nonce ${nonce}`)
+          const tx = await migrationFacet.migrateParcel(parcel.tokenId, parcel, { nonce, gasPrice })
+          await tx.wait()
+          console.log(`Migrated parcel with ID ${parcel.tokenId}\n`);
 
-          console.log(`Saving migrated parcel to empty-migrated-parcels.txt`)
-          fs.appendFileSync('empty-migrated-parcels.txt', `${parcel.tokenId}\n`);
-          console.log(`Saved migrated parcel to empty-migrated-parcels.txt`)
+          // fs.appendFileSync('empty-migrated-parcels.txt', `${parcel.tokenId}\n`);
         } catch (e) {
           console.log(e.message);
 
@@ -55,6 +57,7 @@ export default async function main() {
 
   console.log("Settling")
   await Promise.allSettled(promises);
+  console.log("Settled")
   promises = [];
 }
 
