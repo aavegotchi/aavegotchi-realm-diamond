@@ -34,7 +34,7 @@ contract MigrationFacet is Modifiers {
     uint[][] reservoirs;
   }
 
-  function migrateParcel(uint _parcelId, ParcelData calldata parcelData) external {
+  function migrateParcel(uint _parcelId, ParcelData calldata parcelData) onlyOwner external {
     s.parcels[_parcelId].owner = parcelData.owner;
     s.parcels[_parcelId].parcelAddress = parcelData.parcelAddress;
     s.parcels[_parcelId].parcelId = parcelData.parcelId;
@@ -64,47 +64,47 @@ contract MigrationFacet is Modifiers {
     saveReservoirs(_parcelId, parcelData.reservoirs);
   }
 
-  function saveBuildGrid(uint256 _parcelId, uint[] calldata sparseGrid) public {
+  function saveBuildGrid(uint256 _parcelId, uint[] calldata sparseGrid) onlyOwner public {
     require(sparseGrid.length % 3 == 0, "RealmFacet: Invalid sparse grid");
     for (uint i; i < sparseGrid.length; i = i + 3) {
       s.parcels[_parcelId].buildGrid[sparseGrid[i]][sparseGrid[i + 1]] = sparseGrid[i + 2];
     }
   }
 
-  function saveStartPositionBuildGrid(uint256 _parcelId, uint[] calldata sparseGrid) public {
+  function saveStartPositionBuildGrid(uint256 _parcelId, uint[] calldata sparseGrid) onlyOwner public {
     require(sparseGrid.length % 3 == 0, "RealmFacet: Invalid sparse grid");
     for (uint i; i < sparseGrid.length; i = i + 3) {
       s.parcels[_parcelId].startPositionBuildGrid[sparseGrid[i]][sparseGrid[i + 1]] = sparseGrid[i + 2];
     }
   }
 
-  function saveTileGrid(uint256 _parcelId, uint[] calldata sparseGrid) public {
+  function saveTileGrid(uint256 _parcelId, uint[] calldata sparseGrid) onlyOwner public {
     require(sparseGrid.length % 3 == 0, "RealmFacet: Invalid sparse grid");
     for (uint i; i < sparseGrid.length; i = i + 3) {
       s.parcels[_parcelId].tileGrid[sparseGrid[i]][sparseGrid[i + 1]] = sparseGrid[i + 2];
     }
   }
 
-  function saveStartPositionTileGrid(uint256 _parcelId, uint[] calldata sparseGrid) public {
+  function saveStartPositionTileGrid(uint256 _parcelId, uint[] calldata sparseGrid) onlyOwner public {
     require(sparseGrid.length % 3 == 0, "RealmFacet: Invalid sparse grid");
     for (uint i; i < sparseGrid.length; i = i + 3) {
       s.parcels[_parcelId].startPositionTileGrid[sparseGrid[i]][sparseGrid[i + 1]] = sparseGrid[i + 2];
     }
   }
 
-  function saveRoundBaseAlchemica(uint256 _parcelId, uint[][] calldata roundBaseAlchemica) public {
+  function saveRoundBaseAlchemica(uint256 _parcelId, uint[][] calldata roundBaseAlchemica) internal {
     for (uint i; i < roundBaseAlchemica.length; i++) {
       s.parcels[_parcelId].roundBaseAlchemica[i] = roundBaseAlchemica[i];
     }
   }
 
-  function saveRoundAlchemica(uint256 _parcelId, uint[][] calldata roundAlchemica) public {
+  function saveRoundAlchemica(uint256 _parcelId, uint[][] calldata roundAlchemica) internal {
     for (uint i; i < roundAlchemica.length; i++) {
       s.parcels[_parcelId].roundAlchemica[i] = roundAlchemica[i];
     }
   }
 
-  function saveReservoirs(uint256 _parcelId, uint[][] calldata reservoirs) public {
+  function saveReservoirs(uint256 _parcelId, uint[][] calldata reservoirs) internal {
     for (uint i; i < reservoirs.length; i++) {
       s.parcels[_parcelId].reservoirs[i] = reservoirs[i];
     }
