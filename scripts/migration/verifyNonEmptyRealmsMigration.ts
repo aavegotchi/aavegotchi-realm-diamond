@@ -7,8 +7,8 @@ import { BigNumber } from "ethers";
 
 const fs = require("fs");
 
-// const realmDiamondAddressGotchichain = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
-const realmDiamondAddressGotchichain = '0x5258fCe3bE52b399AE210D875AD70BC2e3A55aD1'
+// const realmDiamondAddress = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
+const realmDiamondAddress = '0x5258fCe3bE52b399AE210D875AD70BC2e3A55aD1'
 const realmsBrigeAddress = process.env.REALMS_BRIDGE_ADDRESS_POLYGON as string
 
 const BATCH_SIZE = 200
