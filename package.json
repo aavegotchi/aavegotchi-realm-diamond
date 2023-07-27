@@ -2,13 +2,16 @@
   "scripts": {
     "deploy:alchemica:matic": "VERIFY=true TS_NODE_TRANSPILE_ONLY=1 npx hardhat run scripts/alchemica/deployAlchemica.ts --network matic",
     "deploy:alchemica:mumbai": "VERIFY=true TS_NODE_TRANSPILE_ONLY=1 npx hardhat run scripts/alchemica/deployAlchemica.ts --network mumbai",
-    "deploy:alchemica:local": "npx hardhat run scripts/alchemica/deployAlchemica.ts --network hardhat"
+    "deploy:alchemica:local": "npx hardhat run scripts/alchemica/deployAlchemica.ts --network hardhat",
+    "test:installation:bridge": "FORKING=false npx hardhat test test/bridge/installations.test.ts --network hardhat",
+    "test:realm:bridge": "FORKING=false npx hardhat test test/bridge/realm.test.ts --network hardhat"
   },
   "dependencies": {
     "@anders-t/ethers-ledger": "^1.0.4",
     "@chainlink/contracts": "^0.6.0",
     "@ethersproject/experimental": "^5.4.0",
     "@ethersproject/hardware-wallets": "^5.6.0",
+    "@layerzerolabs/solidity-examples": "^0.0.12",
     "@nomiclabs/hardhat-etherscan": "^3.1.5",
     "@nomiclabs/hardhat-truffle5": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
@@ -36,6 +39,7 @@
     "typescript": "^4.3.5"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.8",
     "@nomiclabs/hardhat-ethers": "^2.0.5",
     "@nomiclabs/hardhat-etherscan": "^2.1.8",
     "@openzeppelin/hardhat-upgrades": "^1.17.0",

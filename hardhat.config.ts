@@ -43,6 +43,7 @@ module.exports = {
       forking: {
         url: process.env.MATIC_URL,
         timeout: 2000000,
+        enabled: process.env.FORKING === "true",
         // blockNumber: 30865190,
       },
       chainId: 137,
@@ -75,6 +76,12 @@ module.exports = {
       blockGasLimit: 12000000,
       gasPrice: 100000000000,
       //   timeout: 90000
+    },
+    supernetLocal: {
+      url: "http://localhost:10002",
+      accounts: [
+        "b14d3721c3d21d50fc2556f0c54f7b59ee06852efce54c691daf8b79d2fae39d",
+      ],
     },
   },
 

@@ -7,13 +7,14 @@ import {
   InstallationDiamond__factory,
   OwnershipFacet,
 } from "../../typechain";
-import { gasPrice, maticRealmDiamondAddress } from "./helperFunctions";
+import { gasPrice } from "./helperFunctions";
+import { maticRealmDiamondAddress } from "../tile/helperFunctions";
 
 // import {getSelectors, FacetCutAction} from '../libraries/diamond'
 
 const { getSelectors, FacetCutAction } = require("../libraries/diamond");
 
-export async function deployDiamond() {
+export async function deployDiamond(realmDiamondAddress) {
   const accounts: Signer[] = await ethers.getSigners();
   const deployer = accounts[0];
   const deployerAddress = await deployer.getAddress();
@@ -34,7 +35,7 @@ export async function deployDiamond() {
   const diamond = await Diamond.deploy(
     deployerAddress,
     diamondCutFacet.address,
-    maticRealmDiamondAddress,
+    realmDiamondAddress,
     { gasPrice: gasPrice }
   );
   await diamond.deployed();
@@ -49,14 +50,15 @@ export async function deployDiamond() {
   console.log("DiamondInit deployed:", diamondInit.address);
 
   // deploy facets
-  console.log("");
   console.log("Deploying facets");
   const FacetNames = [
     "DiamondLoupeFacet",
     "OwnershipFacet",
     "InstallationFacet",
     "InstallationAdminFacet",
+    "InstallationUpgradeFacet",
     "ERC1155Facet",
+    "InstallationsPolygonXGotchichainBridgeFacet",
   ];
   const cut = [];
   for (const FacetName of FacetNames) {
@@ -106,13 +108,13 @@ export async function deployDiamond() {
     );
   }
 
-  return diamond.address;
+  return diamond;
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 if (require.main === module) {
-  deployDiamond()
+  deployDiamond(maticRealmDiamondAddress)
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);
