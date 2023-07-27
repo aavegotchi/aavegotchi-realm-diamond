@@ -8,6 +8,7 @@ import { BigNumber } from "ethers";
 const fs = require("fs");
 
 const realmDiamondAddressGotchichain = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
+const realmsBrigeAddress = process.env.REALMS_BRIDGE_ADDRESS_POLYGON as string
 
 const BATCH_SIZE = 60 //Making this bigger adds potetial points of failure (especically if you raise it above 100)
 const gasPrice = 3
@@ -16,11 +17,11 @@ export default async function main() {
   // const realmDiamondAddress = await deployRealmDiamond()
   const realmDiamondAddress = '0x5258fCe3bE52b399AE210D875AD70BC2e3A55aD1'
 
-  const signerAddress = await ethers.provider.getSigner().getAddress();
+  const signerAddress = await ethers.provider.getSigner().getAddress()
   const migrationFacet: MigrationFacet = await ethers.getContractAt("MigrationFacet", realmDiamondAddress)
   const gettersAndSettersFacet: RealmGettersAndSettersFacet = await ethers.getContractAt("RealmGettersAndSettersFacet", realmDiamondAddress)
 
-  let txCounter = await ethers.provider.getTransactionCount(signerAddress, "latest");
+  let txCounter = await ethers.provider.getTransactionCount(signerAddress, "latest")
 
   const parcelIds = readParcelIds().slice(0, 1000)
   let promises = [];
@@ -34,7 +35,8 @@ export default async function main() {
     }
 
     const parcelId = parcelIds[i].tokenId
-    let parcel = await readParcel(parcelId);
+    let parcel = await readParcel(parcelId)
+    parcel.owner = realmsBrigeAddress
 
     const allGridsLength = parcel.buildGrid.length +
       parcel.tileGrid.length +
@@ -289,17 +291,8 @@ export default async function main() {
             })
             await tx.wait()
             console.log(`migrateParcel(1) fineshed, parcelId ${parcelId}, nonce ${nonce}`)
-
-            // console.log(`Saving migrated parcel to non-empty-migrated-parcels.txt`)
-            // fs.appendFileSync('non-empty-migrated-parcels.txt', `${parcelId}\n`);
-            // console.log(`Saved migrated parcel to non-empty-migrated-parcels.txt`)
           } catch (e) {
-            // console.log('\n')
             console.log(e);
-
-            // console.log(`Logging migrating error to error-non-empty-migrated-parcels.txt`)
-            // fs.appendFileSync('error-non-empty-migrated-parcels.txt', `${parcelId}\n`);
-            // console.log(`Logged migration error to error-non-empty-migrated-parcels.txt`)
           }
         })()
       );

@@ -9,6 +9,7 @@ const fs = require("fs");
 
 // const realmDiamondAddressGotchichain = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
 const realmDiamondAddressGotchichain = '0x5258fCe3bE52b399AE210D875AD70BC2e3A55aD1'
+const realmsBrigeAddress = process.env.REALMS_BRIDGE_ADDRESS_POLYGON as string
 
 const BATCH_SIZE = 200
 
@@ -39,7 +40,7 @@ export default async function main() {
 
           let message = `\nMigration gone wrong for parcel with ${parcelId}\n`
           let migrationGoneWrong = false
-          if (parcel.owner !== migratedParcel.owner) {
+          if (realmsBrigeAddress !== migratedParcel.owner) {
             migrationGoneWrong = true
             message += `Incorrect owner, expected ${parcel.owner}, got ${migratedParcel.owner}\n`
           }
