@@ -8,13 +8,13 @@ import { BigNumber } from "ethers";
 const fs = require("fs");
 
 // const realmDiamondAddress = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
-const realmsBrigeAddress = process.env.REALMS_BRIDGE_ADDRESS_POLYGON as string
-const realmDiamondAddress = '0x5258fCe3bE52b399AE210D875AD70BC2e3A55aD1'
+// const realmsBrigeAddress = process.env.REALMS_BRIDGE_ADDRESS_POLYGON as string
+// const realmDiamondAddress = '0x5258fCe3bE52b399AE210D875AD70BC2e3A55aD1'
 const BATCH_SIZE = 60
 const gasPrice = 0
 
 export default async function main() {
-
+  const realmDiamondAddress = await deployRealmDiamond()
   const signerAddress = await ethers.provider.getSigner().getAddress();
   const migrationFacet: MigrationFacet = await ethers.getContractAt("MigrationFacet", realmDiamondAddress)
 
@@ -42,14 +42,8 @@ export default async function main() {
           const tx = await migrationFacet.migrateParcel(parcel.tokenId, parcel, { nonce, gasPrice })
           await tx.wait()
           console.log(`Migrated parcel with ID ${parcel.tokenId}\n`);
-
-          // fs.appendFileSync('empty-migrated-parcels.txt', `${parcel.tokenId}\n`);
         } catch (e) {
           console.log(e.message);
-
-          console.log(`Logging error on migrating parcel to error-empty-migrated-parcels.txt`)
-          fs.appendFileSync('error-empty-migrated-parcels.txt', `${parcel.tokenId}\n`);
-          console.log(`Logging error on migrating to error-empty-migrated-parcels.txt`)
         }
       })()
     );
