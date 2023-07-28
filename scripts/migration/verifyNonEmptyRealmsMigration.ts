@@ -8,7 +8,8 @@ import { BigNumber } from "ethers";
 const fs = require("fs");
 
 // const realmDiamondAddress = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
-const realmDiamondAddress = '0x5258fCe3bE52b399AE210D875AD70BC2e3A55aD1'
+// const realmDiamondAddress = '0x5258fCe3bE52b399AE210D875AD70BC2e3A55aD1'
+const realmDiamondAddress = '0x952cfbF529b4E1b3fB328a8e432B1b76f461Fa47'
 const realmsBrigeAddress = process.env.REALMS_BRIDGE_ADDRESS_POLYGON as string
 
 const BATCH_SIZE = 200
@@ -16,7 +17,7 @@ const BATCH_SIZE = 200
 export default async function main() {
   const gettersAndSettersFacet: RealmGettersAndSettersFacet = await ethers.getContractAt("RealmGettersAndSettersFacet", realmDiamondAddress)
 
-  const parcelIds = readParcelIds().slice(0, 1000)
+  const parcelIds = readParcelIds().slice(0, 1)
   let promises = [];
 
   for (let i = 0; i < parcelIds.length; i++) {
@@ -52,7 +53,7 @@ export default async function main() {
             migrationGoneWrong = true
             message += `Incorrect parcelId, expected ${parcel.parcelId}, got ${migratedParcel.parcelId}\n`
           }
-          if (parcel.coordinateX !== migratedParcel.coordinateX._hex) {
+          if (parcel.coordinateX.hex !== migratedParcel.coordinateX._hex) {
             migrationGoneWrong = true
             message += `Incorrect coordinateX, expected ${parcel.coordinateX.hex}, got ${migratedParcel.coordinateX._hex}\n`
           }
