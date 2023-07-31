@@ -8,19 +8,19 @@ import { BigNumber } from "ethers";
 const fs = require("fs");
 
 // const realmDiamondAddress = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
-// const realmsBrigeAddress = process.env.REALMS_BRIDGE_ADDRESS_POLYGON as string
-// const realmDiamondAddress = '0x5258fCe3bE52b399AE210D875AD70BC2e3A55aD1'
+const realmsBrigeAddress = process.env.REALMS_BRIDGE_ADDRESS_POLYGON as string
+const realmDiamondAddress = '0x952cfbF529b4E1b3fB328a8e432B1b76f461Fa47'
 const BATCH_SIZE = 60
 const gasPrice = 0
 
 export default async function main() {
-  const realmDiamondAddress = await deployRealmDiamond()
+
   const signerAddress = await ethers.provider.getSigner().getAddress();
   const migrationFacet: MigrationFacet = await ethers.getContractAt("MigrationFacet", realmDiamondAddress)
 
   const transactionCount = (await ethers.provider.getTransactionCount(signerAddress, "latest"));
 
-  const parcels: any[] = await readAllParcels()
+  const parcels: any[] = (await readAllParcels()).slice(0, 400)
   let promises = [];
 
   for (let i = 0; i < parcels.length; i++) {
@@ -62,7 +62,7 @@ const readAllParcels = async () => {
 }
 
 function fillParcelData(parcel: MigrationFacet.ParcelDataStruct) {
-  parcel.owner = realmDiamondAddress
+  parcel.owner = realmsBrigeAddress
   
   if (!parcel.currentRound) parcel.currentRound = BigNumber.from(0);
   if (!parcel.alchemicaHarvestRate) parcel.alchemicaHarvestRate = ['0', '0', '0', '0'];
