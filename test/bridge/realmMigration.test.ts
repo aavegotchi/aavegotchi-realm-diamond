@@ -108,22 +108,24 @@ describe("Realms Migration", async function () {
       district: 1,
       parcelAddress: "hey-whats-up1",
     }];
-    await realmFacet.mintParcels([deployer.address], [parcelId], parcelsTest1);
+    // await realmFacet.mintParcels([deployer.address], [parcelId], parcelsTest1);
   }
 
   beforeEach(async function () {
     await loadFixture(deployFixture);
   });
 
-  it("Saving only simple parcel data", async () => {
+  it.only("Saving only simple parcel data", async () => {
     await migrationFacet.migrateParcel(parcelId, parcelInput)
 
     const parcel = await gettersAndSettersFacet.getParcel(parcelId);
 
     compareResult(parcelInput, parcel)
+
+    await erc721Facet.transferFrom(deployer.address, '0x5FbDB2315678afecb367f032d93F642f64180aa3', parcelId)
   });
 
-  it.only("Saving grids", async () => {
+  it("Saving grids", async () => {
     const sparsedArray = make2DArraySparse(grid)
     
     parcelInput.buildGrid = sparsedArray
@@ -135,6 +137,7 @@ describe("Realms Migration", async function () {
     
     const parcel = await gettersAndSettersFacet.getParcel(parcelId);
  
+    compareResult(parcelInput, parcel)
     compareGrid(grid, parcel.buildGrid, 16, 16)
     compareGrid(grid, parcel.startPositionBuildGrid, 16, 16)
     compareGrid(grid, parcel.tileGrid, 16, 16)

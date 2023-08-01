@@ -2,6 +2,7 @@
 pragma solidity 0.8.9;
 
 import "../../libraries/AppStorage.sol";
+import "../../libraries/LibERC721.sol";
 import "hardhat/console.sol";
 
 contract MigrationFacet is Modifiers {
@@ -35,6 +36,8 @@ contract MigrationFacet is Modifiers {
   }
 
   function migrateParcel(uint _parcelId, ParcelData calldata parcelData) onlyOwner external {
+    LibERC721.safeMint(parcelData.owner, _parcelId);
+
     s.parcels[_parcelId].owner = parcelData.owner;
     s.parcels[_parcelId].parcelAddress = parcelData.parcelAddress;
     s.parcels[_parcelId].parcelId = parcelData.parcelId;
