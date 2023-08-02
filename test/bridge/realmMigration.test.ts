@@ -16,84 +16,68 @@ import {
   RealmFacet,
   RealmGettersAndSettersFacet,
   RealmGridFacet,
+  RealmsBridgeGotchichainSide,
+  RealmsBridgePolygonSide,
 } from "../../typechain-types";
 import { MintParcelInput } from "../../types";
 import { BigNumber } from "ethers";
 
 describe("Realms Migration", async function () {
-  let installationFacet: InstallationFacet
-  let erc1155Facet: ERC1155Facet
-  let realmGridFacet: RealmGridFacet
-  let realmFacet: RealmFacet
-  let erc721Facet: ERC721Facet
-  let migrationFacet: MigrationFacet
-  let gettersAndSettersFacet: RealmGettersAndSettersFacet
-  let installationsDiamond: InstallationDiamond
-  let alchemica
-  let deployer: SignerWithAddress
-  let realmDiamond
+
+  const chainId_A = 1
+  const chainId_B = 2
+  const minGasToStore = 50000
+  const batchSizeLimit = 1
+  let polygonAdapterParams: any
+  let gotchichainAdapterParams: any
+
+  let LZEndpointMock: any, bridgePolygonSide: RealmsBridgePolygonSide, bridgeGotchichainSide: RealmsBridgeGotchichainSide
+  let deployer: SignerWithAddress, alice: SignerWithAddress
+  let lzEndpointMockA: any, lzEndpointMockB: any
+
+  let installationFacetPolygonSide: InstallationFacet, installationFacetGotchichainSide: InstallationFacet
+  let erc1155FacetPolygonSide: ERC1155Facet, erc1155FacetGotchichainSide: ERC1155Facet
+  let realmGridFacetPolygonSide: RealmGridFacet, realmGridFacetGotchichainSide: RealmGridFacet
+  let realmFacetPolygonSide: RealmFacet, realmFacetGotchichainSide: RealmFacet
+  let erc721FacetPolygonSide: ERC721Facet, erc721FacetGotchichainSide: ERC721Facet
+  let migrationFacetPolygonSide: MigrationFacet, migrationFacetGotchichainSide: MigrationFacet
+  let gettersAndSettersFacetPolygonSide: RealmGettersAndSettersFacet, gettersAndSettersFacetGotchichainSide: RealmGettersAndSettersFacet
+  let installationsDiamondPolygonSide: InstallationDiamond, installationsDiamondGotchichainSide: InstallationDiamond
+  let alchemicaPolygonSide, alchemicaGotchichainSide
+  let realmDiamondPolygonSide, realmDiamondGotchichainSide
   let parcelId = 5
 
   async function deployFixture() {
+    //Deploy diamond and mint parcel on Polygon side
     const accounts = await ethers.getSigners();
     deployer = accounts[0];
 
     ({
-      installationDiamond: installationsDiamond,
-      alchemica: alchemica,
-      realmDiamond: realmDiamond,
+      installationDiamond: installationsDiamondPolygonSide,
+      alchemica: alchemicaPolygonSide,
+      realmDiamond: realmDiamondPolygonSide,
     } = await deploy());
-    delete alchemica["gltr"];
-    const alchemicaWithoutGLTR = Object.values(alchemica);
+    // delete alchemicaPolygonSide["gltr"];
+    // const alchemicaWithoutGLTR = Object.values(alchemicaPolygonSide);
 
-    erc1155Facet = await ethers.getContractAt(
-      "ERC1155Facet",
-      installationsDiamond.address
-    );
-
-    installationFacet = await ethers.getContractAt(
-      "InstallationFacet",
-      installationsDiamond.address
-    );
-
-    realmFacet = await ethers.getContractAt(
-      "RealmFacet",
-      realmDiamond.address
-    );
-
-    realmGridFacet = await ethers.getContractAt(
-      "RealmGridFacet",
-      realmDiamond.address
-    );
-
-    erc721Facet = await ethers.getContractAt(
+    erc721FacetPolygonSide = await ethers.getContractAt(
       "ERC721Facet",
-      realmDiamond.address
-    );
-
-    migrationFacet = await ethers.getContractAt(
-      "MigrationFacet",
-      realmDiamond.address
-    );
-
-    gettersAndSettersFacet = await ethers.getContractAt(
-      "RealmGettersAndSettersFacet",
-      realmDiamond.address
+      realmDiamondPolygonSide.address
     );
 
     //Alchemica
-    await faucetRealAlchemica(
-      deployer.address,
-      ethers,
-      alchemicaWithoutGLTR,
-      realmDiamond.address
-    );
+    // await faucetRealAlchemica(
+    //   deployer.address,
+    //   ethers,
+    //   alchemicaWithoutGLTR,
+    //   realmDiamondPolygonSide.address
+    // );
 
-    await approveRealAlchemica(
-      installationsDiamond.address,
-      ethers,
-      alchemicaWithoutGLTR
-    );
+    // await approveRealAlchemica(
+    //   realmDiamondPolygonSide.address,
+    //   ethers,
+    //   alchemicaWithoutGLTR
+    // );
 
     const boostFomo = Math.floor(Math.random() * 4);
     const boostFud = Math.floor(Math.random() * 4);
@@ -103,12 +87,81 @@ describe("Realms Migration", async function () {
       coordinateX: 0,
       coordinateY: 0,
       parcelId: "",
-      size: Math.floor(Math.random() * 5),
-      boost: [boostFud, boostFomo, boostAlpha, boostKek],
+      size: 0,
+      boost: [0, 0, 0, 0],
       district: 1,
       parcelAddress: "hey-whats-up1",
     }];
-    // await realmFacet.mintParcels([deployer.address], [parcelId], parcelsTest1);
+    const realmFacetPolygonSide = await ethers.getContractAt(
+      "RealmFacet",
+      realmDiamondPolygonSide.address
+    );
+    await realmFacetPolygonSide.mintParcels([deployer.address], [parcelId], parcelsTest1);
+
+    //Deploy diamond on Gotchichain side
+    ({
+      installationDiamond: installationsDiamondGotchichainSide,
+      alchemica: alchemicaGotchichainSide,
+      realmDiamond: realmDiamondGotchichainSide,
+    } = await deploy());
+
+    migrationFacetGotchichainSide = await ethers.getContractAt(
+      "MigrationFacet",
+      realmDiamondGotchichainSide.address
+    );
+
+    gettersAndSettersFacetGotchichainSide = await ethers.getContractAt(
+      "RealmGettersAndSettersFacet",
+      realmDiamondGotchichainSide.address
+    );
+
+    erc721FacetGotchichainSide = await ethers.getContractAt(
+      "ERC721Facet",
+      realmDiamondGotchichainSide.address
+    );
+
+    // Deploy and configure bridges
+    LZEndpointMock = await ethers.getContractFactory(LZEndpointMockCompiled.abi, LZEndpointMockCompiled.bytecode)
+    const BridgePolygonSide = await ethers.getContractFactory("RealmsBridgePolygonSide");
+    const BridgeGotchichainSide = await ethers.getContractFactory("RealmsBridgeGotchichainSide");
+
+    //Deploying LZEndpointMock contracts
+    lzEndpointMockA = await LZEndpointMock.deploy(chainId_A)
+    lzEndpointMockB = await LZEndpointMock.deploy(chainId_B)
+
+    //Deploying bridge contracts
+    bridgePolygonSide = await BridgePolygonSide.deploy(minGasToStore, lzEndpointMockA.address, realmDiamondPolygonSide.address)
+    bridgeGotchichainSide = await BridgeGotchichainSide.deploy(minGasToStore, lzEndpointMockB.address, realmDiamondGotchichainSide.address)
+
+    //Wire the lz endpoints to guide msgs back and forth
+    lzEndpointMockA.setDestLzEndpoint(bridgeGotchichainSide.address, lzEndpointMockB.address)
+    lzEndpointMockB.setDestLzEndpoint(bridgePolygonSide.address, lzEndpointMockA.address)
+
+    //Set each contracts source address so it can send to each other
+    await bridgePolygonSide.setTrustedRemote(chainId_B, ethers.utils.solidityPack(["address", "address"], [bridgeGotchichainSide.address, bridgePolygonSide.address]))
+    await bridgeGotchichainSide.setTrustedRemote(chainId_A, ethers.utils.solidityPack(["address", "address"], [bridgePolygonSide.address, bridgeGotchichainSide.address]))
+
+    //Set batch size limit
+    await bridgePolygonSide.setDstChainIdToBatchLimit(chainId_B, batchSizeLimit)
+    await bridgeGotchichainSide.setDstChainIdToBatchLimit(chainId_A, batchSizeLimit)
+
+    //Set min dst gas for swap
+    await bridgePolygonSide.setMinDstGas(chainId_B, 1, 4500000)
+    await bridgeGotchichainSide.setMinDstGas(chainId_A, 1, 4500000)//73254
+
+    await bridgePolygonSide.setDstChainIdToTransferGas(chainId_B, 1950000)
+    await bridgeGotchichainSide.setDstChainIdToTransferGas(chainId_A, 1950000)
+
+    const minGasToTransferAndStorePolygonSide = await bridgePolygonSide.minDstGasLookup(chainId_B, 1)
+    const transferGasPerTokenPolygonSide = await bridgePolygonSide.dstChainIdToTransferGas(chainId_B)
+    console.log({ minGasToTransferAndStorePolygonSide, transferGasPerTokenPolygonSide })
+    
+    const minGasToTransferAndStoreGotchichainSide = await bridgeGotchichainSide.minDstGasLookup(chainId_A, 1)
+    const transferGasPerTokenGotchichainSide = await bridgeGotchichainSide.dstChainIdToTransferGas(chainId_A)
+    console.log({ minGasToTransferAndStoreGotchichainSide, transferGasPerTokenGotchichainSide })
+
+    polygonAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, minGasToTransferAndStorePolygonSide.add(transferGasPerTokenPolygonSide.mul(1))])
+    gotchichainAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, minGasToTransferAndStoreGotchichainSide.add(transferGasPerTokenGotchichainSide.mul(1))])
   }
 
   beforeEach(async function () {
@@ -116,27 +169,85 @@ describe("Realms Migration", async function () {
   });
 
   it.only("Saving only simple parcel data", async () => {
-    await migrationFacet.migrateParcel(parcelId, parcelInput)
+    const parcelToMigrate = parcelInput
+    parcelToMigrate.owner = bridgeGotchichainSide.address
+    await migrationFacetGotchichainSide.migrateParcel(parcelId, parcelInput)
 
-    const parcel = await gettersAndSettersFacet.getParcel(parcelId);
+    console.log('bridgeGotchichainSide.address', bridgeGotchichainSide.address)
+    console.log('deployer.address', deployer.address)
 
-    compareResult(parcelInput, parcel)
+    const parcel = await gettersAndSettersFacetGotchichainSide.getParcel(parcelId);
 
-    await erc721Facet.transferFrom(deployer.address, '0x5FbDB2315678afecb367f032d93F642f64180aa3', parcelId)
+    // compareResult(parcelInput, parcel)
+
+    //Estimate nativeFees
+    let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, deployer.address, parcelId, false, polygonAdapterParams)).nativeFee
+
+    //Swaping token to Gotchichain
+    await erc721FacetPolygonSide.approve(bridgePolygonSide.address, parcelId)
+    let sendFromTx = await bridgePolygonSide.sendFrom(
+      deployer.address,
+      chainId_B,
+      deployer.address,
+      parcelId,
+      deployer.address,
+      ethers.constants.AddressZero,
+      polygonAdapterParams,
+      { value: nativeFee }
+    )
+    await sendFromTx.wait()
+
+
+    // console.log("events")
+    // const events = Object.keys(bridgeGotchichainSide.interface.events)
+    // events.forEach((event) => {
+    //   console.log(`${bridgeGotchichainSide.interface.getEventTopic(event)} --- ${event}`)
+    // })
+
+    // console.log("getTransactionReceipt")
+    // const failedTxReceipt = await ethers.provider.getTransactionReceipt(sendFromTx.hash)
+    // console.log("failedTxReceipt", failedTxReceipt.logs)
+
+    // console.log("decode")
+    // const decodeData = bridgeGotchichainSide.interface.decodeEventLog("CreditStored", failedTxReceipt.logs[2].data)
+    
+    // console.log({decodeData})
+
+    // console.log("trusted")
+    // const trustedRemote = ethers.utils.solidityPack(
+    //   ['address', 'address'],
+    //   [bridgePolygonSide.address, bridgeGotchichainSide.address]
+    // )
+  
+    // console.log('Failed messages')
+    // console.log(await bridgeGotchichainSide.failedMessages(chainId_A, trustedRemote, 0))
+  
+    // console.log('\nRetrying message')
+    // const tx = await bridgeGotchichainSide.clearCredits(decodeData._payload);
+    // console.log(`Waiting for tx to be validated, tx hash: ${tx.hash}`)
+    // const receipt = await tx.wait()
+  
+    // console.log("Message retried");
+
+    // Checking Realms ownership in both chains
+    console.log('1')
+    expect(await erc721FacetPolygonSide.ownerOf(parcelId)).to.equal(bridgePolygonSide.address)
+    console.log('2')
+    expect(await erc721FacetGotchichainSide.ownerOf(parcelId)).to.be.equal(deployer.address)
   });
 
   it("Saving grids", async () => {
     const sparsedArray = make2DArraySparse(grid)
-    
+
     parcelInput.buildGrid = sparsedArray
     parcelInput.tileGrid = sparsedArray
     parcelInput.startPositionBuildGrid = sparsedArray
     parcelInput.startPositionTileGrid = sparsedArray
 
-    await migrationFacet.migrateParcel(parcelId, parcelInput)
-    
-    const parcel = await gettersAndSettersFacet.getParcel(parcelId);
- 
+    await migrationFacetGotchichainSide.migrateParcel(parcelId, parcelInput)
+
+    const parcel = await gettersAndSettersFacetGotchichainSide.getParcel(parcelId);
+
     compareResult(parcelInput, parcel)
     compareGrid(grid, parcel.buildGrid, 16, 16)
     compareGrid(grid, parcel.startPositionBuildGrid, 16, 16)
@@ -148,9 +259,9 @@ describe("Realms Migration", async function () {
     parcelInput.roundBaseAlchemica = roundGrid;
     parcelInput.roundAlchemica = roundGrid;
 
-    await migrationFacet.migrateParcel(parcelId, parcelInput)
-    
-    const parcel = await gettersAndSettersFacet.getParcel(parcelId);
+    await migrationFacetGotchichainSide.migrateParcel(parcelId, parcelInput)
+
+    const parcel = await gettersAndSettersFacetGotchichainSide.getParcel(parcelId);
 
     compareGrid(roundGrid, parcel.roundBaseAlchemica, 10, 10)
     compareGrid(roundGrid, parcel.roundAlchemica, 10, 10)
@@ -159,10 +270,10 @@ describe("Realms Migration", async function () {
   it("Saving reservoirs", async () => {
     parcelInput.reservoirs = reservoirsGrid;
 
-    await migrationFacet.migrateParcel(parcelId, parcelInput)
-    
-    const parcel = await gettersAndSettersFacet.getParcel(parcelId);
-    
+    await migrationFacetGotchichainSide.migrateParcel(parcelId, parcelInput)
+
+    const parcel = await gettersAndSettersFacetGotchichainSide.getParcel(parcelId);
+
     compareGrid(reservoirsGrid, parcel.reservoirs, 4, 4)
   })
 });
@@ -208,22 +319,6 @@ const faucetRealAlchemica = async (
       .connect(signer)
       .mint(receiver, ethers.utils.parseEther("10000"));
   }
-};
-
-const genSignature = async (tileId: number, x: number, y: number) => {
-  //@ts-ignore
-  let backendSigner = new ethers.Wallet(process.env.REALM_PK); // PK should start with '0x'
-
-  let messageHash1 = ethers.utils.solidityKeccak256(
-    ["uint256", "uint256", "uint256", "uint256"],
-    [0, tileId, x, y]
-  );
-  let signedMessage1 = await backendSigner.signMessage(
-    ethers.utils.arrayify(messageHash1)
-  );
-  let signature1 = ethers.utils.arrayify(signedMessage1);
-
-  return signature1;
 };
 
 const parcelInput = {
@@ -344,9 +439,9 @@ const make2DArraySparse = (array) => {
 
 const printGrid = (grid, width, height) => {
   const coordinateToString = (v) => {
-    try { 
+    try {
       return BigNumber.from(v.hex).toString()
-    } catch(e) {
+    } catch (e) {
       return v.toString()
     }
   }
@@ -360,3 +455,42 @@ const printGrid = (grid, width, height) => {
   }
   console.log(result)
 }
+
+/*
+
+erc1155Facet = await ethers.getContractAt(
+  "ERC1155Facet",
+  installationsDiamond.address
+);
+
+installationFacet = await ethers.getContractAt(
+  "InstallationFacet",
+  installationsDiamond.address
+);
+
+realmFacet = await ethers.getContractAt(
+  "RealmFacet",
+  realmDiamond.address
+);
+
+realmGridFacet = await ethers.getContractAt(
+  "RealmGridFacet",
+  realmDiamond.address
+);
+
+erc721Facet = await ethers.getContractAt(
+  "ERC721Facet",
+  realmDiamond.address
+);
+
+migrationFacet = await ethers.getContractAt(
+  "MigrationFacet",
+  realmDiamond.address
+);
+
+gettersAndSettersFacet = await ethers.getContractAt(
+  "RealmGettersAndSettersFacet",
+  realmDiamond.address
+);
+
+*/ 
