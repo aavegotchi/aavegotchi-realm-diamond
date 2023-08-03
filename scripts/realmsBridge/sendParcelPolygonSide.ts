@@ -4,8 +4,8 @@ import { ethers } from "hardhat";
 import { RealmsBridgePolygonSide } from "../../typechain-types";
 
 const lzChainIdGotchichain = process.env.LZ_CHAIN_ID_GOTCHICHAIN as string
-const realmsDiamondAddressMumbai = process.env.REALMS_DIAMOND_ADDRESS_MUMBAI as string
-const realmsBridgeAddressMumbai = process.env.REALMS_BRIDGE_ADDRESS_MUMBAI as string
+const realmsDiamondAddressPolygon = process.env.REALMS_DIAMOND_ADDRESS_POLYGON as string
+const realmsBridgeAddressPolygon = process.env.REALMS_BRIDGE_ADDRESS_POLYGON as string
 
 const txParams = {
   gasPrice: "5000000000"
@@ -14,10 +14,10 @@ const txParams = {
 export default async function main() {
   const alice = (await ethers.getSigners())[0]
 
-  const parcelId = "140"
+  const parcelId = "88"
 
-  const bridgePolygonSide = await ethers.getContractAt("RealmsBridgePolygonSide", realmsBridgeAddressMumbai)
-  const erc721FacetPolygonSide = await ethers.getContractAt("ERC721Facet", realmsDiamondAddressMumbai)
+  const bridgePolygonSide = await ethers.getContractAt("RealmsBridgePolygonSide", realmsBridgeAddressPolygon)
+  const erc721FacetPolygonSide = await ethers.getContractAt("ERC721Facet", realmsDiamondAddressPolygon)
   
   console.log("Approving parcel to bridge")
   let tx = await erc721FacetPolygonSide.approve(bridgePolygonSide.address, parcelId, txParams)

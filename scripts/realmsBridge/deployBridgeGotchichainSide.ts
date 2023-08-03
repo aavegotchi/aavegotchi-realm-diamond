@@ -6,11 +6,11 @@ const lzEndpointAddressGotchichain = process.env.LZ_ENDPOINT_ADDRESS_GOTCHICHAIN
 const realmsDiamondAddressGotchichain = process.env.REALMS_DIAMOND_ADDRESS_GOTCHICHAIN as string
 
 export default async function main() {
-  const minGasToStore = 150000
-  const BridgePolygonSide = await ethers.getContractFactory("RealmsBridgeGotchichainSide");
-  const bridgePolygonSide = await BridgePolygonSide.deploy(minGasToStore, lzEndpointAddressGotchichain, realmsDiamondAddressGotchichain)
+  const minGasToStore = 50000
+  const BridgeGotchichainSide = await ethers.getContractFactory("RealmsBridgeGotchichainSide");
+  const bridgeGotchichainSide = await BridgeGotchichainSide.deploy(minGasToStore, lzEndpointAddressGotchichain, realmsDiamondAddressGotchichain)
 
-  console.log("RealmsBridgeGotchichainSide deployed to:", bridgePolygonSide.address);
+  console.log("RealmsBridgeGotchichainSide deployed to:", bridgeGotchichainSide.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

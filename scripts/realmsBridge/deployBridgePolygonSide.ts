@@ -6,7 +6,7 @@ const lzEndpointAddressPolygon = process.env.LZ_ENDPOINT_ADDRESS_POLYGON as stri
 const realmsDiamondAddressPolygon = process.env.REALMS_DIAMOND_ADDRESS_POLYGON as string
 
 export default async function main() {
-  const minGasToStore = 150000
+  const minGasToStore = 50000
   const BridgePolygonSide = await ethers.getContractFactory("RealmsBridgePolygonSide");
   const bridgePolygonSide = await BridgePolygonSide.deploy(minGasToStore, lzEndpointAddressPolygon, realmsDiamondAddressPolygon)
 

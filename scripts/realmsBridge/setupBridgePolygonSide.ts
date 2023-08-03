@@ -3,7 +3,7 @@
 import { ethers } from "hardhat";
 
 const lzChainIdGotchichain = process.env.LZ_CHAIN_ID_GOTCHICHAIN as string
-const realmsBridgeAddressMumbai = process.env.REALMS_BRIDGE_ADDRESS_MUMBAI as string
+const realmsBridgeAddressPolygon = process.env.REALMS_BRIDGE_ADDRESS_POLYGON as string
 const realmsBridgeAddressGotchichain = process.env.REALMS_BRIDGE_ADDRESS_GOTCHICHAIN as string
 
 const txParams = {
@@ -11,22 +11,22 @@ const txParams = {
 }
 
 export default async function main() {
-  const bridgePolygonSide = await ethers.getContractAt("RealmsBridgePolygonSide", realmsBridgeAddressMumbai)
+  const bridgePolygonSide = await ethers.getContractAt("RealmsBridgePolygonSide", realmsBridgeAddressPolygon)
 
   let tx = await bridgePolygonSide.setTrustedRemote(lzChainIdGotchichain, ethers.utils.solidityPack(["address", "address"], [realmsBridgeAddressGotchichain, bridgePolygonSide.address]), txParams)
-  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  console.log(`Waiting for tx to be validated, tx hash: ${tx.hash}`)
   await tx.wait()
 
   tx = await bridgePolygonSide.setDstChainIdToBatchLimit(lzChainIdGotchichain, 1, txParams)
-  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  console.log(`Waiting for tx to be validated, tx hash: ${tx.hash}`)
   await tx.wait()
 
   tx = await bridgePolygonSide.setMinDstGas(lzChainIdGotchichain, 1, 35000, txParams)
-  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  console.log(`Waiting for tx to be validated, tx hash: ${tx.hash}`)
   await tx.wait()
 
   tx = await bridgePolygonSide.setDstChainIdToTransferGas(lzChainIdGotchichain, 1950000, txParams)
-  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  console.log(`Waiting for tx to be validated, tx hash: ${tx.hash}`)
   await tx.wait()
 
   console.log("Bridge setted on Polygon.");

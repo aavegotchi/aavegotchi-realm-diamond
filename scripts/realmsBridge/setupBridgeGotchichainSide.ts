@@ -2,9 +2,9 @@
 
 import { ethers } from "hardhat";
 
-const lzChainIdMumbai = process.env.LZ_CHAIN_ID_MUMBAI as string
-const realmsBridgeAddressMumbai = process.env.AAVEGOTCHI_BRIDGE_ADDRESS_MUMBAI as string
-const realmsBridgeAddressGotchichain = process.env.AAVEGOTCHI_BRIDGE_ADDRESS_GOTCHICHAIN as string
+const lzChainIdPolygon = process.env.LZ_CHAIN_ID_POLYGON as string
+const realmsBridgeAddressPolygon = process.env.REALMS_BRIDGE_ADDRESS_POLYGON as string
+const realmsBridgeAddressGotchichain = process.env.REALMS_BRIDGE_ADDRESS_GOTCHICHAIN as string
 
 const txParams = {
   gasPrice: "5000000000"
@@ -13,20 +13,20 @@ const txParams = {
 export default async function main() {
   const bridgeGotchichainSide = await ethers.getContractAt("RealmsBridgeGotchichainSide", realmsBridgeAddressGotchichain)
   
-  let tx = await bridgeGotchichainSide.setTrustedRemote(lzChainIdMumbai, ethers.utils.solidityPack(["address", "address"], [realmsBridgeAddressMumbai, bridgeGotchichainSide.address]), txParams)
-  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  let tx = await bridgeGotchichainSide.setTrustedRemote(lzChainIdPolygon, ethers.utils.solidityPack(["address", "address"], [realmsBridgeAddressPolygon, bridgeGotchichainSide.address]), txParams)
+  console.log(`Waiting for tx to be validated, tx hash: ${tx.hash}`)
   await tx.wait()
 
-  tx = await bridgeGotchichainSide.setDstChainIdToBatchLimit(lzChainIdMumbai, 1, txParams)
-  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  tx = await bridgeGotchichainSide.setDstChainIdToBatchLimit(lzChainIdPolygon, 1, txParams)
+  console.log(`Waiting for tx to be validated, tx hash: ${tx.hash}`)
   await tx.wait()
 
-  tx = await bridgeGotchichainSide.setMinDstGas(lzChainIdMumbai, 1, 35000, txParams)
-  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  tx = await bridgeGotchichainSide.setMinDstGas(lzChainIdPolygon, 1, 4500000, txParams)
+  console.log(`Waiting for tx to be validated, tx hash: ${tx.hash}`)
   await tx.wait()
 
-  tx = await bridgeGotchichainSide.setDstChainIdToTransferGas(lzChainIdMumbai, 1950000, txParams)
-  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  tx = await bridgeGotchichainSide.setDstChainIdToTransferGas(lzChainIdPolygon, 1950000, txParams)
+  console.log(`Waiting for tx to be validated, tx hash: ${tx.hash}`)
   await tx.wait()
 
   console.log("Bridge setted on Polygon.");
