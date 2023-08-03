@@ -38,7 +38,6 @@ contract MigrationFacet is Modifiers {
   function migrateParcel(uint _parcelId, ParcelData calldata parcelData) onlyOwner external {
     LibERC721.safeMint(parcelData.owner, _parcelId);
 
-    s.parcels[_parcelId].owner = parcelData.owner;
     s.parcels[_parcelId].parcelAddress = parcelData.parcelAddress;
     s.parcels[_parcelId].parcelId = parcelData.parcelId;
     s.parcels[_parcelId].coordinateX = parcelData.coordinateX;

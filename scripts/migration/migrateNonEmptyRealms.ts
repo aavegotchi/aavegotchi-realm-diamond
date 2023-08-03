@@ -7,23 +7,20 @@ import { BigNumber } from "ethers";
 
 const fs = require("fs");
 
-const realmDiamondAddressGotchichain = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
-const realmsBrigeAddress = process.env.REALMS_BRIDGE_ADDRESS_POLYGON as string
+const realmDiamondAddress = process.env.REALMS_DIAMOND_ADDRESS_GOTCHICHAIN as string
+const realmsBrigeAddress = process.env.REALMS_BRIDGE_ADDRESS_GOTCHICHAIN as string
 
 const BATCH_SIZE = 60 //Making this bigger adds potetial points of failure (especically if you raise it above 100)
-const gasPrice = 3
+const gasPrice = 0
 
 export default async function main() {
-  // const realmDiamondAddress = await deployRealmDiamond()
-  const realmDiamondAddress = '0x5258fCe3bE52b399AE210D875AD70BC2e3A55aD1'
-
-  const signerAddress = await ethers.provider.getSigner().getAddress()
   const migrationFacet: MigrationFacet = await ethers.getContractAt("MigrationFacet", realmDiamondAddress)
   const gettersAndSettersFacet: RealmGettersAndSettersFacet = await ethers.getContractAt("RealmGettersAndSettersFacet", realmDiamondAddress)
-
+  
+  const signerAddress = await ethers.provider.getSigner().getAddress()
   let txCounter = await ethers.provider.getTransactionCount(signerAddress, "latest")
-
-  const parcelIds = readParcelIds().slice(0, 1000)
+  
+  const parcelIds = readParcelIds()
   let promises = [];
 
   for (let i = 0; i < parcelIds.length; i++) {

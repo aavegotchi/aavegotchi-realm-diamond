@@ -7,16 +7,15 @@ import { BigNumber } from "ethers";
 
 const fs = require("fs");
 
-// const realmDiamondAddress = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
-const realmDiamondAddress = '0x5258fCe3bE52b399AE210D875AD70BC2e3A55aD1'
-const realmsBrigeAddress = process.env.REALMS_BRIDGE_ADDRESS_POLYGON as string
+const realmDiamondAddress = process.env.REALMS_DIAMOND_ADDRESS_GOTCHICHAIN as string
+const realmsBrigeAddress = process.env.REALMS_BRIDGE_ADDRESS_GOTCHICHAIN as string
 
 const BATCH_SIZE = 60
 
 export default async function main() {
   const gettersAndSettersFacet: RealmGettersAndSettersFacet = await ethers.getContractAt("RealmGettersAndSettersFacet", realmDiamondAddress)
 
-  const parcels: any[] = (await readAllParcels()).slice(0, 100)
+  const parcels: any[] = await readAllParcels()
   let promises = [];
 
   for (let i = 0; i < parcels.length; i++) {

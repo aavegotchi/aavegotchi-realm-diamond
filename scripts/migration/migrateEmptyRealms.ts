@@ -8,19 +8,20 @@ import { BigNumber } from "ethers";
 const fs = require("fs");
 
 // const realmDiamondAddress = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
-const realmsBrigeAddress = process.env.REALMS_BRIDGE_ADDRESS_POLYGON as string
-const realmDiamondAddress = '0x952cfbF529b4E1b3fB328a8e432B1b76f461Fa47'
+const realmsBrigeAddress = process.env.REALMS_BRIDGE_ADDRESS_GOTCHICHAIN as string
+const realmsDiamondAddressGotchichain = process.env.REALMS_DIAMOND_ADDRESS_GOTCHICHAIN as string
 const BATCH_SIZE = 60
 const gasPrice = 0
 
 export default async function main() {
 
   const signerAddress = await ethers.provider.getSigner().getAddress();
-  const migrationFacet: MigrationFacet = await ethers.getContractAt("MigrationFacet", realmDiamondAddress)
+  const migrationFacet: MigrationFacet = await ethers.getContractAt("MigrationFacet", realmsDiamondAddressGotchichain)
 
-  const transactionCount = (await ethers.provider.getTransactionCount(signerAddress, "latest"));
+  let txCounter = (await ethers.provider.getTransactionCount(signerAddress, "latest"));
 
-  const parcels: any[] = (await readAllParcels()).slice(0, 400)
+  let parcels: any[] = await readAllParcels()
+
   let promises = [];
 
   for (let i = 0; i < parcels.length; i++) {
@@ -37,16 +38,17 @@ export default async function main() {
     promises.push(
       (async () => {
         try {
-          const nonce = transactionCount + i
+          const nonce = txCounter
           console.log(`Migrating parcel with ID ${parcel.tokenId} at position ${i} with nonce ${nonce}`)
           const tx = await migrationFacet.migrateParcel(parcel.tokenId, parcel, { nonce, gasPrice })
           await tx.wait()
           console.log(`Migrated parcel with ID ${parcel.tokenId}\n`);
         } catch (e) {
-          console.log(e.message);
+          console.log(e);
         }
       })()
     );
+    txCounter++;
   }
 
   console.log("Settling")
