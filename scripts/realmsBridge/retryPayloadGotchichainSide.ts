@@ -4,9 +4,6 @@ import LZEndpointMockCompiled from "@layerzerolabs/solidity-examples/artifacts/c
 import { ethers } from "hardhat";
 import { ILayerZeroEndpoint, RealmsBridgeGotchichainSide } from "../../typechain-types";
 
-const lzChainIdPolygon = process.env.LZ_CHAIN_ID_POLYGON as string
-const realmsBridgeAddressMumbai = process.env.REALMS_BRIDGE_ADDRESS_POLYGON as string
-const realmsBridgeAddressGotchichain = process.env.REALMS_BRIDGE_ADDRESS_GOTCHICHAIN as string
 const lzEndpointAddressGotchichainSide = process.env.LZ_ENDPOINT_ADDRESS_GOTCHICHAIN as string
 
 const txParams = {
@@ -17,11 +14,15 @@ export default async function main() {
   const lzEndpoint = await ethers.getContractAt(LZEndpointMockCompiled.abi, lzEndpointAddressGotchichainSide)
   
   const failedTxReceipt = await ethers.provider.getTransactionReceipt("0x2e6d3bd6973a5c83f752b4375a85499bdbf15e36624daa908b1c2d0d261980c6")
-  const {srcChainId, srcAddress, payload} = lzEndpoint.interface.decodeEventLog("PayloadStored", failedTxReceipt.logs[1].data)
+  const decodedEvent = lzEndpoint.interface.decodeEventLog("PayloadStored", failedTxReceipt.logs[1].data)
 
+  console.log(decodedEvent)
+
+  console.log('\nHas stored payload?')
+  console.log(await lzEndpoint.hasStoredPayload(decodedEvent.srcChainId, decodedEvent.srcAddress))
 
   console.log('\nRetrying payload')
-  const tx = await lzEndpoint.retryPayload(srcChainId, srcAddress, payload)
+  const tx = await lzEndpoint.retryPayload(decodedEvent.srcChainId, decodedEvent.srcAddress, decodedEvent.payload, txParams)
   console.log(`Waiting for tx to be validated, tx hash: ${tx.hash}`)
   await tx.wait()
 

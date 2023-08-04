@@ -1,6 +1,7 @@
 /* global ethers hre */
 
 import { ethers } from "hardhat";
+import addAllowlist from "../addToAllowList";
 
 const lzEndpointAddressGotchichain = process.env.LZ_ENDPOINT_ADDRESS_GOTCHICHAIN as string
 const realmsDiamondAddressGotchichain = process.env.REALMS_DIAMOND_ADDRESS_GOTCHICHAIN as string
@@ -11,6 +12,8 @@ export default async function main() {
   const bridgeGotchichainSide = await BridgeGotchichainSide.deploy(minGasToStore, lzEndpointAddressGotchichain, realmsDiamondAddressGotchichain)
 
   console.log("RealmsBridgeGotchichainSide deployed to:", bridgeGotchichainSide.address);
+
+  await addAllowlist(bridgeGotchichainSide.address)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
