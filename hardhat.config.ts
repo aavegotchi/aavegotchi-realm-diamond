@@ -77,16 +77,16 @@ module.exports = {
       gasPrice: 100000000000,
       //   timeout: 90000
     },
+    supernet: {
+      url: "https://edge.testnet.gotchichain.com/",
+      accounts: [
+        process.env.SECRET
+      ],
+    },
     supernetLocal: {
       url: "http://localhost:10002",
       accounts: [
         "b14d3721c3d21d50fc2556f0c54f7b59ee06852efce54c691daf8b79d2fae39d",
-      ],
-    },
-    supernet: {
-      url: "https://edge.testnet.gotchichain.com",
-      accounts: [
-        process.env.SECRET,
       ],
     },
   },
