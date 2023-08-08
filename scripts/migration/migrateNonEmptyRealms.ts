@@ -36,11 +36,13 @@ export default async function main() {
     parcel.owner = realmsBrigeAddress
 
     const allGridsLength = parcel.buildGrid.length +
-      parcel.tileGrid.length +
-      parcel.startPositionBuildGrid.length +
-      parcel.startPositionTileGrid.length
+    parcel.tileGrid.length +
+    parcel.startPositionBuildGrid.length +
+    parcel.startPositionTileGrid.length
 
     console.log(`\nMigrating parcel with ID ${parcelId}`)
+    
+    if ((await gettersAndSettersFacet.getParcel(parcelId)).owner !== '0x0000000000000000000000000000000000000000') continue
 
     if (allGridsLength > 1500) {
       promises.push(

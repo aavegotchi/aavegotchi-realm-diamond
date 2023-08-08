@@ -17,6 +17,7 @@ export default async function main() {
 
   const signerAddress = await ethers.provider.getSigner().getAddress();
   const migrationFacet: MigrationFacet = await ethers.getContractAt("MigrationFacet", realmsDiamondAddressGotchichain)
+  const gettersAndSettersFacet: RealmGettersAndSettersFacet = await ethers.getContractAt("RealmGettersAndSettersFacet", realmsDiamondAddressGotchichain)
 
   let txCounter = (await ethers.provider.getTransactionCount(signerAddress, "latest"));
 
@@ -34,6 +35,8 @@ export default async function main() {
 
     let parcel = parcels[i];
     fillParcelData(parcel);
+
+    if ((await gettersAndSettersFacet.getParcel(parcel.tokenId)).owner !== '0x0000000000000000000000000000000000000000') continue
 
     promises.push(
       (async () => {
