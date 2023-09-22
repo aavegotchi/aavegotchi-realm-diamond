@@ -1,13 +1,14 @@
 import { ethers, run } from "hardhat";
-import { varsForNetwork } from "../../../constants";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
-import { VRFFacet__factory } from "../../../typechain-types";
+import { AlchemicaFacet, VRFFacet__factory } from "../../../typechain-types";
 
 export async function upgradeApi3Qrng(sponsor, sponsorWallet) {
+  const realmDiamond = "0xBcCf68d104aCEa36b1EA20BBE8f06ceD12CaC008";
+
   // TODO: Check before deploy
   const _api3AirnodeRrp = "0xa0AD79D995DdeeB18a14eAef56A549A04e3Aa1Bd";
   const _api3QrngConfig = {
@@ -20,13 +21,12 @@ export async function upgradeApi3Qrng(sponsor, sponsorWallet) {
     sponsorWallet,
   };
 
-  const c = await varsForNetwork(ethers);
-
   const realmFacets: FacetsAndAddSelectors[] = [
     {
       facetName: "VRFFacet",
       addSelectors: [
         "function api3FulfillRandomWords(bytes32 requestId, bytes calldata data) external",
+        "function testApi3FulfillRandomWords(bytes32 requestId, bytes calldata data) external",
         "function setApi3QrngConfig(tuple(uint256 numWords, address airnode, bytes32 endpointId, address sponsor, address sponsorWallet) calldata _api3QrngConfig, address _api3AirnodeRrp) external",
       ],
       removeSelectors: [
@@ -37,14 +37,12 @@ export async function upgradeApi3Qrng(sponsor, sponsorWallet) {
     },
     {
       facetName: "AlchemicaFacet",
-      addSelectors: [],
+      addSelectors: ["function testApi3Qrng() external"],
       removeSelectors: [],
     },
   ];
 
   const realmJoined = convertFacetAndSelectorsToString(realmFacets);
-
-  console.log("realm diamond:", c.realmDiamond);
 
   let iface = new ethers.utils.Interface(VRFFacet__factory.abi);
   const calldata = iface.encodeFunctionData("setApi3QrngConfig", [
@@ -53,19 +51,30 @@ export async function upgradeApi3Qrng(sponsor, sponsorWallet) {
   ]);
 
   const realmArgs: DeployUpgradeTaskArgs = {
-    diamondAddress: c.realmDiamond,
+    diamondAddress: realmDiamond,
     facetsAndAddSelectors: realmJoined,
-    useLedger: true,
+    useLedger: false,
     useMultisig: false,
     initCalldata: calldata,
-    initAddress: c.realmDiamond,
+    initAddress: realmDiamond,
   };
 
   await run("deployUpgrade", realmArgs);
+
+  // call testApiQrng()
+  const alchemicaFacet = (await ethers.getContractAt(
+    "AlchemicaFacet",
+    realmDiamond
+  )) as AlchemicaFacet;
+
+  await alchemicaFacet.testApi3Qrng();
 }
 
 if (require.main === module) {
-  upgradeApi3Qrng("", "")
+  upgradeApi3Qrng(
+    "0x8BC88974068e984ad9ea21a45C097Ec257edD842",
+    "0x7616C3d59322D0358792E984421B3400480552a5"
+  )
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

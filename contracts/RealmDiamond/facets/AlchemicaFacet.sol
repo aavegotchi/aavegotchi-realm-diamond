@@ -51,6 +51,18 @@ contract AlchemicaFacet is Modifiers {
     emit StartSurveying(_realmId, s.parcels[_realmId].currentRound);
   }
 
+//  function testApi3Qrng() external {
+//    bytes32 requestId = IAirnodeRrpV0(s.api3AirnodeRrp).makeFullRequest(
+//      s.api3QrngConfig.airnode,
+//      s.api3QrngConfig.endpointId,
+//      s.api3QrngConfig.sponsor,
+//      s.api3QrngConfig.sponsorWallet,
+//      address(this),
+//      bytes4(keccak256("testApi3FulfillRandomWords(bytes32,bytes)")),
+//      abi.encode(bytes32("1u"), bytes32("size"), s.api3QrngConfig.numWords)
+//    );
+//  }
+
   function drawRandomNumbers(uint256 _realmId, uint256 _surveyingRound) internal {
     bytes32 requestId = IAirnodeRrpV0(s.api3AirnodeRrp).makeFullRequest(
       s.api3QrngConfig.airnode,

@@ -20,6 +20,14 @@ contract VRFFacet is Modifiers {
     LibRealm.updateRemainingAlchemica(tokenId, randomWords, s.api3QrngRequestIdToSurveyingRound[requestId]);
   }
 
+//  event TestFulfillApi3(bytes32 _requestId, uint256[] _alchemicas);
+//
+//  function testApi3FulfillRandomWords(bytes32 requestId, bytes calldata data) external {
+//    require(LibMeta.msgSender() == s.api3AirnodeRrp, "Only API3 AirnodeRrp can fulfill");
+//    uint256[] memory randomWords = abi.decode(data, (uint256[]));
+//    emit TestFulfillApi3(requestId, randomWords);
+//  }
+
   function setApi3QrngConfig(Api3QrngConfig calldata _api3QrngConfig, address _api3AirnodeRrp) external onlyOwner {
     s.api3AirnodeRrp = _api3AirnodeRrp;
     s.api3QrngConfig = Api3QrngConfig(
