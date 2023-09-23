@@ -65,11 +65,7 @@ contract InstallationFacet is Modifiers {
   /// @param _tokenId The ID of the parent token
   /// @param _id     ID of the token
   /// @return value The balance of the token
-  function balanceOfToken(
-    address _tokenContract,
-    uint256 _tokenId,
-    uint256 _id
-  ) public view returns (uint256 value) {
+  function balanceOfToken(address _tokenContract, uint256 _tokenId, uint256 _id) public view returns (uint256 value) {
     value = s.nftInstallationBalances[_tokenContract][_tokenId][_id];
   }
 
@@ -91,11 +87,10 @@ contract InstallationFacet is Modifiers {
   /// @param _tokenContract Contract address for the token to query
   /// @param _tokenId Identifier of the token to query
   /// @return installationBalancesOfTokenWithTypes_ An array of structs containing details about each installation owned(including installation types)
-  function installationBalancesOfTokenWithTypes(address _tokenContract, uint256 _tokenId)
-    external
-    view
-    returns (ItemTypeIO[] memory installationBalancesOfTokenWithTypes_)
-  {
+  function installationBalancesOfTokenWithTypes(
+    address _tokenContract,
+    uint256 _tokenId
+  ) external view returns (ItemTypeIO[] memory installationBalancesOfTokenWithTypes_) {
     installationBalancesOfTokenWithTypes_ = LibERC998.itemBalancesOfTokenWithTypes(_tokenContract, _tokenId);
   }
 
@@ -360,7 +355,7 @@ contract InstallationFacet is Modifiers {
 
       uint40 blockLeft = queueItem.readyBlock - uint40(block.number);
       uint40 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
-      uint256 burnAmount = uint256(removeBlocks) * 10**18;
+      uint256 burnAmount = uint256(removeBlocks) * 10 ** 18;
       gltr.burnFrom(msg.sender, burnAmount);
       queueItem.readyBlock -= removeBlocks;
       emit CraftTimeReduced(queueId, removeBlocks);
@@ -373,11 +368,7 @@ contract InstallationFacet is Modifiers {
   /// @param _owner Owner of the installation to equip
   /// @param _realmId The identifier of the parcel to equip the installation to
   /// @param _installationId Identifier of the installation to equip
-  function equipInstallation(
-    address _owner,
-    uint256 _realmId,
-    uint256 _installationId
-  ) external onlyRealmDiamond {
+  function equipInstallation(address _owner, uint256 _realmId, uint256 _installationId) external onlyRealmDiamond {
     LibInstallation._equipInstallation(_owner, _realmId, _installationId);
   }
 
@@ -385,11 +376,7 @@ contract InstallationFacet is Modifiers {
   /// @dev Will throw if the caller is not the parcel diamond contract
   /// @param _realmId The identifier of the parcel to unequip the installation from
   /// @param _installationId Identifier of the installation to unequip
-  function unequipInstallation(
-    address _owner,
-    uint256 _realmId,
-    uint256 _installationId
-  ) external onlyRealmDiamond {
+  function unequipInstallation(address _owner, uint256 _realmId, uint256 _installationId) external onlyRealmDiamond {
     LibInstallation._unequipInstallation(_owner, _realmId, _installationId);
   }
 
