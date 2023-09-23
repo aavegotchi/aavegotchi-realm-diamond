@@ -380,6 +380,9 @@ contract InstallationFacet is Modifiers {
     LibInstallation._unequipInstallation(_owner, _realmId, _installationId);
   }
 
+  /// @notice Query if all installations are complete in a queue
+  /// @param _queueId The identifier of the queue to query
+  /// @return True if all installations in the queue are complete, false otherwise
   function upgradeComplete(uint256 _queueId) external view returns (bool) {
     return s.upgradeComplete[_queueId];
   }

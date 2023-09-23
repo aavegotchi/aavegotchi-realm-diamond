@@ -64,6 +64,8 @@ contract AlchemicaFacet is Modifiers {
     s.vrfRequestIdToSurveyingRound[requestId] = _surveyingRound;
   }
 
+  ///@notice Query the alchemica token addresses
+  ///@return output_ An array containing the alchemica token addresses
   function getAlchemicaAddresses() external view returns (address[4] memory) {
     return s.alchemicaAddresses;
   }
@@ -152,6 +154,8 @@ contract AlchemicaFacet is Modifiers {
     s.aavegotchiDiamond = _aavegotchiDiamond;
   }
 
+  ///@notice Allow the diamond owner to set the alchemica capacity of the great portal
+  ///@param _totalAlchemicas A nested array containing the total capped amount of alchemicas
   function setTotalAlchemicas(uint256[4][5] calldata _totalAlchemicas) external onlyOwner {
     for (uint256 i; i < _totalAlchemicas.length; i++) {
       for (uint256 j; j < _totalAlchemicas[i].length; j++) {
@@ -180,6 +184,9 @@ contract AlchemicaFacet is Modifiers {
     return TransferAmounts(owner, spill);
   }
 
+  ///@notice Query the amount of alchemica last claimed on a portal
+  ///@param _realmId Identifier of parcel to query
+  ///@return  The amount of alchemica last claimed on a portal
   function lastClaimedAlchemica(uint256 _realmId) external view returns (uint256) {
     return s.lastClaimedAlchemica[_realmId];
   }
@@ -200,6 +207,9 @@ contract AlchemicaFacet is Modifiers {
     LibAlchemica.claimAvailableAlchemica(_realmId, _gotchiId);
   }
 
+  ///@notice Query the harvest rates of a parcel
+  ///@param _realmId Identifier of parcel to query
+  ///@return harvestRates An array representing the harvest rates of a parcel
   function getHarvestRates(uint256 _realmId) external view returns (uint256[] memory harvestRates) {
     harvestRates = new uint256[](4);
     for (uint256 i; i < 4; i++) {
@@ -207,6 +217,9 @@ contract AlchemicaFacet is Modifiers {
     }
   }
 
+  ///@notice Query the total reservoir capacity of each respective alchemica reservoir on a parcel
+  ///@param _realmId Identifier of parcel to query
+  ///@return capacities An array representing the total reservoir capacity of each respective alchemica reservoir on a parcel
   function getCapacities(uint256 _realmId) external view returns (uint256[] memory capacities) {
     capacities = new uint256[](4);
     for (uint256 i; i < 4; i++) {
@@ -214,6 +227,9 @@ contract AlchemicaFacet is Modifiers {
     }
   }
 
+  ///@notice Query the total alchemica that has been claimed on a parcel
+  ///@param _realmId Identifier of parcel to query
+  ///@return totalClaimed An array representing the total alchemica that has been claimed on a parcel
   function getTotalClaimed(uint256 _realmId) external view returns (uint256[] memory totalClaimed) {
     totalClaimed = new uint256[](4);
     for (uint256 i; i < 4; i++) {
@@ -399,6 +415,10 @@ contract AlchemicaFacet is Modifiers {
     }
   }
 
+  /// @notice Allow an address to batch transfer tokens to multiple addresses
+  /// @param _tokens Nested Array of token addresses
+  /// @param _amounts Nested array of amounts to transfer.
+  /// @param _to Array of addresses to transfer to
   function batchTransferTokens(address[][] calldata _tokens, uint256[][] calldata _amounts, address[] calldata _to) external {
     require(_tokens.length == _amounts.length, "Array length mismatch");
     require(_to.length == _amounts.length, "Array length mismatch");

@@ -293,6 +293,13 @@ contract RealmFacet is Modifiers {
     emit EquipTile(_realmId, _tileId, _x1, _y1);
   }
 
+  /// @notice Allow a parcel owner to upgrade an existing installation
+  /// @param _realmId The identifier of the parcel which the installation is being upgraded on
+  /// @param _prevInstallationId The identifier of the installation being upgraded from
+  /// @param _nextInstallationId The identifier of the installation being upgraded to
+  /// @param _coordinateX The x(horizontal) coordinate of the installation
+  /// @param _coordinateY The y(vertical) coordinate of the installation
+
   function upgradeInstallation(
     uint256 _realmId,
     uint256 _prevInstallationId,
@@ -315,6 +322,7 @@ contract RealmFacet is Modifiers {
     s.parcels[_realmId].upgradeQueueLength--;
   }
 
+  ///@notice Admin function used to fix bugged grids
   function fixGrid(uint256 _realmId, uint256 _installationId, uint256[] memory _x, uint256[] memory _y, bool tile) external onlyOwner {
     require(_x.length == _y.length, "RealmFacet: _x and _y must be the same length");
     Parcel storage parcel = s.parcels[_realmId];
@@ -328,10 +336,14 @@ contract RealmFacet is Modifiers {
     }
   }
 
+  ///@notice Query if a game-wide building is paused
+  ///@return Whether or not building activity is paused
   function buildingFrozen() external view returns (bool) {
     return s.freezeBuilding;
   }
 
+  ///@notice Admin function to toggle building activity
+  ///@param _freezeBuilding Whether or not to freeze building activity
   function setFreezeBuilding(bool _freezeBuilding) external onlyOwner {
     s.freezeBuilding = _freezeBuilding;
   }

@@ -151,6 +151,7 @@ contract ERC721Facet is Modifiers {
     emit LibERC721.ApprovalForAll(sender, _operator, _approved);
   }
 
+  ///@notice Return Collection name
   function name() external pure returns (string memory) {
     return "Gotchiverse REALM Parcel";
   }
@@ -184,6 +185,11 @@ contract ERC721Facet is Modifiers {
     uint256 alphaBoost;
   }
 
+  ///@notice Perform a batch transfer of parcels with callbacks
+  ///@param _from The parcel owner
+  ///@param _to The parcel recipient
+  ///@param _tokenIds The parcelIds to transfer
+  ///@param _data Arbitrary data to exexute on the recipient's end
   function safeBatchTransfer(address _from, address _to, uint256[] calldata _tokenIds, bytes calldata _data) external {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
       safeTransferFrom(_from, _to, _tokenIds[index], _data);

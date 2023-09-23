@@ -163,6 +163,7 @@ contract InstallationAdminFacet is Modifiers {
     uint256 _newAltarId;
   }
 
+  ///@notice Used if a parcel has an altar that must be replaced.
   function fixMissingAltars(MissingAltars[] memory _altars) external onlyOwner {
     for (uint256 i = 0; i < _altars.length; i++) {
       MissingAltars memory altar = _altars[i];
@@ -232,6 +233,9 @@ contract InstallationAdminFacet is Modifiers {
     return s.upgradeHashes[keccak256(abi.encodePacked(_parcelId, _x, _y, _installationId))];
   }
 
+  ///@notice Allow the owner to enable/disable a game manager
+  ///@param _newGameManager The address of the game manager
+  ///@param _active Whether or not the game manager should be activated/deactivated
   function toggleGameManager(address _newGameManager, bool _active) external onlyOwner {
     s.gameManager[_newGameManager] = _active;
   }

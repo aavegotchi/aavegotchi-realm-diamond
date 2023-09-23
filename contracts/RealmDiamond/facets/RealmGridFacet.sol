@@ -15,6 +15,10 @@ import "./ERC721Facet.sol";
 import "../../interfaces/IERC1155Marketplace.sol";
 
 contract RealmGridFacet is Modifiers {
+  ///@notice Query the 8x8 matrix of a humble parcel
+  ///@param _parcelId The parcelId of the humble parcel
+  ///@param _gridType The type of grid to query
+  ///@return output_ The 8x8 matrix of the humble parcel
   function getHumbleGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[8][8] memory output_) {
     require(s.parcels[_parcelId].size == 0, "RealmFacet: Not humble");
     for (uint256 i; i < 8; i++) {
@@ -27,6 +31,11 @@ contract RealmGridFacet is Modifiers {
       }
     }
   }
+
+  ///@notice Query the 16x16 matrix of a reasonable parcel
+  ///@param _parcelId The parcelId of the reasonable parcel
+  ///@param _gridType The type of grid to query
+  ///@return output_ The 16x16 matrix of the reasonable parcel
 
   function getReasonableGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[16][16] memory output_) {
     require(s.parcels[_parcelId].size == 1, "RealmFacet: Not reasonable");
@@ -41,6 +50,10 @@ contract RealmGridFacet is Modifiers {
     }
   }
 
+  ///@notice Query the 32x64 matrix of a spacious vertical parcel
+  ///@param _parcelId The parcelId of the spacious vertical parcel
+  ///@param _gridType The type of grid to query
+  ///@return output_ The 32x64 matrix of the spacious vertical parcel
   function getSpaciousVerticalGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[32][64] memory output_) {
     require(s.parcels[_parcelId].size == 2, "RealmFacet: Not spacious vertical");
     for (uint256 i; i < 64; i++) {
@@ -53,6 +66,11 @@ contract RealmGridFacet is Modifiers {
       }
     }
   }
+
+  ///@notice Query the 64x32 matrix of a spacious horizontal parcel
+  ///@param _parcelId The parcelId of the spacious horizontal parcel
+  ///@param _gridType The type of grid to query
+  ///@return output_ The 64x32 matrix of the spacious horizontal parcel
 
   function getSpaciousHorizontalGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[64][32] memory output_) {
     require(s.parcels[_parcelId].size == 3, "RealmFacet: Not spacious horizontal");
@@ -67,6 +85,10 @@ contract RealmGridFacet is Modifiers {
     }
   }
 
+  ///@notice Query the 64x64 matrix of a paartner parcel
+  ///@param _parcelId The parcelId of the paartner parcel
+  ///@param _gridType The type of grid to query
+  ///@return output_ The 64x64 matrix of the paartner parcel
   function getPaartnerGrid(uint256 _parcelId, uint256 _gridType) external view returns (uint256[64][64] memory output_) {
     require(s.parcels[_parcelId].size == 4, "RealmFacet: Not paartner");
     for (uint256 i; i < 64; i++) {
@@ -84,6 +106,10 @@ contract RealmGridFacet is Modifiers {
     uint256[64][64] coords;
   }
 
+  ///@notice Batch query the parcel coordinates of a list of parcels
+  ///@param _parcelIds The parcelIds of the parcels to query
+  ///@param _gridType The type of grid to query
+  ///@return The parcel coordinates of the parcels
   function batchGetGrid(uint256[] calldata _parcelIds, uint256 _gridType) external view returns (ParcelCoordinates[] memory) {
     ParcelCoordinates[] memory parcels = new ParcelCoordinates[](_parcelIds.length);
     for (uint256 k; k < _parcelIds.length; k++) {
@@ -118,6 +144,14 @@ contract RealmGridFacet is Modifiers {
       }
     }
   }
+
+  ///@notice Query whether or not a grid position is a suitable start position for an item
+  ///@param _parcelId The parcelId of the parcel to query
+  ///@param _x The x coordinate of the grid position
+  ///@param _y The y coordinate of the grid position
+  ///@param _isTile Whether or not item to be installed is a tile
+  ///@param _id The id of the item to be installed
+  ///@return Whether or not the grid position is a suitable start position for an item
 
   function isGridStartPosition(uint256 _parcelId, uint256 _x, uint256 _y, bool _isTile, uint256 _id) external view returns (bool) {
     if (_isTile) {
