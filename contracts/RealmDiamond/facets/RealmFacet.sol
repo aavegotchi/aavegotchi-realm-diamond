@@ -35,11 +35,7 @@ contract RealmFacet is Modifiers {
   /// @param _to The address to mint the parcels to
   /// @param _tokenIds The identifiers of tokens to mint
   /// @param _metadata An array of structs containing the metadata of each parcel being minted
-  function mintParcels(
-    address[] calldata _to,
-    uint256[] calldata _tokenIds,
-    MintParcelInput[] memory _metadata
-  ) external onlyOwner {
+  function mintParcels(address[] calldata _to, uint256[] calldata _tokenIds, MintParcelInput[] memory _metadata) external onlyOwner {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
       require(s.tokenIds.length < LibRealm.MAX_SUPPLY, "RealmFacet: Cannot mint more than 420,069 parcels");
       uint256 tokenId = _tokenIds[index];
@@ -69,12 +65,7 @@ contract RealmFacet is Modifiers {
     uint256[] y;
   }
 
-  function batchEquip(
-    uint256 _realmId,
-    uint256 _gotchiId,
-    BatchEquipIO memory _params,
-    bytes[] memory _signatures
-  ) external gameActive canBuild {
+  function batchEquip(uint256 _realmId, uint256 _gotchiId, BatchEquipIO memory _params, bytes[] memory _signatures) external gameActive canBuild {
     require(_params.ids.length == _params.x.length, "RealmFacet: Wrong length");
     require(_params.x.length == _params.y.length, "RealmFacet: Wrong length");
 
@@ -324,13 +315,7 @@ contract RealmFacet is Modifiers {
     s.parcels[_realmId].upgradeQueueLength--;
   }
 
-  function fixGrid(
-    uint256 _realmId,
-    uint256 _installationId,
-    uint256[] memory _x,
-    uint256[] memory _y,
-    bool tile
-  ) external onlyOwner {
+  function fixGrid(uint256 _realmId, uint256 _installationId, uint256[] memory _x, uint256[] memory _y, bool tile) external onlyOwner {
     require(_x.length == _y.length, "RealmFacet: _x and _y must be the same length");
     Parcel storage parcel = s.parcels[_realmId];
     for (uint256 i; i < _x.length; i++) {
