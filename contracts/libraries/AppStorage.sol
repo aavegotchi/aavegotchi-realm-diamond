@@ -123,6 +123,8 @@ struct AppStorage {
   Api3QrngConfig api3QrngConfig;
   mapping(bytes32 => uint256) api3QrngRequestIdToTokenId;
   mapping(bytes32 => uint256) api3QrngRequestIdToSurveyingRound;
+//  uint256[][] testRandomWordsChainLink;
+//  uint256[][] testRandomWordsApi3;
 }
 
 library LibAppStorage {

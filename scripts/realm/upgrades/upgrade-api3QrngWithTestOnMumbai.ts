@@ -37,7 +37,7 @@ export async function upgradeApi3Qrng(sponsor, sponsorWallet) {
     },
     {
       facetName: "AlchemicaFacet",
-      addSelectors: ["function testApi3Qrng() external"],
+      addSelectors: [],
       removeSelectors: [],
     },
   ];
