@@ -4,7 +4,10 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
-import { AlchemicaFacet, VRFFacet__factory } from "../../../typechain-types";
+import { AlchemicaFacet, VRFFacet, VRFFacet__factory } from "../../../typechain-types";
+import { BigNumber } from "ethers";
+
+const fs = require("fs").promises;
 
 export async function upgradeApi3Qrng(sponsor, sponsorWallet) {
   const realmDiamond = "0xBcCf68d104aCEa36b1EA20BBE8f06ceD12CaC008";
@@ -66,8 +69,20 @@ export async function upgradeApi3Qrng(sponsor, sponsorWallet) {
     "AlchemicaFacet",
     realmDiamond
   )) as AlchemicaFacet;
+  const vrfFacet = (await ethers.getContractAt(
+    "VRFFacet",
+    realmDiamond
+  )) as VRFFacet;
 
-  await alchemicaFacet.testApi3Qrng();
+  for(let i = 0; i < 10; i++) {
+    // await alchemicaFacet.testApi3Qrng();
+    // await alchemicaFacet.testChainlink();
+  }
+  const testRnd = await vrfFacet.getTestRandomWords();
+  await fs.writeFile("./testRndWords-Chainlink.json", JSON.stringify(testRnd[0]), "utf8");
+  await fs.writeFile("./testRndWords-API3.json", JSON.stringify(testRnd[1]), "utf8");
+  // console.log(testRnd)
+  console.log(testRnd[0].length, testRnd[1].length)
 }
 
 if (require.main === module) {
