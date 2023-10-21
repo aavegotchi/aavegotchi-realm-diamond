@@ -1,9 +1,9 @@
 import { BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
 import { gasPrice, varsForNetwork } from "../../../../constants";
-import { ERC20 } from "../../../../typechain";
 import { leaderboard } from "../data/r2";
-import { szn2payouts } from "../competitions";
+import { szn3payouts } from "../competitions";
+import { ERC20 } from "../../../../typechain-types";
 
 async function main() {
   //change to deployer wallet
@@ -46,14 +46,14 @@ async function main() {
       (a, b) =>
         Number(b.fudStandardSpentModified) - Number(a.fudStandardSpentModified)
     )
-    .slice(0, 50);
+    .slice(0, 100);
   if (winners.length == 0) {
     return;
   }
 
   let allTokens = winners.map((e) => [vars.ghst]);
   let allAmounts = winners.map((e, index) => [
-    ethers.utils.parseUnits(szn2payouts[index].toString(), 18).toString(),
+    ethers.utils.parseUnits(szn3payouts[index].toString(), 18).toString(),
   ]);
   let allAddresses = winners.map((e) => e.address);
 
@@ -78,7 +78,7 @@ async function main() {
 
   console.log("total payout:", ethers.utils.formatEther(totalPayout));
   //Payout should be 20,000 GHST per round
-  if (ethers.utils.formatEther(totalPayout) !== "20000.0") {
+  if (ethers.utils.formatEther(totalPayout) !== "30000.0") {
     throw new Error("Incorrect payout!");
   }
 
