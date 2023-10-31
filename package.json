@@ -57,5 +57,10 @@
     "@ledgerhq/hw-app-eth@6.34.0": {
       "@ledgerhq/hw-app-eth": "6.24.0"
     }
-  }
+  },
+  "name": "aavegotchi-realm-diamond",
+  "description": "Realm Diamond contracts for Aavegotchi",
+  "version": "1.0.0",
+  "author": "Pixelcraft Studios",
+  "license": "UNLICENSED"
 }
