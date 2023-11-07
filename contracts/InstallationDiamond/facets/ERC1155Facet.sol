@@ -5,6 +5,7 @@ import "../../libraries/AppStorageInstallation.sol";
 import "../../libraries/LibDiamond.sol";
 import "../../libraries/LibStrings.sol";
 import "../../libraries/LibMeta.sol";
+import "../../libraries/LibERC721.sol";
 import "../../libraries/LibERC1155.sol";
 import "../../interfaces/IERC1155Marketplace.sol";
 
@@ -86,7 +87,7 @@ contract ERC1155Facet is Modifiers {
     address sender = LibMeta.msgSender();
     require(sender != _operator, "ERC1155Facet: setting approval status for self");
     s.operators[sender][_operator] = _approved;
-    emit LibERC1155.ApprovalForAll(sender, _operator, _approved);
+    emit LibERC721.ApprovalForAll(sender, _operator, _approved);
   }
 
   /// @notice Get the URI for a voucher type

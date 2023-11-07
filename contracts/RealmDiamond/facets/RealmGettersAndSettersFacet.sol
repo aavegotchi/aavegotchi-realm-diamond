@@ -5,12 +5,12 @@ import "../../libraries/AppStorage.sol";
 
 import "../../libraries/LibRealm.sol";
 import "../../libraries/LibAlchemica.sol";
+import "../../libraries/LibERC721.sol";
 
 import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamondInterface.sol";
 import "./ERC721Facet.sol";
 
 contract RealmGettersAndSettersFacet is Modifiers {
-  event ParcelAccessRightSet(uint256 _realmId, uint256 _actionRight, uint256 _accessRight);
   event ParcelWhitelistSet(uint256 _realmId, uint256 _actionRight, uint256 _whitelistId);
   event ResyncParcel(uint256 _realmId);
   event SetAltarId(uint256 _realmId, uint256 _altarId);
@@ -31,7 +31,7 @@ contract RealmGettersAndSettersFacet is Modifiers {
       require(LibMeta.msgSender() == s.parcels[_realmIds[i]].owner, "RealmGettersAndSettersFacet: Only Parcel owner can call");
       require(LibRealm.isAccessRightValid(_actionRights[i], _accessRights[i]), "RealmGettersAndSettersFacet: Invalid access rights");
       s.accessRights[_realmIds[i]][_actionRights[i]] = _accessRights[i];
-      emit ParcelAccessRightSet(_realmIds[i], _actionRights[i], _accessRights[i]);
+      emit LibERC721.ParcelAccessRightSet(_realmIds[i], _actionRights[i], _accessRights[i]);
     }
   }
 
@@ -58,7 +58,7 @@ contract RealmGettersAndSettersFacet is Modifiers {
         emit ParcelWhitelistSet(_realmIds[i], _actionRights[i], _whitelistIds[i]);
       }
 
-      emit ParcelAccessRightSet(_realmIds[i], _actionRights[i], _accessRights[i]);
+      emit LibERC721.ParcelAccessRightSet(_realmIds[i], _actionRights[i], _accessRights[i]);
     }
   }
 

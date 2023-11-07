@@ -5,6 +5,8 @@ import "../../libraries/AppStorageTile.sol";
 import "../../libraries/LibDiamond.sol";
 import "../../libraries/LibStrings.sol";
 import "../../libraries/LibMeta.sol";
+import "../../libraries/LibERC721.sol";
+import "../../libraries/LibERC1155.sol";
 import "../../libraries/LibERC1155Tile.sol";
 import "../../interfaces/IERC1155Marketplace.sol";
 
@@ -40,7 +42,7 @@ contract ERC1155TileFacet is Modifiers {
     LibERC1155Tile.removeFromOwner(_from, _id, _value);
     LibERC1155Tile.addToOwner(_to, _id, _value);
     IERC1155Marketplace(s.aavegotchiDiamond).updateERC1155Listing(address(this), _id, _from);
-    emit LibERC1155Tile.TransferSingle(sender, _from, _to, _id, _value);
+    emit LibERC1155.TransferSingle(sender, _from, _to, _id, _value);
     LibERC1155Tile.onERC1155Received(sender, _from, _to, _id, _value, _data);
   }
 
@@ -78,7 +80,7 @@ contract ERC1155TileFacet is Modifiers {
       LibERC1155Tile.addToOwner(_to, id, value);
       IERC1155Marketplace(s.aavegotchiDiamond).updateERC1155Listing(address(this), id, _from);
     }
-    emit LibERC1155Tile.TransferBatch(sender, _from, _to, _ids, _values);
+    emit LibERC1155.TransferBatch(sender, _from, _to, _ids, _values);
     LibERC1155Tile.onERC1155BatchReceived(sender, _from, _to, _ids, _values, _data);
   }
 
@@ -86,7 +88,7 @@ contract ERC1155TileFacet is Modifiers {
     address sender = LibMeta.msgSender();
     require(sender != _operator, "ERC1155Facet: setting approval status for self");
     s.operators[sender][_operator] = _approved;
-    emit LibERC1155Tile.ApprovalForAll(sender, _operator, _approved);
+    emit LibERC721.ApprovalForAll(sender, _operator, _approved);
   }
 
   /// @notice Get the URI for a voucher type
@@ -102,7 +104,7 @@ contract ERC1155TileFacet is Modifiers {
     s.baseUri = _value;
     uint256 _tileTypesLength = s.tileTypes.length;
     for (uint256 i; i < _tileTypesLength; i++) {
-      emit LibERC1155Tile.URI(LibStrings.strWithUint(_value, i), i);
+      emit LibERC1155.URI(LibStrings.strWithUint(_value, i), i);
     }
   }
 
