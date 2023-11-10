@@ -3,7 +3,7 @@ pragma solidity 0.8.9;
 
 import {LibAppStorageTile, TileAppStorage} from "./AppStorageTile.sol";
 import {IERC1155TokenReceiver} from "../interfaces/IERC1155TokenReceiver.sol";
-import "./LibERC1155.sol";
+import "./LibEvents.sol";
 
 library LibERC1155Tile {
   bytes4 internal constant ERC1155_ACCEPTED = 0xf23a6e61; // Return value from `onERC1155Received` call if a contract accepts receipt (i.e `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))`).
@@ -31,7 +31,7 @@ library LibERC1155Tile {
     if (_amount == 1) emit MintTile(_to, _tileId, _queueId);
     else emit MintTiles(_to, _tileId, _amount);
 
-    emit LibERC1155.TransferSingle(address(this), address(0), _to, _tileId, _amount);
+    emit LibEvents.TransferSingle(address(this), address(0), _to, _tileId, _amount);
   }
 
   function addToOwner(
@@ -76,7 +76,7 @@ library LibERC1155Tile {
     uint256 _amount
   ) internal {
     removeFromOwner(_from, _tileType, _amount);
-    emit LibERC1155.TransferSingle(address(this), _from, address(0), _tileType, _amount);
+    emit LibEvents.TransferSingle(address(this), _from, address(0), _tileType, _amount);
   }
 
   function onERC1155Received(
