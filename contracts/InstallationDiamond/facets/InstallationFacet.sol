@@ -16,8 +16,6 @@ contract InstallationFacet is Modifiers {
 
   event CraftTimeReduced(uint256 indexed _queueId, uint256 _blocksReduced);
 
-  event UpgradeTimeReduced(uint256 indexed _queueId, uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _blocksReduced);
-
   /***********************************|
    |             Read Functions         |
    |__________________________________*/

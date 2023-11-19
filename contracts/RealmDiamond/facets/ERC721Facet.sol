@@ -6,6 +6,7 @@ import "../../libraries/LibDiamond.sol";
 import "../../libraries/LibStrings.sol";
 import "../../libraries/LibMeta.sol";
 import "../../libraries/LibERC721.sol";
+import "../../libraries/LibEvents.sol";
 import {IERC721} from "../../interfaces/IERC721.sol";
 import {ERC721Marketplace} from "../../interfaces/ERC721Marketplace.sol";
 
@@ -161,7 +162,7 @@ contract ERC721Facet is Modifiers {
   function setApprovalForAll(address _operator, bool _approved) external {
     address sender = LibMeta.msgSender();
     s.operators[sender][_operator] = _approved;
-    emit LibERC721.ApprovalForAll(sender, _operator, _approved);
+    emit LibEvents.ApprovalForAll(sender, _operator, _approved);
   }
 
   function name() external pure returns (string memory) {

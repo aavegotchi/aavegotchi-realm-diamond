@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-import {LibAppStorageInstallation, InstallationType, QueueItem, UpgradeQueue, Modifiers} from "../../libraries/AppStorageInstallation.sol";
-import {LibSignature} from "../../libraries/LibSignature.sol";
-import {RealmDiamond} from "../../interfaces/RealmDiamond.sol";
-import {IERC721} from "../../interfaces/IERC721.sol";
-import {IERC20} from "../../interfaces/IERC20.sol";
-import {LibItems} from "../../libraries/LibItems.sol";
-import {InstallationAdminFacet} from "./InstallationAdminFacet.sol";
-import {LibInstallation} from "../../libraries/LibInstallation.sol";
-import {LibERC1155} from "../../libraries/LibERC1155.sol";
+import {LibAppStorageInstallation, InstallationType, QueueItem, UpgradeQueue, Modifiers} from "../libraries/AppStorageInstallation.sol";
+import {LibSignature} from "../libraries/LibSignature.sol";
+import {RealmDiamond} from "../interfaces/RealmDiamond.sol";
+import {IERC721} from "../interfaces/IERC721.sol";
+import {IERC20} from "../interfaces/IERC20.sol";
+import {LibItems} from "../libraries/LibItems.sol";
+import {InstallationAdminFacet} from "../InstallationDiamond/facets/InstallationAdminFacet.sol";
+import {LibInstallation} from "../libraries/LibInstallation.sol";
+import {LibERC1155} from "../libraries/LibERC1155.sol";
 
 contract TestInstallationFacet is Modifiers {
   event UpgradeInitiated(

@@ -4,7 +4,7 @@ const fs = require("fs");
 
 const basePath = "/contracts/RealmDiamond/facets/";
 const libraryBasePath = "/contracts/libraries/";
-const sharedLibraryBasePath = "/contracts/libraries/";
+// const sharedLibraryBasePath = "/contracts/libraries/";
 
 task(
   "diamondABI_realm",
@@ -37,23 +37,23 @@ task(
     json = JSON.parse(json);
     abi.push(...json.abi);
   }
-  files = fs.readdirSync("." + sharedLibraryBasePath);
-  for (const file of files) {
-    let jsonFile = file.replace("sol", "json");
-    if (
-      [
-        "AppStorage.json",
-        "AppStorageInstallation.json",
-        "AppStorageTile.json",
-      ].includes(jsonFile)
-    )
-      jsonFile = "Modifiers.json";
-    let json = fs.readFileSync(
-      `./artifacts${sharedLibraryBasePath}${file}/${jsonFile}`
-    );
-    json = JSON.parse(json);
-    abi.push(...json.abi);
-  }
+  // files = fs.readdirSync("." + sharedLibraryBasePath);
+  // for (const file of files) {
+  //   let jsonFile = file.replace("sol", "json");
+  //   if (
+  //     [
+  //       "AppStorage.json",
+  //       "AppStorageInstallation.json",
+  //       "AppStorageTile.json",
+  //     ].includes(jsonFile)
+  //   )
+  //     jsonFile = "Modifiers.json";
+  //   let json = fs.readFileSync(
+  //     `./artifacts${sharedLibraryBasePath}${file}/${jsonFile}`
+  //   );
+  //   json = JSON.parse(json);
+  //   abi.push(...json.abi);
+  // }
   abi = JSON.stringify(abi);
   fs.writeFileSync("./diamondABI/diamond_realm.json", abi);
   console.log("ABI written to diamondABI/diamond_realm.json");
