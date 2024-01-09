@@ -69,7 +69,7 @@ task("fixParcelStartPosition", "batch transfers alchemica to address")
         }}`;
       }
 
-      const signer = new LedgerSigner(hre.ethers.provider, "m/44'/60'/2'/0/0");
+      const signer = new LedgerSigner(hre.ethers.provider, "m/44'/60'/1'/0/0");
 
       const c = await varsForNetwork(hre.ethers);
 
