@@ -1,10 +1,8 @@
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { ethers, network } from "hardhat";
-import { alchemica, gasPrice, varsForNetwork } from "../../../constants";
-import { AlchemicaFacet, VRFFacet } from "../../../typechain";
+import { gasPrice, varsForNetwork } from "../../../constants";
+import { AlchemicaFacet } from "../../../typechain-types/contracts/RealmDiamond/facets/AlchemicaFacet";
 import { diamondOwner, impersonate } from "../../helperFunctions";
-import { genClaimAlchemicaSignature } from "../realmHelpers";
-import { upgradeRemaining } from "../upgrades/upgrade-remainingAlchemica";
 
 export async function incrementRound() {
   const c = await varsForNetwork(ethers);
@@ -15,7 +13,7 @@ export async function incrementRound() {
   let alchemicaFacet = (await ethers.getContractAt(
     "AlchemicaFacet",
     c.realmDiamond,
-    new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0")
+    new LedgerSigner(ethers.provider, "m/44'/60'/1'/0/0")
   )) as AlchemicaFacet;
 
   if (network.name === "hardhat") {

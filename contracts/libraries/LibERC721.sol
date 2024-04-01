@@ -19,10 +19,6 @@ library LibERC721 {
   ///  address for that NFT (if any) is reset to none.
   event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
 
-  /// @dev This emits when an operator is enabled or disabled for an owner.
-  ///  The operator can manage all NFTs of the owner.
-  event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
-
   bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
 
   event MintParcel(address indexed _owner, uint256 indexed _tokenId);

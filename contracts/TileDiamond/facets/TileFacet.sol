@@ -9,7 +9,7 @@ import {LibERC998Tile, ItemTypeIO} from "../../libraries/LibERC998Tile.sol";
 import {LibAppStorageTile, TileType, TileTypeIO, QueueItem, Modifiers} from "../../libraries/AppStorageTile.sol";
 import {LibStrings} from "../../libraries/LibStrings.sol";
 import {LibMeta} from "../../libraries/LibMeta.sol";
-import {LibERC1155Tile} from "../../libraries/LibERC1155Tile.sol";
+import {LibEvents} from "../../libraries/LibEvents.sol";
 import {LibERC20} from "../../libraries/LibERC20.sol";
 import {LibTile} from "../../libraries/LibTile.sol";
 import {LibItems} from "../../libraries/LibItems.sol";
@@ -412,7 +412,7 @@ contract TileFacet is Modifiers {
         )
       );
       string memory uri = "https://app.aavegotchi.com/metadata/tile/";
-      emit LibERC1155Tile.URI(LibStrings.strWithUint(uri, i), i);
+      emit LibEvents.URI(LibStrings.strWithUint(uri, i), i);
       if(_tileTypes[i].deprecateTime > 0){
         s.deprecateTime[s.tileTypes.length - 1] = _tileTypes[i].deprecateTime;
         emit EditDeprecateTime(s.tileTypes.length - 1, _tileTypes[i].deprecateTime);

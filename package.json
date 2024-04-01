@@ -52,5 +52,15 @@
     "prettier-plugin-solidity": "^1.0.0-beta.17",
     "solidity-coverage": "^0.8.2",
     "truffle-assertions": "^0.9.2"
-  }
+  },
+  "overrides": {
+    "@ledgerhq/hw-app-eth@6.34.0": {
+      "@ledgerhq/hw-app-eth": "6.24.0"
+    }
+  },
+  "name": "aavegotchi-realm-diamond",
+  "description": "Realm Diamond contracts for Aavegotchi",
+  "version": "1.0.0",
+  "author": "Pixelcraft Studios",
+  "license": "UNLICENSED"
 }
