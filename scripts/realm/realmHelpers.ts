@@ -11,6 +11,7 @@ import {
 } from "../../types";
 
 import { impersonate } from "../installation/helperFunctions";
+import { gasPrice } from "../../constants";
 
 export function outputInstallation(
   installation: InstallationTypeInput
@@ -94,13 +95,21 @@ export function outputTiles(tiles: TileTypeInput[]): TileTypeOutput[] {
 
 export async function deployAlchemica(ethers: any, diamondAddress: string) {
   const Fud = await ethers.getContractFactory("AlchemicaToken");
-  let fud = (await Fud.deploy()) as AlchemicaToken;
+  let fud = (await Fud.deploy({
+    gasPrice: gasPrice,
+  })) as AlchemicaToken;
   const Fomo = await ethers.getContractFactory("AlchemicaToken");
-  let fomo = (await Fomo.deploy()) as AlchemicaToken;
+  let fomo = (await Fomo.deploy({
+    gasPrice: gasPrice,
+  })) as AlchemicaToken;
   const Alpha = await ethers.getContractFactory("AlchemicaToken");
-  let alpha = (await Alpha.deploy()) as AlchemicaToken;
+  let alpha = (await Alpha.deploy({
+    gasPrice: gasPrice,
+  })) as AlchemicaToken;
   const Kek = await ethers.getContractFactory("AlchemicaToken");
-  let kek = (await Kek.deploy()) as AlchemicaToken;
+  let kek = (await Kek.deploy({
+    gasPrice: gasPrice,
+  })) as AlchemicaToken;
   await fud.initialize(
     "FUD",
     "FUD",
