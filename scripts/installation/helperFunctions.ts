@@ -3,8 +3,6 @@ import { HardhatEthersHelpers } from "hardhat/types";
 import { varsForNetwork } from "../../constants";
 import { DiamondLoupeFacet } from "../../typechain";
 
-export const gasPrice = 180000000000;
-
 export async function impersonate(
   address: string,
   contract: any,

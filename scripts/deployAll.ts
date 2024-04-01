@@ -12,7 +12,7 @@ import {
   RealmGettersAndSettersFacet,
   VRFFacet,
 } from "../typechain";
-import { gasPrice } from "./helperFunctions";
+import { gasPrice } from "../constants";
 import {
   deployAlchemica,
   outputInstallation,
