@@ -11,6 +11,7 @@ import {
 } from "../../types";
 
 import { impersonate } from "../installation/helperFunctions";
+import { gasPrice } from "../../constants";
 
 export function outputInstallation(
   installation: InstallationTypeInput
@@ -29,7 +30,7 @@ export function outputInstallation(
   //Altar spilloverRate is parsed in 2 units, reservoirs are parsed in 4
   const isAltar = installation.id <= 18 ? true : false;
 
-  console.log("spill rate:", installation.spillRate.toString());
+  // console.log("spill rate:", installation.spillRate.toString());
 
   let output: InstallationTypeOutput = {
     deprecated: installation.deprecated,
@@ -80,7 +81,7 @@ export function outputTile(tile: TileTypeInput): TileTypeOutput {
     ],
     craftTime: tile.craftTime,
     name: tile.name,
-    deprecateTime: tile.deprecateTime,
+    deprecateTime: tile.deprecateTime ? tile.deprecateTime : 0,
   };
 
   return output;
@@ -90,6 +91,68 @@ export function outputTiles(tiles: TileTypeInput[]): TileTypeOutput[] {
   let output: TileTypeOutput[] = [];
   output = tiles.map(outputTile);
   return output;
+}
+
+export async function deployAlchemica(ethers: any, diamondAddress: string) {
+  const Fud = await ethers.getContractFactory("AlchemicaToken");
+  let fud = (await Fud.deploy({
+    gasPrice: gasPrice,
+  })) as AlchemicaToken;
+  const Fomo = await ethers.getContractFactory("AlchemicaToken");
+  let fomo = (await Fomo.deploy({
+    gasPrice: gasPrice,
+  })) as AlchemicaToken;
+  const Alpha = await ethers.getContractFactory("AlchemicaToken");
+  let alpha = (await Alpha.deploy({
+    gasPrice: gasPrice,
+  })) as AlchemicaToken;
+  const Kek = await ethers.getContractFactory("AlchemicaToken");
+  let kek = (await Kek.deploy({
+    gasPrice: gasPrice,
+  })) as AlchemicaToken;
+  await fud.initialize(
+    "FUD",
+    "FUD",
+    ethers.utils.parseUnits("1000000000000"),
+    diamondAddress,
+    diamondAddress,
+    diamondAddress
+  );
+  await fomo.initialize(
+    "FOMO",
+    "FOMO",
+    ethers.utils.parseUnits("250000000000"),
+    diamondAddress,
+    diamondAddress,
+    diamondAddress
+  );
+  await alpha.initialize(
+    "ALPHA",
+    "ALPHA",
+    ethers.utils.parseUnits("125000000000"),
+    diamondAddress,
+    diamondAddress,
+    diamondAddress
+  );
+  await kek.initialize(
+    "KEK",
+    "KEK",
+    ethers.utils.parseUnits("100000000000"),
+    diamondAddress,
+    diamondAddress,
+    diamondAddress
+  );
+
+  const Glmr = await ethers.getContractFactory("GLTR");
+  let gltr = (await Glmr.deploy()) as GLTR;
+
+  return {
+    fud,
+    fomo,
+    alpha,
+    kek,
+    gltr,
+  };
 }
 
 const backendSigner = () => {

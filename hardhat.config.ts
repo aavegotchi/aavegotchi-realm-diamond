@@ -61,10 +61,9 @@ module.exports = {
       maxPriorityFeePerGas: 1 * GWEI,
       //   timeout: 90000
     },
-    mumbai: {
-      url: process.env.MUMBAI_MORALIS,
+    amoy: {
+      url: process.env.AMOY_URL,
       accounts: [process.env.SECRET],
-      blockGasLimit: 20000000,
       // gasPrice: 1000000000,
     },
     kovan: {

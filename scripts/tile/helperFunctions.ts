@@ -1,8 +1,6 @@
 import { Contract } from "@ethersproject/contracts";
 import { DiamondLoupeFacet } from "../../typechain";
 
-export const gasPrice = 900000000000;
-
 export async function impersonate(
   address: string,
   contract: any,
