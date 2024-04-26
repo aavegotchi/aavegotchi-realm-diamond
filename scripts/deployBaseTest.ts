@@ -2,10 +2,10 @@ import { ethers } from "hardhat";
 import { gasPrice } from "../constants";
 
 async function main() {
-  const Test = await ethers.getContractFactory("Test");
-  let test = (await Test.deploy({
-    gasPrice: gasPrice
-  }))
+  const Test = await ethers.getContractFactory("BatchTransferTokens");
+  let test = await Test.deploy({
+    gasPrice: gasPrice,
+  });
   console.log("Test:", test.address);
 }
 
