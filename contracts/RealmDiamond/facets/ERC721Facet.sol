@@ -78,12 +78,7 @@ contract ERC721Facet is Modifiers {
   /// @param _to The new owner
   /// @param _tokenId The NFT to transfer
   /// @param _data Additional data with no specified format, sent in call to `_to`
-  function safeTransferFrom(
-    address _from,
-    address _to,
-    uint256 _tokenId,
-    bytes calldata _data
-  ) public {
+  function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes calldata _data) public {
     address sender = LibMeta.msgSender();
     LibERC721.transferFrom(sender, _from, _to, _tokenId);
     LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, _data);
@@ -101,11 +96,7 @@ contract ERC721Facet is Modifiers {
   /// @param _from The current owner of the NFT
   /// @param _to The new owner
   /// @param _tokenId The NFT to transfer
-  function safeTransferFrom(
-    address _from,
-    address _to,
-    uint256 _tokenId
-  ) external {
+  function safeTransferFrom(address _from, address _to, uint256 _tokenId) external {
     address sender = LibMeta.msgSender();
     LibERC721.transferFrom(sender, _from, _to, _tokenId);
     LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, "");
@@ -126,11 +117,7 @@ contract ERC721Facet is Modifiers {
   /// @param _from The current owner of the NFT
   /// @param _to The new owner
   /// @param _tokenId The NFT to transfer
-  function transferFrom(
-    address _from,
-    address _to,
-    uint256 _tokenId
-  ) external {
+  function transferFrom(address _from, address _to, uint256 _tokenId) external {
     address sender = LibMeta.msgSender();
     LibERC721.transferFrom(sender, _from, _to, _tokenId);
 
@@ -198,12 +185,7 @@ contract ERC721Facet is Modifiers {
     uint256 alphaBoost;
   }
 
-  function safeBatchTransfer(
-    address _from,
-    address _to,
-    uint256[] calldata _tokenIds,
-    bytes calldata _data
-  ) external {
+  function safeBatchTransfer(address _from, address _to, uint256[] calldata _tokenIds, bytes calldata _data) external {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
       safeTransferFrom(_from, _to, _tokenIds[index], _data);
     }
