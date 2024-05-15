@@ -7,6 +7,7 @@ import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
 import "hardhat-gas-reporter";
 import * as dotenv from "dotenv";
+import "solidity-docgen";
 dotenv.config({ path: __dirname + "/.env" });
 require("./tasks/generateDiamondABI_realm.js");
 require("./tasks/generateDiamondABI_installation.js");
@@ -143,5 +144,10 @@ module.exports = {
         },
       },
     ],
+  },
+  docgen: {
+    templates: "docgen-templates",
+    exclude: ["/test"],
+    pages: "files",
   },
 };
