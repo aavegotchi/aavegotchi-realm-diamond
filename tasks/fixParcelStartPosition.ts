@@ -8,6 +8,9 @@ import { gasPrice, varsForNetwork } from "../constants";
 import { impersonate } from "../scripts/helperFunctions";
 import { Ownable, RealmGridFacet } from "../typechain";
 
+import * as dotenv from "dotenv";
+dotenv.config({ path: __dirname + "/.env" });
+
 export interface FixParcelStartPositionTaskArgs {
   parcelID: string;
   updateTiles: boolean;
@@ -16,8 +19,7 @@ export interface FixParcelStartPositionTaskArgs {
 
 //To be used if a user has "wrong startPosition" error
 
-const uri =
-  "https://api.thegraph.com/subgraphs/name/aavegotchi/gotchiverse-matic";
+const uri = process.env.GOTCHIVERSE_URI;
 
 const batchSize = 500;
 
