@@ -1,7 +1,5 @@
-import { ethers, network, run } from "hardhat";
-import { maticRealmDiamondAddress } from "../../tile/helperFunctions";
-import { RealmFacet } from "../../../typechain-types";
-import { impersonate } from "../../helperFunctions";
+import { run } from "hardhat";
+
 import { FixParcelStartPositionTaskArgs } from "../../../tasks/fixParcelStartPosition";
 
 async function main() {
