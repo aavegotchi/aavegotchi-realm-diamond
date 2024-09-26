@@ -104,12 +104,7 @@ contract RealmGettersAndSettersFacet is Modifiers {
     output_.timeRemainingToClaim = s.lastClaimedAlchemica[_realmId];
   }
 
-  function checkCoordinates(
-    uint256 _realmId,
-    uint256 _coordinateX,
-    uint256 _coordinateY,
-    uint256 _installationId
-  ) public view {
+  function checkCoordinates(uint256 _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _installationId) public view {
     Parcel storage parcel = s.parcels[_realmId];
     require(parcel.buildGrid[_coordinateX][_coordinateY] == _installationId, "RealmGettersAndSettersFacet: wrong coordinates");
     require(parcel.startPositionBuildGrid[_coordinateX][_coordinateY] == _installationId, "RealmGettersAndSettersFacet: wrong coordinates");
@@ -146,11 +141,10 @@ contract RealmGettersAndSettersFacet is Modifiers {
     return output_;
   }
 
-  function getParcelsAccessRightsWhitelistIds(uint256[] calldata _parcelIds, uint256[] calldata _actionRights)
-    external
-    view
-    returns (uint256[] memory output_)
-  {
+  function getParcelsAccessRightsWhitelistIds(
+    uint256[] calldata _parcelIds,
+    uint256[] calldata _actionRights
+  ) external view returns (uint256[] memory output_) {
     require(_parcelIds.length == _actionRights.length, "RealmGettersAndSettersFacet: Mismatched arrays");
     output_ = new uint256[](_parcelIds.length);
     for (uint256 i; i < _parcelIds.length; i++) {
@@ -168,12 +162,7 @@ contract RealmGettersAndSettersFacet is Modifiers {
     emit SetAltarId(_parcelId, _altarId);
   }
 
-  function verifyAccessRight(
-    uint256 _realmId,
-    uint256 _gotchiId,
-    uint256 _actionRight,
-    address _sender
-  ) external view {
+  function verifyAccessRight(uint256 _realmId, uint256 _gotchiId, uint256 _actionRight, address _sender) external view {
     LibRealm.verifyAccessRight(_realmId, _gotchiId, _actionRight, _sender);
   }
 
