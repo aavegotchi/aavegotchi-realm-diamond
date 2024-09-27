@@ -21,6 +21,10 @@ contract RealmGettersAndSettersFacet is Modifiers {
     return LibRealm.MAX_SUPPLY;
   }
 
+  ///@notice Allow a parcel owner to batch set access rights for their parcels
+  ///@param _realmIds The parcels to set access rights for
+  ///@param _actionRights The action rights to set
+  ///@param _accessRights The access rights to set
   function setParcelsAccessRights(
     uint256[] calldata _realmIds,
     uint256[] calldata _actionRights,
@@ -35,6 +39,11 @@ contract RealmGettersAndSettersFacet is Modifiers {
     }
   }
 
+  ///@notice Allow a parcel owner to batch set access rights for their parcels with whitelisted addresses
+  ///@param _realmIds The parcels to set access rights for
+  ///@param _actionRights The action rights to set
+  ///@param _accessRights The access rights to set
+  ///@param _whitelistIds The whitelist ids to set
   function setParcelsAccessRightWithWhitelists(
     uint256[] calldata _realmIds,
     uint256[] calldata _actionRights,
@@ -72,6 +81,8 @@ contract RealmGettersAndSettersFacet is Modifiers {
     }
   }
 
+  ///@notice Allow the diamond owner to toggle the gameActive state
+  ///@param _gameActive Whether or not the game is active
   function setGameActive(bool _gameActive) external onlyOwner {
     s.gameActive = _gameActive;
   }
@@ -104,16 +115,21 @@ contract RealmGettersAndSettersFacet is Modifiers {
     output_.timeRemainingToClaim = s.lastClaimedAlchemica[_realmId];
   }
 
-  function checkCoordinates(
-    uint256 _realmId,
-    uint256 _coordinateX,
-    uint256 _coordinateY,
-    uint256 _installationId
-  ) public view {
+  ///@notice Do a sanity check on corresponding coordinates for an installation i.e check if an installation can be installed in that location
+  ///@param _realmId The parcelId of the parcel
+  ///@param _coordinateX The x coordinate on the parcel
+  ///@param _coordinateY The y coordinate on the parcel
+  ///@param _installationId The installationId of the installation
+  function checkCoordinates(uint256 _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _installationId) public view {
     Parcel storage parcel = s.parcels[_realmId];
     require(parcel.buildGrid[_coordinateX][_coordinateY] == _installationId, "RealmGettersAndSettersFacet: wrong coordinates");
     require(parcel.startPositionBuildGrid[_coordinateX][_coordinateY] == _installationId, "RealmGettersAndSettersFacet: wrong coordinates");
   }
+
+  ///@notice Query all the parcel ids in a particular district belonging to an address
+  ///@param _owner The address to query
+  ///@param _district The district to query
+  ///@return output_ An array of parcel ids belonging to that owner in that district
 
   function batchGetDistrictParcels(address _owner, uint256 _district) external view returns (uint256[] memory) {
     uint256 totalSupply = ERC721Facet(address(this)).totalSupply();
@@ -129,14 +145,24 @@ contract RealmGettersAndSettersFacet is Modifiers {
     return output_;
   }
 
+  ///@notice Query the number of pending upgrades on a parcel
+  ///@param _parcelId The parcelId to query
+  ///@return The number of pending upgrades
   function getParcelUpgradeQueueLength(uint256 _parcelId) external view returns (uint256) {
     return s.parcels[_parcelId].upgradeQueueLength;
   }
 
+  ///@notice Query the maximum number of simultaneous pending upgrades a parcel can have
+  ///@param _parcelId The parcelId to query
+  ///@return The maximum number of simultaneous pending upgrades
   function getParcelUpgradeQueueCapacity(uint256 _parcelId) external view returns (uint256) {
     return s.parcels[_parcelId].upgradeQueueCapacity;
   }
 
+  ///@notice Batch query the parcel access rights for a set of action rights
+  ///@param _parcelIds The parcelIds to query
+  ///@param _actionRights The action rights to query
+  ///@return output_ An array of access rights for the corresponding parcel and action right
   function getParcelsAccessRights(uint256[] calldata _parcelIds, uint256[] calldata _actionRights) external view returns (uint256[] memory output_) {
     require(_parcelIds.length == _actionRights.length, "RealmGettersAndSettersFacet: Mismatched arrays");
     output_ = new uint256[](_parcelIds.length);
@@ -146,11 +172,14 @@ contract RealmGettersAndSettersFacet is Modifiers {
     return output_;
   }
 
-  function getParcelsAccessRightsWhitelistIds(uint256[] calldata _parcelIds, uint256[] calldata _actionRights)
-    external
-    view
-    returns (uint256[] memory output_)
-  {
+  ///@notice Batch Query the parcel whitelist ids for a set of action rights
+  ///@param _parcelIds The parcelIds to query
+  ///@param _actionRights The action rights to query
+  ///@return output_ An array of whitelist ids for the corresponding parcel and action right
+  function getParcelsAccessRightsWhitelistIds(
+    uint256[] calldata _parcelIds,
+    uint256[] calldata _actionRights
+  ) external view returns (uint256[] memory output_) {
     require(_parcelIds.length == _actionRights.length, "RealmGettersAndSettersFacet: Mismatched arrays");
     output_ = new uint256[](_parcelIds.length);
     for (uint256 i; i < _parcelIds.length; i++) {
@@ -159,6 +188,9 @@ contract RealmGettersAndSettersFacet is Modifiers {
     return output_;
   }
 
+  ///@notice Query the Aaltar id on a particular parcel
+  ///@param _parcelId The parcelId to query
+  ///@return The altar id
   function getAltarId(uint256 _parcelId) external view returns (uint256) {
     return s.parcels[_parcelId].altarId;
   }
@@ -168,12 +200,13 @@ contract RealmGettersAndSettersFacet is Modifiers {
     emit SetAltarId(_parcelId, _altarId);
   }
 
-  function verifyAccessRight(
-    uint256 _realmId,
-    uint256 _gotchiId,
-    uint256 _actionRight,
-    address _sender
-  ) external view {
+  ///@notice Do a sanity check on the rights a gotchi has to perform an action on a parcel
+  ///@param _realmId The parcelId to query
+  ///@param _gotchiId The gotchiId to be used
+  ///@param _actionRight The action right to query
+  ///@param _sender The address of the sender
+
+  function verifyAccessRight(uint256 _realmId, uint256 _gotchiId, uint256 _actionRight, address _sender) external view {
     LibRealm.verifyAccessRight(_realmId, _gotchiId, _actionRight, _sender);
   }
 
@@ -206,6 +239,9 @@ contract RealmGettersAndSettersFacet is Modifiers {
     uint256[64][64] startPositionTileGrid;
   }
 
+  ///@notice Query all the information about a parcel
+  ///@param _parcelId The parcelId to query
+  ///@return parcelOut A struct containing all the information about the parcel
   function getParcel(uint256 _parcelId) external view returns (ParcelOutTest memory parcelOut) {
     Parcel storage parcel = s.parcels[_parcelId];
     parcelOut.owner = parcel.owner;
