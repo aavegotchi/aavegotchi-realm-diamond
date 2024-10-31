@@ -29,7 +29,20 @@ module.exports = {
     timeout: 2000000,
   },
   etherscan: {
-    apiKey: process.env.POLYGON_API_KEY,
+    apiKey: {
+      polygon: process.env.POLYGON_API_KEY,
+      base: process.env.BASE_API_KEY,
+    },
+    customChains: [
+      {
+        network: "base",
+        chainId: 8453,
+        urls: {
+          apiURL: "https://api.basescan.org/api",
+          browserURL: "https://basescan.org",
+        },
+      },
+    ],
   },
   networks: {
     hardhat: {
@@ -64,6 +77,18 @@ module.exports = {
     amoy: {
       url: process.env.AMOY_URL,
       accounts: [process.env.SECRET],
+      blockGasLimit: 20000000,
+      // gasPrice: 1000000000,
+    },
+    base: {
+      url: process.env.BASE_URL,
+      accounts: [process.env.BASE_SECRET],
+      verify: {
+        etherscan: {
+          apiUrl: "https://api.basescan.org/api",
+          apiKey: process.env.BASE_API_KEY,
+        },
+      },
       // gasPrice: 1000000000,
     },
     kovan: {
