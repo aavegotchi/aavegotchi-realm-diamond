@@ -26,17 +26,9 @@ interface TileDiamondInterface {
 
   function claimTiles(uint256[] calldata _queueIds) external;
 
-  function equipTile(
-    address _owner,
-    uint256 _realmTokenId,
-    uint256 _tileId
-  ) external;
+  function equipTile(address _owner, uint256 _realmTokenId, uint256 _tileId) external;
 
-  function unequipTile(
-    address _owner,
-    uint256 _realmId,
-    uint256 _tileId
-  ) external;
+  function unequipTile(address _owner, uint256 _realmId, uint256 _tileId) external;
 
   function addTileTypes(TileType[] calldata _tileTypes) external;
 
@@ -48,11 +40,9 @@ interface TileDiamondInterface {
 
   function balanceOf(address _owner, uint256 _id) external view returns (uint256 bal_);
 
-  function tileBalancesOfTokenByIds(
-    address _tokenContract,
-    uint256 _tokenId,
-    uint256[] calldata _ids
-  ) external view returns (uint256[] memory);
+  function tileBalancesOfTokenByIds(address _tokenContract, uint256 _tokenId, uint256[] calldata _ids) external view returns (uint256[] memory);
+
+  function tileBalancesOfToken(address _tokenContract, uint256 _tokenId) external view returns (TileIdIO[] memory bals_);
 
   function tilesBalances(address _account) external view returns (TileIdIO[] memory bals_);
 }
