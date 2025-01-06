@@ -8,8 +8,6 @@ import "../../libraries/LibAlchemica.sol";
 import "../../libraries/LibERC721.sol";
 
 import {InstallationDiamondInterface} from "../../interfaces/InstallationDiamondInterface.sol";
-import {TileDiamondInterface} from "../../interfaces/TileDiamond.sol";
-
 import "./ERC721Facet.sol";
 
 contract RealmGettersAndSettersFacet is Modifiers {
@@ -106,7 +104,12 @@ contract RealmGettersAndSettersFacet is Modifiers {
     output_.timeRemainingToClaim = s.lastClaimedAlchemica[_realmId];
   }
 
-  function checkCoordinates(uint256 _realmId, uint256 _coordinateX, uint256 _coordinateY, uint256 _installationId) public view {
+  function checkCoordinates(
+    uint256 _realmId,
+    uint256 _coordinateX,
+    uint256 _coordinateY,
+    uint256 _installationId
+  ) public view {
     Parcel storage parcel = s.parcels[_realmId];
     require(parcel.buildGrid[_coordinateX][_coordinateY] == _installationId, "RealmGettersAndSettersFacet: wrong coordinates");
     require(parcel.startPositionBuildGrid[_coordinateX][_coordinateY] == _installationId, "RealmGettersAndSettersFacet: wrong coordinates");
@@ -143,10 +146,11 @@ contract RealmGettersAndSettersFacet is Modifiers {
     return output_;
   }
 
-  function getParcelsAccessRightsWhitelistIds(
-    uint256[] calldata _parcelIds,
-    uint256[] calldata _actionRights
-  ) external view returns (uint256[] memory output_) {
+  function getParcelsAccessRightsWhitelistIds(uint256[] calldata _parcelIds, uint256[] calldata _actionRights)
+    external
+    view
+    returns (uint256[] memory output_)
+  {
     require(_parcelIds.length == _actionRights.length, "RealmGettersAndSettersFacet: Mismatched arrays");
     output_ = new uint256[](_parcelIds.length);
     for (uint256 i; i < _parcelIds.length; i++) {
@@ -164,7 +168,12 @@ contract RealmGettersAndSettersFacet is Modifiers {
     emit SetAltarId(_parcelId, _altarId);
   }
 
-  function verifyAccessRight(uint256 _realmId, uint256 _gotchiId, uint256 _actionRight, address _sender) external view {
+  function verifyAccessRight(
+    uint256 _realmId,
+    uint256 _gotchiId,
+    uint256 _actionRight,
+    address _sender
+  ) external view {
     LibRealm.verifyAccessRight(_realmId, _gotchiId, _actionRight, _sender);
   }
 
@@ -238,135 +247,6 @@ contract RealmGettersAndSettersFacet is Modifiers {
     }
     for (uint256 j; j < 4; j++) {
       parcelOut.reservoirs[j] = parcel.reservoirs[j];
-    }
-  }
-
-  struct ParcelIO {
-    address owner;
-    string parcelAddress; //looks-like-this
-    string parcelId; //C-4208-3168-R
-    uint256 coordinateX; //x position on the map
-    uint256 coordinateY; //y position on the map
-    uint256 district;
-    uint256 size; //0=humble, 1=reasonable, 2=spacious vertical, 3=spacious horizontal, 4=partner
-    // uint256[64][64] buildGrid; //x, then y array of positions - for installations
-    // uint256[64][64] tileGrid; //x, then y array of positions - for tiles under the installations (floor)
-    uint256[4] alchemicaBoost; //fud, fomo, alpha, kek
-    uint256[4] alchemicaRemaining; //fud, fomo, alpha, kek
-    uint256 currentRound; //begins at 0 and increments after surveying has begun
-    // mapping(uint256 => uint256[]) roundBaseAlchemica; //round alchemica not including boosts
-    uint256[][] roundBaseAlchemica; //round alchemica not including boosts
-    // mapping(uint256 => uint256[]) roundAlchemica; //round alchemica including boosts
-    uint256[][] roundAlchemica; //round alchemica including boosts
-    // // alchemicaType => array of reservoir id
-    uint256[][4] reservoirs;
-    uint256[4] alchemicaHarvestRate;
-    uint256[4] lastUpdateTimestamp;
-    uint256[4] unclaimedAlchemica;
-    uint256 altarId;
-    uint256 upgradeQueueCapacity;
-    uint256 upgradeQueueLength;
-    uint256 lodgeId;
-    bool surveying;
-    // uint256[64][64] startPositionBuildGrid;
-    // uint256[64][64] startPositionTileGrid;
-    uint16 harvesterCount;
-    //bouncegate data
-    BounceGate gate;
-  }
-
-  function getParcelData(uint256 _parcelId) public view returns (ParcelIO memory parcel) {
-    (uint256[][] memory roundBaseAlchemica_, uint256[][] memory roundAlchemica_, uint256[][4] memory reservoirs_) = _toStaticTypes(
-      s.parcels[_parcelId].roundBaseAlchemica,
-      s.parcels[_parcelId].roundAlchemica,
-      s.parcels[_parcelId].reservoirs,
-      s.parcels[_parcelId].currentRound
-    );
-
-    parcel.owner = s.parcels[_parcelId].owner;
-    parcel.parcelAddress = s.parcels[_parcelId].parcelAddress;
-    parcel.parcelId = s.parcels[_parcelId].parcelId;
-    parcel.coordinateX = s.parcels[_parcelId].coordinateX;
-    parcel.coordinateY = s.parcels[_parcelId].coordinateY;
-    parcel.district = s.parcels[_parcelId].district;
-    parcel.size = s.parcels[_parcelId].size;
-    parcel.alchemicaBoost = s.parcels[_parcelId].alchemicaBoost;
-    parcel.alchemicaRemaining = s.parcels[_parcelId].alchemicaRemaining;
-    parcel.currentRound = s.parcels[_parcelId].currentRound;
-    parcel.roundBaseAlchemica = roundBaseAlchemica_;
-    parcel.roundAlchemica = roundAlchemica_;
-    parcel.reservoirs = reservoirs_;
-    parcel.alchemicaHarvestRate = s.parcels[_parcelId].alchemicaHarvestRate;
-    parcel.lastUpdateTimestamp = s.parcels[_parcelId].lastUpdateTimestamp;
-    parcel.unclaimedAlchemica = s.parcels[_parcelId].unclaimedAlchemica;
-    parcel.altarId = s.parcels[_parcelId].altarId;
-    parcel.upgradeQueueCapacity = s.parcels[_parcelId].upgradeQueueCapacity;
-    parcel.upgradeQueueLength = s.parcels[_parcelId].upgradeQueueLength;
-    parcel.lodgeId = s.parcels[_parcelId].lodgeId;
-    parcel.surveying = s.parcels[_parcelId].surveying;
-    parcel.harvesterCount = s.parcels[_parcelId].harvesterCount;
-    parcel.gate = s.bounceGates[_parcelId];
-  }
-
-  function getInstallationAndTileBalances(
-    uint256 _parcelId
-  ) internal view returns (InstallationDiamondInterface.InstallationIdIO[] memory installations_, TileDiamondInterface.TileIdIO[] memory tiles_) {
-    installations_ = InstallationDiamondInterface(s.installationsDiamond).installationBalancesOfToken(address(this), _parcelId);
-    tiles_ = TileDiamondInterface(s.tileDiamond).tileBalancesOfToken(address(this), _parcelId);
-  }
-
-  function getParcelGrids(
-    uint256 _parcelId
-  )
-    external
-    view
-    returns (
-      uint256[64][64] memory buildGrid_,
-      uint256[64][64] memory startPositionBuildGrid_,
-      uint256[64][64] memory tileGrid_,
-      uint256[64][64] memory startPositionTileGrid_
-    )
-  {
-    (
-      InstallationDiamondInterface.InstallationIdIO[] memory installations,
-      TileDiamondInterface.TileIdIO[] memory tiles
-    ) = getInstallationAndTileBalances(_parcelId);
-    if (installations.length > 0) {
-      buildGrid_ = s.parcels[_parcelId].buildGrid;
-      startPositionBuildGrid_ = s.parcels[_parcelId].startPositionBuildGrid;
-    }
-    if (tiles.length > 0) {
-      tileGrid_ = s.parcels[_parcelId].tileGrid;
-      startPositionTileGrid_ = s.parcels[_parcelId].startPositionTileGrid;
-    }
-  }
-
-  function _toStaticTypes(
-    mapping(uint256 => uint256[]) storage roundBaseAlchemica,
-    mapping(uint256 => uint256[]) storage roundAlchemica,
-    mapping(uint256 => uint256[]) storage reservoirs,
-    uint256 currentRound
-  ) internal view returns (uint256[][] memory roundBaseAlchemica_, uint256[][] memory roundAlchemica_, uint256[][4] memory reservoirs_) {
-    //if no surveys
-    if (currentRound == 0) {
-      assembly {
-        mstore(roundBaseAlchemica_, 0)
-      }
-    } else {
-      roundBaseAlchemica_ = new uint256[][](currentRound);
-      roundAlchemica_ = new uint256[][](currentRound);
-
-      //handle base and boosts alch
-      for (uint256 i = 0; i < roundBaseAlchemica_.length; i++) {
-        roundBaseAlchemica_[i] = roundBaseAlchemica[i];
-        roundAlchemica_[i] = roundAlchemica[i];
-      }
-
-      ///handle reservoirs
-      //we only have 4 reservoir types e.g 0,1,2,3==> fud,fomo,alpha,kek
-      for (uint256 i = 0; i < 4; i++) {
-        reservoirs_[i] = reservoirs[i];
-      }
     }
   }
 }
