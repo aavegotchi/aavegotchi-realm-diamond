@@ -139,7 +139,7 @@ task(
         signer = (await hre.ethers.getSigners())[0];
       } else if (hre.network.name === "matic") {
         if (useLedger) {
-          signer = new LedgerSigner(hre.ethers.provider, "m/44'/60'/2'/0/0");
+          signer = new LedgerSigner(hre.ethers.provider, "m/44'/60'/1'/0/0");
         } else signer = (await hre.ethers.getSigners())[0];
       } else {
         throw Error("Incorrect network selected");

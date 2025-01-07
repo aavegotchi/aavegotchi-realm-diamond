@@ -61,10 +61,8 @@ export async function upgrade() {
   const args: DeployUpgradeTaskArgs = {
     diamondAddress: c.realmDiamond,
     facetsAndAddSelectors: joined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
-    initAddress: ethers.constants.AddressZero,
-    initCalldata: "0x",
   };
 
   await run("deployUpgrade", args);
