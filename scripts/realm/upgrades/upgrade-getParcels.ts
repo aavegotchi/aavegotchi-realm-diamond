@@ -35,14 +35,20 @@ export async function upgrade() {
     "uint256 lodgeId," +
     "bool surveying," +
     "uint16 harvesterCount," +
-    "tuple(string title,uint64 startTime,uint64 endTime,uint120 priority,bool equipped,uint64 lastTimeUpdated) gate)";
+    "tuple(string title,uint64 startTime,uint64 endTime,uint120 priority,bool equipped,uint64 lastTimeUpdated) gate," +
+    "uint256 lastParcelChanneling," +
+    "uint256 lastClaimedAlchemica)";
+
+  const gChannellingDataTuple =
+    "tuple(uint256 lastChanneledGotchi,uint256 lastClaimedGotchiDay)";
 
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "RealmGettersAndSettersFacet",
       addSelectors: [
-        `function getParcelData(uint256 _parcelId) public view returns (${pTuple} memory parcel) `,
-        `function getParcelGrids(uint256 _parcelId) external view returns (uint256[64][64] memory buildGrid_, uint256[64][64] memory tileGrid_, uint256[64][64] memory startPositionBuildGrid_, uint256[64][64] memory startPositionTileGrid_)`,
+        //`function getParcelData(uint256 _parcelId) public view returns (${pTuple} memory parcel) `,
+        `function getGotchiChannelingData(uint256[] memory _gotchiIds) public view returns (${gChannellingDataTuple}[] memory channelingData_)`,
+        // `function getParcelGrids(uint256 _parcelId) external view returns (uint256[64][64] memory buildGrid_, uint256[64][64] memory tileGrid_, uint256[64][64] memory startPositionBuildGrid_, uint256[64][64] memory startPositionTileGrid_)`,
       ],
       removeSelectors: [],
     },
