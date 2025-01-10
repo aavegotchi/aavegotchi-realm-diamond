@@ -273,22 +273,6 @@ contract RealmGettersAndSettersFacet is Modifiers {
     uint16 harvesterCount;
     //bouncegate data
     BounceGate gate;
-    //channeling data
-    uint256 lastParcelChanneling;
-    uint256 lastClaimedAlchemica;
-  }
-
-  struct GotchiChannelingData {
-    uint256 lastChanneledGotchi;
-    uint256 lastClaimedGotchiDay;
-  }
-
-  function getGotchiChannelingData(uint256[] memory _gotchiIds) public view returns (GotchiChannelingData[] memory channelingData) {
-    channelingData = new GotchiChannelingData[](_gotchiIds.length);
-    for (uint256 i; i < _gotchiIds.length; i++) {
-      channelingData[i].lastChanneledGotchi = s.gotchiChannelings[_gotchiIds[i]];
-      channelingData[i].lastClaimedGotchiDay = s.lastChanneledDay[_gotchiIds[i]];
-    }
   }
 
   function getParcelData(uint256 _parcelId) public view returns (ParcelIO memory parcel) {
