@@ -71,11 +71,7 @@ contract TileFacet is Modifiers {
   /// @param _tokenId The ID of the parent token
   /// @param _id     ID of the token
   /// @return value The balance of the token
-  function balanceOfToken(
-    address _tokenContract,
-    uint256 _tokenId,
-    uint256 _id
-  ) public view returns (uint256 value) {
+  function balanceOfToken(address _tokenContract, uint256 _tokenId, uint256 _id) public view returns (uint256 value) {
     value = s.nftTileBalances[_tokenContract][_tokenId][_id];
   }
 
@@ -97,11 +93,10 @@ contract TileFacet is Modifiers {
   /// @param _tokenContract Contract address for the token to query
   /// @param _tokenId Identifier of the token to query
   /// @return tileBalancesOfTokenWithTypes_ An array of structs containing details about each tile owned(including tile types)
-  function tileBalancesOfTokenWithTypes(address _tokenContract, uint256 _tokenId)
-    external
-    view
-    returns (ItemTypeIO[] memory tileBalancesOfTokenWithTypes_)
-  {
+  function tileBalancesOfTokenWithTypes(
+    address _tokenContract,
+    uint256 _tokenId
+  ) external view returns (ItemTypeIO[] memory tileBalancesOfTokenWithTypes_) {
     tileBalancesOfTokenWithTypes_ = LibERC998Tile.itemBalancesOfTokenWithTypes(_tokenContract, _tokenId);
   }
 
@@ -110,11 +105,7 @@ contract TileFacet is Modifiers {
   /// @param _tokenId The identifier of the ERC721 parent token
   /// @param _ids An array containing the ids of the tileTypes to query
   /// @return An array containing the corresponding balances of the tile types queried
-  function tileBalancesOfTokenByIds(
-    address _tokenContract,
-    uint256 _tokenId,
-    uint256[] calldata _ids
-  ) external view returns (uint256[] memory) {
+  function tileBalancesOfTokenByIds(address _tokenContract, uint256 _tokenId, uint256[] calldata _ids) external view returns (uint256[] memory) {
     uint256[] memory balances = new uint256[](_ids.length);
     for (uint256 i = 0; i < _ids.length; i++) {
       balances[i] = balanceOfToken(_tokenContract, _tokenId, _ids[i]);
@@ -157,7 +148,7 @@ contract TileFacet is Modifiers {
   /// @notice Allow a user to craft tiles one at a time
   /// @dev Puts the tile into a queue
   /// @param _tileTypes An array containing the identifiers of the tileTypes to craft
-  function craftTiles(uint16[] calldata _tileTypes) external {
+  function craftTiles(uint16[] calldata _tileTypes) external diamondPaused {
     address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
 
     uint256 _tileTypesLength = s.tileTypes.length;
@@ -247,7 +238,7 @@ contract TileFacet is Modifiers {
   }
 
   /// @notice Allow a user to craft tiles by batch
-  function batchCraftTiles(BatchCraftTilesInput[] calldata _inputs) external {
+  function batchCraftTiles(BatchCraftTilesInput[] calldata _inputs) external diamondPaused {
     for (uint256 i = 0; i < _inputs.length; i++) {
       _batchCraftTiles(_inputs[i]);
     }
@@ -257,7 +248,7 @@ contract TileFacet is Modifiers {
   /// @dev Will throw if the caller is not the queue owner
   /// @dev Will throw if one of the queues is not ready
   /// @param _queueIds An array containing the identifiers of queues to claim
-  function claimTiles(uint256[] calldata _queueIds) external {
+  function claimTiles(uint256[] calldata _queueIds) external diamondPaused {
     for (uint256 i; i < _queueIds.length; i++) {
       uint256 queueId = _queueIds[i];
 
@@ -280,7 +271,7 @@ contract TileFacet is Modifiers {
   /// @dev amount expressed in block numbers
   /// @param _queueIds An array containing the identifiers of queues to speed up
   /// @param _amounts An array containing the corresponding amounts of $GLTR tokens to pay for each queue speedup
-  function reduceCraftTime(uint256[] calldata _queueIds, uint40[] calldata _amounts) external {
+  function reduceCraftTime(uint256[] calldata _queueIds, uint40[] calldata _amounts) external diamondPaused {
     require(_queueIds.length == _amounts.length, "TileFacet: Mismatched arrays");
     for (uint256 i; i < _queueIds.length; i++) {
       uint256 queueId = _queueIds[i];
@@ -293,7 +284,7 @@ contract TileFacet is Modifiers {
 
       uint40 blockLeft = queueItem.readyBlock - uint40(block.number);
       uint40 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
-      gltr.burnFrom(msg.sender, removeBlocks * 10**18);
+      gltr.burnFrom(msg.sender, removeBlocks * 10 ** 18);
       queueItem.readyBlock -= removeBlocks;
       emit CraftTimeReduced(queueId, removeBlocks);
     }
@@ -326,11 +317,7 @@ contract TileFacet is Modifiers {
   /// @param _owner Owner of the tile to equip
   /// @param _realmId The identifier of the parcel to equip the tile to
   /// @param _tileId Identifier of the tile to equip
-  function equipTile(
-    address _owner,
-    uint256 _realmId,
-    uint256 _tileId
-  ) external onlyRealmDiamond {
+  function equipTile(address _owner, uint256 _realmId, uint256 _tileId) external onlyRealmDiamond {
     LibTile._equipTile(_owner, _realmId, _tileId);
   }
 
@@ -338,11 +325,7 @@ contract TileFacet is Modifiers {
   /// @dev Will throw if the caller is not the parcel diamond contract
   /// @param _realmId The identifier of the parcel to unequip the tile from
   /// @param _tileId Identifier of the tile to unequip
-  function unequipTile(
-    address _owner,
-    uint256 _realmId,
-    uint256 _tileId
-  ) external onlyRealmDiamond {
+  function unequipTile(address _owner, uint256 _realmId, uint256 _tileId) external onlyRealmDiamond {
     LibTile._unequipTile(_owner, _realmId, _tileId);
   }
 
@@ -413,7 +396,7 @@ contract TileFacet is Modifiers {
       );
       string memory uri = "https://app.aavegotchi.com/metadata/tile/";
       emit LibEvents.URI(LibStrings.strWithUint(uri, i), i);
-      if(_tileTypes[i].deprecateTime > 0){
+      if (_tileTypes[i].deprecateTime > 0) {
         s.deprecateTime[s.tileTypes.length - 1] = _tileTypes[i].deprecateTime;
         emit EditDeprecateTime(s.tileTypes.length - 1, _tileTypes[i].deprecateTime);
       }
@@ -436,5 +419,9 @@ contract TileFacet is Modifiers {
       s.tileTypes[_typeIds[i]] = _updatedTiles[i];
       emit EditTileType(_typeIds[i], _updatedTiles[i]);
     }
+  }
+
+  function setDiamondPaused(bool _paused) external onlyOwner {
+    s.diamondPaused = _paused;
   }
 }

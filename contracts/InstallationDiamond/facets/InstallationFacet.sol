@@ -63,11 +63,7 @@ contract InstallationFacet is Modifiers {
   /// @param _tokenId The ID of the parent token
   /// @param _id     ID of the token
   /// @return value The balance of the token
-  function balanceOfToken(
-    address _tokenContract,
-    uint256 _tokenId,
-    uint256 _id
-  ) public view returns (uint256 value) {
+  function balanceOfToken(address _tokenContract, uint256 _tokenId, uint256 _id) public view returns (uint256 value) {
     value = s.nftInstallationBalances[_tokenContract][_tokenId][_id];
   }
 
@@ -89,11 +85,10 @@ contract InstallationFacet is Modifiers {
   /// @param _tokenContract Contract address for the token to query
   /// @param _tokenId Identifier of the token to query
   /// @return installationBalancesOfTokenWithTypes_ An array of structs containing details about each installation owned(including installation types)
-  function installationBalancesOfTokenWithTypes(address _tokenContract, uint256 _tokenId)
-    external
-    view
-    returns (ItemTypeIO[] memory installationBalancesOfTokenWithTypes_)
-  {
+  function installationBalancesOfTokenWithTypes(
+    address _tokenContract,
+    uint256 _tokenId
+  ) external view returns (ItemTypeIO[] memory installationBalancesOfTokenWithTypes_) {
     installationBalancesOfTokenWithTypes_ = LibERC998.itemBalancesOfTokenWithTypes(_tokenContract, _tokenId);
   }
 
@@ -260,7 +255,7 @@ contract InstallationFacet is Modifiers {
     //   }
   }
 
-  function batchCraftInstallations(BatchCraftInstallationsInput[] calldata _inputs) external {
+  function batchCraftInstallations(BatchCraftInstallationsInput[] calldata _inputs) external diamondPaused {
     for (uint256 i = 0; i < _inputs.length; i++) {
       _batchCraftInstallation(_inputs[i]);
     }
@@ -271,7 +266,7 @@ contract InstallationFacet is Modifiers {
   /// @dev Puts the installation into a queue
   /// @param _installationTypes An array containing the identifiers of the installationTypes to craft
   /// @param _gltr Array of GLTR to spend on each crafting
-  function craftInstallations(uint16[] calldata _installationTypes, uint40[] calldata _gltr) external {
+  function craftInstallations(uint16[] calldata _installationTypes, uint40[] calldata _gltr) external diamondPaused {
     require(_installationTypes.length == _gltr.length, "InstallationFacet: Mismatched arrays");
     address[4] memory alchemicaAddresses = RealmDiamond(s.realmDiamond).getAlchemicaAddresses();
 
@@ -319,7 +314,7 @@ contract InstallationFacet is Modifiers {
   /// @dev Will throw if the caller is not the queue owner
   /// @dev Will throw if one of the queues is not ready
   /// @param _queueIds An array containing the identifiers of queues to claim
-  function claimInstallations(uint256[] calldata _queueIds) external {
+  function claimInstallations(uint256[] calldata _queueIds) external diamondPaused {
     for (uint256 i; i < _queueIds.length; i++) {
       uint256 queueId = _queueIds[i];
 
@@ -345,7 +340,7 @@ contract InstallationFacet is Modifiers {
   /// @dev amount expressed in block numbers
   /// @param _queueIds An array containing the identifiers of queues to speed up
   /// @param _amounts An array containing the corresponding amounts of $GLTR tokens to pay for each queue speedup
-  function reduceCraftTime(uint256[] calldata _queueIds, uint40[] calldata _amounts) external {
+  function reduceCraftTime(uint256[] calldata _queueIds, uint40[] calldata _amounts) external diamondPaused {
     require(_queueIds.length == _amounts.length, "InstallationFacet: Mismatched arrays");
     for (uint256 i; i < _queueIds.length; i++) {
       uint256 queueId = _queueIds[i];
@@ -358,7 +353,7 @@ contract InstallationFacet is Modifiers {
 
       uint40 blockLeft = queueItem.readyBlock - uint40(block.number);
       uint40 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
-      uint256 burnAmount = uint256(removeBlocks) * 10**18;
+      uint256 burnAmount = uint256(removeBlocks) * 10 ** 18;
       gltr.burnFrom(msg.sender, burnAmount);
       queueItem.readyBlock -= removeBlocks;
       emit CraftTimeReduced(queueId, removeBlocks);
@@ -371,11 +366,7 @@ contract InstallationFacet is Modifiers {
   /// @param _owner Owner of the installation to equip
   /// @param _realmId The identifier of the parcel to equip the installation to
   /// @param _installationId Identifier of the installation to equip
-  function equipInstallation(
-    address _owner,
-    uint256 _realmId,
-    uint256 _installationId
-  ) external onlyRealmDiamond {
+  function equipInstallation(address _owner, uint256 _realmId, uint256 _installationId) external onlyRealmDiamond diamondPaused {
     LibInstallation._equipInstallation(_owner, _realmId, _installationId);
   }
 
@@ -383,11 +374,7 @@ contract InstallationFacet is Modifiers {
   /// @dev Will throw if the caller is not the parcel diamond contract
   /// @param _realmId The identifier of the parcel to unequip the installation from
   /// @param _installationId Identifier of the installation to unequip
-  function unequipInstallation(
-    address _owner,
-    uint256 _realmId,
-    uint256 _installationId
-  ) external onlyRealmDiamond {
+  function unequipInstallation(address _owner, uint256 _realmId, uint256 _installationId) external onlyRealmDiamond diamondPaused {
     LibInstallation._unequipInstallation(_owner, _realmId, _installationId);
   }
 

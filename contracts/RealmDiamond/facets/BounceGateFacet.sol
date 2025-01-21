@@ -11,28 +11,19 @@ contract BounceGateFacet is Modifiers {
     uint64 _durationInMinutes,
     uint256[4] calldata _alchemicaSpent,
     uint256 _realmId
-  ) external {
+  ) external diamondPaused {
     LibBounceGate._createEvent(_title, _startTime, _durationInMinutes, _alchemicaSpent, _realmId);
   }
 
-  function updateEvent(
-    uint256 _realmId,
-    uint256[4] calldata _alchemicaSpent,
-    uint40 _durationExtensionInMinutes
-  ) external {
+  function updateEvent(uint256 _realmId, uint256[4] calldata _alchemicaSpent, uint40 _durationExtensionInMinutes) external diamondPaused {
     LibBounceGate._updateEvent(_realmId, _alchemicaSpent, _durationExtensionInMinutes);
   }
 
-  function cancelEvent(uint256 _realmId) external {
+  function cancelEvent(uint256 _realmId) external diamondPaused {
     LibBounceGate._cancelEvent(_realmId);
   }
 
-  function recreateEvent(
-    uint256 _realmId,
-    uint64 _startTime,
-    uint64 _durationInMinutes,
-    uint256[4] calldata _alchemicaSpent
-  ) external {
+  function recreateEvent(uint256 _realmId, uint64 _startTime, uint64 _durationInMinutes, uint256[4] calldata _alchemicaSpent) external diamondPaused {
     LibBounceGate._recreateEvent(_realmId, _startTime, _durationInMinutes, _alchemicaSpent);
   }
 

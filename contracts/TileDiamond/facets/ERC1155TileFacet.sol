@@ -28,13 +28,7 @@ contract ERC1155TileFacet is Modifiers {
         @param _value   Transfer amount
         @param _data    Additional data with no specified format, MUST be sent unaltered in call to `onERC1155Received` on `_to`
     */
-  function safeTransferFrom(
-    address _from,
-    address _to,
-    uint256 _id,
-    uint256 _value,
-    bytes calldata _data
-  ) external {
+  function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) external diamondPaused {
     require(_to != address(0), "ERC1155Facet: Can't transfer to 0 address");
     address sender = LibMeta.msgSender();
     require(sender == _from || s.operators[_from][sender] || sender == address(this), "ERC1155Facet: Not owner and not approved to transfer");
@@ -67,7 +61,7 @@ contract ERC1155TileFacet is Modifiers {
     uint256[] calldata _ids,
     uint256[] calldata _values,
     bytes calldata _data
-  ) external {
+  ) external diamondPaused {
     require(_to != address(0), "ItemsTransfer: Can't transfer to 0 address");
     require(_ids.length == _values.length, "ItemsTransfer: ids not same length as values");
     address sender = LibMeta.msgSender();
@@ -83,7 +77,7 @@ contract ERC1155TileFacet is Modifiers {
     LibERC1155Tile.onERC1155BatchReceived(sender, _from, _to, _ids, _values, _data);
   }
 
-  function setApprovalForAll(address _operator, bool _approved) external {
+  function setApprovalForAll(address _operator, bool _approved) external diamondPaused {
     address sender = LibMeta.msgSender();
     require(sender != _operator, "ERC1155Facet: setting approval status for self");
     s.operators[sender][_operator] = _approved;

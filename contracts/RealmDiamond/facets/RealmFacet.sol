@@ -35,11 +35,7 @@ contract RealmFacet is Modifiers {
   /// @param _to The address to mint the parcels to
   /// @param _tokenIds The identifiers of tokens to mint
   /// @param _metadata An array of structs containing the metadata of each parcel being minted
-  function mintParcels(
-    address[] calldata _to,
-    uint256[] calldata _tokenIds,
-    MintParcelInput[] memory _metadata
-  ) external onlyOwner {
+  function mintParcels(address[] calldata _to, uint256[] calldata _tokenIds, MintParcelInput[] memory _metadata) external onlyOwner {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
       require(s.tokenIds.length < LibRealm.MAX_SUPPLY, "RealmFacet: Cannot mint more than 420,069 parcels");
       uint256 tokenId = _tokenIds[index];
@@ -74,7 +70,7 @@ contract RealmFacet is Modifiers {
     uint256 _gotchiId,
     BatchEquipIO memory _params,
     bytes[] memory _signatures
-  ) external gameActive canBuild {
+  ) external diamondPaused gameActive canBuild {
     require(_params.ids.length == _params.x.length, "RealmFacet: Wrong length");
     require(_params.x.length == _params.y.length, "RealmFacet: Wrong length");
 
@@ -106,7 +102,7 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) public gameActive canBuild {
+  ) public diamondPaused gameActive canBuild {
     //2 - Equip Installations
     LibRealm.verifyAccessRight(_realmId, _gotchiId, 2, LibMeta.msgSender());
     require(
@@ -153,7 +149,7 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) public onlyParcelOwner(_realmId) gameActive canBuild {
+  ) public diamondPaused onlyParcelOwner(_realmId) gameActive canBuild {
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _installationId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
@@ -216,7 +212,7 @@ contract RealmFacet is Modifiers {
     uint256 _y0,
     uint256 _x1,
     uint256 _y1
-  ) external onlyParcelOwner(_realmId) gameActive canBuild {
+  ) external diamondPaused onlyParcelOwner(_realmId) gameActive canBuild {
     //Check if upgrade is in progress
     InstallationDiamondInterface installation = InstallationDiamondInterface(s.installationsDiamond);
 
@@ -241,7 +237,7 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) public gameActive canBuild {
+  ) public diamondPaused gameActive canBuild {
     //3 - Equip Tile
     LibRealm.verifyAccessRight(_realmId, _gotchiId, 3, LibMeta.msgSender());
     require(
@@ -269,7 +265,7 @@ contract RealmFacet is Modifiers {
     uint256 _x,
     uint256 _y,
     bytes memory _signature
-  ) public onlyParcelOwner(_realmId) gameActive canBuild {
+  ) public diamondPaused onlyParcelOwner(_realmId) gameActive canBuild {
     require(
       LibSignature.isValid(keccak256(abi.encodePacked(_realmId, _gotchiId, _tileId, _x, _y)), _signature, s.backendPubKey),
       "RealmFacet: Invalid signature"
@@ -295,7 +291,7 @@ contract RealmFacet is Modifiers {
     uint256 _y0,
     uint256 _x1,
     uint256 _y1
-  ) external onlyParcelOwner(_realmId) gameActive canBuild {
+  ) external diamondPaused onlyParcelOwner(_realmId) gameActive canBuild {
     LibRealm.removeTile(_realmId, _tileId, _x0, _y0);
     emit UnequipTile(_realmId, _tileId, _x0, _y0);
     LibRealm.placeTile(_realmId, _tileId, _x1, _y1);
@@ -316,7 +312,7 @@ contract RealmFacet is Modifiers {
     emit InstallationUpgraded(_realmId, _prevInstallationId, _nextInstallationId, _coordinateX, _coordinateY);
   }
 
-  function addUpgradeQueueLength(uint256 _realmId) external onlyInstallationDiamond {
+  function addUpgradeQueueLength(uint256 _realmId) external diamondPaused onlyInstallationDiamond {
     s.parcels[_realmId].upgradeQueueLength++;
   }
 
@@ -324,13 +320,7 @@ contract RealmFacet is Modifiers {
     s.parcels[_realmId].upgradeQueueLength--;
   }
 
-  function fixGrid(
-    uint256 _realmId,
-    uint256 _installationId,
-    uint256[] memory _x,
-    uint256[] memory _y,
-    bool tile
-  ) external onlyOwner {
+  function fixGrid(uint256 _realmId, uint256 _installationId, uint256[] memory _x, uint256[] memory _y, bool tile) external onlyOwner {
     require(_x.length == _y.length, "RealmFacet: _x and _y must be the same length");
     Parcel storage parcel = s.parcels[_realmId];
     for (uint256 i; i < _x.length; i++) {
@@ -349,5 +339,9 @@ contract RealmFacet is Modifiers {
 
   function setFreezeBuilding(bool _freezeBuilding) external onlyOwner {
     s.freezeBuilding = _freezeBuilding;
+  }
+
+  function setDiamondPaused(bool _paused) external onlyOwner {
+    s.diamondPaused = _paused;
   }
 }

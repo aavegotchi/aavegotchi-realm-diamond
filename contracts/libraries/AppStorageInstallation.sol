@@ -95,6 +95,8 @@ struct InstallationAppStorage {
   mapping(uint256 => uint256) unequipTypes; // installationType.id => unequipType
   mapping(uint256 => uint256[]) parcelIdToUpgradeIds; // will not track upgrades before this variable's existence
   mapping(address => bool) gameManager;
+  //geist cloning switch
+  bool diamondPaused;
 }
 
 library LibAppStorageInstallation {
@@ -120,6 +122,14 @@ contract Modifiers {
 
   modifier onlyGameManager() {
     require(s.gameManager[msg.sender] == true, "LibDiamond: Must be a gameManager");
+    _;
+  }
+
+  modifier diamondPaused() {
+    ///we exempt gameManager from the freeze
+    if (!s.gameManager[msg.sender]) {
+      require(!s.diamondPaused, "AppStorage: Diamond paused");
+    }
     _;
   }
 }
