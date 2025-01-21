@@ -58,6 +58,8 @@ struct TileAppStorage {
   mapping(address => mapping(uint256 => uint256)) ownerTileIndexes;
   // installationId => deprecateTime
   mapping(uint256 => uint256) deprecateTime;
+  //in preparation for geist cloning
+  bool diamondPaused;
 }
 
 library LibAppStorageTile {
@@ -78,6 +80,14 @@ contract Modifiers {
 
   modifier onlyRealmDiamond() {
     require(msg.sender == s.realmDiamond, "LibDiamond: Must be realm diamond");
+    _;
+  }
+
+  modifier diamondPaused() {
+    ///we exempt gameManager from the freeze
+    if (msg.sender != LibDiamond.contractOwner()) {
+      require(!s.diamondPaused, "AppStorage: Diamond paused");
+    }
     _;
   }
 }

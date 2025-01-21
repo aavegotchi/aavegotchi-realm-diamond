@@ -110,6 +110,8 @@ struct AppStorage {
   mapping(uint256 => BounceGate) bounceGates;
   // parcelId => action: 0 Alchemical Channeling, 1 Emptying Reservoirs => whitelistIds
   mapping(uint256 => mapping(uint256 => uint32)) whitelistIds;
+  //geist cloning switch
+  bool diamondPaused;
 }
 
 library LibAppStorage {
@@ -156,6 +158,14 @@ contract Modifiers {
 
   modifier canBuild() {
     require(!s.freezeBuilding, "AppStorage: Building temporarily disabled");
+    _;
+  }
+
+  modifier diamondPaused() {
+    ///we exempt gameManager from the freeze
+    if (msg.sender != LibDiamond.contractOwner()) {
+      require(!s.diamondPaused, "AppStorage: Diamond paused");
+    }
     _;
   }
 }

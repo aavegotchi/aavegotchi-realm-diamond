@@ -27,7 +27,7 @@ contract RealmGettersAndSettersFacet is Modifiers {
     uint256[] calldata _realmIds,
     uint256[] calldata _actionRights,
     uint256[] calldata _accessRights
-  ) external gameActive {
+  ) external diamondPaused gameActive {
     require(_realmIds.length == _accessRights.length && _realmIds.length == _actionRights.length, "RealmGettersAndSettersFacet: Mismatched arrays");
     for (uint256 i; i < _realmIds.length; i++) {
       require(LibMeta.msgSender() == s.parcels[_realmIds[i]].owner, "RealmGettersAndSettersFacet: Only Parcel owner can call");
@@ -42,7 +42,7 @@ contract RealmGettersAndSettersFacet is Modifiers {
     uint256[] calldata _actionRights,
     uint256[] calldata _accessRights,
     uint32[] calldata _whitelistIds
-  ) external gameActive {
+  ) external diamondPaused gameActive {
     require(
       _realmIds.length == _actionRights.length && _whitelistIds.length == _actionRights.length && _whitelistIds.length == _actionRights.length,
       "RealmGettersAndSettersFacet: Mismatched arrays"
@@ -68,7 +68,7 @@ contract RealmGettersAndSettersFacet is Modifiers {
   @dev Used to resync a parcel on the subgraph if metadata is added later 
 @param _tokenIds The parcels to resync
   */
-  function resyncParcel(uint256[] calldata _tokenIds) external onlyOwner {
+  function resyncParcel(uint256[] calldata _tokenIds) external diamondPaused onlyOwner {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
       emit ResyncParcel(_tokenIds[index]);
     }
