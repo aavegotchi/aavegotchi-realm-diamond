@@ -200,6 +200,24 @@ contract AlchemicaFacet is Modifiers {
     LibAlchemica.claimAvailableAlchemica(_realmId, _gotchiId);
   }
 
+  /// @notice Allow a parcel owner to claim available alchemica from multiple parcels
+  /// @param _realmIds Array of parcel identifiers
+  /// @param _gotchiId Identifier of Aavegotchi to use for alchemica collection/claiming
+  /// @param _signature Message signature used for backend validation. Always use the first realmId in the array
+  function claimAllAvailableAlchemica(uint256[] memory _realmIds, uint256 _gotchiId, bytes memory _signature) external gameActive {
+    //Check signature
+    require(
+      LibSignature.isValid(keccak256(abi.encode(_realmIds[0], _gotchiId, s.lastClaimedAlchemica[_realmIds[0]])), _signature, s.backendPubKey),
+      "AlchemicaFacet: Invalid signature"
+    );
+
+    for (uint256 i; i < _realmIds.length; i++) {
+      //1 - Empty Reservoir Access Right
+      LibRealm.verifyAccessRight(_realmIds[i], _gotchiId, 1, LibMeta.msgSender());
+      LibAlchemica.claimAvailableAlchemica(_realmIds[i], _gotchiId);
+    }
+  }
+
   function getHarvestRates(uint256 _realmId) external view returns (uint256[] memory harvestRates) {
     harvestRates = new uint256[](4);
     for (uint256 i; i < 4; i++) {
