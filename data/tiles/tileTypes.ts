@@ -1,3 +1,4 @@
+import { BigNumber } from "ethers";
 import { TileTypeInput } from "../../types";
 
 export const tileTypes: TileTypeInput[] = [
@@ -509,3 +510,61 @@ export const tileTypes: TileTypeInput[] = [
     deprecateTime: 1685404800,
   },
 ];
+
+function getTileDimensions(tileId: number): { width: number; height: number } {
+  const tile = tileTypes.find((tile) => tile.id === tileId);
+  if (!tile) {
+    throw new Error(`Tile with id ${tileId} not found`);
+  }
+  return { width: tile.width, height: tile.height };
+}
+
+export function countTileOccurrences(
+  grid: number[][]
+): { id: number; amount: number }[] {
+  const tileCounts: { [id: number]: number } = {};
+  const gridSize = grid.length;
+
+  //if grid is empty return empty array
+  if (gridSize === 0) return [];
+
+  // Create a boolean grid to mark visited cells
+  const visited: boolean[][] = Array.from({ length: gridSize }, () =>
+    Array(gridSize).fill(false)
+  );
+
+  for (let y = 0; y < gridSize; y++) {
+    for (let x = 0; x < gridSize; x++) {
+      const tileId = grid[y][x];
+      if (tileId !== 0 && !visited[y][x]) {
+        const { width, height } = getTileDimensions(tileId);
+
+        // Check if a valid tile exists starting at (x, y)
+        let isValidTile = true;
+        for (let i = y; i < y + height; i++) {
+          for (let j = x; j < x + width; j++) {
+            if (i >= gridSize || j >= gridSize || grid[i][j] !== tileId) {
+              isValidTile = false;
+              break;
+            }
+          }
+          if (!isValidTile) break;
+        }
+
+        if (isValidTile) {
+          tileCounts[tileId] = (tileCounts[tileId] || 0) + 1;
+          // Mark visited cells
+          for (let i = y; i < y + height; i++) {
+            for (let j = x; j < x + width; j++) {
+              visited[i][j] = true;
+            }
+          }
+        }
+      }
+    }
+  }
+  return Object.entries(tileCounts).map(([id, amount]) => ({
+    id: parseInt(id),
+    amount,
+  }));
+}

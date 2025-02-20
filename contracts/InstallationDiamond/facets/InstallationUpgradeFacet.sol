@@ -73,11 +73,18 @@ contract InstallationUpgradeFacet is Modifiers {
     }
   }
 
-  /// @notice Allow anyone to finalize any existing queue upgrade
-  function finalizeUpgrades(uint256[] memory _upgradeIndexes) external diamondPaused {
+  /// @notice Allow gameManager to finalize any existing queue upgrade
+  function finalizeUpgrades(uint256[] memory _upgradeIndexes) public diamondPaused {
     for (uint256 i; i < _upgradeIndexes.length; i++) {
       UpgradeQueue storage upgradeQueue = s.upgradeQueue[_upgradeIndexes[i]];
       LibInstallation.finalizeUpgrade(upgradeQueue.owner, _upgradeIndexes[i]);
+    }
+  }
+
+  function finalizeUpgradesForParcels(uint256[] memory _parcelIds) external diamondPaused {
+    for (uint256 i; i < _parcelIds.length; i++) {
+      uint256[] memory parcelUpgradeIds = s.parcelIdToUpgradeIds[_parcelIds[i]];
+      finalizeUpgrades(parcelUpgradeIds);
     }
   }
 

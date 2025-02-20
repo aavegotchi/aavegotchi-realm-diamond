@@ -24,11 +24,7 @@ library LibInstallation {
   event UpgradeQueued(address indexed _owner, uint256 indexed _realmId, uint256 indexed _queueIndex);
   event UpgradeQueueFinalized(address indexed _owner, uint256 indexed _realmId, uint256 indexed _queueIndex);
 
-  function _equipInstallation(
-    address _owner,
-    uint256 _realmId,
-    uint256 _installationId
-  ) internal {
+  function _equipInstallation(address _owner, uint256 _realmId, uint256 _installationId) internal {
     InstallationAppStorage storage s = LibAppStorageInstallation.diamondStorage();
     LibERC1155.removeFromOwner(_owner, _installationId, 1);
     LibERC1155.addToOwner(s.realmDiamond, _installationId, 1);
@@ -37,11 +33,7 @@ library LibInstallation {
     emit LibEvents.TransferToParent(s.realmDiamond, _realmId, _installationId, 1);
   }
 
-  function _unequipInstallation(
-    address _owner,
-    uint256 _realmId,
-    uint256 _installationId
-  ) internal {
+  function _unequipInstallation(address _owner, uint256 _realmId, uint256 _installationId) internal {
     InstallationAppStorage storage s = LibAppStorageInstallation.diamondStorage();
     LibERC998.removeFromParent(s.realmDiamond, _realmId, _installationId, 1);
     emit LibEvents.TransferFromParent(s.realmDiamond, _realmId, _installationId, 1);
@@ -82,11 +74,7 @@ library LibInstallation {
     return type(uint256).max;
   }
 
-  function checkUpgrade(
-    UpgradeQueue memory _upgradeQueue,
-    uint256 _gotchiId,
-    RealmDiamond _realmDiamond
-  ) internal view {
+  function checkUpgrade(UpgradeQueue memory _upgradeQueue, uint256 _gotchiId, RealmDiamond _realmDiamond) internal view {
     InstallationAppStorage storage s = LibAppStorageInstallation.diamondStorage();
 
     // // check owner
@@ -120,11 +108,7 @@ library LibInstallation {
     //@todo: check for lodge prereq once lodges are implemented
   }
 
-  function upgradeInstallation(
-    UpgradeQueue memory _upgradeQueue,
-    uint256 _nextLevelId,
-    RealmDiamond _realmDiamond
-  ) internal {
+  function upgradeInstallation(UpgradeQueue memory _upgradeQueue, uint256 _nextLevelId, RealmDiamond _realmDiamond) internal {
     LibInstallation._unequipInstallation(_upgradeQueue.owner, _upgradeQueue.parcelId, _upgradeQueue.installationId);
     // mint new installation
     //mint without queue
@@ -170,18 +154,15 @@ library LibInstallation {
     emit UpgradeQueued(_upgradeQueue.owner, _upgradeQueue.parcelId, upgradeIdIndex);
   }
 
-  function finalizeUpgrade(address _owner, uint256 index) internal returns (bool) {
+  function finalizeUpgrade(address _owner, uint256 index) internal {
     InstallationAppStorage storage s = LibAppStorageInstallation.diamondStorage();
 
-    if (s.upgradeComplete[index]) return true;
-    uint40 readyBlock = s.upgradeQueue[index].readyBlock;
-    uint256 parcelId = s.upgradeQueue[index].parcelId;
-    uint256 installationId = s.upgradeQueue[index].installationId;
-    uint16 coordinateX = s.upgradeQueue[index].coordinateX;
-    uint16 coordinateY = s.upgradeQueue[index].coordinateY;
-
-    // check that upgrade is ready
-    if (block.number >= readyBlock) {
+    //we only check for pending upgrade validity
+    if (!s.upgradeComplete[index]) {
+      uint256 parcelId = s.upgradeQueue[index].parcelId;
+      uint256 installationId = s.upgradeQueue[index].installationId;
+      uint16 coordinateX = s.upgradeQueue[index].coordinateX;
+      uint16 coordinateY = s.upgradeQueue[index].coordinateY;
       // burn old installation
       LibInstallation._unequipInstallation(_owner, parcelId, installationId);
       // mint new installation
@@ -206,8 +187,6 @@ library LibInstallation {
 
       emit UpgradeFinalized(parcelId, coordinateX, coordinateY, nextLevelId);
       emit UpgradeQueueFinalized(_owner, parcelId, index);
-      return true;
     }
-    return false;
   }
 }

@@ -126,7 +126,7 @@ contract Modifiers {
   }
 
   modifier diamondPaused() {
-    ///we exempt gameManager from the freeze
+    ///we exempt gameManager  from the freeze
     if (!s.gameManager[msg.sender]) {
       require(!s.diamondPaused, "AppStorage: Diamond paused");
     }
