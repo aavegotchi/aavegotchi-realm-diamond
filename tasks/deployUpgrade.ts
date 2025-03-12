@@ -9,8 +9,6 @@ import {
   PopulatedTransaction,
 } from "@ethersproject/contracts";
 
-import { OwnershipFacet } from "../typechain/OwnershipFacet";
-import { IDiamondCut } from "../typechain/IDiamondCut";
 import {
   getFunctionNames,
   getSelectors,
@@ -21,6 +19,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { gasPrice } from "../constants";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { IDiamondCut, OwnershipFacet } from "../typechain-types";
 
 export interface FacetsAndAddSelectors {
   facetName: string;
@@ -160,9 +159,7 @@ task(
         const factory = (await hre.ethers.getContractFactory(
           facet.facetName
         )) as ContractFactory;
-        const deployedFacet: Contract = await factory.deploy({
-          gasPrice: gasPrice,
-        });
+        const deployedFacet: Contract = await factory.deploy({});
         await deployedFacet.deployed();
         console.log(
           `Deployed Facet Address for ${facet.facetName}:`,
@@ -239,8 +236,7 @@ task(
         const tx: ContractTransaction = await diamondCut.diamondCut(
           cut,
           initAddress ? initAddress : hre.ethers.constants.AddressZero,
-          initCalldata ? initCalldata : "0x",
-          { gasPrice: gasPrice }
+          initCalldata ? initCalldata : "0x"
         );
         console.log("Diamond cut tx:", tx.hash);
         const receipt: ContractReceipt = await tx.wait();
@@ -265,8 +261,7 @@ task(
           const tx: ContractTransaction = await diamondCut.diamondCut(
             cut,
             initAddress ? initAddress : hre.ethers.constants.AddressZero,
-            initCalldata ? initCalldata : "0x",
-            { gasPrice: gasPrice }
+            initCalldata ? initCalldata : "0x"
           );
 
           const receipt: ContractReceipt = await tx.wait();

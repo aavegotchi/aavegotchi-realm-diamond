@@ -9,7 +9,7 @@ import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 
 contract VRFFacet is Modifiers {
-  function rawFulfillRandomWords(uint256 requestId, uint256[] memory randomWords) external {
+  function rawFulfillRandomWords(uint256 requestId, uint256[] memory randomWords) external diamondPaused {
     require(LibMeta.msgSender() == s.vrfCoordinator, "Only VRFCoordinator can fulfill");
     uint256 tokenId = s.vrfRequestIdToTokenId[requestId];
     LibRealm.updateRemainingAlchemica(tokenId, randomWords, s.vrfRequestIdToSurveyingRound[requestId]);

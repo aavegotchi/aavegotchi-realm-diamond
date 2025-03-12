@@ -78,12 +78,7 @@ contract ERC721Facet is Modifiers {
   /// @param _to The new owner
   /// @param _tokenId The NFT to transfer
   /// @param _data Additional data with no specified format, sent in call to `_to`
-  function safeTransferFrom(
-    address _from,
-    address _to,
-    uint256 _tokenId,
-    bytes calldata _data
-  ) public {
+  function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes calldata _data) public diamondPaused {
     address sender = LibMeta.msgSender();
     LibERC721.transferFrom(sender, _from, _to, _tokenId);
     LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, _data);
@@ -101,11 +96,7 @@ contract ERC721Facet is Modifiers {
   /// @param _from The current owner of the NFT
   /// @param _to The new owner
   /// @param _tokenId The NFT to transfer
-  function safeTransferFrom(
-    address _from,
-    address _to,
-    uint256 _tokenId
-  ) external {
+  function safeTransferFrom(address _from, address _to, uint256 _tokenId) external diamondPaused {
     address sender = LibMeta.msgSender();
     LibERC721.transferFrom(sender, _from, _to, _tokenId);
     LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, "");
@@ -126,11 +117,7 @@ contract ERC721Facet is Modifiers {
   /// @param _from The current owner of the NFT
   /// @param _to The new owner
   /// @param _tokenId The NFT to transfer
-  function transferFrom(
-    address _from,
-    address _to,
-    uint256 _tokenId
-  ) external {
+  function transferFrom(address _from, address _to, uint256 _tokenId) external diamondPaused {
     address sender = LibMeta.msgSender();
     LibERC721.transferFrom(sender, _from, _to, _tokenId);
 
@@ -145,7 +132,7 @@ contract ERC721Facet is Modifiers {
   ///  operator of the current owner.
   /// @param _approved The new approved NFT controller
   /// @param _tokenId The NFT to approve
-  function approve(address _approved, uint256 _tokenId) external {
+  function approve(address _approved, uint256 _tokenId) external diamondPaused {
     address owner = s.parcels[_tokenId].owner;
     address sender = LibMeta.msgSender();
     require(owner == sender || s.operators[owner][sender], "ERC721: Not owner or operator of token.");
@@ -159,7 +146,7 @@ contract ERC721Facet is Modifiers {
   ///  multiple operators per owner.
   /// @param _operator Address to add to the set of authorized operators
   /// @param _approved True if the operator is approved, false to revoke approval
-  function setApprovalForAll(address _operator, bool _approved) external {
+  function setApprovalForAll(address _operator, bool _approved) external diamondPaused {
     address sender = LibMeta.msgSender();
     s.operators[sender][_operator] = _approved;
     emit LibEvents.ApprovalForAll(sender, _operator, _approved);
@@ -198,12 +185,7 @@ contract ERC721Facet is Modifiers {
     uint256 alphaBoost;
   }
 
-  function safeBatchTransfer(
-    address _from,
-    address _to,
-    uint256[] calldata _tokenIds,
-    bytes calldata _data
-  ) external {
+  function safeBatchTransfer(address _from, address _to, uint256[] calldata _tokenIds, bytes calldata _data) external diamondPaused {
     for (uint256 index = 0; index < _tokenIds.length; index++) {
       safeTransferFrom(_from, _to, _tokenIds[index], _data);
     }
