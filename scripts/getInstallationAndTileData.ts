@@ -1,6 +1,7 @@
 import { Alchemy, Network } from "alchemy-sdk";
 import { ethers } from "hardhat";
-import fs, { existsSync } from "fs";
+import fs from "fs";
+import path from "path";
 import { varsForNetwork } from "../constants";
 
 export const excludedAddresses = [
@@ -10,7 +11,9 @@ export const excludedAddresses = [
 ];
 
 export const vault = "0xdd564df884fd4e217c9ee6f65b4ba6e5641eac63";
-// Configures the Alchemy SDK
+export const gbmDiamond = "0xD5543237C656f25EEA69f1E247b8Fa59ba353306";
+export const rafflesContract = "0x6c723cac1E35FE29a175b287AE242d424c52c1CE";
+
 const config = {
   apiKey: process.env.ALCHEMY_KEY,
   network: Network.MATIC_MAINNET,
@@ -24,6 +27,13 @@ interface TokenHolder {
   }[];
 }
 
+export interface SafeDetails {
+  safeAddress: string;
+  tokenBalances: {
+    tokenId: string;
+  }[];
+}
+
 interface ContractEOAHolder {
   contractOwner: string;
   tokens: TokenHolder;
@@ -34,30 +44,96 @@ const CONTRACTS = {
   tiles: "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355",
 } as const;
 
+const DATA_DIR = path.join(__dirname, "cloneData");
+const DATA_DIR_INSTALLATIONS = path.join(DATA_DIR, "installations");
+const DATA_DIR_TILES = path.join(DATA_DIR, "tiles");
 const FILES = {
-  //all normal installation holders
-  installations: `${__dirname}/cloneData/installations-balances.json`,
-  //all normal tile holders
-  tiles: `${__dirname}/cloneData/tiles-balances.json`,
-  //all irregular contracts that hold installations
-  installationsContracts: `${__dirname}/cloneData/installations-contractsHolders.json`,
-  //all irregular contracts that hold tiles
-  tilesContracts: `${__dirname}/cloneData/tiles-contractsHolders.json`,
-  //all installations held by the vault
-  vaultInstallations: `${__dirname}/cloneData/vault-installations.json`,
-  //all tiles held by the vault
-  vaultTiles: `${__dirname}/cloneData/vault-tiles.json`,
-  //all installations held by the realm diamond
-  realmDiamondInstallations: `${__dirname}/cloneData/realmDiamond-installations.json`,
-  //all tiles held by the realm diamond
-  realmDiamondTiles: `${__dirname}/cloneData/realmDiamond-tiles.json`,
-  //all regular contracts with valid owners that hold installations
-  installationsContractHolderEOAs: `${__dirname}/cloneData/installations-EOAs.json`,
-  //all regular contracts with valid owners that hold tiles
-  tilesContractHolderEOAs: `${__dirname}/cloneData/tiles-EOAs.json`,
+  installations: path.join(
+    DATA_DIR_INSTALLATIONS,
+    "installations-balances.json"
+  ),
+  tiles: path.join(DATA_DIR_TILES, "tiles-balances.json"),
+  installationsContracts: path.join(
+    DATA_DIR_INSTALLATIONS,
+    "installations-contractsHolders.json"
+  ),
+  tilesContracts: path.join(DATA_DIR_TILES, "tiles-contractsHolders.json"),
+  vaultInstallations: path.join(
+    DATA_DIR_INSTALLATIONS,
+    "vault-installations.json"
+  ),
+  vaultTiles: path.join(DATA_DIR_TILES, "vault-tiles.json"),
+  gbmDiamondInstallations: path.join(
+    DATA_DIR_INSTALLATIONS,
+    "gbmDiamond-installations.json"
+  ),
+  gbmDiamondTiles: path.join(DATA_DIR_TILES, "gbmDiamond-tiles.json"),
+  realmDiamondInstallations: path.join(
+    DATA_DIR_INSTALLATIONS,
+    "realmDiamond-installations.json"
+  ),
+  realmDiamondTiles: path.join(DATA_DIR_TILES, "realmDiamond-tiles.json"),
+  installationsContractHolderEOAs: path.join(
+    DATA_DIR_INSTALLATIONS,
+    "installations-EOAs.json"
+  ),
+  tilesContractHolderEOAs: path.join(DATA_DIR_TILES, "tiles-EOAs.json"),
+  rafflesInstallations: path.join(
+    DATA_DIR_INSTALLATIONS,
+    "raffles-installations.json"
+  ),
+  rafflesTiles: path.join(DATA_DIR_TILES, "raffles-tiles.json"),
+  gnosisSafeInstallations: path.join(
+    DATA_DIR_INSTALLATIONS,
+    "gnosisSafe-installations.json"
+  ),
+  gnosisSafeTiles: path.join(DATA_DIR_TILES, "gnosisSafe-tiles.json"),
 } as const;
 
 const alchemy = new Alchemy(config);
+
+const BATCH_SIZE = 100; // Process 100 holders before saving
+const MAX_CONSECUTIVE_ERRORS = 5;
+const RESTART_DELAY = 30000; // 30 seconds
+
+// Separate processed holders files for installations and tiles
+const PROCESSED_INSTALLATIONS_HOLDERS_FILE = path.join(
+  DATA_DIR_INSTALLATIONS,
+  "processed-installations-holders.json"
+);
+const PROCESSED_TILES_HOLDERS_FILE = path.join(
+  DATA_DIR_TILES,
+  "processed-tiles-holders.json"
+);
+
+function ensureDirectoryExists(dir: string): void {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+}
+
+function readJsonFile<T>(filePath: string, defaultValue: T): T {
+  if (!fs.existsSync(filePath)) {
+    return defaultValue;
+  }
+
+  try {
+    const content = fs.readFileSync(filePath, "utf8");
+    const parsed = JSON.parse(content);
+    return parsed as T;
+  } catch (error) {
+    console.error(`Error reading ${filePath}: ${error.message}`);
+    return defaultValue;
+  }
+}
+
+function writeJsonFile<T>(filePath: string, data: T): void {
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+  } catch (error) {
+    console.error(`Error writing to ${filePath}: ${error.message}`);
+  }
+}
 
 async function updateHolderData(
   contractAddress: string,
@@ -65,132 +141,274 @@ async function updateHolderData(
   contractHoldersFilename: string,
   realmDiamondFilename: string,
   vaultFilename: string,
-  contractHolderEOAsFilename: string
-) {
-  const c = await varsForNetwork(ethers);
-  const dir = `${__dirname}/cloneData/`;
-  if (!existsSync(dir)) {
-    fs.mkdirSync(dir);
-  }
-  const response = await alchemy.nft.getOwnersForContract(contractAddress, {
-    withTokenBalances: true,
-  });
-  let holders: TokenHolder[] = response.owners;
+  gbmDiamondFilename: string,
+  contractHolderEOAsFilename: string,
+  rafflesFilename: string,
+  gnosisSafeContractsFilename: string,
+  processedHoldersFile: string // New parameter for processed holders file
+): Promise<void> {
+  try {
+    const c = await varsForNetwork(ethers);
+    console.log("\n=== Starting holder data update ===");
+    console.log(`Contract Address: ${contractAddress}`);
 
-  let existingData = {};
+    ensureDirectoryExists(DATA_DIR);
+    ensureDirectoryExists(DATA_DIR_INSTALLATIONS);
+    ensureDirectoryExists(DATA_DIR_TILES);
+    console.log("Ensuring all data directory exists...");
 
-  if (existsSync(filename)) {
-    const fileContent = await fs.readFileSync(filename, "utf8");
-    existingData = JSON.parse(fileContent);
-  }
+    console.log("\nFetching holders from Alchemy...");
+    const response = await alchemy.nft.getOwnersForContract(contractAddress, {
+      withTokenBalances: true,
+    });
+    const holders = response.owners;
+    console.log(`Found ${holders.length} total holders`);
 
-  const contractHolders: TokenHolder[] = [];
-  const realmDiamondHolders: TokenHolder[] = [];
-  const vaultHolders: TokenHolder[] = [];
-  const contractEOAs: ContractEOAHolder[] = [];
-  // const realmDiamondEOAs: string[] = [];
-  // const vaultEOAs: string[] = [];
-  console.log(holders.length);
+    let existingData = readJsonFile<Record<string, TokenHolder>>(filename, {});
+    const contractHolders: TokenHolder[] = [];
+    const realmDiamondHolders: TokenHolder[] = [];
+    const vaultHolders: TokenHolder[] = [];
+    const contractEOAs: ContractEOAHolder[] = [];
+    const gbmDiamondHolders: TokenHolder[] = [];
+    const rafflesHolders: TokenHolder[] = [];
+    const gnosisSafeContracts: SafeDetails[] = [];
 
-  for (let i = 0; i < holders.length; i++) {
-    const holder = holders[i];
-    const { ownerAddress } = holder;
+    let regularHoldersCount = 0;
+    let contractHoldersCount = 0;
+    let excludedCount = 0;
+    const processedHolders = readJsonFile<string[]>(processedHoldersFile, []);
+    console.log(`Found ${processedHolders.length} already processed holders`);
 
-    // Skip excluded addresses immediately
-    if (excludedAddresses.includes(ownerAddress)) {
-      continue;
-    }
+    let consecutiveErrors = 0;
+    let batchCount = 0;
 
-    existingData[ownerAddress] = holder;
+    for (let i = 0; i < holders.length; i++) {
+      const holder = holders[i];
+      const { ownerAddress } = holder;
 
-    if (ownerAddress.toLowerCase() === c.realmDiamond.toLowerCase()) {
-      realmDiamondHolders.push(holder);
-      delete existingData[ownerAddress];
-    } else if (ownerAddress.toLowerCase() === vault.toLowerCase()) {
-      vaultHolders.push(holder);
-      delete existingData[ownerAddress];
-    } else {
-      const code = await ethers.provider.getCode(ownerAddress);
-      if (code !== "0x") {
-        const contractOwner = await getOwner(ownerAddress);
-        if (contractOwner) {
-          contractEOAs.push({
-            contractOwner: contractOwner,
-            tokens: holder,
-          });
-        } else {
-          contractHolders.push(holder);
+      // Skip if already processed
+      if (processedHolders.includes(ownerAddress)) {
+        console.log(`Skipping already processed holder ${ownerAddress}`);
+        continue;
+      }
+
+      try {
+        if (excludedAddresses.includes(ownerAddress)) {
+          excludedCount++;
+          continue;
         }
-        delete existingData[ownerAddress];
+
+        existingData[ownerAddress] = holder;
+
+        if (ownerAddress.toLowerCase() === c.realmDiamond.toLowerCase()) {
+          realmDiamondHolders.push(holder);
+          delete existingData[ownerAddress];
+        } else if (ownerAddress.toLowerCase() === vault.toLowerCase()) {
+          vaultHolders.push(holder);
+          delete existingData[ownerAddress];
+        } else if (ownerAddress.toLowerCase() === gbmDiamond.toLowerCase()) {
+          gbmDiamondHolders.push(holder);
+          delete existingData[ownerAddress];
+        } else if (
+          ownerAddress.toLowerCase() === rafflesContract.toLowerCase()
+        ) {
+          rafflesHolders.push(holder);
+          delete existingData[ownerAddress];
+        } else {
+          const code = await ethers.provider.getCode(ownerAddress);
+          if (code !== "0x") {
+            contractHoldersCount++;
+            const contractOwner = await getOwner(ownerAddress);
+            if (contractOwner) {
+              contractEOAs.push({ contractOwner, tokens: holder });
+            } else if (isSafe(ownerAddress)) {
+              const gnosisObject = {
+                safeAddress: ownerAddress,
+                tokenBalances: holder.tokenBalances,
+              };
+
+              gnosisSafeContracts.push(gnosisObject);
+            } else {
+              contractHolders.push(holder);
+            }
+            delete existingData[ownerAddress];
+          } else {
+            regularHoldersCount++;
+          }
+        }
+
+        // On successful processing
+        processedHolders.push(ownerAddress);
+        batchCount++;
+        consecutiveErrors = 0;
+
+        // Save progress periodically
+        if (batchCount >= BATCH_SIZE) {
+          console.log(`Saving batch of ${batchCount} processed holders...`);
+          writeJsonFile(processedHoldersFile, processedHolders);
+          batchCount = 0;
+        }
+      } catch (error) {
+        console.error(`Error processing holder ${ownerAddress}:`, error);
+        consecutiveErrors++;
+
+        if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+          console.log(
+            `\nToo many consecutive errors (${consecutiveErrors}). Waiting before continuing...`
+          );
+          writeJsonFile(processedHoldersFile, processedHolders);
+          await new Promise((resolve) => setTimeout(resolve, RESTART_DELAY));
+          consecutiveErrors = 0; // Reset counter after delay
+          continue;
+        }
+      }
+
+      if ((i + 1) % 100 === 0 || i === holders.length - 1) {
+        const progress = (((i + 1) / holders.length) * 100).toFixed(2);
+        console.log(`Progress: ${progress}% (${i + 1}/${holders.length})`);
+        console.log(`Regular holders: ${regularHoldersCount}`);
+        console.log(`All Contract holders: ${contractHoldersCount}`);
+        console.log(`Irregular Contracts: ${contractHolders.length}`);
+        console.log(`Excluded addresses: ${excludedCount}`);
+        console.log(`Realm Diamond holders: ${realmDiamondHolders.length}`);
+        console.log(`Vault holders: ${vaultHolders.length}`);
+        console.log(`GBM Diamond holds: ${gbmDiamondHolders.length} `);
+        console.log(`Raffles Contract holders: ${rafflesHolders.length}\n`);
+        console.log(`Gnosis Safe contracts: ${gnosisSafeContracts.length}\n`);
       }
     }
 
-    console.log(`processed ${i + 1} of ${holders.length} holders`);
+    // Save any remaining processed holders
+    if (batchCount > 0) {
+      writeJsonFile(processedHoldersFile, processedHolders);
+    }
+
+    console.log("\nSaving data to files...");
+    const filesToWrite = [
+      { path: filename, data: existingData, name: "Regular holders" },
+      {
+        path: contractHoldersFilename,
+        data: contractHolders,
+        name: "Contract holders",
+      },
+      {
+        path: realmDiamondFilename,
+        data: realmDiamondHolders,
+        name: "Realm Diamond holders",
+      },
+      { path: vaultFilename, data: vaultHolders, name: "Vault holders" },
+      {
+        path: gbmDiamondFilename,
+        data: gbmDiamondHolders,
+        name: "GBM Diamond holders",
+      },
+      {
+        path: contractHolderEOAsFilename,
+        data: contractEOAs,
+        name: "Contract EOA holders",
+      },
+      {
+        path: rafflesFilename,
+        data: rafflesHolders,
+        name: "Raffles Contract holders",
+      },
+      {
+        path: gnosisSafeContractsFilename,
+        data: gnosisSafeContracts,
+        name: "Gnosis Safe contracts",
+      },
+    ];
+
+    for (const { path, data, name } of filesToWrite) {
+      console.log(`Writing ${name} to ${path}...`);
+      writeJsonFile(path, data);
+    }
+
+    console.log("\n=== Final Summary ===");
+    console.log(`Total holders processed: ${holders.length}`);
+    console.log(`Regular holders: ${regularHoldersCount}`);
+    console.log(`Contract holders: ${contractHoldersCount}`);
+    console.log(`Excluded addresses: ${excludedCount}`);
+    console.log(`Special contract holders:`);
+    console.log(`Realm Diamond holds: ${realmDiamondHolders.length}`);
+    console.log(`Vault holds: ${vaultHolders.length}`);
+    console.log(`GBM Diamond holds: ${gbmDiamondHolders.length} `);
+    console.log(`Raffles Contract holds: ${rafflesHolders.length}`);
+    console.log(`Gnosis Safe contracts: ${gnosisSafeContracts.length}`);
+  } catch (error) {
+    console.error("\n=== Error in updateHolderData ===");
+    console.error(error);
+    throw error;
   }
-
-  const writePromises = [
-    fs.writeFileSync(filename, JSON.stringify(existingData, null, 2), "utf8"),
-    fs.writeFileSync(
-      contractHoldersFilename,
-      JSON.stringify(contractHolders, null, 2),
-      "utf8"
-    ),
-    fs.writeFileSync(
-      realmDiamondFilename,
-      JSON.stringify(realmDiamondHolders, null, 2),
-      "utf8"
-    ),
-    fs.writeFileSync(
-      vaultFilename,
-      JSON.stringify(vaultHolders, null, 2),
-      "utf8"
-    ),
-    fs.writeFileSync(
-      contractHolderEOAsFilename,
-      JSON.stringify(contractEOAs, null, 2),
-      "utf8"
-    ),
-  ];
-
-  await Promise.all(writePromises);
-
-  console.log(`Updated data for ${holders.length} holders in ${filename}`);
 }
 
-const main = async () => {
-  await updateHolderData(
-    CONTRACTS.installations,
-    FILES.installations,
-    FILES.installationsContracts,
-    FILES.realmDiamondInstallations,
-    FILES.vaultInstallations,
-    FILES.installationsContractHolderEOAs
-  );
-
-  await updateHolderData(
-    CONTRACTS.tiles,
-    FILES.tiles,
-    FILES.tilesContracts,
-    FILES.realmDiamondTiles,
-    FILES.vaultTiles,
-    FILES.tilesContractHolderEOAs
-  );
-};
-
-//a simple fn that gets the owner of an arbitrary contract
-//if the call fails return a mild error
-export const getOwner = async (contractAddress: string) => {
-  const owner = await ethers.getContractAt(
-    "contracts/interfaces/Ownable.sol:Ownable",
-    contractAddress
-  );
+export const getOwner = async (contractAddress: string): Promise<string> => {
   try {
-    const ownerAddress = await owner.owner();
-    return ownerAddress;
+    const owner = await ethers.getContractAt(
+      "contracts/interfaces/Ownable.sol:Ownable",
+      contractAddress
+    );
+    return await owner.owner();
   } catch (error) {
-    console.log(`Error getting owner of ${contractAddress}: ${error}`);
+    console.debug(`Ùnknown contract`);
     return "";
   }
 };
 
-main();
+export const isSafe = async (contractAddress: string): Promise<boolean> => {
+  try {
+    const safe = await ethers.getContractAt("ISafe", contractAddress);
+    const version = await safe.VERSION();
+    return version === "1.3.0";
+  } catch (error) {
+    return false;
+  }
+};
+
+async function main() {
+  try {
+    console.log("Starting installation and tile data update...");
+
+    console.log("\nProcessing installations...");
+    await updateHolderData(
+      CONTRACTS.installations,
+      FILES.installations,
+      FILES.installationsContracts,
+      FILES.realmDiamondInstallations,
+      FILES.vaultInstallations,
+      FILES.gbmDiamondInstallations,
+      FILES.installationsContractHolderEOAs,
+      FILES.rafflesInstallations,
+      FILES.gnosisSafeInstallations,
+      PROCESSED_INSTALLATIONS_HOLDERS_FILE
+    );
+
+    console.log("\nProcessing tiles...");
+    await updateHolderData(
+      CONTRACTS.tiles,
+      FILES.tiles,
+      FILES.tilesContracts,
+      FILES.realmDiamondTiles,
+      FILES.vaultTiles,
+      FILES.gbmDiamondTiles,
+      FILES.tilesContractHolderEOAs,
+      FILES.rafflesTiles,
+      FILES.gnosisSafeTiles,
+      PROCESSED_TILES_HOLDERS_FILE
+    );
+
+    console.log("\nAll data processing completed successfully");
+  } catch (error) {
+    console.error("Fatal error:", error);
+    process.exit(1);
+  }
+}
+
+if (require.main === module) {
+  main()
+    .then(() => process.exit(0))
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
+}

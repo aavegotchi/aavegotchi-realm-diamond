@@ -82,7 +82,7 @@ module.exports = {
     },
     base: {
       url: process.env.BASE_URL,
-      accounts: [process.env.BASE_SECRET],
+      accounts: [process.env.SECRET],
       verify: {
         etherscan: {
           apiUrl: "https://api.basescan.org/api",
