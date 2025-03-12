@@ -49,7 +49,7 @@ async function getTotalRemainingAlchemicaAndSurveyRounds(): Promise<
     BigNumber.from(0), // ALPHA
     BigNumber.from(0), // KEK
   ];
-  const surveyRoundCounts: SurveyRoundCount[] = Array(9)
+  const surveyRoundCounts: SurveyRoundCount[] = Array(11)
     .fill(null)
     .map(() => ({
       total: 0,
@@ -66,7 +66,7 @@ async function getTotalRemainingAlchemicaAndSurveyRounds(): Promise<
         );
       });
 
-      if (parcel.surveyRound >= 0 && parcel.surveyRound <= 8) {
+      if (parcel.surveyRound >= 0 && parcel.surveyRound <= 10) {
         surveyRoundCounts[parcel.surveyRound].total++;
         surveyRoundCounts[parcel.surveyRound].sizeCount[parcel.size]++;
       }
