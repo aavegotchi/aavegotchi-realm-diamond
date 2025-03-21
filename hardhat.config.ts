@@ -17,6 +17,7 @@ require("./tasks/releaseVesting.ts");
 require("./tasks/batchTransferAlchemica");
 require("./tasks/fixParcelStartPosition");
 require("./tasks/fixBuggedParcel");
+require("./tasks/fixUpgradeHashes");
 
 const GWEI = 1000 * 1000 * 1000;
 
@@ -74,12 +75,12 @@ module.exports = {
       maxPriorityFeePerGas: 1 * GWEI,
       //   timeout: 90000
     },
-    mumbai: {
-      url: process.env.MUMBAI_URL,
-      accounts: [process.env.SECRET],
-      blockGasLimit: 20000000,
-      // gasPrice: 1000000000,
-    },
+    // mumbai: {
+    //   url: process.env.MUMBAI_URL,
+    //   accounts: [process.env.SECRET],
+    //   blockGasLimit: 20000000,
+    //   // gasPrice: 1000000000,
+    // },
     base: {
       url: process.env.BASE_URL,
       accounts: [process.env.BASE_SECRET],
@@ -91,15 +92,15 @@ module.exports = {
       },
       // gasPrice: 1000000000,
     },
-    kovan: {
-      url: process.env.KOVAN_URL,
-      // url: 'https://rpc-mainnet.maticvigil.com/',
-      accounts: [process.env.SECRET],
-      // blockGasLimit: 20000000,
-      blockGasLimit: 12000000,
-      gasPrice: 100000000000,
-      //   timeout: 90000
-    },
+    // kovan: {
+    //   url: process.env.KOVAN_URL,
+    //   // url: 'https://rpc-mainnet.maticvigil.com/',
+    //   accounts: [process.env.SECRET],
+    //   // blockGasLimit: 20000000,
+    //   blockGasLimit: 12000000,
+    //   gasPrice: 100000000000,
+    //   //   timeout: 90000
+    // },
   },
 
   gasReporter: {
