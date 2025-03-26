@@ -38,7 +38,7 @@ contract AlchemicaFacet is Modifiers {
   // /// @notice Allow the owner of a parcel to start surveying his parcel
   // /// @dev Will throw if a surveying round has not started
   // /// @param _realmId Identifier of the parcel to survey
-  function startSurveying(uint256 _realmId) external onlyParcelOwner(_realmId) gameActive {
+  function startSurveying(uint256 _realmId) external onlyParcelOwner(_realmId) diamondPaused gameActive {
     //current round and surveying round both begin at 0.
     //after calling VRF, currentRound increases
     require(s.parcels[_realmId].currentRound <= s.surveyingRound, "AlchemicaFacet: Round not released");
@@ -188,7 +188,7 @@ contract AlchemicaFacet is Modifiers {
   /// @param _realmId Identifier of parcel to claim alchemica from
   /// @param _gotchiId Identifier of Aavegotchi to use for alchemica collecction/claiming
   /// @param _signature Message signature used for backend validation
-  function claimAvailableAlchemica(uint256 _realmId, uint256 _gotchiId, bytes memory _signature) external gameActive {
+  function claimAvailableAlchemica(uint256 _realmId, uint256 _gotchiId, bytes memory _signature) external diamondPaused gameActive {
     //Check signature
     require(
       LibSignature.isValid(keccak256(abi.encode(_realmId, _gotchiId, s.lastClaimedAlchemica[_realmId])), _signature, s.backendPubKey),
@@ -227,7 +227,7 @@ contract AlchemicaFacet is Modifiers {
   /// @param _gotchiId Identifier of parent ERC721 aavegotchi which alchemica is channeled to
   /// @param _lastChanneled The last time alchemica was channeled in this _realmId
   /// @param _signature Message signature used for backend validation
-  function channelAlchemica(uint256 _realmId, uint256 _gotchiId, uint256 _lastChanneled, bytes memory _signature) external gameActive {
+  function channelAlchemica(uint256 _realmId, uint256 _gotchiId, uint256 _lastChanneled, bytes memory _signature) external diamondPaused gameActive {
     AavegotchiDiamond diamond = AavegotchiDiamond(s.aavegotchiDiamond);
 
     //gotchi CANNOT have active listing for lending
@@ -340,7 +340,11 @@ contract AlchemicaFacet is Modifiers {
   /// @param _gotchiIds Array of Gotchi IDs
   /// @param _tokenAddresses Array of tokens to transfer
   /// @param _amounts Nested array of amounts to transfer.
-  function batchTransferTokensToGotchis(uint256[] calldata _gotchiIds, address[] calldata _tokenAddresses, uint256[][] calldata _amounts) external {
+  function batchTransferTokensToGotchis(
+    uint256[] calldata _gotchiIds,
+    address[] calldata _tokenAddresses,
+    uint256[][] calldata _amounts
+  ) external diamondPaused {
     require(_gotchiIds.length == _amounts.length, "AlchemicaFacet: Mismatched array lengths");
 
     for (uint256 i = 0; i < _gotchiIds.length; i++) {
@@ -399,7 +403,7 @@ contract AlchemicaFacet is Modifiers {
     }
   }
 
-  function batchTransferTokens(address[][] calldata _tokens, uint256[][] calldata _amounts, address[] calldata _to) external {
+  function batchTransferTokens(address[][] calldata _tokens, uint256[][] calldata _amounts, address[] calldata _to) external diamondPaused {
     require(_tokens.length == _amounts.length, "Array length mismatch");
     require(_to.length == _amounts.length, "Array length mismatch");
     for (uint256 i; i < _to.length; i++) {
