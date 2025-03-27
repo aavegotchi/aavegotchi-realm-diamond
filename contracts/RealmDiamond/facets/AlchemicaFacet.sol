@@ -27,6 +27,14 @@ contract AlchemicaFacet is Modifiers {
 
   event SurveyingRoundProgressed(uint256 indexed _newRound);
 
+  event TransferTokensWithGotchiId(
+    address indexed _sender,
+    uint256 indexed _gotchiId,
+    address _tokenAddress,
+    address _targetAddress,
+    uint256 _amount
+  );
+
   event TransferTokensToGotchi(address indexed _sender, uint256 indexed _gotchiId, address _tokenAddresses, uint256 _amount);
 
   error ERC20TransferFailed(string _tokenName);
@@ -349,6 +357,27 @@ contract AlchemicaFacet is Modifiers {
       for (uint256 j = 0; j < _amounts[i].length; j++) {
         if (_amounts[i][j] > 0) {
           alchemicas[j].transferFrom(msg.sender, _targets[i], _amounts[i][j]);
+        }
+      }
+    }
+  }
+
+  function batchTransferAlchemicaWithGotchiIds(uint256[] calldata _gotchiIds, address[] calldata _targets, uint256[4][] calldata _amounts) external {
+    require(_gotchiIds.length == _amounts.length, "AlchemicaFacet: Mismatched array lengths");
+    require(_targets.length == _amounts.length, "AlchemicaFacet: Mismatched array lengths");
+
+    IERC20Mintable[4] memory alchemicas = [
+      IERC20Mintable(s.alchemicaAddresses[0]),
+      IERC20Mintable(s.alchemicaAddresses[1]),
+      IERC20Mintable(s.alchemicaAddresses[2]),
+      IERC20Mintable(s.alchemicaAddresses[3])
+    ];
+
+    for (uint256 i = 0; i < _targets.length; i++) {
+      for (uint256 j = 0; j < _amounts[i].length; j++) {
+        if (_amounts[i][j] > 0) {
+          alchemicas[j].transferFrom(msg.sender, _targets[i], _amounts[i][j]);
+          emit TransferTokensWithGotchiId(msg.sender, _gotchiIds[i], s.alchemicaAddresses[j], _targets[i], _amounts[i][j]);
         }
       }
     }
