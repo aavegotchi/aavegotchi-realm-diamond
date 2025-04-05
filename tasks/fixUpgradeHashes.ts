@@ -128,7 +128,7 @@ task("fixUpgradeHashes", "Fixes upgrade hashes for a parcel")
       )) as OwnershipFacet;
 
       //TO-DO: Use the correct signer
-      const signer = new LedgerSigner(hre.ethers.provider, "m/44'/60'/2'/0/0");
+      const signer = new LedgerSigner(hre.ethers.provider, "m/44'/60'/1'/0/0");
 
       let installationAdminFacet = (await hre.ethers.getContractAt(
         "InstallationAdminFacet",
@@ -149,7 +149,8 @@ task("fixUpgradeHashes", "Fixes upgrade hashes for a parcel")
 
       console.log("Deleting bugged upgrades");
       const tx = await installationAdminFacet.deleteBuggedUpgrades(
-        deleteBuggedUpgradesInput
+        deleteBuggedUpgradesInput,
+        { gasPrice: 35000000000 }
       );
       await tx.wait();
       console.log("Deleted bugged upgrades in txn", tx.hash);
