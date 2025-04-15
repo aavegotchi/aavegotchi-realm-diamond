@@ -18,6 +18,7 @@ require("./tasks/batchTransferAlchemica");
 require("./tasks/fixParcelStartPosition");
 require("./tasks/fixBuggedParcel");
 require("./tasks/fixUpgradeHashes");
+require("./tasks/distributeGhst");
 
 const GWEI = 1000 * 1000 * 1000;
 
