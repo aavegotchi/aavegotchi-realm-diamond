@@ -218,7 +218,7 @@ export interface RelayerInfo {
 //   });
 // }
 
-export const relayerAddress = "0xb6384935d68e9858f8385ebeed7db84fc93b1420";
+export const relayerAddress = "0x821049b2273b0cCd34a64D1B08A3346F110eCAe2";
 
 export async function getRelayerSigner(hre: HardhatRuntimeEnvironment) {
   const testing = ["hardhat", "localhost"].includes(hre.network.name);

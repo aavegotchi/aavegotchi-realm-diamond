@@ -1,6 +1,7 @@
 import { task } from "hardhat/config";
 import { BigNumber } from "ethers";
 import { gasPrice, varsForNetwork } from "../constants";
+import { getRelayerSigner } from "../scripts/helperFunctions";
 
 interface DistributionResult {
   address: string;
@@ -77,14 +78,20 @@ task("distribute-ghst", "Distribute GHST tokens based on leaderboard results")
 
       // Now use batchTransferTokens functionality to send the tokens
       const c = await varsForNetwork(hre.ethers);
+
+      // const [signer] = await hre.ethers.getSigners();
+
+      const signer = await getRelayerSigner(hre);
+
+      const signerAddress = await signer.getAddress();
+
       const alchemicaFacet = await hre.ethers.getContractAt(
         "AlchemicaFacet",
-        c.realmDiamond
+        c.realmDiamond,
+        signer
       );
 
-      const ghstToken = await hre.ethers.getContractAt("ERC20", c.ghst);
-      const [signer] = await hre.ethers.getSigners();
-      const signerAddress = await signer.getAddress();
+      const ghstToken = await hre.ethers.getContractAt("ERC20", c.ghst, signer);
 
       // Calculate total amount needed
       const totalNeeded = distribution.reduce(
