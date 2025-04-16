@@ -5,7 +5,8 @@ import "../../libraries/AppStorage.sol";
 import "./RealmFacet.sol";
 import "../../libraries/LibRealm.sol";
 import "../../libraries/LibMeta.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
+import "@api3/airnode-protocol/contracts/rrp/interfaces/IAirnodeRrpV0.sol";
+//import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "../../libraries/LibAlchemica.sol";
 import "../../libraries/LibSignature.sol";
 import {IERC20Extended} from "../../interfaces/IERC20Extended.sol";
@@ -51,17 +52,40 @@ contract AlchemicaFacet is Modifiers {
     emit StartSurveying(_realmId, s.parcels[_realmId].currentRound);
   }
 
+//  function testApi3Qrng() external {
+//    bytes32 requestId = IAirnodeRrpV0(s.api3AirnodeRrp).makeFullRequest(
+//      s.api3QrngConfig.airnode,
+//      s.api3QrngConfig.endpointId,
+//      s.api3QrngConfig.sponsor,
+//      s.api3QrngConfig.sponsorWallet,
+//      address(this),
+//      bytes4(keccak256("testApi3FulfillRandomWords(bytes32,bytes)")),
+//      abi.encode(bytes32("1u"), bytes32("size"), s.api3QrngConfig.numWords)
+//    );
+//  }
+//
+//  function testChainlink() external {
+//    uint256 requestId = VRFCoordinatorV2Interface(s.vrfCoordinator).requestRandomWords(
+//      s.requestConfig.keyHash,
+//      s.requestConfig.subId,
+//      s.requestConfig.requestConfirmations,
+//      s.requestConfig.callbackGasLimit,
+//      s.requestConfig.numWords
+//    );
+//  }
+
   function drawRandomNumbers(uint256 _realmId, uint256 _surveyingRound) internal {
-    // Will revert if subscription is not set and funded.
-    uint256 requestId = VRFCoordinatorV2Interface(s.vrfCoordinator).requestRandomWords(
-      s.requestConfig.keyHash,
-      s.requestConfig.subId,
-      s.requestConfig.requestConfirmations,
-      s.requestConfig.callbackGasLimit,
-      s.requestConfig.numWords
+    bytes32 requestId = IAirnodeRrpV0(s.api3AirnodeRrp).makeFullRequest(
+      s.api3QrngConfig.airnode,
+      s.api3QrngConfig.endpointId,
+      s.api3QrngConfig.sponsor,
+      s.api3QrngConfig.sponsorWallet,
+      address(this),
+      bytes4(keccak256("api3FulfillRandomWords(bytes32,bytes)")),
+      abi.encode(bytes32("1u"), bytes32("size"), s.api3QrngConfig.numWords)
     );
-    s.vrfRequestIdToTokenId[requestId] = _realmId;
-    s.vrfRequestIdToSurveyingRound[requestId] = _surveyingRound;
+    s.api3QrngRequestIdToTokenId[requestId] = _realmId;
+    s.api3QrngRequestIdToSurveyingRound[requestId] = _surveyingRound;
   }
 
   function getAlchemicaAddresses() external view returns (address[4] memory) {
