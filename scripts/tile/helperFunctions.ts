@@ -1,5 +1,5 @@
 import { Contract } from "@ethersproject/contracts";
-import { DiamondLoupeFacet } from "../../typechain";
+import { DiamondLoupeFacet } from "../../typechain-types";
 
 export const gasPrice = 900000000000;
 
@@ -63,6 +63,10 @@ export const mumbaiDiamondAddress =
 
 export const maticRealmDiamondAddress =
   "0x1d0360bac7299c86ec8e99d0c1c9a95fefaf2a11";
+export const maticInstallationDiamondAddress =
+  "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
+export const maticTileDiamondAddress =
+  "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
 
 export const maticAavegotchiDiamondAddress =
   "0x86935f11c86623dec8a25696e1c19a8659cbf95d";
