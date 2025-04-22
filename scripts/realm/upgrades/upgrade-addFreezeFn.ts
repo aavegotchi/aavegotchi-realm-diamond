@@ -32,6 +32,11 @@ export async function upgrade() {
       addSelectors: [`function setDiamondPaused(bool _paused) external`],
       removeSelectors: [],
     },
+    {
+      facetName: "AlchemicaFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
   ];
 
   const ownership = (await ethers.getContractAt(
