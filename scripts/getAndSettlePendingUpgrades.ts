@@ -9,70 +9,41 @@ import { ParcelIO } from "./getParcelMetadata";
 
 const DATA_DIR = path.join(__dirname, "cloneData", "parcel", "metadata");
 const PROCESSED_UPGRADES_FILE = path.join(DATA_DIR, "processed-upgrades.json");
-const BATCH_SIZE = 2;
+const BATCH_SIZE = 20;
 
-// Add interface for upgrade analytics
+// Simplified analytics interface
 interface UpgradeAnalytics {
-  normalParcelsWithUpgrades: Set<string>;
-  contractParcelsWithUpgrades: Set<string>;
-  contractsWithOwnerUpgrades: Set<string>;
-  vaultParcelsWithUpgrades: Set<string>;
-  gbmParcelsWithUpgrades: Set<string>;
-  rafflesParcelsWithUpgrades: Set<string>;
-  safeParcelsWithUpgrades: Set<string>;
+  parcelsWithUpgrades: Set<string>;
   totalUpgradeCount: number;
 }
 
-// Add function to display upgrade analytics
+// Simplified display function
 function displayUpgradeAnalytics(
   analytics: UpgradeAnalytics,
   processedUpgrades: Set<string>
 ) {
-  const categories = {
-    "Normal addresses": analytics.normalParcelsWithUpgrades,
-    "Unknown contracts": analytics.contractParcelsWithUpgrades,
-    "Contracts with known owners": analytics.contractsWithOwnerUpgrades,
-    Vault: analytics.vaultParcelsWithUpgrades,
-    GBM: analytics.gbmParcelsWithUpgrades,
-    Raffles: analytics.rafflesParcelsWithUpgrades,
-    "Gnosis Safe": analytics.safeParcelsWithUpgrades,
-  };
-
-  // Get all parcels that need upgrades
-  const allParcelsNeedingUpgrades = new Set<string>();
-  Object.values(categories).forEach((set) =>
-    set.forEach((parcelId) => allParcelsNeedingUpgrades.add(parcelId))
-  );
-
   console.log("\n=== Upgrade Analytics ===");
-  console.log("\nParcels with Pending Upgrades by Category:");
-  Object.entries(categories).forEach(([name, set]) => {
-    console.log(`${name}: ${set.size}`);
-  });
-
-  const totalParcelsWithUpgrades = allParcelsNeedingUpgrades.size;
-
-  // Only count processed parcels that actually need upgrades
-  const validProcessedCount = Array.from(processedUpgrades).filter((id) =>
-    allParcelsNeedingUpgrades.has(id)
-  ).length;
-
   console.log(
-    `\nTotal parcels with pending upgrades: ${totalParcelsWithUpgrades}`
+    `\nTotal parcels with pending upgrades: ${analytics.parcelsWithUpgrades.size}`
   );
   console.log(
     `Total individual upgrades to process: ${analytics.totalUpgradeCount}`
   );
 
+  const validProcessedCount = Array.from(processedUpgrades).filter((id) =>
+    analytics.parcelsWithUpgrades.has(id)
+  ).length;
+
   console.log(
-    `\nProgress: ${validProcessedCount}/${totalParcelsWithUpgrades} parcels processed ` +
-      `(${((validProcessedCount / totalParcelsWithUpgrades) * 100).toFixed(
-        2
-      )}%)`
+    `\nProgress: ${validProcessedCount}/${analytics.parcelsWithUpgrades.size} parcels processed ` +
+      `(${(
+        (validProcessedCount / analytics.parcelsWithUpgrades.size) *
+        100
+      ).toFixed(2)}%)`
   );
 }
 
-// Add function to read/write processed upgrades
+// Read/write processed upgrades
 const readProcessedUpgrades = (): Set<string> =>
   new Set(
     fs.existsSync(PROCESSED_UPGRADES_FILE)
@@ -86,17 +57,12 @@ const writeProcessedUpgrades = (processed: Set<string>): void =>
     JSON.stringify(Array.from(processed), null, 2)
   );
 
+// Simplified generator function
 async function* findParcelsWithUpgrades(
   processedUpgrades: Set<string>
 ): AsyncGenerator<{ parcelId: string; analytics: UpgradeAnalytics }> {
   const analytics: UpgradeAnalytics = {
-    normalParcelsWithUpgrades: new Set<string>(),
-    contractParcelsWithUpgrades: new Set<string>(),
-    contractsWithOwnerUpgrades: new Set<string>(),
-    vaultParcelsWithUpgrades: new Set<string>(),
-    gbmParcelsWithUpgrades: new Set<string>(),
-    rafflesParcelsWithUpgrades: new Set<string>(),
-    safeParcelsWithUpgrades: new Set<string>(),
+    parcelsWithUpgrades: new Set<string>(),
     totalUpgradeCount: 0,
   };
 
@@ -118,13 +84,7 @@ async function* findParcelsWithUpgrades(
       //@ts-ignore
       const upgradeCount = parseInt(parcelData.upgradeQueueLength.hex, 16);
       if (upgradeCount > 0) {
-        const category = file.includes("parcels-")
-          ? file.replace("parcels-", "").replace(".json", "")
-          : "normal";
-
-        const analyticsKey =
-          `${category}ParcelsWithUpgrades` as keyof UpgradeAnalytics;
-        analytics[analyticsKey]?.add(parcelId);
+        analytics.parcelsWithUpgrades.add(parcelId);
         analytics.totalUpgradeCount += upgradeCount;
         yield { parcelId, analytics };
       }
@@ -189,21 +149,8 @@ async function main() {
 
   if (latestAnalytics) {
     displayUpgradeAnalytics(latestAnalytics, processedUpgrades);
-    // Update final message to use same count as analytics
-    const allParcelsNeedingUpgrades = new Set<string>();
-    Object.values({
-      "Normal addresses": latestAnalytics.normalParcelsWithUpgrades,
-      "Unknown contracts": latestAnalytics.contractParcelsWithUpgrades,
-      "Contracts with known owners": latestAnalytics.contractsWithOwnerUpgrades,
-      Vault: latestAnalytics.vaultParcelsWithUpgrades,
-      GBM: latestAnalytics.gbmParcelsWithUpgrades,
-      Raffles: latestAnalytics.rafflesParcelsWithUpgrades,
-      "Gnosis Safe": latestAnalytics.safeParcelsWithUpgrades,
-    }).forEach((set) =>
-      set.forEach((parcelId) => allParcelsNeedingUpgrades.add(parcelId))
-    );
     totalProcessed = Array.from(processedUpgrades).filter((id) =>
-      allParcelsNeedingUpgrades.has(id)
+      latestAnalytics.parcelsWithUpgrades.has(id)
     ).length;
   }
 
