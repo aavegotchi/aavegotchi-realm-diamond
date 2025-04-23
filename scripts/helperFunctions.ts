@@ -2,7 +2,11 @@ import { BigNumber, Signer, Contract, Wallet, Signature } from "ethers";
 import { ethers } from "ethers";
 
 import { Domain, PERMIT_TYPES } from "../constants";
-import { HardhatEthersHelpers, Network } from "hardhat/types";
+import {
+  HardhatEthersHelpers,
+  HardhatRuntimeEnvironment,
+  Network,
+} from "hardhat/types";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 import {
   DefenderRelayProvider,
@@ -201,15 +205,60 @@ export interface RelayerInfo {
   apiKey: string;
   apiSecret: string;
 }
-export function getRelayerSigner() {
-  const credentials: RelayerInfo = {
-    apiKey: process.env.DEFENDER_APIKEY!,
-    apiSecret: process.env.DEFENDER_SECRET!,
-  };
+// export function getRelayerSigner() {
+//   const credentials: RelayerInfo = {
+//     apiKey: process.env.DEFENDER_APIKEY!,
+//     apiSecret: process.env.DEFENDER_SECRET!,
+//   };
 
-  const provider = new DefenderRelayProvider(credentials);
-  return new DefenderRelaySigner(credentials, provider, {
-    speed: "fast",
-    validForSeconds: 3600,
-  });
+//   const provider = new DefenderRelayProvider(credentials);
+//   return new DefenderRelaySigner(credentials, provider, {
+//     speed: "fast",
+//     validForSeconds: 3600,
+//   });
+// }
+
+export const relayerAddress = "0x821049b2273b0cCd34a64D1B08A3346F110eCAe2";
+
+export async function getRelayerSigner(hre: HardhatRuntimeEnvironment) {
+  const testing = ["hardhat", "localhost"].includes(hre.network.name);
+  if (testing) {
+    console.log("Using Hardhat");
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [relayerAddress],
+    });
+    await hre.network.provider.request({
+      method: "hardhat_setBalance",
+      params: [relayerAddress, "0x100000000000000000000000"],
+    });
+    return await hre.ethers.provider.getSigner(relayerAddress);
+  } else if (hre.network.name === "matic") {
+    console.log("USING MATIC");
+
+    const credentials: RelayerInfo = {
+      apiKey: process.env.DEFENDER_APIKEY!,
+      apiSecret: process.env.DEFENDER_SECRET!,
+    };
+
+    const provider = new DefenderRelayProvider(credentials);
+    return new DefenderRelaySigner(credentials, provider, {
+      speed: "safeLow",
+      validForSeconds: 7200,
+    });
+  } else if (
+    [
+      "tenderly",
+      "polter",
+      "base-sepolia",
+      "amoy",
+      "geist",
+      "baseSepolia",
+    ].includes(hre.network.name)
+  ) {
+    //impersonate
+    return (await hre.ethers.getSigners())[0];
+  } else {
+    throw Error("Incorrect network selected");
+  }
 }
