@@ -94,7 +94,7 @@ async function writeJsonFile<T>(filePath: string, data: T): Promise<void> {
 }
 
 // GraphQL query function
-async function getParcelIds(): Promise<string[]> {
+export async function getParcelIds(): Promise<string[]> {
   const apollo = require("apollo-fetch");
   const uri = process.env.GOTCHIVERSE_URI;
   const graph = apollo.createApolloFetch({ uri });

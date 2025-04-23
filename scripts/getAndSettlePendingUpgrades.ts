@@ -1,7 +1,11 @@
 import { ethers } from "hardhat";
-import { InstallationUpgradeFacet } from "../typechain-types";
+import {
+  InstallationUpgradeFacet,
+  RealmGettersAndSettersFacet,
+} from "../typechain-types";
 // import { PARCELS_FILE, ParcelIO } from "./getParcelData";
 
+import { getParcelIds } from "./getParcelMetadata";
 import fs from "fs";
 import path from "path";
 import { varsForNetwork } from "../constants";
@@ -57,46 +61,78 @@ const writeProcessedUpgrades = (processed: Set<string>): void =>
     JSON.stringify(Array.from(processed), null, 2)
   );
 
-// Simplified generator function
+// Modified generator function to use on-chain data with batching
 async function* findParcelsWithUpgrades(
-  processedUpgrades: Set<string>
+  processedUpgrades: Set<string>,
+  realmGettersAndSettersFacet: RealmGettersAndSettersFacet
 ): AsyncGenerator<{ parcelId: string; analytics: UpgradeAnalytics }> {
   const analytics: UpgradeAnalytics = {
     parcelsWithUpgrades: new Set<string>(),
     totalUpgradeCount: 0,
   };
 
-  const files = fs
-    .readdirSync(DATA_DIR)
-    .filter(
-      (file) =>
-        file.endsWith(".json") &&
-        !["processed-parcels.json", "processed-upgrades.json"].includes(file)
-    );
+  const allParcelIds = await getParcelIds();
+  console.log(`Found ${allParcelIds.length} total parcels to check`);
 
-  for (const file of files) {
-    console.log(`Processing ${file} for upgrades...`);
-    const parcelsJson = JSON.parse(
-      await fs.promises.readFile(path.join(DATA_DIR, file), "utf8")
-    );
+  let checkedCount = 0;
+  let foundWithUpgrades = 0;
+  const CHECK_BATCH_SIZE = 500; // Process 500 parcels at a time for checking
+  const PROCESS_BATCH_SIZE = 20; // Process 20 parcels at a time for upgrades
 
-    for (const [parcelId, parcelData] of Object.entries(parcelsJson)) {
-      //@ts-ignore
-      const upgradeCount = parseInt(parcelData.upgradeQueueLength.hex, 16);
-      if (upgradeCount > 0) {
-        analytics.parcelsWithUpgrades.add(parcelId);
-        analytics.totalUpgradeCount += upgradeCount;
-        yield { parcelId, analytics };
+  // Process parcels in batches
+  for (let i = 0; i < allParcelIds.length; i += CHECK_BATCH_SIZE) {
+    const batchParcelIds = allParcelIds.slice(i, i + CHECK_BATCH_SIZE);
+    checkedCount += batchParcelIds.length;
+
+    try {
+      const upgradeQueueLengths =
+        await realmGettersAndSettersFacet.batchGetParcelUpgradeQueueLength(
+          batchParcelIds
+        );
+
+      // Process results for this batch
+      for (let j = 0; j < batchParcelIds.length; j++) {
+        const parcelId = batchParcelIds[j];
+        const queueLength = upgradeQueueLengths[j];
+
+        if (queueLength.gt(0)) {
+          foundWithUpgrades++;
+          analytics.parcelsWithUpgrades.add(parcelId);
+          analytics.totalUpgradeCount += queueLength.toNumber();
+          console.log(
+            `Found parcel ${parcelId} with ${queueLength.toNumber()} upgrades`
+          );
+          yield { parcelId, analytics };
+        }
       }
+
+      // Log progress
+      console.log(
+        `Checked ${checkedCount}/${allParcelIds.length} parcels (${(
+          (checkedCount / allParcelIds.length) *
+          100
+        ).toFixed(2)}%)`
+      );
+      console.log(`Found ${foundWithUpgrades} parcels with upgrades so far`);
+    } catch (error) {
+      console.error(`Error checking batch of parcels:`, error);
     }
   }
+
+  console.log(`\nFinal results:`);
+  console.log(`Checked ${checkedCount} parcels`);
+  console.log(`Found ${foundWithUpgrades} parcels with upgrades`);
+  console.log(`Total upgrades to process: ${analytics.totalUpgradeCount}`);
 }
 
 async function processParcels(
   parcels: string[],
-  processedUpgrades: Set<string>
+  processedUpgrades: Set<string>,
+  installationUpgrade: InstallationUpgradeFacet
 ): Promise<number> {
   try {
+    console.log(`Processing batch of ${parcels.length} parcels...`);
+    // Commented out for testing
     // const tx = await installationUpgrade.finalizeUpgradesForParcels(parcels);
     // await tx.wait();
 
@@ -122,12 +158,19 @@ async function main() {
     c.installationDiamond
   )) as InstallationUpgradeFacet;
 
+  const realmGettersAndSettersFacet = (await ethers.getContractAt(
+    "RealmGettersAndSettersFacet",
+    c.realmDiamond
+  )) as RealmGettersAndSettersFacet;
+
   let currentBatch: string[] = [];
   let totalProcessed = 0;
   let latestAnalytics: UpgradeAnalytics | null = null;
+  const PROCESS_BATCH_SIZE = 20; // Process 20 parcels at a time for upgrades
 
   for await (const { parcelId, analytics } of findParcelsWithUpgrades(
-    processedUpgrades
+    processedUpgrades,
+    realmGettersAndSettersFacet
   )) {
     latestAnalytics = analytics;
 
@@ -137,14 +180,26 @@ async function main() {
     }
 
     currentBatch.push(parcelId);
-    if (currentBatch.length === BATCH_SIZE) {
-      totalProcessed += await processParcels(currentBatch, processedUpgrades);
+    if (currentBatch.length >= PROCESS_BATCH_SIZE) {
+      console.log(
+        `\nReached batch size of ${PROCESS_BATCH_SIZE}, processing upgrades...`
+      );
+      totalProcessed += await processParcels(
+        currentBatch,
+        processedUpgrades,
+        installationUpgrade
+      );
       currentBatch = [];
     }
   }
 
   if (currentBatch.length > 0) {
-    totalProcessed += await processParcels(currentBatch, processedUpgrades);
+    console.log(`\nProcessing remaining ${currentBatch.length} parcels...`);
+    totalProcessed += await processParcels(
+      currentBatch,
+      processedUpgrades,
+      installationUpgrade
+    );
   }
 
   if (latestAnalytics) {
