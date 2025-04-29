@@ -5,7 +5,7 @@ import {
   maticInstallationDiamondAddress,
   maticRealmDiamondAddress,
   maticTileDiamondAddress,
-} from "./tile/helperFunctions";
+} from "../tile/helperFunctions";
 
 export async function lockDiamonds() {
   let signer;
