@@ -2,7 +2,7 @@ import { Alchemy, Network } from "alchemy-sdk";
 import { ethers } from "hardhat";
 import fs from "fs";
 import path from "path";
-import { varsForNetwork } from "../constants";
+import { varsForNetwork } from "../../constants";
 import {
   vault,
   gbmDiamond,

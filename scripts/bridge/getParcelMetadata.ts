@@ -1,9 +1,9 @@
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
-import { varsForNetwork } from "../constants";
-import { RealmGettersAndSettersFacet } from "../typechain-types";
-import { countInstallationOccurrences } from "../data/installations/allInstallations";
-import { countTileOccurrences } from "../data/tiles/tileTypes";
+import { varsForNetwork } from "../../constants";
+import { RealmGettersAndSettersFacet } from "../../typechain-types";
+import { countInstallationOccurrences } from "../../data/installations/allInstallations";
+import { countTileOccurrences } from "../../data/tiles/tileTypes";
 import fs from "fs";
 import path from "path";
 

@@ -2,13 +2,13 @@ import { ethers } from "hardhat";
 import {
   InstallationUpgradeFacet,
   RealmGettersAndSettersFacet,
-} from "../typechain-types";
+} from "../../typechain-types";
 // import { PARCELS_FILE, ParcelIO } from "./getParcelData";
 
 import { getParcelIds } from "./getParcelMetadata";
 import fs from "fs";
 import path from "path";
-import { varsForNetwork } from "../constants";
+import { varsForNetwork } from "../../constants";
 import { ParcelIO } from "./getParcelMetadata";
 
 const DATA_DIR = path.join(__dirname, "cloneData", "parcel", "metadata");

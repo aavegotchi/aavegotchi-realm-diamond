@@ -2,7 +2,7 @@ import { Alchemy, Network } from "alchemy-sdk";
 import { ethers } from "hardhat";
 import fs from "fs";
 import path from "path";
-import { varsForNetwork } from "../constants";
+import { varsForNetwork } from "../../constants";
 
 export const excludedAddresses = [
   "0x0000000000000000000000000000000000000000",
@@ -13,6 +13,7 @@ export const excludedAddresses = [
 export const vault = "0xdd564df884fd4e217c9ee6f65b4ba6e5641eac63";
 export const gbmDiamond = "0xD5543237C656f25EEA69f1E247b8Fa59ba353306";
 export const rafflesContract = "0x6c723cac1E35FE29a175b287AE242d424c52c1CE";
+export const rafflesContract2 = "0xa85f5a59a71842fddaabd4c2cd373300a31750d8";
 
 const config = {
   apiKey: process.env.ALCHEMY_KEY,
@@ -210,7 +211,8 @@ async function updateHolderData(
           gbmDiamondHolders.push(holder);
           delete existingData[ownerAddress];
         } else if (
-          ownerAddress.toLowerCase() === rafflesContract.toLowerCase()
+          ownerAddress.toLowerCase() === rafflesContract.toLowerCase() ||
+          ownerAddress.toLowerCase() === rafflesContract2.toLowerCase()
         ) {
           rafflesHolders.push(holder);
           delete existingData[ownerAddress];
