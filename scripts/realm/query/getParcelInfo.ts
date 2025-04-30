@@ -1,25 +1,20 @@
 /* global ethers hre */
 /* eslint prefer-const: "off" */
 
-import { RealmFacet } from "../../typechain";
-import { maticDiamondAddress } from "../../constants";
-
 //@ts-ignore
 // import hardhat, { run, ethers } from "hardhat";
 
 import { ethers } from "hardhat";
-
-// Init GBM
-const diamondAddress = "0xa44c8e0eCAEFe668947154eE2b803Bd4e6310EFe";
-const aavegotchiDiamond = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
+import { maticRealmDiamondAddress } from "../../tile/helperFunctions";
+import { RealmGettersAndSettersFacet } from "../../../typechain-types";
 
 async function getAuctionID() {
   const realmFacet = (await ethers.getContractAt(
-    "RealmFacet",
-    maticDiamondAddress
-  )) as RealmFacet;
+    "RealmGettersAndSettersFacet",
+    maticRealmDiamondAddress
+  )) as RealmGettersAndSettersFacet;
 
-  const parcel = await realmFacet.getParcelInfo("1000");
+  const parcel = await realmFacet.getParcelInfo("15726");
 
   console.log("parcel:", parcel);
 }
