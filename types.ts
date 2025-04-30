@@ -107,7 +107,7 @@ export interface InstallationTypeInput {
   nextLevelId: number;
   prerequisites: number[];
   name: string;
-  unequipType: number;
+  unequipType?: number;
   deprecateTime?: number;
 }
 
