@@ -5,6 +5,8 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
+import { InstallationAdminFacet__factory } from "../../../typechain-types";
+import { InstallationAdminFacetInterface } from "../../../typechain-types/contracts/InstallationDiamond/facets/InstallationAdminFacet";
 
 export async function upgrade() {
   const facets: FacetsAndAddSelectors[] = [
@@ -15,7 +17,7 @@ export async function upgrade() {
     },
     {
       facetName: "InstallationAdminFacet",
-      addSelectors: ["function toggleUpgradePaused()"],
+      addSelectors: ["function toggleUpgradePaused(bool)"],
       removeSelectors: [],
     },
   ];
@@ -24,13 +26,19 @@ export async function upgrade() {
 
   const c = await varsForNetwork(ethers);
 
+  let iface: InstallationAdminFacetInterface = new ethers.utils.Interface(
+    InstallationAdminFacet__factory.abi
+  ) as InstallationAdminFacetInterface;
+
+  const calldata = iface.encodeFunctionData("toggleUpgradePaused", [true]);
+
   const args: DeployUpgradeTaskArgs = {
     diamondAddress: c.installationDiamond,
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,
-    initAddress: ethers.constants.AddressZero,
-    initCalldata: "0x",
+    initAddress: c.installationDiamond,
+    initCalldata: calldata,
   };
 
   await run("deployUpgrade", args);

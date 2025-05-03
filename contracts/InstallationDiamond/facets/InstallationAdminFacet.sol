@@ -236,7 +236,7 @@ contract InstallationAdminFacet is Modifiers {
     s.gameManager[_newGameManager] = _active;
   }
 
-  function toggleUpgradePaused() external onlyOwner {
-    s.upgradePaused = !s.upgradePaused;
+  function toggleUpgradePaused(bool _paused) external onlyOwner {
+    s.upgradePaused = _paused;
   }
 }
