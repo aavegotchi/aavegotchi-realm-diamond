@@ -95,6 +95,7 @@ struct InstallationAppStorage {
   mapping(uint256 => uint256) unequipTypes; // installationType.id => unequipType
   mapping(uint256 => uint256[]) parcelIdToUpgradeIds; // will not track upgrades before this variable's existence
   mapping(address => bool) gameManager;
+  bool upgradePaused;
 }
 
 library LibAppStorageInstallation {

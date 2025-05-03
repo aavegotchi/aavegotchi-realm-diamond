@@ -22,12 +22,7 @@ contract InstallationUpgradeFacet is Modifiers {
   /// @param _gotchiId The id of the gotchi which is upgrading the installation
   ///@param _signature API signature
   ///@param _gltr Amount of GLTR to use, can be 0
-  function upgradeInstallation(
-    UpgradeQueue memory _upgradeQueue,
-    uint256 _gotchiId,
-    bytes memory _signature,
-    uint40 _gltr
-  ) external {
+  function upgradeInstallation(UpgradeQueue memory _upgradeQueue, uint256 _gotchiId, bytes memory _signature, uint40 _gltr) external {
     // Check signature
     require(
       LibSignature.isValid(
@@ -69,6 +64,7 @@ contract InstallationUpgradeFacet is Modifiers {
       emit UpgradeTimeReduced(0, _upgradeQueue.parcelId, _upgradeQueue.coordinateX, _upgradeQueue.coordinateY, _gltr);
       LibInstallation.upgradeInstallation(_upgradeQueue, nextLevelId, realm);
     } else {
+      require(!s.upgradePaused, "AppStorage: Upgrade paused");
       // Add upgrade hash to maintain uniqueness in upgrades
       s.upgradeHashes[uniqueHash] = _upgradeQueue.parcelId;
       // Set the ready block and claimed flag before adding to the queue
@@ -86,12 +82,7 @@ contract InstallationUpgradeFacet is Modifiers {
     }
   }
 
-  function reduceUpgradeTime(
-    uint256 _upgradeIndex,
-    uint256 _gotchiId,
-    uint40 _blocks,
-    bytes memory _signature
-  ) external {
+  function reduceUpgradeTime(uint256 _upgradeIndex, uint256 _gotchiId, uint40 _blocks, bytes memory _signature) external {
     UpgradeQueue storage queue = s.upgradeQueue[_upgradeIndex];
 
     require(
@@ -212,12 +203,7 @@ contract InstallationUpgradeFacet is Modifiers {
     return s.parcelIdToUpgradeIds[_parcelId].length == 0;
   }
 
-  function parcelInstallationUpgrading(
-    uint256 _parcelId,
-    uint256 _installationId,
-    uint256 _x,
-    uint256 _y
-  ) external view returns (bool) {
+  function parcelInstallationUpgrading(uint256 _parcelId, uint256 _installationId, uint256 _x, uint256 _y) external view returns (bool) {
     uint256[] memory parcelQueue = s.parcelIdToUpgradeIds[_parcelId];
 
     for (uint256 i; i < parcelQueue.length; i++) {
