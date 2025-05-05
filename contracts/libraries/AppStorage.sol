@@ -65,6 +65,14 @@ struct RequestConfig {
   bytes32 keyHash;
 }
 
+struct Api3QrngConfig {
+  uint256 numWords;
+  address airnode;
+  bytes32 endpointId;
+  address sponsor;
+  address sponsorWallet;
+}
+
 struct AppStorage {
   uint256[] tokenIds;
   mapping(uint256 => Parcel) parcels;
@@ -80,11 +88,11 @@ struct AppStorage {
   uint256[4] boostMultipliers;
   uint256[4] greatPortalCapacity;
   // VRF
-  address vrfCoordinator;
-  address linkAddress;
-  RequestConfig requestConfig;
-  mapping(uint256 => uint256) vrfRequestIdToTokenId;
-  mapping(uint256 => uint256) vrfRequestIdToSurveyingRound;
+  address vrfCoordinator; // Deprecated
+  address linkAddress; // Deprecated
+  RequestConfig requestConfig; // Deprecated
+  mapping(uint256 => uint256) vrfRequestIdToTokenId; // Deprecated
+  mapping(uint256 => uint256) vrfRequestIdToSurveyingRound; // Deprecated
   bytes backendPubKey;
   address gameManager;
   mapping(uint256 => uint256) lastExitTime; //for aavegotchis exiting alchemica
@@ -110,6 +118,13 @@ struct AppStorage {
   mapping(uint256 => BounceGate) bounceGates;
   // parcelId => action: 0 Alchemical Channeling, 1 Emptying Reservoirs => whitelistIds
   mapping(uint256 => mapping(uint256 => uint32)) whitelistIds;
+  // VRF based on API3 QRNG
+  address api3AirnodeRrp;
+  Api3QrngConfig api3QrngConfig;
+  mapping(bytes32 => uint256) api3QrngRequestIdToTokenId;
+  mapping(bytes32 => uint256) api3QrngRequestIdToSurveyingRound;
+//  uint256[][] testRandomWordsChainLink;
+//  uint256[][] testRandomWordsApi3;
 }
 
 library LibAppStorage {
