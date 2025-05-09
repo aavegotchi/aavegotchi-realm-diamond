@@ -14,6 +14,8 @@ export const vault = "0xdd564df884fd4e217c9ee6f65b4ba6e5641eac63";
 export const gbmDiamond = "0xD5543237C656f25EEA69f1E247b8Fa59ba353306";
 export const rafflesContract = "0x6c723cac1E35FE29a175b287AE242d424c52c1CE";
 export const rafflesContract2 = "0xa85f5a59a71842fddaabd4c2cd373300a31750d8";
+export const PC = "0x01F010a5e001fe9d6940758EA5e8c777885E351e";
+export const voucherContract = "0xd5724BCA82423D5792C676cd453c1Bf66151dC04";
 
 const config = {
   apiKey: process.env.ALCHEMY_KEY,
@@ -144,7 +146,7 @@ async function updateHolderData(
   vaultFilename: string,
   gbmDiamondFilename: string,
   contractHolderEOAsFilename: string,
-  rafflesFilename: string,
+  // rafflesFilename: string,
   gnosisSafeContractsFilename: string,
   processedHoldersFile: string // New parameter for processed holders file
 ): Promise<void> {
@@ -171,12 +173,12 @@ async function updateHolderData(
     const vaultHolders: TokenHolder[] = [];
     const contractEOAs: ContractEOAHolder[] = [];
     const gbmDiamondHolders: TokenHolder[] = [];
-    const rafflesHolders: TokenHolder[] = [];
     const gnosisSafeContracts: SafeDetails[] = [];
 
     let regularHoldersCount = 0;
     let contractHoldersCount = 0;
     let excludedCount = 0;
+    let raffleTokensAllocatedToPC = 0;
     const processedHolders = readJsonFile<string[]>(processedHoldersFile, []);
     console.log(`Found ${processedHolders.length} already processed holders`);
 
@@ -214,7 +216,15 @@ async function updateHolderData(
           ownerAddress.toLowerCase() === rafflesContract.toLowerCase() ||
           ownerAddress.toLowerCase() === rafflesContract2.toLowerCase()
         ) {
-          rafflesHolders.push(holder);
+          // Allocate raffle contract tokens to PC
+          if (!existingData[PC]) {
+            existingData[PC] = {
+              ownerAddress: PC,
+              tokenBalances: [],
+            };
+          }
+          existingData[PC].tokenBalances.push(...holder.tokenBalances);
+          raffleTokensAllocatedToPC += holder.tokenBalances.length;
           delete existingData[ownerAddress];
         } else {
           const code = await ethers.provider.getCode(ownerAddress);
@@ -275,7 +285,9 @@ async function updateHolderData(
         console.log(`Realm Diamond holders: ${realmDiamondHolders.length}`);
         console.log(`Vault holders: ${vaultHolders.length}`);
         console.log(`GBM Diamond holds: ${gbmDiamondHolders.length} `);
-        console.log(`Raffles Contract holders: ${rafflesHolders.length}\n`);
+        console.log(
+          `Raffle tokens allocated to PC: ${raffleTokensAllocatedToPC}\n`
+        );
         console.log(`Gnosis Safe contracts: ${gnosisSafeContracts.length}\n`);
       }
     }
@@ -309,11 +321,11 @@ async function updateHolderData(
         data: contractEOAs,
         name: "Contract EOA holders",
       },
-      {
-        path: rafflesFilename,
-        data: rafflesHolders,
-        name: "Raffles Contract holders",
-      },
+      // {
+      //     path: rafflesFilename,
+      //     data: rafflesHolders,
+      //     name: "Raffles Contract holders",
+      //   },
       {
         path: gnosisSafeContractsFilename,
         data: gnosisSafeContracts,
@@ -335,7 +347,7 @@ async function updateHolderData(
     console.log(`Realm Diamond holds: ${realmDiamondHolders.length}`);
     console.log(`Vault holds: ${vaultHolders.length}`);
     console.log(`GBM Diamond holds: ${gbmDiamondHolders.length} `);
-    console.log(`Raffles Contract holds: ${rafflesHolders.length}`);
+    console.log(`Raffle tokens allocated to PC: ${raffleTokensAllocatedToPC}`);
     console.log(`Gnosis Safe contracts: ${gnosisSafeContracts.length}`);
   } catch (error) {
     console.error("\n=== Error in updateHolderData ===");
@@ -380,7 +392,7 @@ async function main() {
       FILES.vaultInstallations,
       FILES.gbmDiamondInstallations,
       FILES.installationsContractHolderEOAs,
-      FILES.rafflesInstallations,
+      // FILES.rafflesInstallations,
       FILES.gnosisSafeInstallations,
       PROCESSED_INSTALLATIONS_HOLDERS_FILE
     );
@@ -394,7 +406,7 @@ async function main() {
       FILES.vaultTiles,
       FILES.gbmDiamondTiles,
       FILES.tilesContractHolderEOAs,
-      FILES.rafflesTiles,
+      // FILES.rafflesTiles,
       FILES.gnosisSafeTiles,
       PROCESSED_TILES_HOLDERS_FILE
     );

@@ -6,6 +6,12 @@ import { countInstallationOccurrences } from "../../data/installations/allInstal
 import { countTileOccurrences } from "../../data/tiles/tileTypes";
 import fs from "fs";
 import path from "path";
+import {
+  rafflesContract,
+  rafflesContract2,
+  PC,
+  voucherContract,
+} from "./getInstallationAndTileData";
 
 // File paths configuration
 const DATA_DIR = path.join(__dirname, "cloneData", "parcel", "metadata");
@@ -205,8 +211,16 @@ function populateParcelIO(
   const convertGrid = (grid: BigNumber[][]) =>
     grid.map((row) => row.map((val) => val.toNumber()));
 
+  // Check if owner is a raffle contract or voucher contract and replace with PC if it is
+  const owner =
+    parcelData.owner.toLowerCase() === rafflesContract.toLowerCase() ||
+    parcelData.owner.toLowerCase() === rafflesContract2.toLowerCase() ||
+    parcelData.owner.toLowerCase() === voucherContract.toLowerCase()
+      ? PC
+      : parcelData.owner;
+
   return {
-    owner: parcelData.owner,
+    owner,
     parcelAddress: parcelData.parcelAddress,
     parcelId: parcelData.parcelId,
     coordinateX: parcelData.coordinateX,

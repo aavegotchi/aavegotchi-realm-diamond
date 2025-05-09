@@ -10,6 +10,9 @@ import {
   excludedAddresses,
   getOwner,
   isSafe,
+  rafflesContract2,
+  PC,
+  voucherContract,
 } from "./getInstallationAndTileData";
 
 const config = {
@@ -61,13 +64,13 @@ interface ParcelAnalytics {
   normalAddressParcels: Set<string>;
   gbmParcels: Set<string>;
   vaultParcels: Set<string>;
-  rafflesParcels: Set<string>;
   contractsWithOwnerParcels: Set<string>;
   unknownContractParcels: Set<string>;
   uniqueNormalHolders: Set<string>;
   uniqueContractsWithOwners: Set<string>;
   uniqueContractsWithoutOwners: Set<string>;
   uniqueGnosisSafes: Set<string>;
+  pixelcraftAllocatedParcels: Set<string>;
 }
 
 // Add function to display analytics
@@ -80,12 +83,14 @@ function displayAnalytics(analytics: ParcelAnalytics) {
   );
   console.log(`Parcels in GBM: ${analytics.gbmParcels.size}`);
   console.log(`Parcels in Vault: ${analytics.vaultParcels.size}`);
-  console.log(`Parcels in Raffles: ${analytics.rafflesParcels.size}`);
   console.log(
     `Parcels in contracts with known owners: ${analytics.contractsWithOwnerParcels.size}`
   );
   console.log(
     `Parcels in unknown contracts: ${analytics.unknownContractParcels.size}`
+  );
+  console.log(
+    `Parcels allocated to Pixelcraft: ${analytics.pixelcraftAllocatedParcels.size}`
   );
 
   console.log("\nUnique Holder Counts:");
@@ -105,9 +110,9 @@ function displayAnalytics(analytics: ParcelAnalytics) {
     analytics.normalAddressParcels.size +
     analytics.gbmParcels.size +
     analytics.vaultParcels.size +
-    analytics.rafflesParcels.size +
     analytics.contractsWithOwnerParcels.size +
-    analytics.unknownContractParcels.size;
+    analytics.unknownContractParcels.size +
+    analytics.pixelcraftAllocatedParcels.size;
 
   const totalUniqueHolders =
     analytics.uniqueNormalHolders.size +
@@ -155,13 +160,13 @@ async function updateParcelData(): Promise<void> {
     normalAddressParcels: new Set<string>(),
     gbmParcels: new Set<string>(),
     vaultParcels: new Set<string>(),
-    rafflesParcels: new Set<string>(),
     contractsWithOwnerParcels: new Set<string>(),
     unknownContractParcels: new Set<string>(),
     uniqueNormalHolders: new Set<string>(),
     uniqueContractsWithOwners: new Set<string>(),
     uniqueContractsWithoutOwners: new Set<string>(),
     uniqueGnosisSafes: new Set<string>(),
+    pixelcraftAllocatedParcels: new Set<string>(),
   };
 
   try {
@@ -206,12 +211,30 @@ async function updateParcelData(): Promise<void> {
             analytics.gbmParcels.add(token.tokenId)
           );
         } else if (
-          ownerAddress.toLowerCase() === rafflesContract.toLowerCase()
+          ownerAddress.toLowerCase() === rafflesContract.toLowerCase() ||
+          ownerAddress.toLowerCase() === rafflesContract2.toLowerCase()
         ) {
-          rafflesHolders.push(holder);
-          holder.tokenBalances.forEach((token) =>
-            analytics.rafflesParcels.add(token.tokenId)
-          );
+          // Allocate raffle contract tokens to Pixelcraft
+          const pixelcraftHolder: TokenHolder = {
+            ownerAddress: PC,
+            tokenBalances: holder.tokenBalances,
+          };
+          normalHolders[PC] = pixelcraftHolder;
+          holder.tokenBalances.forEach((token) => {
+            analytics.pixelcraftAllocatedParcels.add(token.tokenId);
+          });
+        } else if (
+          ownerAddress.toLowerCase() === voucherContract.toLowerCase()
+        ) {
+          // Allocate voucher contract tokens to Pixelcraft
+          const pixelcraftHolder: TokenHolder = {
+            ownerAddress: PC,
+            tokenBalances: holder.tokenBalances,
+          };
+          normalHolders[PC] = pixelcraftHolder;
+          holder.tokenBalances.forEach((token) => {
+            analytics.pixelcraftAllocatedParcels.add(token.tokenId);
+          });
         } else {
           const code = await ethers.provider.getCode(ownerAddress);
           if (code !== "0x") {
