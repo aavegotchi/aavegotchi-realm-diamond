@@ -22,7 +22,6 @@ contract TokenDistributor {
     require(recipients.length > 0, "TokenDistributor: No recipients provided");
 
     IERC20 token = IERC20(tokenAddress);
-    uint256 totalAmountActuallyTransferred = 0;
 
     for (uint256 i = 0; i < recipients.length; i++) {
       require(recipients[i] != address(0), "TokenDistributor: Invalid recipient address");
@@ -30,10 +29,7 @@ contract TokenDistributor {
       if (amounts[i] > 0) {
         bool success = token.transferFrom(msg.sender, recipients[i], amounts[i]);
         require(success, "TokenDistributor: ERC20 transferFrom failed");
-        totalAmountActuallyTransferred += amounts[i];
-        // emit IndividualDistribution(tokenAddress, recipients[i], amounts[i]);
       }
     }
-    // emit TokensDistributed(tokenAddress, msg.sender, totalAmountActuallyTransferred);
   }
 }

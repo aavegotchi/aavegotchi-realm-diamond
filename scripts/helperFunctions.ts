@@ -249,8 +249,21 @@ export async function getRelayerSigner(hre: HardhatRuntimeEnvironment) {
     console.log("USING MATIC");
 
     const credentials: RelayerInfo = {
-      apiKey: process.env.DEFENDER_APIKEY!,
-      apiSecret: process.env.DEFENDER_SECRET!,
+      apiKey: process.env.DEFENDER_APIKEY_MATIC!,
+      apiSecret: process.env.DEFENDER_SECRET_MATIC!,
+    };
+
+    const provider = new DefenderRelayProvider(credentials);
+    return new DefenderRelaySigner(credentials, provider, {
+      speed: "safeLow",
+      validForSeconds: 7200,
+    });
+  } else if (hre.network.name === "base") {
+    console.log("USING BASE");
+
+    const credentials: RelayerInfo = {
+      apiKey: process.env.DEFENDER_APIKEY_BASE!,
+      apiSecret: process.env.DEFENDER_SECRET_BASE!,
     };
 
     const provider = new DefenderRelayProvider(credentials);

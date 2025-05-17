@@ -65,27 +65,15 @@ task("distribute-ghst", "Distribute GHST tokens based on leaderboard results")
       // Now use batchTransferTokens functionality to send the tokens
       const c = await varsForNetwork(hre.ethers);
 
-      // const [signer] = await hre.ethers.getSigners();
-
       const signer = await getRelayerSigner(hre);
 
       const signerAddress = await signer.getAddress();
-
-      console.log("signerAddress", signerAddress);
-
-      console.log("ghst token:", c.ghst);
 
       const ghstToken = await hre.ethers.getContractAt("ERC20", c.ghst, signer);
 
       const signerBalanceBefore = await ghstToken.balanceOf(signerAddress);
 
       console.log("signerBalanceBefore", signerBalanceBefore.toString());
-
-      // const alchemicaFacet = await hre.ethers.getContractAt(
-      //   "AlchemicaFacet",
-      //   c.realmDiamond,
-      //   signer
-      // );
 
       const newTokenDistributorAddress =
         "0x23E1dFdE8259Bdd049E055ACbc138607ECfa2b19"; // TODO: REPLACE THIS
@@ -112,22 +100,20 @@ task("distribute-ghst", "Distribute GHST tokens based on leaderboard results")
       const allowance = await ghstToken.allowance(
         signerAddress,
         newTokenDistributorAddress // Use the new contract address for allowance check
-        // c.realmDiamond
       );
 
       if (allowance.lt(totalNeeded)) {
         console.log("Approving GHST spending for TokenDistributor contract...");
         const approveTx = await ghstToken.approve(
           newTokenDistributorAddress, // Approve the new contract address
-          hre.ethers.constants.MaxUint256,
-          { gasPrice }
+          hre.ethers.constants.MaxUint256
         );
         await approveTx.wait();
         console.log("Approval successful");
       }
 
       // Process in batches of 100
-      const batchSize = 3;
+      const batchSize = 100;
       const totalBatches = Math.ceil(distribution.length / batchSize);
 
       console.log("total batches:", totalBatches);
@@ -165,55 +151,22 @@ task("distribute-ghst", "Distribute GHST tokens based on leaderboard results")
           );
         }
 
-        // console.log("Sending batch..., example of 10 below:");
-        // console.log(tokens.slice(0, 10));
-        // console.log(amounts.slice(0, 10));
-        // console.log(addresses.slice(0, 10));
-
         // Send the batch
         try {
-          // const batchTotalNeeded = amounts.reduce(...); // This is not needed for the new contract function signature
-
           // Flatten the amounts array for the contract call
           // Ensure elements are strings representing wei, which they should be from distributeGeistGHST.ts
           const flatAmountsForCall = amounts.map((innerArray) =>
             innerArray[0].toString()
           );
 
-          const whaleBalanceBefore1 = await ghstToken.balanceOf(addresses[0]);
-          const whaleBalanceBefore2 = await ghstToken.balanceOf(addresses[1]);
-          const whaleBalanceBefore3 = await ghstToken.balanceOf(addresses[2]);
-
-          console.log("before1:", whaleBalanceBefore1.toString());
-          console.log("before2:", whaleBalanceBefore2.toString());
-          console.log("before3:", whaleBalanceBefore3.toString());
-
           const tx = await batchTransferContract.distribute(
-            // No batchTotalNeeded parameter for the new contract
             c.ghst, // tokenAddress param
             addresses, // recipients param
-            flatAmountsForCall, // amounts param
-            { gasPrice }
+            flatAmountsForCall // amounts param
           );
-
-          // await tx.wait(); // Original first wait
-          // const tx = await alchemicaFacet.batchTransferTokens(
-          //   tokens,
-          //   amounts,
-          //   addresses,
-          //   { gasPrice }
-          // );
 
           console.log(`Transaction sent: ${tx.hash}`);
           await tx.wait(); // Wait for transaction to be mined
-
-          const whaleBalanceAfter1 = await ghstToken.balanceOf(addresses[0]);
-          const whaleBalanceAfter2 = await ghstToken.balanceOf(addresses[1]);
-          const whaleBalanceAfter3 = await ghstToken.balanceOf(addresses[2]);
-
-          console.log("after1:", whaleBalanceAfter1.toString());
-          console.log("after2:", whaleBalanceAfter2.toString());
-          console.log("after3:", whaleBalanceAfter3.toString());
 
           console.log(`Successfully processed batch ${batchIndex + 1}`);
         } catch (error) {
