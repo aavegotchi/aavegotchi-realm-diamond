@@ -56,12 +56,12 @@ module.exports = {
         },
        ],*/
       forking: {
-        url: process.env.MATIC_URL,
+        url: process.env.BASE_URL,
         timeout: 2000000,
-        // blockNumber: 30865190,
+        blockNumber: 30339508,
       },
-      chainId: 137,
-      blockGasLimit: 20000000,
+      chainId: 8453,
+      // blockGasLimit: 20000000,
       timeout: 2000000,
       gas: "auto",
     },

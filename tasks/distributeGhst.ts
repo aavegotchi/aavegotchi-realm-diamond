@@ -1,5 +1,5 @@
 import { task } from "hardhat/config";
-import { BigNumber } from "ethers";
+import { BigNumber, BigNumberish, ethers } from "ethers";
 import { gasPrice, varsForNetwork } from "../constants";
 import { getRelayerSigner } from "../scripts/helperFunctions";
 
@@ -20,6 +20,9 @@ task("distribute-ghst", "Distribute GHST tokens based on leaderboard results")
       // Parse addresses and amounts from parameters
       const addresses = taskArgs.addresses ? taskArgs.addresses.split(",") : [];
       const amounts = taskArgs.amounts ? taskArgs.amounts.split(",") : [];
+
+      console.log(addresses);
+      console.log(amounts);
 
       // Validate input
       if (addresses.length === 0) {
@@ -59,23 +62,6 @@ task("distribute-ghst", "Distribute GHST tokens based on leaderboard results")
       console.log(`Distribution saved to ghst-distribution.json`);
       console.log(`Total addresses: ${distribution.length}`);
 
-      // Log top 10 recipients
-      console.log("\nTop 10 recipients:");
-      distribution.slice(0, 10).forEach((entry, index) => {
-        console.log(
-          `${index + 1}. ${entry.address}: ${
-            entry.amount
-          } GHST percentage total: ${
-            (Number(entry.amount) /
-              distribution.reduce(
-                (sum, item) => sum + Number(item.amount),
-                0
-              )) *
-            100
-          }%`
-        );
-      });
-
       // Now use batchTransferTokens functionality to send the tokens
       const c = await varsForNetwork(hre.ethers);
 
@@ -85,29 +71,54 @@ task("distribute-ghst", "Distribute GHST tokens based on leaderboard results")
 
       const signerAddress = await signer.getAddress();
 
-      const alchemicaFacet = await hre.ethers.getContractAt(
-        "AlchemicaFacet",
-        c.realmDiamond,
-        signer
-      );
+      console.log("signerAddress", signerAddress);
+
+      console.log("ghst token:", c.ghst);
 
       const ghstToken = await hre.ethers.getContractAt("ERC20", c.ghst, signer);
 
+      const signerBalanceBefore = await ghstToken.balanceOf(signerAddress);
+
+      console.log("signerBalanceBefore", signerBalanceBefore.toString());
+
+      // const alchemicaFacet = await hre.ethers.getContractAt(
+      //   "AlchemicaFacet",
+      //   c.realmDiamond,
+      //   signer
+      // );
+
+      const newTokenDistributorAddress =
+        "0x23E1dFdE8259Bdd049E055ACbc138607ECfa2b19"; // TODO: REPLACE THIS
+
+      const batchTransferContract = await hre.ethers.getContractAt(
+        "TokenDistributor", // Using contract name, requires ABI to be available via compilation
+        newTokenDistributorAddress,
+        signer
+      );
+
       // Calculate total amount needed
       const totalNeeded = distribution.reduce(
-        (acc, curr) => acc.add(hre.ethers.utils.parseEther(curr.amount)),
+        (acc, curr) => acc.add(curr.amount),
         BigNumber.from(0)
       );
+
+      console.log("totalNeeded", totalNeeded.toString());
+
+      if (totalNeeded.gt(signerBalanceBefore)) {
+        throw new Error("Insufficient balance");
+      }
 
       // Check and approve GHST spending if needed
       const allowance = await ghstToken.allowance(
         signerAddress,
-        c.realmDiamond
+        newTokenDistributorAddress // Use the new contract address for allowance check
+        // c.realmDiamond
       );
+
       if (allowance.lt(totalNeeded)) {
-        console.log("Approving GHST spending...");
+        console.log("Approving GHST spending for TokenDistributor contract...");
         const approveTx = await ghstToken.approve(
-          c.realmDiamond,
+          newTokenDistributorAddress, // Approve the new contract address
           hre.ethers.constants.MaxUint256,
           { gasPrice }
         );
@@ -116,8 +127,10 @@ task("distribute-ghst", "Distribute GHST tokens based on leaderboard results")
       }
 
       // Process in batches of 100
-      const batchSize = 100;
+      const batchSize = 3;
       const totalBatches = Math.ceil(distribution.length / batchSize);
+
+      console.log("total batches:", totalBatches);
 
       console.log(
         `Processing ${distribution.length} distributions in ${totalBatches} batches of ${batchSize}`
@@ -136,7 +149,7 @@ task("distribute-ghst", "Distribute GHST tokens based on leaderboard results")
 
         // Prepare the tokens and amounts arrays for this batch
         const tokens: string[][] = [];
-        const amounts: string[][] = [];
+        const amounts: BigNumberish[][] = [];
         const addresses: string[] = [];
 
         for (const dist of batchDistribution) {
@@ -152,30 +165,66 @@ task("distribute-ghst", "Distribute GHST tokens based on leaderboard results")
           );
         }
 
-        console.log("Sending batch..., example of 10 below:");
-        console.log(tokens.slice(0, 10));
-        console.log(amounts.slice(0, 10));
-        console.log(addresses.slice(0, 10));
+        // console.log("Sending batch..., example of 10 below:");
+        // console.log(tokens.slice(0, 10));
+        // console.log(amounts.slice(0, 10));
+        // console.log(addresses.slice(0, 10));
 
         // Send the batch
         try {
-          const tx = await alchemicaFacet.batchTransferTokens(
-            tokens,
-            amounts,
-            addresses,
+          // const batchTotalNeeded = amounts.reduce(...); // This is not needed for the new contract function signature
+
+          // Flatten the amounts array for the contract call
+          // Ensure elements are strings representing wei, which they should be from distributeGeistGHST.ts
+          const flatAmountsForCall = amounts.map((innerArray) =>
+            innerArray[0].toString()
+          );
+
+          const whaleBalanceBefore1 = await ghstToken.balanceOf(addresses[0]);
+          const whaleBalanceBefore2 = await ghstToken.balanceOf(addresses[1]);
+          const whaleBalanceBefore3 = await ghstToken.balanceOf(addresses[2]);
+
+          console.log("before1:", whaleBalanceBefore1.toString());
+          console.log("before2:", whaleBalanceBefore2.toString());
+          console.log("before3:", whaleBalanceBefore3.toString());
+
+          const tx = await batchTransferContract.distribute(
+            // No batchTotalNeeded parameter for the new contract
+            c.ghst, // tokenAddress param
+            addresses, // recipients param
+            flatAmountsForCall, // amounts param
             { gasPrice }
           );
 
+          // await tx.wait(); // Original first wait
+          // const tx = await alchemicaFacet.batchTransferTokens(
+          //   tokens,
+          //   amounts,
+          //   addresses,
+          //   { gasPrice }
+          // );
+
           console.log(`Transaction sent: ${tx.hash}`);
-          await tx.wait();
+          await tx.wait(); // Wait for transaction to be mined
+
+          const whaleBalanceAfter1 = await ghstToken.balanceOf(addresses[0]);
+          const whaleBalanceAfter2 = await ghstToken.balanceOf(addresses[1]);
+          const whaleBalanceAfter3 = await ghstToken.balanceOf(addresses[2]);
+
+          console.log("after1:", whaleBalanceAfter1.toString());
+          console.log("after2:", whaleBalanceAfter2.toString());
+          console.log("after3:", whaleBalanceAfter3.toString());
+
           console.log(`Successfully processed batch ${batchIndex + 1}`);
         } catch (error) {
           console.error(`Error processing batch ${batchIndex + 1}:`, error);
+
+          throw error;
         }
       }
 
       console.log("All distributions completed");
     } catch (error) {
-      console.error("Error distributing GHST:", error.slice(0, 1000));
+      console.error("Error distributing GHST:", String(error).slice(0, 1000));
     }
   });

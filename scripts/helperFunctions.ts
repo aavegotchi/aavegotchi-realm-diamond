@@ -218,10 +218,22 @@ export interface RelayerInfo {
 //   });
 // }
 
-export const relayerAddress = "0x821049b2273b0cCd34a64D1B08A3346F110eCAe2";
+export const relayerAddressPolygon =
+  "0x821049b2273b0cCd34a64D1B08A3346F110eCAe2";
+export const relayerAddressBase = "0x2fbEE2AF0A95f5Ee6a251C4fb6f48DC755e7bDac";
+
+const relayerAddresses = {
+  matic: relayerAddressPolygon,
+  base: relayerAddressBase,
+  hardhat: relayerAddressBase,
+};
 
 export async function getRelayerSigner(hre: HardhatRuntimeEnvironment) {
   const testing = ["hardhat", "localhost"].includes(hre.network.name);
+
+  const relayerAddress =
+    relayerAddresses[hre.network.name as keyof typeof relayerAddresses];
+
   if (testing) {
     console.log("Using Hardhat");
     await hre.network.provider.request({

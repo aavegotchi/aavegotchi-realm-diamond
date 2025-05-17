@@ -26,12 +26,16 @@ export interface Domain {
 }
 
 function varsByChainId(chainId: number) {
-  if ([137, 80001].includes(chainId)) return networkToVars[chainId];
+  if ([137, 80001, 8453].includes(chainId)) return networkToVars[chainId];
   else return networkToVars[137];
 }
 
 export async function varsForNetwork(ethers: HardhatEthersHelpers) {
-  return varsByChainId((await ethers.provider.getNetwork()).chainId);
+  const chainId = (await ethers.provider.getNetwork()).chainId;
+
+  console.log("chainId:", chainId);
+
+  return varsByChainId(chainId);
 }
 export const gotchiverseSubgraph =
   "https://api.thegraph.com/subgraphs/name/aavegotchi/gotchiverse-matic";
@@ -83,11 +87,25 @@ const mumbaiVars: Constants = {
   ghst: "",
 };
 
+const baseVars: Constants = {
+  aavegotchiDiamond: "",
+  realmDiamond: "",
+  installationDiamond: "",
+  tileDiamond: "",
+  fud: "",
+  fomo: "",
+  alpha: "",
+  kek: "",
+  gltr: "",
+  ghst: "0xcd2f22236dd9dfe2356d7c543161d4d260fd9bcb",
+};
+
 const networkToVars: NetworkToConstants = {
   137: maticVars,
   80001: mumbaiVars,
   0: kovanVars, //update
   100: maticVars, //update
+  8453: baseVars,
 };
 
 export const gasPrice = 175000000000;
