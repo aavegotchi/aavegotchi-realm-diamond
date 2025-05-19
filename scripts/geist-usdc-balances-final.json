@@ -1,0 +1,196 @@
+[
+  {
+    "address": "0x6360Ea0e3AF36b7B51cF7E4F810370dd5a8cDc0f",
+    "balance": 548.947284
+  },
+  {
+    "address": "0x01F010a5e001fe9d6940758EA5e8c777885E351e",
+    "balance": 457.892958
+  },
+  {
+    "address": "0x137c0F7d6b2558eDF5B8f69eEc0635Dd43FAd6af",
+    "balance": 234.683384
+  },
+  {
+    "address": "0x088d4BC351C14DE9b57725d587Cd7996b2D746e8",
+    "balance": 161.38666,
+    "smartContract": true
+  },
+  {
+    "address": "0x45094EFd6DE3d846A9d8079d05cE585564EB86a9",
+    "balance": 146.416992,
+    "smartContract": true
+  },
+  {
+    "address": "0x246E3e91c8f3dB1326563800D6d28Aa27C7ccF40",
+    "balance": 134.481749
+  },
+  {
+    "address": "0x58095979B412a366687cA05CbE85fF56241bE21f",
+    "balance": 109.872282
+  },
+  {
+    "address": "0xa322f14c4e9628F5934420a6098a01e7C999e657",
+    "balance": 18.991651
+  },
+  {
+    "address": "0x01Bb7B44cc398AaA2b76Ac6253F0F5634279Db9D",
+    "balance": 18.493253
+  },
+  {
+    "address": "0x47D6F96Ba098816389DB7c87CBF077dE7181b853",
+    "balance": 15.603121
+  },
+  {
+    "address": "0x305Ea81690998383a6965244092B66F9692af230",
+    "balance": 11.871608
+  },
+  {
+    "address": "0x7af4922fc22037D573e889201bE7C38E42f22220",
+    "balance": 10
+  },
+  {
+    "address": "0x472d7E705f3baa44f82bFF5B397330015d810828",
+    "balance": 10
+  },
+  {
+    "address": "0x2dD35e7a6f5FCC28d146C04BE641f969F6D1e403",
+    "balance": 7
+  },
+  {
+    "address": "0x77c85dC1bc35F3674E115a8C21fA9c9B8EEdc9d3",
+    "balance": 6.328049
+  },
+  {
+    "address": "0x6701DC817396c99E40E31F2724Ea966e2832492C",
+    "balance": 5.53549
+  },
+  {
+    "address": "0x1A760e3A431c8B9C075eD1280C8835a1a0F1651b",
+    "balance": 5.219745
+  },
+  {
+    "address": "0x5CC81f1AfA43f8f3c65FC9Ce96D5a0568F4E285F",
+    "balance": 5
+  },
+  {
+    "address": "0xB48EC01849e8207a5a734e588510Dad5c668aFB8",
+    "balance": 4.98938
+  },
+  {
+    "address": "0x451d5140852B90Ba1f337D9094A359323341FaD2",
+    "balance": 4.724692
+  },
+  {
+    "address": "0xF8C82Ff30D2acE28E34d2101D4aed3a2A872d50F",
+    "balance": 4
+  },
+  {
+    "address": "0x6186290B28D511bFF971631c916244A9fC539cfE",
+    "balance": 3.906579
+  },
+  {
+    "address": "0x2cad71eDFC197B7acBB7718828dB34092245Da73",
+    "balance": 3.378015
+  },
+  {
+    "address": "0xf1950fc03486A502b05F93Df1a7A4EDC741257C6",
+    "balance": 3
+  },
+  {
+    "address": "0x6B0AB64BA82daB64130fCD7dC1E2F803f7aEf730",
+    "balance": 2.398231
+  },
+  {
+    "address": "0x6fD155b9D52F80E8A73a8A2537268602978486e2",
+    "balance": 2.366067
+  },
+  {
+    "address": "0xC4fe12630fEffDb5Ee72eDdCBBB43b595407442F",
+    "balance": 2.098538
+  },
+  {
+    "address": "0xbfD82bD44b3DF57B26e29770D0c8f1690f1c49F1",
+    "balance": 2.024477
+  },
+  {
+    "address": "0x8886DcA35291F05Ed5d8e21F083998EA8dcEB50f",
+    "balance": 2.012541
+  },
+  {
+    "address": "0xa78EeA2874982946d922Ac2eaF3CFB50eB95E404",
+    "balance": 1.759224
+  },
+  {
+    "address": "0x95968F2D5A8fC86aec6a2c93F7D28939AA408B7b",
+    "balance": 1.546697
+  },
+  {
+    "address": "0x9c155d672e1d7Bb3632CB5602AA004577F3E964a",
+    "balance": 1.212765
+  },
+  {
+    "address": "0xe3D2283e983D9Ec973d1e773358981a7e9c62409",
+    "balance": 1.124568
+  },
+  {
+    "address": "0xe908c2D5613d24D49E376f19715c795DB8E04f81",
+    "balance": 1.11
+  },
+  {
+    "address": "0x9fE6d7d5e9c9E3Bff91149fBf731B618cbCE3375",
+    "balance": 1.100983
+  },
+  {
+    "address": "0x5aE7aE79765973cA60EE9f9e29866B63952Ae807",
+    "balance": 1.090116
+  },
+  {
+    "address": "0x2e21407be0545C706F25490fbBA532943fCaED32",
+    "balance": 0.982107
+  },
+  {
+    "address": "0x9531b36510317B775F159E17B4ae1cB4C90b1a1a",
+    "balance": 0.676683
+  },
+  {
+    "address": "0xb0cE77b18b8663Baa0D6be63B7C5eE0bdF933001",
+    "balance": 0.35518
+  },
+  {
+    "address": "0x83bb781a2a2Ca1fec0350F178C911848811cC440",
+    "balance": 0.059014
+  },
+  {
+    "address": "0x08E9Ac02bfEbdE88A800aFd25241B5053189d19F",
+    "balance": 0.02989
+  },
+  {
+    "address": "0x05b1Dc159A92b6cEC407c649c6B17D8311fd85EC",
+    "balance": 0.009241
+  },
+  {
+    "address": "0xb3De3b6Ac5F8e7b41B834C1509fdd0E56887C9B0",
+    "balance": 0.007681
+  },
+  {
+    "address": "0x91294E33c48160f931AEBb380F2A026fc0Eb11BA",
+    "balance": 0.003611
+  },
+  {
+    "address": "0xace7C2c094f2e82af0E958106e99f98507937165",
+    "balance": 0.002672
+  },
+  {
+    "address": "0x8678F58AC6c4748b5289D0Db70e627eef395deaD",
+    "balance": 0.00202
+  },
+  {
+    "address": "0x71f9F33062B4247200B78c729Ff834F4362B4BA8",
+    "balance": 0.001547
+  },
+  {
+    "address": "0x1d2FC88Fc4AFdC2ccdCf2563F65bA0320C248863",
+    "balance": 0.000196
+  }
+]

@@ -225,7 +225,7 @@ export const relayerAddressBase = "0x2fbEE2AF0A95f5Ee6a251C4fb6f48DC755e7bDac";
 const relayerAddresses = {
   matic: relayerAddressPolygon,
   base: relayerAddressBase,
-  hardhat: relayerAddressBase,
+  hardhat: relayerAddressPolygon,
 };
 
 export async function getRelayerSigner(hre: HardhatRuntimeEnvironment) {
@@ -233,6 +233,8 @@ export async function getRelayerSigner(hre: HardhatRuntimeEnvironment) {
 
   const relayerAddress =
     relayerAddresses[hre.network.name as keyof typeof relayerAddresses];
+
+  console.log("RELAYER ADDRESS", relayerAddress);
 
   if (testing) {
     console.log("Using Hardhat");

@@ -4,6 +4,7 @@ import { ethers } from "ethers";
 import fs from "fs";
 import balancesData from "./geist-ghst-balances-final.json";
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
+import { varsForNetwork } from "../constants";
 
 async function checkBalanceExistence(addresses: string[]) {
   // --- BEGIN ADDRESS EXISTENCE CHECK ---
@@ -213,11 +214,15 @@ async function main() {
 
     console.log(`Calculated distribution for ${addresses.length} addresses`);
 
+    const vars = await varsForNetwork(hre.ethers);
+
     // Run the distribute-ghst task with the calculated addresses and amounts
     await run("distribute-ghst", {
       amount: amount,
       addresses: addresses.join(","),
       amounts: amounts.join(","),
+      erc20: vars.ghst,
+      tokenName: "ghst",
     });
 
     console.log("Distribution complete!");

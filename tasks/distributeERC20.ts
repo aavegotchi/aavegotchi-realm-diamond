@@ -1,6 +1,6 @@
 import { task } from "hardhat/config";
-import { BigNumber, BigNumberish, ethers } from "ethers";
-import { gasPrice, varsForNetwork } from "../constants";
+import { BigNumber, BigNumberish } from "ethers";
+import { varsForNetwork } from "../constants";
 import { getRelayerSigner } from "../scripts/helperFunctions";
 
 interface DistributionResult {
@@ -8,18 +8,26 @@ interface DistributionResult {
   amount: string;
 }
 
-task("distribute-ghst", "Distribute GHST tokens based on leaderboard results")
-  .addParam("amount", "Total amount of GHST to distribute")
+task("distribute-erc20", "Distribute ERC20 tokens based on leaderboard results")
+  .addParam("amount", "Total amount of ERC20 to distribute")
   .addParam("addresses", "Comma-separated list of addresses to distribute to")
   .addParam(
     "amounts",
     "Comma-separated list of amounts to distribute to each address"
   )
+  .addParam("erc20", "ERC20 token to distribute")
+  .addParam("tokenName", "Name of the token to distribute")
+  .addParam("tokenDecimals", "Decimals of the token to distribute")
+  .addParam("tokenDistributorAddress", "Address of the token distributor")
   .setAction(async (taskArgs, hre) => {
     try {
       // Parse addresses and amounts from parameters
       const addresses = taskArgs.addresses ? taskArgs.addresses.split(",") : [];
       const amounts = taskArgs.amounts ? taskArgs.amounts.split(",") : [];
+      const erc20Address = taskArgs.erc20;
+      const tokenName = taskArgs.tokenName;
+      const tokenDecimals = taskArgs.tokenDecimals;
+      const tokenDistributorAddress = taskArgs.tokenDistributorAddress;
 
       console.log(addresses);
       console.log(amounts);
@@ -55,11 +63,11 @@ task("distribute-ghst", "Distribute GHST tokens based on leaderboard results")
       // Save distribution to file
       const fs = require("fs");
       fs.writeFileSync(
-        "ghst-distribution.json",
+        `${tokenName}-distribution.json`,
         JSON.stringify(distribution, null, 2)
       );
 
-      console.log(`Distribution saved to ghst-distribution.json`);
+      console.log(`Distribution saved to ${tokenName}-distribution.json`);
       console.log(`Total addresses: ${distribution.length}`);
 
       // Now use batchTransferTokens functionality to send the tokens
@@ -69,18 +77,19 @@ task("distribute-ghst", "Distribute GHST tokens based on leaderboard results")
 
       const signerAddress = await signer.getAddress();
 
-      const ghstToken = await hre.ethers.getContractAt("ERC20", c.ghst, signer);
+      const erc20Token = await hre.ethers.getContractAt(
+        "ERC20",
+        erc20Address,
+        signer
+      );
 
-      const signerBalanceBefore = await ghstToken.balanceOf(signerAddress);
+      const signerBalanceBefore = await erc20Token.balanceOf(signerAddress);
 
       console.log("signerBalanceBefore", signerBalanceBefore.toString());
 
-      const newTokenDistributorAddress =
-        "0x23E1dFdE8259Bdd049E055ACbc138607ECfa2b19"; // TODO: REPLACE THIS
-
       const batchTransferContract = await hre.ethers.getContractAt(
         "TokenDistributor", // Using contract name, requires ABI to be available via compilation
-        newTokenDistributorAddress,
+        tokenDistributorAddress,
         signer
       );
 
@@ -96,16 +105,18 @@ task("distribute-ghst", "Distribute GHST tokens based on leaderboard results")
         throw new Error("Insufficient balance");
       }
 
-      // Check and approve GHST spending if needed
-      const allowance = await ghstToken.allowance(
+      // Check and approve ERC20 spending if needed
+      const allowance = await erc20Token.allowance(
         signerAddress,
-        newTokenDistributorAddress // Use the new contract address for allowance check
+        tokenDistributorAddress // Use the new contract address for allowance check
       );
 
       if (allowance.lt(totalNeeded)) {
-        console.log("Approving GHST spending for TokenDistributor contract...");
-        const approveTx = await ghstToken.approve(
-          newTokenDistributorAddress, // Approve the new contract address
+        console.log(
+          `Approving ${tokenName} spending for TokenDistributor contract...`
+        );
+        const approveTx = await erc20Token.approve(
+          tokenDistributorAddress, // Approve the new contract address
           hre.ethers.constants.MaxUint256
         );
         await approveTx.wait();
@@ -139,28 +150,31 @@ task("distribute-ghst", "Distribute GHST tokens based on leaderboard results")
         const addresses: string[] = [];
 
         for (const dist of batchDistribution) {
-          tokens.push([c.ghst]);
+          tokens.push([erc20Address]);
           amounts.push([dist.amount]);
           addresses.push(dist.address);
         }
 
-        //for each address, output the amount of ghst they are getting
+        //for each address, output the amount of erc20 they are getting
         for (const dist of batchDistribution) {
           console.log(
-            `${dist.address}: ${hre.ethers.utils.formatEther(dist.amount)} GHST`
+            `${dist.address}: ${hre.ethers.utils.formatUnits(
+              dist.amount,
+              tokenDecimals
+            )} ${tokenName}`
           );
         }
 
         // Send the batch
         try {
           // Flatten the amounts array for the contract call
-          // Ensure elements are strings representing wei, which they should be from distributeGeistGHST.ts
+          // Ensure elements are strings representing wei, which they should be from distributeGeistERC20.ts
           const flatAmountsForCall = amounts.map((innerArray) =>
             innerArray[0].toString()
           );
 
           const tx = await batchTransferContract.distribute(
-            c.ghst, // tokenAddress param
+            erc20Address, // tokenAddress param
             addresses, // recipients param
             flatAmountsForCall // amounts param
           );
@@ -178,6 +192,6 @@ task("distribute-ghst", "Distribute GHST tokens based on leaderboard results")
 
       console.log("All distributions completed");
     } catch (error) {
-      console.error("Error distributing GHST:", String(error).slice(0, 1000));
+      console.error(`Error running script:`, String(error).slice(0, 1000));
     }
   });

@@ -18,7 +18,7 @@ require("./tasks/batchTransferAlchemica");
 require("./tasks/fixParcelStartPosition");
 require("./tasks/fixBuggedParcel");
 require("./tasks/fixUpgradeHashes");
-require("./tasks/distributeGhst");
+require("./tasks/distributeERC20");
 
 const GWEI = 1000 * 1000 * 1000;
 
@@ -56,11 +56,11 @@ module.exports = {
         },
        ],*/
       forking: {
-        url: process.env.BASE_URL,
+        url: process.env.MATIC_URL,
         timeout: 2000000,
-        blockNumber: 30339508,
+        blockNumber: 71667379,
       },
-      chainId: 8453,
+      chainId: 137,
       // blockGasLimit: 20000000,
       timeout: 2000000,
       gas: "auto",
