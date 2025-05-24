@@ -9,8 +9,8 @@ import {
   PopulatedTransaction,
 } from "@ethersproject/contracts";
 
-import { OwnershipFacet } from "../typechain/OwnershipFacet";
-import { IDiamondCut } from "../typechain/IDiamondCut";
+import { OwnershipFacet } from "../typechain-types";
+import { IDiamondCut } from "../typechain-types";
 import {
   getFunctionNames,
   getSelectors,
