@@ -276,9 +276,9 @@ contract RealmGettersAndSettersFacet is Modifiers {
     uint256 upgradeQueueLength;
     uint256 lodgeId;
     bool surveying;
-    // uint256[64][64] startPositionBuildGrid;
-    // uint256[64][64] startPositionTileGrid;
     uint16 harvesterCount;
+    uint256 lastChanneledAlchemica;
+    uint256 lastClaimedAlchemica;
     //bouncegate data
     BounceGate gate;
   }
@@ -313,6 +313,8 @@ contract RealmGettersAndSettersFacet is Modifiers {
     parcel.lodgeId = s.parcels[_parcelId].lodgeId;
     parcel.surveying = s.parcels[_parcelId].surveying;
     parcel.harvesterCount = s.parcels[_parcelId].harvesterCount;
+    parcel.lastChanneledAlchemica = s.parcelChannelings[_parcelId];
+    parcel.lastClaimedAlchemica = s.lastClaimedAlchemica[_parcelId];
     parcel.gate = s.bounceGates[_parcelId];
   }
 
