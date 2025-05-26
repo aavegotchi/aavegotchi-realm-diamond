@@ -22,9 +22,6 @@ import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { gasPrice } from "../constants";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
-import { InstallationAdminFacet__factory } from "../typechain-types";
-import { InstallationAdminFacetInterface } from "../typechain-types/contracts/InstallationDiamond/facets/InstallationAdminFacet";
-import { ethers } from "ethers";
 
 export interface FacetsAndAddSelectors {
   facetName: string;

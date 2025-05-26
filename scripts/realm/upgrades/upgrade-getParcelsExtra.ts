@@ -5,7 +5,6 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
-import { OwnershipFacet } from "../../../typechain-types";
 import { varsForNetwork } from "../../../constants";
 
 export async function upgrade() {
@@ -18,14 +17,6 @@ export async function upgrade() {
       removeSelectors: [],
     },
   ];
-
-  const ownership = (await ethers.getContractAt(
-    "OwnershipFacet",
-    c.realmDiamond
-  )) as OwnershipFacet;
-
-  const owner = await ownership.owner();
-  console.log("owner:", owner);
 
   const joined = convertFacetAndSelectorsToString(facets);
 
