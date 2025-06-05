@@ -13,90 +13,87 @@ import {LibERC1155} from "../../libraries/LibERC1155.sol";
 import {LibERC998} from "../../libraries/LibERC998.sol";
 import {LibMeta} from "../../libraries/LibMeta.sol";
 
+import "hardhat/console.sol";
+
 contract InstallationUpgradeFacet is Modifiers {
   event UpgradeTimeReduced(uint256 indexed _queueId, uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint40 _blocksReduced);
 
-  function instantUpgrade(
-    uint16 _coordinateX,
-    uint16 _coordinateY,
-    uint256[] memory _targetInstallationIds, //for example, [1, 2, 3, 4]. should include the current installation id as the first element
-    uint256 _parcelId,
-    RealmDiamond _realmDiamond,
-    uint256 _gltr
-  ) external {
+  struct InstantUpgradeParams {
+    uint16 coordinateX;
+    uint16 coordinateY;
+    uint256[] targetInstallationIds;
+    uint256 parcelId;
+    address realmDiamond;
+  }
+
+  function instantUpgrade(InstantUpgradeParams memory _params, uint256 _gltr, uint256 _gotchiId, bytes memory _signature) external {
     //The idea behind this function is that the user can upgrade an installation to its max level (or any level above the current one) without having to do multiple upgrades. Just pay the GLTR and call this function.
-    //Which arguments do we need to pass?
-    //target installation id
-    //we need to validate this installation is the same installation, and it must be greater than the current level
-    //one way to do this is to pass the current installation id, and the target id, and then iterate through all of the levels until we fetch the required amount of gltr and alchemica
 
-    require(_targetInstallationIds.length > 0, "InstallationUpgradeFacet: Target installation ids must be greater than 0");
-
-    //first, check that the parcel has the installation at the specified coordinates
-    _realmDiamond.checkCoordinates(_parcelId, _coordinateX, _coordinateY, _targetInstallationIds[0]);
-
+    // // Check signature - CRITICAL security validation
     // require(
-    //   s.parcelIdToInstallation[_parcelId][_coordinateX][_coordinateY] == _targetInstallationIds[0],
-    //   "InstallationUpgradeFacet: Parcel does not have the installation at the specified coordinates"
+    //   LibSignature.isValid(
+    //     keccak256(abi.encodePacked(_params.parcelId, _params.coordinateX, _params.coordinateY, _params.targetInstallationIds, _gotchiId)),
+    //     _signature,
+    //     s.backendPubKey
+    //   ),
+    //   "InstallationUpgradeFacet: Invalid signature"
     // );
 
-    //we should pass through an array of target installation ids, and the previous installation should be the next level of the previous installation
+    require(_params.targetInstallationIds.length >= 2, "InstallationUpgradeFacet: Must specify at least one upgrade target");
 
-    uint256 totalGltrCost;
-    uint256 totalFudCost;
-    uint256 totalFomoCost;
-    uint256 totalAlphaCost;
-    uint256 totalKekCost;
+    // CRITICAL: Verify access right for upgrade installations (access right 6)
+    RealmDiamond(_params.realmDiamond).verifyAccessRight(_params.parcelId, _gotchiId, 6, LibMeta.msgSender());
+
+    //first, check that the parcel has the installation at the specified coordinates
+    RealmDiamond(_params.realmDiamond).checkCoordinates(_params.parcelId, _params.coordinateX, _params.coordinateY, _params.targetInstallationIds[0]);
+
+    uint256 totalGltrCost = 0;
 
     //Loop through the target installations, beginning with the current installation id
-    for (uint256 index = 0; index < _targetInstallationIds.length; index++) {
-      uint256 currentInstallationId = _targetInstallationIds[index];
+    for (uint256 index = 0; index < _params.targetInstallationIds.length - 1; index++) {
+      uint256 currentInstallationId = _params.targetInstallationIds[index];
+
       uint256 nextLevelId = s.installationTypes[currentInstallationId].nextLevelId;
 
-      uint256 nextInstallationId = _targetInstallationIds[index + 1];
+      //will this overflow? make sure to test it
+      uint256 nextInstallationId = _params.targetInstallationIds[index + 1];
 
       //This check is important to ensure that people do not run malicious upgrades or skip levels
       require(nextLevelId == nextInstallationId, "InstallationUpgradeFacet: Next installation id must be the next level of the current installation");
 
       InstallationType memory nextInstallation = s.installationTypes[nextLevelId];
 
-      //Tally up the GLTR and Alchemica costs
-      uint256 gltrCost = nextInstallation.craftTime;
-      uint256[4] memory alchemicaCost = nextInstallation.alchemicaCost;
+      require(nextInstallation.level <= 9, "InstallationUpgradeFacet: Installation is already at the max level");
 
-      totalGltrCost += gltrCost;
-      totalFudCost += alchemicaCost[0];
-      totalFomoCost += alchemicaCost[1];
-      totalAlphaCost += alchemicaCost[2];
-      totalKekCost += alchemicaCost[3];
+      // Take the required alchemica and GLTR
+      LibItems._splitAlchemica(nextInstallation.alchemicaCost, RealmDiamond(_params.realmDiamond).getAlchemicaAddresses());
+      //prevent underflow if user sends too much GLTR
+
+      totalGltrCost += nextInstallation.craftTime;
+
+      //Upgrade the installation
+
+      LibInstallation.upgradeInstallation(
+        UpgradeQueue({
+          parcelId: _params.parcelId,
+          coordinateX: _params.coordinateX,
+          coordinateY: _params.coordinateY,
+          installationId: currentInstallationId,
+          owner: LibMeta.msgSender(),
+          readyBlock: 0, //check this
+          claimed: false //check this
+        }),
+        nextInstallationId,
+        RealmDiamond(_params.realmDiamond)
+      );
     }
 
-    require(totalGltrCost == _gltr, "InstallationUpgradeFacet: Not enough GLTR");
-
-    // Take the required alchemica and GLTR
-    LibItems._splitAlchemica([totalFudCost, totalFomoCost, totalAlphaCost, totalKekCost], _realmDiamond.getAlchemicaAddresses());
-    //prevent underflow if user sends too much GLTR
-
-    //only burn when gltr amount >0
+    require(_gltr == totalGltrCost, "InstallationUpgradeFacet: Incorrect GLTR sent");
 
     require(
-      IERC20(s.gltr).transferFrom(LibMeta.msgSender(), 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, (uint256(_gltr) * 1e18)),
+      IERC20(s.gltr).transferFrom(LibMeta.msgSender(), 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, uint256(_gltr) * 1e18),
       "InstallationUpgradeFacet: Failed GLTR transfer"
     ); //should revert if user doesnt have enough GLTR
-
-    //Upgrade the installation
-
-    UpgradeQueue memory upgradeQueue = UpgradeQueue({
-      parcelId: _parcelId,
-      coordinateX: _coordinateX,
-      coordinateY: _coordinateY,
-      installationId: _targetInstallationIds[0],
-      owner: LibMeta.msgSender(),
-      readyBlock: 0, //check this
-      claimed: false //check this
-    });
-
-    LibInstallation.upgradeInstallation(upgradeQueue, _targetInstallationIds[_targetInstallationIds.length - 1], _realmDiamond);
   }
 
   /// @notice Allow a user to upgrade an installation in a parcel
