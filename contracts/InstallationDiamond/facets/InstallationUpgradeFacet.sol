@@ -26,18 +26,23 @@ contract InstallationUpgradeFacet is Modifiers {
     address realmDiamond;
   }
 
+  /**
+   * @notice Instantly upgrades installations on a parcel.
+   * @dev This function performs multiple checks including signature validation, access rights, and GLTR cost.
+   * @param _params Struct containing the parameters for the upgrade including coordinates, target installation IDs, parcel ID, and realm diamond address.
+   * @param _gltr The amount of GLTR tokens to be used for the upgrade.
+   * @param _gotchiId The ID of the Gotchi performing the upgrade.
+   * @param _signature A cryptographic signature validating the upgrade request.
+   */
   function instantUpgrade(InstantUpgradeParams memory _params, uint256 _gltr, uint256 _gotchiId, bytes memory _signature) external {
-    //The idea behind this function is that the user can upgrade an installation to its max level (or any level above the current one) without having to do multiple upgrades. Just pay the GLTR and call this function.
-
-    // // Check signature - CRITICAL security validation
-    // require(
-    //   LibSignature.isValid(
-    //     keccak256(abi.encodePacked(_params.parcelId, _params.coordinateX, _params.coordinateY, _params.targetInstallationIds, _gotchiId)),
-    //     _signature,
-    //     s.backendPubKey
-    //   ),
-    //   "InstallationUpgradeFacet: Invalid signature"
-    // );
+    require(
+      LibSignature.isValid(
+        keccak256(abi.encodePacked(_params.parcelId, _params.coordinateX, _params.coordinateY, _params.targetInstallationIds, _gotchiId)),
+        _signature,
+        s.backendPubKey
+      ),
+      "InstallationUpgradeFacet: Invalid signature"
+    );
 
     require(_params.targetInstallationIds.length >= 2, "InstallationUpgradeFacet: Must specify at least one upgrade target");
 
@@ -55,15 +60,16 @@ contract InstallationUpgradeFacet is Modifiers {
 
       uint256 nextLevelId = s.installationTypes[currentInstallationId].nextLevelId;
 
-      //will this overflow? make sure to test it
-      uint256 nextInstallationId = _params.targetInstallationIds[index + 1];
+      if (nextLevelId == 0) {
+        revert("InstallationUpgradeFacet: Installation is already at the max level");
+      }
 
-      //This check is important to ensure that people do not run malicious upgrades or skip levels
-      require(nextLevelId == nextInstallationId, "InstallationUpgradeFacet: Next installation id must be the next level of the current installation");
+      uint256 nextInstallationId = _params.targetInstallationIds[index + 1];
 
       InstallationType memory nextInstallation = s.installationTypes[nextLevelId];
 
-      require(nextInstallation.level <= 9, "InstallationUpgradeFacet: Installation is already at the max level");
+      //This check is important to ensure that people do not run malicious upgrades or skip levels
+      require(nextLevelId == nextInstallationId, "InstallationUpgradeFacet: Next installation id must be the next level of the current installation");
 
       // Take the required alchemica and GLTR
       LibItems._splitAlchemica(nextInstallation.alchemicaCost, RealmDiamond(_params.realmDiamond).getAlchemicaAddresses());

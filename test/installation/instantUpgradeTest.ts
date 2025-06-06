@@ -31,21 +31,47 @@ interface InstantUpgradeParams {
   realmDiamond: string;
 }
 
-// Helper function for generating instant upgrade signatures
+// // Helper function for generating instant upgrade signatures
+// async function genInstantUpgradeSignature(
+//   parcelId: number,
+//   coordinateX: number,
+//   coordinateY: number,
+//   targetInstallationIds: number[],
+//   gotchiId: number,
+//   signer: Signer
+// ): Promise<string> {
+//   const messageHash = ethers.utils.solidityKeccak256(
+//     ["uint256", "uint16", "uint16", "uint256[]", "uint256"],
+//     [parcelId, coordinateX, coordinateY, targetInstallationIds, gotchiId]
+//   );
+//   const messageBytes = ethers.utils.arrayify(messageHash);
+//   return signer.signMessage(messageBytes);
+// }
+
 async function genInstantUpgradeSignature(
   parcelId: number,
   coordinateX: number,
   coordinateY: number,
   targetInstallationIds: number[],
   gotchiId: number,
-  signer: Signer
-): Promise<string> {
-  const messageHash = ethers.utils.solidityKeccak256(
+  signer: Signer,
+  invalid?: boolean
+) {
+  let messageHash1 = ethers.utils.solidityKeccak256(
     ["uint256", "uint16", "uint16", "uint256[]", "uint256"],
     [parcelId, coordinateX, coordinateY, targetInstallationIds, gotchiId]
   );
-  const messageBytes = ethers.utils.arrayify(messageHash);
-  return signer.signMessage(messageBytes);
+
+  const backendSigner = new ethers.Wallet(
+    invalid ? process.env.REALM_PK : process.env.PROD_PK
+  ); // PK should start with '0x'
+
+  let signedMessage1 = await backendSigner.signMessage(
+    ethers.utils.arrayify(messageHash1)
+  );
+  let signature1 = ethers.utils.arrayify(signedMessage1);
+
+  return signature1;
 }
 
 describe("Testing Instant Upgrade Functionality", async function () {
@@ -71,12 +97,12 @@ describe("Testing Instant Upgrade Functionality", async function () {
 
     c = await varsForNetwork(ethers);
 
-    const backendPkFromEnv = process.env.REALM_PK;
+    const backendPkFromEnv = process.env.PROD_PK;
     let actualBackendPk: string;
 
     if (backendPkFromEnv) {
       actualBackendPk = backendPkFromEnv;
-      console.log("Using backend private key from TEST_BACKEND_PRIVATE_KEY.");
+      console.log("Using backend private key from REALM_PK.");
     } else {
       // Fallback to Hardhat's default accounts[1] private key if env var is not set.
       // This is for local testing convenience. For CI/CD, TEST_BACKEND_PRIVATE_KEY should be set.
@@ -394,46 +420,6 @@ describe("Testing Instant Upgrade Functionality", async function () {
     );
   });
 
-  it("Should successfully perform instant upgrade", async () => {
-    const totalGltrCost = await getTotalGltrCost(
-      targetInstallationIdsLvl1to3,
-      installationFacet
-    );
-    const params: InstantUpgradeParams = {
-      coordinateX,
-      coordinateY,
-      targetInstallationIds: targetInstallationIdsLvl1to3,
-      parcelId: realmId,
-      realmDiamond: c.realmDiamond,
-    };
-    const signature = await genInstantUpgradeSignature(
-      params.parcelId,
-      params.coordinateX,
-      params.coordinateY,
-      params.targetInstallationIds,
-      gotchiIdForUpgrade,
-      backendSigner
-    );
-
-    await (installationUpgradeFacet as any).instantUpgrade(
-      params,
-      totalGltrCost,
-      gotchiIdForUpgrade,
-      signature
-    );
-
-    const finalInstallationId =
-      targetInstallationIdsLvl1to3[targetInstallationIdsLvl1to3.length - 1];
-    await expect(
-      realmGettersAndSettersFacet.checkCoordinates(
-        realmId,
-        coordinateX,
-        coordinateY,
-        finalInstallationId
-      )
-    ).to.not.be.reverted;
-  });
-
   it("Should fail with an invalid signature", async () => {
     const totalGltrCost = await getTotalGltrCost(
       targetInstallationIdsLvl1to3,
@@ -452,22 +438,25 @@ describe("Testing Instant Upgrade Functionality", async function () {
         "backendSigner is not an ethers.Wallet instance for signature generation"
       );
     }
+
+    console.log("params", params);
+
     const signature = await genInstantUpgradeSignature(
       params.parcelId,
       params.coordinateX,
       params.coordinateY,
       params.targetInstallationIds,
       gotchiIdForUpgrade,
-      backendSigner
+      backendSigner,
+      true
     );
-    const invalidSignature = signature.slice(0, -4) + "dead";
 
     await expect(
       (installationUpgradeFacet as any).instantUpgrade(
         params,
         totalGltrCost,
         gotchiIdForUpgrade,
-        invalidSignature
+        signature
       )
     ).to.be.revertedWith("InstallationUpgradeFacet: Invalid signature");
   });
@@ -543,21 +532,66 @@ describe("Testing Instant Upgrade Functionality", async function () {
     ).to.be.revertedWith("LibRealm: Access Right - Only Owner");
   });
 
-  it("Should fail if initial installation is already at its defined max level in the path", async () => {
-    const currentMaxLevelId = 14;
-    const attemptFurtherUpgradePath = [currentMaxLevelId, 15];
+  //   // Ensure the max level installation is equipped for this test isolation
+  //   const equipMaxLevelSig = await genEquipInstallationSignature(
+  //     realmId,
+  //     gotchiIdForUpgrade,
+  //     14,
+  //     coordinateX,
+  //     coordinateY
+  //   );
+  //   await realmFacet.equipInstallation(
+  //     realmId,
+  //     gotchiIdForUpgrade,
+  //     14,
+  //     coordinateX,
+  //     coordinateY,
+  //     equipMaxLevelSig
+  //   );
 
-    const type15 = await installationFacet.getInstallationTypes([15]);
-    if (!type15[0])
-      throw new Error(
-        "Test setup: Installation type 15 not found for cost calculation"
-      );
-    const costForInvalidPath = type15[0].craftTime;
+  //   const currentIsMaxLevel = 14;
+  //   const attemptPathFromMax = [currentIsMaxLevel, 15];
 
+  //   const cost = await getTotalGltrCost(attemptPathFromMax, installationFacet);
+  //   const params: InstantUpgradeParams = {
+  //     coordinateX,
+  //     coordinateY,
+  //     targetInstallationIds: attemptPathFromMax,
+  //     parcelId: realmId,
+  //     realmDiamond: c.realmDiamond,
+  //   };
+  //   const signature = await genInstantUpgradeSignature(
+  //     params.parcelId,
+  //     params.coordinateX,
+  //     params.coordinateY,
+  //     params.targetInstallationIds,
+  //     gotchiIdForUpgrade,
+  //     backendSigner
+  //   );
+
+  //   await expect(
+  //     (installationUpgradeFacet as any).instantUpgrade(
+  //       params,
+  //       cost,
+  //       gotchiIdForUpgrade,
+  //       signature
+  //     )
+  //   ).to.be.revertedWith(
+  //     "InstallationUpgradeFacet: Next installation id must be the next level of the current installation"
+  //   );
+  // });
+
+  it("Should successfully perform instant upgrade", async () => {
+    const pathToLevel9Type = [10, 11, 12, 13, 14, 15, 16, 17, 18];
+
+    const totalGltrCost = await getTotalGltrCost(
+      pathToLevel9Type,
+      installationFacet
+    );
     const params: InstantUpgradeParams = {
       coordinateX,
       coordinateY,
-      targetInstallationIds: attemptFurtherUpgradePath,
+      targetInstallationIds: pathToLevel9Type,
       parcelId: realmId,
       realmDiamond: c.realmDiamond,
     };
@@ -570,63 +604,31 @@ describe("Testing Instant Upgrade Functionality", async function () {
       backendSigner
     );
 
+    await (installationUpgradeFacet as any).instantUpgrade(
+      params,
+      totalGltrCost,
+      gotchiIdForUpgrade,
+      signature
+    );
+
+    const finalInstallationId = pathToLevel9Type[pathToLevel9Type.length - 1];
     await expect(
-      (installationUpgradeFacet as any).instantUpgrade(
-        params,
-        Number(costForInvalidPath), // Ensure gltr is number
-        gotchiIdForUpgrade,
-        signature
-      )
-    ).to.be.revertedWith(
-      "InstallationUpgradeFacet: Next installation id must be the next level of the current installation"
-    );
-  });
-
-  it("Should fail if trying to upgrade to an installation type that is level > 9 (contract rule)", async () => {
-    // Ensure the initial state for this specific test: parcel has installation type 10.
-    const equipInitialSig = await genEquipInstallationSignature(
-      realmId,
-      gotchiIdForUpgrade,
-      10, // Ensure initial installation is type 10 for this test path
-      coordinateX,
-      coordinateY
-    );
-    console.log("Attempting to equip installation 10 for 'level > 9' test...");
-    await realmFacet.equipInstallation(
-      realmId,
-      gotchiIdForUpgrade,
-      10,
-      coordinateX,
-      coordinateY,
-      equipInitialSig
-    );
-    console.log("Equip installation 10 call completed.");
-
-    // Verify the equipped installation using checkCoordinates
-    try {
-      await realmGettersAndSettersFacet.checkCoordinates(
+      realmGettersAndSettersFacet.checkCoordinates(
         realmId,
         coordinateX,
         coordinateY,
-        10
-      );
-      console.log(
-        `State check: Installation 10 IS present at (${coordinateX},${coordinateY}) on parcel ${realmId} before instantUpgrade.`
-      );
-    } catch (e: any) {
-      console.error(
-        `State check failed: Installation 10 NOT present. checkCoordinates reverted: ${e.message}`
-      );
-      throw new Error(
-        `Test setup failed: Expected installation 10 but checkCoordinates failed. Original error: ${e.message}`
-      );
-    }
+        finalInstallationId
+      )
+    ).to.not.be.reverted;
+  });
 
-    const pathToLevel10Type = [10, 11, 12, 13, 14, 20];
+  it("Should fail if trying to upgrade to an installation type that is already max level (contract rule)", async () => {
+    const pathToLevel10Type = [18, 19];
     const costToLevel10Type = await getTotalGltrCost(
       pathToLevel10Type,
       installationFacet
     );
+
     const params: InstantUpgradeParams = {
       coordinateX,
       coordinateY,
@@ -655,55 +657,43 @@ describe("Testing Instant Upgrade Functionality", async function () {
     );
   });
 
-  it("Should fail if trying to upgrade *from* a max level installation (e.g. nextLevelId is 0)", async () => {
-    // Ensure the max level installation is equipped for this test isolation
-    const equipMaxLevelSig = await genEquipInstallationSignature(
-      realmId,
-      gotchiIdForUpgrade,
-      14,
-      coordinateX,
-      coordinateY
-    );
-    await realmFacet.equipInstallation(
-      realmId,
-      gotchiIdForUpgrade,
-      14,
-      coordinateX,
-      coordinateY,
-      equipMaxLevelSig
-    );
+  //   const currentMaxLevelId = 18;
+  //   const attemptFurtherUpgradePath = [currentMaxLevelId, 19];
 
-    const currentIsMaxLevel = 14;
-    const attemptPathFromMax = [currentIsMaxLevel, 15];
+  //   const type19 = await installationFacet.getInstallationTypes([19]);
+  //   if (!type19[0])
+  //     throw new Error(
+  //       "Test setup: Installation type 19 not found for cost calculation"
+  //     );
+  //   const costForInvalidPath = type19[0].craftTime;
 
-    const cost = await getTotalGltrCost(attemptPathFromMax, installationFacet);
-    const params: InstantUpgradeParams = {
-      coordinateX,
-      coordinateY,
-      targetInstallationIds: attemptPathFromMax,
-      parcelId: realmId,
-      realmDiamond: c.realmDiamond,
-    };
-    const signature = await genInstantUpgradeSignature(
-      params.parcelId,
-      params.coordinateX,
-      params.coordinateY,
-      params.targetInstallationIds,
-      gotchiIdForUpgrade,
-      backendSigner
-    );
+  //   const params: InstantUpgradeParams = {
+  //     coordinateX,
+  //     coordinateY,
+  //     targetInstallationIds: attemptFurtherUpgradePath,
+  //     parcelId: realmId,
+  //     realmDiamond: c.realmDiamond,
+  //   };
+  //   const signature = await genInstantUpgradeSignature(
+  //     params.parcelId,
+  //     params.coordinateX,
+  //     params.coordinateY,
+  //     params.targetInstallationIds,
+  //     gotchiIdForUpgrade,
+  //     backendSigner
+  //   );
 
-    await expect(
-      (installationUpgradeFacet as any).instantUpgrade(
-        params,
-        cost,
-        gotchiIdForUpgrade,
-        signature
-      )
-    ).to.be.revertedWith(
-      "InstallationUpgradeFacet: Next installation id must be the next level of the current installation"
-    );
-  });
+  //   await expect(
+  //     (installationUpgradeFacet as any).instantUpgrade(
+  //       params,
+  //       Number(costForInvalidPath), // Ensure gltr is number
+  //       gotchiIdForUpgrade,
+  //       signature
+  //     )
+  //   ).to.be.revertedWith(
+  //     "InstallationUpgradeFacet: Next installation id must be the next level of the current installation"
+  //   );
+  // });
 });
 
 async function getTotalGltrCost(
