@@ -15,11 +15,7 @@ contract BounceGateFacet is Modifiers {
     LibBounceGate._createEvent(_title, _startTime, _durationInMinutes, _alchemicaSpent, _realmId);
   }
 
-  function updateEvent(
-    uint256 _realmId,
-    uint256[4] calldata _alchemicaSpent,
-    uint40 _durationExtensionInMinutes
-  ) external {
+  function updateEvent(uint256 _realmId, uint256[4] calldata _alchemicaSpent, uint40 _durationExtensionInMinutes) external {
     LibBounceGate._updateEvent(_realmId, _alchemicaSpent, _durationExtensionInMinutes);
   }
 
@@ -27,12 +23,7 @@ contract BounceGateFacet is Modifiers {
     LibBounceGate._cancelEvent(_realmId);
   }
 
-  function recreateEvent(
-    uint256 _realmId,
-    uint64 _startTime,
-    uint64 _durationInMinutes,
-    uint256[4] calldata _alchemicaSpent
-  ) external {
+  function recreateEvent(uint256 _realmId, uint64 _startTime, uint64 _durationInMinutes, uint256[4] calldata _alchemicaSpent) external {
     LibBounceGate._recreateEvent(_realmId, _startTime, _durationInMinutes, _alchemicaSpent);
   }
 

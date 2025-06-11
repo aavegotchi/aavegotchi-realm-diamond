@@ -7,11 +7,7 @@ contract NFTDisplayFacet is Modifiers {
   event NFTDisplayStatusUpdated(address _token, uint256 _chainId, bool _allowed);
   error LengthMisMatch();
 
-  function toggleNftDisplayAllowed(
-    address[] calldata _tokens,
-    uint256[] calldata _chainIds,
-    bool[] calldata _allow
-  ) external onlyOwner {
+  function toggleNftDisplayAllowed(address[] calldata _tokens, uint256[] calldata _chainIds, bool[] calldata _allow) external onlyOwner {
     if (_tokens.length != _chainIds.length && _tokens.length != _allow.length) revert LengthMisMatch();
     for (uint256 i; i < _tokens.length; i++) {
       address token = _tokens[i];
