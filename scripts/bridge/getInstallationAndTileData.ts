@@ -3,6 +3,10 @@ import { ethers } from "hardhat";
 import fs from "fs";
 import path from "path";
 import { varsForNetwork } from "../../constants";
+import { getVaultOwner } from "./getParcelData";
+import { DATA_DIR } from "./paths";
+import { DATA_DIR_TILES } from "./paths";
+import { DATA_DIR_INSTALLATIONS } from "./paths";
 
 export const excludedAddresses = [
   "0x0000000000000000000000000000000000000000",
@@ -47,9 +51,6 @@ const CONTRACTS = {
   tiles: "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355",
 } as const;
 
-const DATA_DIR = path.join(__dirname, "cloneData");
-const DATA_DIR_INSTALLATIONS = path.join(DATA_DIR, "installations");
-const DATA_DIR_TILES = path.join(DATA_DIR, "tiles");
 const FILES = {
   installations: path.join(
     DATA_DIR_INSTALLATIONS,
@@ -61,11 +62,6 @@ const FILES = {
     "installations-contractsHolders.json"
   ),
   tilesContracts: path.join(DATA_DIR_TILES, "tiles-contractsHolders.json"),
-  vaultInstallations: path.join(
-    DATA_DIR_INSTALLATIONS,
-    "vault-installations.json"
-  ),
-  vaultTiles: path.join(DATA_DIR_TILES, "vault-tiles.json"),
   gbmDiamondInstallations: path.join(
     DATA_DIR_INSTALLATIONS,
     "gbmDiamond-installations.json"
@@ -143,12 +139,10 @@ async function updateHolderData(
   filename: string,
   contractHoldersFilename: string,
   realmDiamondFilename: string,
-  vaultFilename: string,
   gbmDiamondFilename: string,
   contractHolderEOAsFilename: string,
-  // rafflesFilename: string,
   gnosisSafeContractsFilename: string,
-  processedHoldersFile: string // New parameter for processed holders file
+  processedHoldersFile: string
 ): Promise<void> {
   try {
     const c = await varsForNetwork(ethers);
@@ -170,7 +164,6 @@ async function updateHolderData(
     let existingData = readJsonFile<Record<string, TokenHolder>>(filename, {});
     const contractHolders: TokenHolder[] = [];
     const realmDiamondHolders: TokenHolder[] = [];
-    const vaultHolders: TokenHolder[] = [];
     const contractEOAs: ContractEOAHolder[] = [];
     const gbmDiamondHolders: TokenHolder[] = [];
     const gnosisSafeContracts: SafeDetails[] = [];
@@ -207,7 +200,54 @@ async function updateHolderData(
           realmDiamondHolders.push(holder);
           delete existingData[ownerAddress];
         } else if (ownerAddress.toLowerCase() === vault.toLowerCase()) {
-          vaultHolders.push(holder);
+          //get the vault depositor
+          const trueOwners = await getVaultOwner(
+            holder.tokenBalances.map((token) => token.tokenId),
+            ethers
+          );
+
+          // Group tokens by their true owners, filtering out tokens with undefined owners
+          const tokensByOwner = holder.tokenBalances.reduce(
+            (acc: Record<string, string[]>, token) => {
+              const trueOwner = trueOwners[token.tokenId];
+
+              // Only process tokens that have a valid owner
+              if (trueOwner && trueOwner !== "undefined") {
+                if (!acc[trueOwner]) acc[trueOwner] = [];
+                acc[trueOwner].push(token.tokenId);
+              } else {
+                console.warn(
+                  `Skipping token ${token.tokenId} - no valid owner found in vault`
+                );
+              }
+              return acc;
+            },
+            {}
+          );
+
+          // Add each owner's tokens to existingData
+          for (const [owner, tokenIds] of Object.entries(tokensByOwner)) {
+            // Additional validation to ensure owner is not undefined
+            if (!owner || owner === "undefined") {
+              const errorMsg = `Attempting to add an entry with undefined owner! Category: vault`;
+              console.error(errorMsg, { owner, tokenIds });
+              continue; // Skip this entry instead of throwing
+            }
+
+            if (!existingData[owner]) {
+              existingData[owner] = {
+                ownerAddress: owner,
+                tokenBalances: [],
+              };
+            }
+            existingData[owner].tokenBalances.push(
+              ...tokenIds.map((tokenId) => ({
+                tokenId,
+                balance: "1",
+              }))
+            );
+          }
+
           delete existingData[ownerAddress];
         } else if (ownerAddress.toLowerCase() === gbmDiamond.toLowerCase()) {
           gbmDiamondHolders.push(holder);
@@ -258,6 +298,41 @@ async function updateHolderData(
         if (batchCount >= BATCH_SIZE) {
           console.log(`Saving batch of ${batchCount} processed holders...`);
           writeJsonFile(processedHoldersFile, processedHolders);
+
+          // Write main data files every batch
+          const filesToWrite = [
+            { path: filename, data: existingData, name: "Regular holders" },
+            {
+              path: contractHoldersFilename,
+              data: contractHolders,
+              name: "Contract holders",
+            },
+            {
+              path: realmDiamondFilename,
+              data: realmDiamondHolders,
+              name: "Realm Diamond holders",
+            },
+            {
+              path: gbmDiamondFilename,
+              data: gbmDiamondHolders,
+              name: "GBM Diamond holders",
+            },
+            {
+              path: contractHolderEOAsFilename,
+              data: contractEOAs,
+              name: "Contract EOA holders",
+            },
+            {
+              path: gnosisSafeContractsFilename,
+              data: gnosisSafeContracts,
+              name: "Gnosis Safe contracts",
+            },
+          ];
+          for (const { path, data, name } of filesToWrite) {
+            console.log(`[Batch] Writing ${name} to ${path}...`);
+            writeJsonFile(path, data);
+          }
+
           batchCount = 0;
         }
       } catch (error) {
@@ -283,7 +358,6 @@ async function updateHolderData(
         console.log(`Irregular Contracts: ${contractHolders.length}`);
         console.log(`Excluded addresses: ${excludedCount}`);
         console.log(`Realm Diamond holders: ${realmDiamondHolders.length}`);
-        console.log(`Vault holders: ${vaultHolders.length}`);
         console.log(`GBM Diamond holds: ${gbmDiamondHolders.length} `);
         console.log(
           `Raffle tokens allocated to PC: ${raffleTokensAllocatedToPC}\n`
@@ -295,47 +369,39 @@ async function updateHolderData(
     // Save any remaining processed holders
     if (batchCount > 0) {
       writeJsonFile(processedHoldersFile, processedHolders);
-    }
-
-    console.log("\nSaving data to files...");
-    const filesToWrite = [
-      { path: filename, data: existingData, name: "Regular holders" },
-      {
-        path: contractHoldersFilename,
-        data: contractHolders,
-        name: "Contract holders",
-      },
-      {
-        path: realmDiamondFilename,
-        data: realmDiamondHolders,
-        name: "Realm Diamond holders",
-      },
-      { path: vaultFilename, data: vaultHolders, name: "Vault holders" },
-      {
-        path: gbmDiamondFilename,
-        data: gbmDiamondHolders,
-        name: "GBM Diamond holders",
-      },
-      {
-        path: contractHolderEOAsFilename,
-        data: contractEOAs,
-        name: "Contract EOA holders",
-      },
-      // {
-      //     path: rafflesFilename,
-      //     data: rafflesHolders,
-      //     name: "Raffles Contract holders",
-      //   },
-      {
-        path: gnosisSafeContractsFilename,
-        data: gnosisSafeContracts,
-        name: "Gnosis Safe contracts",
-      },
-    ];
-
-    for (const { path, data, name } of filesToWrite) {
-      console.log(`Writing ${name} to ${path}...`);
-      writeJsonFile(path, data);
+      // Write main data files for the last partial batch
+      const filesToWrite = [
+        { path: filename, data: existingData, name: "Regular holders" },
+        {
+          path: contractHoldersFilename,
+          data: contractHolders,
+          name: "Contract holders",
+        },
+        {
+          path: realmDiamondFilename,
+          data: realmDiamondHolders,
+          name: "Realm Diamond holders",
+        },
+        {
+          path: gbmDiamondFilename,
+          data: gbmDiamondHolders,
+          name: "GBM Diamond holders",
+        },
+        {
+          path: contractHolderEOAsFilename,
+          data: contractEOAs,
+          name: "Contract EOA holders",
+        },
+        {
+          path: gnosisSafeContractsFilename,
+          data: gnosisSafeContracts,
+          name: "Gnosis Safe contracts",
+        },
+      ];
+      for (const { path, data, name } of filesToWrite) {
+        console.log(`[Batch] Writing ${name} to ${path}...`);
+        writeJsonFile(path, data);
+      }
     }
 
     console.log("\n=== Final Summary ===");
@@ -345,7 +411,6 @@ async function updateHolderData(
     console.log(`Excluded addresses: ${excludedCount}`);
     console.log(`Special contract holders:`);
     console.log(`Realm Diamond holds: ${realmDiamondHolders.length}`);
-    console.log(`Vault holds: ${vaultHolders.length}`);
     console.log(`GBM Diamond holds: ${gbmDiamondHolders.length} `);
     console.log(`Raffle tokens allocated to PC: ${raffleTokensAllocatedToPC}`);
     console.log(`Gnosis Safe contracts: ${gnosisSafeContracts.length}`);
@@ -364,7 +429,7 @@ export const getOwner = async (contractAddress: string): Promise<string> => {
     );
     return await owner.owner();
   } catch (error) {
-    console.debug(`Ùnknown contract`);
+    console.debug(`Ùnknown contract without owner`);
     return "";
   }
 };
@@ -389,10 +454,8 @@ async function main() {
       FILES.installations,
       FILES.installationsContracts,
       FILES.realmDiamondInstallations,
-      FILES.vaultInstallations,
       FILES.gbmDiamondInstallations,
       FILES.installationsContractHolderEOAs,
-      // FILES.rafflesInstallations,
       FILES.gnosisSafeInstallations,
       PROCESSED_INSTALLATIONS_HOLDERS_FILE
     );
@@ -403,10 +466,8 @@ async function main() {
       FILES.tiles,
       FILES.tilesContracts,
       FILES.realmDiamondTiles,
-      FILES.vaultTiles,
       FILES.gbmDiamondTiles,
       FILES.tilesContractHolderEOAs,
-      // FILES.rafflesTiles,
       FILES.gnosisSafeTiles,
       PROCESSED_TILES_HOLDERS_FILE
     );

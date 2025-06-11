@@ -14,25 +14,60 @@ import {
   PC,
   voucherContract,
 } from "./getInstallationAndTileData";
+import { DATA_DIR_PARCEL } from "./paths";
 
 const config = {
   apiKey: process.env.ALCHEMY_KEY,
   network: Network.MATIC_MAINNET,
 };
 
-const PARCELS_CONTRACT = "0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11";
-const DATA_DIR = path.join(__dirname, "cloneData", "alchemy-parcels");
+export const PARCELS_CONTRACT = "0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11";
 
 const FILES = {
-  normal: path.join(DATA_DIR, "parcels-balances.json"),
-  contracts: path.join(DATA_DIR, "parcels-contracts.json"),
-  contractsWithOwner: path.join(DATA_DIR, "parcels-contractsWithOwner.json"),
-  vault: path.join(DATA_DIR, "parcels-vault.json"),
-  gbm: path.join(DATA_DIR, "parcels-gbm.json"),
-  raffles: path.join(DATA_DIR, "parcels-raffles.json"),
-  safe: path.join(DATA_DIR, "gnosisSafe-parcels.json"),
-  processed: path.join(DATA_DIR, "processed-holders.json"),
+  normal: path.join(DATA_DIR_PARCEL, "parcels-balances.json"),
+  contracts: path.join(DATA_DIR_PARCEL, "parcels-contracts.json"),
+  contractsWithOwner: path.join(
+    DATA_DIR_PARCEL,
+    "parcels-contractsWithOwner.json"
+  ),
+  gbm: path.join(DATA_DIR_PARCEL, "parcels-gbm.json"),
+  raffles: path.join(DATA_DIR_PARCEL, "parcels-raffles.json"),
+  safe: path.join(DATA_DIR_PARCEL, "gnosisSafe-parcels.json"),
+  processed: path.join(DATA_DIR_PARCEL, "processed-holders.json"),
 };
+
+export async function getVaultOwner(tokenIds: string[], ethers: any) {
+  const vaultContract = await ethers.getContractAt("IVault", vault);
+  const owners: Record<string, string> = {};
+
+  for (let i = 0; i < tokenIds.length; i++) {
+    const tokenId = tokenIds[i];
+    try {
+      // Convert string token ID to numeric ID
+      const numericTokenId = parseInt(tokenId);
+      if (isNaN(numericTokenId)) {
+        console.error(`Invalid token ID format: ${tokenId}`);
+        continue;
+      }
+
+      console.log(
+        `[VAULT OWNER] (${i + 1}/${
+          tokenIds.length
+        }) Getting owner for tokenId: ${tokenId} (numeric: ${numericTokenId})`
+      );
+      const owner = await vaultContract.getDepositor(
+        PARCELS_CONTRACT,
+        numericTokenId
+      );
+      owners[tokenId] = owner.toLowerCase();
+    } catch (error) {
+      console.error(`Error getting vault owner for token ${tokenId}:`, error);
+    }
+  }
+
+  console.log(`Found ${Object.keys(owners).length} vault owners`);
+  return owners;
+}
 
 const BATCH_SIZE = 100;
 const MAX_CONSECUTIVE_ERRORS = 5;
@@ -153,6 +188,7 @@ function writeJsonFile<T>(filePath: string, data: T): void {
 
 // Modify updateParcelData function to track analytics
 async function updateParcelData(): Promise<void> {
+  const c = await varsForNetwork(ethers);
   const alchemy = new Alchemy(config);
 
   const analytics: ParcelAnalytics = {
@@ -170,9 +206,9 @@ async function updateParcelData(): Promise<void> {
   };
 
   try {
-    ensureDirectoryExists(DATA_DIR);
+    ensureDirectoryExists(DATA_DIR_PARCEL);
 
-    const response = await alchemy.nft.getOwnersForContract(PARCELS_CONTRACT, {
+    const response = await alchemy.nft.getOwnersForContract(c.realmDiamond, {
       withTokenBalances: true,
     });
 
@@ -180,7 +216,6 @@ async function updateParcelData(): Promise<void> {
     let normalHolders: Record<string, TokenHolder> = {};
     let contractHolders: TokenHolder[] = [];
     let contractsWithOwner: ContractEOAHolder[] = [];
-    let vaultHolders: TokenHolder[] = [];
     let gbmHolders: TokenHolder[] = [];
     let rafflesHolders: TokenHolder[] = [];
     let safeHolders: SafeDetails[] = [];
@@ -201,10 +236,50 @@ async function updateParcelData(): Promise<void> {
 
       try {
         if (ownerAddress.toLowerCase() === vault.toLowerCase()) {
-          vaultHolders.push(holder);
-          holder.tokenBalances.forEach((token) =>
-            analytics.vaultParcels.add(token.tokenId)
+          console.log(`Processing vault tokens`);
+
+          // Track vault tokens in analytics before resolving
+          holder.tokenBalances.forEach((token) => {
+            analytics.vaultParcels.add(token.tokenId);
+          });
+
+          const trueOwners = await getVaultOwner(
+            holder.tokenBalances.map((token) => token.tokenId),
+            ethers
           );
+
+          // Group the holders by owner
+          const tokensByOwner = holder.tokenBalances.reduce(
+            (acc: Record<string, string[]>, token) => {
+              const trueOwner = trueOwners[token.tokenId];
+              if (!acc[trueOwner]) acc[trueOwner] = [];
+              acc[trueOwner].push(token.tokenId);
+              return acc;
+            },
+            {}
+          );
+
+          // Add each owner's tokens to normalHolders
+          for (const [owner, tokenIds] of Object.entries(tokensByOwner)) {
+            if (!normalHolders[owner]) {
+              normalHolders[owner] = {
+                ownerAddress: owner,
+                tokenBalances: [],
+              };
+            }
+            normalHolders[owner].tokenBalances.push(
+              ...tokenIds.map((tokenId) => ({
+                tokenId,
+                balance: "1",
+              }))
+            );
+
+            // Update analytics
+            tokenIds.forEach((tokenId) => {
+              analytics.normalAddressParcels.add(tokenId);
+            });
+            analytics.uniqueNormalHolders.add(owner);
+          }
         } else if (ownerAddress.toLowerCase() === gbmDiamond.toLowerCase()) {
           gbmHolders.push(holder);
           holder.tokenBalances.forEach((token) =>
@@ -275,7 +350,18 @@ async function updateParcelData(): Promise<void> {
         consecutiveErrors = 0;
 
         if (batchCount >= BATCH_SIZE) {
+          console.log(`Saving batch of ${batchCount} processed holders...`);
           writeJsonFile(FILES.processed, processedHolders);
+
+          // Write main data files every batch
+          console.log("[Batch] Writing main data files...");
+          writeJsonFile(FILES.normal, normalHolders);
+          writeJsonFile(FILES.contracts, contractHolders);
+          writeJsonFile(FILES.contractsWithOwner, contractsWithOwner);
+          writeJsonFile(FILES.gbm, gbmHolders);
+          writeJsonFile(FILES.raffles, rafflesHolders);
+          writeJsonFile(FILES.safe, safeHolders);
+
           batchCount = 0;
         }
 
@@ -293,16 +379,27 @@ async function updateParcelData(): Promise<void> {
       }
     }
 
-    // Save remaining processed holders
+    // Save remaining processed holders and any pending data from the last batch
     if (batchCount > 0) {
+      console.log(`Saving remaining ${batchCount} processed holders...`);
       writeJsonFile(FILES.processed, processedHolders);
+
+      // Write main data files for the last partial batch
+      console.log("[Final Batch] Writing main data files...");
+      writeJsonFile(FILES.normal, normalHolders);
+      writeJsonFile(FILES.contracts, contractHolders);
+      writeJsonFile(FILES.contractsWithOwner, contractsWithOwner);
+      writeJsonFile(FILES.gbm, gbmHolders);
+      writeJsonFile(FILES.raffles, rafflesHolders);
+      writeJsonFile(FILES.safe, safeHolders);
     }
 
-    // Write all data to respective files
+    console.log(
+      "\n[Final Save] Ensuring all data is written to respective files one last time..."
+    );
     writeJsonFile(FILES.normal, normalHolders);
     writeJsonFile(FILES.contracts, contractHolders);
     writeJsonFile(FILES.contractsWithOwner, contractsWithOwner);
-    writeJsonFile(FILES.vault, vaultHolders);
     writeJsonFile(FILES.gbm, gbmHolders);
     writeJsonFile(FILES.raffles, rafflesHolders);
     writeJsonFile(FILES.safe, safeHolders);

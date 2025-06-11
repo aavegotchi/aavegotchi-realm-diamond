@@ -1,7 +1,7 @@
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { varsForNetwork } from "../../constants";
-import { RealmGettersAndSettersFacet } from "../../typechain-types";
+import { IVault, RealmGettersAndSettersFacet } from "../../typechain-types";
 import { countInstallationOccurrences } from "../../data/installations/allInstallations";
 import { countTileOccurrences } from "../../data/tiles/tileTypes";
 import fs from "fs";
@@ -11,11 +11,17 @@ import {
   rafflesContract2,
   PC,
   voucherContract,
+  vault,
 } from "./getInstallationAndTileData";
+import { maticRealmDiamondAddress } from "../tile/helperFunctions";
+import { DATA_DIR, DATA_DIR_PARCEL } from "./paths";
 
 // File paths configuration
-const DATA_DIR = path.join(__dirname, "cloneData", "parcel", "metadata");
-const PROCESSED_REALMS_FILE = path.join(DATA_DIR, "processed-parcels.json");
+const PARCEL_METADATA_DIR = `${DATA_DIR_PARCEL}/metadata`;
+const PROCESSED_REALMS_FILE = path.join(
+  PARCEL_METADATA_DIR,
+  "processed-parcel-metadata.json"
+);
 
 // Interfaces
 interface BounceGate {
@@ -60,6 +66,8 @@ export interface ParcelIO {
   lodgeId: BigNumber;
   surveying: boolean;
   harvesterCount: number;
+  lastChanneledAlchemica: BigNumber;
+  lastClaimedAlchemica: BigNumber;
   gate: BounceGate;
   buildGrid: number[][];
   tileGrid: number[][];
@@ -154,16 +162,26 @@ async function processParcel(
   realmGetterAndSettersFacet: RealmGettersAndSettersFacet,
   currentFileIndex: number
 ): Promise<{ success: boolean; newFileIndex: number }> {
+  const c = await varsForNetwork(ethers);
+  const vaultContract = await ethers.getContractAt("IVault", vault);
   try {
     const parcelData = await realmGetterAndSettersFacet.getParcelData(realmId);
     const parcelGrid = await realmGetterAndSettersFacet.getParcelGrids(realmId);
-    const data = populateParcelIO(parcelData, parcelGrid);
+    const data = await populateParcelIO(
+      parcelData,
+      parcelGrid,
+      vaultContract,
+      realmId
+    );
 
     let fileIndex = currentFileIndex;
     let writeSuccess = false;
 
     while (!writeSuccess) {
-      const targetFile = path.join(DATA_DIR, `parcels${fileIndex}.json`);
+      const targetFile = path.join(
+        PARCEL_METADATA_DIR,
+        `parcels${fileIndex}.json`
+      );
       try {
         const existingData = readJsonFile<Record<string, ParcelIO>>(
           targetFile,
@@ -185,6 +203,7 @@ async function processParcel(
     }
 
     // Update processed parcels list
+    console.log(`[PROCESS] Updating processed parcels list for ${realmId}`);
     const processedParcels = readJsonFile<string[]>(PROCESSED_REALMS_FILE, []);
     if (!processedParcels.includes(realmId)) {
       processedParcels.push(realmId);
@@ -199,25 +218,33 @@ async function processParcel(
 }
 
 // Convert parcel data to ParcelIO format
-function populateParcelIO(
+async function populateParcelIO(
   parcelData: any,
   parcelGrid: {
     buildGrid_: BigNumber[][];
     tileGrid_: BigNumber[][];
     startPositionBuildGrid_: BigNumber[][];
     startPositionTileGrid_: BigNumber[][];
-  }
-): ParcelIO {
+  },
+  vaultContract: IVault,
+  realmId: string
+): Promise<ParcelIO> {
   const convertGrid = (grid: BigNumber[][]) =>
     grid.map((row) => row.map((val) => val.toNumber()));
 
   // Check if owner is a raffle contract or voucher contract and replace with PC if it is
-  const owner =
+  let owner =
     parcelData.owner.toLowerCase() === rafflesContract.toLowerCase() ||
     parcelData.owner.toLowerCase() === rafflesContract2.toLowerCase() ||
     parcelData.owner.toLowerCase() === voucherContract.toLowerCase()
       ? PC
       : parcelData.owner;
+
+  // Check if parcel is a vault parcel
+  if (parcelData.owner.toLowerCase() === vault.toLowerCase()) {
+    owner = await vaultContract.getDepositor(maticRealmDiamondAddress, realmId);
+    console.log(`[VAULT] Found vault parcel ${realmId} with owner ${owner}`);
+  }
 
   return {
     owner,
@@ -242,6 +269,8 @@ function populateParcelIO(
     lodgeId: parcelData.lodgeId,
     surveying: parcelData.surveying,
     harvesterCount: parcelData.harvesterCount,
+    lastChanneledAlchemica: parcelData.lastChanneledAlchemica,
+    lastClaimedAlchemica: parcelData.lastClaimedAlchemica,
     gate: parcelData.gate,
     buildGrid: convertGrid(parcelGrid.buildGrid_),
     tileGrid: convertGrid(parcelGrid.tileGrid_),
@@ -261,7 +290,7 @@ function populateParcelIO(
 
 // Find current highest file index
 function findCurrentFileIndex(): number {
-  const files = fs.readdirSync(DATA_DIR);
+  const files = fs.readdirSync(PARCEL_METADATA_DIR);
   let maxIndex = 1;
 
   files.forEach((file) => {
@@ -277,7 +306,7 @@ function findCurrentFileIndex(): number {
 
 async function main() {
   try {
-    ensureDirectoryExists(DATA_DIR);
+    ensureDirectoryExists(PARCEL_METADATA_DIR);
 
     // Get all parcel IDs
     const allRealmIds = await getParcelIds();
@@ -289,7 +318,7 @@ async function main() {
     );
     console.log(`Already processed: ${processedParcels.size} parcels`);
 
-    // Setup contract
+    // // Setup contract
     const c = await varsForNetwork(ethers);
     const realmGettersAndSettersFacet = await ethers.getContractAt(
       "RealmGettersAndSettersFacet",

@@ -10,9 +10,13 @@ import fs from "fs";
 import path from "path";
 import { varsForNetwork } from "../../constants";
 import { ParcelIO } from "./getParcelMetadata";
+import { DATA_DIR_PARCEL } from "./paths";
 
-const DATA_DIR = path.join(__dirname, "cloneData", "parcel", "metadata");
-const PROCESSED_UPGRADES_FILE = path.join(DATA_DIR, "processed-upgrades.json");
+const PROCESSED_UPGRADES_FILE = path.join(
+  DATA_DIR_PARCEL,
+  "metadata",
+  "finalized-upgrades.json"
+);
 const BATCH_SIZE = 20;
 
 // Simplified analytics interface
@@ -133,8 +137,8 @@ async function processParcels(
   try {
     console.log(`Processing batch of ${parcels.length} parcels...`);
     // Commented out for testing
-    // const tx = await installationUpgrade.finalizeUpgradesForParcels(parcels);
-    // await tx.wait();
+    const tx = await installationUpgrade.finalizeUpgradesForParcels(parcels);
+    await tx.wait();
 
     for (const id of parcels) {
       processedUpgrades.add(id);
