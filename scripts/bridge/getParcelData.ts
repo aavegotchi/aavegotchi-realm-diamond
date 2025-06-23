@@ -14,7 +14,7 @@ import {
   PC,
   voucherContract,
 } from "./getInstallationAndTileData";
-import { DATA_DIR_PARCEL } from "./paths";
+import { DATA_DIR_PARCEL, writeBlockNumber } from "./paths";
 
 const config = {
   apiKey: process.env.ALCHEMY_KEY,
@@ -207,6 +207,7 @@ async function updateParcelData(): Promise<void> {
 
   try {
     ensureDirectoryExists(DATA_DIR_PARCEL);
+    await writeBlockNumber("parcel", ethers);
 
     const response = await alchemy.nft.getOwnersForContract(c.realmDiamond, {
       withTokenBalances: true,

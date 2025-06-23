@@ -14,7 +14,7 @@ import {
   vault,
 } from "./getInstallationAndTileData";
 import { maticRealmDiamondAddress } from "../tile/helperFunctions";
-import { DATA_DIR, DATA_DIR_PARCEL } from "./paths";
+import { DATA_DIR, DATA_DIR_PARCEL, writeBlockNumber } from "./paths";
 
 // File paths configuration
 const PARCEL_METADATA_DIR = `${DATA_DIR_PARCEL}/metadata`;
@@ -307,7 +307,7 @@ function findCurrentFileIndex(): number {
 async function main() {
   try {
     ensureDirectoryExists(PARCEL_METADATA_DIR);
-
+    await writeBlockNumber("parcelMetadata", ethers);
     // Get all parcel IDs
     const allRealmIds = await getParcelIds();
     console.log(`Total parcels to process: ${allRealmIds.length}`);

@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import { varsForNetwork } from "../../constants";
 import { getVaultOwner } from "./getParcelData";
-import { DATA_DIR } from "./paths";
+import { DATA_DIR, writeBlockNumber } from "./paths";
 import { DATA_DIR_TILES } from "./paths";
 import { DATA_DIR_INSTALLATIONS } from "./paths";
 
@@ -449,6 +449,7 @@ async function main() {
     console.log("Starting installation and tile data update...");
 
     console.log("\nProcessing installations...");
+    await writeBlockNumber("installation", ethers);
     await updateHolderData(
       CONTRACTS.installations,
       FILES.installations,
@@ -461,6 +462,7 @@ async function main() {
     );
 
     console.log("\nProcessing tiles...");
+    await writeBlockNumber("tile", ethers);
     await updateHolderData(
       CONTRACTS.tiles,
       FILES.tiles,
