@@ -10,7 +10,7 @@ import fs from "fs";
 import path from "path";
 import { varsForNetwork } from "../../constants";
 import { ParcelIO } from "./getParcelMetadata";
-import { DATA_DIR_PARCEL } from "./paths";
+import { DATA_DIR_PARCEL, writeBlockNumber } from "./paths";
 
 const PROCESSED_UPGRADES_FILE = path.join(
   DATA_DIR_PARCEL,
@@ -75,13 +75,13 @@ async function* findParcelsWithUpgrades(
     totalUpgradeCount: 0,
   };
 
-  const allParcelIds = await getParcelIds();
+  const blockNumber = await writeBlockNumber("pendingUpgrades", ethers);
+  const allParcelIds = await getParcelIds(blockNumber);
   console.log(`Found ${allParcelIds.length} total parcels to check`);
 
   let checkedCount = 0;
   let foundWithUpgrades = 0;
   const CHECK_BATCH_SIZE = 500; // Process 500 parcels at a time for checking
-  const PROCESS_BATCH_SIZE = 20; // Process 20 parcels at a time for upgrades
 
   // Process parcels in batches
   for (let i = 0; i < allParcelIds.length; i += CHECK_BATCH_SIZE) {

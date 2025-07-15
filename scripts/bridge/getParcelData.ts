@@ -3,6 +3,7 @@ import { ethers } from "hardhat";
 import fs from "fs";
 import path from "path";
 import { varsForNetwork } from "../../constants";
+
 import {
   vault,
   gbmDiamond,
@@ -205,12 +206,15 @@ async function updateParcelData(): Promise<void> {
     pixelcraftAllocatedParcels: new Set<string>(),
   };
 
+  const blockNumber = await writeBlockNumber("parcel", ethers);
+
   try {
     ensureDirectoryExists(DATA_DIR_PARCEL);
     await writeBlockNumber("parcel", ethers);
 
     const response = await alchemy.nft.getOwnersForContract(c.realmDiamond, {
       withTokenBalances: true,
+      block: blockNumber,
     });
 
     const holders = response.owners;
@@ -282,7 +286,17 @@ async function updateParcelData(): Promise<void> {
             analytics.uniqueNormalHolders.add(owner);
           }
         } else if (ownerAddress.toLowerCase() === gbmDiamond.toLowerCase()) {
-          gbmHolders.push(holder);
+          gbmHolders.push({
+            ownerAddress: holder.ownerAddress,
+            tokenBalances: holder.tokenBalances.map((token) => ({
+              tokenId:
+                typeof token.tokenId === "string" &&
+                token.tokenId.startsWith("0x")
+                  ? parseInt(token.tokenId, 16).toString()
+                  : token.tokenId.toString(),
+              balance: token.balance.toString(),
+            })),
+          });
           holder.tokenBalances.forEach((token) =>
             analytics.gbmParcels.add(token.tokenId)
           );
@@ -293,7 +307,14 @@ async function updateParcelData(): Promise<void> {
           // Allocate raffle contract tokens to Pixelcraft
           const pixelcraftHolder: TokenHolder = {
             ownerAddress: PC,
-            tokenBalances: holder.tokenBalances,
+            tokenBalances: holder.tokenBalances.map((token) => ({
+              tokenId:
+                typeof token.tokenId === "string" &&
+                token.tokenId.startsWith("0x")
+                  ? parseInt(token.tokenId, 16).toString()
+                  : token.tokenId.toString(),
+              balance: token.balance.toString(),
+            })),
           };
           normalHolders[PC] = pixelcraftHolder;
           holder.tokenBalances.forEach((token) => {
@@ -305,7 +326,14 @@ async function updateParcelData(): Promise<void> {
           // Allocate voucher contract tokens to Pixelcraft
           const pixelcraftHolder: TokenHolder = {
             ownerAddress: PC,
-            tokenBalances: holder.tokenBalances,
+            tokenBalances: holder.tokenBalances.map((token) => ({
+              tokenId:
+                typeof token.tokenId === "string" &&
+                token.tokenId.startsWith("0x")
+                  ? parseInt(token.tokenId, 16).toString()
+                  : token.tokenId.toString(),
+              balance: token.balance.toString(),
+            })),
           };
           normalHolders[PC] = pixelcraftHolder;
           holder.tokenBalances.forEach((token) => {
@@ -316,7 +344,20 @@ async function updateParcelData(): Promise<void> {
           if (code !== "0x") {
             const contractOwner = await getOwner(ownerAddress);
             if (contractOwner) {
-              contractsWithOwner.push({ contractOwner, tokens: holder });
+              contractsWithOwner.push({
+                contractOwner,
+                tokens: {
+                  ownerAddress: holder.ownerAddress,
+                  tokenBalances: holder.tokenBalances.map((token) => ({
+                    tokenId:
+                      typeof token.tokenId === "string" &&
+                      token.tokenId.startsWith("0x")
+                        ? parseInt(token.tokenId, 16).toString()
+                        : token.tokenId.toString(),
+                    balance: token.balance.toString(),
+                  })),
+                },
+              });
               holder.tokenBalances.forEach((token) =>
                 analytics.contractsWithOwnerParcels.add(token.tokenId)
               );
@@ -324,21 +365,48 @@ async function updateParcelData(): Promise<void> {
             } else if (await isSafe(ownerAddress)) {
               safeHolders.push({
                 safeAddress: ownerAddress,
-                tokenBalances: holder.tokenBalances,
+                tokenBalances: holder.tokenBalances.map((token) => ({
+                  tokenId:
+                    typeof token.tokenId === "string" &&
+                    token.tokenId.startsWith("0x")
+                      ? parseInt(token.tokenId, 16).toString()
+                      : token.tokenId.toString(),
+                  balance: token.balance.toString(),
+                })),
               });
               holder.tokenBalances.forEach((token) =>
                 analytics.gnosisSafeParcels.add(token.tokenId)
               );
               analytics.uniqueGnosisSafes.add(ownerAddress);
             } else {
-              contractHolders.push(holder);
+              contractHolders.push({
+                ownerAddress: holder.ownerAddress,
+                tokenBalances: holder.tokenBalances.map((token) => ({
+                  tokenId:
+                    typeof token.tokenId === "string" &&
+                    token.tokenId.startsWith("0x")
+                      ? parseInt(token.tokenId, 16).toString()
+                      : token.tokenId.toString(),
+                  balance: token.balance.toString(),
+                })),
+              });
               holder.tokenBalances.forEach((token) =>
                 analytics.unknownContractParcels.add(token.tokenId)
               );
               analytics.uniqueContractsWithoutOwners.add(ownerAddress);
             }
           } else {
-            normalHolders[ownerAddress] = holder;
+            normalHolders[ownerAddress] = {
+              ownerAddress: holder.ownerAddress,
+              tokenBalances: holder.tokenBalances.map((token) => ({
+                tokenId:
+                  typeof token.tokenId === "string" &&
+                  token.tokenId.startsWith("0x")
+                    ? parseInt(token.tokenId, 16).toString()
+                    : token.tokenId.toString(),
+                balance: token.balance.toString(),
+              })),
+            };
             holder.tokenBalances.forEach((token) =>
               analytics.normalAddressParcels.add(token.tokenId)
             );

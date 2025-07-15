@@ -154,9 +154,16 @@ async function updateHolderData(
     ensureDirectoryExists(DATA_DIR_TILES);
     console.log("Ensuring all data directory exists...");
 
+    //use current block number if it's not set
+    const blockNumber = await writeBlockNumber(
+      contractAddress === CONTRACTS.installations ? "installation" : "tile",
+      ethers
+    );
+
     console.log("\nFetching holders from Alchemy...");
     const response = await alchemy.nft.getOwnersForContract(contractAddress, {
       withTokenBalances: true,
+      block: blockNumber,
     });
     const holders = response.owners;
     console.log(`Found ${holders.length} total holders`);
@@ -194,10 +201,26 @@ async function updateHolderData(
           continue;
         }
 
-        existingData[ownerAddress] = holder;
+        // Convert tokenBalances' balance property to string if needed
+        const normalizedHolder: TokenHolder = {
+          ...holder,
+          tokenBalances: holder.tokenBalances.map((token) => ({
+            tokenId:
+              typeof token.tokenId === "string" &&
+              token.tokenId.startsWith("0x")
+                ? parseInt(token.tokenId, 16).toString()
+                : token.tokenId.toString(),
+            balance:
+              typeof token.balance === "string"
+                ? token.balance
+                : token.balance.toString(),
+          })),
+        };
+
+        existingData[ownerAddress] = normalizedHolder;
 
         if (ownerAddress.toLowerCase() === c.realmDiamond.toLowerCase()) {
-          realmDiamondHolders.push(holder);
+          realmDiamondHolders.push(normalizedHolder);
           delete existingData[ownerAddress];
         } else if (ownerAddress.toLowerCase() === vault.toLowerCase()) {
           //get the vault depositor
@@ -250,7 +273,7 @@ async function updateHolderData(
 
           delete existingData[ownerAddress];
         } else if (ownerAddress.toLowerCase() === gbmDiamond.toLowerCase()) {
-          gbmDiamondHolders.push(holder);
+          gbmDiamondHolders.push(normalizedHolder);
           delete existingData[ownerAddress];
         } else if (
           ownerAddress.toLowerCase() === rafflesContract.toLowerCase() ||
@@ -263,7 +286,9 @@ async function updateHolderData(
               tokenBalances: [],
             };
           }
-          existingData[PC].tokenBalances.push(...holder.tokenBalances);
+          existingData[PC].tokenBalances.push(
+            ...normalizedHolder.tokenBalances
+          );
           raffleTokensAllocatedToPC += holder.tokenBalances.length;
           delete existingData[ownerAddress];
         } else {
@@ -272,16 +297,16 @@ async function updateHolderData(
             contractHoldersCount++;
             const contractOwner = await getOwner(ownerAddress);
             if (contractOwner) {
-              contractEOAs.push({ contractOwner, tokens: holder });
+              contractEOAs.push({ contractOwner, tokens: normalizedHolder });
             } else if (isSafe(ownerAddress)) {
               const gnosisObject = {
                 safeAddress: ownerAddress,
-                tokenBalances: holder.tokenBalances,
+                tokenBalances: normalizedHolder.tokenBalances,
               };
 
               gnosisSafeContracts.push(gnosisObject);
             } else {
-              contractHolders.push(holder);
+              contractHolders.push(normalizedHolder);
             }
             delete existingData[ownerAddress];
           } else {

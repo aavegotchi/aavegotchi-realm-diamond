@@ -14,7 +14,7 @@ import {
   vault,
 } from "./getInstallationAndTileData";
 import { maticRealmDiamondAddress } from "../tile/helperFunctions";
-import { DATA_DIR, DATA_DIR_PARCEL, writeBlockNumber } from "./paths";
+import { DATA_DIR_PARCEL, writeBlockNumber } from "./paths";
 
 // File paths configuration
 const PARCEL_METADATA_DIR = `${DATA_DIR_PARCEL}/metadata`;
@@ -108,7 +108,7 @@ async function writeJsonFile<T>(filePath: string, data: T): Promise<void> {
 }
 
 // GraphQL query function
-export async function getParcelIds(): Promise<string[]> {
+export async function getParcelIds(blockNumber: number): Promise<string[]> {
   const apollo = require("apollo-fetch");
   const uri = process.env.GOTCHIVERSE_URI;
   const graph = apollo.createApolloFetch({ uri });
@@ -127,6 +127,9 @@ export async function getParcelIds(): Promise<string[]> {
             "0x0000000000000000000000000000000000000000",
             "0x000000000000000000000000000000000000dEaD"
           ]
+        },
+        block: {
+          number: ${blockNumber}
         }
         orderBy: tokenId
         orderDirection: asc
@@ -160,18 +163,25 @@ export async function getParcelIds(): Promise<string[]> {
 async function processParcel(
   realmId: string,
   realmGetterAndSettersFacet: RealmGettersAndSettersFacet,
-  currentFileIndex: number
+  currentFileIndex: number,
+  blockNumber: number
 ): Promise<{ success: boolean; newFileIndex: number }> {
   const c = await varsForNetwork(ethers);
   const vaultContract = await ethers.getContractAt("IVault", vault);
   try {
-    const parcelData = await realmGetterAndSettersFacet.getParcelData(realmId);
-    const parcelGrid = await realmGetterAndSettersFacet.getParcelGrids(realmId);
+    const parcelData = await realmGetterAndSettersFacet.getParcelData(realmId, {
+      blockTag: blockNumber,
+    });
+    const parcelGrid = await realmGetterAndSettersFacet.getParcelGrids(
+      realmId,
+      { blockTag: blockNumber }
+    );
     const data = await populateParcelIO(
       parcelData,
       parcelGrid,
       vaultContract,
-      realmId
+      realmId,
+      blockNumber
     );
 
     let fileIndex = currentFileIndex;
@@ -227,7 +237,8 @@ async function populateParcelIO(
     startPositionTileGrid_: BigNumber[][];
   },
   vaultContract: IVault,
-  realmId: string
+  realmId: string,
+  blockNumber: number
 ): Promise<ParcelIO> {
   const convertGrid = (grid: BigNumber[][]) =>
     grid.map((row) => row.map((val) => val.toNumber()));
@@ -242,7 +253,11 @@ async function populateParcelIO(
 
   // Check if parcel is a vault parcel
   if (parcelData.owner.toLowerCase() === vault.toLowerCase()) {
-    owner = await vaultContract.getDepositor(maticRealmDiamondAddress, realmId);
+    owner = await vaultContract.getDepositor(
+      maticRealmDiamondAddress,
+      realmId,
+      { blockTag: blockNumber }
+    );
     console.log(`[VAULT] Found vault parcel ${realmId} with owner ${owner}`);
   }
 
@@ -307,9 +322,9 @@ function findCurrentFileIndex(): number {
 async function main() {
   try {
     ensureDirectoryExists(PARCEL_METADATA_DIR);
-    await writeBlockNumber("parcelMetadata", ethers);
+    const blockNumber = await writeBlockNumber("parcelMetadata", ethers);
     // Get all parcel IDs
-    const allRealmIds = await getParcelIds();
+    const allRealmIds = await getParcelIds(blockNumber);
     console.log(`Total parcels to process: ${allRealmIds.length}`);
 
     // Get already processed parcels
@@ -338,7 +353,8 @@ async function main() {
       const { success, newFileIndex } = await processParcel(
         realmId,
         realmGettersAndSettersFacet,
-        currentFileIndex
+        currentFileIndex,
+        blockNumber
       );
 
       if (success) {
