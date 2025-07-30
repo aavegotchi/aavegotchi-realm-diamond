@@ -15,7 +15,7 @@ import {
   PC,
   voucherContract,
 } from "./getInstallationAndTileData";
-import { DATA_DIR_PARCEL, writeBlockNumber } from "./paths";
+import { DATA_DIR_PARCEL, isRealContract, writeBlockNumber } from "./paths";
 
 const config = {
   apiKey: process.env.ALCHEMY_KEY,
@@ -340,8 +340,11 @@ async function updateParcelData(): Promise<void> {
             analytics.pixelcraftAllocatedParcels.add(token.tokenId);
           });
         } else {
-          const code = await ethers.provider.getCode(ownerAddress);
-          if (code !== "0x") {
+          const isContract = await isRealContract(
+            ethers.provider,
+            ownerAddress
+          );
+          if (isContract) {
             const contractOwner = await getOwner(ownerAddress);
             if (contractOwner) {
               contractsWithOwner.push({

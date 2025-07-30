@@ -107,6 +107,18 @@ async function writeJsonFile<T>(filePath: string, data: T): Promise<void> {
   }
 }
 
+// Transpose a square grid (64×64) so that grid[y][x] maps correctly to contract's grid[x][y]
+function transpose<T>(grid: T[][]): T[][] {
+  const size = grid.length;
+  const transposed: T[][] = Array.from({ length: size }, () => Array(size));
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      transposed[i][j] = grid[j][i];
+    }
+  }
+  return transposed;
+}
+
 // GraphQL query function
 export async function getParcelIds(blockNumber: number): Promise<string[]> {
   const apollo = require("apollo-fetch");
@@ -287,19 +299,27 @@ async function populateParcelIO(
     lastChanneledAlchemica: parcelData.lastChanneledAlchemica,
     lastClaimedAlchemica: parcelData.lastClaimedAlchemica,
     gate: parcelData.gate,
-    buildGrid: convertGrid(parcelGrid.buildGrid_),
-    tileGrid: convertGrid(parcelGrid.tileGrid_),
-    startPositionBuildGrid: convertGrid(parcelGrid.startPositionBuildGrid_),
-    startPositionTileGrid: convertGrid(parcelGrid.startPositionTileGrid_),
-    installations: countInstallationOccurrences(
-      convertGrid(parcelGrid.buildGrid_)
+    // Convert and transpose grids so dimensions align as rows (Y) × cols (X)
+    buildGrid: transpose(convertGrid(parcelGrid.buildGrid_)),
+    tileGrid: transpose(convertGrid(parcelGrid.tileGrid_)),
+    startPositionBuildGrid: transpose(
+      convertGrid(parcelGrid.startPositionBuildGrid_)
     ),
-    tiles: countTileOccurrences(convertGrid(parcelGrid.tileGrid_)),
+    startPositionTileGrid: transpose(
+      convertGrid(parcelGrid.startPositionTileGrid_)
+    ),
+    // Count occurrences using the transposed (row-major) grids
+    installations: countInstallationOccurrences(
+      transpose(convertGrid(parcelGrid.buildGrid_))
+    ),
+    tiles: countTileOccurrences(transpose(convertGrid(parcelGrid.tileGrid_))),
     buildWrite:
-      countInstallationOccurrences(convertGrid(parcelGrid.buildGrid_)).length >
-      0,
+      countInstallationOccurrences(
+        transpose(convertGrid(parcelGrid.buildGrid_))
+      ).length > 0,
     tileWrite:
-      countTileOccurrences(convertGrid(parcelGrid.tileGrid_)).length > 0,
+      countTileOccurrences(transpose(convertGrid(parcelGrid.tileGrid_)))
+        .length > 0,
   };
 }
 

@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import { varsForNetwork } from "../../constants";
 import { getVaultOwner } from "./getParcelData";
-import { DATA_DIR, writeBlockNumber } from "./paths";
+import { DATA_DIR, isRealContract, writeBlockNumber } from "./paths";
 import { DATA_DIR_TILES } from "./paths";
 import { DATA_DIR_INSTALLATIONS } from "./paths";
 
@@ -292,13 +292,17 @@ async function updateHolderData(
           raffleTokensAllocatedToPC += holder.tokenBalances.length;
           delete existingData[ownerAddress];
         } else {
-          const code = await ethers.provider.getCode(ownerAddress);
-          if (code !== "0x") {
+          const isContract = await isRealContract(
+            ethers.provider,
+            ownerAddress
+          );
+
+          if (isContract) {
             contractHoldersCount++;
             const contractOwner = await getOwner(ownerAddress);
             if (contractOwner) {
               contractEOAs.push({ contractOwner, tokens: normalizedHolder });
-            } else if (isSafe(ownerAddress)) {
+            } else if (await isSafe(ownerAddress)) {
               const gnosisObject = {
                 safeAddress: ownerAddress,
                 tokenBalances: normalizedHolder.tokenBalances,
