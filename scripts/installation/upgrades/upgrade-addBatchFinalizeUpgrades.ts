@@ -5,12 +5,10 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
-import {
-  InstallationUpgradeFacet,
-  OwnershipFacet,
-} from "../../../typechain-types";
+import { OwnershipFacet } from "../../../typechain-types";
 import { varsForNetwork } from "../../../constants";
-import { impersonate } from "../helperFunctions";
+
+import { mine } from "@nomicfoundation/hardhat-network-helpers";
 
 export async function upgrade() {
   const c = await varsForNetwork(ethers);
@@ -30,6 +28,8 @@ export async function upgrade() {
     c.installationDiamond
   )) as OwnershipFacet;
 
+  await mine();
+
   const owner = await ownership.owner();
   console.log("owner:", owner);
 
@@ -38,7 +38,7 @@ export async function upgrade() {
   const args: DeployUpgradeTaskArgs = {
     diamondAddress: c.installationDiamond,
     facetsAndAddSelectors: joined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
     initAddress: ethers.constants.AddressZero,
     initCalldata: "0x",
