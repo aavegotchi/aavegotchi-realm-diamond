@@ -8,8 +8,6 @@ import {
 import { OwnershipFacet } from "../../../typechain-types";
 import { varsForNetwork } from "../../../constants";
 
-import { mine } from "@nomicfoundation/hardhat-network-helpers";
-
 export async function upgrade() {
   const c = await varsForNetwork(ethers);
 
@@ -27,8 +25,6 @@ export async function upgrade() {
     "OwnershipFacet",
     c.installationDiamond
   )) as OwnershipFacet;
-
-  await mine();
 
   const owner = await ownership.owner();
   console.log("owner:", owner);

@@ -11,6 +11,8 @@ import path from "path";
 import { varsForNetwork } from "../../constants";
 import { ParcelIO } from "./getParcelMetadata";
 import { DATA_DIR_PARCEL, writeBlockNumber } from "./paths";
+import { mine } from "@nomicfoundation/hardhat-network-helpers";
+import { LedgerSigner } from "@anders-t/ethers-ledger";
 
 const PROCESSED_UPGRADES_FILE = path.join(
   DATA_DIR_PARCEL,
@@ -74,6 +76,8 @@ async function* findParcelsWithUpgrades(
     parcelsWithUpgrades: new Set<string>(),
     totalUpgradeCount: 0,
   };
+
+  // await mine();
 
   const blockNumber = await writeBlockNumber("pendingUpgrades", ethers);
   const allParcelIds = await getParcelIds(blockNumber);
@@ -154,12 +158,15 @@ async function processParcels(
 
 async function main() {
   const processedUpgrades = readProcessedUpgrades();
+
+  const signer = new LedgerSigner(ethers.provider, "m/44'/60'/1'/0/0");
   console.log(`Found ${processedUpgrades.size} previously processed parcels`);
 
   const c = await varsForNetwork(ethers);
   const installationUpgrade = (await ethers.getContractAt(
     "InstallationUpgradeFacet",
-    c.installationDiamond
+    c.installationDiamond,
+    signer
   )) as InstallationUpgradeFacet;
 
   const realmGettersAndSettersFacet = (await ethers.getContractAt(
@@ -170,7 +177,7 @@ async function main() {
   let currentBatch: string[] = [];
   let totalProcessed = 0;
   let latestAnalytics: UpgradeAnalytics | null = null;
-  const PROCESS_BATCH_SIZE = 20; // Process 20 parcels at a time for upgrades
+  const PROCESS_BATCH_SIZE = 50; // Process 20 parcels at a time for upgrades
 
   for await (const { parcelId, analytics } of findParcelsWithUpgrades(
     processedUpgrades,

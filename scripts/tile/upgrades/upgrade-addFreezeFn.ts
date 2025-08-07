@@ -24,20 +24,12 @@ export async function upgrade() {
     },
   ];
 
-  const ownership = (await ethers.getContractAt(
-    "OwnershipFacet",
-    c.tileDiamond
-  )) as OwnershipFacet;
-
-  const owner = await ownership.owner();
-  console.log("owner:", owner);
-
   const joined = convertFacetAndSelectorsToString(facets);
 
   const args: DeployUpgradeTaskArgs = {
     diamondAddress: c.tileDiamond,
     facetsAndAddSelectors: joined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
     initAddress: ethers.constants.AddressZero,
     initCalldata: "0x",

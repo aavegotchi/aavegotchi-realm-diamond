@@ -21,6 +21,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { gasPrice } from "../constants";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { mine } from "@nomicfoundation/hardhat-network-helpers";
 
 export interface FacetsAndAddSelectors {
   facetName: string;
@@ -268,8 +269,11 @@ task(
           const tx: ContractTransaction = await diamondCut.diamondCut(
             cut,
             initAddress ? initAddress : hre.ethers.constants.AddressZero,
-            initCalldata ? initCalldata : "0x"
+            initCalldata ? initCalldata : "0x",
+            { gasPrice: gasPrice }
           );
+
+          console.log("Tx submitted:", tx.hash);
 
           const receipt: ContractReceipt = await tx.wait();
           if (!receipt.status) {
