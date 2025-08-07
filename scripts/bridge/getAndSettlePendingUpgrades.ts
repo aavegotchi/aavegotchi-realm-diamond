@@ -77,7 +77,8 @@ async function* findParcelsWithUpgrades(
     totalUpgradeCount: 0,
   };
 
-  // await mine();
+  // Exclude problematic parcels
+  const EXCLUDED_PARCELS = new Set(["39043"]);
 
   const blockNumber = await writeBlockNumber("pendingUpgrades", ethers);
   const allParcelIds = await getParcelIds(blockNumber);
@@ -85,6 +86,7 @@ async function* findParcelsWithUpgrades(
 
   let checkedCount = 0;
   let foundWithUpgrades = 0;
+  let excludedCount = 0;
   const CHECK_BATCH_SIZE = 500; // Process 500 parcels at a time for checking
 
   // Process parcels in batches
@@ -104,6 +106,15 @@ async function* findParcelsWithUpgrades(
         const queueLength = upgradeQueueLengths[j];
 
         if (queueLength.gt(0)) {
+          // Check if parcel should be excluded
+          if (EXCLUDED_PARCELS.has(parcelId)) {
+            excludedCount++;
+            console.log(
+              `⚠️ Excluding parcel ${parcelId} (has ${queueLength.toNumber()} upgrades but is in exclusion list)`
+            );
+            continue;
+          }
+
           foundWithUpgrades++;
           analytics.parcelsWithUpgrades.add(parcelId);
           analytics.totalUpgradeCount += queueLength.toNumber();
@@ -122,6 +133,9 @@ async function* findParcelsWithUpgrades(
         ).toFixed(2)}%)`
       );
       console.log(`Found ${foundWithUpgrades} parcels with upgrades so far`);
+      if (excludedCount > 0) {
+        console.log(`Excluded ${excludedCount} parcels from processing`);
+      }
     } catch (error) {
       console.error(`Error checking batch of parcels:`, error);
     }
@@ -130,6 +144,9 @@ async function* findParcelsWithUpgrades(
   console.log(`\nFinal results:`);
   console.log(`Checked ${checkedCount} parcels`);
   console.log(`Found ${foundWithUpgrades} parcels with upgrades`);
+  if (excludedCount > 0) {
+    console.log(`Excluded ${excludedCount} parcels from processing`);
+  }
   console.log(`Total upgrades to process: ${analytics.totalUpgradeCount}`);
 }
 
