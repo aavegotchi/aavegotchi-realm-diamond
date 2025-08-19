@@ -176,7 +176,8 @@ async function processParcels(
 async function main() {
   const processedUpgrades = readProcessedUpgrades();
 
-  const signer = new LedgerSigner(ethers.provider, "m/44'/60'/1'/0/0");
+  const signer = (await ethers.getSigners())[0];
+  console.log("signer:", signer);
   console.log(`Found ${processedUpgrades.size} previously processed parcels`);
 
   const c = await varsForNetwork(ethers);
@@ -194,7 +195,7 @@ async function main() {
   let currentBatch: string[] = [];
   let totalProcessed = 0;
   let latestAnalytics: UpgradeAnalytics | null = null;
-  const PROCESS_BATCH_SIZE = 50; // Process 20 parcels at a time for upgrades
+  const PROCESS_BATCH_SIZE = 5; // Process 20 parcels at a time for upgrades
 
   for await (const { parcelId, analytics } of findParcelsWithUpgrades(
     processedUpgrades,

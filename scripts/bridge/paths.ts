@@ -4,7 +4,7 @@ export const DATA_DIR_INSTALLATIONS = `${DATA_DIR}/installations`;
 export const DATA_DIR_TILES = `${DATA_DIR}/tiles`;
 export const BLOCKNUMBERFILE = `${DATA_DIR}/blockNumber.json`;
 
-export let BLOCK_NUMBER = 74872131;
+export let BLOCK_NUMBER = 74905283;
 
 import fs from "fs";
 
