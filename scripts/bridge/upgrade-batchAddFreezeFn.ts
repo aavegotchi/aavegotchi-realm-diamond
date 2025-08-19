@@ -4,8 +4,8 @@ import { upgrade as tileUpgrade } from "../tile/upgrades/upgrade-addFreezeFn";
 
 async function upgrade() {
   await realmUpgrade();
-  await installationUpgrade();
-  await tileUpgrade();
+  // await installationUpgrade();
+  // await tileUpgrade();
 }
 
 if (require.main === module) {

@@ -162,10 +162,7 @@ contract Modifiers {
   }
 
   modifier diamondPaused() {
-    ///we exempt gameManager from the freeze
-    if (msg.sender != LibDiamond.contractOwner()) {
-      require(!s.diamondPaused, "AppStorage: Diamond paused");
-    }
+    revert("Diamond Paused");
     _;
   }
 }
