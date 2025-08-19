@@ -29,7 +29,7 @@ export async function upgrade() {
     },
     {
       facetName: "RealmFacet",
-      addSelectors: [`function setDiamondPaused(bool _paused) external`],
+      addSelectors: [],
       removeSelectors: [],
     },
     {
