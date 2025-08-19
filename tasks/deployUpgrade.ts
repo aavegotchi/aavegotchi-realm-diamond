@@ -21,6 +21,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { gasPrice } from "../constants";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { mine } from "@nomicfoundation/hardhat-network-helpers";
 
 export interface FacetsAndAddSelectors {
   facetName: string;
