@@ -204,7 +204,7 @@ contract AlchemicaFacet is Modifiers {
   /// @param _realmIds Array of parcel identifiers
   /// @param _gotchiId Identifier of Aavegotchi to use for alchemica collection/claiming
   /// @param _signature Message signature used for backend validation. Always use the first realmId in the array
-  function claimAllAvailableAlchemica(uint256[] memory _realmIds, uint256 _gotchiId, bytes memory _signature) external gameActive {
+  function claimAllAvailableAlchemica(uint256[] memory _realmIds, uint256 _gotchiId, bytes memory _signature) external diamondPaused gameActive {
     //Check signature
     require(
       LibSignature.isValid(keccak256(abi.encode(_realmIds[0], _gotchiId, s.lastClaimedAlchemica[_realmIds[0]])), _signature, s.backendPubKey),
