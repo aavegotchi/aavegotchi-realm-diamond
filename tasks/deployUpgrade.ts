@@ -269,7 +269,8 @@ task(
           const tx: ContractTransaction = await diamondCut.diamondCut(
             cut,
             initAddress ? initAddress : hre.ethers.constants.AddressZero,
-            initCalldata ? initCalldata : "0x"
+            initCalldata ? initCalldata : "0x",
+            { gasPrice: gasPrice }
           );
 
           const receipt: ContractReceipt = await tx.wait();
