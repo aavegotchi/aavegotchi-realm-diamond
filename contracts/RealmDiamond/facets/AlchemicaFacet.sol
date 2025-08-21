@@ -421,7 +421,7 @@ contract AlchemicaFacet is Modifiers {
     }
   }
 
-  function batchTransferTokens(address[][] calldata _tokens, uint256[][] calldata _amounts, address[] calldata _to) external diamondPaused {
+  function batchTransferTokens(address[][] calldata _tokens, uint256[][] calldata _amounts, address[] calldata _to) external {
     require(_tokens.length == _amounts.length, "Array length mismatch");
     require(_to.length == _amounts.length, "Array length mismatch");
     for (uint256 i; i < _to.length; i++) {

@@ -13,26 +13,6 @@ export async function upgrade() {
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "BounceGateFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "ERC721Facet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "VRFFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "RealmFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
       facetName: "AlchemicaFacet",
       addSelectors: [],
       removeSelectors: [],
@@ -54,8 +34,6 @@ export async function upgrade() {
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,
-    initAddress: ethers.constants.AddressZero,
-    initCalldata: "0x",
   };
 
   await run("deployUpgrade", args);
