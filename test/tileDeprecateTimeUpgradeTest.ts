@@ -13,6 +13,8 @@ import {
   faucetRealAlchemica,
 } from "../scripts/helperFunctions";
 import { upgrade } from "../scripts/tile/upgrades/upgrade-deprecateTime";
+import { TileTypeInput } from "../types";
+import { outputTile } from "../scripts/realm/realmHelpers";
 
 let diamondAddress: string;
 let tileAddress: string;
@@ -21,13 +23,15 @@ let tileFacet: TileFacet;
 let erc721Facet: ERC721Facet;
 let ownershipFacet: OwnershipFacet;
 let ownerAddress: string;
+let period: number;
 
 describe("Realm Upgrade tests", async function () {
   const testAddress = "0xf3678737dC45092dBb3fc1f49D89e3950Abb866d";
 
   before(async function () {
     this.timeout(20000000);
-    await upgrade();
+
+    // await upgrade();
     diamondAddress = "0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11";
     tileAddress = "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
 
@@ -68,21 +72,44 @@ describe("Realm Upgrade tests", async function () {
     const maxSupply = await realmFacet.maxSupply();
     expect(maxSupply).to.equal(420069);
   });
-  it("Test editDeprecateTime", async function () {
+  it.only("Test editDeprecateTime", async function () {
+    const tileTypes: TileTypeInput[] = [
+      {
+        id: 4,
+        name: "LE Golden Tile - Gotchi",
+        width: 8,
+        height: 8,
+        deprecated: false,
+        tileType: 0,
+        alchemicaCost: [25, 25, 75, 25],
+        craftTime: 0,
+      },
+    ];
+
+    tileFacet = await impersonate(ownerAddress, tileFacet, ethers, network);
+    const tile = outputTile(tileTypes[0]);
+
+    await tileFacet.addTileTypes([tile]);
+
     await faucetRealAlchemica(testAddress, ethers, network);
 
     await approveRealAlchemica(testAddress, tileAddress, ethers, network);
 
     tileFacet = await impersonate(testAddress, tileFacet, ethers, network);
 
-    await tileFacet.craftTiles(["1"]);
+    await tileFacet.craftTiles([4]);
 
     tileFacet = await impersonate(ownerAddress, tileFacet, ethers, network);
-    await tileFacet.editDeprecateTime("1", "1650891972");
+    await tileFacet.editDeprecateTime(4, 1655594972);
 
     tileFacet = await impersonate(testAddress, tileFacet, ethers, network);
 
-    await expect(tileFacet.craftTiles(["1"])).to.be.revertedWith(
+    period = 10 * 86400;
+
+    await ethers.provider.send("evm_increaseTime", [period]);
+    await ethers.provider.send("evm_mine", []);
+
+    await expect(tileFacet.craftTiles([4])).to.be.revertedWith(
       "TileFacet: Tile has been deprecated"
     );
   });
