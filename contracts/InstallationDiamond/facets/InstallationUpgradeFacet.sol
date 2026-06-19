@@ -13,8 +13,94 @@ import {LibERC1155} from "../../libraries/LibERC1155.sol";
 import {LibERC998} from "../../libraries/LibERC998.sol";
 import {LibMeta} from "../../libraries/LibMeta.sol";
 
+import "hardhat/console.sol";
+
 contract InstallationUpgradeFacet is Modifiers {
   event UpgradeTimeReduced(uint256 indexed _queueId, uint256 indexed _realmId, uint256 _coordinateX, uint256 _coordinateY, uint40 _blocksReduced);
+
+  struct InstantUpgradeParams {
+    uint16 coordinateX;
+    uint16 coordinateY;
+    uint256[] targetInstallationIds;
+    uint256 parcelId;
+    address realmDiamond;
+  }
+
+  /**
+   * @notice Instantly upgrades installations on a parcel.
+   * @dev This function performs multiple checks including signature validation, access rights, and GLTR cost.
+   * @param _params Struct containing the parameters for the upgrade including coordinates, target installation IDs, parcel ID, and realm diamond address.
+   * @param _gltr The amount of GLTR tokens to be used for the upgrade.
+   * @param _gotchiId The ID of the Gotchi performing the upgrade.
+   * @param _signature A cryptographic signature validating the upgrade request.
+   */
+  function instantUpgrade(InstantUpgradeParams memory _params, uint256 _gltr, uint256 _gotchiId, bytes memory _signature) external {
+    require(
+      LibSignature.isValid(
+        keccak256(abi.encodePacked(_params.parcelId, _params.coordinateX, _params.coordinateY, _params.targetInstallationIds, _gotchiId)),
+        _signature,
+        s.backendPubKey
+      ),
+      "InstallationUpgradeFacet: Invalid signature"
+    );
+
+    require(_params.targetInstallationIds.length >= 2, "InstallationUpgradeFacet: Must specify at least one upgrade target");
+
+    // CRITICAL: Verify access right for upgrade installations (access right 6)
+    RealmDiamond(_params.realmDiamond).verifyAccessRight(_params.parcelId, _gotchiId, 6, LibMeta.msgSender());
+
+    //first, check that the parcel has the installation at the specified coordinates
+    RealmDiamond(_params.realmDiamond).checkCoordinates(_params.parcelId, _params.coordinateX, _params.coordinateY, _params.targetInstallationIds[0]);
+
+    uint256 totalGltrCost = 0;
+
+    //Loop through the target installations, beginning with the current installation id
+    for (uint256 index = 0; index < _params.targetInstallationIds.length - 1; index++) {
+      uint256 currentInstallationId = _params.targetInstallationIds[index];
+
+      uint256 nextLevelId = s.installationTypes[currentInstallationId].nextLevelId;
+
+      if (nextLevelId == 0) {
+        revert("InstallationUpgradeFacet: Installation is already at the max level");
+      }
+
+      uint256 nextInstallationId = _params.targetInstallationIds[index + 1];
+
+      InstallationType memory nextInstallation = s.installationTypes[nextLevelId];
+
+      //This check is important to ensure that people do not run malicious upgrades or skip levels
+      require(nextLevelId == nextInstallationId, "InstallationUpgradeFacet: Next installation id must be the next level of the current installation");
+
+      // Take the required alchemica and GLTR
+      LibItems._splitAlchemica(nextInstallation.alchemicaCost, RealmDiamond(_params.realmDiamond).getAlchemicaAddresses());
+      //prevent underflow if user sends too much GLTR
+
+      totalGltrCost += nextInstallation.craftTime;
+
+      //Upgrade the installation
+
+      LibInstallation.upgradeInstallation(
+        UpgradeQueue({
+          parcelId: _params.parcelId,
+          coordinateX: _params.coordinateX,
+          coordinateY: _params.coordinateY,
+          installationId: currentInstallationId,
+          owner: LibMeta.msgSender(),
+          readyBlock: 0, //check this
+          claimed: false //check this
+        }),
+        nextInstallationId,
+        RealmDiamond(_params.realmDiamond)
+      );
+    }
+
+    require(_gltr == totalGltrCost, "InstallationUpgradeFacet: Incorrect GLTR sent");
+
+    require(
+      IERC20(s.gltr).transferFrom(LibMeta.msgSender(), 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, uint256(_gltr) * 1e18),
+      "InstallationUpgradeFacet: Failed GLTR transfer"
+    ); //should revert if user doesnt have enough GLTR
+  }
 
   /// @notice Allow a user to upgrade an installation in a parcel
   /// @dev Will throw if the caller is not the owner of the parcel in which the installation is installed
