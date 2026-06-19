@@ -18,6 +18,8 @@ async function getParcels() {
 
   // Get all parcel ids
   let allParcelIds = [];
+  let nonEmptyParcelIds = [];
+  let emptyParcels = [];
   let id = 0;
   let parcels = [];
   do {
@@ -25,6 +27,27 @@ async function getParcels() {
         {
           parcels(first: 2500  where:{ id_gt: ${id}} orderBy: id orderDirection: asc) {
             id
+            equippedTiles {
+              id
+            }
+            equippedInstallations {
+              id
+            }
+            coordinateX
+            coordinateY
+            district
+            alphaBoost
+            fomoBoost
+            fudBoost
+            kekBoost
+            lastChanneledAlchemica
+            lastClaimedAlchemica
+            remainingAlchemica
+            owner
+            parcelHash
+            parcelId
+            size
+            tokenId
           }
         }
       `;
@@ -33,14 +56,45 @@ async function getParcels() {
     parcels = response.data.parcels;
 
     if (parcels.length > 0) {
-      allParcelIds = allParcelIds.concat(parcels.map(parcel => parcel.id));
+      allParcelIds = allParcelIds.concat(parcels.map(parcel => {
+        return {
+          id: Number(parcel.id),
+          tokenId: Number(parcel.tokenId)
+        }
+      }));
+      nonEmptyParcelIds = nonEmptyParcelIds.concat(parcels.filter(parcel => parcel.equippedTiles.length > 0 || parcel.equippedInstallations > 0).map(parcel => {
+        return {
+          id: Number(parcel.id),
+          tokenId: Number(parcel.tokenId)
+        }
+      }));
+      emptyParcels = emptyParcels.concat(parcels.filter(parcel => !(parcel.equippedTiles.length > 0 || parcel.equippedInstallations > 0)).map(p => {
+        return {
+          owner: p.owner,
+          parcelAddress: p.parcelHash,
+          parcelId: p.parcelId,
+          tokenId: p.tokenId,
+          coordinateX: p.coordinateX,
+          coordinateY: p.coordinateY,
+          district: p.district,
+          size: p.size,
+          alchemicaBoost: [p.fudBoost, p.fomoBoost, p.alphaBoost, p.kekBoost],
+          alchemicaRemaining: p.remainingAlchemica,
+        }
+      }));
       id = parcels[parcels.length - 1].id;
     }
   } while (parcels.length > 0);
-  console.log("allParcelIds", allParcelIds);
+
+  // Write empty parcels to JSON file.
+  await fs.writeFile("./parcels/allParcelIds.json", JSON.stringify(allParcelIds), "utf8");
+  await fs.writeFile("./parcels/nonEmptyParcelIds.json", JSON.stringify(nonEmptyParcelIds), "utf8");
+  await fs.writeFile("./parcels/emptyParcels.json", JSON.stringify(emptyParcels), "utf8");
+
+  // fetch non-empty parcels
 
   // run upgrade for getter function on hardhat
-  await upgradeRealmParcelGetter();
+  // await upgradeRealmParcelGetter();
 
   // get all parcel metadata onchain
   const c = await varsForNetwork(ethers);
@@ -49,14 +103,46 @@ async function getParcels() {
     c.realmDiamond
   )) as RealmGettersAndSettersFacet;
 
-  let allParcels = [];
-  for (let i = 0; i < allParcelIds.length; i++) {
-    const parcel: RealmGettersAndSettersFacet.ParcelOutTestStruct = await realmGettersAndSettersFacet.getParcel(allParcelIds[i]);
-    console.log(parcel)
-    allParcels.push(parcel);
+  for (let i = 0; i < nonEmptyParcelIds.length; i++) {
+    console.log('parcel id:', nonEmptyParcelIds[i].id)
+    try {
+      const parcel: RealmGettersAndSettersFacet.ParcelOutTestStruct = await realmGettersAndSettersFacet.getParcel(nonEmptyParcelIds[i].id);
+      const parcelObj = {
+        owner: parcel.owner,
+        parcelAddress: parcel.parcelAddress,
+        parcelId: parcel.parcelId,
+        tokenId: nonEmptyParcelIds[i].tokenId,
+        coordinateX: parcel.coordinateX,
+        coordinateY: parcel.coordinateY,
+        district: parcel.district,
+        size: parcel.size,
+        alchemicaBoost: parcel.alchemicaBoost,
+        alchemicaRemaining: parcel.alchemicaRemaining,
+        currentRound: parcel.currentRound,
+        roundBaseAlchemica: parcel.roundBaseAlchemica,
+        roundAlchemica: parcel.roundAlchemica,
+        reservoirs: parcel.reservoirs,
+        alchemicaHarvestRate: parcel.alchemicaHarvestRate,
+        lastUpdateTimestamp: parcel.lastUpdateTimestamp,
+        unclaimedAlchemica: parcel.unclaimedAlchemica,
+        altarId: parcel.altarId,
+        upgradeQueueCapacity: parcel.upgradeQueueCapacity,
+        upgradeQueueLength: parcel.upgradeQueueLength,
+        lodgeId: parcel.lodgeId,
+        surveying: parcel.surveying,
+        harvesterCount: parcel.harvesterCount,
+        buildGrid: parcel.buildGrid,
+        tileGrid: parcel.tileGrid,
+        startPositionBuildGrid: parcel.startPositionBuildGrid,
+        startPositionTileGrid: parcel.startPositionTileGrid,
+      }
+      // console.log(parcelObj)
+      // await fs.writeFile(`./parcels/parcel-${nonEmptyParcelIds[i]}.json`, JSON.stringify(parcelObj), "utf8");
+      await fs.writeFile("./parcels/nonEmptyParcels.json", JSON.stringify(parcelObj),  { flag: "a", encoding: "utf8" });
+    } catch (e) {
+      console.log("ERROR", e);
+    }
   }
-  const json = JSON.stringify(allParcels);
-  await fs.writeFile("./allParcels.json", json, "utf8");
 }
 
 // We recommend this pattern to be able to use async/await everywhere
